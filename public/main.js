@@ -14,9 +14,7 @@ const info = document.getElementById('info');
 const setInfo = (text) => {
     info.innerHTML = text;
 }
-
-
-// first we need to create a stage
+// stage is the master container
 var stage = new Konva.Stage({
     container: 'container',
     visible: true,
@@ -25,7 +23,7 @@ var stage = new Konva.Stage({
     height: 500,
 });
 
-// then create layer
+// layer is a container for shapes; we can have multiple layers in a stage
 var layer = new Konva.Layer();
 
 var center = new Konva.Star({
@@ -138,22 +136,17 @@ var ship = new Konva.Rect({
     draggable: true,
     id: 'ship',
 }); layer.add(ship);
-
 ship.on('dragstart', function () {
-    setInfo('dragging');
     layer.children.forEach(child => {
         if (child.attrs.id !== 'ship') {
             child.fill('#00D2FF');
         }
     });
 });
-
 ship.on('dragend', function () {
-    setInfo('released');
-
-    for (let i = 0; i < layer.children.length; i++) {
+    const childrenCount = layer.children.length;
+    for (let i = 0; i < childrenCount; i++) {
         if (layer.children[i].attrs.id !== 'ship' && haveIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
-            setInfo('placed in ' + layer.children[i].attrs.id);
             layer.children[i].fill('lightblue');
             connection.send('Player in hex ' + layer.children[i].attrs.id);
             break;
@@ -172,6 +165,5 @@ function haveIntersection(r1, r2) {
 
 // add the layer to the stage
 stage.add(layer);
-
-// draw the image
+// draw the layer
 layer.draw();
