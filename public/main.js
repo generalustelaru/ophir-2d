@@ -1,3 +1,15 @@
+const serverUrl = 'ws://localhost:8080';
+const connection = new WebSocket(serverUrl);
+
+connection.onopen = () => {
+ console.log('Connected to the server');
+ connection.send('Player connected');
+};
+
+connection.onmessage = (event) => {
+ console.log('Message from server ', event.data);
+};
+
 const info = document.getElementById('info');
 const setInfo = (text) => {
     info.innerHTML = text;
