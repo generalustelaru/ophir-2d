@@ -151,12 +151,10 @@ ship.on('dragstart', function () {
 ship.on('dragend', function () {
     setInfo('released');
     layer.children.forEach(child => {
-        if (child.attrs.id !== 'ship') {
-            if (haveIntersection(ship.getClientRect(), child.getClientRect())) {
-                setInfo('placed in ' + child.attrs.id);
-                child.fill('lightblue');
-                connection.send('Player in hex ' + child.attrs.id);
-            }
+        if (child.attrs.id !== 'ship' && haveIntersection(ship.getClientRect(), child.getClientRect())) {
+            setInfo('placed in ' + child.attrs.id);
+            child.fill('lightblue');
+            connection.send('Player in hex ' + child.attrs.id);
         }
     });
 });
