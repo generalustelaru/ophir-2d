@@ -4,13 +4,25 @@ const connection = new WebSocket(serverUrl);
 connection.onopen = () => {
     console.log('Connected to the server');
     connection.send(JSON.stringify({
-        action: 'Player connected',
-        details: 'Player 1'})
+        action: 'refresh',
+        details: null})
     );
 };
 
+let state = {
+    locationHex: null,
+    allowedMoves: null,
+};
+let canMove = true;
+
 connection.onmessage = (event) => {
     console.log('Received ', event.data);
+    const data = JSON.parse(event.data);
+    if (data.error) {
+        setInfo(data.error);
+        return;
+    }
+    state = data;
 };
 
 const info = document.getElementById('info');
@@ -59,7 +71,7 @@ mapHexes.forEach(hex => {
     layer.add(getMapHex(hex.name, hex.x, hex.y, hex.fill));
 });
 
-var ship = new Konva.Rect({
+const ship = new Konva.Rect({
     x: stage.width() / 2,
     y: stage.height() / 2,
     fill: 'red',
@@ -71,7 +83,7 @@ var ship = new Konva.Rect({
     draggable: true,
     id: 'ship',
 }); layer.add(ship);
-ship.on('dragstart', function () {
+ship.on('dragstart', () => {
 
     layer.children.forEach(child => {
 
@@ -80,7 +92,7 @@ ship.on('dragstart', function () {
         }
     });
 });
-ship.on('dragmove', function () {
+ship.on('dragmove', () => {
     const childrenCount = layer.children.length;
 
     for (let i = 0; i < childrenCount; i++) {
@@ -93,7 +105,14 @@ ship.on('dragmove', function () {
                     layer.children[j].fill('#00D2FF');
                 }
             }
-            layer.children[i].fill('lightgreen');
+
+            if (state.allowedMoves.includes(layer.children[i].attrs.id)) {
+                layer.children[i].fill('lightgreen');
+                canMove = true;
+            } else {
+                layer.children[i].fill('red');
+                canMove = false;
+            }
             break;
         }
     }
