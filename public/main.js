@@ -26,103 +26,35 @@ var stage = new Konva.Stage({
 // layer is a container for shapes; we can have multiple layers in a stage
 var layer = new Konva.Layer();
 
-var center = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: 'lightblue',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    id: 'center',
-}); layer.add(center);
-var topLeft = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    offsetX: 86,
-    offsetY: 150,
-    id: 'topLeft',
-}); layer.add(topLeft);
-var bottomRight = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    offsetX: -86,
-    offsetY: -150,
-    id: 'bottomRight',
-}); layer.add(bottomRight);
-var topRight = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    offsetX: -86,
-    offsetY: 150,
-    id: 'topRight',
-}); layer.add(topRight);
-var bottomLeft = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    offsetX: 86,
-    offsetY: -150,
-    id: 'bottomLeft',
-}); layer.add(bottomLeft);
-var left = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    offsetX: 172,
-    offsetY: 0,
-    id: 'left',
-}); layer.add(left);
-var right = new Konva.Star({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    numPoints: 3,
-    innerRadius: 100,
-    outerRadius: 100,
-    fill: '#00D2FF',
-    stroke: 'black',
-    strokeWidth: 1,
-    closed: true,
-    offsetX: -172,
-    offsetY: 0,
-    id: 'right',
-}); layer.add(right);
+const getMapHex = (name, x, y, fill) => {
+    return new Konva.Star({
+        x: stage.width() / 2,
+        y: stage.width() / 2,
+        offsetX: x,
+        offsetY: y,
+        numPoints: 3,
+        innerRadius: 100,
+        outerRadius: 100,
+        fill: fill,
+        stroke: 'black',
+        strokeWidth: 1,
+        closed: true,
+        id: name,
+    });
+}
 
+const mapHexes = [
+    { name: 'center', x: 0, y: 0, fill: 'lightblue' },
+    { name: 'topLeft', x: 86, y: 150, fill: '#00D2FF' },
+    { name: 'bottomRight', x: -86, y: -150, fill: '#00D2FF' },
+    { name: 'topRight', x: -86, y: 150, fill: '#00D2FF' },
+    { name: 'bottomLeft', x: 86, y: -150, fill: '#00D2FF' },
+    { name: 'left', x: 172, y: 0, fill: '#00D2FF' },
+    { name: 'right', x: -172, y: 0, fill: '#00D2FF' },
+];
+mapHexes.forEach(hex => {
+    layer.add(getMapHex(hex.name, hex.x, hex.y, hex.fill));
+});
 
 var ship = new Konva.Rect({
     x: stage.width() / 2,
@@ -148,7 +80,7 @@ ship.on('dragmove', function () {
 
     for (let i = 0; i < childrenCount; i++) {
 
-        if (layer.children[i].attrs.id !== 'ship' && haveIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
+        if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
 
             for (let j = 0; j < childrenCount; j++) {
 
@@ -163,8 +95,10 @@ ship.on('dragmove', function () {
 });
 ship.on('dragend', function () {
     const childrenCount = layer.children.length;
+
     for (let i = 0; i < childrenCount; i++) {
-        if (layer.children[i].attrs.id !== 'ship' && haveIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
+
+        if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
             layer.children[i].fill('lightblue');
             connection.send('Player in hex ' + layer.children[i].attrs.id);
             break;
@@ -172,7 +106,7 @@ ship.on('dragend', function () {
     }
 });
 
-function haveIntersection(r1, r2) {
+const isIntersection = (r1, r2) => {
     return !(
         r2.x > r1.x + r1.width ||
         r2.x + r2.width < r1.x ||
