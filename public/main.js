@@ -143,6 +143,24 @@ ship.on('dragstart', function () {
         }
     });
 });
+ship.on('dragmove', function () {
+    const childrenCount = layer.children.length;
+
+    for (let i = 0; i < childrenCount; i++) {
+
+        if (layer.children[i].attrs.id !== 'ship' && haveIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
+
+            for (let j = 0; j < childrenCount; j++) {
+
+                if (layer.children[j].attrs.id !== 'ship') {
+                    layer.children[j].fill('#00D2FF');
+                }
+            }
+            layer.children[i].fill('lightgreen');
+            break;
+        }
+    }
+});
 ship.on('dragend', function () {
     const childrenCount = layer.children.length;
     for (let i = 0; i < childrenCount; i++) {
