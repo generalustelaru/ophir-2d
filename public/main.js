@@ -155,6 +155,7 @@ ship.on('dragend', function () {
             if (haveIntersection(ship.getClientRect(), child.getClientRect())) {
                 setInfo('placed in ' + child.attrs.id);
                 child.fill('lightblue');
+                connection.send('Player in hex ' + child.attrs.id);
             }
         }
     });
