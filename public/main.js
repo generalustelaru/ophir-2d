@@ -2,12 +2,12 @@ const serverUrl = 'ws://localhost:8080';
 const connection = new WebSocket(serverUrl);
 
 connection.onopen = () => {
- console.log('Connected to the server');
- connection.send('Player connected');
+    console.log('Connected to the server');
+    connection.send('Player connected');
 };
 
 connection.onmessage = (event) => {
- console.log('Message from server ', event.data);
+    console.log('Message from server ', event.data);
 };
 
 const info = document.getElementById('info');
@@ -163,12 +163,12 @@ ship.on('dragend', function () {
 
 function haveIntersection(r1, r2) {
     return !(
-      r2.x > r1.x + r1.width ||
-      r2.x + r2.width < r1.x ||
-      r2.y > r1.y + r1.height ||
-      r2.y + r2.height < r1.y
+        r2.x > r1.x + r1.width ||
+        r2.x + r2.width < r1.x ||
+        r2.y > r1.y + r1.height ||
+        r2.y + r2.height < r1.y
     );
-  }
+}
 
 // add the layer to the stage
 stage.add(layer);
