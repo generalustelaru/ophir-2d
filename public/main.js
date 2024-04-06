@@ -3,7 +3,10 @@ const connection = new WebSocket(serverUrl);
 
 connection.onopen = () => {
     console.log('Connected to the server');
-    connection.send('Player connected');
+    connection.send(JSON.stringify({
+        action: 'Player connected',
+        details: 'Player 1'})
+    );
 };
 
 connection.onmessage = (event) => {
@@ -100,7 +103,10 @@ ship.on('dragend', function () {
 
         if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
             layer.children[i].fill('lightblue');
-            connection.send('Player in hex ' + layer.children[i].attrs.id);
+            connection.send(JSON.stringify({
+                action: 'move',
+                details: layer.children[i].attrs.id})
+            );
             break;
         }
     }
