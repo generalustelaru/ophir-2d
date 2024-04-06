@@ -22,7 +22,7 @@ var center = new Konva.Star({
     numPoints: 3,
     innerRadius: 100,
     outerRadius: 100,
-    fill: '#00D2FF',
+    fill: 'lightblue',
     stroke: 'black',
     strokeWidth: 1,
     closed: true,
