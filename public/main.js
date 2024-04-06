@@ -10,7 +10,7 @@ connection.onopen = () => {
 };
 
 connection.onmessage = (event) => {
-    console.log('Message from server ', event.data);
+    console.log('Received ', event.data);
 };
 
 const info = document.getElementById('info');
@@ -72,7 +72,9 @@ var ship = new Konva.Rect({
     id: 'ship',
 }); layer.add(ship);
 ship.on('dragstart', function () {
+
     layer.children.forEach(child => {
+
         if (child.attrs.id !== 'ship') {
             child.fill('#00D2FF');
         }
