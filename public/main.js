@@ -1,6 +1,13 @@
 const serverUrl = 'ws://localhost:8080';
 const connection = new WebSocket(serverUrl);
 
+const color = {
+    playerRed: 'red',
+    illegal: '#e60049',
+    valid: '#50e991',
+    mapHex: '#b3d4ff',
+    currentHex: '#0bb4ff',
+}
 connection.onopen = () => {
     console.log('Connected to the server');
     connection.send(JSON.stringify({
@@ -59,13 +66,13 @@ const getMapHex = (name, x, y, fill) => {
 }
 
 const mapHexes = [
-    { name: 'center', x: 0, y: 0, fill: 'lightblue' },
-    { name: 'topLeft', x: 86, y: 150, fill: '#00D2FF' },
-    { name: 'bottomRight', x: -86, y: -150, fill: '#00D2FF' },
-    { name: 'topRight', x: -86, y: 150, fill: '#00D2FF' },
-    { name: 'bottomLeft', x: 86, y: -150, fill: '#00D2FF' },
-    { name: 'left', x: 172, y: 0, fill: '#00D2FF' },
-    { name: 'right', x: -172, y: 0, fill: '#00D2FF' },
+    { name: 'center', x: 0, y: 0, fill: color.currentHex },
+    { name: 'topLeft', x: 86, y: 150, fill: color.mapHex },
+    { name: 'bottomRight', x: -86, y: -150, fill: color.mapHex },
+    { name: 'topRight', x: -86, y: 150, fill: color.mapHex },
+    { name: 'bottomLeft', x: 86, y: -150, fill: color.mapHex },
+    { name: 'left', x: 172, y: 0, fill: color.mapHex },
+    { name: 'right', x: -172, y: 0, fill: color.mapHex },
 ];
 mapHexes.forEach(hex => {
     layer.add(getMapHex(hex.name, hex.x, hex.y, hex.fill));
@@ -74,7 +81,7 @@ mapHexes.forEach(hex => {
 const ship = new Konva.Rect({
     x: stage.width() / 2,
     y: stage.height() / 2,
-    fill: 'red',
+    fill: color.playerRed,
     stroke: 'black',
     strokeWidth: 4,
     width: 40,
@@ -88,7 +95,7 @@ ship.on('dragstart', () => {
     layer.children.forEach(child => {
 
         if (child.attrs.id !== 'ship') {
-            child.fill('#00D2FF');
+            child.fill(color.mapHex);
         }
     });
 });
@@ -102,15 +109,15 @@ ship.on('dragmove', () => {
             for (let j = 0; j < childrenCount; j++) {
 
                 if (layer.children[j].attrs.id !== 'ship') {
-                    layer.children[j].fill('#00D2FF');
+                    layer.children[j].fill(color.mapHex);
                 }
             }
 
             if (state.allowedMoves.includes(layer.children[i].attrs.id)) {
-                layer.children[i].fill('lightgreen');
+                layer.children[i].fill(color.valid);
                 canMove = true;
             } else {
-                layer.children[i].fill('red');
+                layer.children[i].fill(color.illegal);
                 canMove = false;
             }
             break;
@@ -123,7 +130,7 @@ ship.on('dragend', function () {
     for (let i = 0; i < childrenCount; i++) {
 
         if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
-            layer.children[i].fill('lightblue');
+            layer.children[i].fill(color.currentHex);
             connection.send(JSON.stringify({
                 action: 'move',
                 details: layer.children[i].attrs.id})
