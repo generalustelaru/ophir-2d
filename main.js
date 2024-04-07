@@ -12,6 +12,7 @@ const color = {
 }
 connection.onopen = () => {
     console.log('Connected to the server');
+    setInfo('Your turn');
     connection.send(JSON.stringify({
         action: 'refresh',
         details: null
@@ -144,12 +145,12 @@ ship.on('dragend', function () {
                     action: 'move',
                     details: layer.children[i].attrs.id})
                 );
-                setInfo('');
+                setInfo('Your turn');
             } else {
                 ship.x(currentPosition.x);
                 ship.y(currentPosition.y);
                 layer.batchDraw();
-                setInfo('Illegal move!');
+                setInfo('Your turn; <b>Illegal move!</b>');
             }
 
         } else {
