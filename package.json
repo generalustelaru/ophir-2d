@@ -1,9 +1,11 @@
 {
   "name": "konva",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "npx webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,6 +13,11 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.19.2",
+    "konva": "^9.3.6",
     "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.91.0",
+    "webpack-cli": "^5.1.4"
   }
 }

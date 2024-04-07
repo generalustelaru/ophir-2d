@@ -1,3 +1,5 @@
+import Konva from 'konva';
+
 const serverUrl = 'ws://localhost:8080';
 const connection = new WebSocket(serverUrl);
 
@@ -12,8 +14,8 @@ connection.onopen = () => {
     console.log('Connected to the server');
     connection.send(JSON.stringify({
         action: 'refresh',
-        details: null})
-    );
+        details: null
+    }));
 };
 
 let state = {

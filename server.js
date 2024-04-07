@@ -1,4 +1,5 @@
-const express = require('express');
+import express from 'express';
+import { WebSocketServer } from 'ws';
 const app = express();
 const port = 3000;
 
@@ -27,14 +28,13 @@ app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
 
-const WebSocket = require('ws');
-const wss = new WebSocket.Server({ port: 8080 });
+const wss = new WebSocketServer({ port: 8080 });
 
 wss.on('connection', function connection(ws) {
 
     ws.on('message', function incoming(message) {
         try {
-            messageObject = JSON.parse(message);
+            const messageObject = JSON.parse(message);
             console.log('received: %s: %s', messageObject.action, messageObject.details);
 
             if (messageObject.action === 'refresh') {
@@ -55,7 +55,8 @@ wss.on('connection', function connection(ws) {
                 }
             }
         } catch (error) {
-            console.log(error.message, `message: ${message}`);
+            console.log(error.message);
+            console.log(`original message: ${message}`);
         }
     });
 });
