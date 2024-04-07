@@ -48,7 +48,7 @@ var stage = new Konva.Stage({
 // layer is a container for shapes; we can have multiple layers in a stage
 var layer = new Konva.Layer();
 
-const getMapHex = (name, x, y, fill) => {
+const newMapHex = (name, x, y, fill) => {
     return new Konva.Star({
         x: stage.width() / 2,
         y: stage.width() / 2,
@@ -75,7 +75,7 @@ const mapHexes = [
     { name: 'right', x: -172, y: 0, fill: color.mapHex },
 ];
 mapHexes.forEach(hex => {
-    layer.add(getMapHex(hex.name, hex.x, hex.y, hex.fill));
+    layer.add(newMapHex(hex.name, hex.x, hex.y, hex.fill));
 });
 
 const ship = new Konva.Rect({
@@ -121,6 +121,7 @@ ship.on('dragmove', () => {
         }
     }
 });
+
 ship.on('dragend', function () {
     const count = layer.children.length;
 
