@@ -90,26 +90,23 @@ const ship = new Konva.Rect({
     draggable: true,
     id: 'ship',
 }); layer.add(ship);
-ship.on('dragstart', () => {
 
-    layer.children.forEach(child => {
-
-        if (child.attrs.id !== 'ship') {
-            child.fill(color.mapHex);
-        }
-    });
-});
 ship.on('dragmove', () => {
-    const childrenCount = layer.children.length;
+    const count = layer.children.length;
 
-    for (let i = 0; i < childrenCount; i++) {
+    for (let i = 0; i < count; i++) {
 
         if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
 
-            for (let j = 0; j < childrenCount; j++) {
+            for (let j = 0; j < count; j++) {
 
                 if (layer.children[j].attrs.id !== 'ship') {
-                    layer.children[j].fill(color.mapHex);
+
+                    if (!state.allowedMoves.includes(layer.children[j].attrs.id)) {
+                        layer.children[j].fill(color.illegal);
+                    } else {
+                        layer.children[j].fill(color.mapHex);
+                    }
                 }
             }
 
@@ -125,17 +122,20 @@ ship.on('dragmove', () => {
     }
 });
 ship.on('dragend', function () {
-    const childrenCount = layer.children.length;
+    const count = layer.children.length;
 
-    for (let i = 0; i < childrenCount; i++) {
+    for (let i = 0; i < count; i++) {
 
-        if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
+        if (layer.children[i].attrs.id == 'ship') continue;
+
+        if (isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
             layer.children[i].fill(color.currentHex);
             connection.send(JSON.stringify({
                 action: 'move',
                 details: layer.children[i].attrs.id})
             );
-            break;
+        } else {
+            layer.children[i].fill(color.mapHex);
         }
     }
 });
