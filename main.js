@@ -53,18 +53,17 @@ var stage = new Konva.Stage({
 var layer = new Konva.Layer();
 
 const newMapHex = (name, x, y, fill) => {
-    return new Konva.Star({
+    return new Konva.RegularPolygon({
         x: stage.width() / 2,
         y: stage.width() / 2,
         offsetX: x,
         offsetY: y,
-        numPoints: 3,
-        innerRadius: 100,
-        outerRadius: 100,
+        sides: 6,
+        radius: 100,
         fill: fill,
         stroke: 'black',
         strokeWidth: 1,
-        closed: true,
+        // closed: true,
         id: name,
     });
 }
@@ -87,7 +86,7 @@ const ship = new Konva.Rect({
     y: stage.height() / 2,
     fill: color.playerRed,
     stroke: 'black',
-    strokeWidth: 4,
+    strokeWidth: 3,
     width: 40,
     height: 30,
     cornerRadius: [0, 0, 5, 30],
