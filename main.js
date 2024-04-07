@@ -23,6 +23,7 @@ let state = {
     allowedMoves: null,
 };
 let canMove = true;
+let currentPosition = null;
 
 connection.onmessage = (event) => {
     console.log('Received ', event.data);
@@ -93,6 +94,10 @@ const ship = new Konva.Rect({
     id: 'ship',
 }); layer.add(ship);
 
+ship.on('dragstart', () => {
+    currentPosition = { x: ship.x(), y: ship.y() };
+});
+
 ship.on('dragmove', () => {
     const count = layer.children.length;
 
@@ -132,11 +137,21 @@ ship.on('dragend', function () {
         if (layer.children[i].attrs.id == 'ship') continue;
 
         if (isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
-            layer.children[i].fill(color.currentHex);
-            connection.send(JSON.stringify({
-                action: 'move',
-                details: layer.children[i].attrs.id})
-            );
+
+            if(canMove) {
+                layer.children[i].fill(color.currentHex);
+                connection.send(JSON.stringify({
+                    action: 'move',
+                    details: layer.children[i].attrs.id})
+                );
+                setInfo('');
+            } else {
+                ship.x(currentPosition.x);
+                ship.y(currentPosition.y);
+                layer.batchDraw();
+                setInfo('Illegal move!');
+            }
+
         } else {
             layer.children[i].fill(color.mapHex);
         }
