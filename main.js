@@ -63,7 +63,6 @@ const newMapHex = (name, x, y, fill) => {
         fill: fill,
         stroke: 'black',
         strokeWidth: 1,
-        // closed: true,
         id: name,
     });
 }
@@ -103,7 +102,10 @@ ship.on('dragmove', () => {
 
     for (let i = 0; i < count; i++) {
 
-        if (layer.children[i].attrs.id !== 'ship' && isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
+        if (layer.children[i].attrs.id == 'ship') continue;
+
+        const mapElement = layer.children[i];
+        if (isPointerOver(mapElement)) {
 
             for (let j = 0; j < count; j++) {
 
@@ -117,11 +119,11 @@ ship.on('dragmove', () => {
                 }
             }
 
-            if (state.allowedMoves.includes(layer.children[i].attrs.id)) {
-                layer.children[i].fill(color.valid);
+            if (state.allowedMoves.includes(mapElement.attrs.id)) {
+                mapElement.fill(color.valid);
                 canMove = true;
             } else {
-                layer.children[i].fill(color.illegal);
+                mapElement.fill(color.illegal);
                 canMove = false;
             }
             break;
@@ -136,7 +138,7 @@ ship.on('dragend', function () {
 
         if (layer.children[i].attrs.id == 'ship') continue;
 
-        if (isIntersection(ship.getClientRect(), layer.children[i].getClientRect())) {
+        if (isPointerOver(layer.children[i])) {
 
             if(canMove) {
                 layer.children[i].fill(color.currentHex);
@@ -158,13 +160,9 @@ ship.on('dragend', function () {
     }
 });
 
-const isIntersection = (r1, r2) => {
-    return !(
-        r2.x > r1.x + r1.width ||
-        r2.x + r2.width < r1.x ||
-        r2.y > r1.y + r1.height ||
-        r2.y + r2.height < r1.y
-    );
+const isPointerOver = (mapElement) => {
+
+    return mapElement.intersects(stage.getPointerPosition());
 }
 
 // add the layer to the stage
