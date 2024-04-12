@@ -20,7 +20,7 @@ const state = {
     allowedMoves: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
 };
 
-app.get('/', (req, res) => {
+app.get('/', (res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
 
