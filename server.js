@@ -25,12 +25,12 @@ app.get('/', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+    console.info(`Server running at http://localhost:${port}`);
 });
 
-const wss = new WebSocketServer({ port: 8080 });
+const socketServer = new WebSocketServer({ port: 8080 });
 
-wss.on('connection', function connection(ws) {
+socketServer.on('connection', function connection(ws) {
 
     ws.on('message', function incoming(message) {
         try {
