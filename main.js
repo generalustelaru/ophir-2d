@@ -4,10 +4,10 @@ const serverUrl = 'ws://localhost:8080';
 const connection = new WebSocket(serverUrl);
 
 const color = {
-    playerRed: 'red',
+    playerRed: '#ff0000',
     illegal: '#e60049',
     valid: '#50e991',
-    mapHex: '#b3d4ff',
+    default: '#b3d4ff',
     currentHex: '#0bb4ff',
 }
 connection.onopen = () => {
@@ -23,8 +23,8 @@ let state = {
     locationHex: null,
     allowedMoves: null,
 };
-let canMove = true;
-let currentPosition = null;
+let homePosition = null;
+let hoverStatus = null;
 
 connection.onmessage = (event) => {
     console.log('Received ', event.data);
@@ -40,7 +40,6 @@ const info = document.getElementById('info');
 const setInfo = (text) => {
     info.innerHTML = text;
 }
-// stage is the master container
 var stage = new Konva.Stage({
     container: 'container',
     visible: true,
@@ -48,8 +47,6 @@ var stage = new Konva.Stage({
     width: 500,
     height: 500,
 });
-
-// layer is a container for shapes; we can have multiple layers in a stage
 var layer = new Konva.Layer();
 
 const newMapHex = (name, x, y, fill) => {
@@ -67,105 +64,107 @@ const newMapHex = (name, x, y, fill) => {
     });
 }
 
-const mapHexes = [
-    { name: 'center', x: 0, y: 0, fill: color.currentHex },
-    { name: 'topLeft', x: 86, y: 150, fill: color.mapHex },
-    { name: 'bottomRight', x: -86, y: -150, fill: color.mapHex },
-    { name: 'topRight', x: -86, y: 150, fill: color.mapHex },
-    { name: 'bottomLeft', x: 86, y: -150, fill: color.mapHex },
-    { name: 'left', x: 172, y: 0, fill: color.mapHex },
-    { name: 'right', x: -172, y: 0, fill: color.mapHex },
-];
-mapHexes.forEach(hex => {
-    layer.add(newMapHex(hex.name, hex.x, hex.y, hex.fill));
-});
+const newShip = (x, y) => {
+    const ship = new Konva.Rect({
+        x: stage.width() / 2,
+        y: stage.height() / 2,
+        offsetX: x,
+        offsetY: y,
+        fill: color.playerRed,
+        stroke: 'black',
+        strokeWidth: 3,
+        width: 40,
+        height: 30,
+        cornerRadius: [0, 0, 5, 30],
+        draggable: true,
+        id: 'ship',
+    });
+    ship.on('dragstart', () => {
+        homePosition = { x: ship.x(), y: ship.y() };
+    });
 
-const ship = new Konva.Rect({
-    x: stage.width() / 2,
-    y: stage.height() / 2,
-    fill: color.playerRed,
-    stroke: 'black',
-    strokeWidth: 3,
-    width: 40,
-    height: 30,
-    cornerRadius: [0, 0, 5, 30],
-    draggable: true,
-    id: 'ship',
-}); layer.add(ship);
-
-ship.on('dragstart', () => {
-    currentPosition = { x: ship.x(), y: ship.y() };
-});
-
-ship.on('dragmove', () => {
-    const count = layer.children.length;
-
-    for (let i = 0; i < count; i++) {
-
-        if (layer.children[i].attrs.id == 'ship') continue;
-
-        const mapElement = layer.children[i];
-        if (isPointerOver(mapElement)) {
-
-            for (let j = 0; j < count; j++) {
-
-                if (layer.children[j].attrs.id !== 'ship') {
-
-                    if (!state.allowedMoves.includes(layer.children[j].attrs.id)) {
-                        layer.children[j].fill(color.illegal);
-                    } else {
-                        layer.children[j].fill(color.mapHex);
-                    }
-                }
-            }
-
-            if (state.allowedMoves.includes(mapElement.attrs.id)) {
-                mapElement.fill(color.valid);
-                canMove = true;
-            } else {
-                mapElement.fill(color.illegal);
-                canMove = false;
-            }
-            break;
+    ship.on('dragmove', () => {
+        for (let i = 0; i < 7; i++) {
+            const hex = mapHexes[i];
+            hex.fill(hex.attrs.id == state.locationHex ? color.currentHex : color.default);
         }
-    }
-});
 
-ship.on('dragend', function () {
-    const count = layer.children.length;
+        const targetHex = mapHexes.find(hex => isPointerOver(hex));
 
-    for (let i = 0; i < count; i++) {
 
-        if (layer.children[i].attrs.id == 'ship') continue;
+        switch (true) {
+            case targetHex.attrs.id == state.locationHex:
+                hoverStatus = 'home';
+                break;
+            case state.allowedMoves.includes(targetHex.attrs.id):
+                hoverStatus = 'valid';
+                targetHex.fill(color.valid);
+                break;
+            default:
+                hoverStatus = 'illegal';
+                targetHex.fill(color.illegal);
+        }
+    });
 
-        if (isPointerOver(layer.children[i])) {
+    ship.on('dragend', () => {
 
-            if(canMove) {
-                layer.children[i].fill(color.currentHex);
+        for (let i = 0; i < 7; i++) {
+            mapHexes[i].fill(color.default);
+        }
+
+        switch (hoverStatus) {
+            case 'home':
+            case 'illegal':
+                mapHexes.find(hex => hex.attrs.id == state.locationHex).fill(color.currentHex);
+                ship.x(homePosition.x);
+                ship.y(homePosition.y);
+                break;
+            case 'valid':
+                const hex = mapHexes.find(hex => isPointerOver(hex));
+                hex.fill(color.currentHex);
                 connection.send(JSON.stringify({
                     action: 'move',
-                    details: layer.children[i].attrs.id})
+                    details: hex.attrs.id
+                })
                 );
-                setInfo('Your turn');
-            } else {
-                ship.x(currentPosition.x);
-                ship.y(currentPosition.y);
-                layer.batchDraw();
-                setInfo('Your turn; <b>Illegal move!</b>');
-            }
-
-        } else {
-            layer.children[i].fill(color.mapHex);
         }
-    }
-});
+        layer.batchDraw();
+    });
+
+    return ship;
+};
+
+const initialHexData = [
+    { name: 'center', x: 0, y: 0 },
+    { name: 'topLeft', x: 86, y: 150 },
+    { name: 'bottomRight', x: -86, y: -150 },
+    { name: 'topRight', x: -86, y: 150 },
+    { name: 'bottomLeft', x: 86, y: -150 },
+    { name: 'left', x: 172, y: 0 },
+    { name: 'right', x: -172, y: 0 },
+];
+const mapHexes = [];
+let ship = null;
+
+window.setTimeout(() => {
+    initialHexData.forEach(item => {
+        const hex = newMapHex(
+            item.name,
+            item.x,
+            item.y,
+            state.locationHex == item.name ? color.currentHex : color.default
+        );
+        mapHexes.push(hex);
+        layer.add(hex);
+    });
+    const currentHexInitialData = initialHexData.find(item => item.name == state.locationHex);
+    ship = newShip(currentHexInitialData.x, currentHexInitialData.y);
+    layer.add(ship);
+}, 1000);
 
 const isPointerOver = (mapElement) => {
 
     return mapElement.intersects(stage.getPointerPosition());
 }
-
-// add the layer to the stage
 stage.add(layer);
-// draw the layer
 layer.draw();

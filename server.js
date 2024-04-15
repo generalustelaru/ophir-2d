@@ -6,18 +6,18 @@ const port = 3000;
 app.use(express.static('public'));
 
 const moveRules = [
-    { from: 'center', allowed: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'] },
-    { from: 'topRight', allowed: ['topRight', 'center', 'right', 'topLeft'] },
-    { from: 'right', allowed: ['right', 'center', 'topRight', 'bottomRight'] },
-    { from: 'bottomRight', allowed: ['bottomRight', 'center', 'right', 'bottomLeft'] },
-    { from: 'bottomLeft', allowed: ['bottomLeft', 'center', 'left', 'bottomRight'] },
-    { from: 'left', allowed: ['left', 'center', 'topLeft', 'bottomLeft'] },
-    { from: 'topLeft', allowed: ['topLeft', 'center', 'left', 'topRight'] },
+    { from: 'center', allowed: [ 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'] },
+    { from: 'topRight', allowed: [ 'center', 'right', 'topLeft'] },
+    { from: 'right', allowed: [ 'center', 'topRight', 'bottomRight'] },
+    { from: 'bottomRight', allowed: [ 'center', 'right', 'bottomLeft'] },
+    { from: 'bottomLeft', allowed: [ 'center', 'left', 'bottomRight'] },
+    { from: 'left', allowed: [ 'center', 'topLeft', 'bottomLeft'] },
+    { from: 'topLeft', allowed: [ 'center', 'left', 'topRight'] },
 ]
 
 const state = {
     locationHex: 'center',
-    allowedMoves: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
+    allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
 };
 
 app.get('/', (res) => {
