@@ -5,6 +5,7 @@ const connection = new WebSocket(serverUrl);
 
 const color = {
     playerRed: '#ff0000',
+    playerGreen: 'lightGreen',
     illegal: '#e60049',
     valid: '#50e991',
     default: '#b3d4ff',
@@ -19,12 +20,18 @@ connection.onopen = () => {
     }));
 };
 
-let state = {
+const serverState = {
     locationHex: null,
     allowedMoves: null,
 };
 let homePosition = null;
 let hoverStatus = null;
+
+const board = {
+    playerShip: null,
+    opponents: [],
+    mapHexes: []
+}
 
 connection.onmessage = (event) => {
     console.log('Received ', event.data);
@@ -33,7 +40,7 @@ connection.onmessage = (event) => {
         setInfo(data.error);
         return;
     }
-    state = data;
+    saveValues(data, serverState);
 };
 
 const info = document.getElementById('info');
@@ -85,18 +92,21 @@ const newShip = (x, y) => {
 
     ship.on('dragmove', () => {
         for (let i = 0; i < 7; i++) {
-            const hex = mapHexes[i];
-            hex.fill(hex.attrs.id == state.locationHex ? color.currentHex : color.default);
+            const hex = board.mapHexes[i];
+            hex.fill(hex.attrs.id == serverState.locationHex ? color.currentHex : color.default);
         }
 
-        const targetHex = mapHexes.find(hex => isPointerOver(hex));
+        const targetHex = board.mapHexes.find(hex => isPointerOver(hex));
 
+        if(!targetHex) {
+            return
+        }
 
         switch (true) {
-            case targetHex.attrs.id == state.locationHex:
+            case targetHex.attrs.id == serverState.locationHex:
                 hoverStatus = 'home';
                 break;
-            case state.allowedMoves.includes(targetHex.attrs.id):
+            case serverState.allowedMoves.includes(targetHex.attrs.id):
                 hoverStatus = 'valid';
                 targetHex.fill(color.valid);
                 break;
@@ -108,19 +118,29 @@ const newShip = (x, y) => {
 
     ship.on('dragend', () => {
 
+        const targetHex = board.mapHexes.find(hex => isPointerOver(hex));
+
+        if(!targetHex) {
+            ship.x(homePosition.x);
+            ship.y(homePosition.y);
+            layer.batchDraw();
+
+            return
+        }
+
         for (let i = 0; i < 7; i++) {
-            mapHexes[i].fill(color.default);
+            board.mapHexes[i].fill(color.default);
         }
 
         switch (hoverStatus) {
             case 'home':
             case 'illegal':
-                mapHexes.find(hex => hex.attrs.id == state.locationHex).fill(color.currentHex);
+                board.mapHexes.find(hex => hex.attrs.id == serverState.locationHex).fill(color.currentHex);
                 ship.x(homePosition.x);
                 ship.y(homePosition.y);
                 break;
             case 'valid':
-                const hex = mapHexes.find(hex => isPointerOver(hex));
+                const hex = board.mapHexes.find(hex => isPointerOver(hex));
                 hex.fill(color.currentHex);
                 connection.send(JSON.stringify({
                     action: 'move',
@@ -143,7 +163,7 @@ const initialHexData = [
     { name: 'left', x: 172, y: 0 },
     { name: 'right', x: -172, y: 0 },
 ];
-const mapHexes = [];
+// const mapHexes = [];
 let ship = null;
 
 window.setTimeout(() => {
@@ -152,12 +172,12 @@ window.setTimeout(() => {
             item.name,
             item.x,
             item.y,
-            state.locationHex == item.name ? color.currentHex : color.default
+            serverState.locationHex == item.name ? color.currentHex : color.default
         );
-        mapHexes.push(hex);
+        board.mapHexes.push(hex);
         layer.add(hex);
     });
-    const currentHexInitialData = initialHexData.find(item => item.name == state.locationHex);
+    const currentHexInitialData = initialHexData.find(item => item.name == serverState.locationHex);
     ship = newShip(currentHexInitialData.x, currentHexInitialData.y);
     layer.add(ship);
 }, 1000);
@@ -165,6 +185,12 @@ window.setTimeout(() => {
 const isPointerOver = (mapElement) => {
 
     return mapElement.intersects(stage.getPointerPosition());
+}
+
+const saveValues = (source, destination) => {
+    Object.keys(source).forEach(key => {
+        destination[key] = source[key];
+    })
 }
 stage.add(layer);
 layer.draw();
