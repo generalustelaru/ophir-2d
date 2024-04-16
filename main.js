@@ -1,16 +1,9 @@
 import Konva from 'konva';
+import { color, initialHexData } from './config.js';
 
 const serverUrl = 'ws://localhost:8080';
 const connection = new WebSocket(serverUrl);
 
-const color = {
-    playerRed: '#ff0000',
-    playerGreen: 'lightGreen',
-    illegal: '#e60049',
-    valid: '#50e991',
-    default: '#b3d4ff',
-    currentHex: '#0bb4ff',
-}
 connection.onopen = () => {
     console.log('Connected to the server');
     setInfo('Your turn');
@@ -24,12 +17,10 @@ const serverState = {
     locationHex: null,
     allowedMoves: null,
 };
-let homePosition = null;
-let hoverStatus = null;
 
 const board = {
     playerShip: null,
-    opponents: [],
+    // opponents: [],
     mapHexes: []
 }
 
@@ -71,7 +62,8 @@ const newMapHex = (name, x, y, fill) => {
     });
 }
 
-const newShip = (x, y) => {
+const createPlayerShip = (x, y) => {
+
     const ship = new Konva.Rect({
         x: stage.width() / 2,
         y: stage.height() / 2,
@@ -86,9 +78,14 @@ const newShip = (x, y) => {
         draggable: true,
         id: 'ship',
     });
+
+    let homePosition = null;
+
     ship.on('dragstart', () => {
         homePosition = { x: ship.x(), y: ship.y() };
     });
+
+    let hoverStatus = null;
 
     ship.on('dragmove', () => {
         for (let i = 0; i < 7; i++) {
@@ -148,23 +145,14 @@ const newShip = (x, y) => {
                 })
                 );
         }
+
         layer.batchDraw();
     });
 
     return ship;
 };
 
-const initialHexData = [
-    { name: 'center', x: 0, y: 0 },
-    { name: 'topLeft', x: 86, y: 150 },
-    { name: 'bottomRight', x: -86, y: -150 },
-    { name: 'topRight', x: -86, y: 150 },
-    { name: 'bottomLeft', x: 86, y: -150 },
-    { name: 'left', x: 172, y: 0 },
-    { name: 'right', x: -172, y: 0 },
-];
-// const mapHexes = [];
-let ship = null;
+
 
 window.setTimeout(() => {
     initialHexData.forEach(item => {
@@ -178,8 +166,8 @@ window.setTimeout(() => {
         layer.add(hex);
     });
     const currentHexInitialData = initialHexData.find(item => item.name == serverState.locationHex);
-    ship = newShip(currentHexInitialData.x, currentHexInitialData.y);
-    layer.add(ship);
+    board.playerShip = createPlayerShip(currentHexInitialData.x, currentHexInitialData.y);
+    layer.add(board.playerShip);
 }, 1000);
 
 const isPointerOver = (mapElement) => {
