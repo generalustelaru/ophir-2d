@@ -16,5 +16,3 @@ export const initialHexData = [
     { name: 'left', x: 172, y: 0 },
     { name: 'right', x: -172, y: 0 },
 ];
-
-// export default {color, initialHexData}
