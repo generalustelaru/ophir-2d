@@ -53,18 +53,21 @@ const createConnection = () => {
 
         wss.onmessage = (event) => {
 
+            console.log('Received ', event.data);
+            const data = JSON.parse(event.data);
+
+            if (data.error) {
+                setInfo(data.error);
+                return;
+            }
+
+            saveValues(data, serverState);
+
             if (isPromise) {
                 isPromise = false;
 
                 resolve(wss);
             }
-            console.log('Received ', event.data);
-            const data = JSON.parse(event.data);
-            if (data.error) {
-                setInfo(data.error);
-                return;
-            }
-            saveValues(data, serverState);
         }
     });
 }
@@ -169,8 +172,7 @@ const createPlayerShip = (x, y) => {
                 connection.send(JSON.stringify({
                     action: 'move',
                     details: hex.attrs.id
-                })
-                );
+                }));
         }
 
         layer.batchDraw();
