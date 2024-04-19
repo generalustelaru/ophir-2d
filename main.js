@@ -2,50 +2,58 @@ import Konva from 'konva';
 import { color, initialHexData } from './config.js';
 
 const serverUrl = 'ws://localhost:8080';
-const connection = new WebSocket(serverUrl);
-
-connection.onopen = () => {
-    console.log('Connected to the server');
-    setInfo('Your turn');
-    connection.send(JSON.stringify({
-        action: 'refresh',
-        details: null
-    }));
-};
 
 const serverState = {
     locationHex: null,
     allowedMoves: null,
-};
+}
 
 const board = {
     playerShip: null,
     // opponents: [],
-    mapHexes: []
+    mapHexes: [],
 }
 
-connection.onmessage = (event) => {
-    console.log('Received ', event.data);
-    const data = JSON.parse(event.data);
-    if (data.error) {
-        setInfo(data.error);
-        return;
-    }
-    saveValues(data, serverState);
-};
+const createConnection = () => {
 
-const info = document.getElementById('info');
+    const wss = new WebSocket(serverUrl);
+
+    wss.onopen = () => {
+        console.log('Connected to the server');
+        setInfo('Your turn');
+        wss.send(JSON.stringify({
+            action: 'refresh',
+            details: null
+        }));
+    }
+
+    wss.onmessage = (event) => {
+        console.log('Received ', event.data);
+        const data = JSON.parse(event.data);
+        if (data.error) {
+            setInfo(data.error);
+            return;
+        }
+        saveValues(data, serverState);
+    }
+
+    return wss;
+}
+
+const connection = createConnection();
+
 const setInfo = (text) => {
+    const info = document.getElementById('info');
     info.innerHTML = text;
 }
-var stage = new Konva.Stage({
+const stage = new Konva.Stage({
     container: 'container',
     visible: true,
     opacity: 1,
     width: 500,
     height: 500,
 });
-var layer = new Konva.Layer();
+const layer = new Konva.Layer();
 
 const newMapHex = (name, x, y, fill) => {
     return new Konva.RegularPolygon({
@@ -151,8 +159,6 @@ const createPlayerShip = (x, y) => {
 
     return ship;
 };
-
-
 
 window.setTimeout(() => {
     initialHexData.forEach(item => {
