@@ -15,11 +15,19 @@ const moveRules = [
     { from: 'left', allowed: [ 'center', 'topLeft', 'bottomLeft'] },
     { from: 'topLeft', allowed: [ 'center', 'left', 'topRight'] },
 ]
+const playerColors = ['playerRed', 'playerBlue', 'playerGreen', 'playerWhite'];
 
-const state = {
+const defaultPlayerState = {
     locationHex: 'center',
     allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
 };
+
+const state = { //TODO: turn into a service class and detach from the server
+    playerRed: null,
+    playerBlue: null,
+    playerGreen: null,
+    playerWhite: null,
+}
 
 app.get('/', (res) => {
     res.sendFile(__dirname + '/public/index.html');
@@ -29,30 +37,51 @@ app.listen(httpPort, () => {
     console.info(`Server running at http://localhost:${httpPort}`);
 });
 
+const socketClients = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 
 socketServer.on('connection', function connection(ws) {
 
+    socketClients.push(ws);
+
+    const sendAll = (message) => {
+        socketClients.forEach(client => {
+            client.send(JSON.stringify(message));
+        });
+    }
+
+    const send = (client, message) => {
+        ws.send(JSON.stringify(message));
+    }
+
     ws.on('message', function incoming(message) {
         try {
             const messageObject = JSON.parse(message);
-            console.log('received: %s: %s', messageObject.action, messageObject.details);
+            console.info('%s: %s %s', messageObject.playerColor, messageObject.action, messageObject.details);
+
+            const sender = messageObject.playerColor;
+            const playerState = state[sender];
 
             if (messageObject.action == 'refresh') {
-                ws.send(JSON.stringify(state));
+
+                if (state[sender] == null) {
+                    addNewPlayer(sender);
+                }
+
+                sendAll(state);
             }
 
             if (messageObject.action == 'move') {
-                const allowed = moveRules.find(rule => rule.from == state.locationHex).allowed;
+                const destination = messageObject.details.hex;
+                const allowed = moveRules.find(rule => rule.from == playerState.locationHex).allowed;
 
-                if (allowed.includes(messageObject.details)) {
-                    state.locationHex = messageObject.details;
-                    state.allowedMoves = moveRules.find(rule => rule.from == messageObject.details).allowed;
+                if (allowed.includes(destination)) {
+                    playerState.locationHex = destination;
+                    playerState.allowedMoves = moveRules.find(rule => rule.from == destination).allowed;
 
-                    ws.send(JSON.stringify(state));
+                    sendAll(state);
                 } else {
-
-                    ws.send(JSON.stringify({ error: 'illegal move!' }));
+                    send({ error: 'Illegal move!' });
                 }
             }
         } catch (error) {
@@ -61,3 +90,12 @@ socketServer.on('connection', function connection(ws) {
         }
     });
 });
+
+function addNewPlayer(playerColor) {
+
+    if (playerColors.includes(playerColor)) {
+        console.log(`${playerColor} connected`);
+    }
+
+    state[playerColor] = { ...defaultPlayerState };
+}
