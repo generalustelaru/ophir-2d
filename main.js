@@ -1,6 +1,8 @@
 import Konva from 'konva';
 import { color, initialHexData } from './config.js';
 
+const HEX_COUNT = 7;
+
 const serverUrl = 'ws://localhost:8080';
 let connection = null;
 
@@ -118,7 +120,7 @@ const createPlayerShip = (x, y) => {
     let hoverStatus = null;
 
     ship.on('dragmove', () => {
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < HEX_COUNT; i++) {
             const hex = boardState.mapHexes[i];
             hex.fill(hex.attrs.id == serverState.locationHex ? color.currentHex : color.default);
         }
@@ -155,7 +157,7 @@ const createPlayerShip = (x, y) => {
             return
         }
 
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < HEX_COUNT; i++) {
             boardState.mapHexes[i].fill(color.default);
         }
 
