@@ -1,11 +1,12 @@
 import Konva from 'konva';
-import { color, initialHexData } from './config.js';
+import { colors, initialHexData } from './config.js';
 import { MapHex } from './elements/MapHex.js';
 
 const HEX_COUNT = 7;
 
 const serverUrl = 'ws://localhost:8080';
 let connection = null;
+let playerColor = null;
 
 const serverState = {
     locationHex: null,
@@ -31,6 +32,11 @@ stage.add(layer);
 layer.draw();
 
 const createConnection = () => {
+    playerColor = document.getElementById('playerColorSelect').value;
+
+    if (!playerColor) {
+        throw new Error('Please select a color');
+    }
 
     return new Promise((resolve, reject) => {
         let isPromise = true;
@@ -43,7 +49,7 @@ const createConnection = () => {
 
             wss.send(JSON.stringify({
                 action: 'refresh',
-                details: null
+                details: { playerColor }
             }));
 
         }
@@ -80,14 +86,14 @@ const setInfo = (text) => {
     info.innerHTML = text;
 }
 
-const createPlayerShip = (x, y) => {
+const createPlayerShip = (x, y, color) => {
 
     const ship = new Konva.Rect({
         x: stage.width() / 2,
         y: stage.height() / 2,
         offsetX: x,
         offsetY: y,
-        fill: color.playerRed,
+        fill: color,
         stroke: 'black',
         strokeWidth: 3,
         width: 40,
@@ -108,7 +114,7 @@ const createPlayerShip = (x, y) => {
     ship.on('dragmove', () => {
         for (let i = 0; i < HEX_COUNT; i++) {
             const hex = boardState.mapHexes[i];
-            hex.fill(hex.attrs.id == serverState.locationHex ? color.currentHex : color.default);
+            hex.fill(hex.attrs.id == serverState.locationHex ? colors.currentHex : colors.default);
         }
 
         const targetHex = boardState.mapHexes.find(hex => isPointerOver(hex));
@@ -123,11 +129,11 @@ const createPlayerShip = (x, y) => {
                 break;
             case serverState.allowedMoves.includes(targetHex.attrs.id):
                 hoverStatus = 'valid';
-                targetHex.fill(color.valid);
+                targetHex.fill(colors.valid);
                 break;
             default:
                 hoverStatus = 'illegal';
-                targetHex.fill(color.illegal);
+                targetHex.fill(colors.illegal);
         }
     });
 
@@ -144,19 +150,19 @@ const createPlayerShip = (x, y) => {
         }
 
         for (let i = 0; i < HEX_COUNT; i++) {
-            boardState.mapHexes[i].fill(color.default);
+            boardState.mapHexes[i].fill(colors.default);
         }
 
         switch (hoverStatus) {
             case 'home':
             case 'illegal':
-                boardState.mapHexes.find(hex => hex.attrs.id == serverState.locationHex).fill(color.currentHex);
+                boardState.mapHexes.find(hex => hex.attrs.id == serverState.locationHex).fill(colors.currentHex);
                 ship.x(homePosition.x);
                 ship.y(homePosition.y);
                 break;
             case 'valid':
                 const hex = boardState.mapHexes.find(hex => isPointerOver(hex));
-                hex.fill(color.currentHex);
+                hex.fill(colors.currentHex);
                 connection.send(JSON.stringify({
                     action: 'move',
                     details: hex.attrs.id
@@ -176,13 +182,13 @@ const drawBoard = () => {
             item.name,
             item.x,
             item.y,
-            serverState.locationHex == item.name ? color.currentHex : color.default
+            serverState.locationHex == item.name ? colors.currentHex : colors.default
         );
         boardState.mapHexes.push(hex);
         layer.add(hex);
     });
     const currentHexInitialData = initialHexData.find(item => item.name == serverState.locationHex);
-    boardState.playerShip = createPlayerShip(currentHexInitialData.x, currentHexInitialData.y);
+    boardState.playerShip = createPlayerShip(currentHexInitialData.x, currentHexInitialData.y, colors[playerColor]);
     layer.add(boardState.playerShip);
 }
 
@@ -198,9 +204,15 @@ const saveValues = (source, destination) => {
 }
 
 document.getElementById('joinButton').addEventListener('click', () => {
-    createConnection().then((wsObject) => {
-        document.getElementById('joinButton').disabled = true;
-        connection = wsObject;
-        drawBoard();
-    });
+
+    try {
+        createConnection().then((wsObject) => {
+            document.getElementById('joinButton').disabled = true;
+            document.getElementById('playerColorSelect').disabled = true;
+            connection = wsObject;
+            drawBoard();
+        });
+    } catch (error) {
+        setInfo(error);
+    }
 });
