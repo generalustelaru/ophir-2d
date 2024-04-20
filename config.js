@@ -1,10 +1,10 @@
-export const color = {
-    playerRed: '#ff0000',
-    playerGreen: 'lightGreen',
-    illegal: '#e60049',
-    valid: '#50e991',
-    default: '#b3d4ff',
-    currentHex: '#0bb4ff',
+export const colors = {
+    playerRed: '#FF204E',
+    playerGreen: '#87A922',
+    illegal: '#CD8D7A',
+    valid: '#A3FFD6',
+    default: '#3887BE',
+    currentHex: '#52D3D8',
 }
 
 export const initialHexData = [
