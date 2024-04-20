@@ -1,5 +1,6 @@
 import Konva from 'konva';
 import { color, initialHexData } from './config.js';
+import { MapHex } from './elements/MapHex.js';
 
 const HEX_COUNT = 7;
 
@@ -77,21 +78,6 @@ const createConnection = () => {
 const setInfo = (text) => {
     const info = document.getElementById('info');
     info.innerHTML = text;
-}
-
-const newMapHex = (name, x, y, fill) => {
-    return new Konva.RegularPolygon({
-        x: stage.width() / 2,
-        y: stage.width() / 2,
-        offsetX: x,
-        offsetY: y,
-        sides: 6,
-        radius: 100,
-        fill: fill,
-        stroke: 'black',
-        strokeWidth: 1,
-        id: name,
-    });
 }
 
 const createPlayerShip = (x, y) => {
@@ -185,7 +171,8 @@ const createPlayerShip = (x, y) => {
 
 const drawBoard = () => {
     initialHexData.forEach(item => {
-        const hex = newMapHex(
+        const hex = new MapHex(
+            stage.width(),
             item.name,
             item.x,
             item.y,
