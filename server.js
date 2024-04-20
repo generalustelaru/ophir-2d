@@ -6,18 +6,23 @@ const wsPort = 8080;
 
 app.use(express.static('public'));
 
-const moveRules = [
-    { from: 'center', allowed: [ 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'] },
-    { from: 'topRight', allowed: [ 'center', 'right', 'topLeft'] },
-    { from: 'right', allowed: [ 'center', 'topRight', 'bottomRight'] },
-    { from: 'bottomRight', allowed: [ 'center', 'right', 'bottomLeft'] },
-    { from: 'bottomLeft', allowed: [ 'center', 'left', 'bottomRight'] },
-    { from: 'left', allowed: [ 'center', 'topLeft', 'bottomLeft'] },
-    { from: 'topLeft', allowed: [ 'center', 'left', 'topRight'] },
+const MOVE_RULES = [
+    { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'] },
+    { from: 'topRight', allowed: ['center', 'right', 'topLeft'] },
+    { from: 'right', allowed: ['center', 'topRight', 'bottomRight'] },
+    { from: 'bottomRight', allowed: ['center', 'right', 'bottomLeft'] },
+    { from: 'bottomLeft', allowed: ['center', 'left', 'bottomRight'] },
+    { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'] },
+    { from: 'topLeft', allowed: ['center', 'left', 'topRight'] },
 ]
-const playerColors = ['playerRed', 'playerBlue', 'playerGreen', 'playerWhite'];
+const PLAYER_COLORS = ['playerRed', 'playerBlue', 'playerGreen', 'playerWhite'];
 
-const defaultPlayerState = {
+const ACTIONS = {
+    refresh: 'refresh',
+    move: 'move',
+}
+
+const STARTING_PLAYER_STATE = {
     locationHex: 'center',
     allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
 };
@@ -56,28 +61,27 @@ socketServer.on('connection', function connection(ws) {
 
     ws.on('message', function incoming(message) {
         try {
-            const messageObject = JSON.parse(message);
-            console.info('%s: %s %s', messageObject.playerColor, messageObject.action, messageObject.details);
+            const { playerColor, action, details } = JSON.parse(message);
+            console.info('%s: %s %s', playerColor, action, details);
 
-            const sender = messageObject.playerColor;
-            const playerState = state[sender];
+            const playerState = state[playerColor];
 
-            if (messageObject.action == 'refresh') {
+            if (action == ACTIONS.refresh) {
 
-                if (state[sender] == null) {
-                    addNewPlayer(sender);
+                if (state[playerColor] == null) {
+                    addNewPlayer(playerColor);
                 }
 
                 sendAll(state);
             }
 
-            if (messageObject.action == 'move') {
-                const destination = messageObject.details.hex;
-                const allowed = moveRules.find(rule => rule.from == playerState.locationHex).allowed;
+            if (action == ACTIONS.move) {
+                const destination = details.hex;
+                const allowed = MOVE_RULES.find(rule => rule.from == playerState.locationHex).allowed;
 
                 if (allowed.includes(destination)) {
                     playerState.locationHex = destination;
-                    playerState.allowedMoves = moveRules.find(rule => rule.from == destination).allowed;
+                    playerState.allowedMoves = MOVE_RULES.find(rule => rule.from == destination).allowed;
 
                     sendAll(state);
                 } else {
@@ -93,9 +97,9 @@ socketServer.on('connection', function connection(ws) {
 
 function addNewPlayer(playerColor) {
 
-    if (playerColors.includes(playerColor)) {
+    if (PLAYER_COLORS.includes(playerColor)) {
         console.log(`${playerColor} connected`);
     }
 
-    state[playerColor] = { ...defaultPlayerState };
+    state[playerColor] = { ...STARTING_PLAYER_STATE };
 }
