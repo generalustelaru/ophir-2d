@@ -15,7 +15,12 @@ const MOVE_RULES = [
     { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'] },
     { from: 'topLeft', allowed: ['center', 'left', 'topRight'] },
 ]
-const PLAYER_COLORS = ['playerRed', 'playerBlue', 'playerGreen', 'playerWhite'];
+const PLAYER_COLORS = [
+    'playerWhite',
+    'playerYellow',
+    'playerRed',
+    'playerGreen',
+];
 
 const ACTIONS = {
     refresh: 'refresh',

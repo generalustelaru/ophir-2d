@@ -9,10 +9,10 @@ let connection = null;
 let playerColor = null; // TODO: rename playerColor as playerId to avoid confusion w/ Konva color
 
 const serverState = {
-    playerRed: null,
-    playerBlue: null,
-    playerGreen: null,
     playerWhite: null,
+    playerYellow: null,
+    playerRed: null,
+    playerGreen: null,
 }
 
 const boardState = {
