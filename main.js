@@ -51,7 +51,8 @@ wss.onopen = () => {
 }
 
 wss.onerror = (error) => {
-    console.error('WebSocket connection error:', error);
+    console.error('WebSocket error:', error);
+    setInfo('We encoutered a connection error :(');
 }
 
 wss.onmessage = (event) => {
@@ -78,21 +79,7 @@ wss.onmessage = (event) => {
     }
 }
 
-const createSession = () => {
-    playerId = document.getElementById('playerColorSelect').value;
-
-    if (!playerId) {
-        throw new Error('Please select a color');
-    }
-
-    wss.send(JSON.stringify({
-        playerId,
-        action: 'refresh',
-        details: null,
-    }));
-}
-
-const syncWithSession = () => {
+const refreshSession = () => {
     playerId = document.getElementById('playerColorSelect').value;
 
     if (!playerId) {
@@ -240,6 +227,7 @@ const drawBoard = () => {
     });
 
     for (const opponentId in players) {
+
         if (players[opponentId] && opponentId != playerId) {
             console.log(opponentId);
             const locationData = hexData.find(hexItem => hexItem.id == players[opponentId].locationHex);
@@ -260,7 +248,6 @@ const drawBoard = () => {
 }
 
 const updateBoard = () => {
-
     boardState.opponentShips.forEach(ship => {
         const opponentId = ship.attrs.id;
         const players = serverState.players;
@@ -276,7 +263,6 @@ const updateBoard = () => {
             ship.destroy();
         }
     });
-
 }
 
 const isPointerOver = (mapElement) => {
@@ -322,17 +308,14 @@ const updatePreSessionUi = () => {
 
 document.getElementById('createButton').addEventListener('click', () => {
     try {
-        createSession();
+        refreshSession();
     } catch (error) {
         setInfo(error);
     }
-    // document.getElementById('createButton').disabled = true;
 });
 document.getElementById('joinButton').addEventListener('click', () => {
     try {
-        syncWithSession();
-        // document.getElementById('joinButton').disabled = true;
-        // document.getElementById('playerColorSelect').disabled = true;
+        refreshSession();
     } catch (error) {
         setInfo(error);
     }
