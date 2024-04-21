@@ -23,7 +23,9 @@ const PLAYER_IDS = [
 ];
 
 const ACTIONS = {
+    inquire: 'inquire',
     refresh: 'refresh',
+    start: 'start',
     move: 'move',
 }
 
@@ -34,10 +36,13 @@ const STARTING_PLAYER_STATE = {
 
 const sessionState = { //TODO: turn into a service class and detach from the server
     hasStarted: false,
-    playerWhite: null,
-    playerYellow: null,
-    playerRed: null,
-    playerGreen: null,
+    sessionOwner: null,
+    players: {
+        playerWhite: null,
+        playerYellow: null,
+        playerRed: null,
+        playerGreen: null,
+    },
 }
 
 app.get('/', (res) => {
@@ -70,14 +75,27 @@ socketServer.on('connection', function connection(ws) {
             const { playerId, action, details } = JSON.parse(message);
             console.info('%s: %s %s', playerId, action, details);
 
-            const playerState = sessionState[playerId];
+            const playerState = playerId ? sessionState.players[playerId] : null;
+
+            if (action == ACTIONS.inquire) {
+                send(sessionState);
+            }
 
             if (action == ACTIONS.refresh) {
 
-                if (false == sessionState.hasStarted && sessionState[playerId] == null) {
+                if (false == sessionState.hasStarted && sessionState.players[playerId] == null) {
                     addNewPlayer(playerId);
                 }
 
+                if (sessionState.sessionOwner == null) {
+                    sessionState.sessionOwner = playerId;
+                }
+
+                sendAll(sessionState);
+            }
+
+            if (action == ACTIONS.start) {
+                sessionState.hasStarted = true;
                 sendAll(sessionState);
             }
 
@@ -107,5 +125,5 @@ function addNewPlayer(playerId) {
         console.log(`${playerId} connected`);
     }
 
-    sessionState[playerId] = { ...STARTING_PLAYER_STATE };
+    sessionState.players[playerId] = { ...STARTING_PLAYER_STATE };
 }
