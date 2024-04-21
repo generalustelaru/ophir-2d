@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { colors, initialHexData } from './config.js';
+import { colors, hexData } from './config.js';
 import { MapHex } from './elements/MapHex.js';
 
 const HEX_COUNT = 7;
@@ -205,28 +205,28 @@ const createPlayerShip = (x, y, color) => {
 };
 
 const drawBoard = () => {
-    initialHexData.forEach(hex => {
-        const hex = new MapHex(
+    hexData.forEach(hexItem => {
+        const hexElement = new MapHex(
             stage.width(),
-            hex.id,
-            hex.x,
-            hex.y,
-            serverState[playerId].locationHex == hex.id ? colors.currentHex : colors.default
+            hexItem.id,
+            hexItem.x,
+            hexItem.y,
+            serverState[playerId].locationHex == hexItem.id ? colors.currentHex : colors.default
         );
-        boardState.mapHexes.push(hex);
-        layer.add(hex);
+        boardState.mapHexes.push(hexElement);
+        layer.add(hexElement);
     });
 
     for (const opponentId in serverState) {
         if (serverState[opponentId] && opponentId != playerId) {
-            const locationData = initialHexData.find(hex => hex.id == serverState[opponentId].locationHex);
+            const locationData = hexData.find(hexItem => hexItem.id == serverState[opponentId].locationHex);
             const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentId], opponentId);
             boardState.opponentShips.push(ship);
             layer.add(ship);
         }
     }
 
-    const locationData = initialHexData.find(item => item.id == serverState[playerId].locationHex);
+    const locationData = hexData.find(hexItem => hexItem.id == serverState[playerId].locationHex);
     boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerId]);
     layer.add(boardState.playerShip);
 
@@ -238,7 +238,7 @@ const updateBoard = () => {
         const opponentId = ship.attrs.id;
 
         if (serverState[opponentId]) {
-            const locationData = initialHexData.find(hex => hex.id == serverState[opponentId].locationHex);
+            const locationData = hexData.find(hexItem => hexItem.id == serverState[opponentId].locationHex);
             ship.offsetX(locationData.x);
             ship.offsetY(locationData.y);
 
