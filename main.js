@@ -7,6 +7,7 @@ const HEX_COUNT = 7;
 const serverUrl = 'ws://localhost:8080';
 let playerId = null;
 let isBoardDrawn = false;
+let isSpectator = false;
 
 const serverState = {
     hasStarted: null,
@@ -156,7 +157,7 @@ const createPlayerShip = (x, y, color) => {
     ship.on('dragmove', () => {
 
         const players = serverState.players;
-        
+
         for (let i = 0; i < HEX_COUNT; i++) {
             const hex = boardState.mapHexes[i];
             hex.fill(hex.attrs.id == players[playerId].locationHex ? colors.currentHex : colors.default);
@@ -224,15 +225,15 @@ const createPlayerShip = (x, y, color) => {
 };
 
 const drawBoard = () => {
-
     const players = serverState.players;
+
     hexData.forEach(hexItem => {
         const hexElement = new MapHex(
             stage.width(),
             hexItem.id,
             hexItem.x,
             hexItem.y,
-            players[playerId].locationHex == hexItem.id ? colors.currentHex : colors.default
+            players[playerId]?.locationHex == hexItem.id ? colors.currentHex : colors.default
         );
         boardState.mapHexes.push(hexElement);
         layer.add(hexElement);
@@ -248,10 +249,14 @@ const drawBoard = () => {
         }
     }
 
+    if (isSpectator) {
+        setInfo('You are a spectator');
+        return;
+    }
+
     const locationData = hexData.find(hexItem => hexItem.id == players[playerId].locationHex);
     boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerId]);
     layer.add(boardState.playerShip);
-
 }
 
 const updateBoard = () => {
@@ -286,10 +291,9 @@ const saveValues = (source, destination) => {
 }
 
 const updatePreSessionUi = () => {
-    const { playerWhite, playerYellow, playerRed, playerGreen } = serverState.players;
-    const players = [playerWhite, playerYellow, playerRed, playerGreen];
+    const playerArray = Object.entries(serverState.players).map(([, value]) => value);
 
-    if (players.every(state => state == null)) {
+    if (playerArray.every(state => state == null)) {
         document.getElementById('createButton').disabled = false;
         setInfo('You may create the game');
     } else if (playerId) {
@@ -297,10 +301,18 @@ const updatePreSessionUi = () => {
         document.getElementById('joinButton').disabled = true;
         document.getElementById('playerColorSelect').disabled = true;
         setInfo('Waiting for players to join...');
-    } else if (players.includes(null)) {
+    } else if (playerArray.includes(null)) {
         document.getElementById('createButton').disabled = true;
         document.getElementById('joinButton').disabled = false;
+        Array.from(document.getElementById('playerColorSelect').options).forEach(option => {
+            option.disabled = serverState.players[option.value] != null;
+        });
         setInfo('A game is waiting for you');
+    } else {
+        document.getElementById('playerColorSelect').disabled = true;
+        document.getElementById('joinButton').disabled = true;
+        setInfo('The game is full, sorry :(');
+        isSpectator = true;
     }
 
     if (playerId && playerId == serverState.sessionOwner) {
