@@ -15,7 +15,7 @@ const MOVE_RULES = [
     { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'] },
     { from: 'topLeft', allowed: ['center', 'left', 'topRight'] },
 ]
-const PLAYER_COLORS = [
+const PLAYER_IDS = [
     'playerWhite',
     'playerYellow',
     'playerRed',
@@ -60,21 +60,21 @@ socketServer.on('connection', function connection(ws) {
         });
     }
 
-    const send = (client, message) => {
+    const send = (message) => {
         ws.send(JSON.stringify(message));
     }
 
     ws.on('message', function incoming(message) {
         try {
-            const { playerColor, action, details } = JSON.parse(message);
-            console.info('%s: %s %s', playerColor, action, details);
+            const { playerId, action, details } = JSON.parse(message);
+            console.info('%s: %s %s', playerId, action, details);
 
-            const playerState = state[playerColor];
+            const playerState = state[playerId];
 
             if (action == ACTIONS.refresh) {
 
-                if (state[playerColor] == null) {
-                    addNewPlayer(playerColor);
+                if (state[playerId] == null) {
+                    addNewPlayer(playerId);
                 }
 
                 sendAll(state);
@@ -100,11 +100,11 @@ socketServer.on('connection', function connection(ws) {
     });
 });
 
-function addNewPlayer(playerColor) {
+function addNewPlayer(playerId) {
 
-    if (PLAYER_COLORS.includes(playerColor)) {
-        console.log(`${playerColor} connected`);
+    if (PLAYER_IDS.includes(playerId)) {
+        console.log(`${playerId} connected`);
     }
 
-    state[playerColor] = { ...STARTING_PLAYER_STATE };
+    state[playerId] = { ...STARTING_PLAYER_STATE };
 }
