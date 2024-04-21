@@ -5,15 +5,18 @@ import { MapHex } from './elements/MapHex.js';
 const HEX_COUNT = 7;
 
 const serverUrl = 'ws://localhost:8080';
-let connection = null;
 let playerId = null;
+let isBoardDrawn = false;
 
 const serverState = {
     hasStarted: null,
-    playerWhite: null,
-    playerYellow: null,
-    playerRed: null,
-    playerGreen: null,
+    sessionOwner: null,
+    players: {
+        playerWhite: null,
+        playerYellow: null,
+        playerRed: null,
+        playerGreen: null,
+    },
 }
 
 const boardState = {
@@ -34,60 +37,72 @@ const layer = new Konva.Layer();
 stage.add(layer);
 layer.draw();
 
-const createConnection = () => {
+const wss = new WebSocket(serverUrl);
+
+wss.onopen = () => {
+    setInfo('Connected to the server');
+
+    wss.send(JSON.stringify({
+        playerId,
+        action: 'inquire',
+        details: null,
+    }))
+}
+
+wss.onerror = (error) => {
+    console.error('WebSocket connection error:', error);
+}
+
+wss.onmessage = (event) => {
+    console.debug('Received ', event.data);
+    const data = JSON.parse(event.data);
+
+    if (data.error) {
+        setInfo(data.error);
+        return;
+    }
+
+    saveValues(data, serverState);
+
+    if (serverState.hasStarted) {
+        setInfo('The \'game\' has started');
+        if (isBoardDrawn) {
+            updateBoard();
+        } else {
+            drawBoard();
+            isBoardDrawn = true;
+        }
+    } else {
+        updatePreSessionUi();
+    }
+}
+
+const createSession = () => {
     playerId = document.getElementById('playerColorSelect').value;
 
     if (!playerId) {
         throw new Error('Please select a color');
     }
 
-    return new Promise((resolve, reject) => {
-        let isPromise = true;
-
-        const wss = new WebSocket(serverUrl);
-
-        //TODO: should move object composition from here
-        wss.onopen = () => {
-            console.log('Connected to the server');
-            setInfo('Your turn');
-
-            wss.send(JSON.stringify({
-                playerId,
-                action: 'refresh',
-                details: null,
-            }));
-
-        }
-
-        wss.onerror = (error) => {
-            console.error('WebSocket connection error:', error);
-
-            reject(error);
-        }
-
-        wss.onmessage = (event) => {
-
-            console.debug('Received ', event.data);
-            const data = JSON.parse(event.data);
-
-            if (data.error) {
-                setInfo(data.error);
-                return;
-            }
-
-            saveValues(data, serverState);
-
-            if (isPromise) {
-                isPromise = false;
-
-                resolve(wss);
-            } else {
-                updateBoard();
-            }
-        }
-    });
+    wss.send(JSON.stringify({
+        playerId,
+        action: 'refresh',
+        details: null,
+    }));
 }
 
+const syncWithSession = () => {
+    playerId = document.getElementById('playerColorSelect').value;
+
+    if (!playerId) {
+        throw new Error('Please select a color');
+    }
+    wss.send(JSON.stringify({
+        playerId,
+        action: 'refresh',
+        details: null,
+    }));
+}
 const setInfo = (text) => {
     const info = document.getElementById('info');
     info.innerHTML = text;
@@ -139,9 +154,12 @@ const createPlayerShip = (x, y, color) => {
     let hoverStatus = null;
 
     ship.on('dragmove', () => {
+
+        const players = serverState.players;
+        
         for (let i = 0; i < HEX_COUNT; i++) {
             const hex = boardState.mapHexes[i];
-            hex.fill(hex.attrs.id == serverState[playerId].locationHex ? colors.currentHex : colors.default);
+            hex.fill(hex.attrs.id == players[playerId].locationHex ? colors.currentHex : colors.default);
         }
 
         const targetHex = boardState.mapHexes.find(hex => isPointerOver(hex));
@@ -151,10 +169,10 @@ const createPlayerShip = (x, y, color) => {
         }
 
         switch (true) {
-            case targetHex.attrs.id == serverState[playerId].locationHex:
+            case players[playerId].locationHex == targetHex.attrs.id:
                 hoverStatus = 'home';
                 break;
-            case serverState[playerId].allowedMoves.includes(targetHex.attrs.id):
+            case players[playerId].allowedMoves.includes(targetHex.attrs.id):
                 hoverStatus = 'valid';
                 targetHex.fill(colors.valid);
                 break;
@@ -183,14 +201,14 @@ const createPlayerShip = (x, y, color) => {
         switch (hoverStatus) {
             case 'home':
             case 'illegal':
-                boardState.mapHexes.find(hex => hex.attrs.id == serverState[playerId].locationHex).fill(colors.currentHex);
+                boardState.mapHexes.find(hex => hex.attrs.id == serverState.players[playerId].locationHex).fill(colors.currentHex);
                 ship.x(homePosition.x);
                 ship.y(homePosition.y);
                 break;
             case 'valid':
                 const hex = boardState.mapHexes.find(hex => isPointerOver(hex));
                 hex.fill(colors.currentHex);
-                connection.send(JSON.stringify({
+                wss.send(JSON.stringify({
                     playerId,
                     action: 'move',
                     details: {
@@ -206,28 +224,31 @@ const createPlayerShip = (x, y, color) => {
 };
 
 const drawBoard = () => {
+
+    const players = serverState.players;
     hexData.forEach(hexItem => {
         const hexElement = new MapHex(
             stage.width(),
             hexItem.id,
             hexItem.x,
             hexItem.y,
-            serverState[playerId].locationHex == hexItem.id ? colors.currentHex : colors.default
+            players[playerId].locationHex == hexItem.id ? colors.currentHex : colors.default
         );
         boardState.mapHexes.push(hexElement);
         layer.add(hexElement);
     });
 
-    for (const opponentId in serverState) {
-        if (serverState[opponentId] && opponentId != playerId) {
-            const locationData = hexData.find(hexItem => hexItem.id == serverState[opponentId].locationHex);
+    for (const opponentId in players) {
+        if (players[opponentId] && opponentId != playerId) {
+            console.log(opponentId);
+            const locationData = hexData.find(hexItem => hexItem.id == players[opponentId].locationHex);
             const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentId], opponentId);
             boardState.opponentShips.push(ship);
             layer.add(ship);
         }
     }
 
-    const locationData = hexData.find(hexItem => hexItem.id == serverState[playerId].locationHex);
+    const locationData = hexData.find(hexItem => hexItem.id == players[playerId].locationHex);
     boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerId]);
     layer.add(boardState.playerShip);
 
@@ -237,9 +258,10 @@ const updateBoard = () => {
 
     boardState.opponentShips.forEach(ship => {
         const opponentId = ship.attrs.id;
+        const players = serverState.players;
 
-        if (serverState[opponentId]) {
-            const locationData = hexData.find(hexItem => hexItem.id == serverState[opponentId].locationHex);
+        if (players[opponentId]) {
+            const locationData = hexData.find(hexItem => hexItem.id == players[opponentId].locationHex);
             ship.offsetX(locationData.x);
             ship.offsetY(locationData.y);
 
@@ -263,16 +285,51 @@ const saveValues = (source, destination) => {
     })
 }
 
-document.getElementById('joinButton').addEventListener('click', () => {
+const updatePreSessionUi = () => {
+    const { playerWhite, playerYellow, playerRed, playerGreen } = serverState.players;
+    const players = [playerWhite, playerYellow, playerRed, playerGreen];
 
+    if (players.every(state => state == null)) {
+        document.getElementById('createButton').disabled = false;
+        setInfo('You may create the game');
+    } else if (playerId) {
+        document.getElementById('createButton').disabled = true;
+        document.getElementById('joinButton').disabled = true;
+        document.getElementById('playerColorSelect').disabled = true;
+        setInfo('Waiting for players to join...');
+    } else if (players.includes(null)) {
+        document.getElementById('createButton').disabled = true;
+        document.getElementById('joinButton').disabled = false;
+        setInfo('A game is waiting for you');
+    }
+
+    if (playerId && playerId == serverState.sessionOwner) {
+        document.getElementById('startButton').disabled = false;
+    }
+}
+
+document.getElementById('createButton').addEventListener('click', () => {
     try {
-        createConnection().then((wsObject) => {
-            document.getElementById('joinButton').disabled = true;
-            document.getElementById('playerColorSelect').disabled = true;
-            connection = wsObject;
-            drawBoard();
-        });
+        createSession();
     } catch (error) {
         setInfo(error);
     }
+    // document.getElementById('createButton').disabled = true;
+});
+document.getElementById('joinButton').addEventListener('click', () => {
+    try {
+        syncWithSession();
+        // document.getElementById('joinButton').disabled = true;
+        // document.getElementById('playerColorSelect').disabled = true;
+    } catch (error) {
+        setInfo(error);
+    }
+});
+document.getElementById('startButton').addEventListener('click', () => {
+    wss.send(JSON.stringify({
+        playerId,
+        action: 'start',
+        details: null,
+    }));
+    document.getElementById('startButton').disabled = true;
 });
