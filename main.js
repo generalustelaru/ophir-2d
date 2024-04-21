@@ -6,7 +6,7 @@ const HEX_COUNT = 7;
 
 const serverUrl = 'ws://localhost:8080';
 let connection = null;
-let playerColor = null;
+let playerColor = null; // TODO: rename playerColor as playerId to avoid confusion w/ Konva color
 
 const serverState = {
     playerRed: null,
@@ -17,7 +17,7 @@ const serverState = {
 
 const boardState = {
     playerShip: null,
-    // opponents: [],
+    opponentShips: [],
     mapHexes: [],
 }
 
@@ -66,7 +66,7 @@ const createConnection = () => {
 
         wss.onmessage = (event) => {
 
-            console.log('Received ', event.data);
+            console.debug('Received ', event.data);
             const data = JSON.parse(event.data);
 
             if (data.error) {
@@ -80,6 +80,8 @@ const createConnection = () => {
                 isPromise = false;
 
                 resolve(wss);
+            } else {
+                updateBoard();
             }
         }
     });
@@ -88,6 +90,26 @@ const createConnection = () => {
 const setInfo = (text) => {
     const info = document.getElementById('info');
     info.innerHTML = text;
+}
+
+const createOpponentShip = (x, y, color, opponentColor) => {
+
+    const ship = new Konva.Rect({
+        x: stage.width() / 2,
+        y: stage.height() / 2,
+        offsetX: x,
+        offsetY: y,
+        fill: color,
+        stroke: 'black',
+        strokeWidth: 3,
+        width: 40,
+        height: 30,
+        cornerRadius: [0, 0, 5, 30],
+        draggable: false,
+        id: opponentColor,
+    });
+
+    return ship;
 }
 
 const createPlayerShip = (x, y, color) => {
@@ -104,7 +126,7 @@ const createPlayerShip = (x, y, color) => {
         height: 30,
         cornerRadius: [0, 0, 5, 30],
         draggable: true,
-        id: 'ship',
+        id: 'playerShip',
     });
 
     let homePosition = null;
@@ -194,9 +216,39 @@ const drawBoard = () => {
         boardState.mapHexes.push(hex);
         layer.add(hex);
     });
-    const currentHexInitialData = initialHexData.find(item => item.name == serverState[playerColor].locationHex);
-    boardState.playerShip = createPlayerShip(currentHexInitialData.x, currentHexInitialData.y, colors[playerColor]);
+
+    for (const opponentColor in serverState) {
+        if (serverState[opponentColor] && opponentColor != playerColor) {
+            const locationData = initialHexData.find(item => item.name == serverState[opponentColor].locationHex);
+            const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentColor], opponentColor);
+            boardState.opponentShips.push(ship);
+            layer.add(ship);
+        }
+    }
+
+    const locationData = initialHexData.find(item => item.name == serverState[playerColor].locationHex);
+    boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerColor]);
     layer.add(boardState.playerShip);
+
+}
+
+const updateBoard = () => {
+
+    boardState.opponentShips.forEach(ship => {
+        const opponentColor = ship.attrs.id;
+
+        if (serverState[opponentColor]) {
+            const locationData = initialHexData.find(item => item.name == serverState[opponentColor].locationHex);
+            ship.offsetX(locationData.x);
+            ship.offsetY(locationData.y);
+
+            layer.batchDraw();
+        } else {
+            setInfo(`${opponentColor} has left the game`);
+            ship.destroy();
+        }
+    });
+
 }
 
 const isPointerOver = (mapElement) => {
