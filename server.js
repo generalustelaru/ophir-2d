@@ -32,11 +32,12 @@ const STARTING_PLAYER_STATE = {
     allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
 };
 
-const state = { //TODO: turn into a service class and detach from the server
-    playerRed: null,
-    playerBlue: null,
-    playerGreen: null,
+const sessionState = { //TODO: turn into a service class and detach from the server
+    hasStarted: false,
     playerWhite: null,
+    playerYellow: null,
+    playerRed: null,
+    playerGreen: null,
 }
 
 app.get('/', (res) => {
@@ -69,15 +70,15 @@ socketServer.on('connection', function connection(ws) {
             const { playerId, action, details } = JSON.parse(message);
             console.info('%s: %s %s', playerId, action, details);
 
-            const playerState = state[playerId];
+            const playerState = sessionState[playerId];
 
             if (action == ACTIONS.refresh) {
 
-                if (state[playerId] == null) {
+                if (false == sessionState.hasStarted && sessionState[playerId] == null) {
                     addNewPlayer(playerId);
                 }
 
-                sendAll(state);
+                sendAll(sessionState);
             }
 
             if (action == ACTIONS.move) {
@@ -88,7 +89,7 @@ socketServer.on('connection', function connection(ws) {
                     playerState.locationHex = destination;
                     playerState.allowedMoves = MOVE_RULES.find(rule => rule.from == destination).allowed;
 
-                    sendAll(state);
+                    sendAll(sessionState);
                 } else {
                     send({ error: 'Illegal move!' });
                 }
@@ -106,5 +107,5 @@ function addNewPlayer(playerId) {
         console.log(`${playerId} connected`);
     }
 
-    state[playerId] = { ...STARTING_PLAYER_STATE };
+    sessionState[playerId] = { ...STARTING_PLAYER_STATE };
 }
