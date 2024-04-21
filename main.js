@@ -9,6 +9,7 @@ let connection = null;
 let playerId = null;
 
 const serverState = {
+    hasStarted: null,
     playerWhite: null,
     playerYellow: null,
     playerRed: null,
