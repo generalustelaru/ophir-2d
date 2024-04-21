@@ -1,4 +1,6 @@
 export const colors = {
+    playerWhite: '#FFFFFF',
+    playerYellow: '#F5E049',
     playerRed: '#FF204E',
     playerGreen: '#87A922',
     illegal: '#CD8D7A',
