@@ -6,7 +6,7 @@ const HEX_COUNT = 7;
 
 const serverUrl = 'ws://localhost:8080';
 let connection = null;
-let playerColor = null; // TODO: rename playerColor as playerId to avoid confusion w/ Konva color
+let playerId = null;
 
 const serverState = {
     playerWhite: null,
@@ -34,9 +34,9 @@ stage.add(layer);
 layer.draw();
 
 const createConnection = () => {
-    playerColor = document.getElementById('playerColorSelect').value;
+    playerId = document.getElementById('playerColorSelect').value;
 
-    if (!playerColor) {
+    if (!playerId) {
         throw new Error('Please select a color');
     }
 
@@ -51,7 +51,7 @@ const createConnection = () => {
             setInfo('Your turn');
 
             wss.send(JSON.stringify({
-                playerColor,
+                playerId,
                 action: 'refresh',
                 details: null,
             }));
@@ -140,7 +140,7 @@ const createPlayerShip = (x, y, color) => {
     ship.on('dragmove', () => {
         for (let i = 0; i < HEX_COUNT; i++) {
             const hex = boardState.mapHexes[i];
-            hex.fill(hex.attrs.id == serverState[playerColor].locationHex ? colors.currentHex : colors.default);
+            hex.fill(hex.attrs.id == serverState[playerId].locationHex ? colors.currentHex : colors.default);
         }
 
         const targetHex = boardState.mapHexes.find(hex => isPointerOver(hex));
@@ -150,10 +150,10 @@ const createPlayerShip = (x, y, color) => {
         }
 
         switch (true) {
-            case targetHex.attrs.id == serverState[playerColor].locationHex:
+            case targetHex.attrs.id == serverState[playerId].locationHex:
                 hoverStatus = 'home';
                 break;
-            case serverState[playerColor].allowedMoves.includes(targetHex.attrs.id):
+            case serverState[playerId].allowedMoves.includes(targetHex.attrs.id):
                 hoverStatus = 'valid';
                 targetHex.fill(colors.valid);
                 break;
@@ -182,7 +182,7 @@ const createPlayerShip = (x, y, color) => {
         switch (hoverStatus) {
             case 'home':
             case 'illegal':
-                boardState.mapHexes.find(hex => hex.attrs.id == serverState[playerColor].locationHex).fill(colors.currentHex);
+                boardState.mapHexes.find(hex => hex.attrs.id == serverState[playerId].locationHex).fill(colors.currentHex);
                 ship.x(homePosition.x);
                 ship.y(homePosition.y);
                 break;
@@ -190,7 +190,7 @@ const createPlayerShip = (x, y, color) => {
                 const hex = boardState.mapHexes.find(hex => isPointerOver(hex));
                 hex.fill(colors.currentHex);
                 connection.send(JSON.stringify({
-                    playerColor,
+                    playerId,
                     action: 'move',
                     details: {
                         hex: hex.attrs.id
@@ -205,29 +205,29 @@ const createPlayerShip = (x, y, color) => {
 };
 
 const drawBoard = () => {
-    initialHexData.forEach(item => {
+    initialHexData.forEach(hex => {
         const hex = new MapHex(
             stage.width(),
-            item.name,
-            item.x,
-            item.y,
-            serverState[playerColor].locationHex == item.name ? colors.currentHex : colors.default
+            hex.id,
+            hex.x,
+            hex.y,
+            serverState[playerId].locationHex == hex.id ? colors.currentHex : colors.default
         );
         boardState.mapHexes.push(hex);
         layer.add(hex);
     });
 
-    for (const opponentColor in serverState) {
-        if (serverState[opponentColor] && opponentColor != playerColor) {
-            const locationData = initialHexData.find(item => item.name == serverState[opponentColor].locationHex);
-            const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentColor], opponentColor);
+    for (const opponentId in serverState) {
+        if (serverState[opponentId] && opponentId != playerId) {
+            const locationData = initialHexData.find(hex => hex.id == serverState[opponentId].locationHex);
+            const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentId], opponentId);
             boardState.opponentShips.push(ship);
             layer.add(ship);
         }
     }
 
-    const locationData = initialHexData.find(item => item.name == serverState[playerColor].locationHex);
-    boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerColor]);
+    const locationData = initialHexData.find(item => item.id == serverState[playerId].locationHex);
+    boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerId]);
     layer.add(boardState.playerShip);
 
 }
@@ -235,16 +235,16 @@ const drawBoard = () => {
 const updateBoard = () => {
 
     boardState.opponentShips.forEach(ship => {
-        const opponentColor = ship.attrs.id;
+        const opponentId = ship.attrs.id;
 
-        if (serverState[opponentColor]) {
-            const locationData = initialHexData.find(item => item.name == serverState[opponentColor].locationHex);
+        if (serverState[opponentId]) {
+            const locationData = initialHexData.find(hex => hex.id == serverState[opponentId].locationHex);
             ship.offsetX(locationData.x);
             ship.offsetY(locationData.y);
 
             layer.batchDraw();
         } else {
-            setInfo(`${opponentColor} has left the game`);
+            setInfo(`${opponentId} has left the game`);
             ship.destroy();
         }
     });

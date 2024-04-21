@@ -10,11 +10,11 @@ export const colors = {
 }
 
 export const initialHexData = [
-    { name: 'center', x: 0, y: 0 },
-    { name: 'topLeft', x: 86, y: 150 },
-    { name: 'bottomRight', x: -86, y: -150 },
-    { name: 'topRight', x: -86, y: 150 },
-    { name: 'bottomLeft', x: 86, y: -150 },
-    { name: 'left', x: 172, y: 0 },
-    { name: 'right', x: -172, y: 0 },
+    { id: 'center', x: 0, y: 0 },
+    { id: 'topLeft', x: 86, y: 150 },
+    { id: 'bottomRight', x: -86, y: -150 },
+    { id: 'topRight', x: -86, y: 150 },
+    { id: 'bottomLeft', x: 86, y: -150 },
+    { id: 'left', x: 172, y: 0 },
+    { id: 'right', x: -172, y: 0 },
 ];
