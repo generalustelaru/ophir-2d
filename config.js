@@ -9,7 +9,7 @@ export const colors = {
     currentHex: '#52D3D8',
 }
 
-export const initialHexData = [
+export const hexData = [
     { id: 'center', x: 0, y: 0 },
     { id: 'topLeft', x: 86, y: 150 },
     { id: 'bottomRight', x: -86, y: -150 },
