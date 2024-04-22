@@ -24,25 +24,29 @@ const PLAYER_IDS = [
 
 const ACTIONS = {
     inquire: 'inquire',
+    enroll: 'enroll',
     refresh: 'refresh',
     start: 'start',
     move: 'move',
 }
 
+const STATUS = {
+    empty: 'empty',
+    lobby: 'lobby',
+    full: 'full',
+    started: 'started',
+}
+
 const STARTING_PLAYER_STATE = {
     locationHex: 'center',
-    allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft']
+    allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
 };
 
-const sessionState = { //TODO: turn into a service class and detach from the server
-    hasStarted: false,
+const session = {
+    status: STATUS.empty,
     sessionOwner: null,
-    players: {
-        playerWhite: null,
-        playerYellow: null,
-        playerRed: null,
-        playerGreen: null,
-    },
+    availableSlots: [...PLAYER_IDS],
+    players: {},
 }
 
 app.get('/', (res) => {
@@ -73,30 +77,28 @@ socketServer.on('connection', function connection(ws) {
     ws.on('message', function incoming(message) {
         try {
             const { playerId, action, details } = JSON.parse(message);
-            console.info('%s: %s %s', playerId, action, details);
+            console.info('%s -> %s %s', playerId ?? '?', action, details ?? '');
 
-            const playerState = playerId ? sessionState.players[playerId] : null;
+            const playerState = playerId ? session.players[playerId] : null;
 
             if (action == ACTIONS.inquire) {
-                send(sessionState);
+                send(session);
             }
 
-            if (action == ACTIONS.refresh) {
+            if (action == ACTIONS.enroll) {
+                const isEnrolled = processPlayer(playerId);
 
-                if (false == sessionState.hasStarted && sessionState.players[playerId] == null) {
-                    addNewPlayer(playerId);
+                if (isEnrolled) {
+                    sendAll(session);
+                } else {
+                    send({ error: 'Cannot enroll' });
                 }
-
-                if (sessionState.sessionOwner == null) {
-                    sessionState.sessionOwner = playerId;
-                }
-
-                sendAll(sessionState);
             }
 
             if (action == ACTIONS.start) {
-                sessionState.hasStarted = true;
-                sendAll(sessionState);
+                session.status = STATUS.started;
+                session.availableSlots = [];
+                sendAll(session);
             }
 
             if (action == ACTIONS.move) {
@@ -107,7 +109,7 @@ socketServer.on('connection', function connection(ws) {
                     playerState.locationHex = destination;
                     playerState.allowedMoves = MOVE_RULES.find(rule => rule.from == destination).allowed;
 
-                    sendAll(sessionState);
+                    sendAll(session);
                 } else {
                     send({ error: 'Illegal move!' });
                 }
@@ -119,11 +121,34 @@ socketServer.on('connection', function connection(ws) {
     });
 });
 
-function addNewPlayer(playerId) {
+function processPlayer(playerId) {
 
-    if (PLAYER_IDS.includes(playerId)) {
-        console.log(`${playerId} connected`);
+    if (session.status == STATUS.started || session.status == STATUS.full) {
+        console.log(`${playerId} cannot enroll`);
+
+        return false;
     }
 
-    sessionState.players[playerId] = { ...STARTING_PLAYER_STATE };
+    if (false == PLAYER_IDS.includes(playerId)) {
+        console.log(`${playerId} is not a valid player`);
+
+        return false;
+    }
+
+    session.availableSlots = session.availableSlots.filter(slot => slot != playerId);
+    session.players[playerId] = { ...STARTING_PLAYER_STATE };
+    console.log(`${playerId} enrolled`);
+
+    if (session.sessionOwner == null) {
+        session.status = STATUS.lobby;
+        session.sessionOwner = playerId;
+        console.log(`${playerId} is the session owner`);
+    }
+
+    if (session.availableSlots.length == 0) {
+        session.status = STATUS.full;
+        console.log(`Session is full`);
+    }
+
+    return true;
 }

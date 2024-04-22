@@ -4,21 +4,19 @@ import { MapHex } from './elements/MapHex.js';
 
 const HEX_COUNT = 7;
 
+const STATUS = {
+    empty: 'empty',
+    lobby: 'lobby',
+    full: 'full',
+    started: 'started',
+}
+
 const serverUrl = 'ws://localhost:8080';
 let playerId = null;
 let isBoardDrawn = false;
 let isSpectator = false;
 
-const serverState = {
-    hasStarted: null,
-    sessionOwner: null,
-    players: {
-        playerWhite: null,
-        playerYellow: null,
-        playerRed: null,
-        playerGreen: null,
-    },
-}
+let serverState = {}
 
 const boardState = {
     playerShip: null,
@@ -56,21 +54,21 @@ wss.onerror = (error) => {
 }
 
 wss.onmessage = (event) => {
-    console.debug('Received ', event.data);
     const data = JSON.parse(event.data);
+    console.dir(data);
 
     if (data.error) {
         setInfo(data.error);
         return;
     }
 
-    saveValues(data, serverState);
+    serverState = data;
 
-    if (serverState.hasStarted) {
-        setInfo('The \'game\' has started');
+    if ((serverState.status == STATUS.started && playerId) || isSpectator) {
         if (isBoardDrawn) {
             updateBoard();
         } else {
+            setInfo('The \'game\' has started');
             drawBoard();
             isBoardDrawn = true;
         }
@@ -79,17 +77,22 @@ wss.onmessage = (event) => {
     }
 }
 
-const refreshSession = () => {
+const enroll = () => {
     playerId = document.getElementById('playerColorSelect').value;
 
     if (!playerId) {
         throw new Error('Please select a color');
     }
-    wss.send(JSON.stringify({
-        playerId,
-        action: 'refresh',
-        details: null,
-    }));
+
+    if (serverState.availableSlots.includes(playerId)) {
+        wss.send(JSON.stringify({
+            playerId,
+            action: 'enroll',
+            details: null,
+        }));
+    } else {
+        setInfo('This color has just been taken :(');
+    }
 }
 const setInfo = (text) => {
     const info = document.getElementById('info');
@@ -229,7 +232,6 @@ const drawBoard = () => {
     for (const opponentId in players) {
 
         if (players[opponentId] && opponentId != playerId) {
-            console.log(opponentId);
             const locationData = hexData.find(hexItem => hexItem.id == players[opponentId].locationHex);
             const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentId], opponentId);
             boardState.opponentShips.push(ship);
@@ -277,45 +279,105 @@ const saveValues = (source, destination) => {
 }
 
 const updatePreSessionUi = () => {
-    const playerArray = Object.entries(serverState.players).map(([, value]) => value);
 
-    if (playerArray.every(state => state == null)) {
-        document.getElementById('createButton').disabled = false;
-        setInfo('You may create the game');
-    } else if (playerId) {
-        document.getElementById('createButton').disabled = true;
-        document.getElementById('joinButton').disabled = true;
-        document.getElementById('playerColorSelect').disabled = true;
-        setInfo('Waiting for players to join...');
-    } else if (playerArray.includes(null)) {
-        document.getElementById('createButton').disabled = true;
-        document.getElementById('joinButton').disabled = false;
-        Array.from(document.getElementById('playerColorSelect').options).forEach(option => {
-            option.disabled = serverState.players[option.value] != null;
-        });
-        setInfo('A game is waiting for you');
-    } else {
-        document.getElementById('playerColorSelect').disabled = true;
-        document.getElementById('joinButton').disabled = true;
-        setInfo('The game is full, sorry :(');
-        isSpectator = true;
+    const createButton = {
+        element: document.getElementById('createButton'),
+        enable: () => createButton.element.disabled = false,
+        disable: () => createButton.element.disabled = true,
     }
 
-    if (playerId && playerId == serverState.sessionOwner) {
-        document.getElementById('startButton').disabled = false;
+    const joinButton = {
+        element: document.getElementById('joinButton'),
+        enable: () => joinButton.element.disabled = false,
+        disable: () => joinButton.element.disabled = true,
+    }
+
+    const playerColorSelect = {
+        element: document.getElementById('playerColorSelect'),
+        enable: () => {
+            playerColorSelect.element.disabled = false;
+            playerColorSelect.filter();
+        },
+        disable: () => playerColorSelect.element.disabled = true,
+        filter: () => Array.from(playerColorSelect.element.options).forEach(option => {
+            option.disabled = serverState.players[option.value] != null;
+        }),
+    }
+
+    const startButton = {
+        element: document.getElementById('startButton'),
+        enable: () => startButton.element.disabled = false,
+        disable: () => startButton.element.disabled = true,
+    }
+
+    const disableAll = () => {
+        createButton.disable();
+        joinButton.disable();
+        playerColorSelect.disable();
+        startButton.disable();
+    }
+
+    const setEmpty = () => {
+        disableAll();
+        createButton.enable();
+        playerColorSelect.enable();
+        setInfo('You may create the game');
+    }
+
+    const setLobby = () => {
+        disableAll();
+
+        if (!playerId) {
+            joinButton.enable();
+            playerColorSelect.enable();
+            setInfo('A game is waiting for you');
+
+        } else if (serverState.sessionOwner == playerId) {
+            setInfo('You may wait for more player or start');
+            startButton.enable();
+
+        } else {
+            setInfo('Waiting for players to join...');
+        }
+    }
+
+    const setFull = () => {
+        disableAll();
+
+        if (!playerId) {
+            setInfo('The game is full, sorry :(');
+            isSpectator = true;
+        } else if (playerId == serverState.sessionOwner) {
+            setInfo('You may start whenever you want');
+            startButton.enable();
+        } else {
+            setInfo('The game might start at any time.');
+        }
+    }
+
+    if (serverState.status == STATUS.empty) {
+        setEmpty();
+    }
+
+    if (serverState.status == STATUS.lobby) {
+        setLobby();
+    }
+
+    if (serverState.status == STATUS.full || serverState.status == STATUS.started) {
+        setFull();
     }
 }
 
 document.getElementById('createButton').addEventListener('click', () => {
     try {
-        refreshSession();
+        enroll();
     } catch (error) {
         setInfo(error);
     }
 });
 document.getElementById('joinButton').addEventListener('click', () => {
     try {
-        refreshSession();
+        enroll();
     } catch (error) {
         setInfo(error);
     }
