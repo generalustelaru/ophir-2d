@@ -1,15 +1,8 @@
 import Konva from 'konva';
-import { colors, hexData } from './config.js';
-import { MapHex } from './elements/MapHex.js';
+import { MapHex, Ship } from './elements/mapBoard.js';
+import constants from './constants.json';
 
-const HEX_COUNT = 7;
-
-const STATUS = {
-    empty: 'empty',
-    lobby: 'lobby',
-    full: 'full',
-    started: 'started',
-}
+const { STATUS, MOVE_HINT, COLOR, HEX_OFFSET_DATA, HEX_COUNT, ACTION } = constants;
 
 const serverUrl = 'ws://localhost:8080';
 let playerId = null;
@@ -18,10 +11,10 @@ let isSpectator = false;
 
 let serverState = {}
 
-const boardState = {
+const mapBoard = {
     playerShip: null,
     opponentShips: [],
-    mapHexes: [],
+    islands: [],
 }
 
 const stage = new Konva.Stage({
@@ -43,7 +36,7 @@ wss.onopen = () => {
 
     wss.send(JSON.stringify({
         playerId,
-        action: 'inquire',
+        action: ACTION.inquire,
         details: null,
     }))
 }
@@ -99,42 +92,9 @@ const setInfo = (text) => {
     info.innerHTML = text;
 }
 
-const createOpponentShip = (x, y, color, opponentColor) => {
-
-    const ship = new Konva.Rect({
-        x: stage.width() / 2,
-        y: stage.height() / 2,
-        offsetX: x,
-        offsetY: y,
-        fill: color,
-        stroke: 'black',
-        strokeWidth: 3,
-        width: 40,
-        height: 30,
-        cornerRadius: [0, 0, 5, 30],
-        draggable: false,
-        id: opponentColor,
-    });
-
-    return ship;
-}
-
 const createPlayerShip = (x, y, color) => {
 
-    const ship = new Konva.Rect({
-        x: stage.width() / 2,
-        y: stage.height() / 2,
-        offsetX: x,
-        offsetY: y,
-        fill: color,
-        stroke: 'black',
-        strokeWidth: 3,
-        width: 40,
-        height: 30,
-        cornerRadius: [0, 0, 5, 30],
-        draggable: true,
-        id: 'playerShip',
-    });
+    const ship = new Ship(stage.width(), x, y, color, playerId, true);
 
     let homePosition = null;
 
@@ -149,33 +109,33 @@ const createPlayerShip = (x, y, color) => {
         const players = serverState.players;
 
         for (let i = 0; i < HEX_COUNT; i++) {
-            const hex = boardState.mapHexes[i];
-            hex.fill(hex.attrs.id == players[playerId].locationHex ? colors.currentHex : colors.default);
+            const hex = mapBoard.islands[i];
+            hex.fill(hex.attrs.id == players[playerId].location ? COLOR.currentHex : COLOR.default);
         }
 
-        const targetHex = boardState.mapHexes.find(hex => isPointerOver(hex));
+        const targetHex = mapBoard.islands.find(hex => isPointerOver(hex));
 
         if (!targetHex) {
             return
         }
 
         switch (true) {
-            case players[playerId].locationHex == targetHex.attrs.id:
-                hoverStatus = 'home';
+            case players[playerId].location == targetHex.attrs.id:
+                hoverStatus = MOVE_HINT.home;
                 break;
             case players[playerId].allowedMoves.includes(targetHex.attrs.id):
-                hoverStatus = 'valid';
-                targetHex.fill(colors.valid);
+                hoverStatus = MOVE_HINT.valid;
+                targetHex.fill(COLOR.valid);
                 break;
             default:
-                hoverStatus = 'illegal';
-                targetHex.fill(colors.illegal);
+                hoverStatus = MOVE_HINT.illegal;
+                targetHex.fill(COLOR.illegal);
         }
     });
 
     ship.on('dragend', () => {
 
-        const targetHex = boardState.mapHexes.find(hex => isPointerOver(hex));
+        const targetHex = mapBoard.islands.find(hex => isPointerOver(hex));
 
         if (!targetHex) {
             ship.x(homePosition.x);
@@ -186,19 +146,21 @@ const createPlayerShip = (x, y, color) => {
         }
 
         for (let i = 0; i < HEX_COUNT; i++) {
-            boardState.mapHexes[i].fill(colors.default);
+            mapBoard.islands[i].fill(COLOR.default);
         }
 
         switch (hoverStatus) {
-            case 'home':
-            case 'illegal':
-                boardState.mapHexes.find(hex => hex.attrs.id == serverState.players[playerId].locationHex).fill(colors.currentHex);
+            case MOVE_HINT.home:
+            case MOVE_HINT.illegal:
+                mapBoard.islands
+                    .find(hex => hex.attrs.id == serverState.players[playerId].location)
+                    .fill(COLOR.currentHex);
                 ship.x(homePosition.x);
                 ship.y(homePosition.y);
                 break;
-            case 'valid':
-                const hex = boardState.mapHexes.find(hex => isPointerOver(hex));
-                hex.fill(colors.currentHex);
+            case MOVE_HINT.valid:
+                const hex = mapBoard.islands.find(hex => isPointerOver(hex));
+                hex.fill(COLOR.currentHex);
                 wss.send(JSON.stringify({
                     playerId,
                     action: 'move',
@@ -217,24 +179,30 @@ const createPlayerShip = (x, y, color) => {
 const drawBoard = () => {
     const players = serverState.players;
 
-    hexData.forEach(hexItem => {
+    HEX_OFFSET_DATA.forEach(hexItem => {
         const hexElement = new MapHex(
             stage.width(),
             hexItem.id,
             hexItem.x,
             hexItem.y,
-            players[playerId]?.locationHex == hexItem.id ? colors.currentHex : colors.default
+            players[playerId]?.location == hexItem.id ? COLOR.currentHex : COLOR.default
         );
-        boardState.mapHexes.push(hexElement);
+        mapBoard.islands.push(hexElement);
         layer.add(hexElement);
     });
 
     for (const opponentId in players) {
 
         if (players[opponentId] && opponentId != playerId) {
-            const locationData = hexData.find(hexItem => hexItem.id == players[opponentId].locationHex);
-            const ship = createOpponentShip(locationData.x, locationData.y, colors[opponentId], opponentId);
-            boardState.opponentShips.push(ship);
+            const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[opponentId].location);
+            const ship = new Ship(
+                stage.width(),
+                locationData.x,
+                locationData.y,
+                COLOR[opponentId],
+                opponentId
+            );
+            mapBoard.opponentShips.push(ship);
             layer.add(ship);
         }
     }
@@ -244,18 +212,18 @@ const drawBoard = () => {
         return;
     }
 
-    const locationData = hexData.find(hexItem => hexItem.id == players[playerId].locationHex);
-    boardState.playerShip = createPlayerShip(locationData.x, locationData.y, colors[playerId]);
-    layer.add(boardState.playerShip);
+    const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[playerId].location);
+    mapBoard.playerShip = createPlayerShip(locationData.x, locationData.y, COLOR[playerId]);
+    layer.add(mapBoard.playerShip);
 }
 
 const updateBoard = () => {
-    boardState.opponentShips.forEach(ship => {
+    mapBoard.opponentShips.forEach(ship => {
         const opponentId = ship.attrs.id;
         const players = serverState.players;
 
         if (players[opponentId]) {
-            const locationData = hexData.find(hexItem => hexItem.id == players[opponentId].locationHex);
+            const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[opponentId].location);
             ship.offsetX(locationData.x);
             ship.offsetY(locationData.y);
 
@@ -270,12 +238,6 @@ const updateBoard = () => {
 const isPointerOver = (mapElement) => {
 
     return mapElement.intersects(stage.getPointerPosition());
-}
-
-const saveValues = (source, destination) => {
-    Object.keys(source).forEach(key => {
-        destination[key] = source[key];
-    })
 }
 
 const updatePreSessionUi = () => {

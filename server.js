@@ -6,6 +6,12 @@ const wsPort = 8080;
 
 app.use(express.static('public'));
 
+const WS_SIGNAL = {
+    connection: 'connection',
+    message: 'message',
+    close: 'close',
+}
+
 const MOVE_RULES = [
     { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'] },
     { from: 'topRight', allowed: ['center', 'right', 'topLeft'] },
@@ -22,7 +28,7 @@ const PLAYER_IDS = [
     'playerGreen',
 ];
 
-const ACTIONS = {
+const ACTION = {
     inquire: 'inquire',
     enroll: 'enroll',
     refresh: 'refresh',
@@ -37,8 +43,8 @@ const STATUS = {
     started: 'started',
 }
 
-const STARTING_PLAYER_STATE = {
-    locationHex: 'center',
+const PLAYER_STATE = {
+    location: 'center',
     allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
 };
 
@@ -60,7 +66,7 @@ app.listen(httpPort, () => {
 const socketClients = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 
-socketServer.on('connection', function connection(ws) {
+socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
     socketClients.push(ws);
 
@@ -74,18 +80,18 @@ socketServer.on('connection', function connection(ws) {
         ws.send(JSON.stringify(message));
     }
 
-    ws.on('message', function incoming(message) {
+    ws.on(WS_SIGNAL.message, function incoming(message) {
         try {
             const { playerId, action, details } = JSON.parse(message);
             console.info('%s -> %s %s', playerId ?? '?', action, details ?? '');
 
-            const playerState = playerId ? session.players[playerId] : null;
+            const player = playerId ? session.players[playerId] : null;
 
-            if (action == ACTIONS.inquire) {
+            if (action == ACTION.inquire) {
                 send(session);
             }
 
-            if (action == ACTIONS.enroll) {
+            if (action == ACTION.enroll) {
                 const isEnrolled = processPlayer(playerId);
 
                 if (isEnrolled) {
@@ -95,19 +101,19 @@ socketServer.on('connection', function connection(ws) {
                 }
             }
 
-            if (action == ACTIONS.start) {
+            if (action == ACTION.start) {
                 session.status = STATUS.started;
                 session.availableSlots = [];
                 sendAll(session);
             }
 
-            if (action == ACTIONS.move) {
+            if (action == ACTION.move) {
                 const destination = details.hex;
-                const allowed = MOVE_RULES.find(rule => rule.from == playerState.locationHex).allowed;
+                const allowed = MOVE_RULES.find(rule => rule.from == player.location).allowed;
 
                 if (allowed.includes(destination)) {
-                    playerState.locationHex = destination;
-                    playerState.allowedMoves = MOVE_RULES.find(rule => rule.from == destination).allowed;
+                    player.location = destination;
+                    player.allowedMoves = MOVE_RULES.find(rule => rule.from == destination).allowed;
 
                     sendAll(session);
                 } else {
@@ -136,7 +142,7 @@ function processPlayer(playerId) {
     }
 
     session.availableSlots = session.availableSlots.filter(slot => slot != playerId);
-    session.players[playerId] = { ...STARTING_PLAYER_STATE };
+    session.players[playerId] = { ...PLAYER_STATE };
     console.log(`${playerId} enrolled`);
 
     if (session.sessionOwner == null) {
