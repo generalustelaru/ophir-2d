@@ -1,21 +1,11 @@
 import Konva from 'konva';
-import { MapHex, Ship } from './elements/mapBoard.js';
+import { MapHex, PlayerShip, Ship } from './elements/mapBoard.js';
 import constants from './constants.json';
+import state from './state.js';
 
-const { STATUS, MOVE_HINT, COLOR, HEX_OFFSET_DATA, HEX_COUNT, ACTION } = constants;
+const { STATUS, COLOR, HEX_OFFSET_DATA, ACTION } = constants;
 
 const serverUrl = 'ws://localhost:8080';
-let playerId = null;
-let isBoardDrawn = false;
-let isSpectator = false;
-
-let serverState = {}
-
-const mapBoard = {
-    playerShip: null,
-    opponentShips: [],
-    islands: [],
-}
 
 const stage = new Konva.Stage({
     container: 'container',
@@ -34,11 +24,7 @@ const wss = new WebSocket(serverUrl);
 wss.onopen = () => {
     setInfo('Connected to the server');
 
-    wss.send(JSON.stringify({
-        playerId,
-        action: ACTION.inquire,
-        details: null,
-    }))
+    sendMessage(ACTION.inquire);
 }
 
 wss.onerror = (error) => {
@@ -55,34 +41,29 @@ wss.onmessage = (event) => {
         return;
     }
 
-    serverState = data;
+    state.server = data;
 
-    if ((serverState.status == STATUS.started && playerId) || isSpectator) {
-        if (isBoardDrawn) {
+    if ((state.server.status == STATUS.started && state.playerId) || state.isSpectator) {
+        if (state.isBoardDrawn) {
             updateBoard();
         } else {
             setInfo('The \'game\' has started');
             drawBoard();
-            isBoardDrawn = true;
+            state.isBoardDrawn = true;
         }
-    } else {
-        updatePreSessionUi();
     }
+    updatePreSessionUi();
 }
 
-const enroll = () => {
-    playerId = document.getElementById('playerColorSelect').value;
+const sendEnrollMessage = () => {
+    state.playerId = document.getElementById('playerColorSelect').value;
 
-    if (!playerId) {
-        throw new Error('Please select a color');
+    if (!state.playerId) {
+        return setInfo('Please select a color');
     }
 
-    if (serverState.availableSlots.includes(playerId)) {
-        wss.send(JSON.stringify({
-            playerId,
-            action: 'enroll',
-            details: null,
-        }));
+    if (state.server.availableSlots.includes(state.playerId)) {
+        sendMessage(ACTION.enroll);
     } else {
         setInfo('This color has just been taken :(');
     }
@@ -92,92 +73,8 @@ const setInfo = (text) => {
     info.innerHTML = text;
 }
 
-const createPlayerShip = (x, y, color) => {
-
-    const ship = new Ship(stage.width(), x, y, color, playerId, true);
-
-    let homePosition = null;
-
-    ship.on('dragstart', () => {
-        homePosition = { x: ship.x(), y: ship.y() };
-    });
-
-    let hoverStatus = null;
-
-    ship.on('dragmove', () => {
-
-        const players = serverState.players;
-
-        for (let i = 0; i < HEX_COUNT; i++) {
-            const hex = mapBoard.islands[i];
-            hex.fill(hex.attrs.id == players[playerId].location ? COLOR.currentHex : COLOR.default);
-        }
-
-        const targetHex = mapBoard.islands.find(hex => isPointerOver(hex));
-
-        if (!targetHex) {
-            return
-        }
-
-        switch (true) {
-            case players[playerId].location == targetHex.attrs.id:
-                hoverStatus = MOVE_HINT.home;
-                break;
-            case players[playerId].allowedMoves.includes(targetHex.attrs.id):
-                hoverStatus = MOVE_HINT.valid;
-                targetHex.fill(COLOR.valid);
-                break;
-            default:
-                hoverStatus = MOVE_HINT.illegal;
-                targetHex.fill(COLOR.illegal);
-        }
-    });
-
-    ship.on('dragend', () => {
-
-        const targetHex = mapBoard.islands.find(hex => isPointerOver(hex));
-
-        if (!targetHex) {
-            ship.x(homePosition.x);
-            ship.y(homePosition.y);
-            layer.batchDraw();
-
-            return
-        }
-
-        for (let i = 0; i < HEX_COUNT; i++) {
-            mapBoard.islands[i].fill(COLOR.default);
-        }
-
-        switch (hoverStatus) {
-            case MOVE_HINT.home:
-            case MOVE_HINT.illegal:
-                mapBoard.islands
-                    .find(hex => hex.attrs.id == serverState.players[playerId].location)
-                    .fill(COLOR.currentHex);
-                ship.x(homePosition.x);
-                ship.y(homePosition.y);
-                break;
-            case MOVE_HINT.valid:
-                const hex = mapBoard.islands.find(hex => isPointerOver(hex));
-                hex.fill(COLOR.currentHex);
-                wss.send(JSON.stringify({
-                    playerId,
-                    action: 'move',
-                    details: {
-                        hex: hex.attrs.id
-                    }
-                }));
-        }
-
-        layer.batchDraw();
-    });
-
-    return ship;
-};
-
 const drawBoard = () => {
-    const players = serverState.players;
+    const players = state.server.players;
 
     HEX_OFFSET_DATA.forEach(hexItem => {
         const hexElement = new MapHex(
@@ -185,15 +82,15 @@ const drawBoard = () => {
             hexItem.id,
             hexItem.x,
             hexItem.y,
-            players[playerId]?.location == hexItem.id ? COLOR.currentHex : COLOR.default
+            players[state.playerId]?.location == hexItem.id ? COLOR.currentHex : COLOR.default
         );
-        mapBoard.islands.push(hexElement);
+        state.map.islands.push(hexElement);
         layer.add(hexElement);
     });
 
     for (const opponentId in players) {
 
-        if (players[opponentId] && opponentId != playerId) {
+        if (players[opponentId] && opponentId != state.playerId) {
             const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[opponentId].location);
             const ship = new Ship(
                 stage.width(),
@@ -202,25 +99,33 @@ const drawBoard = () => {
                 COLOR[opponentId],
                 opponentId
             );
-            mapBoard.opponentShips.push(ship);
+            state.map.opponentShips.push(ship);
             layer.add(ship);
         }
     }
 
-    if (isSpectator) {
+    if (state.isSpectator) {
         setInfo('You are a spectator');
         return;
     }
 
-    const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[playerId].location);
-    mapBoard.playerShip = createPlayerShip(locationData.x, locationData.y, COLOR[playerId]);
-    layer.add(mapBoard.playerShip);
+    const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[state.playerId].location);
+    state.map.playerShip = new PlayerShip(
+        wss,
+        stage,
+        layer,
+        stage.width(),
+        locationData.x,
+        locationData.y,
+        COLOR[state.playerId],
+    );
+    layer.add(state.map.playerShip);
 }
 
 const updateBoard = () => {
-    mapBoard.opponentShips.forEach(ship => {
+    state.map.opponentShips.forEach(ship => {
         const opponentId = ship.attrs.id;
-        const players = serverState.players;
+        const players = state.server.players;
 
         if (players[opponentId]) {
             const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[opponentId].location);
@@ -235,120 +140,100 @@ const updateBoard = () => {
     });
 }
 
-const isPointerOver = (mapElement) => {
-
-    return mapElement.intersects(stage.getPointerPosition());
-}
-
 const updatePreSessionUi = () => {
 
     const createButton = {
         element: document.getElementById('createButton'),
-        enable: () => createButton.element.disabled = false,
-        disable: () => createButton.element.disabled = true,
+        enable: () => {
+            createButton.element.disabled = false;
+            createButton.element.addEventListener('click', () => sendEnrollMessage());
+        },
+        disable: () => {
+            createButton.element.disabled = true;
+            createButton.element.removeEventListener('click', () => sendEnrollMessage());
+        },
     }
 
     const joinButton = {
         element: document.getElementById('joinButton'),
-        enable: () => joinButton.element.disabled = false,
-        disable: () => joinButton.element.disabled = true,
+        enable: () => {
+            joinButton.element.disabled = false;
+            joinButton.element.addEventListener('click', () => sendEnrollMessage());
+        },
+        disable: () => {
+            joinButton.element.disabled = true
+            joinButton.element.removeEventListener('click', () => sendEnrollMessage());
+        },
     }
 
     const playerColorSelect = {
         element: document.getElementById('playerColorSelect'),
         enable: () => {
             playerColorSelect.element.disabled = false;
-            playerColorSelect.filter();
+            Array.from(playerColorSelect.element.options).forEach(option => {
+                option.disabled = state.server.players[option.value] != null;
+            });
         },
         disable: () => playerColorSelect.element.disabled = true,
-        filter: () => Array.from(playerColorSelect.element.options).forEach(option => {
-            option.disabled = serverState.players[option.value] != null;
-        }),
     }
 
     const startButton = {
         element: document.getElementById('startButton'),
-        enable: () => startButton.element.disabled = false,
-        disable: () => startButton.element.disabled = true,
+        enable: () => {
+            startButton.element.disabled = false;
+            startButton.element.addEventListener('click', () => sendMessage(ACTION.start));
+        },
+        disable: () => {
+            startButton.element.disabled = true;
+            startButton.element.removeEventListener('click', () => sendMessage(ACTION.start));
+        },
     }
 
-    const disableAll = () => {
-        createButton.disable();
-        joinButton.disable();
-        playerColorSelect.disable();
-        startButton.disable();
+    createButton.disable();
+    joinButton.disable();
+    playerColorSelect.disable();
+    startButton.disable();
+
+    const enable = (...buttons) => {
+        buttons.forEach(button => button.enable());
     }
 
-    const setEmpty = () => {
-        disableAll();
-        createButton.enable();
-        playerColorSelect.enable();
-        setInfo('You may create the game');
-    }
-
-    const setLobby = () => {
-        disableAll();
-
-        if (!playerId) {
-            joinButton.enable();
-            playerColorSelect.enable();
-            setInfo('A game is waiting for you');
-
-        } else if (serverState.sessionOwner == playerId) {
-            setInfo('You may wait for more player or start');
-            startButton.enable();
-
-        } else {
-            setInfo('Waiting for players to join...');
-        }
-    }
-
-    const setFull = () => {
-        disableAll();
-
-        if (!playerId) {
-            setInfo('The game is full, sorry :(');
-            isSpectator = true;
-        } else if (playerId == serverState.sessionOwner) {
-            setInfo('You may start whenever you want');
-            startButton.enable();
-        } else {
-            setInfo('The game might start at any time.');
-        }
-    }
-
-    if (serverState.status == STATUS.empty) {
-        setEmpty();
-    }
-
-    if (serverState.status == STATUS.lobby) {
-        setLobby();
-    }
-
-    if (serverState.status == STATUS.full || serverState.status == STATUS.started) {
-        setFull();
+    switch (state.server.status) {
+        case STATUS.empty:
+            enable(createButton, playerColorSelect);
+            setInfo('You may create the game');
+            break;
+        case STATUS.lobby:
+            if (!state.playerId) {
+                enable(joinButton, playerColorSelect);
+                setInfo('A game is waiting for you');
+            } else if (state.server.sessionOwner == state.playerId) {
+                enable(startButton);
+                setInfo('You may wait for more player or start');
+            } else {
+                setInfo('Waiting for players to join...');
+            }
+            break;
+        case STATUS.full:
+            if (!state.playerId) {
+                setInfo('The game is full, sorry :(');
+                state.isSpectator = true;
+            } else if (state.playerId == state.server.sessionOwner) {
+                setInfo('You may start whenever you want');
+                enable(startButton);
+            } else {
+                setInfo('The game might start at any time.');
+            }
+            break;
+        default:
+            break;
     }
 }
 
-document.getElementById('createButton').addEventListener('click', () => {
-    try {
-        enroll();
-    } catch (error) {
-        setInfo(error);
-    }
-});
-document.getElementById('joinButton').addEventListener('click', () => {
-    try {
-        enroll();
-    } catch (error) {
-        setInfo(error);
-    }
-});
-document.getElementById('startButton').addEventListener('click', () => {
+const sendMessage = (action, details = null) => {
     wss.send(JSON.stringify({
-        playerId,
-        action: 'start',
-        details: null,
+        playerId: state.playerId,
+        action,
+        details,
     }));
-    document.getElementById('startButton').disabled = true;
-});
+}
