@@ -44,8 +44,8 @@ const STATUS = {
 }
 
 const PLAYER_STATE = {
-    location: 'center',
-    allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
+    location: 'right',
+    allowedMoves: ['center', 'topRight', 'bottomRight'],
 };
 
 const session = {
