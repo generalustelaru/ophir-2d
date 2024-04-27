@@ -1,8 +1,11 @@
 import express from 'express';
 import { WebSocketServer } from 'ws';
+import constants from './constants.json' assert { type: "json" };
 const app = express();
 const httpPort = 3000;
 const wsPort = 8080;
+
+const { ACTION, STATUS } = constants;
 
 app.use(express.static('public'));
 
@@ -27,21 +30,6 @@ const PLAYER_IDS = [
     'playerRed',
     'playerGreen',
 ];
-
-const ACTION = {
-    inquire: 'inquire',
-    enroll: 'enroll',
-    refresh: 'refresh',
-    start: 'start',
-    move: 'move',
-}
-
-const STATUS = {
-    empty: 'empty',
-    lobby: 'lobby',
-    full: 'full',
-    started: 'started',
-}
 
 const PLAYER_STATE = {
     location: 'right',
@@ -83,7 +71,12 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
     ws.on(WS_SIGNAL.message, function incoming(message) {
         try {
             const { playerId, action, details } = JSON.parse(message);
-            console.info('%s -> %s %s', playerId ?? '?', action, details ?? '');
+            console.info(
+                '%s -> %s %s',
+                playerId ?? '?',
+                getKey(ACTION, action) ?? '?',
+                details ?? ''
+            );
 
             const player = playerId ? session.players[playerId] : null;
 
@@ -157,4 +150,8 @@ function processPlayer(playerId) {
     }
 
     return true;
+}
+
+function getKey(object, value) {
+    return Object.keys(object).find(key => object[key] === value);
 }
