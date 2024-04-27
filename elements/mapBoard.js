@@ -1,7 +1,7 @@
 // import Konva from 'konva';
 import constants from '../constants.json';
 import state from '../state.js';
-const { COLOR, HEX_COUNT, MOVE_HINT } = constants;
+const { COLOR, HEX_COUNT, MOVE_HINT, EVENT, ACTION } = constants;
 
 export class MapHex {
     constructor(width, name, x, y, fill) {
@@ -47,8 +47,15 @@ export class PlayerShip {
     hoverStatus = null
     islands = null
 
-    constructor (wss, stage, layer, stageWidth, offsetX, offsetY, fill) {
-        this.ship = new Ship(stageWidth, offsetX, offsetY, fill, state.playerId, true);
+    constructor (stage, layer, offsetX, offsetY, fill) {
+        this.ship = new Ship(
+            stage.width(),
+            offsetX,
+            offsetY,
+            fill,
+            state.playerId,
+            true
+        );
         this.islands = state.map.islands;
 
         this.ship.on('dragstart', () => {
@@ -111,13 +118,15 @@ export class PlayerShip {
                     break;
                 case MOVE_HINT.valid:
                     targetHex.fill(COLOR.currentHex);
-                    wss.send(JSON.stringify({
-                        playerId: state.playerId,
-                        action: 'move',
-                        details: {
-                            hex: targetHex.attrs.id
-                        }
-                    }));
+                    dispatchEvent(new CustomEvent(
+                        EVENT.action,
+                        {detail: {
+                            action: ACTION.move,
+                            details: {
+                                hex: targetHex.attrs.id
+                            }
+                        }}
+                    ));
             }
 
             layer.batchDraw();
