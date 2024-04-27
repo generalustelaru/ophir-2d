@@ -2,9 +2,12 @@ import Konva from 'konva';
 import { MapHex, PlayerShip, Ship } from './elements/mapBoard.js';
 import constants from './constants.json';
 import state from './state.js';
+import { CommunicationService } from './commService.js';
+import { EventHandler } from './eventHandler.js';
 
 const { STATUS, COLOR, HEX_OFFSET_DATA, ACTION, EVENT } = constants;
 
+const handler = new EventHandler();
 const serverUrl = 'ws://localhost:8080';
 
 const stage = new Konva.Stage({
@@ -19,30 +22,10 @@ const layer = new Konva.Layer();
 stage.add(layer);
 layer.draw();
 
-const wss = new WebSocket(serverUrl);
+const commService = CommunicationService.getInstance();
+commService.createConnection(serverUrl);
 
-wss.onopen = () => {
-    setInfo('Connected to the server');
-
-    sendMessage(ACTION.inquire);
-}
-
-wss.onerror = (error) => {
-    console.error('WebSocket error:', error);
-    setInfo('We encoutered a connection error :(');
-}
-
-wss.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.dir(data);
-
-    if (data.error) {
-        setInfo(data.error);
-        return;
-    }
-
-    state.server = data;
-
+window.addEventListener(EVENT.update, () => {
     if ((state.server.status == STATUS.started && state.playerId) || state.isSpectator) {
         if (state.isBoardDrawn) {
             updateBoard();
@@ -53,7 +36,7 @@ wss.onmessage = (event) => {
         }
     }
     updatePreSessionUi();
-}
+});
 
 const sendEnrollMessage = () => {
     state.playerId = document.getElementById('playerColorSelect').value;
@@ -63,7 +46,7 @@ const sendEnrollMessage = () => {
     }
 
     if (state.server.availableSlots.includes(state.playerId)) {
-        sendMessage(ACTION.enroll);
+        commService.sendMessage(ACTION.enroll);
     } else {
         setInfo('This color has just been taken :(');
     }
@@ -179,11 +162,11 @@ const updatePreSessionUi = () => {
         element: document.getElementById('startButton'),
         enable: () => {
             startButton.element.disabled = false;
-            startButton.element.addEventListener('click', () => sendMessage(ACTION.start));
+            startButton.element.addEventListener('click', () => commService.sendMessage(ACTION.start));
         },
         disable: () => {
             startButton.element.disabled = true;
-            startButton.element.removeEventListener('click', () => sendMessage(ACTION.start));
+            startButton.element.removeEventListener('click', () => commService.sendMessage(ACTION.start));
         },
     }
 
@@ -228,17 +211,3 @@ const updatePreSessionUi = () => {
     }
 }
 
-window.addEventListener(EVENT.action, (event) => {
-    const action = event.detail.action;
-    const details = event.detail.details;
-
-    sendMessage(action, details);
-});
-
-const sendMessage = (action, details = null) => {
-    wss.send(JSON.stringify({
-        playerId: state.playerId,
-        action,
-        details,
-    }));
-}

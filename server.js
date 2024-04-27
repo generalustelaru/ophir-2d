@@ -69,7 +69,7 @@ const socketServer = new WebSocketServer({ port: wsPort });
 socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
     socketClients.push(ws);
-
+    console.log('New client connection or page refresh');
     const sendAll = (message) => {
         socketClients.forEach(client => {
             client.send(JSON.stringify(message));
