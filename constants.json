@@ -36,5 +36,8 @@
         "refresh": "refresh",
         "start": "start",
         "move": "move"
+    },
+    "EVENT" : {
+        "action": "ACTION"
     }
 }

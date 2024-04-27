@@ -3,7 +3,7 @@ import { MapHex, PlayerShip, Ship } from './elements/mapBoard.js';
 import constants from './constants.json';
 import state from './state.js';
 
-const { STATUS, COLOR, HEX_OFFSET_DATA, ACTION } = constants;
+const { STATUS, COLOR, HEX_OFFSET_DATA, ACTION, EVENT } = constants;
 
 const serverUrl = 'ws://localhost:8080';
 
@@ -111,10 +111,8 @@ const drawBoard = () => {
 
     const locationData = HEX_OFFSET_DATA.find(hexItem => hexItem.id == players[state.playerId].location);
     state.map.playerShip = new PlayerShip(
-        wss,
         stage,
         layer,
-        stage.width(),
         locationData.x,
         locationData.y,
         COLOR[state.playerId],
@@ -229,6 +227,13 @@ const updatePreSessionUi = () => {
             break;
     }
 }
+
+window.addEventListener(EVENT.action, (event) => {
+    const action = event.detail.action;
+    const details = event.detail.details;
+
+    sendMessage(action, details);
+});
 
 const sendMessage = (action, details = null) => {
     wss.send(JSON.stringify({
