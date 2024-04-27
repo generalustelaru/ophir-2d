@@ -38,6 +38,9 @@
         "move": "move"
     },
     "EVENT" : {
-        "action": "ACTION"
+        "connected": "connected",
+        "action": "action",
+        "update": "update",
+        "error": "error"
     }
 }
