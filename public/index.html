@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,18 +8,22 @@
     <link rel="stylesheet" href="main.css">
     <script type="module" src="/bundle.js"></script>
 </head>
+
 <body>
-    <div id="info">...</div>
     <div id="container"></div>
-    <button id="createButton" disabled>Create Game</button>
-    <button id="joinButton" disabled>Join Game</button>
-    <select id="playerColorSelect">
-        <option value="" disabled selected>--Select color--</option>
-        <option value="playerWhite">White</option>
-        <option value="playerYellow">Yellow</option>
-        <option value="playerRed">Red</option>
-        <option value="playerGreen">Green</option>
-    </select>
-    <button id="startButton" disabled>Start Game</button>
+    <div id="lobby-controls">
+        <button id="createButton" disabled>Create Game</button>
+        <button id="joinButton" disabled>Join Game</button>
+        <select id="playerColorSelect">
+            <option value="" disabled selected>--Select color--</option>
+            <option value="playerWhite">White</option>
+            <option value="playerYellow">Yellow</option>
+            <option value="playerRed">Red</option>
+            <option value="playerGreen">Green</option>
+        </select>
+        <button id="startButton" disabled>Start Game</button>
+    </div>
+    <div id="info">...</div>
 </body>
+
 </html>

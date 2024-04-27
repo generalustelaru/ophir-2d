@@ -14,8 +14,16 @@ html, body {
     height: 500px;
 }
 
+#lobby-controls {
+    width: 500px;
+    display: flex;
+    justify-content: space-between;
+}
+
+button, select {
+    font-size: large;
+    height: 40px;}
+
 .test {
     background-color: red;
-    width: 100px;
-    height: 100px;
 }
