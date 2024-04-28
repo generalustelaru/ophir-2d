@@ -1,7 +1,7 @@
 import { Service } from './service.js';
-import state from './state.js';
-import constants from './constants.json';
-import { Button } from './html_components/button.js';
+import state from '../state.js';
+import constants from '../constants.json';
+import { Button } from '../html_components/button.js';
 
 const { ACTION, EVENT, STATUS } = constants;
 
