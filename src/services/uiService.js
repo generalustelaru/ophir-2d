@@ -1,5 +1,5 @@
 import { Service } from './service.js';
-import state from '../state.js';
+import state from '../state.ts';
 import constants from '../constants.json';
 import { Button } from '../html_components/button.js';
 
@@ -26,6 +26,7 @@ export class UserInterfaceService extends Service {
     }
 
     processStart = () => {
+        this.startButton.disable();
         dispatchEvent(new CustomEvent(
             EVENT.action, {detail: {action: ACTION.start}}
         ));

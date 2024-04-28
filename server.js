@@ -1,6 +1,6 @@
 import express from 'express';
 import { WebSocketServer } from 'ws';
-import constants from './constants.json' assert { type: "json" };
+import constants from './src/constants.json' assert { type: "json" };
 const app = express();
 const httpPort = 3000;
 const wsPort = 8080;
@@ -44,7 +44,7 @@ const session = {
 }
 
 app.get('/', (res) => {
-    res.sendFile(__dirname + '/public/index.html');
+    res.sendFile(__dirname + '../public/index.html');
 });
 
 app.listen(httpPort, () => {
