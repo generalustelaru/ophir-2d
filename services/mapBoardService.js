@@ -6,7 +6,7 @@ import { MapHex } from '../canvas_objects/mapHex.js';
 import state from '../state.js';
 import constants from '../constants.json';
 
-const { COLOR, HEX_OFFSET_DATA } = constants;
+const { COLOR, HEX_OFFSET_DATA, EVENT } = constants;
 
 export class MapBoardService extends Service {
     stage = null;
@@ -65,7 +65,7 @@ export class MapBoardService extends Service {
             }
         }
 
-        if (state.isSpectator) {
+        if (!state.playerId) {
             dispatchEvent(new CustomEvent(
                 EVENT.info,
                 {detail: {text: 'You are a spectator'}}

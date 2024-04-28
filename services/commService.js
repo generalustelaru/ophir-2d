@@ -29,8 +29,8 @@ export class CommunicationService extends Service {
                 return;
             }
 
-            console.dir(data); // debug
             state.server = data;
+            console.dir(state); // debug
             dispatchEvent(new CustomEvent(EVENT.update));
         }
     }

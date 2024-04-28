@@ -44,7 +44,7 @@
         "connected": "connected",
         "action": "action",
         "update": "update",
-        "error": "error",
+        "error": "code_error",
         "info": "info"
     }
 }

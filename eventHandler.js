@@ -35,7 +35,7 @@ export class EventHandler extends EventTarget{
         );
 
         window.addEventListener(EVENT.update, () => {
-            if ((state.server.status == STATUS.started && state.playerId) || state.isSpectator) {
+            if (state.server.status == STATUS.started) {
                 if (state.isBoardDrawn) {
                     this.mapBoardService.updateBoard();
                 } else {
@@ -43,8 +43,9 @@ export class EventHandler extends EventTarget{
                     this.mapBoardService.drawBoard();
                     state.isBoardDrawn = true;
                 }
+            } else {
+                this.uiService.updatePreSessionUi();
             }
-            this.uiService.updatePreSessionUi();
         });
 
         window.addEventListener(
