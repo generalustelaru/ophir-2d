@@ -1,13 +1,14 @@
 
 export class Service {
-    static instances = {};
+    static instance = null;
 
-    static getInstance(name) {
+    static getInstance() {
 
-        if(!this.instances[name]) {
-            this.instances[name] = new this();
+        if(!this.instance) {
+            this.instance = new this();
+            console.log(`Instance of ${this.name} created`);
         }
 
-        return this.instances[name];
+        return this.instance;
     }
 }

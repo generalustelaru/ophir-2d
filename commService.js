@@ -1,7 +1,7 @@
-import { Service } from './service.js'
-import state from './state.js'
-import constants from './constants.json'
-const { EVENT } = constants
+import { Service } from './service.js';
+import state from './state.js';
+import constants from './constants.json';
+const { EVENT } = constants;
 
 export class CommunicationService extends Service {
 
@@ -29,7 +29,7 @@ export class CommunicationService extends Service {
                 return;
             }
 
-            // console.dir(data); // debug
+            console.dir(data); // debug
             state.server = data;
             dispatchEvent(new CustomEvent(EVENT.update));
         }
