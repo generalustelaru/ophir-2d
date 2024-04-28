@@ -93,7 +93,6 @@ export class UserInterfaceService extends Service {
             case STATUS.full:
                 if (!state.playerId) {
                     this.setInfo('The game is full, sorry :(');
-                    state.isSpectator = true;
                 } else if (state.playerId == state.server.sessionOwner) {
                     this.startButton.enable();
                     this.setInfo('You may start whenever you want');
