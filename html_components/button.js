@@ -2,16 +2,16 @@
 export class Button {
     constructor(id, callback) {
         this.element = document.getElementById(id);
-        this.callback = callback;
+        this.callback = callback.bind(this);
     }
 
     enable = () => {
         this.element.disabled = false;
-        this.element.addEventListener('click', () => this.callback());
+        this.element.addEventListener('click', this.callback);
     }
 
     disable = () => {
         this.element.disabled = true;
-        this.element.removeEventListener('click', () => this.callback());
+        this.element.removeEventListener('click', this.callback);
     }
 }
