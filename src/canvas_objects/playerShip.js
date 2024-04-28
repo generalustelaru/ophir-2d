@@ -1,4 +1,4 @@
-import state from '../state.js';
+import state from '../state.ts';
 import constants from '../constants.json';
 import { Ship } from './ship.js';
 const { COLOR, HEX_COUNT, MOVE_HINT, EVENT, ACTION } = constants;

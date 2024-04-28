@@ -3,7 +3,7 @@ import { Service } from "./service.js";
 import { Ship } from '../canvas_objects/ship.js';
 import { PlayerShip } from '../canvas_objects/playerShip.js';
 import { MapHex } from '../canvas_objects/mapHex.js';
-import state from '../state.js';
+import state from '../state.ts';
 import constants from '../constants.json';
 
 const { COLOR, HEX_OFFSET_DATA, EVENT } = constants;

@@ -1,4 +1,4 @@
-import state from "./state.js";
+import state from "./state.ts";
 import { CommunicationService } from "./services/commService.js";
 import { MapBoardService } from "./services/mapBoardService.js";
 import { UserInterfaceService } from "./services/uiService.js";
