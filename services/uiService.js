@@ -55,18 +55,22 @@ export class UserInterfaceService extends Service {
         info.innerHTML = text;
     }
 
-    enableButtons = (...buttons) => {
+    enableElements = (...buttons) => {
         buttons.forEach(button => button.enable());
     }
 
-    updatePreSessionUi() {
+    disableAllElements = () => {
         this.createButton.disable();
         this.joinButton.disable();
-        this.playerColorSelect.disable();
         this.startButton.disable();
+        this.playerColorSelect.disable();
+    }
+
+    updatePreSessionUi() {
+        this.disableAllElements();
         switch (state.server.status) {
             case STATUS.empty:
-                this.enableButtons(
+                this.enableElements(
                     this.createButton,
                     this.playerColorSelect
                 );
@@ -74,13 +78,13 @@ export class UserInterfaceService extends Service {
                 break;
             case STATUS.lobby:
                 if (!state.playerId) {
-                    this.enableButtons(
+                    this.enableElements(
                         this.joinButton,
                         this.playerColorSelect
                     );
                     this.setInfo('A game is waiting for you');
                 } else if (state.server.sessionOwner == state.playerId) {
-                    this.enableButtons(this.startButton);
+                    this.startButton.enable();
                     this.setInfo('You may wait for more player or start');
                 } else {
                     this.setInfo('Waiting for players to join...');
@@ -91,6 +95,7 @@ export class UserInterfaceService extends Service {
                     this.setInfo('The game is full, sorry :(');
                     state.isSpectator = true;
                 } else if (state.playerId == state.server.sessionOwner) {
+                    this.startButton.enable();
                     this.setInfo('You may start whenever you want');
                 } else {
                     this.setInfo('The game might start at any time.');
