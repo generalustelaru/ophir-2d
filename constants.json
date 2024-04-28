@@ -1,15 +1,18 @@
 {
     "HEX_COUNT": 7,
+    "CONNECTION": {
+        "wsAddress": "ws://localhost:8080"
+    },
     "STATUS": {
-        "empty": "s0",
-        "lobby": "s1",
-        "full": "s2",
-        "started": "s3"
+        "empty": "empty",
+        "lobby": "lobby",
+        "full": "full",
+        "started": "started"
     },
     "MOVE_HINT": {
-        "valid": "m1",
-        "home": "m2",
-        "illegal": "m3"
+        "valid": "valid",
+        "home": "home",
+        "illegal": "illegal"
     },
     "COLOR": {
         "playerWhite": "#FFFFFF",
@@ -31,16 +34,17 @@
         { "id": "right", "x": -172, "y": 0 }
     ],
     "ACTION": {
-        "inquire": "a1",
-        "enroll": "a2",
-        "start": "a4",
-        "move": "a5",
-        "refresh": "a6"
+        "inquire": "inquire",
+        "enroll": "enroll",
+        "start": "start",
+        "move": "move",
+        "refresh": "refresh"
     },
     "EVENT" : {
-        "connected": "e1",
-        "action": "e2",
-        "update": "e3",
-        "error": "e4"
+        "connected": "connected",
+        "action": "action",
+        "update": "update",
+        "error": "error",
+        "info": "info"
     }
 }

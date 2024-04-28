@@ -1,18 +1,19 @@
-
-import { Service } from "./service.js";
+import state from "./state.js";
 import { CommunicationService } from "./commService.js";
+import { MapBoardService } from "./mapBoardService.js";
+import { UserInterfaceService } from "./uiService.js";
 import constants from "./constants.json";
-const { EVENT, ACTION } = constants;
+const { EVENT, ACTION, STATUS } = constants;
 
-export class EventHandler extends Service {
+export class EventHandler extends EventTarget{
 
     constructor() {
         super();
         this.commService = CommunicationService.getInstance();
+        this.mapBoardService = MapBoardService.getInstance();
+        this.uiService = UserInterfaceService.getInstance();
 
-        // TODO: move EVENT.update here
-
-        //Konva to Websocket
+        //Send player action to server
         window.addEventListener(
             EVENT.action,
             (event) => this.commService.sendMessage(
@@ -21,17 +22,34 @@ export class EventHandler extends Service {
             ),
         );
 
-        // Websocket to UI
+        // TODO: Update UI on error
         window.addEventListener(
             EVENT.error,
-            () => console.error('Game server erred :('),
+            () => console.error('Something went wrong :('),
         );
 
-        // Websocket to Websocket
+        // Get server data on connection
         window.addEventListener(
             EVENT.connected,
-            // () => {console.log('EVENT.connected received')},
             () => this.commService.sendMessage(ACTION.inquire),
+        );
+
+        window.addEventListener(EVENT.update, () => {
+            if ((state.server.status == STATUS.started && state.playerId) || state.isSpectator) {
+                if (state.isBoardDrawn) {
+                    this.mapBoardService.updateBoard();
+                } else {
+                    this.uiService.setInfo('The \'game\' has started');
+                    this.mapBoardService.drawBoard();
+                    state.isBoardDrawn = true;
+                }
+            }
+            this.uiService.updatePreSessionUi();
+        });
+
+        window.addEventListener(
+            EVENT.info,
+            (event) => this.uiService.setInfo(event.detail.text)
         );
     }
 }
