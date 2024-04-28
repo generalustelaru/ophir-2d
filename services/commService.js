@@ -1,6 +1,6 @@
 import { Service } from './service.js';
-import state from './state.js';
-import constants from './constants.json';
+import state from '../state.js';
+import constants from '../constants.json';
 const { EVENT } = constants;
 
 export class CommunicationService extends Service {

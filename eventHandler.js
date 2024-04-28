@@ -1,7 +1,7 @@
 import state from "./state.js";
-import { CommunicationService } from "./commService.js";
-import { MapBoardService } from "./mapBoardService.js";
-import { UserInterfaceService } from "./uiService.js";
+import { CommunicationService } from "./services/commService.js";
+import { MapBoardService } from "./services/mapBoardService.js";
+import { UserInterfaceService } from "./services/uiService.js";
 import constants from "./constants.json";
 const { EVENT, ACTION, STATUS } = constants;
 
