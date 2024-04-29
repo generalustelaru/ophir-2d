@@ -1,16 +1,17 @@
 import Konva from 'konva';
-import { Service } from "./service.ts";
-import { Ship } from '../canvas_objects/ship.js';
-import { PlayerShip } from '../canvas_objects/playerShip.js';
-import { MapHex } from '../canvas_objects/mapHex.js';
-import state from '../state.ts';
+import { PlayerId } from '../types';
+import { Service } from "./service";
+import { Ship } from '../canvas_objects/ship';
+import { PlayerShip } from '../canvas_objects/playerShip';
+import { MapHex } from '../canvas_objects/mapHex';
+import state from '../state';
 import constants from '../constants.json';
 
 const { COLOR, HEX_OFFSET_DATA, EVENT } = constants;
 
 export class MapBoardService extends Service {
-    stage = null;
-    layer = null;
+    stage: Konva.Stage;
+    layer: Konva.Layer;
 
     constructor() {
         super();
@@ -32,7 +33,6 @@ export class MapBoardService extends Service {
 
     drawBoard = () => {
         const players = state.server.players;
-
         HEX_OFFSET_DATA.forEach(hexItem => {
             const hexElement = new MapHex(
                 this.stage.width(),
@@ -42,12 +42,13 @@ export class MapBoardService extends Service {
                 players[state.playerId]?.location == hexItem.id
                     ? COLOR.currentHex
                     : COLOR.default
-            );
+            ) as Konva.RegularPolygon;
             state.map.islands.push(hexElement);
             this.layer.add(hexElement);
         });
 
-        for (const opponentId in players) {
+        for (const playerId in players) {
+            const opponentId = playerId as PlayerId;
 
             if (players[opponentId] && opponentId != state.playerId) {
                 const locationData = HEX_OFFSET_DATA.find(
@@ -59,7 +60,7 @@ export class MapBoardService extends Service {
                     locationData.y,
                     COLOR[opponentId],
                     opponentId
-                );
+                ) as Konva.Rect;
                 state.map.opponentShips.push(ship);
                 this.layer.add(ship);
             }
@@ -76,19 +77,19 @@ export class MapBoardService extends Service {
         const locationData = HEX_OFFSET_DATA.find(
             hexItem => hexItem.id == players[state.playerId].location
         );
-        state.map.playerShip = new PlayerShip(
+        state.map.playerShip.element = new PlayerShip(
             this.stage,
             this.layer,
             locationData.x,
             locationData.y,
             COLOR[state.playerId],
-        );
-        this.layer.add(state.map.playerShip);
+        ) as unknown as Konva.Rect;
+        this.layer.add(state.map.playerShip.element);
     }
 
     updateBoard = () => {
         state.map.opponentShips.forEach(ship => {
-            const opponentId = ship.attrs.id;
+            const opponentId: PlayerId = ship.attrs.id;
             const players = state.server.players;
 
             if (players[opponentId]) {

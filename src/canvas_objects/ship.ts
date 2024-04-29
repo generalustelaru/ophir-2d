@@ -1,10 +1,18 @@
+import Konva from 'konva';
+import { PlayerId } from '../types';
 import constants from '../constants.json';
 
 const { COLOR } = constants;
 
 export class Ship {
-    constructor(stageWidth, offsetX, offsetY, fill, id, isPlayerShip = false) {
-
+    constructor(
+        stageWidth: number,
+        offsetX: number,
+        offsetY: number,
+        fill: string,
+        id: PlayerId,
+        isPlayerShip = false
+    ) {
         let strokeColor = 'black';
 
         if (isPlayerShip) {

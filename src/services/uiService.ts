@@ -1,4 +1,4 @@
-import { HTMLHandlerInterface, UiInterface } from '../types.js';
+import { UiInterface, PlayerId} from '../types.js';
 import { Service } from './service';
 import state from '../state';
 import constants from '../constants.json';
@@ -22,7 +22,7 @@ export class UserInterfaceService extends Service implements UiInterface {
                 this.playerColorSelect.element.disabled = false;
                 const players = state.server.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
-                    option.disabled = players[option.value] != null;
+                    option.disabled = players[option.value as PlayerId] != null;
                 });
             },
 
@@ -47,7 +47,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
 
         if (state.server.availableSlots.includes(selectedId)) {
-            state.playerId = selectedId;
+            state.playerId = selectedId as PlayerId;
             dispatchEvent(new CustomEvent(
                 EVENT.action, {detail: {action: ACTION.enroll}}
             ));
@@ -61,7 +61,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         info.innerHTML = text;
     }
 
-    enableElements = (...handlers: HTMLHandlerInterface[]) => {
+    enableElements = (...handlers: { enable:()=>void }[]) => {
         handlers.forEach(handler => handler.enable());
     }
 
