@@ -2,10 +2,11 @@
 import Konva from 'konva';
 
 export type PlayerState = {
-    location: Location,
-    allowedMoves: Location[],
+    location: string,
+    allowedMoves: string[],
 }
 
+export type PlayerId = "playerWhite" | "playerYellow" | "playerRed" | "playerGreen";
 export type ServerState = {
     status: string,
     sessionOwner: string | null,
@@ -14,11 +15,15 @@ export type ServerState = {
 }
 
 export type State = {
-    playerId: string | null,
+    playerId: PlayerId | null,
     isBoardDrawn: boolean,
     server: ServerState,
     map: {
-        playerShip: Konva.Rect | null,
+        playerShip: {
+            element: Konva.Rect | null
+            homePosition: { x: number, y: number }
+            hoverStatus: string
+        },
         opponentShips: Konva.Rect[],
         islands: Konva.RegularPolygon[],
     },
@@ -48,11 +53,6 @@ export interface MapBoardInterface extends ServiceInterface {
     initiateCanvas: () => void,
     drawBoard: () => void,
     updateBoard: () => void,
-}
-
-export interface HTMLHandlerInterface {
-    enable: () => void,
-    disable: () => void,
 }
 
 export interface UiInterface extends ServiceInterface {

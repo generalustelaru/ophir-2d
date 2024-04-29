@@ -1,9 +1,10 @@
 
+import Konva from 'konva';
 import constants from '../constants.json';
 
 
 export class MapHex {
-    constructor(width, name, x, y, fill) {
+    constructor(width:number, name: string, x:number, y:number, fill:string) {
 
         return new Konva.RegularPolygon({
             x: width / 2,

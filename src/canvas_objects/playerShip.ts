@@ -1,39 +1,41 @@
-import state from '../state.ts';
+import Konva from 'konva';
+import state from '../state';
 import constants from '../constants.json';
-import { Ship } from './ship.js';
+import { Ship } from './ship';
 const { COLOR, HEX_COUNT, MOVE_HINT, EVENT, ACTION } = constants;
 
 export class PlayerShip {
-    ship = null
-    homePosition = null
-    hoverStatus = null
-    islands = null
 
-    constructor (stage, layer, offsetX, offsetY, fill) {
-        this.ship = new Ship(
+    constructor (
+        stage: Konva.Stage,
+        layer: Konva.Layer,
+        offsetX: number,
+        offsetY: number,
+        fill: string
+    ) {
+        const ship = new Ship(
             stage.width(),
             offsetX,
             offsetY,
             fill,
             state.playerId,
             true
-        );
-        this.islands = state.map.islands;
+        ) as Konva.Rect;
 
-        this.ship.on('dragstart', () => {
-            this.homePosition = { x: this.ship.x(), y: this.ship.y() };
+        ship.on('dragstart', () => {
+            state.map.playerShip.homePosition = { x: ship.x(), y: ship.y() };
         });
 
-        this.ship.on('dragmove', () => {
+        ship.on('dragmove', () => {
 
             const players = state.server.players;
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                const hex = this.islands[i];
+                const hex = state.map.islands[i];
                 hex.fill(hex.attrs.id == players[state.playerId].location ? COLOR.currentHex : COLOR.default);
             }
 
-            const targetHex = this.islands.find(hex => hex.intersects(stage.getPointerPosition()));
+            const targetHex = state.map.islands.find(hex => hex.intersects(stage.getPointerPosition()));
 
             if (!targetHex) {
                 return
@@ -41,42 +43,43 @@ export class PlayerShip {
 
             switch (true) {
                 case players[state.playerId].location == targetHex.attrs.id:
-                    this.hoverStatus = MOVE_HINT.home;
+                    state.map.playerShip.hoverStatus = MOVE_HINT.home;
                     break;
                 case players[state.playerId].allowedMoves.includes(targetHex.attrs.id):
-                    this.hoverStatus = MOVE_HINT.valid;
+                    state.map.playerShip.hoverStatus = MOVE_HINT.valid;
                     targetHex.fill(COLOR.valid);
                     break;
                 default:
-                    this.hoverStatus = MOVE_HINT.illegal;
+                    state.map.playerShip.hoverStatus = MOVE_HINT.illegal;
                     targetHex.fill(COLOR.illegal);
             }
         });
 
-        this.ship.on('dragend', () => {
+        ship.on('dragend', () => {
 
-            const targetHex = this.islands.find(hex => hex.intersects(stage.getPointerPosition()));
+            const targetHex = state.map.islands.find(hex => hex.intersects(stage.getPointerPosition()));
+            const { x: positionX, y: positionY } = state.map.playerShip.homePosition;
 
             if (!targetHex) {
-                this.ship.x(this.homePosition.x);
-                this.ship.y(this.homePosition.y);
+                ship.x(positionX);
+                ship.y(positionY);
                 layer.batchDraw();
 
                 return
             }
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                this.islands[i].fill(COLOR.default);
+                state.map.islands[i].fill(COLOR.default);
             }
 
-            switch (this.hoverStatus) {
+            switch (state.map.playerShip.hoverStatus) {
                 case MOVE_HINT.home:
                 case MOVE_HINT.illegal:
-                    this.islands
+                    state.map.islands
                         .find(hex => hex.attrs.id == state.server.players[state.playerId].location)
                         .fill(COLOR.currentHex);
-                    this.ship.x(this.homePosition.x);
-                    this.ship.y(this.homePosition.y);
+                    ship.x(positionX);
+                    ship.y(positionY);
                     break;
                 case MOVE_HINT.valid:
                     targetHex.fill(COLOR.currentHex);
@@ -94,6 +97,6 @@ export class PlayerShip {
             layer.batchDraw();
         });
 
-        return this.ship;
+        return ship;
     }
 }

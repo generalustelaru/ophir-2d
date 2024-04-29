@@ -11,7 +11,12 @@ const state: State = {
         players: {},
     },
     map: {
-        playerShip: null,
+        playerShip: {
+            element: null,
+            homePosition: { x: 0, y: 0 },
+            hoverStatus: "",
+        
+        },
         opponentShips: [],
         islands: [],
     },
