@@ -1,10 +1,15 @@
-import { EventHandlerInterface, EventPayload, CommunicationInterface, MapBoardInterface, UiInterface, ServiceInterface } from "./types";
+import {
+    EventHandlerInterface,
+    EventPayload,
+    CommunicationInterface,
+    MapBoardInterface,
+    UiInterface
+} from "./types";
 import state from "./state";
 import { CommunicationService } from "./services/commService.js";
 import { MapBoardService } from "./services/mapBoardService.js";
-import { UserInterfaceService } from "./services/uiService.js";
+import { UserInterfaceService } from "./services/uiService";
 import constants from "./constants.json";
-import { Service } from "./services/service";
 const { EVENT, ACTION, STATUS } = constants;
 
 export class EventHandler implements EventHandlerInterface{

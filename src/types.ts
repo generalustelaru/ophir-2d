@@ -10,7 +10,7 @@ export type ServerState = {
     status: string,
     sessionOwner: string | null,
     availableSlots: string[],
-    players: Record<string, PlayerState> | {},
+    players: Record<string, PlayerState>,
 }
 
 export type State = {
@@ -32,8 +32,11 @@ export type EventPayload = {
     },
 }
 
+export interface ServiceStaticInterface {
+    new (): ServiceInterface;
+    getInstance(): ServiceInterface;
+}
 export interface ServiceInterface {
-    getInstance: () => ServiceInterface,
 }
 
 export interface CommunicationInterface extends ServiceInterface {
@@ -47,7 +50,18 @@ export interface MapBoardInterface extends ServiceInterface {
     updateBoard: () => void,
 }
 
+export interface HTMLHandlerInterface {
+    element: HTMLButtonElement | HTMLSelectElement,
+    callback: (() => void) | null,
+    enable: () => void,
+    disable: () => void,
+}
+
 export interface UiInterface extends ServiceInterface {
+    createButton: HTMLHandlerInterface,
+    joinButton: HTMLHandlerInterface,
+    startButton: HTMLHandlerInterface,
+    playerColorSelect: HTMLHandlerInterface,
     setInfo: (text: string) => void,
     updatePreSessionUi: () => void,
 }
