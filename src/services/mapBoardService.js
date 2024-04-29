@@ -68,7 +68,7 @@ export class MapBoardService extends Service {
         if (!state.playerId) {
             dispatchEvent(new CustomEvent(
                 EVENT.info,
-                {detail: {text: 'You are a spectator'}}
+                {detail: {details: 'You are a spectator'}}
             ));
             return;
         }

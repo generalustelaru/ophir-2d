@@ -1,24 +1,16 @@
 
 import Konva from 'konva';
 
-export type PlayerId = "playerWhite" | "playerYellow" | "playerRed" | "playerGreen";
-
-export type Location =
-    | 'center' | 'topRight' | 'right' | 'bottomRight'
-    | 'bottomLeft' | 'left' | 'topLeft';
-
-export type Status = "empty" | "lobby" | "full" | "started";
-
 export type PlayerState = {
     location: Location,
     allowedMoves: Location[],
 }
 
 export type ServerState = {
-    status: Status,
-    sessionOwner: PlayerId | null,
-    availableSlots: PlayerId[],
-    players: Record<PlayerId, PlayerState> | {},
+    status: string,
+    sessionOwner: string | null,
+    availableSlots: string[],
+    players: Record<string, PlayerState> | {},
 }
 
 export type State = {
@@ -30,4 +22,38 @@ export type State = {
         opponentShips: Konva.Rect[],
         islands: Konva.RegularPolygon[],
     },
+}
+
+export type EventPayload = {
+    type: string,
+    detail: {
+        action: string,
+        details: string | null
+    },
+}
+
+export interface ServiceInterface {
+    getInstance: () => ServiceInterface,
+}
+
+export interface CommunicationInterface extends ServiceInterface {
+    createConnection: (address: string) => void,
+    sendMessage: (action: string, details?: any) => void,
+}
+
+export interface MapBoardInterface extends ServiceInterface {
+    initiateCanvas: () => void,
+    drawBoard: () => void,
+    updateBoard: () => void,
+}
+
+export interface UiInterface extends ServiceInterface {
+    setInfo: (text: string) => void,
+    updatePreSessionUi: () => void,
+}
+
+export interface EventHandlerInterface {
+    commService: CommunicationInterface,
+    mapBoardService: MapBoardInterface,
+    uiService: UiInterface,
 }

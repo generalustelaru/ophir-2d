@@ -4,8 +4,8 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
     entry: {
-        'my-lib': './src/main.js',
-        'my-lib.min': './src/main.js',
+        'my-lib': './src/main.ts',
+        'my-lib.min': './src/main.ts',
     },
     optimization: {
         minimize: true,
@@ -19,7 +19,7 @@ module.exports = {
         umdNamedDefine: true,
     },
     resolve: {
-        extensions: ['ts', '.js', '.json'],
+        extensions: ['.ts', '.js', '.json'],
     },
     devtool: 'source-map',
     mode: 'development',
