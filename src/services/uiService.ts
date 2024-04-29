@@ -6,12 +6,9 @@ import { Button } from '../html_components/button';
 
 const { ACTION, EVENT, STATUS } = constants;
 
-export class UserInterfaceService extends Service implements UiInterface{
+export class UserInterfaceService extends Service implements UiInterface {
 
-    createButton;
-    joinButton;
-    startButton;
-    playerColorSelect;
+    createButton; joinButton; startButton; playerColorSelect;
 
     constructor() {
         super();

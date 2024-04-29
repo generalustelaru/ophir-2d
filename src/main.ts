@@ -1,6 +1,6 @@
 import constants from './constants.json';
 import { CommunicationInterface, MapBoardInterface } from './types';
-import { CommunicationService } from './services/commService.js';
+import { CommunicationService } from './services/commService';
 import { MapBoardService } from './services/mapBoardService.js';
 import { EventHandler } from './eventHandler';
 
