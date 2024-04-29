@@ -51,23 +51,11 @@ export interface MapBoardInterface extends ServiceInterface {
 }
 
 export interface HTMLHandlerInterface {
-    element: HTMLButtonElement | HTMLSelectElement,
-    callback: (() => void) | null,
     enable: () => void,
     disable: () => void,
 }
 
 export interface UiInterface extends ServiceInterface {
-    createButton: HTMLHandlerInterface,
-    joinButton: HTMLHandlerInterface,
-    startButton: HTMLHandlerInterface,
-    playerColorSelect: HTMLHandlerInterface,
     setInfo: (text: string) => void,
     updatePreSessionUi: () => void,
-}
-
-export interface EventHandlerInterface {
-    commService: CommunicationInterface,
-    mapBoardService: MapBoardInterface,
-    uiService: UiInterface,
 }

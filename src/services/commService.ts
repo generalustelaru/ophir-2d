@@ -1,15 +1,18 @@
-import { Service } from './service.ts';
-import state from '../state.ts';
+import { CommunicationInterface } from '../types';
+import { Service } from './service';
+import state from '../state';
 import constants from '../constants.json';
 const { EVENT } = constants;
 
-export class CommunicationService extends Service {
+export class CommunicationService extends Service implements CommunicationInterface {
+
+    socket: WebSocket;
 
     constructor() {
         super();
     }
 
-    createConnection(url) {
+    createConnection(url: string) {
         this.socket = new WebSocket(url);
         this.socket.onopen = () => {
             console.info('Connected to the server');
@@ -35,7 +38,7 @@ export class CommunicationService extends Service {
         }
     }
 
-    sendMessage(action, details = null) {
+    sendMessage(action: string, details: string | null) {
 
         if (!this.socket.readyState) {
             console.error('The connection is not open');
