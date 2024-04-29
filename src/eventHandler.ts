@@ -1,22 +1,27 @@
-import state from "./state.ts";
+import { EventHandlerInterface, EventPayload, CommunicationInterface, MapBoardInterface, UiInterface, ServiceInterface } from "./types";
+import state from "./state";
 import { CommunicationService } from "./services/commService.js";
 import { MapBoardService } from "./services/mapBoardService.js";
 import { UserInterfaceService } from "./services/uiService.js";
 import constants from "./constants.json";
+import { Service } from "./services/service";
 const { EVENT, ACTION, STATUS } = constants;
 
-export class EventHandler extends EventTarget{
+export class EventHandler implements EventHandlerInterface{
+
+    commService: CommunicationInterface
+    mapBoardService: MapBoardInterface
+    uiService: UiInterface
 
     constructor() {
-        super();
         this.commService = CommunicationService.getInstance();
         this.mapBoardService = MapBoardService.getInstance();
         this.uiService = UserInterfaceService.getInstance();
 
         //Send player action to server
         window.addEventListener(
-            EVENT.action,
-            (event) => this.commService.sendMessage(
+            EVENT.action as any,
+            (event: EventPayload) => this.commService.sendMessage(
                 event.detail.action,
                 event.detail.details
             ),
@@ -24,13 +29,13 @@ export class EventHandler extends EventTarget{
 
         // TODO: Update UI on error
         window.addEventListener(
-            EVENT.error,
-            () => console.error('Something went wrong :('),
-        );
+            EVENT.error as any,
+            (event: EventPayload) => console.error('Something went wrong :('),
+);
 
         // Get server data on connection
         window.addEventListener(
-            EVENT.connected,
+            EVENT.connected as any,
             () => this.commService.sendMessage(ACTION.inquire),
         );
 
@@ -49,8 +54,8 @@ export class EventHandler extends EventTarget{
         });
 
         window.addEventListener(
-            EVENT.info,
-            (event) => this.uiService.setInfo(event.detail.text)
+            EVENT.info as any,
+            (event: EventPayload) => this.uiService.setInfo(event.detail.details)
         );
     }
 }
