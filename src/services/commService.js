@@ -1,4 +1,4 @@
-import { Service } from './service.js';
+import { Service } from './service.ts';
 import state from '../state.ts';
 import constants from '../constants.json';
 const { EVENT } = constants;

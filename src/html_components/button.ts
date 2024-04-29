@@ -1,7 +1,12 @@
+import { HTMLHandlerInterface } from '../types';
 
-export class Button {
-    constructor(id, callback) {
-        this.element = document.getElementById(id);
+export class Button implements HTMLHandlerInterface {
+
+    element: HTMLButtonElement;
+    callback: () => void;
+
+    constructor (id: string, callback: () => void) {
+        this.element = document.getElementById(id) as HTMLButtonElement;
         this.callback = callback.bind(this);
     }
 

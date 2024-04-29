@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Service } from "./service.js";
+import { Service } from "./service.ts";
 import { Ship } from '../canvas_objects/ship.js';
 import { PlayerShip } from '../canvas_objects/playerShip.js';
 import { MapHex } from '../canvas_objects/mapHex.js';

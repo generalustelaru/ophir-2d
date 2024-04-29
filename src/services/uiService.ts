@@ -1,23 +1,31 @@
-import { Service } from './service.js';
-import state from '../state.ts';
+import { HTMLHandlerInterface, UiInterface } from '../types.js';
+import { Service } from './service';
+import state from '../state';
 import constants from '../constants.json';
-import { Button } from '../html_components/button.js';
+import { Button } from '../html_components/button';
 
 const { ACTION, EVENT, STATUS } = constants;
 
-export class UserInterfaceService extends Service {
+export class UserInterfaceService extends Service implements UiInterface{
+
+    createButton;
+    joinButton;
+    startButton;
+    playerColorSelect;
+
     constructor() {
         super();
         this.createButton = new Button('createButton', this.processEnroll);
         this.joinButton = new Button('joinButton', this.processEnroll);
         this.startButton = new Button('startButton', this.processStart);
         this.playerColorSelect = {
-            element: document.getElementById('playerColorSelect'),
-
+            element: document.getElementById('playerColorSelect') as HTMLSelectElement,
+            callback: null as any,
             enable: () => {
                 this.playerColorSelect.element.disabled = false;
+                const players = state.server.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
-                    option.disabled = state.server.players[option.value] != null;
+                    option.disabled = players[option.value] != null;
                 });
             },
 
@@ -51,13 +59,13 @@ export class UserInterfaceService extends Service {
         }
     }
 
-    setInfo = (text) => {
+    setInfo = (text: string) => {
         const info = document.getElementById('info');
         info.innerHTML = text;
     }
 
-    enableElements = (...buttons) => {
-        buttons.forEach(button => button.enable());
+    enableElements = (...handlers: HTMLHandlerInterface[]) => {
+        handlers.forEach(handler => handler.enable());
     }
 
     disableAllElements = () => {
