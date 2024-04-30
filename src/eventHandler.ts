@@ -30,11 +30,11 @@ export class EventHandler {
         window.addEventListener(
             EVENT.error as any,
             (event: EventPayload) => console.error('Something went wrong :('),
-);
+        );
 
         // Get server data on connection
         window.addEventListener(
-            EVENT.connected as any,
+            EVENT.connected,
             () => this.commService.sendMessage(ACTION.inquire),
         );
 
