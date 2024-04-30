@@ -1,4 +1,5 @@
 import Konva from 'konva';
+import { ActionEventPayload } from '../types';
 import state from '../state';
 import constants from '../constants.json';
 import { Ship } from './ship';
@@ -83,14 +84,15 @@ export class PlayerShip {
                     break;
                 case MOVE_HINT.valid:
                     targetHex.fill(COLOR.currentHex);
-                    dispatchEvent(new CustomEvent(
+                    const payload: ActionEventPayload = {
+                        action: ACTION.move,
+                        details: {
+                            hex: targetHex.attrs.id
+                        }
+                    };
+                    window.dispatchEvent(new CustomEvent(
                         EVENT.action,
-                        {detail: {
-                            action: ACTION.move,
-                            details: {
-                                hex: targetHex.attrs.id
-                            }
-                        }}
+                        { detail: payload }
                     ));
             }
 

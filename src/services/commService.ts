@@ -16,25 +16,25 @@ export class CommunicationService extends Service implements CommunicationInterf
         this.socket = new WebSocket(url);
         this.socket.onopen = () => {
             console.info('Connected to the server');
-            dispatchEvent(new CustomEvent(EVENT.connected));
+            this.broadcastEvent(EVENT.connected);
         }
         this.socket.onerror = (error) => {
             console.error(error);
-            dispatchEvent(new CustomEvent(EVENT.error));
+            this.broadcastEvent(EVENT.error);
         }
         this.socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
             if (data.error) {
                 console.error(data.error);
-                dispatchEvent(new CustomEvent(EVENT.error));
+                this.broadcastEvent(EVENT.error);
 
                 return;
             }
 
             state.server = data;
             console.dir(state); // debug
-            dispatchEvent(new CustomEvent(EVENT.update));
+            this.broadcastEvent(EVENT.update);
         }
     }
 
@@ -42,7 +42,7 @@ export class CommunicationService extends Service implements CommunicationInterf
 
         if (!this.socket.readyState) {
             console.error('The connection is not open');
-            dispatchEvent(new CustomEvent(EVENT.error));
+            this.broadcastEvent(EVENT.error);
 
             return;
         }
