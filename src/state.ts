@@ -8,14 +8,18 @@ const state: State = {
         status: "empty",
         sessionOwner: null,
         availableSlots: ["playerWhite", "playerYellow", "playerRed", "playerGreen"],
-        players: {},
+        players: {
+            playerWhite: null,
+            playerYellow: null,
+            playerRed: null,
+            playerGreen: null,
+        },
     },
     map: {
         playerShip: {
             element: null,
             homePosition: { x: 0, y: 0 },
             hoverStatus: "",
-        
         },
         opponentShips: [],
         islands: [],

@@ -33,6 +33,7 @@ export class MapBoardService extends Service {
 
     drawBoard = () => {
         const players = state.server.players;
+
         HEX_OFFSET_DATA.forEach(hexItem => {
             const hexElement = new MapHex(
                 this.stage.width(),
@@ -47,24 +48,23 @@ export class MapBoardService extends Service {
             this.layer.add(hexElement);
         });
 
-        for (const playerId in players) {
-            const opponentId = playerId as PlayerId;
-
-            if (players[opponentId] && opponentId != state.playerId) {
+        const playerIds = Object.keys(players) as PlayerId[];
+        playerIds.forEach((id) => {
+            if (players[id] && id != state.playerId) {
                 const locationData = HEX_OFFSET_DATA.find(
-                    hexItem => hexItem.id == players[opponentId].location
+                    hexItem => hexItem.id == players[id].location
                 );
                 const ship = new Ship(
                     this.stage.width(),
                     locationData.x,
                     locationData.y,
-                    COLOR[opponentId],
-                    opponentId
+                    COLOR[id],
+                    id
                 ) as Konva.Rect;
                 state.map.opponentShips.push(ship);
                 this.layer.add(ship);
             }
-        }
+        });
 
         if (!state.playerId) {
             dispatchEvent(new CustomEvent(
