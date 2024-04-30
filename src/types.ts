@@ -58,4 +58,5 @@ export interface MapBoardInterface extends ServiceInterface {
 export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
     updatePreSessionUi: () => void,
+    disableAllElements: () => void,
 }
