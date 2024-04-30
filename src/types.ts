@@ -1,17 +1,17 @@
 
 import Konva from 'konva';
 
+export type PlayerId = "playerWhite" | "playerYellow" | "playerRed" | "playerGreen";
 export type PlayerState = {
     location: string,
     allowedMoves: string[],
 }
 
-export type PlayerId = "playerWhite" | "playerYellow" | "playerRed" | "playerGreen";
 export type ServerState = {
     status: string,
     sessionOwner: string | null,
     availableSlots: string[],
-    players: Record<string, PlayerState>,
+    players: Record<PlayerId, (PlayerState | null)>,
 }
 
 export type State = {

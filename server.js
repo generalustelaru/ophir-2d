@@ -40,7 +40,12 @@ const session = {
     status: STATUS.empty,
     sessionOwner: null,
     availableSlots: [...PLAYER_IDS],
-    players: {},
+    players: {
+        playerWhite: null,
+        playerYellow: null,
+        playerRed: null,
+        playerGreen: null,
+    },
 }
 
 app.get('/', (res) => {
