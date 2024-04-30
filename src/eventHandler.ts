@@ -46,6 +46,7 @@ export class EventHandler {
                     this.uiService.setInfo('The \'game\' has started');
                     this.mapBoardService.drawBoard();
                     state.isBoardDrawn = true;
+                    this.uiService.disableAllElements();
                 }
             } else {
                 this.uiService.updatePreSessionUi();
