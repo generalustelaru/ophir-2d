@@ -1,4 +1,4 @@
-import { UiInterface, PlayerId} from '../types.js';
+import { UiInterface, PlayerId, ActionEventPayload } from '../types.js';
 import { Service } from './service';
 import state from '../state';
 import constants from '../constants.json';
@@ -32,9 +32,8 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     processStart = () => {
         this.startButton.disable();
-        dispatchEvent(new CustomEvent(
-            EVENT.action, {detail: {action: ACTION.start}}
-        ));
+        const payload: ActionEventPayload = {action: ACTION.start, details: null};
+        this.broadcastEvent(EVENT.action, payload);
     }
 
     processEnroll = () => {
@@ -48,9 +47,8 @@ export class UserInterfaceService extends Service implements UiInterface {
 
         if (state.server.availableSlots.includes(selectedId)) {
             state.playerId = selectedId as PlayerId;
-            dispatchEvent(new CustomEvent(
-                EVENT.action, {detail: {action: ACTION.enroll}}
-            ));
+            const payload: ActionEventPayload = {action: ACTION.enroll, details: null};
+            this.broadcastEvent(EVENT.action, payload);
         } else {
             this.setInfo('This color has just been taken :(');
         }

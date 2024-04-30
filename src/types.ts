@@ -29,19 +29,27 @@ export type State = {
     },
 }
 
-export type EventPayload = {
-    type: string,
-    detail: {
-        action: string,
-        details: string | null
-    },
+export type InfoEventPayload = {
+    text: string,
+};
+
+export type ActionEventPayload = {
+    action: string,
+    details: MoveActionDetails | null,
 }
+
+type MoveActionDetails = {
+    hex: string,
+}
+
+export type EventPayload = InfoEventPayload | ActionEventPayload | null;
 
 export interface ServiceStaticInterface {
     new (): ServiceInterface;
     getInstance(): ServiceInterface;
 }
 export interface ServiceInterface {
+    broadcastEvent: (event: string, payload: EventPayload) => void,
 }
 
 export interface CommunicationInterface extends ServiceInterface {

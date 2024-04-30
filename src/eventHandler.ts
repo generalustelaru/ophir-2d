@@ -1,4 +1,4 @@
-import { EventPayload, CommunicationInterface, MapBoardInterface, UiInterface } from "./types";
+import { InfoEventPayload, ActionEventPayload, CommunicationInterface, MapBoardInterface, UiInterface } from "./types";
 import state from "./state";
 import { CommunicationService } from "./services/commService";
 import { MapBoardService } from "./services/mapBoardService";
@@ -20,16 +20,19 @@ export class EventHandler {
         //Send player action to server
         window.addEventListener(
             EVENT.action as any,
-            (event: EventPayload) => this.commService.sendMessage(
-                event.detail.action,
-                event.detail.details
-            ),
+            (event) => {
+                const actionEvent: ActionEventPayload = event.detail;
+                this.commService.sendMessage(
+                    actionEvent.action,
+                    actionEvent.details
+                )
+            },
         );
 
         // TODO: Update UI on error
         window.addEventListener(
-            EVENT.error as any,
-            (event: EventPayload) => console.error('Something went wrong :('),
+            EVENT.error,
+            () => console.error('Something went wrong :('),
         );
 
         // Get server data on connection
@@ -43,7 +46,7 @@ export class EventHandler {
                 if (state.isBoardDrawn) {
                     this.mapBoardService.updateBoard();
                 } else {
-                    this.uiService.setInfo('The \'game\' has started');
+                    this.uiService.setInfo('The game has started');
                     this.mapBoardService.drawBoard();
                     state.isBoardDrawn = true;
                     this.uiService.disableAllElements();
@@ -55,7 +58,10 @@ export class EventHandler {
 
         window.addEventListener(
             EVENT.info as any,
-            (event: EventPayload) => this.uiService.setInfo(event.detail.details)
+            (event) => {
+                const infoEvent: InfoEventPayload = event.detail;
+                this.uiService.setInfo(infoEvent.text)
+            }
         );
     }
 }

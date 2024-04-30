@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { PlayerId } from '../types';
+import { PlayerId, InfoEventPayload} from '../types';
 import { Service } from "./service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
@@ -67,10 +67,9 @@ export class MapBoardService extends Service {
         });
 
         if (!state.playerId) {
-            dispatchEvent(new CustomEvent(
-                EVENT.info,
-                {detail: {details: 'You are a spectator'}}
-            ));
+            const payload: InfoEventPayload = { text: 'You are a spectator' };
+            this.broadcastEvent(EVENT.info, payload);
+
             return;
         }
 
@@ -101,10 +100,8 @@ export class MapBoardService extends Service {
 
                 this.layer.batchDraw();
             } else {
-                dispatchEvent(new CustomEvent(
-                    EVENT.info,
-                    {detail: {text: `${opponentId} has left the game`}}
-                ));
+                const payload: InfoEventPayload = { text: `${opponentId} has left the game` };
+                this.broadcastEvent(EVENT.info, payload);
                 ship.destroy();
             }
         });
