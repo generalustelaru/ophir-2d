@@ -32,6 +32,8 @@ const PLAYER_IDS = [
 ];
 
 const PLAYER_STATE = {
+    turnOrder: null,
+    isActive: false,
     location: 'right',
     allowedMoves: ['center', 'topRight', 'bottomRight'],
 };
@@ -40,12 +42,7 @@ const session = {
     status: STATUS.empty,
     sessionOwner: null,
     availableSlots: [...PLAYER_IDS],
-    players: {
-        playerWhite: null,
-        playerYellow: null,
-        playerRed: null,
-        playerGreen: null,
-    },
+    players: {},
 }
 
 app.get('/', (res) => {
@@ -102,17 +99,18 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             if (action == ACTION.start) {
                 session.status = STATUS.started;
                 session.availableSlots = [];
+                session.players = assignTurnOrder(session.players);
                 sendAll(session);
             }
 
             if (action == ACTION.move) {
                 const destination = details.hex;
-                const allowed = MOVE_RULES.find(rule => rule.from == player.location).allowed;
+                const allowed = MOVE_RULES.find(rule => rule.from === player.location).allowed;
 
                 if (allowed.includes(destination)) {
                     player.location = destination;
-                    player.allowedMoves = MOVE_RULES.find(rule => rule.from == destination).allowed;
-
+                    player.allowedMoves = MOVE_RULES.find(rule => rule.from === destination).allowed;
+                    session.players = passActiveStatus(session.players);
                     sendAll(session);
                 } else {
                     send({ error: 'Illegal move!' });
@@ -127,7 +125,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
 function processPlayer(playerId) {
 
-    if (session.status == STATUS.started || session.status == STATUS.full) {
+    if (session.status === STATUS.started || session.status === STATUS.full) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
@@ -143,13 +141,13 @@ function processPlayer(playerId) {
     session.players[playerId] = { ...PLAYER_STATE };
     console.log(`${playerId} enrolled`);
 
-    if (session.sessionOwner == null) {
+    if (session.sessionOwner === null) {
         session.status = STATUS.lobby;
         session.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
 
-    if (session.availableSlots.length == 0) {
+    if (session.availableSlots.length === 0) {
         session.status = STATUS.full;
         console.log(`Session is full`);
     }
@@ -159,4 +157,43 @@ function processPlayer(playerId) {
 
 function getKey(object, value) {
     return Object.keys(object).find(key => object[key] === value);
+}
+
+function assignTurnOrder(playersObject) {
+    const players = Object.keys(playersObject);
+    let tokenCount = players.length;
+
+    while (tokenCount > 0) {
+        const randomPick = Math.floor(Math.random() * players.length);
+        const playerId = players.splice(randomPick, 1)[0];
+        playersObject[playerId].turnOrder = tokenCount;
+        tokenCount -= 1;
+    }
+
+    return passActiveStatus(playersObject);
+}
+
+function passActiveStatus(playersObject) {
+    const playerCount = Object.keys(playersObject).length;
+    let nextToken = 1;
+
+    for (const playerId in playersObject) {
+
+        if (playersObject[playerId].isActive) {
+            nextToken = playersObject[playerId].turnOrder === playerCount
+                ? 1
+                : playersObject[playerId].turnOrder + 1;
+
+            playersObject[playerId].isActive = false;
+        }
+    }
+
+    for (const playerId in playersObject) {
+
+        if (playersObject[playerId].turnOrder === nextToken) {
+            playersObject[playerId].isActive = true;
+        }
+    }
+
+    return playersObject;
 }

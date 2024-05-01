@@ -60,7 +60,7 @@ export class MapBoardService extends Service {
                     locationData.y,
                     COLOR[id],
                     id
-                ) as Konva.Rect;
+                ).getElement();
                 state.map.opponentShips.push(ship);
                 this.layer.add(ship);
             }
@@ -76,20 +76,24 @@ export class MapBoardService extends Service {
         const locationData = HEX_OFFSET_DATA.find(
             hexItem => hexItem.id == players[state.playerId].location
         );
-        state.map.playerShip.element = new PlayerShip(
+        state.map.playerShip.object = new PlayerShip(
             this.stage,
             this.layer,
             locationData.x,
             locationData.y,
             COLOR[state.playerId],
-        ) as unknown as Konva.Rect;
-        this.layer.add(state.map.playerShip.element);
+        );
+        state.map.playerShip.object.switchControl(players[state.playerId].isActive);
+
+        this.layer.add(state.map.playerShip.object.getElement());
     }
 
     updateBoard = () => {
-        state.map.opponentShips.forEach(ship => {
+        const players = state.server.players;
+        const mapState = state.map;
+
+        mapState.opponentShips.forEach(ship => {
             const opponentId: PlayerId = ship.attrs.id;
-            const players = state.server.players;
 
             if (players[opponentId]) {
                 const locationData = HEX_OFFSET_DATA.find(
@@ -97,7 +101,6 @@ export class MapBoardService extends Service {
                 );
                 ship.offsetX(locationData.x);
                 ship.offsetY(locationData.y);
-
                 this.layer.batchDraw();
             } else {
                 const payload: InfoEventPayload = { text: `${opponentId} has left the game` };
@@ -105,5 +108,7 @@ export class MapBoardService extends Service {
                 ship.destroy();
             }
         });
+
+        mapState.playerShip.object?.switchControl(players[state.playerId].isActive);
     }
 }
