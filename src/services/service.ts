@@ -1,5 +1,12 @@
-import { ServiceInterface, EventPayload } from "../types";
+import { EventPayload } from "../types";
 
+export interface ServiceStaticInterface {
+    new (): ServiceInterface;
+    getInstance(): ServiceInterface;
+}
+export interface ServiceInterface {
+    broadcastEvent: (event: string, payload: EventPayload) => void,
+}
 export class Service implements ServiceInterface {
     static instance: Service | null = null;
 

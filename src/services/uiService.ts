@@ -1,8 +1,14 @@
-import { UiInterface, PlayerId, ActionEventPayload } from '../types.js';
-import { Service } from './service';
+import { PlayerId, ActionEventPayload } from '../types.js';
+import { Service, ServiceInterface } from './service';
 import state from '../state';
 import constants from '../constants.json';
 import { Button } from '../html_components/button';
+
+interface UiInterface extends ServiceInterface {
+    setInfo: (text: string) => void,
+    updatePreSessionUi: () => void,
+    disableAllElements: () => void,
+}
 
 const { ACTION, EVENT, STATUS } = constants;
 

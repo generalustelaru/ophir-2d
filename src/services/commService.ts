@@ -1,7 +1,12 @@
-import { CommunicationInterface } from '../types';
-import { Service } from './service';
+import { Service, ServiceInterface } from './service';
 import state from '../state';
 import constants from '../constants.json';
+
+export interface CommunicationInterface extends ServiceInterface {
+    createConnection: (address: string) => void,
+    sendMessage: (action: string, details?: any) => void,
+}
+
 const { EVENT } = constants;
 
 export class CommunicationService extends Service implements CommunicationInterface {
