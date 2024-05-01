@@ -1,6 +1,10 @@
 import Konva from 'konva';
-import { PlayerId, ShipInterface} from '../types';
+import { PlayerId } from '../types';
 import constants from '../constants.json';
+
+interface ShipInterface {
+    getElement: () => Konva.Rect,
+}
 
 const { COLOR } = constants;
 
