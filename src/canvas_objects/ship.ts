@@ -13,26 +13,21 @@ export class Ship implements ShipInterface {
     ship: Konva.Rect;
 
     constructor(
-        stageWidth: number,
+        // stageWidth: number,
         offsetX: number,
         offsetY: number,
         fill: string,
         id: PlayerId,
         isPlayerShip = false
     ) {
-        let strokeColor = 'black';
-
-        if (isPlayerShip) {
-            strokeColor = fill == COLOR.playerWhite ? 'gold' : 'white';
-        }
 
         this.ship = new Konva.Rect({
-            x: stageWidth / 2,
-            y: stageWidth / 2,
-            offsetX,
-            offsetY,
+            // x: stageWidth / 2,
+            // y: stageWidth / 2,
+            x: offsetX,
+            y: offsetY,
             fill,
-            stroke: strokeColor,
+            stroke: isPlayerShip ? 'white' : 'black',
             strokeWidth: 3,
             width: 40,
             height: 30,

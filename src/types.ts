@@ -1,11 +1,14 @@
 
 import Konva from 'konva';
 
-export type PlayerId = "playerWhite" | "playerYellow" | "playerRed" | "playerGreen";
+export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type PlayerState = {
     turnOrder: number | null,
     isActive: boolean,
-    location: string, // TODO: change to {hexId: string, position: {x: number, y: number}
+    location: {
+        hexId: string,
+        position: { x: number, y: number } | null,
+    },
     allowedMoves: string[],
 }
 
@@ -17,7 +20,7 @@ export type ServerState = {
 }
 
 export type State = {
-    playerId: PlayerId | null,
+    localPlayerId: PlayerId | null,
     isBoardDrawn: boolean,
     server: ServerState | null,
     map: {
@@ -43,7 +46,8 @@ export type ActionEventPayload = {
 }
 
 type MoveActionDetails = {
-    hex: string,
+    hexId: string,
+    position: { x: number, y: number },
 }
 
 export type EventPayload =

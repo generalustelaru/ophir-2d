@@ -25,7 +25,7 @@ const MOVE_RULES = [
     { from: 'topLeft', allowed: ['center', 'left', 'topRight'] },
 ]
 const PLAYER_IDS = [
-    'playerWhite',
+    'playerPurple',
     'playerYellow',
     'playerRed',
     'playerGreen',
@@ -34,8 +34,8 @@ const PLAYER_IDS = [
 const PLAYER_STATE = {
     turnOrder: null,
     isActive: false,
-    location: 'right',
-    allowedMoves: ['center', 'topRight', 'bottomRight'],
+    location: { hexId: 'center', position: null },
+    allowedMoves: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
 };
 
 const session = {
@@ -104,11 +104,11 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             }
 
             if (action == ACTION.move) {
-                const destination = details.hex;
-                const allowed = MOVE_RULES.find(rule => rule.from === player.location).allowed;
+                const destination = details.hexId;
+                const allowed = MOVE_RULES.find(rule => rule.from === player.location.hexId).allowed;
 
                 if (allowed.includes(destination)) {
-                    player.location = destination;
+                    player.location = { hexId: destination, position: details.position };
                     player.allowedMoves = MOVE_RULES.find(rule => rule.from === destination).allowed;
                     session.players = passActiveStatus(session.players);
                     sendAll(session);

@@ -15,9 +15,10 @@ interface MapBoardInterface extends ServiceInterface {
 
 const { COLOR, HEX_OFFSET_DATA, EVENT } = constants;
 
-export class MapBoardService extends Service {
+export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;
     layer: Konva.Layer;
+    center: { x: number, y: number };
 
     constructor() {
         super();
@@ -31,7 +32,7 @@ export class MapBoardService extends Service {
             width: 500,
             height: 500,
         });
-
+        this.center = { x: this.stage.width() / 2, y: this.stage.height() / 2 };
         this.layer = new Konva.Layer();
         this.stage.add(this.layer);
         this.layer.draw();
@@ -42,11 +43,11 @@ export class MapBoardService extends Service {
 
         HEX_OFFSET_DATA.forEach(hexItem => {
             const hexElement = new MapHex(
-                this.stage.width(),
+                this.center,
                 hexItem.id,
                 hexItem.x,
                 hexItem.y,
-                players[state.playerId]?.location == hexItem.id
+                players[state.localPlayerId]?.location.hexId == hexItem.id
                     ? COLOR.currentHex
                     : COLOR.default
             ) as Konva.RegularPolygon;
@@ -56,14 +57,12 @@ export class MapBoardService extends Service {
 
         const playerIds = Object.keys(players) as PlayerId[];
         playerIds.forEach((id) => {
-            if (players[id] && id != state.playerId) {
-                const locationData = HEX_OFFSET_DATA.find(
-                    hexItem => hexItem.id == players[id].location
-                );
+            if (players[id] && id != state.localPlayerId) {
+
+                const shipPosition = players[id].location.position ?? this.center;
                 const ship = new Ship(
-                    this.stage.width(),
-                    locationData.x,
-                    locationData.y,
+                    shipPosition.x,
+                    shipPosition.y,
                     COLOR[id],
                     id
                 ).getElement();
@@ -72,24 +71,23 @@ export class MapBoardService extends Service {
             }
         });
 
-        if (!state.playerId) {
+        if (!state.localPlayerId) {
             const payload: InfoEventPayload = { text: 'You are a spectator' };
             this.broadcastEvent(EVENT.info, payload);
 
             return;
         }
 
-        const locationData = HEX_OFFSET_DATA.find(
-            hexItem => hexItem.id == players[state.playerId].location
-        );
+        const shipPosition = players[state.localPlayerId].location.position
+            ?? this.center;
         state.map.playerShip.object = new PlayerShip(
             this.stage,
             this.layer,
-            locationData.x,
-            locationData.y,
-            COLOR[state.playerId],
+            shipPosition.x,
+            shipPosition.y,
+            COLOR[state.localPlayerId],
         );
-        state.map.playerShip.object.switchControl(players[state.playerId].isActive);
+        state.map.playerShip.object.switchControl(players[state.localPlayerId].isActive);
 
         this.layer.add(state.map.playerShip.object.getElement());
     }
@@ -102,11 +100,10 @@ export class MapBoardService extends Service {
             const opponentId: PlayerId = ship.attrs.id;
 
             if (players[opponentId]) {
-                const locationData = HEX_OFFSET_DATA.find(
-                    hexItem => hexItem.id == players[opponentId].location
-                );
-                ship.offsetX(locationData.x);
-                ship.offsetY(locationData.y);
+                const shipPosition = players[opponentId].location.position ??
+                    this.center;
+                ship.x(shipPosition.x);
+                ship.y(shipPosition.y);
                 this.layer.batchDraw();
             } else {
                 const payload: InfoEventPayload = { text: `${opponentId} has left the game` };
@@ -115,6 +112,6 @@ export class MapBoardService extends Service {
             }
         });
 
-        mapState.playerShip.object?.switchControl(players[state.playerId].isActive);
+        mapState.playerShip.object?.switchControl(players[state.localPlayerId].isActive);
     }
 }
