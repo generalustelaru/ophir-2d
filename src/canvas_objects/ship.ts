@@ -1,10 +1,13 @@
 import Konva from 'konva';
-import { PlayerId } from '../types';
+import { PlayerId, ShipInterface} from '../types';
 import constants from '../constants.json';
 
 const { COLOR } = constants;
 
-export class Ship {
+export class Ship implements ShipInterface {
+
+    ship: Konva.Rect;
+
     constructor(
         stageWidth: number,
         offsetX: number,
@@ -19,7 +22,7 @@ export class Ship {
             strokeColor = fill == COLOR.playerWhite ? 'gold' : 'white';
         }
 
-        return new Konva.Rect({
+        this.ship = new Konva.Rect({
             x: stageWidth / 2,
             y: stageWidth / 2,
             offsetX,
@@ -34,4 +37,6 @@ export class Ship {
             draggable: isPlayerShip,
         });
     }
+
+    getElement = () => this.ship;
 }

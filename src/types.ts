@@ -3,7 +3,9 @@ import Konva from 'konva';
 
 export type PlayerId = "playerWhite" | "playerYellow" | "playerRed" | "playerGreen";
 export type PlayerState = {
-    location: string,
+    turnOrder: number | null,
+    isActive: boolean,
+    location: string, // TODO: change to {hexId: string, position: {x: number, y: number}
     allowedMoves: string[],
 }
 
@@ -11,16 +13,16 @@ export type ServerState = {
     status: string,
     sessionOwner: string | null,
     availableSlots: string[],
-    players: Record<PlayerId, (PlayerState | null)>,
+    players: Record<PlayerId, (PlayerState)>,
 }
 
 export type State = {
     playerId: PlayerId | null,
     isBoardDrawn: boolean,
-    server: ServerState,
+    server: ServerState | null,
     map: {
         playerShip: {
-            element: Konva.Rect | null
+            object: PlayerShipInterface | null
             homePosition: { x: number, y: number }
             hoverStatus: string
         },
@@ -68,3 +70,11 @@ export interface UiInterface extends ServiceInterface {
     updatePreSessionUi: () => void,
     disableAllElements: () => void,
 }
+
+export interface ShipInterface {
+    getElement: () => Konva.Rect,
+}
+export interface PlayerShipInterface {
+    switchControl: (isActivePlayer: boolean) => void,
+    getElement: () => Konva.Rect,
+};

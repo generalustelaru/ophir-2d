@@ -1,11 +1,13 @@
 import Konva from 'konva';
-import { ActionEventPayload } from '../types';
+import { ActionEventPayload, PlayerShipInterface } from '../types';
 import state from '../state';
 import constants from '../constants.json';
 import { Ship } from './ship';
 const { COLOR, HEX_COUNT, MOVE_HINT, EVENT, ACTION } = constants;
 
-export class PlayerShip {
+export class PlayerShip implements PlayerShipInterface {
+
+    ship: Konva.Rect;
 
     constructor (
         stage: Konva.Stage,
@@ -14,20 +16,20 @@ export class PlayerShip {
         offsetY: number,
         fill: string
     ) {
-        const ship = new Ship(
+        this.ship = new Ship(
             stage.width(),
             offsetX,
             offsetY,
             fill,
             state.playerId,
             true
-        ) as Konva.Rect;
+        ).getElement();
 
-        ship.on('dragstart', () => {
-            state.map.playerShip.homePosition = { x: ship.x(), y: ship.y() };
+        this.ship.on('dragstart', () => {
+            state.map.playerShip.homePosition = { x: this.ship.x(), y: this.ship.y() };
         });
 
-        ship.on('dragmove', () => {
+        this.ship.on('dragmove', () => {
 
             const players = state.server.players;
 
@@ -56,14 +58,14 @@ export class PlayerShip {
             }
         });
 
-        ship.on('dragend', () => {
+        this.ship.on('dragend', () => {
 
             const targetHex = state.map.islands.find(hex => hex.intersects(stage.getPointerPosition()));
             const { x: positionX, y: positionY } = state.map.playerShip.homePosition;
 
             if (!targetHex) {
-                ship.x(positionX);
-                ship.y(positionY);
+                this.ship.x(positionX);
+                this.ship.y(positionY);
                 layer.batchDraw();
 
                 return
@@ -79,8 +81,8 @@ export class PlayerShip {
                     state.map.islands
                         .find(hex => hex.attrs.id == state.server.players[state.playerId].location)
                         .fill(COLOR.currentHex);
-                    ship.x(positionX);
-                    ship.y(positionY);
+                    this.ship.x(positionX);
+                    this.ship.y(positionY);
                     break;
                 case MOVE_HINT.valid:
                     targetHex.fill(COLOR.currentHex);
@@ -98,7 +100,11 @@ export class PlayerShip {
 
             layer.batchDraw();
         });
-
-        return ship;
     }
+
+    switchControl = (isActivePlayer: boolean) => {
+        this.ship.draggable(isActivePlayer);
+    }
+
+    getElement = () => this.ship;
 }
