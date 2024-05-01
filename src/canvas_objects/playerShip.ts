@@ -17,11 +17,11 @@ export class PlayerShip implements PlayerShipInterface {
         fill: string
     ) {
         this.ship = new Ship(
-            stage.width(),
+            // stage.width(),
             offsetX,
             offsetY,
             fill,
-            state.playerId,
+            state.localPlayerId,
             true
         ).getElement();
 
@@ -35,7 +35,7 @@ export class PlayerShip implements PlayerShipInterface {
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 const hex = state.map.islands[i];
-                hex.fill(hex.attrs.id == players[state.playerId].location ? COLOR.currentHex : COLOR.default);
+                hex.fill(hex.attrs.id == players[state.localPlayerId].location.hexId ? COLOR.currentHex : COLOR.default);
             }
 
             const targetHex = state.map.islands.find(hex => hex.intersects(stage.getPointerPosition()));
@@ -45,10 +45,10 @@ export class PlayerShip implements PlayerShipInterface {
             }
 
             switch (true) {
-                case players[state.playerId].location == targetHex.attrs.id:
+                case players[state.localPlayerId].location.hexId == targetHex.attrs.id:
                     state.map.playerShip.hoverStatus = MOVE_HINT.home;
                     break;
-                case players[state.playerId].allowedMoves.includes(targetHex.attrs.id):
+                case players[state.localPlayerId].allowedMoves.includes(targetHex.attrs.id):
                     state.map.playerShip.hoverStatus = MOVE_HINT.valid;
                     targetHex.fill(COLOR.valid);
                     break;
@@ -79,7 +79,7 @@ export class PlayerShip implements PlayerShipInterface {
                 case MOVE_HINT.home:
                 case MOVE_HINT.illegal:
                     state.map.islands
-                        .find(hex => hex.attrs.id == state.server.players[state.playerId].location)
+                        .find(hex => hex.attrs.id == state.server.players[state.localPlayerId].location.hexId)
                         .fill(COLOR.currentHex);
                     this.ship.x(positionX);
                     this.ship.y(positionY);
@@ -89,7 +89,8 @@ export class PlayerShip implements PlayerShipInterface {
                     const payload: ActionEventPayload = {
                         action: ACTION.move,
                         details: {
-                            hex: targetHex.attrs.id
+                            hexId: targetHex.attrs.id,
+                            position: { x: this.ship.x(), y: this.ship.y() }
                         }
                     };
                     window.dispatchEvent(new CustomEvent(

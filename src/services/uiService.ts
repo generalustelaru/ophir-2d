@@ -52,7 +52,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
 
         if (state.server.availableSlots.includes(selectedId)) {
-            state.playerId = selectedId as PlayerId;
+            state.localPlayerId = selectedId as PlayerId;
             const payload: ActionEventPayload = {action: ACTION.enroll, details: null};
             this.broadcastEvent(EVENT.action, payload);
         } else {
@@ -87,13 +87,13 @@ export class UserInterfaceService extends Service implements UiInterface {
                 this.setInfo('You may create the game');
                 break;
             case STATUS.lobby:
-                if (!state.playerId) {
+                if (!state.localPlayerId) {
                     this.enableElements(
                         this.joinButton,
                         this.playerColorSelect
                     );
                     this.setInfo('A game is waiting for you');
-                } else if (state.server.sessionOwner == state.playerId) {
+                } else if (state.server.sessionOwner == state.localPlayerId) {
                     this.startButton.enable();
                     this.setInfo('You may wait for more player or start');
                 } else {
@@ -101,9 +101,9 @@ export class UserInterfaceService extends Service implements UiInterface {
                 }
                 break;
             case STATUS.full:
-                if (!state.playerId) {
+                if (!state.localPlayerId) {
                     this.setInfo('The game is full, sorry :(');
-                } else if (state.playerId == state.server.sessionOwner) {
+                } else if (state.localPlayerId == state.server.sessionOwner) {
                     this.startButton.enable();
                     this.setInfo('You may start whenever you want');
                 } else {

@@ -4,13 +4,19 @@ import constants from '../constants.json';
 
 
 export class MapHex {
-    constructor(width:number, name: string, x:number, y:number, fill:string) {
+    constructor(
+        center: {x: number, y: number},
+        name: string,
+        offsetX:number,
+        offsetY:number,
+        fill:string
+    ) {
 
         return new Konva.RegularPolygon({
-            x: width / 2,
-            y: width / 2,
-            offsetX: x,
-            offsetY: y,
+            x: center.x,
+            y: center.y,
+            offsetX,
+            offsetY,
             sides: 6,
             radius: 100,
             fill: fill,

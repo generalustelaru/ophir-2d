@@ -2,7 +2,7 @@
 import { State } from './types';
 
 const state: State = {
-    playerId: null,
+    localPlayerId: null,
     isBoardDrawn: false,
     server: null,
     map: {

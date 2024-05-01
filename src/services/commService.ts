@@ -51,9 +51,9 @@ export class CommunicationService extends Service implements CommunicationInterf
 
             return;
         }
-
+        console.dir({playerId: state.localPlayerId ,action, details})
         this.socket.send(JSON.stringify({
-            playerId: state.playerId,
+            playerId: state.localPlayerId,
             action,
             details,
         }));
