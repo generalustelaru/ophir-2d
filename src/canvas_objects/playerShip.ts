@@ -17,7 +17,6 @@ export class PlayerShip implements PlayerShipInterface {
         fill: string
     ) {
         this.ship = new Ship(
-            // stage.width(),
             offsetX,
             offsetY,
             fill,
@@ -35,7 +34,7 @@ export class PlayerShip implements PlayerShipInterface {
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 const hex = state.map.islands[i];
-                hex.fill(hex.attrs.id == players[state.localPlayerId].location.hexId ? COLOR.currentHex : COLOR.default);
+                hex.fill(hex.attrs.id == players[state.localPlayerId].location.hexId ? COLOR.illegal : COLOR.default);
             }
 
             const targetHex = state.map.islands.find(hex => hex.intersects(stage.getPointerPosition()));
@@ -45,9 +44,9 @@ export class PlayerShip implements PlayerShipInterface {
             }
 
             switch (true) {
-                case players[state.localPlayerId].location.hexId == targetHex.attrs.id:
-                    state.map.playerShip.hoverStatus = MOVE_HINT.home;
-                    break;
+                // case players[state.localPlayerId].location.hexId == targetHex.attrs.id:
+                //     state.map.playerShip.hoverStatus = MOVE_HINT.home;
+                //     break;
                 case players[state.localPlayerId].allowedMoves.includes(targetHex.attrs.id):
                     state.map.playerShip.hoverStatus = MOVE_HINT.valid;
                     targetHex.fill(COLOR.valid);
@@ -80,7 +79,7 @@ export class PlayerShip implements PlayerShipInterface {
                 case MOVE_HINT.illegal:
                     state.map.islands
                         .find(hex => hex.attrs.id == state.server.players[state.localPlayerId].location.hexId)
-                        .fill(COLOR.currentHex);
+                        .fill(COLOR.illegal);
                     this.ship.x(positionX);
                     this.ship.y(positionY);
                     break;

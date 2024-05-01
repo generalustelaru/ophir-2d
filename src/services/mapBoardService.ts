@@ -40,7 +40,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
     drawBoard = () => {
         const players = state.server.players;
-
+        //MARK: Map hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const hexElement = new MapHex(
                 this.center,
@@ -48,13 +48,15 @@ export class MapBoardService extends Service implements MapBoardInterface {
                 hexItem.x,
                 hexItem.y,
                 players[state.localPlayerId]?.location.hexId == hexItem.id
-                    ? COLOR.currentHex
+                && players[state.localPlayerId].isActive
+                    ? COLOR.illegal
                     : COLOR.default
             ) as Konva.RegularPolygon;
             state.map.islands.push(hexElement);
             this.layer.add(hexElement);
         });
 
+        //MARK: Other ships
         const playerIds = Object.keys(players) as PlayerId[];
         playerIds.forEach((id) => {
             if (players[id] && id != state.localPlayerId) {
@@ -78,8 +80,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
             return;
         }
 
-        const shipPosition = players[state.localPlayerId].location.position
-            ?? this.center;
+        //MARK: Local ship
+        const localPlayer = players[state.localPlayerId];
+        const shipPosition = localPlayer.location.position ?? this.center;
         state.map.playerShip.object = new PlayerShip(
             this.stage,
             this.layer,
@@ -87,14 +90,24 @@ export class MapBoardService extends Service implements MapBoardInterface {
             shipPosition.y,
             COLOR[state.localPlayerId],
         );
-        state.map.playerShip.object.switchControl(players[state.localPlayerId].isActive);
+        state.map.playerShip.object.switchControl(localPlayer.isActive);
 
         this.layer.add(state.map.playerShip.object.getElement());
     }
 
     updateBoard = () => {
         const players = state.server.players;
+        const localPlayer = players[state.localPlayerId];
         const mapState = state.map;
+
+        mapState.islands.forEach(hex => {
+            const hexId = hex.attrs.id;
+            const hexColor = localPlayer?.location.hexId === hexId
+                && players[state.localPlayerId].isActive
+                ? COLOR.illegal
+                : COLOR.default;
+            hex.fill(hexColor);
+        });
 
         mapState.opponentShips.forEach(ship => {
             const opponentId: PlayerId = ship.attrs.id;
@@ -112,6 +125,6 @@ export class MapBoardService extends Service implements MapBoardInterface {
             }
         });
 
-        mapState.playerShip.object?.switchControl(players[state.localPlayerId].isActive);
+        mapState.playerShip.object?.switchControl(localPlayer.isActive);
     }
 }
