@@ -5,14 +5,14 @@ const state: State = {
     localPlayerId: null,
     isBoardDrawn: false,
     server: null,
-    map: {
-        playerShip: {
+    konva: {
+        localShip: {
             object: null,
             homePosition: { x: 0, y: 0 },
             hoverStatus: "",
         },
         opponentShips: [],
-        islands: [],
+        hexes: [],
     },
 }
 

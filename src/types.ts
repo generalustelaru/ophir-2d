@@ -1,6 +1,7 @@
 
 import Konva from 'konva';
 
+export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type PlayerState = {
     turnOrder: number | null,
@@ -17,20 +18,21 @@ export type ServerState = {
     sessionOwner: string | null,
     availableSlots: string[],
     players: Record<PlayerId, (PlayerState)>,
+    setup: {barriers: BarrierId[]}
 }
 
 export type State = {
     localPlayerId: PlayerId | null,
     isBoardDrawn: boolean,
     server: ServerState | null,
-    map: {
-        playerShip: {
+    konva: {
+        localShip: {
             object: PlayerShipInterface | null
             homePosition: { x: number, y: number }
             hoverStatus: string
         },
         opponentShips: Konva.Rect[],
-        islands: Konva.RegularPolygon[],
+        hexes: Konva.RegularPolygon[],
     },
 }
 

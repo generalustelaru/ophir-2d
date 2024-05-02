@@ -15,16 +15,18 @@
         "illegal": "illegal"
     },
     "COLOR": {
+        "barrierDefault": "#003C43",
+        "barrierNavigator": "#FFFDD7",
         "localShipBorder": "#FFD700",
         "shipBorder": "#000000",
         "playerPurple": "#A55A9A",
         "playerYellow": "#F5E049",
         "playerRed": "#FF204E",
         "playerGreen": "#87A922",
-        "illegal": "#CD8D7A",
+        "illegal": "#FFF7D4",
         "valid": "#A3FFD6",
         "default": "#3887BE",
-        "currentHex": "#52D3D8"
+        "anchored": "#52D3D8"
     },
     "HEX_OFFSET_DATA": [
         { "id": "center", "x": 0, "y": 0 },

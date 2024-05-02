@@ -1,7 +1,5 @@
 
 import Konva from 'konva';
-import constants from '../constants.json';
-
 
 export class MapHex {
     constructor(
