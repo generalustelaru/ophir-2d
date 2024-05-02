@@ -4,6 +4,7 @@ import { Service, ServiceInterface} from "./service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
 import { MapHex } from '../canvas_objects/mapHex';
+import { Barrier } from '../canvas_objects/barrier';
 import state from '../state';
 import constants from '../constants.json';
 
@@ -52,9 +53,15 @@ export class MapBoardService extends Service implements MapBoardInterface {
                     ? COLOR.illegal
                     : COLOR.default
             ) as Konva.RegularPolygon;
-            state.map.islands.push(hexElement);
+            state.konva.hexes.push(hexElement);
             this.layer.add(hexElement);
         });
+
+        // MARK: Barriers
+        const barriers = state.server.setup.barriers
+        const barrier_1 = new Barrier(this.center, barriers[0]) as Konva.Rect;
+        const barrier_2 = new Barrier(this.center, barriers[1]) as Konva.Rect
+        this.layer.add(barrier_1, barrier_2);
 
         //MARK: Other ships
         const playerIds = Object.keys(players) as PlayerId[];
@@ -68,7 +75,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
                     COLOR[id],
                     id
                 ).getElement();
-                state.map.opponentShips.push(ship);
+                state.konva.opponentShips.push(ship);
                 this.layer.add(ship);
             }
         });
@@ -83,28 +90,29 @@ export class MapBoardService extends Service implements MapBoardInterface {
         //MARK: Local ship
         const localPlayer = players[state.localPlayerId];
         const shipPosition = localPlayer.location.position ?? this.center;
-        state.map.playerShip.object = new PlayerShip(
+        state.konva.localShip.object = new PlayerShip(
             this.stage,
             this.layer,
             shipPosition.x,
             shipPosition.y,
             COLOR[state.localPlayerId],
         );
-        state.map.playerShip.object.switchControl(localPlayer.isActive);
+        state.konva.localShip.object.switchControl(localPlayer.isActive);
 
-        this.layer.add(state.map.playerShip.object.getElement());
+        this.layer.add(state.konva.localShip.object.getElement());
     }
 
     updateBoard = () => {
         const players = state.server.players;
         const localPlayer = players[state.localPlayerId];
-        const mapState = state.map;
+        const mapState = state.konva;
 
-        mapState.islands.forEach(hex => {
+        mapState.hexes.forEach(hex => {
             const hexId = hex.attrs.id;
             const hexColor = localPlayer?.location.hexId === hexId
-                && players[state.localPlayerId].isActive
-                ? COLOR.illegal
+                ? players[state.localPlayerId].isActive
+                    ? COLOR.illegal
+                    : COLOR.anchored
                 : COLOR.default;
             hex.fill(hexColor);
         });
@@ -125,6 +133,6 @@ export class MapBoardService extends Service implements MapBoardInterface {
             }
         });
 
-        mapState.playerShip.object?.switchControl(localPlayer.isActive);
+        mapState.localShip.object?.switchControl(localPlayer.isActive);
     }
 }
