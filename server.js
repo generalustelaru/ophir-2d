@@ -304,6 +304,11 @@ function hydrateMoveRules(playersObject, moveRules) {
     return playersObject;
 }
 
+/**
+ * Deep copy an object
+ * !! only for data objects containing scalars and arrays of scalars !!
+ * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.;
+ */
 function cc(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
