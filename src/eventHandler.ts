@@ -1,8 +1,8 @@
-import { InfoEventPayload, ActionEventPayload, CommunicationInterface, MapBoardInterface, UiInterface } from "./types";
+import { InfoEventPayload, ActionEventPayload } from "./types";
 import state from "./state";
-import { CommunicationService } from "./services/commService";
-import { MapBoardService } from "./services/mapBoardService";
-import { UserInterfaceService } from "./services/uiService";
+import { CommunicationService, CommunicationInterface } from "./services/commService";
+import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
+import { UserInterfaceService, UiInterface } from "./services/uiService";
 import constants from "./constants.json";
 const { EVENT, ACTION, STATUS } = constants;
 

@@ -4,7 +4,7 @@ import state from '../state';
 import constants from '../constants.json';
 import { Button } from '../html_components/button';
 
-interface UiInterface extends ServiceInterface {
+export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
     updatePreSessionUi: () => void,
     disableAllElements: () => void,
