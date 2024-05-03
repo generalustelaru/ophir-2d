@@ -8,7 +8,7 @@ import { Barrier } from '../canvas_objects/barrier';
 import state from '../state';
 import constants from '../constants.json';
 
-interface MapBoardInterface extends ServiceInterface {
+export interface MapBoardInterface extends ServiceInterface {
     initiateCanvas: () => void,
     drawBoard: () => void,
     updateBoard: () => void,

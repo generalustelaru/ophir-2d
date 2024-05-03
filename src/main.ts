@@ -1,7 +1,6 @@
 import constants from './constants.json';
-import { CommunicationInterface, MapBoardInterface } from './types';
-import { CommunicationService } from './services/commService';
-import { MapBoardService } from './services/mapBoardService';
+import { CommunicationService, CommunicationInterface } from './services/commService';
+import { MapBoardService, MapBoardInterface } from './services/mapBoardService';
 import { EventHandler } from './eventHandler';
 
 const { CONNECTION } = constants;
