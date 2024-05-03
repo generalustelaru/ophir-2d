@@ -1,16 +1,7 @@
 {
     "compilerOptions": {
-        "esModuleInterop":true,
-        "resolveJsonModule": true,
-        "sourceMap": true,
         "noImplicitAny": true,
         "module": "commonjs",
-        "target": "es6",
-        "allowJs": true,
-        "lib": [
-            "es6",
-            "dom"
-        ]
     },
     "include": [
         "./src/**/*"
@@ -19,3 +10,5 @@
         "node_modules",
     ]
 }
+
+// TODO: How do I add types for 'ws' and 'express'?

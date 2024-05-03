@@ -1,5 +1,5 @@
 node_modules/
-public/bundle.js
-public/bundle.js.map
-public/bundle.js.LICENSE.txt
+public/client.js
+public/client.js.map
+public/client.js.LICENSE.txt
 javascript/
