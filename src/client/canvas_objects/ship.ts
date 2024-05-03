@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { PlayerId } from '../../types';
+import { PlayerId } from '../../shared_types';
 import constants from '../../constants';
 
 interface ShipInterface {

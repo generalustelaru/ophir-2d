@@ -1,4 +1,4 @@
-import { InfoEventPayload, ActionEventPayload } from "../types";
+import { InfoEventPayload, ActionEventPayload } from "../shared_types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
 import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
