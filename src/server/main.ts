@@ -1,10 +1,10 @@
-// @ts-ignore
-import express from 'express';
+
+import express, { Request, Response } from 'express';
 
 import { WebSocketServer } from 'ws';
 import constants from '../constants';
 import { PlayerState, PlayerId, ServerState, WebsocketClientMessage, BarrierId } from '../shared_types';
-import { LocalSession, BarrierChecks, DefaultMoveRule, ProcessedMoveRule, WssMessage} from './server_types';
+import { LocalSession, BarrierChecks, DefaultMoveRule, ProcessedMoveRule, WssMessage } from './server_types';
 const app = express();
 const httpPort = 3000;
 const wsPort = 8080;
@@ -20,31 +20,31 @@ const WS_SIGNAL = {
 }
 
 const DEFAULT_MOVE_RULES: DefaultMoveRule[] = [
-    { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2,4,6,8,10,12] },
-    { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1,2,3] },
-    { from: 'right', allowed: ['center', 'topRight', 'bottomRight'], blockedBy: [3,4,5] },
-    { from: 'bottomRight', allowed: ['center', 'right', 'bottomLeft'], blockedBy: [5,6,7] },
-    { from: 'bottomLeft', allowed: ['center', 'left', 'bottomRight'], blockedBy: [7,8,9] },
-    { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'], blockedBy: [9,10,11] },
-    { from: 'topLeft', allowed: ['center', 'left', 'topRight'], blockedBy: [1,11,12] },
+    { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
+    { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1, 2, 3] },
+    { from: 'right', allowed: ['center', 'topRight', 'bottomRight'], blockedBy: [3, 4, 5] },
+    { from: 'bottomRight', allowed: ['center', 'right', 'bottomLeft'], blockedBy: [5, 6, 7] },
+    { from: 'bottomLeft', allowed: ['center', 'left', 'bottomRight'], blockedBy: [7, 8, 9] },
+    { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'], blockedBy: [9, 10, 11] },
+    { from: 'topLeft', allowed: ['center', 'left', 'topRight'], blockedBy: [1, 11, 12] },
 ]
 
 const BARRIER_CHECKS: BarrierChecks = {
-    1: { between: ['topLeft', 'topRight'], incompatible: [11,12,2,3] },
-    2: { between: ['topRight', 'center'], incompatible: [12,1,3,4] },
-    3: { between: ['topRight', 'right'], incompatible: [1,2,4,5] },
-    4: { between: ['right', 'center'], incompatible: [2,3,5,6] },
-    5: { between: ['right', 'bottomRight'], incompatible: [3,4,6,7] },
-    6: { between: ['bottomRight', 'center'], incompatible: [4,5,7,8] },
-    7: { between: ['bottomRight', 'bottomLeft'], incompatible: [5,6,8,9] },
-    8: { between: ['bottomLeft', 'center'], incompatible: [6,7,9,10] },
-    9: { between: ['bottomLeft', 'left'], incompatible: [7,8,10,11] },
-    10: { between: ['left', 'center'], incompatible: [8,9,11,12] },
-    11: { between: ['left', 'topLeft'], incompatible: [9,10,12,1] },
-    12: { between: ['topLeft', 'center'], incompatible: [10,11,1,2] },
+    1: { between: ['topLeft', 'topRight'], incompatible: [11, 12, 2, 3] },
+    2: { between: ['topRight', 'center'], incompatible: [12, 1, 3, 4] },
+    3: { between: ['topRight', 'right'], incompatible: [1, 2, 4, 5] },
+    4: { between: ['right', 'center'], incompatible: [2, 3, 5, 6] },
+    5: { between: ['right', 'bottomRight'], incompatible: [3, 4, 6, 7] },
+    6: { between: ['bottomRight', 'center'], incompatible: [4, 5, 7, 8] },
+    7: { between: ['bottomRight', 'bottomLeft'], incompatible: [5, 6, 8, 9] },
+    8: { between: ['bottomLeft', 'center'], incompatible: [6, 7, 9, 10] },
+    9: { between: ['bottomLeft', 'left'], incompatible: [7, 8, 10, 11] },
+    10: { between: ['left', 'center'], incompatible: [8, 9, 11, 12] },
+    11: { between: ['left', 'topLeft'], incompatible: [9, 10, 12, 1] },
+    12: { between: ['topLeft', 'center'], incompatible: [10, 11, 1, 2] },
 }
 
-const PLAYER_IDS = [
+const PLAYER_IDS: PlayerId[] = [
     'playerPurple',
     'playerYellow',
     'playerRed',
@@ -64,13 +64,13 @@ const localSession: LocalSession = {
 const session: ServerState = {
     status: STATUS.empty,
     sessionOwner: null,
-    availableSlots: [...PLAYER_IDS],
+    availableSlots: PLAYER_IDS,
     players: {},
     setup: null,
 }
 
 app.use(express.static(__dirname));
-app.get('/', (req: any, res: any) => { // TODO: see if you can handle express and type the heck out of this too.
+app.get('/', (req: Request, res: Response) => {
     console.info('GET / from', req.ip);
     res.sendFile(__dirname + 'public/index.html');
 });
@@ -97,66 +97,67 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
     }
 
     ws.on(WS_SIGNAL.message, function incoming(message: string) {
-        try {
-            const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
-            console.info(
-                '%s -> %s %s',
-                playerId ?? '?',
-                action ?? '?',
-                details ? `& ${JSON.stringify(details)}` : ''
+
+        const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
+        console.info(
+            '%s -> %s %s',
+            playerId ?? '?',
+            action ?? '?',
+            details ? `& ${JSON.stringify(details)}` : ''
+        );
+
+        const player = playerId ? session.players[playerId] : null;
+
+        if (action == ACTION.inquire) {
+            send(session);
+        }
+
+        if (action == ACTION.enroll) {
+            const isEnrolled = processPlayer(playerId);
+
+            if (isEnrolled) {
+                sendAll(session);
+            } else {
+                console.debug('Enrollment failed:', playerId);
+            }
+        }
+
+        if (action == ACTION.start) {
+            session.status = STATUS.started;
+            session.availableSlots = [];
+            session.players = assignTurnOrder(cc(session.players));
+            session.setup = generateSetup(cc(BARRIER_CHECKS));
+            localSession.moveRules = filterAllowedMoves(
+                cc(DEFAULT_MOVE_RULES),
+                cc(BARRIER_CHECKS),
+                cc(session.setup.barriers)
+            );
+            session.players = hydrateMoveRules(
+                cc(session.players),
+                cc(localSession.moveRules)
             );
 
-            const player = playerId ? session.players[playerId] : null;
-            console.debug('Player:', player);
-            if (action == ACTION.inquire) {
-                send(session);
-            }
-
-            if (action == ACTION.enroll) {
-                const isEnrolled = processPlayer(playerId);
-
-                if (isEnrolled) {
-                    sendAll(session);
-                } else {
-                    console.debug('Enrollment failed:', playerId);
-                }
-            }
-
-            if (action == ACTION.start) {
-                session.status = STATUS.started;
-                session.availableSlots = [];
-                session.players = assignTurnOrder(cc(session.players));
-                session.setup = generateSetup(cc(BARRIER_CHECKS));
-                localSession.moveRules = filterAllowedMoves(
-                    cc(DEFAULT_MOVE_RULES),
-                    cc(BARRIER_CHECKS),
-                    cc(session.setup.barriers)
-                );
-                session.players = hydrateMoveRules(
-                    cc(session.players),
-                    cc(localSession.moveRules)
-                );
-
-                sendAll(session);
-            }
-
-            if (action == ACTION.move) {
-                const destination = details.hexId;
-                const allowed = localSession.moveRules.find(rule => rule.from === player.location.hexId).allowed;
-
-                if (allowed.includes(destination)) {
-                    player.location = { hexId: destination, position: details.position };
-                    player.allowedMoves = localSession.moveRules.find(rule => rule.from === destination).allowed;
-                    session.players = passActiveStatus(cc(session.players));
-                    sendAll(session);
-                } else {
-                    send({ error: 'Illegal move!' });
-                }
-            }
-        } catch (error) {
-            console.log(error.message);
-            console.log(`original message: ${message}`);
+            sendAll(session);
         }
+
+        if (action == ACTION.move) {
+            const destination = details.hexId;
+            const allowed = localSession.moveRules.find(
+                rule => rule.from === player.location.hexId
+            ).allowed;
+
+            if (allowed.includes(destination)) {
+                player.location = { hexId: destination, position: details.position };
+                player.allowedMoves = localSession.moveRules.find(
+                    rule => rule.from === destination
+                ).allowed;
+                session.players = passActiveStatus(cc(session.players));
+                sendAll(session);
+            } else {
+                send({ error: 'Illegal move!' });
+            }
+        }
+
     });
 });
 
@@ -215,8 +216,8 @@ function passActiveStatus(playersObject: Record<PlayerId, PlayerState>) {
 
         if (playersObject[playerId].isActive) {
             nextToken = playersObject[playerId].turnOrder === playerCount
-            ? 1
-            : playersObject[playerId].turnOrder + 1;
+                ? 1
+                : playersObject[playerId].turnOrder + 1;
 
             playersObject[playerId].isActive = false;
         }
@@ -247,26 +248,26 @@ function determineBarriers(barrierChecks: BarrierChecks) {
     const b1 = Math.ceil(Math.random() * 12) as BarrierId;
     let b2: BarrierId = null;
 
-    while (false === checkBarrierCompatibility(barrierChecks, b1, b2)) {
-        b2 = Math.ceil(Math.random() * 12)  as BarrierId;
+    while (false === isArrangementLegal(barrierChecks, b1, b2)) {
+        b2 = Math.ceil(Math.random() * 12) as BarrierId;
     }
 
-    return [b1,b2];
+    return [b1, b2];
 }
 
-function checkBarrierCompatibility(barrierChecks: BarrierChecks, b1: BarrierId, b2: BarrierId) {
+function isArrangementLegal(barrierChecks: BarrierChecks, b1: BarrierId, b2: BarrierId) {
 
     if (!b2 || b1 === b2) {
-        return false
+        return false;
     }
 
     const check = barrierChecks[b1];
 
     if (check.incompatible.find(id => id === b2)) {
-        return false
+        return false;
     }
 
-    return true
+    return true;
 }
 
 function filterAllowedMoves(defaultMoves: DefaultMoveRule[], barrierChecks: BarrierChecks, barrierIds: BarrierId[]) {
@@ -281,7 +282,7 @@ function filterAllowedMoves(defaultMoves: DefaultMoveRule[], barrierChecks: Barr
                 const neighborHex = barrierChecks[barrierId].between
                     .filter(hexId => hexId != moveRule.from)[0];
 
-                    moveRule.allowed = moveRule.allowed
+                moveRule.allowed = moveRule.allowed
                     .filter(hexId => hexId != neighborHex);
             }
         });
@@ -296,20 +297,22 @@ function filterAllowedMoves(defaultMoves: DefaultMoveRule[], barrierChecks: Barr
 }
 
 function hydrateMoveRules(
-    playersObject: Record<PlayerId, PlayerState>,
+    playerStates: Record<PlayerId, PlayerState>,
     moveRules: ProcessedMoveRule[],
 ) {
+    const initialPlacement = moveRules[0];
 
-    const { from, allowed } = moveRules[0];
-
-    for (const id in playersObject) {
+    for (const id in playerStates) {
         const playerId = id as PlayerId;
+        const player = playerStates[playerId];
 
-        playersObject[playerId].location = {hexId: from, position: null};
-        playersObject[playerId].allowedMoves = allowed;
+        player.location = {
+            hexId: initialPlacement.from,
+            position: null};
+        player.allowedMoves = initialPlacement.allowed;
     }
 
-    return playersObject;
+    return playerStates;
 }
 
 /**

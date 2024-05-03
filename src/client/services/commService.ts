@@ -1,10 +1,11 @@
+import { WebsocketClientMessage, Action, ActionDetails, EventPayload } from '../../shared_types';
 import { Service, ServiceInterface } from './service';
 import state from '../state';
 import constants from '../../constants';
 
 export interface CommunicationInterface extends ServiceInterface {
     createConnection: (address: string) => void,
-    sendMessage: (action: string, details?: any) => void,
+    sendMessage: (action: Action, details?: ActionDetails) => void,
 }
 
 const { EVENT } = constants;
@@ -25,25 +26,25 @@ export class CommunicationService extends Service implements CommunicationInterf
         }
         this.socket.onerror = (error) => {
             console.error(error);
-            this.broadcastEvent(EVENT.error);
+            this.broadcastEvent(EVENT.error, {text: "The connection encountered an error."});
         }
         this.socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
             if (data.error) {
                 console.error(data.error);
-                this.broadcastEvent(EVENT.error);
+                this.broadcastEvent(EVENT.error, {text: data.error});
 
                 return;
             }
 
             state.server = data;
-            console.dir(state); // debug
+
             this.broadcastEvent(EVENT.update);
         }
     }
 
-    sendMessage(action: string, details: string | null) {
+    sendMessage(action: Action, details?: ActionDetails) {
 
         if (!this.socket.readyState) {
             console.error('The connection is not open');
@@ -51,11 +52,13 @@ export class CommunicationService extends Service implements CommunicationInterf
 
             return;
         }
-        console.dir({playerId: state.localPlayerId ,action, details})
-        this.socket.send(JSON.stringify({
+
+        const message: WebsocketClientMessage = {
             playerId: state.localPlayerId,
             action,
             details,
-        }));
+        };
+
+        this.socket.send(JSON.stringify(message));
     }
 }

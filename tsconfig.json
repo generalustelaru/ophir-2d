@@ -2,6 +2,7 @@
     "compilerOptions": {
         "noImplicitAny": true,
         "module": "commonjs",
+        "esModuleInterop": true, // To lint express only. Use @ts-ignore if it causes trouble.
     },
     "include": [
         "./src/**/*"

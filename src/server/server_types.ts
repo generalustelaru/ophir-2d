@@ -7,8 +7,8 @@ export type DefaultMoveRule = {
     blockedBy: BarrierId[];
 };
 export type ProcessedMoveRule = {
-    from: string;
-    allowed: string[];
+    from: HexId;
+    allowed: HexId[];
 }
 
 export type LocalSession = {

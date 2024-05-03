@@ -4,20 +4,26 @@ import Konva from 'konva';
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
+export type HexOffset = { id: HexId, x: number, y: number };
+export type Action = "inquire" | "enroll" | "start" | "move" | "refresh";
+export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
+export type SessionStatus = "empty" | "lobby" | "full" | "started";
+export type HoverHint = "valid" | "home" | "illegal";
+export type HexaColor = `#${string}`;
 export type PlayerState = {
     turnOrder: number | null,
     isActive: boolean,
     location: {
-        hexId: string,
+        hexId: HexId,
         position: { x: number, y: number } | null,
     },
-    allowedMoves: string[],
+    allowedMoves: HexId[],
 }
 
 export type ServerState = {
-    status: string,
-    sessionOwner: string | null,
-    availableSlots: string[],
+    status: SessionStatus,
+    sessionOwner: PlayerId | null,
+    availableSlots: PlayerId[],
     players: Record<string|PlayerId, (PlayerState)>,
     setup: {barriers: BarrierId[]}
 }
@@ -42,16 +48,16 @@ export type InfoEventPayload = {
 };
 
 export type ActionEventPayload = {
-    action: string,
-    details:
-        | MoveActionDetails
-        | null,
+    action: Action,
+    details: ActionDetails,
 }
 
-type MoveActionDetails = {
-    hexId: string,
+export type MoveActionDetails = {
+    hexId: HexId,
     position: { x: number, y: number },
 }
+
+export type ActionDetails = MoveActionDetails | null;
 
 export type EventPayload =
     | InfoEventPayload
@@ -65,7 +71,19 @@ export interface PlayerShipInterface {
 
 export type WebsocketClientMessage = {
     playerId: PlayerId,
-    action: string,
-    details: MoveActionDetails | null,
-
+    action: Action,
+    details: ActionDetails,
 }
+
+export type ConstantsCollection = {
+    HEX_COUNT: 7,
+    CONNECTION: {
+        wsAddress: string
+    },
+    STATUS: Record<SessionStatus, SessionStatus>,
+    MOVE_HINT: Record<HoverHint, HoverHint>,
+    COLOR: Record<string, HexaColor>,
+    HEX_OFFSET_DATA: HexOffset[],
+    ACTION: Record<Action, Action>,
+    EVENT: Record<CustomEventTitle, CustomEventTitle>,
+};
