@@ -1,6 +1,6 @@
 import express from 'express';
 import { WebSocketServer } from 'ws';
-import constants from './src/constants.json' assert { type: "json" };
+import constants from './constants.js';
 const app = express();
 const httpPort = 3000;
 const wsPort = 8080;

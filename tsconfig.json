@@ -2,6 +2,11 @@
     "compilerOptions": {
         "noImplicitAny": true,
         "module": "commonjs",
+
+        //TODO: for satisfying TS on json imports only.
+        // Remove if hinders configuration; replace w/ @ts-ignore where needed.
+        // "esModuleInterop": true,
+        // "resolveJsonModule": true,
     },
     "include": [
         "./src/**/*"

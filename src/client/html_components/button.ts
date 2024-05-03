@@ -1,4 +1,3 @@
-// import { HTMLHandlerInterface } from '../types';
 
 interface HTMLHandlerInterface {
     enable: () => void,

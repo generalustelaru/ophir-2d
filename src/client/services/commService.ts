@@ -1,6 +1,6 @@
 import { Service, ServiceInterface } from './service';
 import state from '../state';
-import constants from '../constants.json';
+import constants from '../../constants';
 
 export interface CommunicationInterface extends ServiceInterface {
     createConnection: (address: string) => void,

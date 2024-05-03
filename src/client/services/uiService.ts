@@ -1,7 +1,7 @@
-import { PlayerId, ActionEventPayload } from '../types.js';
+import { PlayerId, ActionEventPayload } from '../../types.js';
 import { Service, ServiceInterface } from './service';
 import state from '../state';
-import constants from '../constants.json';
+import constants from '../../constants';
 import { Button } from '../html_components/button';
 
 export interface UiInterface extends ServiceInterface {
