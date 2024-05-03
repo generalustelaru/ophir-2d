@@ -1,9 +1,9 @@
-import { InfoEventPayload, ActionEventPayload } from "./types";
+import { InfoEventPayload, ActionEventPayload } from "../types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
 import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
 import { UserInterfaceService, UiInterface } from "./services/uiService";
-import constants from "./constants.json";
+import constants from "../constants";
 const { EVENT, ACTION, STATUS } = constants;
 
 export class EventHandler {

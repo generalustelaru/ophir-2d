@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { PlayerId, InfoEventPayload } from '../types';
+import { PlayerId, InfoEventPayload } from '../../types';
 import { Service, ServiceInterface} from "./service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
 import { MapHex } from '../canvas_objects/mapHex';
 import { Barrier } from '../canvas_objects/barrier';
 import state from '../state';
-import constants from '../constants.json';
+import constants from '../../constants';
 
 export interface MapBoardInterface extends ServiceInterface {
     initiateCanvas: () => void,

@@ -1,4 +1,4 @@
-import constants from './constants.json';
+import constants from '../constants';
 import { CommunicationService, CommunicationInterface } from './services/commService';
 import { MapBoardService, MapBoardInterface } from './services/mapBoardService';
 import { EventHandler } from './eventHandler';

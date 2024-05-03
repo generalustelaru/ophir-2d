@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import constants from '../constants.json';
-import { BarrierId } from '../types';
+import constants from '../../constants';
+import { BarrierId } from '../../types';
 
 const { COLOR } = constants;
 

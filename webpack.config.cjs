@@ -4,7 +4,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
     entry: {
-        'client': './src/main.ts',
+        'client': './src/client/main.ts',
     },
     optimization: {
         minimize: true,
@@ -12,7 +12,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, 'public'),
-        filename: '[name].js',
+        filename: 'client.js',
     },
     resolve: {
         extensions: ['.ts', '.js', '.json'],

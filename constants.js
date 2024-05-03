@@ -1,4 +1,4 @@
-{
+const constants = {
     "HEX_COUNT": 7,
     "CONNECTION": {
         "wsAddress": "ws://localhost:8080"
@@ -52,3 +52,5 @@
         "info": "info"
     }
 }
+
+export default constants;
