@@ -1,6 +1,10 @@
+// @ts-ignore
 import express from 'express';
+
 import { WebSocketServer } from 'ws';
-import constants from './constants.js';
+import constants from '../constants';
+import { PlayerState, PlayerId, ServerState, WebsocketClientMessage, BarrierId } from '../shared_types';
+import { LocalSession, BarrierChecks, DefaultMoveRule, ProcessedMoveRule, WssMessage} from './server_types';
 const app = express();
 const httpPort = 3000;
 const wsPort = 8080;
@@ -15,17 +19,17 @@ const WS_SIGNAL = {
     close: 'close',
 }
 
-const MOVE_RULES = [
-    { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], barrierChecks: [2,4,6,8,10,12] },
-    { from: 'topRight', allowed: ['center', 'right', 'topLeft'], barrierChecks: [1,2,3] },
-    { from: 'right', allowed: ['center', 'topRight', 'bottomRight'], barrierChecks: [3,4,5] },
-    { from: 'bottomRight', allowed: ['center', 'right', 'bottomLeft'], barrierChecks: [5,6,7] },
-    { from: 'bottomLeft', allowed: ['center', 'left', 'bottomRight'], barrierChecks: [7,8,9] },
-    { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'], barrierChecks: [9,10,11] },
-    { from: 'topLeft', allowed: ['center', 'left', 'topRight'], barrierChecks: [1,11,12] },
+const DEFAULT_MOVE_RULES: DefaultMoveRule[] = [
+    { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2,4,6,8,10,12] },
+    { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1,2,3] },
+    { from: 'right', allowed: ['center', 'topRight', 'bottomRight'], blockedBy: [3,4,5] },
+    { from: 'bottomRight', allowed: ['center', 'right', 'bottomLeft'], blockedBy: [5,6,7] },
+    { from: 'bottomLeft', allowed: ['center', 'left', 'bottomRight'], blockedBy: [7,8,9] },
+    { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'], blockedBy: [9,10,11] },
+    { from: 'topLeft', allowed: ['center', 'left', 'topRight'], blockedBy: [1,11,12] },
 ]
 
-const BARRIER_CHECKS = {
+const BARRIER_CHECKS: BarrierChecks = {
     1: { between: ['topLeft', 'topRight'], incompatible: [11,12,2,3] },
     2: { between: ['topRight', 'center'], incompatible: [12,1,3,4] },
     3: { between: ['topRight', 'right'], incompatible: [1,2,4,5] },
@@ -47,17 +51,17 @@ const PLAYER_IDS = [
     'playerGreen',
 ];
 
-const PLAYER_STATE = {
+const PLAYER_STATE: PlayerState = {
     turnOrder: null,
     isActive: false,
     location: null,
     allowedMoves: null,
 };
 
-const localSession = {
-    moveRules: null,
+const localSession: LocalSession = {
+    moveRules: [],
 }
-const session = {
+const session: ServerState = {
     status: STATUS.empty,
     sessionOwner: null,
     availableSlots: [...PLAYER_IDS],
@@ -65,43 +69,45 @@ const session = {
     setup: null,
 }
 
-app.get('/', (res) => {
-    res.sendFile(__dirname + '../public/index.html');
+app.use(express.static(__dirname));
+app.get('/', (req: any, res: any) => { // TODO: see if you can handle express and type the heck out of this too.
+    console.info('GET / from', req.ip);
+    res.sendFile(__dirname + 'public/index.html');
 });
 
 app.listen(httpPort, () => {
     console.info(`Server running at http://localhost:${httpPort}`);
 });
 
-const socketClients = [];
+const socketClients: any[] = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 
 socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
     socketClients.push(ws);
     console.log('New client connection or page refresh');
-    const sendAll = (message) => {
+    const sendAll = (message: WssMessage) => {
         socketClients.forEach(client => {
             client.send(JSON.stringify(message));
         });
     }
 
-    const send = (message) => {
+    const send = (message: WssMessage) => {
         ws.send(JSON.stringify(message));
     }
 
-    ws.on(WS_SIGNAL.message, function incoming(message) {
+    ws.on(WS_SIGNAL.message, function incoming(message: string) {
         try {
-            const { playerId, action, details } = JSON.parse(message);
+            const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
             console.info(
                 '%s -> %s %s',
                 playerId ?? '?',
-                getKey(ACTION, action) ?? '?',
+                action ?? '?',
                 details ? `& ${JSON.stringify(details)}` : ''
             );
 
             const player = playerId ? session.players[playerId] : null;
-
+            console.debug('Player:', player);
             if (action == ACTION.inquire) {
                 send(session);
             }
@@ -112,7 +118,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
                 if (isEnrolled) {
                     sendAll(session);
                 } else {
-                    send({ error: 'Cannot enroll' });
+                    console.debug('Enrollment failed:', playerId);
                 }
             }
 
@@ -122,7 +128,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
                 session.players = assignTurnOrder(cc(session.players));
                 session.setup = generateSetup(cc(BARRIER_CHECKS));
                 localSession.moveRules = filterAllowedMoves(
-                    cc(MOVE_RULES),
+                    cc(DEFAULT_MOVE_RULES),
                     cc(BARRIER_CHECKS),
                     cc(session.setup.barriers)
                 );
@@ -154,7 +160,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
     });
 });
 
-function processPlayer(playerId) {
+function processPlayer(playerId: PlayerId) {
 
     if (session.status === STATUS.started || session.status === STATUS.full) {
         console.log(`${playerId} cannot enroll`);
@@ -186,12 +192,8 @@ function processPlayer(playerId) {
     return true;
 }
 
-function getKey(object, value) {
-    return Object.keys(object).find(key => object[key] === value);
-}
-
-function assignTurnOrder(playersObject) {
-    const players = Object.keys(playersObject);
+function assignTurnOrder(playersObject: Record<PlayerId, PlayerState>) {
+    const players = Object.keys(playersObject) as PlayerId[];
     let tokenCount = players.length;
 
     while (tokenCount > 0) {
@@ -204,22 +206,24 @@ function assignTurnOrder(playersObject) {
     return passActiveStatus(playersObject);
 }
 
-function passActiveStatus(playersObject) {
+function passActiveStatus(playersObject: Record<PlayerId, PlayerState>) {
     const playerCount = Object.keys(playersObject).length;
     let nextToken = 1;
 
-    for (const playerId in playersObject) {
+    for (const id in playersObject) {
+        const playerId = id as PlayerId;
 
         if (playersObject[playerId].isActive) {
             nextToken = playersObject[playerId].turnOrder === playerCount
-                ? 1
-                : playersObject[playerId].turnOrder + 1;
+            ? 1
+            : playersObject[playerId].turnOrder + 1;
 
             playersObject[playerId].isActive = false;
         }
     }
 
-    for (const playerId in playersObject) {
+    for (const id in playersObject) {
+        const playerId = id as PlayerId;
 
         if (playersObject[playerId].turnOrder === nextToken) {
             playersObject[playerId].isActive = true;
@@ -229,7 +233,7 @@ function passActiveStatus(playersObject) {
     return playersObject;
 }
 
-function generateSetup(barrierChecks) {
+function generateSetup(barrierChecks: BarrierChecks) {
     const setup = {
         barriers: determineBarriers(barrierChecks),
         // settlements: determineSettlements(), // Collection<hexId, settlementId>
@@ -238,19 +242,19 @@ function generateSetup(barrierChecks) {
     return setup;
 }
 
-function determineBarriers(barrierChecks) {
+function determineBarriers(barrierChecks: BarrierChecks) {
 
-    const b1 = Math.ceil(Math.random() * 12);
-    let b2 = null;
+    const b1 = Math.ceil(Math.random() * 12) as BarrierId;
+    let b2: BarrierId = null;
 
     while (false === checkBarrierCompatibility(barrierChecks, b1, b2)) {
-        b2 = Math.ceil(Math.random() * 12);
+        b2 = Math.ceil(Math.random() * 12)  as BarrierId;
     }
 
     return [b1,b2];
 }
 
-function checkBarrierCompatibility(barrierChecks, b1, b2) {
+function checkBarrierCompatibility(barrierChecks: BarrierChecks, b1: BarrierId, b2: BarrierId) {
 
     if (!b2 || b1 === b2) {
         return false
@@ -265,40 +269,44 @@ function checkBarrierCompatibility(barrierChecks, b1, b2) {
     return true
 }
 
-function filterAllowedMoves(defaultMoves, barrierChecks, barrierIds) {
+function filterAllowedMoves(defaultMoves: DefaultMoveRule[], barrierChecks: BarrierChecks, barrierIds: BarrierId[]) {
 
-    const filteredMoves = [];
+    const filteredMoves: ProcessedMoveRule[] = [];
 
-    defaultMoves.forEach(rule => {
+    defaultMoves.forEach(moveRule => {
 
         barrierIds.forEach(barrierId => {
 
-            if (rule.barrierChecks.find(id => id === barrierId)) {
+            if (moveRule.blockedBy.find(id => id === barrierId)) {
                 const neighborHex = barrierChecks[barrierId].between
-                    .filter(hexId => hexId != rule.from)[0];
+                    .filter(hexId => hexId != moveRule.from)[0];
 
-                    rule.allowed = rule.allowed
+                    moveRule.allowed = moveRule.allowed
                     .filter(hexId => hexId != neighborHex);
             }
         });
 
         filteredMoves.push({
-            from: rule.from,
-            allowed: rule.allowed,
+            from: moveRule.from,
+            allowed: moveRule.allowed,
         });
     });
 
     return filteredMoves;
 }
 
-function hydrateMoveRules(playersObject, moveRules) {
+function hydrateMoveRules(
+    playersObject: Record<PlayerId, PlayerState>,
+    moveRules: ProcessedMoveRule[],
+) {
 
     const { from, allowed } = moveRules[0];
 
     for (const id in playersObject) {
+        const playerId = id as PlayerId;
 
-        playersObject[id].location = {hexId: from, position: null};
-        playersObject[id].allowedMoves = allowed;
+        playersObject[playerId].location = {hexId: from, position: null};
+        playersObject[playerId].allowedMoves = allowed;
     }
 
     return playersObject;
@@ -309,6 +317,6 @@ function hydrateMoveRules(playersObject, moveRules) {
  * !! only for data objects containing scalars and arrays of scalars !!
  * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.;
  */
-function cc(obj) {
+function cc(obj: unknown) {
     return JSON.parse(JSON.stringify(obj));
 }

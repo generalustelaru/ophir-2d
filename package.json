@@ -6,7 +6,7 @@
   "main": "main.ts",
   "scripts": {
     "build_client": "webpack --config webpack.config.cjs --env isServer=false",
-    "build_server": "webpack --config webpack.config.cjs --env isServer=false",
+    "build_server": "webpack --config webpack.config.cjs --env isServer=true",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
