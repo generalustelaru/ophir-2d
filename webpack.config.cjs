@@ -3,20 +3,26 @@ const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = (env, argv) => {
-    const label = env.isServer === 'true' ? 'server' : 'client';
-    console.info(`Bundling ${label} code...`);
+    const isServer = env.isServer === 'true';
+    const label = isServer ? 'server' : 'client';
 
+    console.info(`Bundling ${label} code...`);
     return {
         entry: {
             [label]: `./src/${label}/main.ts`,
         },
+        target: isServer ? 'node' : 'web',
         optimization: {
             minimize: true,
             minimizer: [new TerserPlugin()],
         },
+        externals: isServer ? {
+            express: 'commonjs express',
+            ws: 'commonjs ws',
+        } : {},
         output: {
             path: path.resolve(__dirname, 'public'),
-            filename: '[name].js',
+            filename: isServer ? 'server.cjs' : 'client.js',
         },
         resolve: {
             extensions: ['.ts', '.js', '.json'],
@@ -32,5 +38,3 @@ module.exports = (env, argv) => {
         },
     }
 };
-
-// TODO: How do I split configuration between client and server?

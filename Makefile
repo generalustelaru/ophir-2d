@@ -2,16 +2,12 @@ app:
 	npm run build_client
 
 end:
-	# npm run build_server
+	npm run build_server
 
 all:
 	npm run build_client
-	# npm run build_server
-	node server.js
+	npm run build_server
+	node public/server.cjs
 
 serve:
-	node server.js
-
-start:
-	npm run build
-	node server.js
+	node public/server.cjs

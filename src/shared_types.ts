@@ -18,7 +18,7 @@ export type ServerState = {
     status: string,
     sessionOwner: string | null,
     availableSlots: string[],
-    players: Record<PlayerId, (PlayerState)>,
+    players: Record<string|PlayerId, (PlayerState)>,
     setup: {barriers: BarrierId[]}
 }
 
