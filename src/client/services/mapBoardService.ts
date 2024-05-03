@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { PlayerId, InfoEventPayload } from '../../types';
+import { PlayerId, InfoEventPayload } from '../../shared_types';
 import { Service, ServiceInterface} from "./service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';

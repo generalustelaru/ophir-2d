@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { ActionEventPayload, PlayerShipInterface } from '../../types';
+import { ActionEventPayload, PlayerShipInterface } from '../../shared_types';
 import state from '../state';
 import constants from '../../constants';
 import { Ship } from './ship';

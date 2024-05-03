@@ -1,4 +1,4 @@
-import { PlayerId, ActionEventPayload } from '../../types.js';
+import { PlayerId, ActionEventPayload } from '../../shared_types.js';
 import { Service, ServiceInterface } from './service';
 import state from '../state';
 import constants from '../../constants';

@@ -3,6 +3,7 @@ import Konva from 'konva';
 
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
+export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type PlayerState = {
     turnOrder: number | null,
     isActive: boolean,
@@ -61,3 +62,10 @@ export interface PlayerShipInterface {
     switchControl: (isActivePlayer: boolean) => void,
     getElement: () => Konva.Rect,
 };
+
+export type WebsocketClientMessage = {
+    playerId: PlayerId,
+    action: string,
+    details: MoveActionDetails | null,
+
+}

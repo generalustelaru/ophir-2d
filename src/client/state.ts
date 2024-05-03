@@ -1,5 +1,5 @@
 
-import { State } from '../types';
+import { State } from '../shared_types';
 
 const state: State = {
     localPlayerId: null,
