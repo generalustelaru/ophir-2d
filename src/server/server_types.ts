@@ -1,6 +1,6 @@
-import { ServerState, BarrierId, HexId, PlayerId, PlayerState} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, PlayerState} from '../shared_types';
 
-export type WssMessage = ServerState | { error: string};
+export type WssMessage = SharedState | { error: string};
 export type DefaultMoveRule = {
     from: HexId;
     allowed: HexId[];
@@ -11,8 +11,13 @@ export type ProcessedMoveRule = {
     allowed: HexId[];
 }
 
-export type LocalSession = {
+export type PrivateState = {
     moveRules: ProcessedMoveRule[],
+}
+
+export type StateBundle = {
+    sharedState: SharedState,
+    privateState: PrivateState,
 }
 
 export type BarrierCheck = {

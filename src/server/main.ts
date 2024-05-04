@@ -4,21 +4,21 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import constants from '../constants';
 import serverConstants from './server_constants';
-import { PlayerStates, PlayerId, ServerState, WebsocketClientMessage } from '../shared_types';
-import { LocalSession, WssMessage } from './server_types';
-import { GameSetupService } from './services/gameSetupService';
-const app = express();
+import { PlayerStates, PlayerId, SharedState, WebsocketClientMessage } from '../shared_types';
+import { PrivateState, WssMessage, StateBundle } from './server_types';
+import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
+import { ToolService, ToolInterface } from './services/toolService';
 const httpPort = 3000;
 const wsPort = 8080;
 
 const { ACTION, STATUS } = constants;
-const { DEFAULT_MOVE_RULES, BARRIER_CHECKS, PLAYER_IDS, WS_SIGNAL } = serverConstants;
-app.use(express.static('public'));
+const { PLAYER_IDS, WS_SIGNAL, PLAYER_STATE } = serverConstants;
 
-const localSession: LocalSession = {
+const privateState: PrivateState = {
     moveRules: [],
 }
-const session: ServerState = {
+
+const sharedState: SharedState = {
     status: STATUS.empty,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
@@ -26,7 +26,10 @@ const session: ServerState = {
     setup: null,
 }
 
+const app = express();
+app.use(express.static('public'));
 app.use(express.static(__dirname));
+
 app.get('/', (req: Request, res: Response) => {
     console.info('GET / from', req.ip);
     res.sendFile(__dirname + 'public/index.html');
@@ -38,7 +41,8 @@ app.listen(httpPort, () => {
 
 const socketClients: any[] = [];
 const socketServer = new WebSocketServer({ port: wsPort });
-const setupService = new GameSetupService(session);
+const setupService: GameSetupInterface = GameSetupService.getInstance();
+const tools: ToolInterface = ToolService.getInstance();
 
 socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
@@ -71,58 +75,51 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
         );
 
         if (action === ACTION.inquire) {
-            send(session);
+            send(sharedState);
         }
 
         if (action === ACTION.enroll) {
-            const isEnrolled = setupService.processPlayer(playerId);
+            const isEnrolled = processPlayer(playerId);
 
             if (isEnrolled) {
-                sendAll(session);
+                sendAll(sharedState);
             } else {
                 console.debug('Enrollment failed:', playerId);
             }
         }
 
         // TODO: Move all calls into gameSetupService and expose a single method to handle setup and players session hydration
-        if (action === ACTION.start && isRecord(session.players)) {
-            session.status = STATUS.started;
-            session.availableSlots = [];
-            session.players = setupService.assignTurnOrder(cc(session.players))
-            session.players = passActiveStatus(cc(session.players));
-            session.setup = setupService.determineBoardPieces();
-            localSession.moveRules = setupService.filterAllowedMoves(
-                cc(DEFAULT_MOVE_RULES),
-                cc(BARRIER_CHECKS),
-                cc(session.setup.barriers)
-            );
-            session.players = setupService.hydrateMoveRules(
-                cc(session.players),
-                cc(localSession.moveRules)
-            );
+        if (action === ACTION.start && tools.isRecord(sharedState.players)) {
+            sharedState.status = STATUS.started;
+            sharedState.availableSlots = [];
 
-            sendAll(session);
+            const bundle: StateBundle = setupService.produceGameData(tools.cc(sharedState));
+            sharedState.players = bundle.sharedState.players;
+            sharedState.setup = bundle.sharedState.setup;
+            privateState.moveRules = bundle.privateState.moveRules;
+            sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+
+            sendAll(sharedState);
         }
 
         if (action === ACTION.move) {
-            const player = session.players[playerId];
+            const player = sharedState.players[playerId];
             const destination = details.hexId;
-            const allowed = localSession.moveRules.find(
+            const allowed = privateState.moveRules.find(
                 rule => rule.from === player.location.hexId
             ).allowed;
 
             if (allowed.includes(destination)) {
                 player.location = { hexId: destination, position: details.position };
-                player.allowedMoves = localSession.moveRules.find(
+                player.allowedMoves = privateState.moveRules.find(
                     rule => rule.from === destination
                 ).allowed;
-                session.players = passActiveStatus(cc(session.players));
-                sendAll(session);
+                sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+                sendAll(sharedState);
             } else {
                 send({ error: 'Illegal move!' });
             }
         }
-
     });
 });
 
@@ -155,17 +152,40 @@ function passActiveStatus<S extends PlayerStates>(states: S): S {
     return states;
 }
 
-function isRecord (obj: object): boolean {
+function processPlayer(playerId: PlayerId): boolean {
 
-    return obj.constructor === Object && Object.keys(obj).length > 0;
-}
-/**
- * Deep copy a data object
- * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.
- *
- * @param obj - JSON-compatible object to copy
- */
-function cc <O extends object> (obj: O): O {
+    if (sharedState.status === STATUS.started || sharedState.status === STATUS.full) {
+        console.log(`${playerId} cannot enroll`);
 
-    return JSON.parse(JSON.stringify(obj));
+        return false;
+    }
+
+    if (false == PLAYER_IDS.includes(playerId)) {
+        console.log(`${playerId} is not a valid player`);
+
+        return false;
+    }
+
+    sharedState.availableSlots = sharedState.availableSlots.filter(slot => slot != playerId);
+
+    if (sharedState.players === null) {
+        sharedState.players = { [playerId]: { ...PLAYER_STATE } } as PlayerStates;
+    } else {
+        sharedState.players[playerId] = { ...PLAYER_STATE };
+    }
+
+    console.log(`${playerId} enrolled`);
+
+    if (sharedState.sessionOwner === null) {
+        sharedState.status = STATUS.created;
+        sharedState.sessionOwner = playerId;
+        console.log(`${playerId} is the session owner`);
+    }
+
+    if (sharedState.availableSlots.length === 0) {
+        sharedState.status = STATUS.full;
+        console.log(`Session is full`);
+    }
+
+    return true;
 }
