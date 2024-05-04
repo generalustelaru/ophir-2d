@@ -41,15 +41,17 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
     drawBoard = () => {
         const players = state.server.players;
+        const localPlayer = players[state.localPlayerId];
         //MARK: Map hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
+            const localPlayerHere = localPlayer?.location.hexId == hexItem.id;
+
             const hexElement = new MapHex(
                 this.center,
                 hexItem.id,
                 hexItem.x,
                 hexItem.y,
-                players[state.localPlayerId]?.location.hexId == hexItem.id
-                && players[state.localPlayerId].isActive
+                localPlayerHere && localPlayer.isActive
                     ? COLOR.illegal
                     : COLOR.default
             ) as Konva.RegularPolygon;
@@ -88,18 +90,18 @@ export class MapBoardService extends Service implements MapBoardInterface {
         }
 
         //MARK: Local ship
-        const localPlayer = players[state.localPlayerId];
         const shipPosition = localPlayer.location.position ?? this.center;
-        state.konva.localShip.object = new PlayerShip(
+        const playerShip = new PlayerShip(
             this.stage,
             this.layer,
             shipPosition.x,
             shipPosition.y,
             COLOR[state.localPlayerId],
         );
-        state.konva.localShip.object.switchControl(localPlayer.isActive);
+        playerShip.switchControl(localPlayer.isActive);
 
-        this.layer.add(state.konva.localShip.object.getElement());
+        this.layer.add(playerShip.getElement());
+        state.konva.localShip.object = playerShip;
     }
 
     updateBoard = () => {
@@ -127,7 +129,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
                 ship.y(shipPosition.y);
                 this.layer.batchDraw();
             } else {
-                const payload: InfoEventPayload = { text: `${opponentId} has left the game` };
+                const payload: InfoEventPayload = {
+                    text: `${opponentId} has left the game`
+                };
                 this.broadcastEvent(EVENT.info, payload);
                 ship.destroy();
             }

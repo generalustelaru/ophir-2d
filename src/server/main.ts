@@ -11,7 +11,7 @@ const app = express();
 const httpPort = 3000;
 const wsPort = 8080;
 
-const { ACTION, STATUS } = constants;
+const { ACTION, STATUS, COLOR } = constants;
 
 app.use(express.static('public'));
 
@@ -101,11 +101,18 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
     ws.on(WS_SIGNAL.message, function incoming(message: string) {
 
         const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
+        const colorized = {
+            playerPurple: '\x1b[35mplayerPurple\x1b[0m',
+            playerYellow: '\x1b[33mplayerYellow\x1b[0m',
+            playerRed: '\x1b[31mplayerRed\x1b[0m',
+            playerGreen: '\x1b[32mplayerGreen\x1b[0m',
+        }
+        const colorizedId = playerId ? colorized[playerId] : '?';
         console.info(
-            '\x1b[90m%s -> %s %s\x1b[0m',
-            playerId ?? '?',
-            action ?? '?',
-            details ? `& ${JSON.stringify(details)}` : '',
+            '%s -> %s %s',
+            colorizedId,
+            `\x1b[37;1m${action}\x1b[0m` ?? '?',
+            details ? `-> ${JSON.stringify(details)}` : '',
         );
 
         if (action === ACTION.inquire) {

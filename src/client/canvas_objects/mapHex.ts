@@ -1,13 +1,14 @@
 
 import Konva from 'konva';
+import { HexId, HexaColor } from '../../shared_types';
 
 export class MapHex {
     constructor(
         center: {x: number, y: number},
-        name: string,
+        name: HexId,
         offsetX:number,
         offsetY:number,
-        fill:string
+        fill: HexaColor
     ) {
 
         return new Konva.RegularPolygon({
