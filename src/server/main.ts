@@ -88,7 +88,6 @@ const socketServer = new WebSocketServer({ port: wsPort });
 socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
     socketClients.push(ws);
-    console.log('New client connection or page refresh');
     const sendAll = (message: WssMessage) => {
         socketClients.forEach(client => {
             client.send(JSON.stringify(message));
@@ -103,10 +102,10 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
         const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
         console.info(
-            '%s -> %s %s',
+            '\x1b[90m%s -> %s %s\x1b[0m',
             playerId ?? '?',
             action ?? '?',
-            details ? `& ${JSON.stringify(details)}` : ''
+            details ? `& ${JSON.stringify(details)}` : '',
         );
 
         if (action === ACTION.inquire) {
