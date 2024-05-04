@@ -1,7 +1,7 @@
 
-import { State } from '../shared_types';
+import { ClientState } from '../shared_types';
 
-const state: State = {
+const state: ClientState = {
     localPlayerId: null,
     isBoardDrawn: false,
     server: null,

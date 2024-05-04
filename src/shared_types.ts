@@ -7,9 +7,10 @@ export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLef
 export type HexOffset = { id: HexId, x: number, y: number };
 export type Action = "inquire" | "enroll" | "start" | "move" | "refresh";
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
-export type SessionStatus = "empty" | "created" | "full" | "started";
+export type GameStatus = "empty" | "created" | "full" | "started";
 export type HoverHint = "valid" | "home" | "illegal";
 export type HexaColor = `#${string}`;
+
 export type PlayerState = {
     turnOrder: number | null,
     isActive: boolean,
@@ -19,9 +20,11 @@ export type PlayerState = {
     },
     allowedMoves: HexId[],
 }
+
 export type PlayerStates = Record<PlayerId, (PlayerState)>;
-export type ServerState = {
-    status: SessionStatus,
+
+export type SharedState = {
+    status: GameStatus,
     sessionOwner: PlayerId | null,
     availableSlots: PlayerId[],
     players: PlayerStates | null,
@@ -32,10 +35,10 @@ export type GameSetup = {
     barriers: BarrierId[],
 }
 
-export type State = {
+export type ClientState = {
     localPlayerId: PlayerId | null,
     isBoardDrawn: boolean,
-    server: ServerState | null,
+    server: SharedState | null,
     konva: {
         localShip: {
             object: PlayerShipInterface | null
@@ -88,7 +91,7 @@ export type ConstantsCollection = {
     CONNECTION: {
         wsAddress: string
     },
-    STATUS: Record<SessionStatus, SessionStatus>,
+    STATUS: Record<GameStatus, GameStatus>,
     MOVE_HINT: Record<HoverHint, HoverHint>,
     COLOR: Record<string, HexaColor>,
     HEX_OFFSET_DATA: HexOffset[],

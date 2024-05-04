@@ -1,59 +1,46 @@
 
-import { PlayerId, PlayerStates, ServerState, GameSetup, BarrierId } from '../../shared_types';
-import { BarrierChecks, DefaultMoveRule, ProcessedMoveRule  } from '../server_types';
+import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId } from '../../shared_types';
+import { ProcessedMoveRule, StateBundle } from '../server_types';
 import constants from '../../constants';
 import serverConstants from '../server_constants';
+import { Service, ServiceInterface } from './service';
 
-const { STATUS } = constants;
-const { PLAYER_IDS, PLAYER_STATE, BARRIER_CHECKS } = serverConstants;
-export class GameSetupService { // TODO: Create a singleton parent class like on the client for this.
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 
-    session: ServerState;
-    constructor(
-        session: ServerState
-    ) {
-        this.session = session;
+export interface GameSetupInterface extends ServiceInterface {
+    produceGameData: (state: SharedState) => StateBundle,
+}
+
+export class GameSetupService extends Service implements GameSetupInterface {
+
+    constructor() {
+        super();
     }
 
-    public processPlayer(playerId: PlayerId): boolean {
 
-        if (this.session.status === STATUS.started || this.session.status === STATUS.full) {
-            console.log(`${playerId} cannot enroll`);
+    public produceGameData (state: SharedState): StateBundle {
+        // state.status = STATUS.setup; TODO: for when players will need to draft their characters
+        state.players = this.assignTurnOrder(state.players);
+        state.setup = this.determineBoardPieces();
 
-            return false;
+        const privateState = {
+            moveRules: this.produceMoveRules(state.setup.barriers),
         }
 
-        if (false == PLAYER_IDS.includes(playerId)) {
-            console.log(`${playerId} is not a valid player`);
+        state.players = this.assignTurnOneRules(
+            state.players,
+            privateState.moveRules
+        );
 
-            return false;
+        const bundle: StateBundle = {
+            sharedState: state,
+            privateState: privateState,
         }
 
-        this.session.availableSlots = this.session.availableSlots.filter(slot => slot != playerId);
+        return bundle;
+    };
 
-        if (this.session.players === null) {
-            this.session.players = { [playerId]: { ...PLAYER_STATE } } as PlayerStates;
-        } else {
-            this.session.players[playerId] = { ...PLAYER_STATE };
-        }
-
-        console.log(`${playerId} enrolled`);
-
-        if (this.session.sessionOwner === null) {
-            this.session.status = STATUS.created;
-            this.session.sessionOwner = playerId;
-            console.log(`${playerId} is the session owner`);
-        }
-
-        if (this.session.availableSlots.length === 0) {
-            this.session.status = STATUS.full;
-            console.log(`Session is full`);
-        }
-
-        return true;
-    }
-
-    public assignTurnOrder (states: PlayerStates): PlayerStates {
+    private assignTurnOrder (states: PlayerStates): PlayerStates {
         const playerIds = Object.keys(states) as PlayerId[];
         let tokenCount = playerIds.length;
 
@@ -67,36 +54,34 @@ export class GameSetupService { // TODO: Create a singleton parent class like on
         return states;
     }
 
-    public determineBoardPieces(): GameSetup {
+    private determineBoardPieces (): GameSetup {
         const setup = {
-            barriers: this.determineBarriers(BARRIER_CHECKS),
+            barriers: this.determineBarriers(),
             //TODO: settlements: determineSettlements(), // Collection<hexId, settlementId> // Settlements should be implemented after the influence and favor mechanics are in place
         }
 
         return setup;
     }
 
-    private determineBarriers (barrierChecks: BarrierChecks): BarrierId[] {
+    private determineBarriers (): BarrierId[] {
 
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
         let b2: BarrierId = null;
 
-        while (false === this.isArrangementLegal(barrierChecks, b1, b2)) {
+        while (false === this.isArrangementLegal(b1, b2)) {
             b2 = Math.ceil(Math.random() * 12) as BarrierId;
         }
 
         return [b1, b2];
     }
 
-    private isArrangementLegal (
-        barrierChecks: BarrierChecks, b1: BarrierId, b2: BarrierId
-    ): boolean {
+    private isArrangementLegal (b1: BarrierId, b2: BarrierId): boolean {
 
         if (!b2 || b1 === b2) {
             return false;
         }
 
-        const check = barrierChecks[b1];
+        const check = BARRIER_CHECKS[b1];
 
         if (check.incompatible.find(id => id === b2)) {
             return false;
@@ -105,11 +90,10 @@ export class GameSetupService { // TODO: Create a singleton parent class like on
         return true;
     }
 
-    // TODO:switch to calling filterAllowedMoves() here when the setup is delivered from this class
-    public hydrateMoveRules (
-        states: PlayerStates, moveRules: ProcessedMoveRule[]
+    private assignTurnOneRules (
+        states: PlayerStates, rules: ProcessedMoveRule[]
     ): PlayerStates {
-        const initialPlacement = moveRules[0];
+        const initialPlacement = rules[0];
 
         for (const id in states) {
             const playerId = id as PlayerId;
@@ -117,26 +101,23 @@ export class GameSetupService { // TODO: Create a singleton parent class like on
 
             player.location = {
                 hexId: initialPlacement.from,
-                position: null};
+                position: null
+            };
             player.allowedMoves = initialPlacement.allowed;
         }
 
         return states;
     }
 
-    public filterAllowedMoves ( // TODO: make this a private method
-        defaultMoves: DefaultMoveRule[],
-        barrierChecks: BarrierChecks,
-        barrierIds: BarrierId[]
-    ): ProcessedMoveRule[] {
-        const filteredMoves: ProcessedMoveRule[] = [];
+    private produceMoveRules (barrierIds: BarrierId[]): ProcessedMoveRule[] {
+        const rules: ProcessedMoveRule[] = [];
 
-        defaultMoves.forEach(moveRule => {
+        DEFAULT_MOVE_RULES.forEach(moveRule => {
 
             barrierIds.forEach(barrierId => {
 
                 if (moveRule.blockedBy.find(id => id === barrierId)) {
-                    const neighborHex = barrierChecks[barrierId].between
+                    const neighborHex = BARRIER_CHECKS[barrierId].between
                         .filter(hexId => hexId != moveRule.from)[0];
 
                     moveRule.allowed = moveRule.allowed
@@ -144,12 +125,12 @@ export class GameSetupService { // TODO: Create a singleton parent class like on
                 }
             });
 
-            filteredMoves.push({
+            rules.push({
                 from: moveRule.from,
                 allowed: moveRule.allowed,
             });
         });
 
-        return filteredMoves;
+        return rules;
     }
 }
