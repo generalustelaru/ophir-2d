@@ -32,11 +32,13 @@ export class CommunicationService extends Service implements CommunicationInterf
             const data = JSON.parse(event.data);
 
             if (data.error) {
-                console.error(data.error);
+                console.error('<-', data.error);
                 this.broadcastEvent(EVENT.error, {text: data.error});
 
                 return;
             }
+
+            console.debug('<-', data);
 
             state.server = data;
 
@@ -58,6 +60,8 @@ export class CommunicationService extends Service implements CommunicationInterf
             action,
             details,
         };
+
+        console.debug('->', message);
 
         this.socket.send(JSON.stringify(message));
     }

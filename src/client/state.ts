@@ -9,7 +9,7 @@ const state: State = {
         localShip: {
             object: null,
             homePosition: { x: 0, y: 0 },
-            hoverStatus: "",
+            hoverStatus: null,
         },
         opponentShips: [],
         hexes: [],

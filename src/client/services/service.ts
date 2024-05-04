@@ -10,16 +10,14 @@ export interface ServiceInterface {
 export class Service implements ServiceInterface {
     static instance: Service | null = null;
 
-    broadcastEvent = (eventType: CustomEventTitle, detail: EventPayload = null) => {
-        window.dispatchEvent(
-            new CustomEvent(
-                eventType,
-                { detail: detail }
-            )
-        );
+    public broadcastEvent = (
+        eventType: CustomEventTitle,
+        detail: EventPayload = null
+    ): void => {
+        window.dispatchEvent(new CustomEvent(eventType, { detail: detail }));
     }
 
-    static getInstance<I extends ServiceInterface>(): I {
+    public static getInstance<I extends ServiceInterface>(): I {
 
         if(!this.instance) {
             this.instance = new this();

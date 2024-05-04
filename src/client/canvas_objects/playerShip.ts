@@ -9,6 +9,12 @@ export class PlayerShip implements PlayerShipInterface {
 
     ship: Konva.Rect;
 
+    public switchControl = (isActivePlayer: boolean) => {
+        this.ship.draggable(isActivePlayer);
+    }
+
+    public getElement = () => this.ship;
+
     constructor (
         stage: Konva.Stage,
         layer: Konva.Layer,
@@ -82,29 +88,27 @@ export class PlayerShip implements PlayerShipInterface {
                         .fill(COLOR.illegal);
                     this.ship.x(positionX);
                     this.ship.y(positionY);
-                    break;
+                break;
                 case MOVE_HINT.valid:
                     targetHex.fill(COLOR.anchored);
-                    const payload: ActionEventPayload = {
+                    this.broadcastAction({
                         action: ACTION.move,
                         details: {
                             hexId: targetHex.attrs.id,
                             position: { x: this.ship.x(), y: this.ship.y() }
                         }
-                    };
-                    window.dispatchEvent(new CustomEvent(
-                        EVENT.action,
-                        { detail: payload }
-                    ));
+                    });
+                break;
             }
 
             layer.batchDraw();
         });
     }
 
-    switchControl = (isActivePlayer: boolean) => {
-        this.ship.draggable(isActivePlayer);
+    private broadcastAction = (detail: ActionEventPayload = null) => {
+        window.dispatchEvent(new CustomEvent(
+            EVENT.action,
+            { detail: detail }
+        ));
     }
-
-    getElement = () => this.ship;
 }
