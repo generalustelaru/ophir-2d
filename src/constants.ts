@@ -7,7 +7,7 @@ const constants: ConstantsCollection = {
     },
     STATUS: {
         empty: "empty",
-        lobby: "lobby",
+        created: "created",
         full: "full",
         started: "started"
     },

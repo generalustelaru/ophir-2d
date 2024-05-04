@@ -1,13 +1,13 @@
 
 import Konva from 'konva';
-
+// TODO: Segregate client-only types to a separate file
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type HexOffset = { id: HexId, x: number, y: number };
 export type Action = "inquire" | "enroll" | "start" | "move" | "refresh";
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
-export type SessionStatus = "empty" | "lobby" | "full" | "started";
+export type SessionStatus = "empty" | "created" | "full" | "started";
 export type HoverHint = "valid" | "home" | "illegal";
 export type HexaColor = `#${string}`;
 export type PlayerState = {
@@ -19,13 +19,17 @@ export type PlayerState = {
     },
     allowedMoves: HexId[],
 }
-
+export type PlayerStates = Record<PlayerId, (PlayerState)>;
 export type ServerState = {
     status: SessionStatus,
     sessionOwner: PlayerId | null,
     availableSlots: PlayerId[],
-    players: Record<string|PlayerId, (PlayerState)>,
-    setup: {barriers: BarrierId[]}
+    players: PlayerStates | null,
+    setup: GameSetup | null,
+}
+
+export type GameSetup = {
+    barriers: BarrierId[],
 }
 
 export type State = {
@@ -36,7 +40,7 @@ export type State = {
         localShip: {
             object: PlayerShipInterface | null
             homePosition: { x: number, y: number }
-            hoverStatus: string
+            hoverStatus: HoverHint,
         },
         opponentShips: Konva.Rect[],
         hexes: Konva.RegularPolygon[],
@@ -45,6 +49,10 @@ export type State = {
 
 export type InfoEventPayload = {
     text: string,
+};
+
+export type ErrorEventPayload = {
+    error: string,
 };
 
 export type ActionEventPayload = {

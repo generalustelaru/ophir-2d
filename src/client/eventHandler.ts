@@ -1,4 +1,4 @@
-import { InfoEventPayload, ActionEventPayload } from "../shared_types";
+import { InfoEventPayload, ActionEventPayload, ErrorEventPayload} from "../shared_types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
 import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
@@ -21,18 +21,22 @@ export class EventHandler {
         window.addEventListener(
             EVENT.action as any,
             (event) => {
-                const actionEvent: ActionEventPayload = event.detail;
+                const payload: ActionEventPayload = event.detail;
                 this.commService.sendMessage(
-                    actionEvent.action,
-                    actionEvent.details
+                    payload.action,
+                    payload.details
                 )
             },
         );
 
         // TODO: Update UI on error
         window.addEventListener(
-            EVENT.error,
-            () => console.error('Something went wrong :('),
+            EVENT.error as any,
+            (event) => {
+                const payload: ErrorEventPayload = event.detail;
+                console.error(payload.error);
+                alert(payload.error);
+            },
         );
 
         // Get server data on connection
@@ -59,8 +63,8 @@ export class EventHandler {
         window.addEventListener(
             EVENT.info as any,
             (event) => {
-                const infoEvent: InfoEventPayload = event.detail;
-                this.uiService.setInfo(infoEvent.text)
+                const payload: InfoEventPayload = event.detail;
+                this.uiService.setInfo(payload.text)
             }
         );
     }

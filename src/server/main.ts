@@ -3,8 +3,10 @@ import express, { Request, Response } from 'express';
 
 import { WebSocketServer } from 'ws';
 import constants from '../constants';
-import { PlayerState, PlayerId, ServerState, WebsocketClientMessage, BarrierId } from '../shared_types';
-import { LocalSession, BarrierChecks, DefaultMoveRule, ProcessedMoveRule, WssMessage } from './server_types';
+import { GameSetup, PlayerState, PlayerStates, PlayerId,
+    ServerState, WebsocketClientMessage, BarrierId } from '../shared_types';
+import { LocalSession, BarrierChecks,
+    DefaultMoveRule, ProcessedMoveRule,WssMessage } from './server_types';
 const app = express();
 const httpPort = 3000;
 const wsPort = 8080;
@@ -18,6 +20,7 @@ const WS_SIGNAL = {
     message: 'message',
     close: 'close',
 }
+//TODO: Start splitting the server into modules
 
 const DEFAULT_MOVE_RULES: DefaultMoveRule[] = [
     { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
@@ -51,7 +54,7 @@ const PLAYER_IDS: PlayerId[] = [
     'playerGreen',
 ];
 
-const PLAYER_STATE: PlayerState = {
+const PLAYER_STATE: PlayerState = { // TODO: Implement Influence logic (rolling d6 on moving to an occupied hex). Will require keeping track of last position and plauers' current influence in state.
     turnOrder: null,
     isActive: false,
     location: null,
@@ -65,7 +68,7 @@ const session: ServerState = {
     status: STATUS.empty,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
-    players: {},
+    players: null,
     setup: null,
 }
 
@@ -106,13 +109,11 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             details ? `& ${JSON.stringify(details)}` : ''
         );
 
-        const player = playerId ? session.players[playerId] : null;
-
-        if (action == ACTION.inquire) {
+        if (action === ACTION.inquire) {
             send(session);
         }
 
-        if (action == ACTION.enroll) {
+        if (action === ACTION.enroll) {
             const isEnrolled = processPlayer(playerId);
 
             if (isEnrolled) {
@@ -122,7 +123,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             }
         }
 
-        if (action == ACTION.start) {
+        if (action === ACTION.start && isRecord(session.players)) {
             session.status = STATUS.started;
             session.availableSlots = [];
             session.players = assignTurnOrder(cc(session.players));
@@ -140,7 +141,8 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             sendAll(session);
         }
 
-        if (action == ACTION.move) {
+        if (action === ACTION.move) {
+            const player = session.players[playerId];
             const destination = details.hexId;
             const allowed = localSession.moveRules.find(
                 rule => rule.from === player.location.hexId
@@ -161,7 +163,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
     });
 });
 
-function processPlayer(playerId: PlayerId) {
+function processPlayer(playerId: PlayerId): boolean {
 
     if (session.status === STATUS.started || session.status === STATUS.full) {
         console.log(`${playerId} cannot enroll`);
@@ -176,11 +178,17 @@ function processPlayer(playerId: PlayerId) {
     }
 
     session.availableSlots = session.availableSlots.filter(slot => slot != playerId);
-    session.players[playerId] = { ...PLAYER_STATE };
+
+    if (session.players === null) {
+        session.players = { [playerId]: { ...PLAYER_STATE } } as PlayerStates;
+    } else {
+        session.players[playerId] = { ...PLAYER_STATE };
+    }
+
     console.log(`${playerId} enrolled`);
 
     if (session.sessionOwner === null) {
-        session.status = STATUS.lobby;
+        session.status = STATUS.created;
         session.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
@@ -193,57 +201,59 @@ function processPlayer(playerId: PlayerId) {
     return true;
 }
 
-function assignTurnOrder(playersObject: Record<PlayerId, PlayerState>) {
-    const players = Object.keys(playersObject) as PlayerId[];
-    let tokenCount = players.length;
+function assignTurnOrder<S extends PlayerStates>(states: S): S {
+    const playerIds = Object.keys(states) as PlayerId[];
+    let tokenCount = playerIds.length;
 
     while (tokenCount > 0) {
-        const randomPick = Math.floor(Math.random() * players.length);
-        const playerId = players.splice(randomPick, 1)[0];
-        playersObject[playerId].turnOrder = tokenCount;
+        const randomPick = Math.floor(Math.random() * playerIds.length);
+        const playerId = playerIds.splice(randomPick, 1)[0];
+        states[playerId].turnOrder = tokenCount;
         tokenCount -= 1;
     }
 
-    return passActiveStatus(playersObject);
+    return passActiveStatus(states);
 }
 
-function passActiveStatus(playersObject: Record<PlayerId, PlayerState>) {
-    const playerCount = Object.keys(playersObject).length;
+function passActiveStatus<S extends PlayerStates>(states: S): S {
+    const playerCount = Object.keys(states).length;
     let nextToken = 1;
 
-    for (const id in playersObject) {
+    for (const id in states) {
         const playerId = id as PlayerId;
+        const player = states[playerId];
 
-        if (playersObject[playerId].isActive) {
-            nextToken = playersObject[playerId].turnOrder === playerCount
+        if (player.isActive) {
+            nextToken = player.turnOrder === playerCount
                 ? 1
-                : playersObject[playerId].turnOrder + 1;
+                : player.turnOrder + 1;
 
-            playersObject[playerId].isActive = false;
+            player.isActive = false;
         }
     }
 
-    for (const id in playersObject) {
+    for (const id in states) {
         const playerId = id as PlayerId;
+        const player = states[playerId];
 
-        if (playersObject[playerId].turnOrder === nextToken) {
-            playersObject[playerId].isActive = true;
+        if (player.turnOrder === nextToken) {
+            player.isActive = true;
         }
     }
 
-    return playersObject;
+    return states;
 }
 
-function generateSetup(barrierChecks: BarrierChecks) {
+function generateSetup(barrierChecks: BarrierChecks): GameSetup {
     const setup = {
         barriers: determineBarriers(barrierChecks),
-        // settlements: determineSettlements(), // Collection<hexId, settlementId>
+        //TODO: settlements: determineSettlements(), // Collection<hexId, settlementId> // Settlements should be implemented after the influence and favor mechanics are in place
     }
 
     return setup;
 }
 
-function determineBarriers(barrierChecks: BarrierChecks) {
+function determineBarriers (barrierChecks: BarrierChecks): BarrierId[] {
 
     const b1 = Math.ceil(Math.random() * 12) as BarrierId;
     let b2: BarrierId = null;
@@ -255,7 +265,9 @@ function determineBarriers(barrierChecks: BarrierChecks) {
     return [b1, b2];
 }
 
-function isArrangementLegal(barrierChecks: BarrierChecks, b1: BarrierId, b2: BarrierId) {
+function isArrangementLegal (
+    barrierChecks: BarrierChecks, b1: BarrierId, b2: BarrierId
+): boolean {
 
     if (!b2 || b1 === b2) {
         return false;
@@ -270,8 +282,11 @@ function isArrangementLegal(barrierChecks: BarrierChecks, b1: BarrierId, b2: Bar
     return true;
 }
 
-function filterAllowedMoves(defaultMoves: DefaultMoveRule[], barrierChecks: BarrierChecks, barrierIds: BarrierId[]) {
-
+function filterAllowedMoves (
+    defaultMoves: DefaultMoveRule[],
+    barrierChecks: BarrierChecks,
+    barrierIds: BarrierId[]
+): ProcessedMoveRule[] {
     const filteredMoves: ProcessedMoveRule[] = [];
 
     defaultMoves.forEach(moveRule => {
@@ -296,15 +311,14 @@ function filterAllowedMoves(defaultMoves: DefaultMoveRule[], barrierChecks: Barr
     return filteredMoves;
 }
 
-function hydrateMoveRules(
-    playerStates: Record<PlayerId, PlayerState>,
-    moveRules: ProcessedMoveRule[],
-) {
+function hydrateMoveRules <S extends PlayerStates> (
+    states: S, moveRules: ProcessedMoveRule[]
+): S {
     const initialPlacement = moveRules[0];
 
-    for (const id in playerStates) {
+    for (const id in states) {
         const playerId = id as PlayerId;
-        const player = playerStates[playerId];
+        const player = states[playerId];
 
         player.location = {
             hexId: initialPlacement.from,
@@ -312,14 +326,21 @@ function hydrateMoveRules(
         player.allowedMoves = initialPlacement.allowed;
     }
 
-    return playerStates;
+    return states;
 }
 
+
+function isRecord (obj: object): boolean {
+
+    return obj.constructor === Object && Object.keys(obj).length > 0;
+}
 /**
- * Deep copy an object
- * !! only for data objects containing scalars and arrays of scalars !!
- * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.;
+ * Deep copy a data object
+ * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.
+ *
+ * @param obj - JSON-compatible object to copy
  */
-function cc(obj: unknown) {
+function cc <O extends object> (obj: O): O {
+
     return JSON.parse(JSON.stringify(obj));
 }

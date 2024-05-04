@@ -23,12 +23,15 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.startButton = new Button('startButton', this.processStart);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
-            callback: null as any,
             enable: () => {
                 this.playerColorSelect.element.disabled = false;
                 const players = state.server.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
-                    option.disabled = players[option.value as PlayerId] != null;
+                    switch (true) {
+                        case players && (option.value in players):
+                        case option.value === '': option.disabled = true; break;
+                        default: option.disabled = false; break
+                    }
                 });
             },
 
@@ -36,82 +39,91 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
     }
 
-    processStart = () => {
+    private processStart = (): void => {
         this.startButton.disable();
         const payload: ActionEventPayload = {action: ACTION.start, details: null};
-        this.broadcastEvent(EVENT.action, payload);
+
+        return this.broadcastEvent(EVENT.action, payload);
     }
 
-    processEnroll = () => {
-        const selectedId = this.playerColorSelect.element.value;
+    private processEnroll = (): void => {
+        const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
-            this.setInfo('Please select a color');
-
-            return;
+            return this.setInfo('Please select a color');
         }
 
         if (state.server.availableSlots.includes(selectedId)) {
             state.localPlayerId = selectedId as PlayerId;
             const payload: ActionEventPayload = {action: ACTION.enroll, details: null};
-            this.broadcastEvent(EVENT.action, payload);
-        } else {
-            this.setInfo('This color has just been taken :(');
+
+            return this.broadcastEvent(EVENT.action, payload);
         }
+
+        return this.setInfo('This color has just been taken :(');
     }
 
-    setInfo = (text: string) => {
+    public setInfo (text: string): void {
         const info = document.getElementById('info');
         info.innerHTML = text;
     }
 
-    enableElements = (...handlers: { enable:()=>void }[]) => {
+    private enableElements (...handlers: { enable:()=>void }[]): void {
         handlers.forEach(handler => handler.enable());
     }
 
-    disableAllElements = () => {
+    public disableAllElements = (): void => {
         this.createButton.disable();
         this.joinButton.disable();
         this.startButton.disable();
         this.playerColorSelect.disable();
     }
 
-    updatePreSessionUi() {
+    public updatePreSessionUi = (): void => {
         this.disableAllElements();
+
         switch (state.server.status) {
-            case STATUS.empty:
-                this.enableElements(
-                    this.createButton,
-                    this.playerColorSelect
-                );
-                this.setInfo('You may create the game');
-                break;
-            case STATUS.lobby:
-                if (!state.localPlayerId) {
-                    this.enableElements(
-                        this.joinButton,
-                        this.playerColorSelect
-                    );
-                    this.setInfo('A game is waiting for you');
-                } else if (state.server.sessionOwner == state.localPlayerId) {
-                    this.startButton.enable();
-                    this.setInfo('You may wait for more player or start');
-                } else {
-                    this.setInfo('Waiting for players to join...');
-                }
-                break;
-            case STATUS.full:
-                if (!state.localPlayerId) {
-                    this.setInfo('The game is full, sorry :(');
-                } else if (state.localPlayerId == state.server.sessionOwner) {
-                    this.startButton.enable();
-                    this.setInfo('You may start whenever you want');
-                } else {
-                    this.setInfo('The game might start at any time.');
-                }
-                break;
-            default:
-                break;
+            case STATUS.empty: this.enableCreate(); break;
+            case STATUS.created: this.enableJoinOrStart(); break;
+            case STATUS.full: this.enableStartForOwner(); break;
         }
+    }
+
+    private enableJoinOrStart = (): void => {
+
+        if (!state.localPlayerId) {
+            this.enableElements(this.joinButton, this.playerColorSelect);
+
+            return this.setInfo('A game is waiting for you');
+        }
+
+        if (state.server.sessionOwner === state.localPlayerId) {
+            this.startButton.enable();
+
+            return this.setInfo('You may wait for more player or start');
+        }
+
+        return this.setInfo('Waiting for players to join...');
+    }
+
+    private enableCreate = (): void => {
+        this.enableElements(this.createButton, this.playerColorSelect);
+
+        return this.setInfo('You may create the game');
+    }
+
+    private enableStartForOwner = (): void => {
+
+        if (!state.localPlayerId) {
+            return this.setInfo('The game is full, sorry :(');
+        }
+
+        if (state.localPlayerId === state.server.sessionOwner) {
+            this.startButton.enable();
+
+            return this.setInfo('You may start whenever you want');
+        }
+
+        return this.setInfo('The game might start at any time.');
     }
 }
