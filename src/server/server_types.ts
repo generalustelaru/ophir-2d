@@ -1,4 +1,4 @@
-import { ServerState, BarrierId, HexId} from '../shared_types';
+import { ServerState, BarrierId, HexId, PlayerId, PlayerState} from '../shared_types';
 
 export type WssMessage = ServerState | { error: string};
 export type DefaultMoveRule = {
@@ -20,4 +20,16 @@ export type BarrierCheck = {
     incompatible: BarrierId[],
 };
 
-export type BarrierChecks = Record<BarrierId, BarrierCheck>; 
+export type BarrierChecks = Record<BarrierId, BarrierCheck>;
+
+export type ServerConstants = {
+    WS_SIGNAL: {
+        connection: string,
+        message: string,
+        close: string,
+    },
+    DEFAULT_MOVE_RULES: DefaultMoveRule[],
+    BARRIER_CHECKS: BarrierChecks,
+    PLAYER_IDS: PlayerId[],
+    PLAYER_STATE: PlayerState,
+}
