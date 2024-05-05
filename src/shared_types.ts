@@ -24,7 +24,7 @@ export type PlayerState = {
 export type PlayerStates = Record<PlayerId, (PlayerState)>;
 
 export type SharedState = {
-    status: GameStatus,
+    gameStatus: GameStatus,
     sessionOwner: PlayerId | null,
     availableSlots: PlayerId[],
     players: PlayerStates | null,

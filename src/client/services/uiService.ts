@@ -82,7 +82,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     public updatePreSessionUi = (): void => {
         this.disableAllElements();
 
-        switch (state.server.status) {
+        switch (state.server.gameStatus) {
             case STATUS.empty: this.enableCreate(); break;
             case STATUS.created: this.enableJoinOrStart(); break;
             case STATUS.full: this.enableStartForOwner(); break;
