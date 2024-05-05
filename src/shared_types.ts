@@ -1,11 +1,11 @@
-
+//TODO: Research and implement namespaces for type files
 import Konva from 'konva';
 // TODO: Segregate client-only types to a separate file
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type HexOffset = { id: HexId, x: number, y: number };
-export type Action = "inquire" | "enroll" | "start" | "move" | "refresh";
+export type Action = "inquire" | "enroll" | "start" | "move" | "refresh" | "turn";
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type HoverHint = "valid" | "home" | "illegal";
@@ -18,6 +18,8 @@ export type PlayerState = {
         hexId: HexId,
         position: { x: number, y: number } | null,
     },
+    moveActions: number,
+    isAnchored: boolean,
     allowedMoves: HexId[],
 }
 
@@ -73,6 +75,7 @@ export type ActionDetails = MoveActionDetails | null;
 export type EventPayload =
     | InfoEventPayload
     | ActionEventPayload
+    | ErrorEventPayload
     | null;
 
 export interface PlayerShipInterface {

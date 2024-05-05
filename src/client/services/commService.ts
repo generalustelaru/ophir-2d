@@ -1,4 +1,4 @@
-import { WebsocketClientMessage, Action, ActionDetails, EventPayload } from '../../shared_types';
+import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
 import { Service, ServiceInterface } from './service';
 import state from '../state';
 import constants from '../../constants';
@@ -26,14 +26,14 @@ export class CommunicationService extends Service implements CommunicationInterf
         }
         this.socket.onerror = (error) => {
             console.error(error);
-            this.broadcastEvent(EVENT.error, {text: "The connection encountered an error."});
+            this.broadcastEvent(EVENT.error, { error: 'The connection encountered an error' });
         }
         this.socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
             if (data.error) {
                 console.error('<-', data.error);
-                this.broadcastEvent(EVENT.error, {text: data.error});
+                this.broadcastEvent(EVENT.error, { error: data.error });
 
                 return;
             }

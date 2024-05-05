@@ -6,5 +6,5 @@ all:
 	make build
 	node public/server.cjs
 
-serve:
+run:
 	node public/server.cjs

@@ -45,6 +45,7 @@ export class EventHandler {
             () => this.commService.sendMessage(ACTION.inquire),
         );
 
+        // Update client on server state update
         window.addEventListener(EVENT.update, () => {
             if (state.server.gameStatus == STATUS.started) {
                 if (state.isBoardDrawn) {

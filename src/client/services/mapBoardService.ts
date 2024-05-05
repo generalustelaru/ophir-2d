@@ -111,11 +111,14 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
         mapState.hexes.forEach(hex => {
             const hexId = hex.attrs.id;
-            const hexColor = localPlayer?.location.hexId === hexId
-                ? players[state.localPlayerId].isActive
+            let hexColor = COLOR.default;
+
+            if (localPlayer?.location.hexId === hexId) {
+                hexColor = localPlayer.isActive && false === localPlayer.isAnchored
                     ? COLOR.illegal
-                    : COLOR.anchored
-                : COLOR.default;
+                    : COLOR.home;
+            }
+
             hex.fill(hexColor);
         });
 

@@ -44,7 +44,8 @@ const constants: ConstantsCollection = {
         enroll: "enroll",
         start: "start",
         move: "move",
-        refresh: "refresh"
+        refresh: "refresh",
+        turn: "turn",
     },
     EVENT: {
         connected: "connected",
