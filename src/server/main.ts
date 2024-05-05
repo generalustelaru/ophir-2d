@@ -88,7 +88,6 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             }
         }
 
-        // TODO: Move all calls into gameSetupService and expose a single method to handle setup and players session hydration
         if (action === ACTION.start && tools.isRecord(sharedState.players)) {
             sharedState.status = STATUS.started;
             sharedState.availableSlots = [];
