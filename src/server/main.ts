@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import constants from '../constants';
 import serverConstants from './server_constants';
-import { PlayerStates, PlayerId, SharedState, WebsocketClientMessage, MoveActionDetails} from '../shared_types';
+import { SharedState, PlayerStates, PlayerState, PlayerId, WebsocketClientMessage, MoveActionDetails, } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
 import { ToolService, ToolInterface } from './services/toolService';
@@ -140,9 +140,7 @@ function passActiveStatus(states: PlayerStates): PlayerStates {
         const player = states[playerId];
 
         if (player.turnOrder === nextToken) {
-            player.isActive = true;
-            player.isAnchored = false;
-            player.moveActions = 2;
+            states[playerId] = setTurnStartConditions(tools.cc(player));
         }
     }
 
@@ -160,7 +158,8 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
     if (allowed.includes(destination) && remainingMoves > 0) {
         player.location = { hexId: destination, position: details.position };
         player.allowedMoves = privateState.moveRules
-            .find(rule => rule.from === destination).allowed;
+            .find(rule => rule.from === destination).allowed
+            .filter(move => move !== departure);
         player.moveActions = remainingMoves - 1;
         player.isAnchored = true;
 
@@ -235,4 +234,14 @@ function processPlayer(playerId: PlayerId): boolean {
     }
 
     return true;
+}
+
+function setTurnStartConditions(player: PlayerState): PlayerState {;
+    player.isActive = true;
+    player.isAnchored = false;
+    player.moveActions = 2;
+    player.allowedMoves = privateState.moveRules
+        .find(rule => rule.from === player.location.hexId).allowed;
+
+    return player;
 }
