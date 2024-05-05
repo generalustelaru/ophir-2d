@@ -6,8 +6,8 @@ import { Button } from '../html_components/button';
 
 export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
-    updatePreSessionUi: () => void,
-    switchToGameControls: () => void,
+    updateLobbyControls: () => void,
+    updateGameControls: () => void,
 }
 
 const { ACTION, EVENT, STATUS } = constants;
@@ -15,6 +15,7 @@ const { ACTION, EVENT, STATUS } = constants;
 export class UserInterfaceService extends Service implements UiInterface {
 
     createButton; joinButton; startButton; playerColorSelect;
+    endTurnButton;
 
     constructor() {
         super();
@@ -37,6 +38,8 @@ export class UserInterfaceService extends Service implements UiInterface {
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
+
+        this.endTurnButton = new Button('endTurnButton', this.processEndTurn);
     }
 
     private processStart = (): void => {
@@ -63,6 +66,12 @@ export class UserInterfaceService extends Service implements UiInterface {
         return this.setInfo('This color has just been taken :(');
     }
 
+    private processEndTurn = (): void => {
+        const payload: ActionEventPayload = {action: ACTION.turn, details: null};
+
+        return this.broadcastEvent(EVENT.action, payload);
+    }
+
     public setInfo (text: string): void {
         const info = document.getElementById('info');
         info.innerHTML = text;
@@ -79,11 +88,23 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.playerColorSelect.disable();
     }
 
-    public switchToGameControls = (): void => {
-        this.disableLobbyControls();
+    private disableGameControls = (): void => {
+        this.endTurnButton.disable();
     }
 
-    public updatePreSessionUi = (): void => {
+    public updateGameControls = (): void => {
+        this.disableLobbyControls();
+        this.disableGameControls();
+        const player = state.server.players[state.localPlayerId];
+
+        if (player?.isActive) {
+            if (player.moveActions < 2) {
+                this.endTurnButton.enable();
+            }
+        }
+    }
+
+    public updateLobbyControls = (): void => {
         this.disableLobbyControls();
 
         switch (state.server.gameStatus) {
