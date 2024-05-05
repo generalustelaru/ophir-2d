@@ -1,10 +1,9 @@
 
 import express, { Request, Response } from 'express';
-
 import { WebSocketServer } from 'ws';
 import constants from '../constants';
 import serverConstants from './server_constants';
-import { PlayerStates, PlayerId, SharedState, WebsocketClientMessage } from '../shared_types';
+import { PlayerStates, PlayerId, SharedState, WebsocketClientMessage, MoveActionDetails} from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
 import { ToolService, ToolInterface } from './services/toolService';
@@ -88,41 +87,38 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             }
         }
 
-        if (action === ACTION.start && tools.isRecord(sharedState.players)) {
-            sharedState.gameStatus = STATUS.started;
-            sharedState.availableSlots = [];
+        if (action === ACTION.start) {
+            const isGameReady = processGameStart();
 
-            const bundle: StateBundle = setupService.produceGameData(tools.cc(sharedState));
-            sharedState.players = bundle.sharedState.players;
-            sharedState.setup = bundle.sharedState.setup;
-            privateState.moveRules = bundle.privateState.moveRules;
-            sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+            if (isGameReady) {
+                sharedState.players = passActiveStatus(
+                    tools.cc(sharedState.players)
+                );
 
-            sendAll(sharedState);
+                return sendAll(sharedState);
+            }
+
+            sendAll({ error: 'Game start failed' });
         }
 
         if (action === ACTION.move) {
-            const player = sharedState.players[playerId];
-            const destination = details.hexId;
-            const allowed = privateState.moveRules.find(
-                rule => rule.from === player.location.hexId
-            ).allowed;
+            const isMoveLegal = processMove(playerId, details);
 
-            if (allowed.includes(destination)) {
-                player.location = { hexId: destination, position: details.position };
-                player.allowedMoves = privateState.moveRules.find(
-                    rule => rule.from === destination
-                ).allowed;
-                sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+            if (isMoveLegal) {
                 sendAll(sharedState);
             } else {
-                send({ error: 'Illegal move!' });
+                sendAll({ error: `Illegal move on ${playerId}` });
             }
+        }
+
+        if (action === ACTION.turn) {
+            sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+            sendAll(sharedState);
         }
     });
 });
 
-function passActiveStatus<S extends PlayerStates>(states: S): S {
+function passActiveStatus(states: PlayerStates): PlayerStates {
     const playerCount = Object.keys(states).length;
     let nextToken = 1;
 
@@ -145,15 +141,66 @@ function passActiveStatus<S extends PlayerStates>(states: S): S {
 
         if (player.turnOrder === nextToken) {
             player.isActive = true;
+            player.isAnchored = false;
+            player.moveActions = 2;
         }
     }
 
     return states;
 }
 
+function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
+
+    const player = sharedState.players[playerId];
+    const departure = player.location.hexId;
+    const destination  = details.hexId;
+    const remainingMoves = player.moveActions;
+    const allowed = privateState.moveRules.find(rule => rule.from === departure).allowed;
+
+    if (allowed.includes(destination) && remainingMoves > 0) {
+        player.location = { hexId: destination, position: details.position };
+        player.allowedMoves = privateState.moveRules
+            .find(rule => rule.from === destination).allowed;
+        player.moveActions = remainingMoves - 1;
+        player.isAnchored = true;
+
+        if (player.moveActions === 0) { // TODO: not perfect, change with End Turn button
+            sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+        }
+
+        return true;
+    }
+
+    return false;
+}
+
+function processGameStart(): boolean{
+
+    try {
+        sharedState.gameStatus = STATUS.started;
+        sharedState.availableSlots = [];
+
+        const bundle: StateBundle = setupService.produceGameData(
+            tools.cc(sharedState)
+        );
+        sharedState.players = bundle.sharedState.players;
+        sharedState.setup = bundle.sharedState.setup;
+        privateState.moveRules = bundle.privateState.moveRules;
+    } catch (error) {
+        console.error('Game start failed:', error);
+
+        return false;
+    }
+
+    return true;
+}
+
 function processPlayer(playerId: PlayerId): boolean {
 
-    if (sharedState.gameStatus === STATUS.started || sharedState.gameStatus === STATUS.full) {
+    if (
+        sharedState.gameStatus === STATUS.started
+        || sharedState.gameStatus === STATUS.full
+    ) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
@@ -165,7 +212,8 @@ function processPlayer(playerId: PlayerId): boolean {
         return false;
     }
 
-    sharedState.availableSlots = sharedState.availableSlots.filter(slot => slot != playerId);
+    sharedState.availableSlots = sharedState.availableSlots
+        .filter(slot => slot != playerId);
 
     if (sharedState.players === null) {
         sharedState.players = { [playerId]: { ...PLAYER_STATE } } as PlayerStates;
