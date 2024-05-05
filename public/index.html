@@ -11,7 +11,7 @@
 
 <body>
     <div id="canvas"></div>
-    <div id="lobby-controls">
+    <div id="lobby-controls" class="control-row">
         <button id="createButton" disabled>Create Game</button>
         <button id="joinButton" disabled>Join Game</button>
         <select id="playerColorSelect" disabled>
@@ -22,6 +22,13 @@
             <option value="playerGreen">Green</option>
         </select>
         <button id="startButton" disabled>Start Game</button>
+    </div>
+    <div id="game-controls" class="control-row">
+        <button id="endTurnButton" disabled>End Turn</button>
+        <button id="extendAchoring" disabled>Extend Stay</button>
+        <button id="freeSail" disabled>Free Sailing</button>
+        <button id="trade" disabled>Trade</button>
+        <input id="vavorCounter" type="text" value="1" disabled>
     </div>
     <div id="info">...</div>
 </body>

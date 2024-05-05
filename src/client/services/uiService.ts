@@ -7,7 +7,7 @@ import { Button } from '../html_components/button';
 export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
     updatePreSessionUi: () => void,
-    disableAllElements: () => void,
+    switchToGameControls: () => void,
 }
 
 const { ACTION, EVENT, STATUS } = constants;
@@ -72,15 +72,19 @@ export class UserInterfaceService extends Service implements UiInterface {
         handlers.forEach(handler => handler.enable());
     }
 
-    public disableAllElements = (): void => {
+    private disableLobbyControls = (): void => {
         this.createButton.disable();
         this.joinButton.disable();
         this.startButton.disable();
         this.playerColorSelect.disable();
     }
 
+    public switchToGameControls = (): void => {
+        this.disableLobbyControls();
+    }
+
     public updatePreSessionUi = (): void => {
-        this.disableAllElements();
+        this.disableLobbyControls();
 
         switch (state.server.gameStatus) {
             case STATUS.empty: this.enableCreate(); break;
