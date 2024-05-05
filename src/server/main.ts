@@ -19,7 +19,7 @@ const privateState: PrivateState = {
 }
 
 const sharedState: SharedState = {
-    status: STATUS.empty,
+    gameStatus: STATUS.empty,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
     players: null,
@@ -89,7 +89,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
         }
 
         if (action === ACTION.start && tools.isRecord(sharedState.players)) {
-            sharedState.status = STATUS.started;
+            sharedState.gameStatus = STATUS.started;
             sharedState.availableSlots = [];
 
             const bundle: StateBundle = setupService.produceGameData(tools.cc(sharedState));
@@ -153,7 +153,7 @@ function passActiveStatus<S extends PlayerStates>(states: S): S {
 
 function processPlayer(playerId: PlayerId): boolean {
 
-    if (sharedState.status === STATUS.started || sharedState.status === STATUS.full) {
+    if (sharedState.gameStatus === STATUS.started || sharedState.gameStatus === STATUS.full) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
@@ -176,13 +176,13 @@ function processPlayer(playerId: PlayerId): boolean {
     console.log(`${playerId} enrolled`);
 
     if (sharedState.sessionOwner === null) {
-        sharedState.status = STATUS.created;
+        sharedState.gameStatus = STATUS.created;
         sharedState.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
 
     if (sharedState.availableSlots.length === 0) {
-        sharedState.status = STATUS.full;
+        sharedState.gameStatus = STATUS.full;
         console.log(`Session is full`);
     }
 

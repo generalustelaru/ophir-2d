@@ -46,7 +46,7 @@ export class EventHandler {
         );
 
         window.addEventListener(EVENT.update, () => {
-            if (state.server.status == STATUS.started) {
+            if (state.server.gameStatus == STATUS.started) {
                 if (state.isBoardDrawn) {
                     this.mapBoardService.updateBoard();
                 } else {
