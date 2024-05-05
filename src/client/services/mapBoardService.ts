@@ -27,7 +27,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
     initiateCanvas = () => {
         this.stage = new Konva.Stage({
-            container: 'container',
+            container: 'canvas',
             visible: true,
             opacity: 1,
             width: 500,
