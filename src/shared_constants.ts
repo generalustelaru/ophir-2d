@@ -1,6 +1,6 @@
 import { SharedConstants } from "./shared_types";
 
-const shared_constants: SharedConstants = {
+const sharedConstants: SharedConstants = {
     HEX_COUNT: 7,
     CONNECTION: {
         wsAddress: "ws://localhost:8080"
@@ -51,4 +51,4 @@ const shared_constants: SharedConstants = {
     }
 }
 
-export default shared_constants;
+export default sharedConstants;

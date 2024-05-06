@@ -3,8 +3,8 @@ import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
 import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
 import { UserInterfaceService, UiInterface } from "./services/uiService";
-import constants from "../constants";
-const { EVENT, ACTION, STATUS } = constants;
+import sharedConstants from "../shared_constants";
+const { EVENT, ACTION, STATUS } = sharedConstants;
 
 export class EventHandler {
 

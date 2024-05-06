@@ -6,7 +6,7 @@ import { PlayerShip } from '../canvas_objects/playerShip';
 import { MapHex } from '../canvas_objects/mapHex';
 import { Barrier } from '../canvas_objects/barrier';
 import state from '../state';
-import constants from '../../constants';
+import sharedConstants from '../../shared_constants';
 
 export interface MapBoardInterface extends ServiceInterface {
     initiateCanvas: () => void,
@@ -14,7 +14,7 @@ export interface MapBoardInterface extends ServiceInterface {
     updateBoard: () => void,
 }
 
-const { COLOR, HEX_OFFSET_DATA, EVENT } = constants;
+const { COLOR, HEX_OFFSET_DATA, EVENT } = sharedConstants;
 
 export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;

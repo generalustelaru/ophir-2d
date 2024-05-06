@@ -88,7 +88,7 @@ export type WebsocketClientMessage = {
     details: ActionDetails,
 }
 
-export type ConstantsCollection = {
+export type SharedConstants = {
     HEX_COUNT: 7,
     CONNECTION: {
         wsAddress: string

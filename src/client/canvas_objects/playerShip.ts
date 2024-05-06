@@ -1,9 +1,9 @@
 import Konva from 'konva';
 import { ActionEventPayload, PlayerShipInterface } from '../../shared_types';
 import state from '../state';
-import constants from '../../constants';
+import sharedConstants from '../../shared_constants';
 import { Ship } from './ship';
-const { COLOR, HEX_COUNT, EVENT, ACTION } = constants;
+const { COLOR, HEX_COUNT, EVENT, ACTION } = sharedConstants;
 
 export class PlayerShip implements PlayerShipInterface {
 

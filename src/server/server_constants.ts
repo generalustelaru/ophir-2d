@@ -1,4 +1,5 @@
 import { ServerConstants } from "./server_types"
+
 const serverConstants: ServerConstants = {
     WS_SIGNAL: {
         connection: 'connection',
