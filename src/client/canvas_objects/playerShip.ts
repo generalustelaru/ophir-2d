@@ -5,10 +5,6 @@ import sharedConstants from '../../shared_constants';
 
 const { COLOR, HEX_COUNT, EVENT, ACTION } = sharedConstants;
 
-
-// TODO: see why we can't declare the interface here
-
-
 export class PlayerShip implements PlayerShipInterface {
 
     ship: Konva.Rect;
