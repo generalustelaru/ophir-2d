@@ -1,7 +1,7 @@
 
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
-import constants from '../constants';
+import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
 import { SharedState, PlayerStates, PlayerState, PlayerId, WebsocketClientMessage, MoveActionDetails, } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
@@ -10,7 +10,7 @@ import { ToolService, ToolInterface } from './services/toolService';
 const httpPort = 3000;
 const wsPort = 8080;
 
-const { ACTION, STATUS } = constants;
+const { ACTION, STATUS } = sharedConstants;
 const { PLAYER_IDS, WS_SIGNAL, PLAYER_STATE } = serverConstants;
 
 const privateState: PrivateState = {

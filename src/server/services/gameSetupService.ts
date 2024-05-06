@@ -1,7 +1,7 @@
 
 import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
-import constants from '../../constants';
+import sharedConstants from '../../shared_constants';
 import serverConstants from '../server_constants';
 import { Service, ServiceInterface } from './service';
 

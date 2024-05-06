@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import constants from '../../constants';
+import sharedConstants from '../../shared_constants';
 import { BarrierId } from '../../shared_types';
 
-const { COLOR } = constants;
+const { COLOR } = sharedConstants;
 
 type OffsetData = {x: number, y: number, rotation: number};
 

@@ -1,9 +1,9 @@
-import constants from '../constants';
+import sharedConstants from '../shared_constants';
 import { CommunicationService, CommunicationInterface } from './services/commService';
 import { MapBoardService, MapBoardInterface } from './services/mapBoardService';
 import { EventHandler } from './eventHandler';
 
-const { CONNECTION } = constants;
+const { CONNECTION } = sharedConstants;
 
 new EventHandler(); // Enables inter-class communication
 

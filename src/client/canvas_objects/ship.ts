@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { PlayerId } from '../../shared_types';
-import constants from '../../constants';
+import sharedConstants from '../../shared_constants';
 
 interface ShipInterface {
     getElement: () => Konva.Rect,
 }
 
-const { COLOR } = constants;
+const { COLOR } = sharedConstants;
 
 export class Ship implements ShipInterface {
 
