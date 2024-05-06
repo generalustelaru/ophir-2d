@@ -42,17 +42,15 @@ export class MapBoardService extends Service implements MapBoardInterface {
     drawBoard = () => {
         const players = state.server.players;
         const localPlayer = players[state.localPlayerId];
+        const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
         //MARK: Map hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
-            const localPlayerHere = localPlayer?.location.hexId == hexItem.id;
-
             const hexElement = new MapHex(
                 this.center,
                 hexItem.id,
-                hexItem.x,
-                hexItem.y,
-                localPlayerHere && localPlayer.isActive
-                    ? COLOR.illegal
+                hexItem.x, hexItem.y,
+                localPlayer?.location.hexId === hexItem.id
+                    ? localPlayerHexColor
                     : COLOR.default
             ) as Konva.RegularPolygon;
             state.konva.hexes.push(hexElement);
