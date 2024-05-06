@@ -8,7 +8,6 @@ export type HexOffset = { id: HexId, x: number, y: number };
 export type Action = "inquire" | "enroll" | "start" | "move" | "refresh" | "turn";
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
 export type GameStatus = "empty" | "created" | "full" | "started";
-export type HoverHint = "valid" | "home" | "illegal";
 export type HexaColor = `#${string}`;
 
 export type PlayerState = {
@@ -45,7 +44,7 @@ export type ClientState = {
         localShip: {
             object: PlayerShipInterface | null
             homePosition: { x: number, y: number }
-            hoverStatus: HoverHint,
+            isDestinationValid: boolean,
         },
         opponentShips: Konva.Rect[],
         hexes: Konva.RegularPolygon[],
@@ -95,7 +94,6 @@ export type ConstantsCollection = {
         wsAddress: string
     },
     STATUS: Record<GameStatus, GameStatus>,
-    MOVE_HINT: Record<HoverHint, HoverHint>,
     COLOR: Record<string, HexaColor>,
     HEX_OFFSET_DATA: HexOffset[],
     ACTION: Record<Action, Action>,

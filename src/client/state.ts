@@ -9,7 +9,7 @@ const state: ClientState = {
         localShip: {
             object: null,
             homePosition: { x: 0, y: 0 },
-            hoverStatus: null,
+            isDestinationValid: null,
         },
         opponentShips: [],
         hexes: [],

@@ -11,11 +11,6 @@ const constants: ConstantsCollection = {
         full: "full",
         started: "started"
     },
-    MOVE_HINT: {
-        valid: "valid",
-        home: "home",
-        illegal: "illegal"
-    },
     COLOR: {
         barrierDefault: "#003C43",
         barrierNavigator: "#FFFDD7",
