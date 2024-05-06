@@ -29,7 +29,7 @@ export class EventHandler {
             },
         );
 
-        // TODO: Update UI on error
+        //Display errors
         window.addEventListener(
             EVENT.error as any,
             (event) => {
