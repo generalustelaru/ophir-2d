@@ -14,7 +14,7 @@ const sharedConstants: SharedConstants = {
     COLOR: {
         barrierDefault: "#003C43",
         barrierNavigator: "#FFFDD7",
-        localShipBorder: "#FFD700",
+        localShipBorder: "#FFFFFF",
         shipBorder: "#000000",
         playerPurple: "#A55A9A",
         playerYellow: "#F5E049",
