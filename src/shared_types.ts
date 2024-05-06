@@ -43,10 +43,10 @@ export type ClientState = {
     konva: {
         localShip: {
             object: PlayerShipInterface | null
-            homePosition: { x: number, y: number }
+            homePosition: Coordinates,
             isDestinationValid: boolean,
         },
-        opponentShips: Konva.Rect[],
+        opponentShips: ShipInterface[],
         hexes: Konva.RegularPolygon[],
     },
 }
@@ -66,7 +66,7 @@ export type ActionEventPayload = {
 
 export type MoveActionDetails = {
     hexId: HexId,
-    position: { x: number, y: number },
+    position: Coordinates,
 }
 
 export type ActionDetails = MoveActionDetails | null;
@@ -76,6 +76,15 @@ export type EventPayload =
     | ActionEventPayload
     | ErrorEventPayload
     | null;
+
+export interface ShipInterface {
+    getElement: () => Konva.Rect,
+    getId: () => PlayerId,
+    setPosition: (coordinates: Coordinates) => void,
+    destroy: () => void,
+}
+
+export type Coordinates = { x: number, y: number };
 
 export interface PlayerShipInterface {
     switchControl: (isActivePlayer: boolean) => void,

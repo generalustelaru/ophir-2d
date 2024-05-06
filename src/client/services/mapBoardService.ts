@@ -74,9 +74,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
                     shipPosition.y,
                     COLOR[id],
                     id
-                ).getElement();
+                );
                 state.konva.opponentShips.push(ship);
-                this.layer.add(ship);
+                this.layer.add(ship.getElement());
             }
         });
 
@@ -120,13 +120,11 @@ export class MapBoardService extends Service implements MapBoardInterface {
         });
 
         mapState.opponentShips.forEach(ship => {
-            const opponentId: PlayerId = ship.attrs.id;
+            const opponentId: PlayerId = ship.getId();
 
             if (players[opponentId]) {
-                const shipPosition = players[opponentId].location.position ??
-                    this.center;
-                ship.x(shipPosition.x);
-                ship.y(shipPosition.y);
+                const shipPosition = players[opponentId].location.position ?? this.center;
+                ship.setPosition(shipPosition);
                 this.layer.batchDraw();
             } else {
                 const payload: InfoEventPayload = {
@@ -134,6 +132,8 @@ export class MapBoardService extends Service implements MapBoardInterface {
                 };
                 this.broadcastEvent(EVENT.info, payload);
                 ship.destroy();
+                // TODO: remove ship element from layer
+                // TODO: implement a forfeit action to update the server state
             }
         });
 

@@ -2,8 +2,12 @@ import Konva from 'konva';
 import { ActionEventPayload, PlayerShipInterface } from '../../shared_types';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
-import { Ship } from './ship';
+
 const { COLOR, HEX_COUNT, EVENT, ACTION } = sharedConstants;
+
+
+// TODO: see why we can't declare the interface here
+
 
 export class PlayerShip implements PlayerShipInterface {
 
@@ -22,13 +26,18 @@ export class PlayerShip implements PlayerShipInterface {
         offsetY: number,
         fill: string
     ) {
-        this.ship = new Ship(
-            offsetX,
-            offsetY,
+        this.ship = new Konva.Rect({
+            x: offsetX,
+            y: offsetY,
             fill,
-            state.localPlayerId,
-            true
-        ).getElement();
+            stroke: COLOR.localShipBorder,
+            strokeWidth: 3,
+            width: 40,
+            height: 30,
+            cornerRadius: [0, 0, 5, 30],
+            id: state.localPlayerId,
+            draggable: true,
+        })
 
         this.ship.on('dragstart', () => {
             state.konva.localShip.homePosition = { x: this.ship.x(), y: this.ship.y() }
