@@ -75,6 +75,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
                     COLOR[id],
                     id
                 );
+                ship.setInfluence(1);
                 state.konva.opponentShips.push(ship);
                 this.layer.add(ship.getElement());
             }
@@ -97,6 +98,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             COLOR[state.localPlayerId],
         );
         playerShip.switchControl(localPlayer.isActive);
+        playerShip.setInfluence(6);
 
         this.layer.add(playerShip.getElement());
         state.konva.localShip.object = playerShip;
