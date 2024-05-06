@@ -78,9 +78,10 @@ export type EventPayload =
     | null;
 
 export interface ShipInterface {
-    getElement: () => Konva.Rect,
+    getElement: () => Konva.Group,
     getId: () => PlayerId,
     setPosition: (coordinates: Coordinates) => void,
+    setInfluence: (value: number) => void,
     destroy: () => void,
 }
 
@@ -88,7 +89,8 @@ export type Coordinates = { x: number, y: number };
 
 export interface PlayerShipInterface {
     switchControl: (isActivePlayer: boolean) => void,
-    getElement: () => Konva.Rect,
+    getElement: () => Konva.Group,
+    setInfluence: (value: number) => void,
 };
 
 export type WebsocketClientMessage = {
