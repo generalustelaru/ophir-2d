@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { ActionEventPayload, PlayerShipInterface } from '../../shared_types';
+import { ActionEventPayload, PlayerShipInterface, Coordinates } from '../../shared_types';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
 
@@ -20,6 +20,11 @@ export class PlayerShip implements PlayerShipInterface {
     public setInfluence = (value: number) => {
         this.label.text(value.toString());
     }
+
+    public setPosition = (coordinates: Coordinates) => {
+        this.group.x(coordinates.x);
+        this.group.y(coordinates.y);
+    };
 
     constructor (
         stage: Konva.Stage,
