@@ -92,6 +92,7 @@ export interface PlayerShipInterface {
     switchControl: (isActivePlayer: boolean) => void,
     getElement: () => Konva.Group,
     setInfluence: (value: number) => void,
+    setPosition: (coordinates: Coordinates) => void,
 };
 
 export type WebsocketClientMessage = {

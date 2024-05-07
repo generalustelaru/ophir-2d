@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
-import { SharedState, PlayerStates, PlayerState, PlayerId, WebsocketClientMessage, MoveActionDetails, } from '../shared_types';
+import { SharedState, HexId, PlayerStates, PlayerState, PlayerId, WebsocketClientMessage, MoveActionDetails, } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
 import { ToolService, ToolInterface } from './services/toolService';
@@ -12,7 +12,7 @@ const wsPort = 8080;
 
 const { ACTION, STATUS } = sharedConstants;
 const { PLAYER_IDS, WS_SIGNAL, PLAYER_STATE } = serverConstants;
-
+// TODO: move all session-related state and functionality into (a) GamerSession class
 const privateState: PrivateState = {
     moveRules: [],
 }
@@ -156,19 +156,75 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
     const allowed = privateState.moveRules.find(rule => rule.from === departure).allowed;
 
     if (allowed.includes(destination) && remainingMoves > 0) {
-        player.location = { hexId: destination, position: details.position };
-        player.allowedMoves = privateState.moveRules
+        player.moveActions = remainingMoves - 1;
+
+        const manifest = getPortManifest(sharedState.players, destination);
+        const sailSuccess = manifest
+            ? handleInfluenceRoll(player, manifest)
+            : true;
+
+        if (sailSuccess) {
+            player.location = { hexId: destination, position: details.position };
+            player.allowedMoves = privateState.moveRules
             .find(rule => rule.from === destination).allowed
             .filter(move => move !== departure);
-        player.moveActions = remainingMoves - 1;
-        player.isAnchored = true;
-        player.influence += 1;
+            player.isAnchored = true;
+        }
 
-        if (player.moveActions === 0) { // TODO: not perfect, change with End Turn button
+        if (player.moveActions === 0 && false === sailSuccess) {
             sharedState.players = passActiveStatus(tools.cc(sharedState.players));
         }
 
         return true;
+    }
+
+    return false;
+}
+
+type ManifestItem = { id: PlayerId, influence: number };
+function getPortManifest (players: PlayerStates, destinationHex: HexId): ManifestItem[] | false {
+    const manifest = [];
+
+    for (const id in players) {
+        const playerId = id as PlayerId;
+        const player = players[playerId];
+
+        if (player.location.hexId === destinationHex) {
+            manifest.push({ id: playerId, influence: player.influence });
+        }
+    }
+
+    if (manifest.length === 0) {
+        return false;
+    }
+
+    return manifest;
+}
+
+function handleInfluenceRoll (activePlayer: PlayerState, manifest:ManifestItem[] ): boolean {
+    let canMove = true;
+
+    activePlayer.influence = Math.ceil(Math.random() * 6);
+    let highestInfluence = activePlayer.influence;
+
+    manifest.forEach(item => {
+        if (item.influence > highestInfluence) {
+            canMove = false;
+            highestInfluence = item.influence;
+        }
+    });
+
+    if (canMove) {
+        return true;
+    }
+
+    for (const id in sharedState.players) {
+        const playerId = id as PlayerId;
+        const player = sharedState.players[playerId];
+
+        if (player.influence === highestInfluence) {
+            player.influence -= 1;
+        }
     }
 
     return false;
