@@ -44,6 +44,7 @@ const serverConstants: ServerConstants = {
         turnOrder: null,
         isActive: false,
         location: null,
+        influence: 0,
         allowedMoves: null,
         isAnchored: true,
         moveActions: 2,
