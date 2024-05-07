@@ -162,6 +162,7 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
             .filter(move => move !== departure);
         player.moveActions = remainingMoves - 1;
         player.isAnchored = true;
+        player.influence += 1;
 
         if (player.moveActions === 0) { // TODO: not perfect, change with End Turn button
             sharedState.players = passActiveStatus(tools.cc(sharedState.players));

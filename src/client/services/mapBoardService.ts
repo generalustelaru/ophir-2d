@@ -68,14 +68,15 @@ export class MapBoardService extends Service implements MapBoardInterface {
         playerIds.forEach((id) => {
             if (players[id] && id != state.localPlayerId) {
 
-                const shipPosition = players[id].location.position ?? this.center;
+                const player = players[id];
+                const shipPosition = player.location.position ?? this.center;
                 const ship = new Ship(
                     shipPosition.x,
                     shipPosition.y,
                     COLOR[id],
                     id
                 );
-                ship.setInfluence(1);
+                ship.setInfluence(player.influence);
                 state.konva.opponentShips.push(ship);
                 this.layer.add(ship.getElement());
             }
@@ -97,8 +98,8 @@ export class MapBoardService extends Service implements MapBoardInterface {
             shipPosition.y,
             COLOR[state.localPlayerId],
         );
+        playerShip.setInfluence(localPlayer.influence);
         playerShip.switchControl(localPlayer.isActive);
-        playerShip.setInfluence(6);
 
         this.layer.add(playerShip.getElement());
         state.konva.localShip.object = playerShip;
@@ -127,6 +128,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             if (players[opponentId]) {
                 const shipPosition = players[opponentId].location.position ?? this.center;
                 ship.setPosition(shipPosition);
+                ship.setInfluence(players[opponentId].influence);
                 this.layer.batchDraw();
             } else {
                 const payload: InfoEventPayload = {
@@ -139,6 +141,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             }
         });
 
+        mapState.localShip.object?.setInfluence(localPlayer.influence);
         mapState.localShip.object?.switchControl(localPlayer.isActive);
     }
 }
