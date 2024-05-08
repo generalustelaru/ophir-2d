@@ -1,23 +1,17 @@
-import { SharedConstants } from "./shared_types";
 
-const shared_constants: SharedConstants = {
-    HEX_COUNT: 7,
+import { ClientConstants } from "./client_types";
+
+const clientConstants: ClientConstants = {
     CONNECTION: {
         wsAddress: "ws://localhost:8080"
-    },
-    STATUS: {
-        empty: "empty",
-        created: "created",
-        full: "full",
-        started: "started"
     },
     COLOR: {
         barrierDefault: "#003C43",
         barrierNavigator: "#FFFDD7",
-        localShipBorder: "#FFD700",
+        localShipBorder: "#FFFFFF",
         shipBorder: "#000000",
         playerPurple: "#A55A9A",
-        playerYellow: "#F5E049",
+        playerYellow: "#FFC94A",
         playerRed: "#FF204E",
         playerGreen: "#87A922",
         illegal: "#FFF7D4",
@@ -34,21 +28,6 @@ const shared_constants: SharedConstants = {
         { id: "left", x: 172, y: 0 },
         { id: "right", x: -172, y: 0 }
     ],
-    ACTION: {
-        inquire: "inquire",
-        enroll: "enroll",
-        start: "start",
-        move: "move",
-        refresh: "refresh",
-        turn: "turn",
-    },
-    EVENT: {
-        connected: "connected",
-        action: "action",
-        update: "update",
-        error: "error",
-        info: "info"
-    }
 }
 
-export default shared_constants;
+export default clientConstants;
