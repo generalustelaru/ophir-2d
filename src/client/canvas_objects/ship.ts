@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { Coordinates, PlayerId, ShipInterface } from '../../shared_types';
-import sharedConstants from '../../shared_constants';
+import clientConstants from '../client_constants';
 
-const { COLOR } = sharedConstants;
+const { COLOR } = clientConstants;
 
 export class Ship implements ShipInterface {
 

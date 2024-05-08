@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import sharedConstants from '../../shared_constants';
+import constants from '../client_constants';
 import { BarrierId } from '../../shared_types';
 
-const { COLOR } = sharedConstants;
+const { COLOR } = constants;
 
 type OffsetData = {x: number, y: number, rotation: number};
 
@@ -24,14 +24,14 @@ const barrierOffsets: Record <BarrierId, OffsetData> = {
 export class Barrier {
     constructor(
         center: {x: number, y: number},
-        barrierIndex: BarrierId,
+        barrierId: BarrierId,
         fill: string = COLOR.barrierDefault
     ) {
         const rect = new Konva.Rect({
-            x: center.x + barrierOffsets[barrierIndex].x,
-            y: center.y + barrierOffsets[barrierIndex].y,
+            x: center.x + barrierOffsets[barrierId].x,
+            y: center.y + barrierOffsets[barrierId].y,
             cornerRadius: 5,
-            rotation: barrierOffsets[barrierIndex].rotation,
+            rotation: barrierOffsets[barrierId].rotation,
             width: 26,
             height: 100,
             fill: fill,
