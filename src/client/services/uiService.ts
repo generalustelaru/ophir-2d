@@ -15,7 +15,7 @@ const { ACTION, EVENT, STATUS } = sharedConstants;
 export class UserInterfaceService extends Service implements UiInterface {
 
     createButton; joinButton; startButton; playerColorSelect;
-    favorCounter; endTurnButton;
+    favorButton; favorCounter; endTurnButton;
 
     constructor() {
         super();
@@ -38,6 +38,8 @@ export class UserInterfaceService extends Service implements UiInterface {
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
+
+        this.favorButton = new Button('favorButton', this.processFavor);
         this.favorCounter = {
             element: document.getElementById('favorCounter') as HTMLInputElement,
             set: (value: number) => this.favorCounter.element.value = value.toString(),
@@ -69,6 +71,12 @@ export class UserInterfaceService extends Service implements UiInterface {
         return this.setInfo('This color has just been taken :(');
     }
 
+    private processFavor = (): void => {
+        const payload: ActionEventPayload = {action: ACTION.favor, details: null};
+
+        return this.broadcastEvent(EVENT.action, payload);
+    }
+
     private processEndTurn = (): void => {
         const payload: ActionEventPayload = {action: ACTION.turn, details: null};
 
@@ -92,6 +100,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     private disableGameControls = (): void => {
+        this.favorButton.disable();
         this.endTurnButton.disable();
     }
 
@@ -103,8 +112,13 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.favorCounter.set(player?.favor ?? 0);
 
         if (player?.isActive) {
-            if (player.moveActions < 2) {
+
+            if (player.isAnchored) {
                 this.endTurnButton.enable();
+            }
+
+            if (player.favor > 0 && !player.hasSpentFavor && player.moveActions > 0) {
+                this.favorButton.enable();
             }
         }
     }

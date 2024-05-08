@@ -121,6 +121,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
                     ? COLOR.illegal
                     : COLOR.anchored;
             }
+
             hex.fill(hexColor);
         });
 

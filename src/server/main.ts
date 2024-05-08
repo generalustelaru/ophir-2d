@@ -111,6 +111,16 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             }
         }
 
+        if (action === ACTION.favor) {
+            const isLegalSpend = processFavorSpending(playerId);
+
+            if (isLegalSpend) {
+                sendAll(sharedState);
+            } else {
+                sendAll({ error: `Illegal favor spend on ${playerId}` });
+            }
+        }
+
         if (action === ACTION.turn) {
             sharedState.players = passActiveStatus(tools.cc(sharedState.players));
             sendAll(sharedState);
@@ -118,6 +128,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
     });
 });
 
+// TODO: convert into a boolean-returning function with plenty of side effects
 function passActiveStatus(states: PlayerStates): PlayerStates {
     const playerCount = Object.keys(states).length;
     let nextToken = 1;
@@ -159,9 +170,9 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
         player.moveActions = remainingMoves - 1;
 
         const manifest = getPortManifest(sharedState.players, destination);
-        const sailSuccess = manifest
-            ? handleInfluenceRoll(player, manifest)
-            : true;
+        const sailSuccess = !manifest || player.hasSpentFavor
+            ? true
+            : handleInfluenceRoll(player, manifest);
 
         if (sailSuccess) {
             player.location = { hexId: destination, position: details.position };
@@ -174,6 +185,20 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
         if (player.moveActions === 0 && false === sailSuccess) {
             sharedState.players = passActiveStatus(tools.cc(sharedState.players));
         }
+
+        return true;
+    }
+
+    return false;
+}
+
+function processFavorSpending(playerId: PlayerId): boolean {
+    const player = sharedState.players[playerId];
+
+    if (player.favor > 0 && player.hasSpentFavor === false) {
+        player.favor -= 1;
+        player.hasSpentFavor = true;
+        player.isAnchored = true;
 
         return true;
     }
@@ -296,6 +321,7 @@ function processPlayer(playerId: PlayerId): boolean {
 function setTurnStartConditions(player: PlayerState): PlayerState {;
     player.isActive = true;
     player.isAnchored = false;
+    player.hasSpentFavor = false;
     player.moveActions = 2;
     player.allowedMoves = privateState.moveRules
         .find(rule => rule.from === player.location.hexId).allowed;
