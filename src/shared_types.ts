@@ -17,6 +17,8 @@ export type PlayerState = {
         hexId: HexId,
         position: { x: number, y: number } | null,
     },
+    favor: number,
+    hasSpentFavor: boolean,
     influence: number,
     moveActions: number,
     isAnchored: boolean,

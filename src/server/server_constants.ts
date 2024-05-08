@@ -39,11 +39,12 @@ const serverConstants: ServerConstants = {
         'playerGreen',
     ],
 
-    // TODO: Implement Influence logic (rolling d6 on moving to an occupied hex). Will require keeping track of last position and plauers' current influence in state.
     PLAYER_STATE: { //PlayerState
         turnOrder: null,
         isActive: false,
         location: null,
+        favor: 6,
+        hasSpentFavor: false,
         influence: 1,
         allowedMoves: null,
         isAnchored: true,

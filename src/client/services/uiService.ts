@@ -15,7 +15,7 @@ const { ACTION, EVENT, STATUS } = sharedConstants;
 export class UserInterfaceService extends Service implements UiInterface {
 
     createButton; joinButton; startButton; playerColorSelect;
-    endTurnButton;
+    favorCounter; endTurnButton;
 
     constructor() {
         super();
@@ -38,7 +38,10 @@ export class UserInterfaceService extends Service implements UiInterface {
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
-
+        this.favorCounter = {
+            element: document.getElementById('favorCounter') as HTMLInputElement,
+            set: (value: number) => this.favorCounter.element.value = value.toString(),
+        }
         this.endTurnButton = new Button('endTurnButton', this.processEndTurn);
     }
 
@@ -96,6 +99,8 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.disableLobbyControls();
         this.disableGameControls();
         const player = state.server.players[state.localPlayerId];
+
+        this.favorCounter.set(player?.favor ?? 0);
 
         if (player?.isActive) {
             if (player.moveActions < 2) {
