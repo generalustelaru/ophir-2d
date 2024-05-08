@@ -182,7 +182,7 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
             player.isAnchored = true;
         }
 
-        if (player.moveActions === 0 && false === sailSuccess) {
+        if (player.moveActions === 0 && !sailSuccess) {
             sharedState.players = passActiveStatus(tools.cc(sharedState.players));
         }
 

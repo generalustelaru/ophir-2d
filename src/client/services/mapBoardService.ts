@@ -117,7 +117,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             let hexColor = COLOR.default;
 
             if (localPlayer?.location.hexId === hexId) {
-                hexColor = localPlayer.isActive && false === localPlayer.isAnchored
+                hexColor = localPlayer.isActive && !localPlayer.isAnchored
                     ? COLOR.illegal
                     : COLOR.anchored;
             }
