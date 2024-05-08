@@ -1,6 +1,7 @@
 
 import Konva from 'konva';
-import { HexId, HexaColor } from '../../shared_types';
+import { HexId } from '../../shared_types';
+import { HexaColor } from '../client_types';
 
 export class MapHex {
     constructor(
