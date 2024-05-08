@@ -68,7 +68,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
         let b2: BarrierId = null;
 
-        while (false === this.isArrangementLegal(b1, b2)) {
+        while (!this.isArrangementLegal(b1, b2)) {
             b2 = Math.ceil(Math.random() * 12) as BarrierId;
         }
 
