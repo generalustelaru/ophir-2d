@@ -141,8 +141,11 @@ export class MapBoardService extends Service implements MapBoardInterface {
             }
         });
 
-        mapState.localShip.object?.setPosition(localPlayer.location.position ?? this.center);
-        mapState.localShip.object?.setInfluence(localPlayer.influence);
-        mapState.localShip.object?.switchControl(localPlayer.isActive);
+        if (localPlayer) {
+            const localShip = mapState.localShip.object;
+            localShip.switchControl(localPlayer.isActive && localPlayer.moveActions > 0);
+            localShip.setPosition(localPlayer.location.position ?? this.center);
+            localShip.setInfluence(localPlayer.influence);
+        }
     }
 }
