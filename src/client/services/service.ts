@@ -1,4 +1,4 @@
-import { EventPayload, CustomEventTitle } from "../../shared_types";
+import { EventPayload, CustomEventTitle } from "../client_types";
 
 export interface ServiceStaticInterface {
     new (): ServiceInterface;

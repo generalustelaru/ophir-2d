@@ -19,13 +19,6 @@ const sharedConstants: SharedConstants = {
         refresh: "refresh",
         turn: "turn",
     },
-    EVENT: {
-        connected: "connected",
-        action: "action",
-        update: "update",
-        error: "error",
-        info: "info"
-    }
 }
 
 export default sharedConstants;

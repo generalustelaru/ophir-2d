@@ -1,14 +1,14 @@
 import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
 import { Service, ServiceInterface } from './service';
 import state from '../state';
-import sharedConstants from '../../shared_constants';
+import clientConstants from '../client_constants';
 
 export interface CommunicationInterface extends ServiceInterface {
     createConnection: (address: string) => void,
     sendMessage: (action: Action, details?: ActionDetails) => void,
 }
 
-const { EVENT } = sharedConstants;
+const { EVENT } = clientConstants;
 
 export class CommunicationService extends Service implements CommunicationInterface {
 

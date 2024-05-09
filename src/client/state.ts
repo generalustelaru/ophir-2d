@@ -1,5 +1,5 @@
 
-import { ClientState } from '../shared_types';
+import { ClientState } from './client_types';
 
 const state: ClientState = {
     localPlayerId: null,

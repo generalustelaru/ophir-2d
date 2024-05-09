@@ -28,6 +28,13 @@ const clientConstants: ClientConstants = {
         { id: "left", x: 172, y: 0 },
         { id: "right", x: -172, y: 0 }
     ],
+    EVENT: {
+        connected: "connected",
+        action: "action",
+        update: "update",
+        error: "error",
+        info: "info"
+    }
 }
 
 export default clientConstants;

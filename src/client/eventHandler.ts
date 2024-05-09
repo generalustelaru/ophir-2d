@@ -1,10 +1,12 @@
-import { InfoEventPayload, ActionEventPayload, ErrorEventPayload} from "../shared_types";
+import { InfoEventPayload, ActionEventPayload, ErrorEventPayload} from "./client_types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
 import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
 import { UserInterfaceService, UiInterface } from "./services/uiService";
 import sharedConstants from "../shared_constants";
-const { EVENT, ACTION, STATUS } = sharedConstants;
+import clientConstants from "./client_constants";
+const { ACTION, STATUS } = sharedConstants;
+const { EVENT } = clientConstants;
 
 export class EventHandler {
 
