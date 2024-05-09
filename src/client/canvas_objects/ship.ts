@@ -1,5 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, PlayerId, ShipInterface } from '../../shared_types';
+import { Coordinates, PlayerId } from '../../shared_types';
+import { ShipInterface } from '../client_types';
 import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;

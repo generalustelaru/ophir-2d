@@ -1,11 +1,12 @@
 import Konva from 'konva';
-import { ActionEventPayload, PlayerShipInterface, Coordinates } from '../../shared_types';
+import { Coordinates } from '../../shared_types';
+import { ActionEventPayload, PlayerShipInterface } from '../client_types';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
 
-const { EVENT, ACTION } = sharedConstants;
-const { COLOR } = clientConstants;
+const { ACTION } = sharedConstants;
+const { EVENT, COLOR } = clientConstants;
 const HEX_COUNT = 7;
 
 export class PlayerShip implements PlayerShipInterface {

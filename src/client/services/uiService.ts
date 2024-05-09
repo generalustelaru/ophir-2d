@@ -1,7 +1,9 @@
-import { PlayerId, ActionEventPayload } from '../../shared_types.js';
+import { PlayerId } from '../../shared_types';
+import { ActionEventPayload } from '../client_types';
 import { Service, ServiceInterface } from './service';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
+import clientConstants from '../client_constants';
 import { Button } from '../html_components/button';
 
 export interface UiInterface extends ServiceInterface {
@@ -10,7 +12,8 @@ export interface UiInterface extends ServiceInterface {
     updateGameControls: () => void,
 }
 
-const { ACTION, EVENT, STATUS } = sharedConstants;
+const { ACTION, STATUS } = sharedConstants;
+const { EVENT } = clientConstants;
 
 export class UserInterfaceService extends Service implements UiInterface {
 
