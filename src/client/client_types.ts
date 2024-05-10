@@ -4,7 +4,8 @@ import Konva from 'konva';
 
 export type HexaColor = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
-export type ShapeDetails = { name: LocationName, island: string, settlement: string, fill: HexaColor };
+export type BuildingData = { name: LocationName, shape: string, fill: HexaColor };
+export type IslandData = { shape: string };
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
 
 export type ClientState = {
@@ -28,12 +29,13 @@ export type ClientConstants = {
     },
     COLOR: Record<string, HexaColor>,
     HEX_OFFSET_DATA: HexOffset[],
-    LOCATION_DATA: ShapeDetails[],
+    ISLAND_DATA: Record<HexId, (IslandData)>,
+    LOCATION_DATA: BuildingData[],
     EVENT: Record<CustomEventTitle, CustomEventTitle>,
 }
 
 export interface MapHexInterface {
-    getElement: () => Konva.RegularPolygon,
+    getElement: () => Konva.Group,
     getId: () => HexId,
     setFill: (color: HexaColor) => void,
     isIntersecting: (coordinates: Vector2d) => boolean,
