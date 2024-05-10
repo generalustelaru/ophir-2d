@@ -6,6 +6,7 @@ export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGr
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type Action = "inquire" | "enroll" | "start" | "move" | "favor" |"refresh" | "turn";
 export type GameStatus = "empty" | "created" | "full" | "started";
+export type LocationName = "temple" | "market" | "mines" | "forest" | "quary" | "caves" | "farms";
 
 export type PlayerState = {
     turnOrder: number | null,

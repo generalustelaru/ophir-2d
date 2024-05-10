@@ -28,6 +28,9 @@ const clientConstants: ClientConstants = {
         { id: "left", x: 172, y: 0 },
         { id: "right", x: -172, y: 0 }
     ],
+    LOCATION_DATA: [
+        // { name: "temple", fill: "#FFD700", island: '', settlement: "M 0,0 V 26.458333 H 26.458333 V 0 H 23.8125 V 10.583333 H 23.72878 A 10.583333,10.583333 0 0 0 13.229167,1.3229167 10.583333,10.583333 0 0 0 2.7352336,10.583333 h -0.0894 V 0 Z",},
+    ],
     EVENT: {
         connected: "connected",
         action: "action",

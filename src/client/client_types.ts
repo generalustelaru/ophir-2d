@@ -1,9 +1,10 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationName } from '../shared_types';
 import Konva from 'konva';
 
 export type HexaColor = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
+export type ShapeDetails = { name: LocationName, island: string, settlement: string, fill: HexaColor };
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
 
 export type ClientState = {
@@ -27,6 +28,7 @@ export type ClientConstants = {
     },
     COLOR: Record<string, HexaColor>,
     HEX_OFFSET_DATA: HexOffset[],
+    LOCATION_DATA: ShapeDetails[],
     EVENT: Record<CustomEventTitle, CustomEventTitle>,
 }
 
