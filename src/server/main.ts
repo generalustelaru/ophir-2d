@@ -60,10 +60,10 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
         const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
         const colorized = {
-            playerPurple: '\x1b[35mplayerPurple\x1b[0m',
-            playerYellow: '\x1b[33mplayerYellow\x1b[0m',
-            playerRed: '\x1b[31mplayerRed\x1b[0m',
-            playerGreen: '\x1b[32mplayerGreen\x1b[0m',
+            playerPurple: '\x1b[95mplayerPurple\x1b[0m',
+            playerYellow: '\x1b[93mplayerYellow\x1b[0m',
+            playerRed: '\x1b[91mplayerRed\x1b[0m',
+            playerGreen: '\x1b[92mplayerGreen\x1b[0m',
         }
         const colorizedId = playerId ? colorized[playerId] : '?';
         console.info(
