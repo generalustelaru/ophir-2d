@@ -15,7 +15,7 @@ export interface MapBoardInterface extends ServiceInterface {
     updateBoard: () => void,
 }
 
-const { COLOR, HEX_OFFSET_DATA, EVENT } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, EVENT } = clientConstants;
 
 export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;
@@ -49,7 +49,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
             const mapHex = new MapHex(
                 this.center,
                 hexItem.id,
-                hexItem.x, hexItem.y,
+                hexItem.x,
+                hexItem.y,
+                ISLAND_DATA[hexItem.id],
                 localPlayer?.location.hexId === hexItem.id
                     ? localPlayerHexColor
                     : COLOR.default
