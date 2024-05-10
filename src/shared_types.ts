@@ -1,11 +1,11 @@
 //TODO: Research and implement namespaces for type files
 
+// TODO: Research and implement enums to reduce the number of type definitions
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type Action = "inquire" | "enroll" | "start" | "move" | "favor" |"refresh" | "turn";
 export type GameStatus = "empty" | "created" | "full" | "started";
-
 
 export type PlayerState = {
     turnOrder: number | null,
