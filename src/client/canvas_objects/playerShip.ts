@@ -62,11 +62,11 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.on('dragmove', () => {
 
             const player = state.server.players[state.localPlayerId];
-            const targetHex = state.konva.hexes.find(hex => hex.intersects(stage.getPointerPosition()));
+            const targetHex = state.konva.hexes.find(hex => hex.isIntersecting(stage.getPointerPosition()));
             const shipState = state.konva.localShip;
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                state.konva.hexes[i].fill(COLOR.default);
+                state.konva.hexes[i].setFill(COLOR.default);
             }
 
             shipState.isDestinationValid = false;
@@ -75,42 +75,42 @@ export class PlayerShip implements PlayerShipInterface {
                 return;
             }
 
-            if (targetHex.attrs.id === player.location.hexId) {
-                targetHex.fill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
+            if (targetHex.getId() === player.location.hexId) {
+                targetHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
 
-            } else if (player.allowedMoves.includes(targetHex.attrs.id)) {
-                targetHex.fill(COLOR.valid);
+            } else if (player.allowedMoves.includes(targetHex.getId())) {
+                targetHex.setFill(COLOR.valid);
                 shipState.isDestinationValid = true;
 
             } else {
-                targetHex.fill(COLOR.illegal);
+                targetHex.setFill(COLOR.illegal);
             }
         });
 
         this.group.on('dragend', () => {
 
-            const targetHex = state.konva.hexes.find(hex => hex.intersects(stage.getPointerPosition()));
+            const targetHex = state.konva.hexes.find(hex => hex.isIntersecting(stage.getPointerPosition()));
             const { x: positionX, y: positionY } = state.konva.localShip.homePosition;
             const player = state.server.players[state.localPlayerId];
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                state.konva.hexes[i].fill(COLOR.default);
+                state.konva.hexes[i].setFill(COLOR.default);
             }
 
             if (state.konva.localShip.isDestinationValid) {
-                targetHex.fill(COLOR.anchored);
+                targetHex.setFill(COLOR.anchored);
                 this.broadcastAction({
                     action: ACTION.move,
                     details: {
-                        hexId: targetHex.attrs.id,
+                        hexId: targetHex.getId(),
                         position: { x: this.group.x(), y: this.group.y() }
                     }
                 });
             } else {
                 this.group.x(positionX);
                 this.group.y(positionY);
-                const locationHex = state.konva.hexes.find(hex => hex.attrs.id === player.location.hexId);
-                locationHex.fill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
+                const locationHex = state.konva.hexes.find(hex => hex.getId() === player.location.hexId);
+                locationHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
             }
 
             layer.batchDraw();

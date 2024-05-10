@@ -1,3 +1,4 @@
+import { Vector2d } from 'konva/lib/types';
 import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails } from '../shared_types';
 import Konva from 'konva';
 
@@ -16,7 +17,7 @@ export type ClientState = {
             isDestinationValid: boolean,
         },
         opponentShips: ShipInterface[],
-        hexes: Konva.RegularPolygon[],
+        hexes: MapHexInterface[],
     },
 }
 
@@ -27,6 +28,13 @@ export type ClientConstants = {
     COLOR: Record<string, HexaColor>,
     HEX_OFFSET_DATA: HexOffset[],
     EVENT: Record<CustomEventTitle, CustomEventTitle>,
+}
+
+export interface MapHexInterface {
+    getElement: () => Konva.RegularPolygon,
+    getId: () => HexId,
+    setFill: (color: HexaColor) => void,
+    isIntersecting: (coordinates: Vector2d) => boolean,
 }
 
 export interface ShipInterface {
