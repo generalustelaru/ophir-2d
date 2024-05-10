@@ -1,9 +1,12 @@
 
 import Konva from 'konva';
 import { HexId } from '../../shared_types';
-import { HexaColor } from '../client_types';
+import { HexaColor, MapHexInterface} from '../client_types';
+import { Vector2d } from 'konva/lib/types';
 
-export class MapHex {
+export class MapHex implements MapHexInterface {
+
+    element: Konva.RegularPolygon;
     constructor(
         center: {x: number, y: number},
         name: HexId,
@@ -12,7 +15,7 @@ export class MapHex {
         fill: HexaColor
     ) {
 
-        return new Konva.RegularPolygon({
+        this.element = new Konva.RegularPolygon({
             x: center.x,
             y: center.y,
             offsetX,
@@ -25,5 +28,10 @@ export class MapHex {
             id: name,
         });
     }
+
+    public getElement = () => this.element;
+    public getId = () => this.element.attrs.id as HexId;
+    public setFill = (color: HexaColor) => this.element.fill(color);
+    public isIntersecting = (vector: Vector2d) => this.element.intersects(vector);
 }
 

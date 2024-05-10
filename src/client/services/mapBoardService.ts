@@ -46,16 +46,16 @@ export class MapBoardService extends Service implements MapBoardInterface {
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
         //MARK: Map hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
-            const hexElement = new MapHex(
+            const mapHex = new MapHex(
                 this.center,
                 hexItem.id,
                 hexItem.x, hexItem.y,
                 localPlayer?.location.hexId === hexItem.id
                     ? localPlayerHexColor
                     : COLOR.default
-            ) as Konva.RegularPolygon;
-            state.konva.hexes.push(hexElement);
-            this.layer.add(hexElement);
+            );
+            state.konva.hexes.push(mapHex);
+            this.layer.add(mapHex.getElement());
         });
 
         // MARK: Barriers
@@ -112,7 +112,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         const mapState = state.konva;
 
         mapState.hexes.forEach(hex => {
-            const hexId = hex.attrs.id;
+            const hexId = hex.getId();
             let hexColor = COLOR.default;
 
             if (localPlayer?.location.hexId === hexId) {
@@ -121,7 +121,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
                     : COLOR.anchored;
             }
 
-            hex.fill(hexColor);
+            hex.setFill(hexColor);
         });
 
         mapState.opponentShips.forEach(ship => {
