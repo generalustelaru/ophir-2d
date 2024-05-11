@@ -78,33 +78,27 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
         }
 
         if (action === ACTION.enroll) {
-            const isEnrolled = processPlayer(playerId);
 
-            if (isEnrolled) {
+            if (processPlayer(playerId)) {
                 sendAll(sharedState);
             } else {
-                console.debug('Enrollment failed:', playerId);
+                sendAll({ error: `Enrollment failed on ${playerId}`});
             }
+
         }
 
         if (action === ACTION.start) {
-            const isGameReady = processGameStart();
 
-            if (isGameReady) {
-                sharedState.players = passActiveStatus(
-                    tools.cc(sharedState.players)
-                );
-
-                return sendAll(sharedState);
+            if (processGameStart()) {
+                sendAll(sharedState);
+            } else {
+                sendAll({ error: 'Game start failed' });
             }
-
-            sendAll({ error: 'Game start failed' });
         }
 
         if (action === ACTION.move) {
-            const isMoveLegal = processMove(playerId, details);
 
-            if (isMoveLegal) {
+            if (processMove(playerId, details)) {
                 sendAll(sharedState);
             } else {
                 sendAll({ error: `Illegal move on ${playerId}` });
@@ -112,21 +106,38 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
         }
 
         if (action === ACTION.favor) {
-            const isLegalSpend = processFavorSpending(playerId);
 
-            if (isLegalSpend) {
+            if (processFavorSpending(playerId)) {
                 sendAll(sharedState);
             } else {
                 sendAll({ error: `Illegal favor spend on ${playerId}` });
             }
+
         }
 
         if (action === ACTION.turn) {
-            sharedState.players = passActiveStatus(tools.cc(sharedState.players));
-            sendAll(sharedState);
+
+            if (processEndTurn(playerId)) {
+                sendAll(sharedState);
+            } else {
+                sendAll({ error: `Illegal turn end on ${playerId}` });
+            }
+
         }
     });
 });
+
+function processEndTurn(playerId: PlayerId): boolean {
+    const player = sharedState.players[playerId];
+
+    if(player.isActive && player.isAnchored) {
+        sharedState.players = passActiveStatus(tools.cc(sharedState.players));
+
+        return true;
+    }
+
+    return false;
+}
 
 // TODO: convert into a boolean-returning function with plenty of side effects
 function passActiveStatus(states: PlayerStates): PlayerStates {
@@ -267,6 +278,9 @@ function processGameStart(): boolean{
         sharedState.players = bundle.sharedState.players;
         sharedState.setup = bundle.sharedState.setup;
         privateState.moveRules = bundle.privateState.moveRules;
+        sharedState.players = passActiveStatus(
+            tools.cc(sharedState.players)
+        );
     } catch (error) {
         console.error('Game start failed:', error);
 
