@@ -23,6 +23,8 @@ export class MapHex implements MapHexInterface {
     ) {
 
         this.group = new Konva.Group({
+            width: 100,
+            height: 100,
             x: center.x,
             y: center.y,
             offsetX,
@@ -41,9 +43,11 @@ export class MapHex implements MapHexInterface {
         this.group.add(this.hexagon);
 
         this.island = new Konva.Path({
+            x: island.x,
+            y: island.y,
             data: island.shape,
             fill: COLOR.islandGreen,
-            stroke: 'black',
+            scale: {x: 7, y: 7},
             strokeWidth: 1,
         });
 
