@@ -5,7 +5,7 @@ import Konva from 'konva';
 export type HexaColor = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
 export type BuildingData = { name: LocationName, shape: string, fill: HexaColor };
-export type IslandData = { shape: string };
+export type IslandData = { x: number , y: number, shape: string };
 export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
 
 export type ClientState = {
