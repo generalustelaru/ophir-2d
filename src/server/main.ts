@@ -177,8 +177,8 @@ function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
         if (sailSuccess) {
             player.location = { hexId: destination, position: details.position };
             player.allowedMoves = privateState.moveRules
-            .find(rule => rule.from === destination).allowed
-            .filter(move => move !== departure);
+                .find(rule => rule.from === destination).allowed
+                .filter(move => move !== departure);
             player.isAnchored = true;
         }
 
