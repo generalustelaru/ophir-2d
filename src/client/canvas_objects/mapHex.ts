@@ -47,7 +47,7 @@ export class MapHex implements MapHexInterface {
             y: island.y,
             data: island.shape,
             fill: COLOR.islandGreen,
-            scale: {x: 7, y: 7},
+            scale: {x: 7.5, y: 7.5},
             strokeWidth: 1,
         });
 
