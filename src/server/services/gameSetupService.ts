@@ -1,7 +1,6 @@
 
 import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
-import sharedConstants from '../../shared_constants';
 import serverConstants from '../server_constants';
 import { Service, ServiceInterface } from './service';
 
@@ -48,6 +47,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
             const randomPick = Math.floor(Math.random() * playerIds.length);
             const playerId = playerIds.splice(randomPick, 1)[0];
             states[playerId].turnOrder = tokenCount;
+            states[playerId].isActive = tokenCount === 1;
             tokenCount -= 1;
         }
 
