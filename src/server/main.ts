@@ -45,20 +45,21 @@ const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupInterface = GameSetupService.getInstance();
 const tools: ToolInterface = ToolService.getInstance();
 
-socketServer.on(WS_SIGNAL.connection, function connection(ws) {
+const sendAll = (message: WssMessage) => {
+    socketClients.forEach(client => {
+        client.send(JSON.stringify(message));
+    });
+}
 
-    socketClients.push(ws);
-    const sendAll = (message: WssMessage) => {
-        socketClients.forEach(client => {
-            client.send(JSON.stringify(message));
-        });
-    }
+const send = (client: any, message: WssMessage) => {
+    client.send(JSON.stringify(message));
+}
 
-    const send = (message: WssMessage) => {
-        ws.send(JSON.stringify(message));
-    }
+socketServer.on(WS_SIGNAL.connection, function connection(client) {
 
-    ws.on(WS_SIGNAL.message, function incoming(message: string) {
+    socketClients.push(client);
+
+    client.on(WS_SIGNAL.message, function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
         const { playerId, action, details } = parsedMessage;
@@ -77,7 +78,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
         );
 
         if (action === ACTION.inquire) {
-            send(sharedState);
+            send(client, sharedState);
             return;
         }
 
@@ -131,10 +132,7 @@ function processGameStart(): boolean{
 
 function processPlayer(playerId: PlayerId): boolean {
 
-    if (
-        sharedState.gameStatus === STATUS.started
-        || sharedState.gameStatus === STATUS.full
-    ) {
+    if ([STATUS.started, STATUS.full].includes(sharedState.gameStatus)) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
