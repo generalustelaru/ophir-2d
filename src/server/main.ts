@@ -7,12 +7,12 @@ import { SharedState, HexId, PlayerStates, PlayerState, PlayerId, WebsocketClien
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
 import { ToolService, ToolInterface } from './services/toolService';
+import { GameSession } from './classes/gameSession';
 const httpPort = 3000;
 const wsPort = 8080;
 
 const { ACTION, STATUS } = sharedConstants;
 const { PLAYER_IDS, WS_SIGNAL, PLAYER_STATE } = serverConstants;
-// TODO: move all session-related state and functionality into (a) GamerSession class
 const privateState: PrivateState = {
     moveRules: [],
 }
@@ -24,6 +24,8 @@ const sharedState: SharedState = {
     players: null,
     setup: null,
 }
+
+let singleSession: GameSession = null;
 
 const app = express();
 app.use(express.static('public'));
@@ -58,7 +60,8 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
     ws.on(WS_SIGNAL.message, function incoming(message: string) {
 
-        const { playerId, action, details } = JSON.parse(message) as WebsocketClientMessage;
+        const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
+        const { playerId, action, details } = parsedMessage;
         const colorized = {
             playerPurple: '\x1b[95mplayerPurple\x1b[0m',
             playerYellow: '\x1b[93mplayerYellow\x1b[0m',
@@ -75,6 +78,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
 
         if (action === ACTION.inquire) {
             send(sharedState);
+            return;
         }
 
         if (action === ACTION.enroll) {
@@ -84,7 +88,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}`});
             }
-
+            return;
         }
 
         if (action === ACTION.start) {
@@ -94,177 +98,12 @@ socketServer.on(WS_SIGNAL.connection, function connection(ws) {
             } else {
                 sendAll({ error: 'Game start failed' });
             }
+            return;
         }
-
-        if (action === ACTION.move) {
-
-            if (processMove(playerId, details)) {
-                sendAll(sharedState);
-            } else {
-                sendAll({ error: `Illegal move on ${playerId}` });
-            }
-        }
-
-        if (action === ACTION.favor) {
-
-            if (processFavorSpending(playerId)) {
-                sendAll(sharedState);
-            } else {
-                sendAll({ error: `Illegal favor spend on ${playerId}` });
-            }
-
-        }
-
-        if (action === ACTION.turn) {
-
-            if (processEndTurn(playerId)) {
-                sendAll(sharedState);
-            } else {
-                sendAll({ error: `Illegal turn end on ${playerId}` });
-            }
-
-        }
+        // in-game player actions are handled in instantiable class
+        sendAll(singleSession.processAction(parsedMessage));
     });
 });
-
-function processEndTurn(playerId: PlayerId): boolean {
-    const player = sharedState.players[playerId];
-
-    if(player.isActive && player.isAnchored) {
-        sharedState.players = passActiveStatus(tools.cc(sharedState.players));
-
-        return true;
-    }
-
-    return false;
-}
-
-// TODO: convert into a boolean-returning function with plenty of side effects
-function passActiveStatus(states: PlayerStates): PlayerStates {
-    const playerCount = Object.keys(states).length;
-    let nextToken = 1;
-
-    for (const id in states) {
-        const playerId = id as PlayerId;
-        const player = states[playerId];
-
-        if (player.isActive) {
-            nextToken = player.turnOrder === playerCount
-                ? 1
-                : player.turnOrder + 1;
-
-            player.isActive = false;
-        }
-    }
-
-    for (const id in states) {
-        const playerId = id as PlayerId;
-        const player = states[playerId];
-
-        if (player.turnOrder === nextToken) {
-            states[playerId] = setTurnStartConditions(tools.cc(player));
-        }
-    }
-
-    return states;
-}
-
-function processMove(playerId: PlayerId, details: MoveActionDetails): boolean {
-
-    const player = sharedState.players[playerId];
-    const departure = player.location.hexId;
-    const destination  = details.hexId;
-    const remainingMoves = player.moveActions;
-    const allowed = privateState.moveRules.find(rule => rule.from === departure).allowed;
-
-    if (allowed.includes(destination) && remainingMoves > 0) {
-        player.moveActions = remainingMoves - 1;
-
-        const manifest = getPortManifest(sharedState.players, destination);
-        const sailSuccess = !manifest || player.hasSpentFavor
-            ? true
-            : handleInfluenceRoll(player, manifest);
-
-        if (sailSuccess) {
-            player.location = { hexId: destination, position: details.position };
-            player.allowedMoves = privateState.moveRules
-                .find(rule => rule.from === destination).allowed
-                .filter(move => move !== departure);
-            player.isAnchored = true;
-        }
-
-        if (player.moveActions === 0 && !sailSuccess) {
-            sharedState.players = passActiveStatus(tools.cc(sharedState.players));
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
-function processFavorSpending(playerId: PlayerId): boolean {
-    const player = sharedState.players[playerId];
-
-    if (player.favor > 0 && player.hasSpentFavor === false) {
-        player.favor -= 1;
-        player.hasSpentFavor = true;
-        player.isAnchored = true;
-
-        return true;
-    }
-
-    return false;
-}
-
-type ManifestItem = { id: PlayerId, influence: number };
-function getPortManifest (players: PlayerStates, destinationHex: HexId): ManifestItem[] | false {
-    const manifest = [];
-
-    for (const id in players) {
-        const playerId = id as PlayerId;
-        const player = players[playerId];
-
-        if (player.location.hexId === destinationHex) {
-            manifest.push({ id: playerId, influence: player.influence });
-        }
-    }
-
-    if (manifest.length === 0) {
-        return false;
-    }
-
-    return manifest;
-}
-
-function handleInfluenceRoll (activePlayer: PlayerState, manifest:ManifestItem[] ): boolean {
-    let canMove = true;
-
-    activePlayer.influence = Math.ceil(Math.random() * 6);
-    let highestInfluence = activePlayer.influence;
-
-    manifest.forEach(item => {
-        if (item.influence > highestInfluence) {
-            canMove = false;
-            highestInfluence = item.influence;
-        }
-    });
-
-    if (canMove) {
-        return true;
-    }
-
-    for (const id in sharedState.players) {
-        const playerId = id as PlayerId;
-        const player = sharedState.players[playerId];
-
-        if (player.influence === highestInfluence) {
-            player.influence -= 1;
-        }
-    }
-
-    return false;
-}
 
 function processGameStart(): boolean{
 
@@ -275,12 +114,12 @@ function processGameStart(): boolean{
         const bundle: StateBundle = setupService.produceGameData(
             tools.cc(sharedState)
         );
+
+        singleSession = new GameSession(bundle);
+
         sharedState.players = bundle.sharedState.players;
         sharedState.setup = bundle.sharedState.setup;
         privateState.moveRules = bundle.privateState.moveRules;
-        sharedState.players = passActiveStatus(
-            tools.cc(sharedState.players)
-        );
     } catch (error) {
         console.error('Game start failed:', error);
 
@@ -330,15 +169,4 @@ function processPlayer(playerId: PlayerId): boolean {
     }
 
     return true;
-}
-
-function setTurnStartConditions(player: PlayerState): PlayerState {;
-    player.isActive = true;
-    player.isAnchored = false;
-    player.hasSpentFavor = false;
-    player.moveActions = 2;
-    player.allowedMoves = privateState.moveRules
-        .find(rule => rule.from === player.location.hexId).allowed;
-
-    return player;
 }
