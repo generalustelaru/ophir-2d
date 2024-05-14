@@ -6,13 +6,13 @@ import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
 
 const { ACTION } = sharedConstants;
-const { EVENT, COLOR } = clientConstants;
+const { EVENT, COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
 
 export class PlayerShip implements PlayerShipInterface {
 
-    ship: Konva.Rect;
-    label: Konva.Text;
+    ship: Konva.Path;
+    influence: Konva.Text;
     group: Konva.Group;
 
     public switchControl = (isActivePlayer: boolean) => {
@@ -22,7 +22,7 @@ export class PlayerShip implements PlayerShipInterface {
     public getElement = () => this.group;
 
     public setInfluence = (value: number) => {
-        this.label.text(value.toString());
+        this.influence.text(value.toString());
     }
 
     public setPosition = (coordinates: Coordinates) => {
@@ -40,20 +40,19 @@ export class PlayerShip implements PlayerShipInterface {
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
-            width: 40,
-            height: 30,
             draggable: true,
             id: state.localPlayerId,
         });
 
-        this.ship = new Konva.Rect({
+        this.ship = new Konva.Path({
+            x: -15,
+            y: -5,
+            data: SHIP_DATA.shape,
             fill,
+            scale: {x: 1.5, y: 1.5},
             stroke: COLOR.localShipBorder,
-            strokeWidth: 3,
-            width: 40,
-            height: 30,
-            cornerRadius: [0, 0, 5, 30],
-        })
+            strokeWidth: 2,
+        });
 
         this.group.on('dragstart', () => {
             state.konva.localShip.homePosition = { x: this.group.x(), y: this.group.y() }
@@ -118,15 +117,21 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.add(this.ship);
 
-        this.label = new Konva.Text({
-            x: 5,
-            y: 5,
-            text: '???',
-            fontSize: 20,
-            fill: 'white',
+        const influenceTextColor =
+            state.localPlayerId === 'playerYellow'
+            || state.localPlayerId === 'playerGreen'
+                ? 'black'
+                : 'white';
+
+        this.influence = new Konva.Text({
+            x: 6,
+            y: 10,
+            fontSize: 15,
+            fontStyle: 'bold',
+            fill: influenceTextColor,
         });
 
-        this.group.add(this.label);
+        this.group.add(this.influence);
     }
 
     private broadcastAction = (detail: ActionEventPayload = null) => {

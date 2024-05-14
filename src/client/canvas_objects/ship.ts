@@ -3,12 +3,12 @@ import { Coordinates, PlayerId } from '../../shared_types';
 import { ShipInterface } from '../client_types';
 import clientConstants from '../client_constants';
 
-const { COLOR } = clientConstants;
+const { COLOR, SHIP_DATA } = clientConstants;
 
 export class Ship implements ShipInterface {
 
-    ship: Konva.Rect;
-    label: Konva.Text;
+    ship: Konva.Path;
+    influence: Konva.Text;
     group: Konva.Group;
 
     constructor(
@@ -20,35 +20,42 @@ export class Ship implements ShipInterface {
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
-            width: 40,
-            height: 30,
+            width: 20,
+            height: 15,
             id,
         });
 
-        this.ship = new Konva.Rect({
+        this.ship = new Konva.Path({
+            x: -15,
+            y: -5,
+            data: SHIP_DATA.shape,
             fill,
+            scale: {x: 1, y: 1},
             stroke: COLOR.shipBorder,
-            strokeWidth: 3,
-            width: 40,
-            height: 30,
-            cornerRadius: [0, 0, 5, 30],
+            strokeWidth: 2,
         });
 
         this.group.add(this.ship);
 
-        this.label = new Konva.Text({
-            x: 5,
-            y: 5,
-            text: '???',
-            fontSize: 20,
-            fill: 'black',
+        const influenceTextColor =
+            id === 'playerYellow'
+            || id === 'playerGreen'
+                ? 'black'
+                : 'white';
+
+        this.influence = new Konva.Text({
+            x: -1,
+            y: 4,
+            fontSize: 10,
+            fontStyle: 'bold',
+            fill: influenceTextColor,
         });
 
-        this.group.add(this.label);
+        this.group.add(this.influence);
     }
 
     public setInfluence = (value: number) => {
-        this.label.text(value.toString());
+        this.influence.text(value.toString());
     }
     public getElement = () => this.group;
     public getId = () => this.group.attrs.id as PlayerId;
