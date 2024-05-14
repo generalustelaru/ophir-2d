@@ -31,6 +31,7 @@ export type ClientConstants = {
     HEX_OFFSET_DATA: HexOffset[],
     ISLAND_DATA: Record<HexId, (IslandData)>,
     LOCATION_DATA: BuildingData[],
+    SHIP_DATA: { shape: string },
     EVENT: Record<CustomEventTitle, CustomEventTitle>,
 }
 
