@@ -15,17 +15,25 @@ export class PlayerShip implements PlayerShipInterface {
     influence: Konva.Text;
     group: Konva.Group;
 
-    public switchControl = (isActivePlayer: boolean) => {
+    public switchControl(isActivePlayer: boolean) {
         this.group.draggable(isActivePlayer);
+        this.ship.scale(
+            isActivePlayer ? { x: 1.5, y: 1.5 } : { x: 1, y: 1 }
+        );
+        this.influence.fontSize(isActivePlayer ? 15 : 10)
+        this.influence.x(isActivePlayer ? 6 : -1);
+        this.influence.y(isActivePlayer ? 10 : 4);
     }
 
-    public getElement = () => this.group;
+    public getElement() {
+        return this.group
+    };
 
-    public setInfluence = (value: number) => {
+    public setInfluence(value: number) {
         this.influence.text(value.toString());
     }
 
-    public setPosition = (coordinates: Coordinates) => {
+    public setPosition(coordinates: Coordinates) {
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };
@@ -134,7 +142,7 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.add(this.influence);
     }
 
-    private broadcastAction = (detail: ActionEventPayload = null) => {
+    private broadcastAction(detail: ActionEventPayload = null) {
         window.dispatchEvent(new CustomEvent(
             EVENT.action,
             { detail: detail }
