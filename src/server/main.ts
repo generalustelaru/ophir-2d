@@ -71,10 +71,10 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
         }
         const colorizedId = playerId ? colorized[playerId] : '?';
         console.info(
-            '%s -> %s %s',
+            '%s -> %s%s',
             colorizedId,
-            `\x1b[37;1m${action}\x1b[0m` ?? '?',
-            details ? `-> ${JSON.stringify(details)}` : '',
+            action ?? '?',
+            details ? `: ${JSON.stringify(details)}` : '',
         );
 
         if (action === ACTION.inquire) {
