@@ -87,7 +87,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             if (processPlayer(playerId)) {
                 sendAll(sharedState);
             } else {
-                sendAll({ error: `Enrollment failed on ${playerId}`});
+                sendAll({ error: `Enrollment failed on ${playerId}` });
             }
             return;
         }
@@ -106,7 +106,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
     });
 });
 
-function processGameStart(): boolean{
+function processGameStart(): boolean {
 
     try {
         sharedState.gameStatus = STATUS.started;

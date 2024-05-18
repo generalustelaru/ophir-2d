@@ -8,7 +8,7 @@ export class Button implements HTMLHandlerInterface {
     element: HTMLButtonElement;
     callback: () => void;
 
-    constructor (id: string, callback: () => void) {
+    constructor(id: string, callback: () => void) {
         this.element = document.getElementById(id) as HTMLButtonElement;
         this.callback = callback.bind(this);
     }

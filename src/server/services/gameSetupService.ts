@@ -17,7 +17,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
     }
 
 
-    public produceGameData (state: SharedState): StateBundle {
+    public produceGameData(state: SharedState): StateBundle {
         // state.status = STATUS.setup; TODO: for when players will need to draft their characters
         state.players = this.assignTurnOrder(state.players);
         state.setup = this.determineBoardPieces();
@@ -39,7 +39,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return bundle;
     };
 
-    private assignTurnOrder (states: PlayerStates): PlayerStates {
+    private assignTurnOrder(states: PlayerStates): PlayerStates {
         const playerIds = Object.keys(states) as PlayerId[];
         let tokenCount = playerIds.length;
 
@@ -54,7 +54,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return states;
     }
 
-    private determineBoardPieces (): GameSetup {
+    private determineBoardPieces(): GameSetup {
         const setup = {
             barriers: this.determineBarriers(),
             //TODO: settlements: determineSettlements(), // Collection<hexId, settlementId> // Settlements should be implemented after the influence and favor mechanics are in place
@@ -63,7 +63,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return setup;
     }
 
-    private determineBarriers (): BarrierId[] {
+    private determineBarriers(): BarrierId[] {
 
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
         let b2: BarrierId = null;
@@ -75,7 +75,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return [b1, b2];
     }
 
-    private isArrangementLegal (b1: BarrierId, b2: BarrierId): boolean {
+    private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {
 
         if (!b2 || b1 === b2) {
             return false;
@@ -90,7 +90,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return true;
     }
 
-    private assignTurnOneRules (
+    private assignTurnOneRules(
         states: PlayerStates, rules: ProcessedMoveRule[]
     ): PlayerStates {
         const initialPlacement = rules[0];
@@ -109,7 +109,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return states;
     }
 
-    private produceMoveRules (barrierIds: BarrierId[]): ProcessedMoveRule[] {
+    private produceMoveRules(barrierIds: BarrierId[]): ProcessedMoveRule[] {
         const rules: ProcessedMoveRule[] = [];
 
         DEFAULT_MOVE_RULES.forEach(moveRule => {

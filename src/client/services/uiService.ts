@@ -52,7 +52,7 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private processStart = (): void => {
         this.startButton.disable();
-        const payload: ActionEventPayload = {action: ACTION.start, details: null};
+        const payload: ActionEventPayload = { action: ACTION.start, details: null };
 
         return this.broadcastEvent(EVENT.action, payload);
     }
@@ -66,7 +66,7 @@ export class UserInterfaceService extends Service implements UiInterface {
 
         if (state.server.availableSlots.includes(selectedId)) {
             state.localPlayerId = selectedId as PlayerId;
-            const payload: ActionEventPayload = {action: ACTION.enroll, details: null};
+            const payload: ActionEventPayload = { action: ACTION.enroll, details: null };
 
             return this.broadcastEvent(EVENT.action, payload);
         }
@@ -75,23 +75,23 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     private processFavor = (): void => {
-        const payload: ActionEventPayload = {action: ACTION.favor, details: null};
+        const payload: ActionEventPayload = { action: ACTION.favor, details: null };
 
         return this.broadcastEvent(EVENT.action, payload);
     }
 
     private processEndTurn = (): void => {
-        const payload: ActionEventPayload = {action: ACTION.turn, details: null};
+        const payload: ActionEventPayload = { action: ACTION.turn, details: null };
 
         return this.broadcastEvent(EVENT.action, payload);
     }
 
-    public setInfo (text: string): void {
+    public setInfo(text: string): void {
         const info = document.getElementById('info');
         info.innerHTML = text;
     }
 
-    private enableElements (...handlers: { enable:()=>void }[]): void {
+    private enableElements(...handlers: { enable: () => void }[]): void {
         handlers.forEach(handler => handler.enable());
     }
 

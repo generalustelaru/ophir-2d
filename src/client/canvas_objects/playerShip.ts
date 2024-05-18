@@ -30,7 +30,7 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.y(coordinates.y);
     };
 
-    constructor (
+    constructor(
         stage: Konva.Stage,
         layer: Konva.Layer,
         offsetX: number,
@@ -49,7 +49,7 @@ export class PlayerShip implements PlayerShipInterface {
             y: -5,
             data: SHIP_DATA.shape,
             fill,
-            scale: {x: 1.5, y: 1.5},
+            scale: { x: 1.5, y: 1.5 },
             stroke: COLOR.localShipBorder,
             strokeWidth: 2,
         });
@@ -119,7 +119,7 @@ export class PlayerShip implements PlayerShipInterface {
 
         const influenceTextColor =
             state.localPlayerId === 'playerYellow'
-            || state.localPlayerId === 'playerGreen'
+                || state.localPlayerId === 'playerGreen'
                 ? 'black'
                 : 'white';
 
