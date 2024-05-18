@@ -15,7 +15,7 @@ export interface MapBoardInterface extends ServiceInterface {
     updateBoard: () => void,
 }
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, EVENT } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
 
 export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;
@@ -44,6 +44,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         const players = state.server.players;
         const localPlayer = players[state.localPlayerId];
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
+        const settlements = state.server.setup.settlements
         //MARK: Map hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
@@ -52,6 +53,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
+                SETTLEMENT_DATA[settlements[hexItem.id]],
                 localPlayer?.location.hexId === hexItem.id
                     ? localPlayerHexColor
                     : COLOR.default
@@ -63,7 +65,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         // MARK: Barriers
         const barriers = state.server.setup.barriers
         const barrier_1 = new Barrier(this.center, barriers[0]) as Konva.Rect;
-        const barrier_2 = new Barrier(this.center, barriers[1]) as Konva.Rect
+        const barrier_2 = new Barrier(this.center, barriers[1]) as Konva.Rect;
         this.layer.add(barrier_1, barrier_2);
 
         //MARK: Other ships

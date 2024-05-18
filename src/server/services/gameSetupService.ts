@@ -1,5 +1,5 @@
 
-import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId } from '../../shared_types';
+import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId, HexId, SettlementId } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service, ServiceInterface } from './service';
@@ -15,7 +15,6 @@ export class GameSetupService extends Service implements GameSetupInterface {
     constructor() {
         super();
     }
-
 
     public produceGameData(state: SharedState): StateBundle {
         // state.status = STATUS.setup; TODO: for when players will need to draft their characters
@@ -44,8 +43,8 @@ export class GameSetupService extends Service implements GameSetupInterface {
         let tokenCount = playerIds.length;
 
         while (tokenCount > 0) {
-            const randomPick = Math.floor(Math.random() * playerIds.length);
-            const playerId = playerIds.splice(randomPick, 1)[0];
+            const pick = Math.floor(Math.random() * playerIds.length);
+            const playerId = playerIds.splice(pick, 1)[0];
             states[playerId].turnOrder = tokenCount;
             states[playerId].isActive = tokenCount === 1;
             tokenCount -= 1;
@@ -57,7 +56,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
     private determineBoardPieces(): GameSetup {
         const setup = {
             barriers: this.determineBarriers(),
-            //TODO: settlements: determineSettlements(), // Collection<hexId, settlementId> // Settlements should be implemented after the influence and favor mechanics are in place
+            settlements: this.determineSettlements(),
         }
 
         return setup;
@@ -73,6 +72,27 @@ export class GameSetupService extends Service implements GameSetupInterface {
         }
 
         return [b1, b2];
+    }
+
+    private determineSettlements(): Record<HexId, SettlementId> {
+        const settlementIds: SettlementId[] = ["temple", "market", "exchange", "quary", "forest", "mines", "farms"];
+        const pairing: Record<HexId, SettlementId> = {
+            center: null,
+            topRight: null,
+            right: null,
+            bottomRight: null,
+            bottomLeft: null,
+            left: null,
+            topLeft: null,
+        }
+
+        for (const id in pairing) {
+            const hexId = id as HexId;
+            const pick = Math.floor(Math.random() * settlementIds.length);
+            pairing[hexId] = settlementIds.splice(pick, 1)[0];
+        }
+
+        return pairing;
     }
 
     private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {
