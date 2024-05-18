@@ -1,6 +1,5 @@
 import { PrivateState, StateBundle, WssMessage } from "../server_types";
-import { HexId, MoveActionDetails, PlayerId, PlayerState, PlayerStates, SharedState, WebsocketClientMessage } from "../../shared_types";
-import { ToolService, ToolInterface } from "../services/toolService";
+import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
 
 const { ACTION } = sharedConstants;
@@ -13,17 +12,15 @@ export class GameSession implements GameSessionInterface {
 
     private privateState: PrivateState;
     private sharedState: SharedState;
-    private tools: ToolInterface;
 
     constructor(bundle: StateBundle) {
-        this.tools = ToolService.getInstance();
         this.privateState = bundle.privateState;
         this.sharedState = bundle.sharedState;
 
         this.setTurnStartConditions(this.findActivePlayer());
     }
 
-    public processAction = (message: WebsocketClientMessage): WssMessage => {
+    public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerId;
         switch (message.action) {
             case ACTION.move:
@@ -148,7 +145,7 @@ export class GameSession implements GameSessionInterface {
         return false;
     }
 
-    private passActiveStatus = (): void => {
+    private passActiveStatus(): void {
         const players = this.sharedState.players;
         const playerCount = Object.keys(players).length;
 
@@ -171,8 +168,8 @@ export class GameSession implements GameSessionInterface {
         }
     }
 
-    private findActivePlayer = (): PlayerId => {
-        const players = this.tools.cc(this.sharedState.players);
+    private findActivePlayer(): PlayerId {
+        const players = this.sharedState.players;
 
         for (const id in players) {
             const playerId = id as PlayerId;

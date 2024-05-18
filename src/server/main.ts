@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
-import { SharedState, HexId, PlayerStates, PlayerState, PlayerId, WebsocketClientMessage, MoveActionDetails, } from '../shared_types';
+import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
 import { ToolService, ToolInterface } from './services/toolService';
@@ -113,7 +113,7 @@ function processGameStart(): boolean {
         sharedState.availableSlots = [];
 
         const bundle: StateBundle = setupService.produceGameData(
-            tools.cc(sharedState)
+            tools.getCopy(sharedState)
         );
 
         singleSession = new GameSession(bundle);

@@ -2,7 +2,7 @@ import { Service, ServiceInterface } from './service';
 
 export interface ToolInterface extends ServiceInterface {
     isRecord: (obj: object) => boolean;
-    cc: <O extends object>(obj: O) => O;
+    getCopy: <O extends object>(obj: O) => O;
 }
 export class ToolService extends Service implements ToolInterface {
 
@@ -17,7 +17,7 @@ export class ToolService extends Service implements ToolInterface {
      *
      * @param obj - JSON-compatible object to copy
      */
-    public cc<O extends object>(obj: O): O {
+    public getCopy<O extends object>(obj: O): O {
 
         return JSON.parse(JSON.stringify(obj));
     }
