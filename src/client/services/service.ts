@@ -1,7 +1,7 @@
 import { EventPayload, CustomEventTitle } from "../client_types";
 
 export interface ServiceStaticInterface {
-    new (): ServiceInterface;
+    new(): ServiceInterface;
     getInstance(): ServiceInterface;
 }
 export interface ServiceInterface {
@@ -19,7 +19,7 @@ export class Service implements ServiceInterface {
 
     public static getInstance<I extends ServiceInterface>(): I {
 
-        if(!this.instance) {
+        if (!this.instance) {
             this.instance = new this();
         }
 

@@ -1,4 +1,4 @@
-import { InfoEventPayload, ActionEventPayload, ErrorEventPayload} from "./client_types";
+import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
 import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";

@@ -89,7 +89,7 @@ export class GameSession implements GameSessionInterface {
     private processEndTurn(playerId: PlayerId): boolean {
         const player = this.sharedState.players[playerId];
 
-        if(player.isActive && player.isAnchored) {
+        if (player.isActive && player.isAnchored) {
             this.passActiveStatus();
 
             return true;
@@ -99,7 +99,7 @@ export class GameSession implements GameSessionInterface {
     }
 
     // Helper methods
-    private getPortManifest (destinationHex: HexId): ManifestItem[] | false {
+    private getPortManifest(destinationHex: HexId): ManifestItem[] | false {
         const manifest: ManifestItem[] = [];
         const players = this.sharedState.players;
 

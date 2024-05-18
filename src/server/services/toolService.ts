@@ -6,7 +6,7 @@ export interface ToolInterface extends ServiceInterface {
 }
 export class ToolService extends Service implements ToolInterface {
 
-    public isRecord (obj: object): boolean {
+    public isRecord(obj: object): boolean {
 
         return obj.constructor === Object && Object.keys(obj).length > 0;
     }
@@ -17,7 +17,7 @@ export class ToolService extends Service implements ToolInterface {
      *
      * @param obj - JSON-compatible object to copy
      */
-    public cc <O extends object> (obj: O): O {
+    public cc<O extends object>(obj: O): O {
 
         return JSON.parse(JSON.stringify(obj));
     }

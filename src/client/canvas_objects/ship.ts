@@ -38,8 +38,7 @@ export class Ship implements ShipInterface {
         this.group.add(this.ship);
 
         const influenceTextColor =
-            id === 'playerYellow'
-            || id === 'playerGreen'
+            id === 'playerGreen' || id === 'playerYellow'
                 ? 'black'
                 : 'white';
 
