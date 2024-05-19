@@ -60,9 +60,17 @@ export class MapHex implements MapHexInterface {
         this.group.add(this.settlement);
     }
 
-    public getElement = () => this.group;
-    public getId = () => this.group.attrs.id as HexId;
-    public setFill = (color: HexaColor) => this.hexagon.fill(color);
-    public isIntersecting = (vector: Vector2d) => this.hexagon.intersects(vector);
+    public getElement() {
+        return this.group;
+    }
+    public getId() {
+        return this.group.attrs.id as HexId;
+    }
+    public setFill(color: HexaColor) {
+        this.hexagon.fill(color);
+    }
+    public isIntersecting(vector: Vector2d) {
+        return this.hexagon.intersects(vector);
+    }
 }
 

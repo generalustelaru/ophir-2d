@@ -17,12 +17,6 @@ export class PlayerShip implements PlayerShipInterface {
 
     public switchControl(isActivePlayer: boolean) {
         this.group.draggable(isActivePlayer);
-        this.ship.scale(
-            isActivePlayer ? { x: 1.5, y: 1.5 } : { x: 1, y: 1 }
-        );
-        this.influence.fontSize(isActivePlayer ? 15 : 10)
-        this.influence.x(isActivePlayer ? 6 : -1);
-        this.influence.y(isActivePlayer ? 10 : 4);
     }
 
     public getElement() {
@@ -133,8 +127,8 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.influence = new Konva.Text({
             x: 6,
-            y: 10,
-            fontSize: 15,
+            y: 4,
+            fontSize: 10,
             fontStyle: 'bold',
             fill: influenceTextColor,
         });
