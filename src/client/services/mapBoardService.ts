@@ -34,7 +34,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             width: 750,
             height: 500,
         });
-        this.center = { x: 275, y: this.stage.height() / 2 };
+        this.center = { x: 250, y: this.stage.height() / 2 };
         this.layer = new Konva.Layer();
         this.stage.add(this.layer);
         this.layer.draw();
