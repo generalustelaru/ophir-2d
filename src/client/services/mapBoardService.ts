@@ -31,10 +31,10 @@ export class MapBoardService extends Service implements MapBoardInterface {
             container: 'canvas',
             visible: true,
             opacity: 1,
-            width: 500,
+            width: 750,
             height: 500,
         });
-        this.center = { x: this.stage.width() / 2, y: this.stage.height() / 2 };
+        this.center = { x: 275, y: this.stage.height() / 2 };
         this.layer = new Konva.Layer();
         this.stage.add(this.layer);
         this.layer.draw();

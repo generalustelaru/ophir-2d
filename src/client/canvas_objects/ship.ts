@@ -30,7 +30,7 @@ export class Ship implements ShipInterface {
             y: -5,
             data: SHIP_DATA.shape,
             fill,
-            scale: {x: 1, y: 1},
+            scale: {x: 1.5, y: 1.5},
             stroke: COLOR.shipBorder,
             strokeWidth: 2,
         });
@@ -43,7 +43,7 @@ export class Ship implements ShipInterface {
                 : 'white';
 
         this.influence = new Konva.Text({
-            x: -1,
+            x: 6,
             y: 4,
             fontSize: 10,
             fontStyle: 'bold',
@@ -53,14 +53,20 @@ export class Ship implements ShipInterface {
         this.group.add(this.influence);
     }
 
-    public setInfluence = (value: number) => {
+    public setInfluence(value: number) {
         this.influence.text(value.toString());
     }
-    public getElement = () => this.group;
-    public getId = () => this.group.attrs.id as PlayerId;
-    public setPosition = (coordinates: Coordinates) => {
+    public getElement() {
+        return this.group
+    }
+    public getId() {
+        return this.group.attrs.id as PlayerId
+    }
+    public setPosition(coordinates: Coordinates) {
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };
-    public destroy = () => this.group.destroy();
+    public destroy() {
+        this.group.destroy()
+    }
 }

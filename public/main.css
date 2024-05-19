@@ -7,11 +7,11 @@ html, body {
     padding: 0px;
 }
 
-#canvas {
+/* #canvas {
     border: 1px solid black;
     width: 500px;
     height: 500px;
-}
+} */
 
 #lobby-controls {
     display: flex;
