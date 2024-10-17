@@ -28,6 +28,9 @@ export type PlayerState = {
 
 export type PlayerStates = Record<PlayerId, (PlayerState)>;
 
+/**
+ * @description Shared between players and server in a session
+ */
 export type SharedState = {
     gameStatus: GameStatus,
     sessionOwner: PlayerId | null,

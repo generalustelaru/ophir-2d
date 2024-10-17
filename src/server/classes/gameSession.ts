@@ -43,30 +43,30 @@ export class GameSession implements GameSessionInterface {
         const remainingMoves = player.moveActions;
         const allowed = this.privateState.moveRules.find(rule => rule.from === departure).allowed;
 
-        if (allowed.includes(destination) && remainingMoves > 0) {
-            player.moveActions = remainingMoves - 1;
-
-            const manifest = this.getPortManifest(destination);
-            const sailSuccess = !manifest || player.hasSpentFavor
-                ? true
-                : this.processInfluenceRoll(player, manifest);
-
-            if (sailSuccess) {
-                player.location = { hexId: destination, position: message.details.position };
-                player.allowedMoves = this.privateState.moveRules
-                    .find(rule => rule.from === destination).allowed
-                    .filter(move => move !== departure);
-                player.isAnchored = true;
-            }
-
-            if (player.moveActions === 0 && !sailSuccess) {
-                this.passActiveStatus();
-            }
-
-            return true;
+        if (!allowed.includes(destination) || remainingMoves === 0) {
+            return false;
         }
 
-        return false;
+        player.moveActions = remainingMoves - 1;
+
+        const manifest = this.getPortManifest(destination);
+        const sailSuccess = !manifest || player.hasSpentFavor
+            ? true
+            : this.processInfluenceRoll(player, manifest);
+
+        if (sailSuccess) {
+            player.location = { hexId: destination, position: message.details.position };
+            player.allowedMoves = this.privateState.moveRules
+                .find(rule => rule.from === destination).allowed
+                .filter(move => move !== departure);
+            player.isAnchored = true;
+        }
+
+        if (player.moveActions === 0 && !sailSuccess) {
+            this.passActiveStatus();
+        }
+
+        return true;
     }
 
     private processFavorSpending(playerId: PlayerId): boolean {

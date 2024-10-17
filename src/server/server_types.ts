@@ -11,6 +11,9 @@ export type ProcessedMoveRule = {
     allowed: HexId[];
 }
 
+/**
+ * @description Not to be shared with clients
+*/
 export type PrivateState = {
     moveRules: ProcessedMoveRule[],
 }
