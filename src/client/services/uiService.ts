@@ -4,7 +4,7 @@ import { Service, ServiceInterface } from './service';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
-import { Button } from '../html_components/button';
+import { Button } from '../html_behaviors/button';
 
 export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
