@@ -2,10 +2,10 @@ build:
 	npm run build_client
 	npm run build_server
 
-front:
+client:
 	npm run build_client
 	node public/server.cjs
-back:
+server:
 	npm run build_server
 	node public/server.cjs
 
