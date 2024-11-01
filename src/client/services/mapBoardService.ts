@@ -6,6 +6,7 @@ import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
 import { MapHex } from '../canvas_objects/mapHex';
 import { Barrier } from '../canvas_objects/barrier';
+import { CargoHold } from '../canvas_objects/cargoHold';
 import state from '../state';
 import clientConstants from '../client_constants';
 
@@ -108,6 +109,10 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
         this.layer.add(playerShip.getElement());
         state.konva.localShip.object = playerShip;
+
+        // MARK: Cargo hold
+        const cargoHold = new CargoHold(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
+        this.layer.add(cargoHold.getElement());
     }
 
     updateBoard = () => {
@@ -152,6 +157,21 @@ export class MapBoardService extends Service implements MapBoardInterface {
             localShip.switchControl(localPlayer.isActive && localPlayer.moveActions > 0);
             localShip.setPosition(localPlayer.location.position ?? this.center);
             localShip.setInfluence(localPlayer.influence);
+        }
+    }
+
+    private matchCargoHoldColor = (playerColor: string) => {
+        switch (playerColor) {
+            case COLOR.playerRed:
+                return COLOR.holdDarkRed;
+            case COLOR.playerPurple:
+                return COLOR.holdDarkPurple;
+            case COLOR.playerGreen:
+                return COLOR.holdDarkGreen;
+            case COLOR.playerYellow:
+                return COLOR.holdDarkYellow;
+            default:
+                return COLOR.holdDarkRed;
         }
     }
 }
