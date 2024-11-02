@@ -5,12 +5,24 @@ html, body {
     height: 100%;
     margin: 0px;
     padding: 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #canvas {
     border: 1px solid black;
     width: 750px;
     height: 500px;
+}
+
+#controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 50px;
+    width: 750px;
 }
 
 #lobby-controls {
