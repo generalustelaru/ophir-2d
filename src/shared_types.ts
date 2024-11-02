@@ -4,10 +4,12 @@
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
-export type CargoItem = "gem" | "wood" | "stone" | "cloth" | "silver" | "gold";
+export type ItemId = "gem" | "wood" | "stone" | "cloth" | "silver" | "gold";
 export type SettlementId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
 export type Action = "inquire" | "enroll" | "start" | "move" | "favor" |"refresh" | "turn";
 export type GameStatus = "empty" | "created" | "full" | "started";
+export type ManifestItem = ItemId | "empty";
+export type CargoManifest  = Array<ManifestItem>;
 
 export type PlayerState = {
     turnOrder: number | null,
@@ -23,7 +25,7 @@ export type PlayerState = {
     isAnchored: boolean,
     allowedMoves: HexId[],
     capacity: number,
-    cargo: CargoItem[]
+    cargo: CargoManifest,
 }
 
 export type PlayerStates = Record<PlayerId, (PlayerState)>;

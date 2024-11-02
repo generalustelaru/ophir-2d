@@ -1,19 +1,20 @@
 
 import Konva from 'konva';
-import { HexaColor, MapHexInterface, IslandData, SettlementData } from '../client_types';
-import { Vector2d } from 'konva/lib/types';
-import { LocationToken } from './locationToken';
+import { HexaColor } from '../client_types';
+import { ItemId, CargoManifest } from '../../shared_types';
 import clientConstants from '../client_constants';
 
-const { CARGO_HOLD_DATA, COLOR } = clientConstants;
+const { CARGO_HOLD_DATA } = clientConstants;
 
 export class CargoHold {
 
     group: Konva.Group;
     hold: Konva.Rect;
+    manifest: CargoManifest = [null, null, null, null];
+
     constructor(
         color: HexaColor,
-        isLargeHold: boolean = false,
+        isLargeHold: boolean = true,
     ) {
         this.group = new Konva.Group({
             width: 200,
@@ -31,6 +32,29 @@ export class CargoHold {
         });
 
         this.group.add(this.hold);
+
+        this.manifest = {
+            row_a: { item_a: null, item_b: null },
+            row_b: isLargeHold ? { item_a: null, item_b: null } : null,
+        };
+
+        this.addItem('gem');
+        this.addItem('stone');
+    }
+
+    public addItem(itemId: ItemId) {
+        this.manifest.push(itemId);
+        const itemData = CARGO_HOLD_DATA[itemId];
+        const itemIcon = new Konva.Path({
+            x: 0,
+            y: 0,
+            data: itemData.shape,
+            fill: itemData.fill,
+            stroke: 'white',
+            strokeWidth: 1,
+            scale: {x: 5, y: 5},
+        });
+        this.group.add(itemIcon);
     }
 
     public getElement() {
