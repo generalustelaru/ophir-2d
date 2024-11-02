@@ -4,33 +4,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Konva</title>
+    <title>Ophir 2D</title>
     <link rel="stylesheet" href="main.css">
     <script type="module" src="/client.js"></script>
 </head>
 
 <body>
     <div id="canvas"></div>
-    <div id="lobby-controls" class="control-row">
-        <button id="createButton" disabled>Create Game</button>
-        <button id="joinButton" disabled>Join Game</button>
-        <select id="playerColorSelect" disabled>
-            <option value="" disabled selected>--Select color--</option>
-            <option value="playerPurple">Purple</option>
-            <option value="playerYellow">Yellow</option>
-            <option value="playerRed">Red</option>
-            <option value="playerGreen">Green</option>
-        </select>
-        <button id="startButton" disabled>Start Game</button>
+    <div id="controls">
+        <div id="lobby-controls" class="control-row">
+            <button id="createButton" disabled>Create Game</button>
+            <button id="joinButton" disabled>Join Game</button>
+            <select id="playerColorSelect" disabled>
+                <option value="" disabled selected>--Select color--</option>
+                <option value="playerPurple">Purple</option>
+                <option value="playerYellow">Yellow</option>
+                <option value="playerRed">Red</option>
+                <option value="playerGreen">Green</option>
+            </select>
+            <button id="startButton" disabled>Start Game</button>
+        </div>
+        <div id="game-controls" class="control-row">
+            <button id="favorButton" disabled>Spend Favor</button>
+            <input id="favorCounter" type="text" value="0" disabled>
+            <button id="loadGoodButton" disabled>Load Good</button>
+            <button id="interactButton" disabled>Trade/Donate</button>
+            <button id="endTurnButton" disabled>End Turn</button>
+        </div>
+        <div id="info">...</div>
     </div>
-    <div id="game-controls" class="control-row">
-        <button id="favorButton" disabled>Spend Favor</button>
-        <input id="favorCounter" type="text" value="0" disabled>
-        <button id="loadGoodButton" disabled>Load Good</button>
-        <button id="interactButton" disabled>Trade/Donate</button>
-        <button id="endTurnButton" disabled>End Turn</button>
-    </div>
-    <div id="info">...</div>
 </body>
 
 </html>
