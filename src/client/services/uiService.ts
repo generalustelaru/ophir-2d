@@ -18,7 +18,7 @@ const { EVENT } = clientConstants;
 export class UserInterfaceService extends Service implements UiInterface {
 
     createButton; joinButton; startButton; playerColorSelect;
-    favorButton; favorCounter; endTurnButton;
+    favorButton; favorCounter; pickupGoodButton; endTurnButton;
 
     constructor() {
         super();
@@ -47,6 +47,7 @@ export class UserInterfaceService extends Service implements UiInterface {
             element: document.getElementById('favorCounter') as HTMLInputElement,
             set: (value: number) => this.favorCounter.element.value = value.toString(),
         }
+        this.pickupGoodButton = new Button('pickupGoodButton', this.processPickup);
         this.endTurnButton = new Button('endTurnButton', this.processEndTurn);
     }
 
@@ -80,6 +81,12 @@ export class UserInterfaceService extends Service implements UiInterface {
         return this.broadcastEvent(EVENT.action, payload);
     }
 
+    private processPickup = (): void => {
+        const payload: ActionEventPayload = { action: ACTION.pickup_good, details: null };
+
+        return this.broadcastEvent(EVENT.action, payload);
+    }
+
     private processEndTurn = (): void => {
         const payload: ActionEventPayload = { action: ACTION.turn, details: null };
 
@@ -104,6 +111,7 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private disableGameControls = (): void => {
         this.favorButton.disable();
+        this.pickupGoodButton.disable();
         this.endTurnButton.disable();
     }
 
@@ -118,6 +126,11 @@ export class UserInterfaceService extends Service implements UiInterface {
 
             if (player.isAnchored) {
                 this.endTurnButton.enable();
+
+                // will probably become a switch as new actions are added
+                if (player.allowedSettlementAction === ACTION.pickup_good) {
+                    this.pickupGoodButton.enable();
+                }
             }
 
             if (player.favor > 0 && !player.hasSpentFavor && player.moveActions > 0) {

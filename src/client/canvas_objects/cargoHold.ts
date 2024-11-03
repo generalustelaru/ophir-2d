@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { HexaColor } from '../client_types';
-import { ItemId, CargoManifest } from '../../shared_types';
+import { GoodId, CargoManifest, MetalId } from '../../shared_types';
 import clientConstants from '../client_constants';
 
 const { CARGO_HOLD_DATA } = clientConstants;
@@ -10,11 +10,12 @@ export class CargoHold {
 
     group: Konva.Group;
     hold: Konva.Rect;
-    manifest: CargoManifest = [null, null, null, null];
+    manifest: CargoManifest;
 
     constructor(
         color: HexaColor,
-        isLargeHold: boolean = true,
+        isLargeHold: boolean = false,
+        manifest: CargoManifest = [],
     ) {
         this.group = new Konva.Group({
             width: 200,
@@ -33,16 +34,13 @@ export class CargoHold {
 
         this.group.add(this.hold);
 
-        this.manifest = {
-            row_a: { item_a: null, item_b: null },
-            row_b: isLargeHold ? { item_a: null, item_b: null } : null,
-        };
+        this.manifest = manifest;
 
-        this.addItem('gem');
-        this.addItem('stone');
+        // this.addItem('gem');
+        // this.addGood('stone');
     }
 
-    public addItem(itemId: ItemId) {
+    public addItem(itemId: GoodId|MetalId) {
         this.manifest.push(itemId);
         const itemData = CARGO_HOLD_DATA[itemId];
         const itemIcon = new Konva.Path({

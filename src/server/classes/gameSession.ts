@@ -1,10 +1,10 @@
 import { PrivateState, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage } from "../../shared_types";
+import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, ManifestItem, CargoType } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
 
 const { ACTION } = sharedConstants;
 
-type ManifestItem = { id: PlayerId, influence: number };
+type RegistryItem = { id: PlayerId, influence: number };
 export interface GameSessionInterface {
     processAction: (action: any) => WssMessage;
 }
@@ -23,10 +23,12 @@ export class GameSession implements GameSessionInterface {
     public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerId;
         switch (message.action) {
-            case ACTION.move:
-                return this.processMove(message) ? this.sharedState : { error: `Illegal move on ${id}` };
             case ACTION.favor:
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Illegal favor spend on ${id}` };
+            case ACTION.move:
+                return this.processMove(message) ? this.sharedState : { error: `Illegal move on ${id}` };
+            case ACTION.pickup_good:
+                return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
             case ACTION.turn:
                 return this.processEndTurn(id) ? this.sharedState : { error: `Illegal turn end on ${id}` };
             default:
@@ -49,7 +51,7 @@ export class GameSession implements GameSessionInterface {
 
         player.moveActions = remainingMoves - 1;
 
-        const manifest = this.getPortManifest(destination);
+        const manifest = this.getPortRegistry(destination);
         const sailSuccess = !manifest || player.hasSpentFavor
             ? true
             : this.processInfluenceRoll(player, manifest);
@@ -60,6 +62,7 @@ export class GameSession implements GameSessionInterface {
                 .find(rule => rule.from === destination).allowed
                 .filter(move => move !== departure);
             player.isAnchored = true;
+            player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player, destination);
         }
 
         if (player.moveActions === 0 && !sailSuccess) {
@@ -76,8 +79,32 @@ export class GameSession implements GameSessionInterface {
             player.favor -= 1;
             player.hasSpentFavor = true;
             player.isAnchored = true;
+            player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player);
 
             return true;
+        }
+
+        return false;
+    }
+
+    private processGoodPickup(playerId: PlayerId): boolean {
+        const player = this.sharedState.players[playerId];
+        const localGood = this.getGoodFromLocation(player.location.hexId);
+
+        if (!localGood) {
+            return false;
+        }
+
+        for (let i = 0; i < player.cargo.length; i++) {
+            const item = player.cargo[i];
+
+            if (item === 'empty') {
+                player.cargo[i] = localGood;
+                player.allowedSettlementAction = null;
+                player.moveActions = 0;
+
+                return true;
+            }
         }
 
         return false;
@@ -96,8 +123,8 @@ export class GameSession implements GameSessionInterface {
     }
 
     // Helper methods
-    private getPortManifest(destinationHex: HexId): ManifestItem[] | false {
-        const manifest: ManifestItem[] = [];
+    private getPortRegistry(destinationHex: HexId): RegistryItem[] | false {
+        const manifest: RegistryItem[] = [];
         const players = this.sharedState.players;
 
         for (const id in players) {
@@ -116,13 +143,13 @@ export class GameSession implements GameSessionInterface {
         return manifest;
     }
 
-    private processInfluenceRoll(activePlayer: PlayerState, manifest: ManifestItem[]): boolean {
+    private processInfluenceRoll(activePlayer: PlayerState, registry: RegistryItem[]): boolean {
         let canMove = true;
 
         activePlayer.influence = Math.ceil(Math.random() * 6);
         let highestInfluence = activePlayer.influence;
 
-        manifest.forEach(item => {
+        registry.forEach(item => {
             if (item.influence > highestInfluence) {
                 canMove = false;
                 highestInfluence = item.influence;
@@ -186,8 +213,56 @@ export class GameSession implements GameSessionInterface {
         player.isAnchored = false;
         player.hasSpentFavor = false;
         player.moveActions = 2;
+        player.allowedSettlementAction = null;
         player.allowedMoves = this.privateState.moveRules
             .find(rule => rule.from === player.location.hexId)
             .allowed;
+    }
+
+    private getGoodFromLocation(hexId: HexId): GoodId | false {
+        const settlement = this.sharedState.setup.settlements[hexId];
+
+        switch (settlement) {
+            case 'farms': return 'cloth';
+            case 'mines': return 'gem';
+            case 'forest': return 'wood';
+            case 'quary': return 'stone';
+            default: return false;
+        }
+    }
+
+    private getAllowedSettlementActionFromLocation(
+        playerState: PlayerState,
+        hexId: HexId | null = null
+    ): SettlementAction | null {
+        const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
+
+        switch (settlementId) {
+            case 'farms':
+            case 'mines':
+            case 'forest':
+            case 'quary': return this.loadActionByCargoReq(playerState, 'pickup_good');
+            case 'market': return 'sell_goods';
+            case 'exchange': return this.loadActionByCargoReq(playerState, 'buy_metals');
+            case 'temple': return 'visit_temple';
+            default:
+                console.error(`Unknown settlement at ${hexId}`);
+                return null;
+        }
+    }
+
+    private loadActionByCargoReq(player: PlayerState, desired: SettlementAction): SettlementAction
+    {
+        if (desired !== 'buy_metals' && desired !== 'pickup_good') {
+            console.error(`Unknown settlement action: ${desired}`);
+
+            return null;
+        }
+
+        const cargo = player.cargo;
+        const emptySlots = cargo.filter(item => item === 'empty').length;
+        const cargoReq = desired === 'pickup_good' ? 1 : 2;
+
+        return emptySlots >= cargoReq ? desired : null;
     }
 }
