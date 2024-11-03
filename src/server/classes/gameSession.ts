@@ -1,5 +1,5 @@
 import { PrivateState, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, ManifestItem, CargoType } from "../../shared_types";
+import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
 
 const { ACTION } = sharedConstants;
