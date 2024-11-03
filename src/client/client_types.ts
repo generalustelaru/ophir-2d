@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ItemId } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, GoodId, MetalId } from '../shared_types';
 import Konva from 'konva';
 
 export type HexaColor = `#${string}`;
@@ -33,7 +33,7 @@ export type ClientConstants = {
     ISLAND_DATA: Record<HexId, (IslandData)>,
     SETTLEMENT_DATA: Record<SettlementId, SettlementData>,
     SHIP_DATA: { shape: string },
-    CARGO_HOLD_DATA: Record<ItemId, ItemData>,
+    CARGO_HOLD_DATA: Record<GoodId|MetalId, ItemData>,
     EVENT: Record<CustomEventTitle, CustomEventTitle>, // TODO: cull constants that are replaceable by types
 }
 

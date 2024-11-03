@@ -4,11 +4,13 @@
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
-export type ItemId = "gem" | "wood" | "stone" | "cloth" | "silver" | "gold";
+export type GoodId = "gem" | "wood" | "stone" | "cloth";
+export type MetalId = "silver" | "gold";
 export type SettlementId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
-export type Action = "inquire" | "enroll" | "start" | "move" | "favor" |"refresh" | "turn";
+export type Action = "inquire" | "enroll" | "start" | "move" | "favor" | "refresh" | "turn" | SettlementAction;
+export type SettlementAction = "visit_temple" | "sell_goods" | "buy_metals" | "pickup_good";
 export type GameStatus = "empty" | "created" | "full" | "started";
-export type ManifestItem = ItemId | "empty";
+export type ManifestItem = GoodId | MetalId | "empty";
 export type CargoManifest  = Array<ManifestItem>;
 
 export type PlayerState = {
@@ -23,8 +25,8 @@ export type PlayerState = {
     influence: number,
     moveActions: number,
     isAnchored: boolean,
+    allowedSettlementAction: SettlementAction | null,
     allowedMoves: HexId[],
-    capacity: number,
     cargo: CargoManifest,
 }
 

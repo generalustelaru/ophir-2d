@@ -18,6 +18,10 @@ const sharedConstants: SharedConstants = {
         favor: "favor",
         refresh: "refresh",
         turn: "turn",
+        pickup_good: "pickup_good",
+        visit_temple: "visit_temple",
+        sell_goods: "sell_goods",
+        buy_metals: "buy_metals",
     },
 }
 
