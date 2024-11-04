@@ -1,5 +1,5 @@
 import sharedConstants from '../shared_constants';
-import { CommunicationService, CommunicationInterface } from './services/commService';
+import { CommunicationService, CommunicationInterface } from './services/CommService';
 import { CanvasService, CanvasInterface } from './services/CanvasService';
 import { EventHandler } from './eventHandler';
 

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates } from '../../shared_types';
-import { Service, ServiceInterface } from "./service";
-import { MapBoardService, MapBoardInterface } from './mapBoardService';
+import { Service, ServiceInterface } from "./Service";
+import { MapBoardService, MapBoardInterface } from './MapBoardService';
 
 export interface CanvasInterface extends ServiceInterface {
     initiateCanvas: () => void,
