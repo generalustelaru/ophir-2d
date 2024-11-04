@@ -51,10 +51,10 @@ export class GameSession implements GameSessionInterface {
 
         player.moveActions = remainingMoves - 1;
 
-        const manifest = this.getPortRegistry(destination);
-        const sailSuccess = !manifest || player.hasSpentFavor
+        const registry = this.getPortRegistry(destination);
+        const sailSuccess = !registry || player.hasSpentFavor
             ? true
-            : this.processInfluenceRoll(player, manifest);
+            : this.processInfluenceRoll(player, registry);
 
         if (sailSuccess) {
             player.location = { hexId: destination, position: message.details.position };
@@ -89,7 +89,7 @@ export class GameSession implements GameSessionInterface {
 
     private processGoodPickup(playerId: PlayerId): boolean {
         const player = this.sharedState.players[playerId];
-        const localGood = this.getGoodFromLocation(player.location.hexId);
+        const localGood = this.getMatchingGood(player.location.hexId);
 
         if (!localGood) {
             return false;
@@ -124,7 +124,7 @@ export class GameSession implements GameSessionInterface {
 
     // Helper methods
     private getPortRegistry(destinationHex: HexId): RegistryItem[] | false {
-        const manifest: RegistryItem[] = [];
+        const registry: RegistryItem[] = [];
         const players = this.sharedState.players;
 
         for (const id in players) {
@@ -132,15 +132,15 @@ export class GameSession implements GameSessionInterface {
             const player = players[playerId];
 
             if (player.location.hexId === destinationHex) {
-                manifest.push({ id: playerId, influence: player.influence });
+                registry.push({ id: playerId, influence: player.influence });
             }
         }
 
-        if (manifest.length === 0) {
+        if (registry.length === 0) {
             return false;
         }
 
-        return manifest;
+        return registry;
     }
 
     private processInfluenceRoll(activePlayer: PlayerState, registry: RegistryItem[]): boolean {
@@ -219,7 +219,7 @@ export class GameSession implements GameSessionInterface {
             .allowed;
     }
 
-    private getGoodFromLocation(hexId: HexId): GoodId | false {
+    private getMatchingGood(hexId: HexId): GoodId | false {
         const settlement = this.sharedState.setup.settlements[hexId];
 
         switch (settlement) {
