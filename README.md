@@ -11,6 +11,7 @@ Try it out:
 1. Install/Update Node (v18.18.0).
 2. Download the codebase.
 3. Go to the project folder and run `npm install`.
-4. Run `make build` to bundle and start the server (You can run `make run` afterwards to skip building).
+4. Run `make build` to bundle the code
+5. Run `make run` to start the server.
    Check the `Makefile` for alternative script commands.
-5. Link to [http://localhost:3000](http://localhost:3000) to 'play.'
+6. Link to [http://localhost:3000](http://localhost:3000) to 'play.'
