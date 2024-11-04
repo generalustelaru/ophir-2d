@@ -1,7 +1,7 @@
 import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/commService";
-import { MapBoardService, MapBoardInterface } from "./services/mapBoardService";
+import { CanvasService, CanvasInterface } from "./services/CanvasService";
 import { UserInterfaceService, UiInterface } from "./services/uiService";
 import sharedConstants from "../shared_constants";
 import clientConstants from "./client_constants";
@@ -11,12 +11,12 @@ const { EVENT } = clientConstants;
 export class EventHandler {
 
     commService: CommunicationInterface
-    mapBoardService: MapBoardInterface
+    canvasService: CanvasInterface
     uiService: UiInterface
 
     constructor() {
         this.commService = CommunicationService.getInstance();
-        this.mapBoardService = MapBoardService.getInstance();
+        this.canvasService = CanvasService.getInstance();
         this.uiService = UserInterfaceService.getInstance();
 
         //Send player action to server
@@ -51,10 +51,10 @@ export class EventHandler {
         window.addEventListener(EVENT.update, () => {
             if (state.server.gameStatus == STATUS.started) {
                 if (state.isBoardDrawn) {
-                    this.mapBoardService.updateBoard();
+                    this.canvasService.updateElements();
                 } else {
                     this.uiService.setInfo('The game has started');
-                    this.mapBoardService.drawBoard();
+                    this.canvasService.drawElements();
                     state.isBoardDrawn = true;
                 }
                 this.uiService.updateGameControls();
