@@ -19,7 +19,7 @@ export type ClientState = {
             homePosition: Coordinates,
             isDestinationValid: boolean,
         },
-        localCargoHold: CargoHoldInterface | null,
+        localCargoHold: PlayMatInterface | null,
         opponentShips: ShipInterface[],
         hexes: MapHexInterface[],
     },
@@ -60,7 +60,7 @@ export interface PlayerShipInterface {
     setPosition: (coordinates: Coordinates) => void,
 }
 
-export interface CargoHoldInterface {
+export interface PlayMatInterface {
     getElement: () => Konva.Group,
     updateHold: (items: CargoManifest) => void,
 }

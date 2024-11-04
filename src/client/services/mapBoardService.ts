@@ -6,7 +6,7 @@ import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
 import { MapHex } from '../canvas_objects/mapHex';
 import { Barrier } from '../canvas_objects/barrier';
-import { CargoHold } from '../canvas_objects/cargoHold';
+import { PlayMat } from '../canvas_objects/playMat';
 import state from '../state';
 import clientConstants from '../client_constants';
 
@@ -46,7 +46,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         const localPlayer = players[state.localPlayerId];
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
         const settlements = state.server.setup.settlements
-        //MARK: Map hexes
+        //MARK: draw hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
                 this.center,
@@ -63,13 +63,13 @@ export class MapBoardService extends Service implements MapBoardInterface {
             this.layer.add(mapHex.getElement());
         });
 
-        // MARK: Barriers
+        // MARK: draw barriers
         const barriers = state.server.setup.barriers
         const barrier_1 = new Barrier(this.center, barriers[0]) as Konva.Rect;
         const barrier_2 = new Barrier(this.center, barriers[1]) as Konva.Rect;
         this.layer.add(barrier_1, barrier_2);
 
-        //MARK: Other ships
+        //MARK: draw other ships
         const playerIds = Object.keys(players) as PlayerId[];
         playerIds.forEach((id) => {
             if (players[id] && id != state.localPlayerId) {
@@ -95,7 +95,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             return;
         }
 
-        //MARK: Local ship
+        //MARK: draw local ship
         const shipPosition = localPlayer.location.position ?? this.center;
         const playerShip = new PlayerShip(
             this.stage,
@@ -110,8 +110,8 @@ export class MapBoardService extends Service implements MapBoardInterface {
         this.layer.add(playerShip.getElement());
         state.konva.localShip.object = playerShip;
 
-        // MARK: Cargo hold
-        const cargoHold = new CargoHold(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
+        // MARK: draw cargo hold
+        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
         this.layer.add(cargoHold.getElement());
         state.konva.localCargoHold = cargoHold;
     }
