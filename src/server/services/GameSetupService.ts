@@ -2,7 +2,7 @@
 import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId, HexId, SettlementId } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
-import { Service, ServiceInterface } from './service';
+import { Service, ServiceInterface } from './Service';
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 

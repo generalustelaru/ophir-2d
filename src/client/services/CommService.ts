@@ -1,5 +1,5 @@
 import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
-import { Service, ServiceInterface } from './service';
+import { Service, ServiceInterface } from './Service';
 import state from '../state';
 import clientConstants from '../client_constants';
 

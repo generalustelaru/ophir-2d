@@ -1,8 +1,8 @@
 import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
 import state from "./state";
-import { CommunicationService, CommunicationInterface } from "./services/commService";
+import { CommunicationService, CommunicationInterface } from "./services/CommService";
 import { CanvasService, CanvasInterface } from "./services/CanvasService";
-import { UserInterfaceService, UiInterface } from "./services/uiService";
+import { UserInterfaceService, UiInterface } from "./services/UiService";
 import sharedConstants from "../shared_constants";
 import clientConstants from "./client_constants";
 const { ACTION, STATUS } = sharedConstants;
