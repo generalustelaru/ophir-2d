@@ -1,14 +1,14 @@
 
 import Konva from 'konva';
-import { CargoHoldInterface, HexaColor } from '../client_types';
+import { PlayMatInterface, HexaColor } from '../client_types';
 import { CargoManifest, ManifestItem } from '../../shared_types';
 import clientConstants from '../client_constants';
 
 const { CARGO_ITEM_DATA: CARGO_HOLD_DATA } = clientConstants;
 
-export class CargoHold implements CargoHoldInterface {
+export class PlayMat implements PlayMatInterface {
 
-    group: Konva.Group;
+    playMat: Konva.Group;
     hold: Konva.Rect;
     manifest: CargoManifest;
 
@@ -17,22 +17,22 @@ export class CargoHold implements CargoHoldInterface {
         isLargeHold: boolean = false,
         manifest: CargoManifest = [],
     ) {
-        this.group = new Konva.Group({
-            width: 200,
-            height: 200,
+        this.playMat = new Konva.Group({
+            width: 40,
+            height: 40,
             x: 525,
             y: 25,
         });
 
         this.hold = new Konva.Rect({
-            width: 200,
-            height: isLargeHold ? 200 : 100,
+            width: 40,
+            height: isLargeHold ? 40 : 25,
             fill: color,
-            cornerRadius: 15,
+            // cornerRadius: 15,
             strokeWidth: 1,
         });
 
-        this.group.add(this.hold);
+        this.playMat.add(this.hold);
 
         this.manifest = manifest;
     }
@@ -40,9 +40,9 @@ export class CargoHold implements CargoHoldInterface {
     public updateHold(cargo: CargoManifest) {
         const driftTable = [
             {x: 0, y: 0},
-            {x: 50, y: 0},
-            {x: 0, y: 50},
-            {x: 50, y: 50},
+            {x: 15, y: 0},
+            {x: 0, y: 15},
+            {x: 15, y: 15},
         ]
 
         for (let i = 0; i < cargo.length; i++) {
@@ -65,16 +65,16 @@ export class CargoHold implements CargoHoldInterface {
             fill: itemData.fill,
             stroke: 'white',
             strokeWidth: 1,
-            scale: {x: 5, y: 5},
+            // scale: {x: 5, y: 5},
         });
-        this.group.add(itemIcon);
+        this.playMat.add(itemIcon);
     }
 
     public getElement() {
-        return this.group;
+        return this.playMat;
     }
 
     public upgradeHold() {
-        this.hold.height(200);
+        this.hold.height(40);
     }
 }
