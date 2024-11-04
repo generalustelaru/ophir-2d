@@ -113,6 +113,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         // MARK: Cargo hold
         const cargoHold = new CargoHold(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
         this.layer.add(cargoHold.getElement());
+        state.konva.localCargoHold = cargoHold;
     }
 
     updateBoard = () => {
@@ -157,6 +158,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
             localShip.switchControl(localPlayer.isActive && localPlayer.moveActions > 0);
             localShip.setPosition(localPlayer.location.position ?? this.center);
             localShip.setInfluence(localPlayer.influence);
+
+            const localCargoHold = mapState.localCargoHold;
+            localCargoHold.updateHold(localPlayer.cargo);
         }
     }
 

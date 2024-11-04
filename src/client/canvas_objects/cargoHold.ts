@@ -1,12 +1,12 @@
 
 import Konva from 'konva';
-import { HexaColor } from '../client_types';
-import { GoodId, CargoManifest, MetalId } from '../../shared_types';
+import { CargoHoldInterface, HexaColor } from '../client_types';
+import { CargoManifest, ManifestItem } from '../../shared_types';
 import clientConstants from '../client_constants';
 
-const { CARGO_HOLD_DATA } = clientConstants;
+const { CARGO_ITEM_DATA: CARGO_HOLD_DATA } = clientConstants;
 
-export class CargoHold {
+export class CargoHold implements CargoHoldInterface {
 
     group: Konva.Group;
     hold: Konva.Rect;
@@ -35,17 +35,32 @@ export class CargoHold {
         this.group.add(this.hold);
 
         this.manifest = manifest;
-
-        // this.addItem('gem');
-        // this.addGood('stone');
     }
 
-    public addItem(itemId: GoodId|MetalId) {
+    public updateHold(cargo: CargoManifest) {
+        const driftTable = [
+            {x: 0, y: 0},
+            {x: 50, y: 0},
+            {x: 0, y: 50},
+            {x: 50, y: 50},
+        ]
+
+        for (let i = 0; i < cargo.length; i++) {
+            const item = cargo[i];
+            const driftData = driftTable[i];
+            if (item) {
+                this.addItem(item, driftData);
+            }
+        }
+    };
+
+    private addItem(itemId: ManifestItem, driftData: { x: number, y: number }) {
         this.manifest.push(itemId);
         const itemData = CARGO_HOLD_DATA[itemId];
         const itemIcon = new Konva.Path({
-            x: 0,
-            y: 0,
+            id: itemId,
+            x: driftData.x,
+            y: driftData.y,
             data: itemData.shape,
             fill: itemData.fill,
             stroke: 'white',
