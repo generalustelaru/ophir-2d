@@ -1,4 +1,4 @@
-import { Service, ServiceInterface } from './service';
+import { Service, ServiceInterface } from './Service';
 
 export interface ToolInterface extends ServiceInterface {
     isRecord: (obj: object) => boolean;

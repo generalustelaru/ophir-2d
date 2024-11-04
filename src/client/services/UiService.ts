@@ -1,6 +1,6 @@
 import { PlayerId } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
-import { Service, ServiceInterface } from './service';
+import { Service, ServiceInterface } from './Service';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';

@@ -5,9 +5,9 @@ import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
 import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
-import { GameSetupService, GameSetupInterface } from './services/gameSetupService';
-import { ToolService, ToolInterface } from './services/toolService';
-import { GameSession } from './classes/gameSession';
+import { GameSetupService, GameSetupInterface } from './services/GameSetupService';
+import { ToolService, ToolInterface } from './services/ToolService';
+import { GameSession } from './classes/GameSession';
 const httpPort = 3000;
 const wsPort = 8080;
 

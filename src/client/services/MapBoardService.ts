@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { PlayerId, Coordinates } from '../../shared_types';
 import { InfoEventPayload } from '../client_types';
-import { Service, ServiceInterface } from "./service";
+import { Service, ServiceInterface } from "./Service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
 import { MapHex } from '../canvas_objects/mapHex';
