@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, GoodId, MetalId } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, GoodId, MetalId, ManifestItem, CargoManifest } from '../shared_types';
 import Konva from 'konva';
 
 export type HexaColor = `#${string}`;
@@ -19,6 +19,7 @@ export type ClientState = {
             homePosition: Coordinates,
             isDestinationValid: boolean,
         },
+        localCargoHold: CargoHoldInterface | null,
         opponentShips: ShipInterface[],
         hexes: MapHexInterface[],
     },
@@ -33,7 +34,7 @@ export type ClientConstants = {
     ISLAND_DATA: Record<HexId, (IslandData)>,
     SETTLEMENT_DATA: Record<SettlementId, SettlementData>,
     SHIP_DATA: { shape: string },
-    CARGO_HOLD_DATA: Record<GoodId|MetalId, ItemData>,
+    CARGO_ITEM_DATA: Record<ManifestItem, ItemData>,
     EVENT: Record<CustomEventTitle, CustomEventTitle>, // TODO: cull constants that are replaceable by types
 }
 
@@ -57,6 +58,11 @@ export interface PlayerShipInterface {
     getElement: () => Konva.Group,
     setInfluence: (value: number) => void,
     setPosition: (coordinates: Coordinates) => void,
+}
+
+export interface CargoHoldInterface {
+    getElement: () => Konva.Group,
+    updateHold: (items: CargoManifest) => void,
 }
 
 export type EventPayload =

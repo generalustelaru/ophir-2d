@@ -11,6 +11,7 @@ const state: ClientState = {
             homePosition: { x: 0, y: 0 },
             isDestinationValid: null,
         },
+        localCargoHold: null,
         opponentShips: [],
         hexes: [],
     },
