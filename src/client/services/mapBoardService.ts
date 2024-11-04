@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { PlayerId } from '../../shared_types';
+import { PlayerId, Coordinates } from '../../shared_types';
 import { InfoEventPayload } from '../client_types';
 import { Service, ServiceInterface } from "./service";
 import { Ship } from '../canvas_objects/ship';
@@ -11,8 +11,7 @@ import state from '../state';
 import clientConstants from '../client_constants';
 
 export interface MapBoardInterface extends ServiceInterface {
-    initiateCanvas: () => void,
-    drawBoard: () => void,
+    drawBoard: (stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) => void,
     updateBoard: () => void,
 }
 
@@ -21,27 +20,16 @@ const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientCo
 export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;
     layer: Konva.Layer;
-    center: { x: number, y: number };
+    center: Coordinates;
 
     constructor() {
         super();
     }
 
-    initiateCanvas = () => {
-        this.stage = new Konva.Stage({
-            container: 'canvas',
-            visible: true,
-            opacity: 1,
-            width: 750,
-            height: 500,
-        });
-        this.center = { x: 250, y: this.stage.height() / 2 };
-        this.layer = new Konva.Layer();
-        this.stage.add(this.layer);
-        this.layer.draw();
-    }
-
-    drawBoard = () => {
+    drawBoard = (stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) => {
+        this.stage = stage;
+        this.layer = layer;
+        this.center = center;
         const players = state.server.players;
         const localPlayer = players[state.localPlayerId];
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
