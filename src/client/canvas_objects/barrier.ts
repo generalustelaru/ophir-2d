@@ -22,11 +22,14 @@ const barrierOffsets: Record <BarrierId, OffsetData> = {
 }
 
 export class Barrier {
+
+    private group: Konva.Group;
     constructor(
         center: {x: number, y: number},
         barrierId: BarrierId,
         fill: string = COLOR.barrierDefault
     ) {
+        this.group = new Konva.Group({});
         const rect = new Konva.Rect({
             x: center.x + barrierOffsets[barrierId].x,
             y: center.y + barrierOffsets[barrierId].y,
@@ -37,6 +40,10 @@ export class Barrier {
             fill: fill,
         });
 
-        return rect;
+        this.group.add(rect);
+    }
+
+    public getElement = () => {
+        return this.group;
     }
 }

@@ -54,9 +54,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
         // MARK: draw barriers
         const barriers = serverState.setup.barriers
-        const barrier_1 = new Barrier(this.center, barriers[0]) as Konva.Rect;
-        const barrier_2 = new Barrier(this.center, barriers[1]) as Konva.Rect;
-        this.layer.add(barrier_1, barrier_2);
+        const barrier_1 = new Barrier(this.center, barriers[0]);
+        const barrier_2 = new Barrier(this.center, barriers[1]);
+        this.layer.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: draw other ships
         const playerIds = Object.keys(players) as PlayerId[];
