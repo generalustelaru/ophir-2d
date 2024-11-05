@@ -119,7 +119,10 @@ export class GameSetupService extends Service implements GameSetupInterface {
             const playerId = id as PlayerId;
             const player = states[playerId];
 
-            player.location.hexId = initialPlacement.from;
+            player.location = {
+                hexId: initialPlacement.from,
+                position: { x: 0, y: 0 },
+            }
             player.allowedMoves = initialPlacement.allowed;
         }
 
