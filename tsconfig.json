@@ -5,7 +5,11 @@
         "strictNullChecks": true,
         "strictPropertyInitialization": true,
         "strictFunctionTypes": true,
-        "strictBindCallApply": false,
+        "strictBindCallApply": true,
+        "noImplicitThis": true,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
         "module": "commonjs",
         "esModuleInterop": true, // To lint express only. Use @ts-ignore if it causes trouble.
     },
