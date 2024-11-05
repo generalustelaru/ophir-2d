@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, PlayerId, SharedState } from '../../shared_types';
+import { Coordinates, PlayerId, PlayerState, SharedState } from '../../shared_types';
 import { ActionEventPayload, MapHexInterface, PlayerShipInterface } from '../client_types';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
@@ -40,7 +40,7 @@ export class PlayerShip implements PlayerShipInterface {
         offsetY: number,
         fill: string
     ) {
-        const serverState = state.server as SharedState;
+
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
@@ -64,6 +64,7 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.on('dragmove', () => {
 
+            const serverState = state.server as SharedState
             const player = serverState.players[state.localPlayerId as PlayerId];
 
             const targetHex = state.konva.hexes.find(
@@ -101,6 +102,7 @@ export class PlayerShip implements PlayerShipInterface {
             ) as MapHexInterface;
 
             const { x: positionX, y: positionY } = state.konva.localShip.homePosition;
+            const serverState = state.server as SharedState
             const player = serverState.players[state.localPlayerId as PlayerId];
 
             for (let i = 0; i < HEX_COUNT; i++) {
