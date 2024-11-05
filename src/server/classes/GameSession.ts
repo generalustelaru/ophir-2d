@@ -1,6 +1,7 @@
 import { PrivateState, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction } from "../../shared_types";
+import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MetalId, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
+import state from "../../client/state";
 
 const { ACTION } = sharedConstants;
 
@@ -31,6 +32,8 @@ export class GameSession implements GameSessionInterface {
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
             case ACTION.turn:
                 return this.processEndTurn(id) ? this.sharedState : { error: `Illegal turn end on ${id}` };
+            case ACTION.drop_item:
+                return this.processItemDrop(message) ? this.sharedState : { error: `Illegal drop on ${id}` };
             default:
                 return { error: `Unknown action on ${id}` };
         }
@@ -38,10 +41,11 @@ export class GameSession implements GameSessionInterface {
 
     // Player action processing methods
     private processMove(message: WebsocketClientMessage): boolean {
+        const details = message.details as MoveActionDetails;
 
         const player = this.sharedState.players[message.playerId];
         const departure = player.location.hexId;
-        const destination = message.details.hexId;
+        const destination = details.hexId;
         const remainingMoves = player.moveActions;
         const allowed = this.privateState.moveRules.find(rule => rule.from === departure).allowed;
 
@@ -57,7 +61,7 @@ export class GameSession implements GameSessionInterface {
             : this.processInfluenceRoll(player, registry);
 
         if (sailSuccess) {
-            player.location = { hexId: destination, position: message.details.position };
+            player.location = { hexId: destination, position: details.position };
             player.allowedMoves = this.privateState.moveRules
                 .find(rule => rule.from === destination).allowed
                 .filter(move => move !== departure);
@@ -87,6 +91,33 @@ export class GameSession implements GameSessionInterface {
         return false;
     }
 
+    private processItemDrop(message: WebsocketClientMessage): boolean {
+        const details = message.details as DropItemActionDetails
+
+        const player = this.sharedState.players[message.playerId];
+        const manifest = player.cargo;
+
+        if (!manifest.includes(details.item)) {
+            return false;
+        }
+
+        manifest.splice(manifest.indexOf(details.item), 1, 'empty');
+
+        let hasCargo = false;
+        manifest.forEach(item => {
+            if (item !== 'empty') {
+                hasCargo = true;
+            }
+        });
+        player.hasCargo = hasCargo;
+
+        if (!player.allowedSettlementAction) {
+            player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player);
+        }
+
+        return true;
+    }
+
     private processGoodPickup(playerId: PlayerId): boolean {
         const player = this.sharedState.players[playerId];
         const localGood = this.getMatchingGood(player.location.hexId);
@@ -102,6 +133,7 @@ export class GameSession implements GameSessionInterface {
                 player.cargo[i] = localGood;
                 player.allowedSettlementAction = null;
                 player.moveActions = 0;
+                player.hasCargo = true;
 
                 return true;
             }
