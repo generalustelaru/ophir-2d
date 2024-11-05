@@ -51,6 +51,7 @@ const serverConstants: ServerConstants = {
         allowedSettlementAction: null,
         moveActions: 2,
         cargo: ['empty', 'empty'],
+        hasCargo: false,
     },
 }
 

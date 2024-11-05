@@ -1,4 +1,4 @@
-import { PlayerId } from '../../shared_types';
+import { ManifestItem, PlayerId } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
 import { Service, ServiceInterface } from './Service';
 import state from '../state';
@@ -18,7 +18,7 @@ const { EVENT } = clientConstants;
 export class UserInterfaceService extends Service implements UiInterface {
 
     createButton; joinButton; startButton; playerColorSelect;
-    favorButton; favorCounter; pickupGoodButton; endTurnButton;
+    favorButton; favorCounter; pickupGoodButton; dropItemSelect; endTurnButton;
 
     constructor() {
         super();
@@ -40,6 +40,50 @@ export class UserInterfaceService extends Service implements UiInterface {
             },
 
             disable: () => this.playerColorSelect.element.disabled = true,
+        }
+
+        this.dropItemSelect = {
+            element: document.getElementById('dropItemSelect') as HTMLSelectElement,
+            enable: () => {
+                const element = this.dropItemSelect.element;
+
+                element.addEventListener('change', this.requestItemDrop);
+
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+
+                const titleOption = document.createElement('option');
+                titleOption.value = '';
+                titleOption.text = '--Drop Item--';
+                titleOption.selected = true;
+                element.appendChild(titleOption);
+
+                const manifest = state.server.players[state.localPlayerId].cargo;
+                for (let i = 0; i < manifest.length; i++) {
+                    if (manifest[i] === 'empty') {
+                        continue;
+                    }
+
+                    const itemOption = document.createElement('option');
+                    itemOption.value = manifest[i];
+                    itemOption.text = manifest[i];
+                    element.appendChild(itemOption);
+                }
+
+                element.disabled = false;
+
+            },
+
+            disable: () => {
+                const element = this.dropItemSelect.element;
+                const titleOption = document.createElement('option');
+                titleOption.value = '';
+                titleOption.text = '--Drop Item--';
+                titleOption.selected = true;
+                element.appendChild(titleOption);
+                element.removeEventListener('change', this.requestItemDrop);
+                element.disabled = true},
         }
 
         this.favorButton = new Button('favorButton', this.processFavor);
@@ -87,6 +131,12 @@ export class UserInterfaceService extends Service implements UiInterface {
         return this.broadcastEvent(EVENT.action, payload);
     }
 
+    private requestItemDrop = (): void => {
+        const item = this.dropItemSelect.element.value as ManifestItem;
+        const payload: ActionEventPayload = { action: ACTION.drop_item, details: { item } };
+
+        return this.broadcastEvent(EVENT.action, payload);
+    }
     private processEndTurn = (): void => {
         const payload: ActionEventPayload = { action: ACTION.turn, details: null };
 
@@ -113,6 +163,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.favorButton.disable();
         this.pickupGoodButton.disable();
         this.endTurnButton.disable();
+        this.dropItemSelect.disable();
     }
 
     public updateGameControls = (): void => {
@@ -123,6 +174,10 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.favorCounter.set(player?.favor ?? 0);
 
         if (player?.isActive) {
+
+            if (player.hasCargo) {
+                this.dropItemSelect.enable();
+            }
 
             if (player.isAnchored) {
                 this.endTurnButton.enable();
