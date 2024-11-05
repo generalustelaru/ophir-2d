@@ -7,7 +7,6 @@ import clientConstants from '../client_constants';
 const { CARGO_ITEM_DATA: CARGO_HOLD_DATA } = clientConstants;
 
 type CargoSlot = {
-    id: 'slot_1' | 'slot_2' | 'slot_3' | 'slot_4',
     x: number,
     y: number,
     element: Konva.Path | null,
@@ -41,10 +40,10 @@ export class PlayMat implements PlayMatInterface {
         this.playMat.add(this.hold);
 
         this.cargoData = [
-            {id: 'slot_1', x: 0, y: 0, element: null},
-            {id: 'slot_2', x: 15, y: 0, element: null},
-            {id: 'slot_3', x: 0, y: 15, element: null},
-            {id: 'slot_4', x: 15, y: 15, element: null},
+            {x: 0, y: 0, element: null},
+            {x: 15, y: 0, element: null},
+            {x: 0, y: 15, element: null},
+            {x: 15, y: 15, element: null},
         ];
     }
 
@@ -69,7 +68,6 @@ export class PlayMat implements PlayMatInterface {
     private addItem(itemId: ManifestItem, cargoSlot: CargoSlot) {
         const itemData = CARGO_HOLD_DATA[itemId];
         const itemIcon = new Konva.Path({
-            id: cargoSlot.id,
             x: cargoSlot.x,
             y: cargoSlot.y,
             data: itemData.shape,
