@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ophir 2D</title>
-    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="style.css">
     <script type="module" src="/client.js"></script>
 </head>
 
@@ -28,6 +28,13 @@
             <button id="favorButton" disabled>Spend Favor</button>
             <input id="favorCounter" type="text" value="0" disabled>
             <button id="pickupGoodButton" disabled>Pickup Good</button>
+            <select id="dropGoodSelect" >
+                <option value="" disabled selected>--Drop good--</option>
+                <option value="goodGold">Gold</option>
+                <option value="goodSilver">Silver</option>
+                <option value="goodSpice">Spice</option>
+                <option value="goodSilk">Silk</option>
+            </select>
             <button id="interactButton" disabled>Trade/Donate</button>
             <button id="endTurnButton" disabled>End Turn</button>
         </div>
