@@ -11,7 +11,7 @@ import state from '../state';
 import clientConstants from '../client_constants';
 
 export interface MapBoardInterface extends ServiceInterface {
-    drawBoard: (stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) => void,
+    drawBoard: () => void,
     updateBoard: () => void,
 }
 
@@ -22,15 +22,14 @@ export class MapBoardService extends Service implements MapBoardInterface {
     layer: Konva.Layer;
     center: Coordinates;
 
-    constructor() {
+    constructor(stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) {
         super();
-    }
-
-    drawBoard = (stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) => {
-        console.log('drawBoard', this.center);
         this.stage = stage;
         this.layer = layer;
         this.center = center;
+    }
+
+    drawBoard = () => {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
