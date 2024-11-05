@@ -27,6 +27,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
     }
 
     drawBoard = (stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) => {
+        console.log('drawBoard', this.center);
         this.stage = stage;
         this.layer = layer;
         this.center = center;
@@ -64,7 +65,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
             if (players[id] && id != state.localPlayerId) {
 
                 const player = players[id];
-                const shipPosition = player.location.position ?? this.center;
+                const shipPosition = this.center;
                 const ship = new Ship(
                     shipPosition.x,
                     shipPosition.y,
@@ -85,7 +86,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         }
 
         //MARK: draw local ship
-        const shipPosition = localPlayer.location.position ?? this.center;
+        const shipPosition = this.center;
         const playerShip = new PlayerShip(
             this.stage,
             this.layer,
