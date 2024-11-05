@@ -184,10 +184,13 @@ export class UserInterfaceService extends Service implements UiInterface {
             if (player.isAnchored) {
                 this.endTurnButton.enable();
 
-                // will probably become a switch as new actions are added
-                if (player.allowedSettlementAction === ACTION.pickup_good) {
-                    this.pickupGoodButton.enable();
-                }
+            }
+
+            if (
+                player.allowedSettlementAction === ACTION.pickup_good // will probably become a switch as new actions are added
+                && player.cargo.find(item => item === 'empty')
+            ) {
+                this.pickupGoodButton.enable();
             }
 
             if (player.favor > 0 && !player.hasSpentFavor && player.moveActions > 0) {
