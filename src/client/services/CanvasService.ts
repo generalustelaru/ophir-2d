@@ -4,7 +4,6 @@ import { Service, ServiceInterface } from "./Service";
 import { MapBoardService, MapBoardInterface } from './MapBoardService';
 
 export interface CanvasInterface extends ServiceInterface {
-    initiateCanvas: () => void,
     drawElements: () => void,
     updateElements: () => void,
 }
@@ -17,9 +16,6 @@ export class CanvasService extends Service implements CanvasInterface {
 
     constructor() {
         super();
-    }
-
-    initiateCanvas = () => {
         this.stage = new Konva.Stage({
             container: 'canvas',
             visible: true,
@@ -32,11 +28,11 @@ export class CanvasService extends Service implements CanvasInterface {
         this.stage.add(this.layer);
         this.layer.draw();
 
-        this.mapBoardService = MapBoardService.getInstance();
+        this.mapBoardService = MapBoardService.getInstance([this.stage, this.layer, this.center]);
     }
 
     drawElements = () => {
-        this.mapBoardService.drawBoard(this.stage, this.layer, this.center);
+        this.mapBoardService.drawBoard();
     }
 
     updateElements = () => {

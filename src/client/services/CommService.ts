@@ -4,7 +4,7 @@ import state from '../state';
 import clientConstants from '../client_constants';
 
 export interface CommunicationInterface extends ServiceInterface {
-    createConnection: (address: string) => void,
+    createConnection: () => void,
     sendMessage: (action: Action, details?: ActionDetails) => void,
 }
 
@@ -14,12 +14,12 @@ export class CommunicationService extends Service implements CommunicationInterf
 
     socket: WebSocket;
 
-    constructor() {
+    constructor(url: string) {
         super();
+        this.socket = new WebSocket(url);
     }
 
-    createConnection(url: string) {
-        this.socket = new WebSocket(url);
+    createConnection() {
         this.socket.onopen = () => {
             console.info('Connected to the server');
             this.broadcastEvent(EVENT.connected);
