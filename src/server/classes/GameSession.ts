@@ -111,10 +111,6 @@ export class GameSession implements GameSessionInterface {
         });
         player.hasCargo = hasCargo;
 
-        if (!player.allowedSettlementAction) {
-            player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player);
-        }
-
         return true;
     }
 
@@ -122,7 +118,7 @@ export class GameSession implements GameSessionInterface {
         const player = this.sharedState.players[playerId];
         const localGood = this.getMatchingGood(player.location.hexId);
 
-        if (!localGood) {
+        if (!player.allowedSettlementAction || !localGood) {
             return false;
         }
 
