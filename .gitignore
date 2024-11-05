@@ -1,9 +1,4 @@
 node_modules/
-public/client.js
-public/client.js.map
-public/client.js.LICENSE.txt
-public/server.cjs
-public/server.cjs.map
-public/server.cjs.LICENSE.txt
+public/
 javascript/
 svg/
