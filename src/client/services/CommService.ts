@@ -1,4 +1,4 @@
-import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
+import { WebsocketClientMessage, Action, ActionDetails, PlayerId } from '../../shared_types';
 import { Service, ServiceInterface } from './Service';
 import state from '../state';
 import clientConstants from '../client_constants';
@@ -46,7 +46,7 @@ export class CommunicationService extends Service implements CommunicationInterf
         }
     }
 
-    sendMessage(action: Action, details?: ActionDetails) {
+    sendMessage(action: Action, details: ActionDetails|null = null) {
 
         if (!this.socket.readyState) {
             console.error('The connection is not open');
@@ -56,7 +56,7 @@ export class CommunicationService extends Service implements CommunicationInterf
         }
 
         const message: WebsocketClientMessage = {
-            playerId: state.localPlayerId,
+            playerId: state.localPlayerId as PlayerId,
             action,
             details,
         };

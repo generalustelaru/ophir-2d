@@ -1,4 +1,4 @@
-import { PrivateState, StateBundle, WssMessage } from "../server_types";
+import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
 import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MetalId, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
 import state from "../../client/state";
@@ -43,13 +43,13 @@ export class GameSession implements GameSessionInterface {
     private processMove(message: WebsocketClientMessage): boolean {
         const details = message.details as MoveActionDetails;
 
-        const player = this.sharedState.players[message.playerId];
+        const player = this.sharedState.players[message.playerId] as PlayerState;
         const departure = player.location.hexId;
         const destination = details.hexId;
         const remainingMoves = player.moveActions;
-        const allowed = this.privateState.moveRules.find(rule => rule.from === departure).allowed;
+        const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
 
-        if (!allowed.includes(destination) || remainingMoves === 0) {
+        if (!hexMoveRule.allowed.includes(destination) || remainingMoves === 0) {
             return false;
         }
 
@@ -63,8 +63,8 @@ export class GameSession implements GameSessionInterface {
         if (sailSuccess) {
             player.location = { hexId: destination, position: details.position };
             player.allowedMoves = this.privateState.moveRules
-                .find(rule => rule.from === destination).allowed
-                .filter(move => move !== departure);
+                .find(rule => rule.from === destination)?.allowed
+                .filter(move => move !== departure) as HexId[];
             player.isAnchored = true;
             player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player, destination);
         }
@@ -237,6 +237,8 @@ export class GameSession implements GameSessionInterface {
                 return playerId;
             }
         }
+
+        throw new Error('No active player found');
     }
 
     private setTurnStartConditions(playerId: PlayerId): void {
@@ -246,9 +248,12 @@ export class GameSession implements GameSessionInterface {
         player.hasSpentFavor = false;
         player.moveActions = 2;
         player.allowedSettlementAction = null;
-        player.allowedMoves = this.privateState.moveRules
-            .find(rule => rule.from === player.location.hexId)
-            .allowed;
+
+        const rules = this.privateState.moveRules.find(
+            rule => rule.from === player.location.hexId
+        ) as ProcessedMoveRule;
+
+        player.allowedMoves = rules.allowed as HexId[];
     }
 
     private getMatchingGood(hexId: HexId): GoodId | false {
@@ -283,10 +288,10 @@ export class GameSession implements GameSessionInterface {
         }
     }
 
-    private loadActionByCargoReq(player: PlayerState, desired: SettlementAction): SettlementAction
+    private loadActionByCargoReq(player: PlayerState, desired: SettlementAction): SettlementAction|null
     {
         if (desired !== 'buy_metals' && desired !== 'pickup_good') {
-            console.error(`Unknown settlement action: ${desired}`);
+            console.error(`Incompatible settlement action: ${desired}`);
 
             return null;
         }
