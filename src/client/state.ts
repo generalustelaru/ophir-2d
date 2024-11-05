@@ -4,12 +4,18 @@ import { ClientState } from './client_types';
 const state: ClientState = {
     localPlayerId: null,
     isBoardDrawn: false,
-    server: null,
+    server: {
+        gameStatus: 'empty',
+        sessionOwner: null,
+        availableSlots: [],
+        players: null,
+        setup: null,
+    },
     konva: {
         localShip: {
             object: null,
             homePosition: { x: 0, y: 0 },
-            isDestinationValid: null,
+            isDestinationValid: false,
         },
         localCargoHold: null,
         opponentShips: [],

@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
-import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage } from '../shared_types';
+import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage, PreSessionSharedState } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/GameSetupService';
 import { ToolService, ToolInterface } from './services/ToolService';
@@ -17,7 +17,7 @@ const privateState: PrivateState = {
     moveRules: [],
 }
 
-const sharedState: SharedState = {
+const sharedState: PreSessionSharedState | SharedState = {
     gameStatus: STATUS.empty,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
@@ -25,7 +25,7 @@ const sharedState: SharedState = {
     setup: null,
 }
 
-let singleSession: GameSession = null;
+let singleSession: GameSession|null = null;
 
 const app = express();
 app.use(express.static('public'));
@@ -102,24 +102,26 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             return;
         }
         // in-game player actions are handled in instantiable class
-        sendAll(singleSession.processAction(parsedMessage));
+        const session = singleSession as GameSession;
+        sendAll(session.processAction(parsedMessage));
     });
 });
 
 function processGameStart(): boolean {
 
     try {
-        sharedState.gameStatus = STATUS.started;
-        sharedState.availableSlots = [];
+        const gameState = sharedState as SharedState;
+        gameState.gameStatus = STATUS.started;
+        gameState.availableSlots = [];
 
         const bundle: StateBundle = setupService.produceGameData(
-            tools.getCopy(sharedState)
+            tools.getCopy(gameState)
         );
 
         singleSession = new GameSession(bundle);
 
-        sharedState.players = bundle.sharedState.players;
-        sharedState.setup = bundle.sharedState.setup;
+        gameState.players = bundle.sharedState.players;
+        gameState.setup = bundle.sharedState.setup;
         privateState.moveRules = bundle.privateState.moveRules;
     } catch (error) {
         console.error('Game start failed:', error);

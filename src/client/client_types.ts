@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, GoodId, MetalId, ManifestItem, CargoManifest } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, GoodId, MetalId, ManifestItem, CargoManifest, PreSessionSharedState } from '../shared_types';
 import Konva from 'konva';
 
 export type HexaColor = `#${string}`;
@@ -12,7 +12,7 @@ export type CustomEventTitle = "connected" | "action" | "update" | "error" | "in
 export type ClientState = {
     localPlayerId: PlayerId | null,
     isBoardDrawn: boolean,
-    server: SharedState | null,
+    server: SharedState | PreSessionSharedState,
     konva: {
         localShip: {
             object: PlayerShipInterface | null

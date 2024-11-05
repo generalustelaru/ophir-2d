@@ -5,6 +5,7 @@ import { CanvasService, CanvasInterface } from "./services/CanvasService";
 import { UserInterfaceService, UiInterface } from "./services/UiService";
 import sharedConstants from "../shared_constants";
 import clientConstants from "./client_constants";
+import { SharedState } from "../shared_types";
 const { ACTION, STATUS } = sharedConstants;
 const { EVENT } = clientConstants;
 
@@ -49,7 +50,8 @@ export class EventHandler {
 
         // Update client on server state update
         window.addEventListener(EVENT.update, () => {
-            if (state.server.gameStatus == STATUS.started) {
+            const serverState = state.server as SharedState;
+            if (serverState.gameStatus == STATUS.started) {
                 if (state.isBoardDrawn) {
                     this.canvasService.updateElements();
                 } else {

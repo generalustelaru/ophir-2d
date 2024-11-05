@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { PlayerId, Coordinates } from '../../shared_types';
-import { InfoEventPayload } from '../client_types';
+import { PlayerId, Coordinates, SharedState } from '../../shared_types';
+import { InfoEventPayload, PlayerShipInterface } from '../client_types';
 import { Service, ServiceInterface } from "./Service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
@@ -30,10 +30,11 @@ export class MapBoardService extends Service implements MapBoardInterface {
         this.stage = stage;
         this.layer = layer;
         this.center = center;
-        const players = state.server.players;
-        const localPlayer = players[state.localPlayerId];
+        const serverState = state.server as SharedState;
+        const players = serverState.players;
+        const localPlayer = players[state.localPlayerId as PlayerId];
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
-        const settlements = state.server.setup.settlements
+        const settlements = serverState.setup.settlements
         //MARK: draw hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
@@ -52,7 +53,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         });
 
         // MARK: draw barriers
-        const barriers = state.server.setup.barriers
+        const barriers = serverState.setup.barriers
         const barrier_1 = new Barrier(this.center, barriers[0]) as Konva.Rect;
         const barrier_2 = new Barrier(this.center, barriers[1]) as Konva.Rect;
         this.layer.add(barrier_1, barrier_2);
@@ -105,8 +106,9 @@ export class MapBoardService extends Service implements MapBoardInterface {
     }
 
     updateBoard = () => {
-        const players = state.server.players;
-        const localPlayer = players[state.localPlayerId];
+        const serverState = state.server as SharedState;
+        const players = serverState.players;
+        const localPlayer = players[state.localPlayerId as PlayerId];
         const mapState = state.konva;
 
         mapState.hexes.forEach(hex => {
@@ -142,12 +144,12 @@ export class MapBoardService extends Service implements MapBoardInterface {
         });
 
         if (localPlayer) {
-            const localShip = mapState.localShip.object;
+            const localShip = mapState.localShip.object as PlayerShip;
             localShip.switchControl(localPlayer.isActive && localPlayer.moveActions > 0);
             localShip.setPosition(localPlayer.location.position ?? this.center);
             localShip.setInfluence(localPlayer.influence);
 
-            const localCargoHold = mapState.localCargoHold;
+            const localCargoHold = mapState.localCargoHold as PlayMat;
             localCargoHold.updateHold(localPlayer.cargo);
         }
     }

@@ -1,9 +1,10 @@
 import Konva from 'konva';
-import { Coordinates } from '../../shared_types';
-import { ActionEventPayload, PlayerShipInterface } from '../client_types';
+import { Coordinates, PlayerId, SharedState } from '../../shared_types';
+import { ActionEventPayload, MapHexInterface, PlayerShipInterface } from '../client_types';
 import state from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
+import { Vector2d } from 'konva/lib/types';
 
 const { ACTION } = sharedConstants;
 const { EVENT, COLOR, SHIP_DATA } = clientConstants;
@@ -39,11 +40,12 @@ export class PlayerShip implements PlayerShipInterface {
         offsetY: number,
         fill: string
     ) {
+        const serverState = state.server as SharedState;
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
             draggable: true,
-            id: state.localPlayerId,
+            id: state.localPlayerId as PlayerId,
         });
 
         this.ship = new Konva.Path({
@@ -62,8 +64,12 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.on('dragmove', () => {
 
-            const player = state.server.players[state.localPlayerId];
-            const targetHex = state.konva.hexes.find(hex => hex.isIntersecting(stage.getPointerPosition()));
+            const player = serverState.players[state.localPlayerId as PlayerId];
+
+            const targetHex = state.konva.hexes.find(
+                hex => hex.isIntersecting(stage.getPointerPosition() as Vector2d)
+            );
+
             const shipState = state.konva.localShip;
 
             for (let i = 0; i < HEX_COUNT; i++) {
@@ -90,9 +96,12 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.on('dragend', () => {
 
-            const targetHex = state.konva.hexes.find(hex => hex.isIntersecting(stage.getPointerPosition()));
+            const targetHex = state.konva.hexes.find(
+                hex => hex.isIntersecting(stage.getPointerPosition() as Vector2d)
+            ) as MapHexInterface;
+
             const { x: positionX, y: positionY } = state.konva.localShip.homePosition;
-            const player = state.server.players[state.localPlayerId];
+            const player = serverState.players[state.localPlayerId as PlayerId];
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 state.konva.hexes[i].setFill(COLOR.default);
@@ -110,7 +119,11 @@ export class PlayerShip implements PlayerShipInterface {
             } else {
                 this.group.x(positionX);
                 this.group.y(positionY);
-                const locationHex = state.konva.hexes.find(hex => hex.getId() === player.location.hexId);
+
+                const locationHex = state.konva.hexes.find(
+                    hex => hex.getId() === player.location.hexId
+                ) as MapHexInterface;
+
                 locationHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
             }
 
@@ -136,7 +149,7 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.add(this.influence);
     }
 
-    private broadcastAction(detail: ActionEventPayload = null) {
+    private broadcastAction(detail: ActionEventPayload) {
         window.dispatchEvent(new CustomEvent(
             EVENT.action,
             { detail: detail }

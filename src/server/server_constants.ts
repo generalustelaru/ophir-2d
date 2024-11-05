@@ -40,13 +40,13 @@ const serverConstants: ServerConstants = {
     ],
 
     PLAYER_STATE: { //PlayerState
-        turnOrder: null,
+        turnOrder: 0,
         isActive: false,
-        location: null,
+        location: {hexId: "center", position: {x: 0, y: 0}},
         favor: 6,
         hasSpentFavor: false,
         influence: 1,
-        allowedMoves: null,
+        allowedMoves: [],
         isAnchored: true,
         allowedSettlementAction: null,
         moveActions: 2,

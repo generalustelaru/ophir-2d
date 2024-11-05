@@ -1,6 +1,11 @@
 {
     "compilerOptions": {
         "noImplicitAny": true,
+        "strict": true,
+        "strictNullChecks": true,
+        "strictPropertyInitialization": false,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": false,
         "module": "commonjs",
         "esModuleInterop": true, // To lint express only. Use @ts-ignore if it causes trouble.
     },

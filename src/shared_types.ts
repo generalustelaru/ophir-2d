@@ -14,11 +14,11 @@ export type ManifestItem = GoodId | MetalId | "empty";
 export type CargoManifest  = Array<ManifestItem>;
 
 export type PlayerState = {
-    turnOrder: number | null,
+    turnOrder: number,
     isActive: boolean,
     location: {
         hexId: HexId,
-        position: Coordinates | null,
+        position: Coordinates,
     },
     favor: number,
     hasSpentFavor: boolean,
@@ -31,17 +31,25 @@ export type PlayerState = {
     cargo: CargoManifest,
 }
 
-export type PlayerStates = Record<PlayerId, (PlayerState)>;
+export type PlayerStates = Record<PlayerId, PlayerState>;
 
 /**
  * @description Shared between players and server in a session
  */
 export type SharedState = {
     gameStatus: GameStatus,
+    sessionOwner: PlayerId,
+    availableSlots: Array<never>,
+    players: PlayerStates,
+    setup: GameSetup,
+}
+
+export type PreSessionSharedState = {
+    gameStatus: GameStatus,
     sessionOwner: PlayerId | null,
     availableSlots: PlayerId[],
     players: PlayerStates | null,
-    setup: GameSetup | null,
+    setup: null,
 }
 
 export type GameSetup = {

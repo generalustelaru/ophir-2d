@@ -1,4 +1,4 @@
-import { ManifestItem, PlayerId } from '../../shared_types';
+import { ManifestItem, PlayerId, PreSessionSharedState, SharedState } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
 import { Service, ServiceInterface } from './Service';
 import state from '../state';
@@ -58,8 +58,8 @@ export class UserInterfaceService extends Service implements UiInterface {
                 titleOption.text = '--Drop Item--';
                 titleOption.selected = true;
                 element.appendChild(titleOption);
-
-                const manifest = state.server.players[state.localPlayerId].cargo;
+                const serverState = state.server as SharedState;
+                const manifest = serverState.players[state.localPlayerId as PlayerId].cargo;
                 for (let i = 0; i < manifest.length; i++) {
                     if (manifest[i] === 'empty') {
                         continue;
@@ -103,13 +103,14 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     private processEnroll = (): void => {
+        const lobbyState = state.server as PreSessionSharedState;
         const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
             return this.setInfo('Please select a color');
         }
 
-        if (state.server.availableSlots.includes(selectedId)) {
+        if (lobbyState.availableSlots.includes(selectedId)) {
             state.localPlayerId = selectedId as PlayerId;
             const payload: ActionEventPayload = { action: ACTION.enroll, details: null };
 
@@ -144,7 +145,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     public setInfo(text: string): void {
-        const info = document.getElementById('info');
+        const info = document.getElementById('info') as HTMLDivElement;
         info.innerHTML = text;
     }
 
@@ -169,7 +170,8 @@ export class UserInterfaceService extends Service implements UiInterface {
     public updateGameControls = (): void => {
         this.disableLobbyControls();
         this.disableGameControls();
-        const player = state.server.players[state.localPlayerId];
+        const serverState = state.server as SharedState;
+        const player = serverState.players[state.localPlayerId as PlayerId];
 
         this.favorCounter.set(player?.favor ?? 0);
 
