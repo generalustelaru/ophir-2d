@@ -1,6 +1,6 @@
-import { SharedState, BarrierId, HexId, PlayerId, PlayerState} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, PlayerState, PreSessionSharedState} from '../shared_types';
 
-export type WssMessage = SharedState | { error: string};
+export type WssMessage = SharedState | PreSessionSharedState | { error: string};
 export type DefaultMoveRule = {
     from: HexId;
     allowed: HexId[];

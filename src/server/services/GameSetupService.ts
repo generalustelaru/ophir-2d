@@ -65,7 +65,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
     private determineBarriers(): BarrierId[] {
 
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
-        let b2: BarrierId = null;
+        let b2: BarrierId = b1;
 
         while (!this.isArrangementLegal(b1, b2)) {
             b2 = Math.ceil(Math.random() * 12) as BarrierId;
@@ -76,7 +76,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
 
     private determineSettlements(): Record<HexId, SettlementId> {
         const settlementIds: SettlementId[] = ["temple", "market", "exchange", "quary", "forest", "mines", "farms"];
-        const pairing: Record<HexId, SettlementId> = {
+        const pairing: Record<HexId, null|SettlementId> = {
             center: null,
             topRight: null,
             right: null,
@@ -92,7 +92,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
             pairing[hexId] = settlementIds.splice(pick, 1)[0];
         }
 
-        return pairing;
+        return pairing as Record<HexId, SettlementId>;
     }
 
     private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {
@@ -119,10 +119,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
             const playerId = id as PlayerId;
             const player = states[playerId];
 
-            player.location = {
-                hexId: initialPlacement.from,
-                position: null
-            };
+            player.location.hexId = initialPlacement.from;
             player.allowedMoves = initialPlacement.allowed;
         }
 
