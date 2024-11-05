@@ -9,6 +9,7 @@ else
 	cp src/client/index.html public/index.html
 	cp src/client/style.css public/style.css
 endif
+	make run
 
 run:
 	node public/server.cjs
