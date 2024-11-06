@@ -116,9 +116,10 @@ export class GameSession implements GameSessionInterface {
 
     private processGoodPickup(playerId: PlayerId): boolean {
         const player = this.sharedState.players[playerId];
+        const canPickupGood = this.canItemBeLoaded(player, 'pickup_good');
         const localGood = this.getMatchingGood(player.location.hexId);
 
-        if (!player.allowedSettlementAction || !localGood) {
+        if (!player.allowedSettlementAction || !localGood || !canPickupGood) {
             return false;
         }
 
@@ -270,32 +271,29 @@ export class GameSession implements GameSessionInterface {
     ): SettlementAction | null {
         const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
 
-        switch (settlementId) {
-            case 'farms':
-            case 'mines':
-            case 'forest':
-            case 'quary': return this.loadActionByCargoReq(playerState, 'pickup_good');
-            case 'market': return 'sell_goods';
-            case 'exchange': return this.loadActionByCargoReq(playerState, 'buy_metals');
-            case 'temple': return 'visit_temple';
+        switch (true) {
+            case ['farms', 'mines', 'forest', 'quary'].includes(settlementId): return 'pickup_good';
+            case 'market' == settlementId: return 'sell_goods';
+            case 'exchange' == settlementId: return 'buy_metals';
+            case 'temple' == settlementId: return 'visit_temple';
             default:
                 console.error(`Unknown settlement at ${hexId}`);
                 return null;
         }
     }
 
-    private loadActionByCargoReq(player: PlayerState, desired: SettlementAction): SettlementAction|null
+    private canItemBeLoaded(player: PlayerState, desired: SettlementAction): boolean
     {
         if (desired !== 'buy_metals' && desired !== 'pickup_good') {
             console.error(`Incompatible settlement action: ${desired}`);
 
-            return null;
+            return false;
         }
 
         const cargo = player.cargo;
         const emptySlots = cargo.filter(item => item === 'empty').length;
         const cargoReq = desired === 'pickup_good' ? 1 : 2;
 
-        return emptySlots >= cargoReq ? desired : null;
+        return emptySlots >= cargoReq;
     }
 }
