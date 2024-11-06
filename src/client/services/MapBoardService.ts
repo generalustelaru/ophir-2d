@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { PlayerId, Coordinates, SharedState } from '../../shared_types';
-import { InfoEventPayload, PlayerShipInterface } from '../client_types';
+import { InfoEventPayload, } from '../client_types';
 import { Service, ServiceInterface } from "./Service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
@@ -15,21 +15,21 @@ export interface MapBoardInterface extends ServiceInterface {
     updateBoard: () => void,
 }
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT, SHIP_DATA } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
 
 export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;
     layer: Konva.Layer;
-    center: Coordinates;
+    centerPoint: Coordinates;
 
     constructor(stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) {
         super();
         this.stage = stage;
         this.layer = layer;
-        this.center = center;
+        this.centerPoint = center;
     }
 
-    drawBoard = () => {
+    public drawBoard = () => {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
@@ -38,7 +38,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         //MARK: draw hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
-                this.center,
+                this.centerPoint,
                 hexItem.id,
                 hexItem.x,
                 hexItem.y,
@@ -54,18 +54,17 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
         // MARK: draw barriers
         const barriers = serverState.setup.barriers
-        const barrier_1 = new Barrier(this.center, barriers[0]);
-        const barrier_2 = new Barrier(this.center, barriers[1]);
+        const barrier_1 = new Barrier(this.centerPoint, barriers[0]);
+        const barrier_2 = new Barrier(this.centerPoint, barriers[1]);
         this.layer.add(barrier_1.getElement(), barrier_2.getElement());
 
-        const drifts = SHIP_DATA.setupDrifts;
         //MARK: draw other ships
         const playerIds = Object.keys(players) as PlayerId[];
         playerIds.forEach((id) => {
             if (players[id] && id != state.localPlayerId) {
 
                 const player = players[id];
-                const shipPosition = this.getDrift(this.center, drifts.pop() as Coordinates);
+                const shipPosition = player.location.position;
                 const ship = new Ship(
                     shipPosition.x,
                     shipPosition.y,
@@ -86,7 +85,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         }
 
         //MARK: draw local ship
-        const shipPosition = this.getDrift(this.center, drifts.pop() as Coordinates);
+        const shipPosition = localPlayer.location.position;
         const playerShip = new PlayerShip(
             this.stage,
             this.layer,
@@ -106,7 +105,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         state.konva.localCargoHold = cargoHold;
     }
 
-    updateBoard = () => {
+    public updateBoard = () => {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
@@ -167,13 +166,6 @@ export class MapBoardService extends Service implements MapBoardInterface {
                 return COLOR.holdDarkYellow;
             default:
                 return COLOR.holdDarkRed;
-        }
-    }
-
-    private getDrift = (center: Coordinates, drift: Coordinates): Coordinates => {
-        return {
-            x: center.x + drift.x,
-            y: center.y + drift.y,
         }
     }
 }

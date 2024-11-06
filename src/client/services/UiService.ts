@@ -5,6 +5,7 @@ import state from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
 import { Button } from '../html_behaviors/button';
+import { CanvasService, CanvasInterface } from "./CanvasService";
 
 export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
@@ -97,7 +98,11 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private processStart = (): void => {
         this.startButton.disable();
-        const payload: ActionEventPayload = { action: ACTION.start, details: null };
+        const canvasService = CanvasService.getInstance([]) as CanvasInterface;
+        const payload: ActionEventPayload = {
+            action: ACTION.start,
+            details: canvasService.getSetupCoordinates(),
+        };
 
         return this.broadcastEvent(EVENT.action, payload);
     }
