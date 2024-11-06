@@ -3,7 +3,7 @@ import Konva from 'konva';
 import { HexId } from '../../shared_types';
 import { Color, MapHexInterface, IslandData, SettlementData } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
-import { LocationToken } from './locationToken';
+import { LocationToken } from './LocationToken';
 import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;
