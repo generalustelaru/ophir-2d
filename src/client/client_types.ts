@@ -1,13 +1,14 @@
 import { Vector2d } from 'konva/lib/types';
 import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, GoodId, MetalId, ManifestItem, CargoManifest, PreSessionSharedState } from '../shared_types';
 import Konva from 'konva';
+import e from 'express';
 
 export type HexaColor = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
 export type SettlementData = { shape: string, fill: HexaColor };
 export type ItemData = { shape: string, fill: HexaColor };
 export type IslandData = { x: number , y: number, shape: string };
-export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info";
+export type CustomEventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
 
 export type ClientState = {
     localPlayerId: PlayerId | null,
@@ -31,9 +32,12 @@ export type ClientConstants = {
     },
     COLOR: Record<string, HexaColor>,
     HEX_OFFSET_DATA: HexOffset[],
-    ISLAND_DATA: Record<HexId, (IslandData)>,
+    ISLAND_DATA: Record<HexId, IslandData>,
     SETTLEMENT_DATA: Record<SettlementId, SettlementData>,
-    SHIP_DATA: { shape: string },
+    SHIP_DATA: {
+        setupDrifts: Array<Coordinates>,
+        shape: string
+    },
     CARGO_ITEM_DATA: Record<ManifestItem, ItemData>,
     EVENT: Record<CustomEventTitle, CustomEventTitle>, // TODO: cull constants that are replaceable by types
 }
@@ -69,6 +73,7 @@ export type EventPayload =
     | InfoEventPayload
     | ActionEventPayload
     | ErrorEventPayload
+    | SetupEventPayload
     | null;
 
 export type InfoEventPayload = {
@@ -82,4 +87,8 @@ export type ErrorEventPayload = {
 export type ActionEventPayload = {
     action: Action,
     details: ActionDetails,
+}
+
+export type SetupEventPayload = {
+    playerPositions: Array<Coordinates>,
 }

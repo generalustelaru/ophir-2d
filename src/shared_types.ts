@@ -7,7 +7,7 @@ export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLef
 export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver_a"| "silver_b" | "gold_a" | "gold_b"; // metals cover two cargo spaces
 export type SettlementId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
-export type Action = "inquire" | "enroll" | "start" | "move" | "favor" | "drop_item" | "refresh" | "turn" | SettlementAction;
+export type Action = "inquire" | "setup" | "enroll" | "start" | "move" | "favor" | "drop_item" | "refresh" | "turn" | SettlementAction;
 export type SettlementAction = "visit_temple" | "sell_goods" | "buy_metals" | "pickup_good";
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";
@@ -62,11 +62,15 @@ export type MoveActionDetails = {
     position: Coordinates,
 }
 
+export type GameSetupDetails = {
+    setupCoordinates: Array<Coordinates>,
+}
+
 export type DropItemActionDetails = {
     item: ManifestItem,
 }
 
-export type ActionDetails = MoveActionDetails | DropItemActionDetails | null;
+export type ActionDetails = GameSetupDetails | MoveActionDetails | DropItemActionDetails | null;
 
 export type Coordinates = { x: number, y: number };
 

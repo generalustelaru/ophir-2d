@@ -15,7 +15,7 @@ export interface MapBoardInterface extends ServiceInterface {
     updateBoard: () => void,
 }
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT, SHIP_DATA } = clientConstants;
 
 export class MapBoardService extends Service implements MapBoardInterface {
     stage: Konva.Stage;
@@ -58,13 +58,14 @@ export class MapBoardService extends Service implements MapBoardInterface {
         const barrier_2 = new Barrier(this.center, barriers[1]);
         this.layer.add(barrier_1.getElement(), barrier_2.getElement());
 
+        const drifts = SHIP_DATA.setupDrifts;
         //MARK: draw other ships
         const playerIds = Object.keys(players) as PlayerId[];
         playerIds.forEach((id) => {
             if (players[id] && id != state.localPlayerId) {
 
                 const player = players[id];
-                const shipPosition = this.center;
+                const shipPosition = this.getDrift(this.center, drifts.pop() as Coordinates);
                 const ship = new Ship(
                     shipPosition.x,
                     shipPosition.y,
@@ -85,7 +86,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         }
 
         //MARK: draw local ship
-        const shipPosition = this.center;
+        const shipPosition = this.getDrift(this.center, drifts.pop() as Coordinates);
         const playerShip = new PlayerShip(
             this.stage,
             this.layer,
@@ -110,7 +111,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
         const mapState = state.konva;
-
+        //MARK: update hexes
         mapState.hexes.forEach(hex => {
             const hexId = hex.getId();
             let hexColor = COLOR.default;
@@ -123,12 +124,12 @@ export class MapBoardService extends Service implements MapBoardInterface {
 
             hex.setFill(hexColor);
         });
-
+        // MARK: update other ships
         mapState.opponentShips.forEach(ship => {
             const opponentId: PlayerId = ship.getId();
 
             if (players[opponentId]) {
-                const shipPosition = players[opponentId].location.position ?? this.center;
+                const shipPosition = players[opponentId].location.position;
                 ship.setPosition(shipPosition);
                 ship.setInfluence(players[opponentId].influence);
                 this.layer.batchDraw();
@@ -146,7 +147,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         if (localPlayer) {
             const localShip = mapState.localShip.object as PlayerShip;
             localShip.switchControl(localPlayer.isActive && localPlayer.moveActions > 0);
-            localShip.setPosition(localPlayer.location.position ?? this.center);
+            localShip.setPosition(localPlayer.location.position);
             localShip.setInfluence(localPlayer.influence);
 
             const localCargoHold = mapState.localCargoHold as PlayMat;
@@ -166,6 +167,13 @@ export class MapBoardService extends Service implements MapBoardInterface {
                 return COLOR.holdDarkYellow;
             default:
                 return COLOR.holdDarkRed;
+        }
+    }
+
+    private getDrift = (center: Coordinates, drift: Coordinates): Coordinates => {
+        return {
+            x: center.x + drift.x,
+            y: center.y + drift.y,
         }
     }
 }

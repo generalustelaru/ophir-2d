@@ -82,6 +82,10 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             return;
         }
 
+        if (action === ACTION.setup) {
+            console.log('Setup request');
+        }
+
         if (action === ACTION.enroll) {
 
             if (processPlayer(playerId)) {
@@ -150,6 +154,7 @@ function processPlayer(playerId: PlayerId): boolean {
         .filter(slot => slot != playerId);
 
     if (sharedState.players === null) {
+        // add coordiantes here
         sharedState.players = { [playerId]: { ...PLAYER_STATE } } as PlayerStates;
     } else {
         sharedState.players[playerId] = { ...PLAYER_STATE };
