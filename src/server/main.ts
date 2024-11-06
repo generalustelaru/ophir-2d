@@ -12,12 +12,12 @@ const httpPort = 3000;
 const wsPort = 8080;
 
 const { ACTION, STATUS } = sharedConstants;
-const { PLAYER_IDS, WS_SIGNAL, PLAYER_STATE } = serverConstants;
+const { PLAYER_IDS, WS_SIGNAL, DEFAULT_PLAYER_STATE } = serverConstants;
 const privateState: PrivateState = {
     moveRules: [],
 }
 
-const sharedState: PreSessionSharedState | SharedState = {
+const sharedState: PreSessionSharedState|SharedState = {
     gameStatus: STATUS.empty,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
@@ -40,7 +40,7 @@ app.listen(httpPort, () => {
     console.info(`Server running at http://localhost:${httpPort}`);
 });
 
-const socketClients: any[] = [];
+const socketClients: Array<any> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupInterface = GameSetupService.getInstance();
 const tools: ToolInterface = ToolService.getInstance();
@@ -156,10 +156,9 @@ function processPlayer(playerId: PlayerId): boolean {
         .filter(slot => slot != playerId);
 
     if (sharedState.players === null) {
-        // add coordiantes here
-        sharedState.players = { [playerId]: { ...PLAYER_STATE } } as PlayerStates;
+        sharedState.players = { [playerId]: DEFAULT_PLAYER_STATE } as PlayerStates;
     } else {
-        sharedState.players[playerId] = { ...PLAYER_STATE };
+        sharedState.players[playerId] = DEFAULT_PLAYER_STATE;
     }
 
     console.log(`${playerId} enrolled`);

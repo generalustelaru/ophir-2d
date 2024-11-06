@@ -9,7 +9,7 @@ const { CARGO_ITEM_DATA: CARGO_HOLD_DATA } = clientConstants;
 type CargoSlot = {
     x: number,
     y: number,
-    element: Konva.Path | null,
+    element: Konva.Path|null,
 }
 export class PlayMat implements PlayMatInterface {
 

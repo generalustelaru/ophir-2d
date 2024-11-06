@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { PlayerId, Coordinates, SharedState } from '../../shared_types';
-import { InfoEventPayload, } from '../client_types';
+import { HexaColor, InfoEventPayload, } from '../client_types';
 import { Service, ServiceInterface } from "./Service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
@@ -11,8 +11,8 @@ import state from '../state';
 import clientConstants from '../client_constants';
 
 export interface MapBoardInterface extends ServiceInterface {
-    drawBoard: () => void,
-    updateBoard: () => void,
+    drawBoard(): void,
+    updateBoard(): void,
 }
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
@@ -29,7 +29,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         this.centerPoint = center;
     }
 
-    public drawBoard = () => {
+    public drawBoard(): void {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
@@ -59,7 +59,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         this.layer.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: draw other ships
-        const playerIds = Object.keys(players) as PlayerId[];
+        const playerIds = Object.keys(players) as Array<PlayerId>;
         playerIds.forEach((id) => {
             if (players[id] && id != state.localPlayerId) {
 
@@ -105,7 +105,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         state.konva.localCargoHold = cargoHold;
     }
 
-    public updateBoard = () => {
+    public updateBoard() {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
@@ -154,7 +154,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         }
     }
 
-    private matchCargoHoldColor = (playerColor: string) => {
+    private matchCargoHoldColor(playerColor: string): HexaColor {
         switch (playerColor) {
             case COLOR.playerRed:
                 return COLOR.holdDarkRed;

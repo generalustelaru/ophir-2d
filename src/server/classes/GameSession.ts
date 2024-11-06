@@ -1,7 +1,6 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MetalId, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
+import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
-import state from "../../client/state";
 
 const { ACTION } = sharedConstants;
 
@@ -64,7 +63,7 @@ export class GameSession implements GameSessionInterface {
             player.location = { hexId: destination, position: details.position };
             player.allowedMoves = this.privateState.moveRules
                 .find(rule => rule.from === destination)?.allowed
-                .filter(move => move !== departure) as HexId[];
+                .filter(move => move !== departure) as Array<HexId>;
             player.isAnchored = true;
             player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player, destination);
         }
@@ -152,8 +151,8 @@ export class GameSession implements GameSessionInterface {
     }
 
     // Helper methods
-    private getPortRegistry(destinationHex: HexId): RegistryItem[] | false {
-        const registry: RegistryItem[] = [];
+    private getPortRegistry(destinationHex: HexId): Array<RegistryItem>|false {
+        const registry: Array<RegistryItem> = [];
         const players = this.sharedState.players;
 
         for (const id in players) {
@@ -172,7 +171,7 @@ export class GameSession implements GameSessionInterface {
         return registry;
     }
 
-    private processInfluenceRoll(activePlayer: PlayerState, registry: RegistryItem[]): boolean {
+    private processInfluenceRoll(activePlayer: PlayerState, registry: Array<RegistryItem>): boolean {
         let canMove = true;
 
         activePlayer.influence = Math.ceil(Math.random() * 6);
@@ -250,10 +249,10 @@ export class GameSession implements GameSessionInterface {
             rule => rule.from === player.location.hexId
         ) as ProcessedMoveRule;
 
-        player.allowedMoves = rules.allowed as HexId[];
+        player.allowedMoves = rules.allowed as Array<HexId>;
     }
 
-    private getMatchingGood(hexId: HexId): GoodId | false {
+    private getMatchingGood(hexId: HexId): GoodId|false {
         const settlement = this.sharedState.setup.settlements[hexId];
 
         switch (settlement) {
@@ -265,10 +264,7 @@ export class GameSession implements GameSessionInterface {
         }
     }
 
-    private getAllowedSettlementActionFromLocation(
-        playerState: PlayerState,
-        hexId: HexId | null = null
-    ): SettlementAction | null {
+    private getAllowedSettlementActionFromLocation(playerState: PlayerState, hexId: HexId|null = null): SettlementAction|null {
         const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
 
         switch (true) {

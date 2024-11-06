@@ -1,7 +1,7 @@
 
 interface HTMLHandlerInterface {
-    enable: () => void,
-    disable: () => void,
+    enable(): void,
+    disable(): void,
 }
 export class Button implements HTMLHandlerInterface {
 
