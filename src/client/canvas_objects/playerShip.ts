@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, PlayerId, PlayerState, SharedState } from '../../shared_types';
+import { Coordinates, PlayerId, SharedState } from '../../shared_types';
 import { ActionEventPayload, MapHexInterface, PlayerShipInterface } from '../client_types';
 import state from '../state';
 import sharedConstants from '../../shared_constants';

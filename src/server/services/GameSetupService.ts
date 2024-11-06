@@ -39,7 +39,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
     };
 
     private assignTurnOrderAndPosition(states: PlayerStates, setupCoordinates: Array<Coordinates>): PlayerStates {
-        const playerIds = Object.keys(states) as PlayerId[];
+        const playerIds = Object.keys(states) as Array<PlayerId>;
         let tokenCount = playerIds.length;
 
         while (tokenCount > 0) {
@@ -63,7 +63,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return setup;
     }
 
-    private determineBarriers(): BarrierId[] {
+    private determineBarriers(): Array<BarrierId> {
 
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
         let b2: BarrierId = b1;
@@ -76,7 +76,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
     }
 
     private determineSettlements(): Record<HexId, SettlementId> {
-        const settlementIds: SettlementId[] = ["temple", "market", "exchange", "quary", "forest", "mines", "farms"];
+        const settlementIds: Array<SettlementId> = ["temple", "market", "exchange", "quary", "forest", "mines", "farms"];
         const pairing: Record<HexId, null|SettlementId> = {
             center: null,
             topRight: null,
@@ -111,9 +111,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return true;
     }
 
-    private assignTurnOneRules(
-        states: PlayerStates, rules: ProcessedMoveRule[]
-    ): PlayerStates {
+    private assignTurnOneRules(states: PlayerStates, rules: Array<ProcessedMoveRule>): PlayerStates {
         const initialPlacement = rules[0];
 
         for (const id in states) {
@@ -127,8 +125,8 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return states;
     }
 
-    private produceMoveRules(barrierIds: BarrierId[]): ProcessedMoveRule[] {
-        const rules: ProcessedMoveRule[] = [];
+    private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
+        const rules: Array<ProcessedMoveRule> = [];
 
         DEFAULT_MOVE_RULES.forEach(moveRule => {
 

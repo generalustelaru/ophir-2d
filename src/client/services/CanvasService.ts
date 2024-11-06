@@ -4,12 +4,12 @@ import { Service, ServiceInterface } from "./Service";
 import { MapBoardService, MapBoardInterface } from './MapBoardService';
 import clientConstants from '../client_constants';
 export interface CanvasInterface extends ServiceInterface {
-    getSetupCoordinates: () => GameSetupDetails,
-    drawElements: () => void,
-    updateElements: () => void,
+    getSetupCoordinates(): GameSetupDetails,
+    drawElements(): void,
+    updateElements(): void,
 }
 
-const { SHIP_DATA, EVENT } = clientConstants;
+const { SHIP_DATA } = clientConstants;
 
 export class CanvasService extends Service implements CanvasInterface {
     stage: Konva.Stage;
@@ -34,7 +34,7 @@ export class CanvasService extends Service implements CanvasInterface {
         this.mapBoardService = MapBoardService.getInstance([this.stage, this.layer, this.centerPoint]);
     }
 
-    public getSetupCoordinates = () => {
+    public getSetupCoordinates(): GameSetupDetails {
         const startingPositions: Array<Coordinates> = [];
 
         SHIP_DATA.setupDrifts.forEach((drift) => {
@@ -47,11 +47,11 @@ export class CanvasService extends Service implements CanvasInterface {
         return { setupCoordinates: startingPositions };
     }
 
-    public drawElements = () => {
+    public drawElements(): void {
         this.mapBoardService.drawBoard();
     }
 
-    public updateElements = () => {
+    public updateElements(): void {
         this.mapBoardService.updateBoard();
     }
 }

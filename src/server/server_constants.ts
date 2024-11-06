@@ -7,7 +7,7 @@ const serverConstants: ServerConstants = {
         close: 'close',
     },
 
-    DEFAULT_MOVE_RULES: [ //  DefaultMoveRule[]
+    DEFAULT_MOVE_RULES: [
         { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
         { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1, 2, 3] },
         { from: 'right', allowed: ['center', 'topRight', 'bottomRight'], blockedBy: [3, 4, 5] },
@@ -17,7 +17,7 @@ const serverConstants: ServerConstants = {
         { from: 'topLeft', allowed: ['center', 'left', 'topRight'], blockedBy: [1, 11, 12] },
     ],
 
-    BARRIER_CHECKS: { // BarrierChecks
+    BARRIER_CHECKS: {
         1: { between: ['topLeft', 'topRight'], incompatible: [11, 12, 2, 3] },
         2: { between: ['topRight', 'center'], incompatible: [12, 1, 3, 4] },
         3: { between: ['topRight', 'right'], incompatible: [1, 2, 4, 5] },
@@ -32,14 +32,14 @@ const serverConstants: ServerConstants = {
         12: { between: ['topLeft', 'center'], incompatible: [10, 11, 1, 2] },
     },
 
-    PLAYER_IDS: [ //  PlayerId[]
+    PLAYER_IDS: [
         'playerPurple',
         'playerYellow',
         'playerRed',
         'playerGreen',
     ],
 
-    PLAYER_STATE: { //PlayerState
+    DEFAULT_PLAYER_STATE: {
         turnOrder: 0,
         isActive: false,
         location: {hexId: "center", position: {x: 0, y: 0}},

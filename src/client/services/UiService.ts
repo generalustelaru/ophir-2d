@@ -9,8 +9,8 @@ import { CanvasService, CanvasInterface } from "./CanvasService";
 
 export interface UiInterface extends ServiceInterface {
     setInfo: (text: string) => void,
-    updateLobbyControls: () => void,
-    updateGameControls: () => void,
+    updateLobbyControls(): void,
+    updateGameControls(): void,
 }
 
 const { ACTION, STATUS } = sharedConstants;
@@ -154,25 +154,25 @@ export class UserInterfaceService extends Service implements UiInterface {
         info.innerHTML = text;
     }
 
-    private enableElements(...handlers: { enable: () => void }[]): void {
+    private enableElements(...handlers: Array<{ enable(): void }>): void {
         handlers.forEach(handler => handler.enable());
     }
 
-    private disableLobbyControls = (): void => {
+    private disableLobbyControls(): void {
         this.createButton.disable();
         this.joinButton.disable();
         this.startButton.disable();
         this.playerColorSelect.disable();
     }
 
-    private disableGameControls = (): void => {
+    private disableGameControls(): void {
         this.favorButton.disable();
         this.pickupGoodButton.disable();
         this.endTurnButton.disable();
         this.dropItemSelect.disable();
     }
 
-    public updateGameControls = (): void => {
+    public updateGameControls(): void {
         this.disableLobbyControls();
         this.disableGameControls();
         const serverState = state.server as SharedState;
@@ -204,7 +204,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
     }
 
-    public updateLobbyControls = (): void => {
+    public updateLobbyControls(): void {
         this.disableLobbyControls();
 
         switch (state.server.gameStatus) {
@@ -214,7 +214,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
     }
 
-    private enableJoinOrStart = (): void => {
+    private enableJoinOrStart(): void {
 
         if (!state.localPlayerId) {
             this.enableElements(this.joinButton, this.playerColorSelect);
@@ -231,13 +231,13 @@ export class UserInterfaceService extends Service implements UiInterface {
         return this.setInfo('Waiting for players to join...');
     }
 
-    private enableCreate = (): void => {
+    private enableCreate(): void {
         this.enableElements(this.createButton, this.playerColorSelect);
 
         return this.setInfo('You may create the game');
     }
 
-    private enableStartForOwner = (): void => {
+    private enableStartForOwner(): void {
 
         if (!state.localPlayerId) {
             return this.setInfo('The game is full, sorry :(');

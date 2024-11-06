@@ -4,7 +4,7 @@ import state from '../state';
 import clientConstants from '../client_constants';
 
 export interface CommunicationInterface extends ServiceInterface {
-    createConnection: () => void,
+    createConnection(): void,
     sendMessage: (action: Action, details?: ActionDetails) => void,
 }
 
@@ -19,7 +19,7 @@ export class CommunicationService extends Service implements CommunicationInterf
         this.socket = new WebSocket(url);
     }
 
-    createConnection() {
+    public createConnection() {
         this.socket.onopen = () => {
             console.info('Connected to the server');
             this.broadcastEvent(EVENT.connected);
@@ -46,7 +46,7 @@ export class CommunicationService extends Service implements CommunicationInterf
         }
     }
 
-    sendMessage(action: Action, details: ActionDetails|null = null) {
+    public sendMessage(action: Action, details: ActionDetails|null = null) {
 
         if (!this.socket.readyState) {
             console.error('The connection is not open');

@@ -11,6 +11,8 @@
         "noFallthroughCasesInSwitch": true,
         "forceConsistentCasingInFileNames": true,
         "module": "commonjs",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "esModuleInterop": true, // To lint express only. Use @ts-ignore if it causes trouble.
     },
     "include": [

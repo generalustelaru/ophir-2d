@@ -1,4 +1,4 @@
-import { InfoEventPayload, ActionEventPayload, ErrorEventPayload, SetupEventPayload } from "./client_types";
+import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
 import state from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/CommService";
 import { CanvasService, CanvasInterface } from "./services/CanvasService";
@@ -14,15 +14,6 @@ const commService: CommunicationInterface = CommunicationService.getInstance([CO
 const canvasService: CanvasInterface = CanvasService.getInstance([]);
 const uiService: UiInterface = UserInterfaceService.getInstance([]);
 
-// window.addEventListener(
-//     EVENT.setup as any,
-//     (event) => {
-//         const payload: SetupEventPayload = event.detail;
-//         commService.sendMessage(
-//             payload.playerPositions
-//         )
-//     },
-// );
 //Send player action to server
 window.addEventListener(
     EVENT.action as any,
@@ -52,9 +43,13 @@ window.addEventListener(
 );
 
 // Update client on server state update
-window.addEventListener(EVENT.update, () => {
+window.addEventListener(
+    EVENT.update,
+    () => {
     const serverState = state.server as SharedState;
+
     if (serverState.gameStatus === STATUS.started) {
+
         if (state.isBoardDrawn) {
             canvasService.updateElements();
         } else {

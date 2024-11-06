@@ -1,21 +1,21 @@
 import { SharedState, BarrierId, HexId, PlayerId, PlayerState, PreSessionSharedState} from '../shared_types';
 
-export type WssMessage = SharedState | PreSessionSharedState | { error: string};
+export type WssMessage = SharedState|PreSessionSharedState|{ error: string};
 export type DefaultMoveRule = {
     from: HexId;
-    allowed: HexId[];
-    blockedBy: BarrierId[];
+    allowed: Array<HexId>;
+    blockedBy: Array<BarrierId>;
 };
 export type ProcessedMoveRule = {
     from: HexId;
-    allowed: HexId[];
+    allowed: Array<HexId>;
 }
 
 /**
  * @description Not to be shared with clients
 */
 export type PrivateState = {
-    moveRules: ProcessedMoveRule[],
+    moveRules: Array<ProcessedMoveRule>,
 }
 
 export type StateBundle = {
@@ -24,8 +24,8 @@ export type StateBundle = {
 }
 
 export type BarrierCheck = {
-    between: HexId[],
-    incompatible: BarrierId[],
+    between: Array<HexId>,
+    incompatible: Array<BarrierId>,
 };
 
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
@@ -36,8 +36,8 @@ export type ServerConstants = {
         message: string,
         close: string,
     },
-    DEFAULT_MOVE_RULES: DefaultMoveRule[],
+    DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
     BARRIER_CHECKS: BarrierChecks,
-    PLAYER_IDS: PlayerId[],
-    PLAYER_STATE: PlayerState,
+    PLAYER_IDS: Array<PlayerId>,
+    DEFAULT_PLAYER_STATE: PlayerState,
 }

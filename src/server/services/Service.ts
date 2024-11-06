@@ -7,7 +7,7 @@ export interface ServiceStaticInterface {
 export interface ServiceInterface { }
 
 export class Service {
-    static instance: Service | null = null;
+    static instance: Service|null = null;
 
     public static getInstance<I extends ServiceInterface>(): I {
 
