@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { HexId } from '../../shared_types';
-import { HexaColor, MapHexInterface, IslandData, SettlementData } from '../client_types';
+import { Color, MapHexInterface, IslandData, SettlementData } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
 import { LocationToken } from './locationToken';
 import clientConstants from '../client_constants';
@@ -22,7 +22,7 @@ export class MapHex implements MapHexInterface {
         offsetY:number,
         island: IslandData,
         settlement: SettlementData,
-        fill: HexaColor
+        fill: Color
     ) {
 
         this.group = new Konva.Group({
@@ -66,7 +66,7 @@ export class MapHex implements MapHexInterface {
     public getId() {
         return this.group.attrs.id as HexId;
     }
-    public setFill(color: HexaColor) {
+    public setFill(color: Color) {
         this.hexagon.fill(color);
     }
     public isIntersecting(vector: Vector2d) {

@@ -82,10 +82,6 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             return;
         }
 
-        if (action === ACTION.setup) {
-            console.log('Setup request');
-        }
-
         if (action === ACTION.enroll) {
 
             if (processPlayer(playerId)) {
