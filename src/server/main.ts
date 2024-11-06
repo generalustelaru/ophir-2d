@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
-import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage, PreSessionSharedState } from '../shared_types';
+import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage, PreSessionSharedState, GameSetupDetails } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/GameSetupService';
 import { ToolService, ToolInterface } from './services/ToolService';
@@ -97,8 +97,9 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
         }
 
         if (action === ACTION.start) {
+            const setupDetails = details as GameSetupDetails;
 
-            if (processGameStart()) {
+            if (processGameStart(setupDetails)) {
                 sendAll(sharedState);
             } else {
                 sendAll({ error: 'Game start failed' });
@@ -111,7 +112,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
     });
 });
 
-function processGameStart(): boolean {
+function processGameStart(details: GameSetupDetails): boolean {
 
     try {
         const gameState = sharedState as SharedState;
@@ -119,7 +120,8 @@ function processGameStart(): boolean {
         gameState.availableSlots = [];
 
         const bundle: StateBundle = setupService.produceGameData(
-            tools.getCopy(gameState)
+            tools.getCopy(gameState),
+            details.setupCoordinates
         );
 
         singleSession = new GameSession(bundle);

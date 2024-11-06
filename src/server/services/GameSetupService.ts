@@ -1,5 +1,5 @@
 
-import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId, HexId, SettlementId } from '../../shared_types';
+import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service, ServiceInterface } from './Service';
@@ -7,7 +7,7 @@ import { Service, ServiceInterface } from './Service';
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 
 export interface GameSetupInterface extends ServiceInterface {
-    produceGameData: (state: SharedState) => StateBundle,
+    produceGameData: (state: SharedState, setupCoordinates: Array<Coordinates>) => StateBundle,
 }
 
 export class GameSetupService extends Service implements GameSetupInterface {
@@ -16,9 +16,9 @@ export class GameSetupService extends Service implements GameSetupInterface {
         super();
     }
 
-    public produceGameData(state: SharedState): StateBundle {
+    public produceGameData(state: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
         // state.status = STATUS.setup; TODO: for when players will need to draft their characters
-        state.players = this.assignTurnOrder(state.players);
+        state.players = this.assignTurnOrderAndPosition(state.players, setupCoordinates);
         state.setup = this.determineBoardPieces();
 
         const privateState = {
@@ -38,7 +38,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return bundle;
     };
 
-    private assignTurnOrder(states: PlayerStates): PlayerStates {
+    private assignTurnOrderAndPosition(states: PlayerStates, setupCoordinates: Array<Coordinates>): PlayerStates {
         const playerIds = Object.keys(states) as PlayerId[];
         let tokenCount = playerIds.length;
 
@@ -47,6 +47,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
             const playerId = playerIds.splice(pick, 1)[0];
             states[playerId].turnOrder = tokenCount;
             states[playerId].isActive = tokenCount === 1;
+            states[playerId].location.position = setupCoordinates.pop() as Coordinates;
             tokenCount -= 1;
         }
 
@@ -119,10 +120,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
             const playerId = id as PlayerId;
             const player = states[playerId];
 
-            player.location = {
-                hexId: initialPlacement.from,
-                position: { x: 0, y: 0 },
-            }
+            player.location.hexId = initialPlacement.from;
             player.allowedMoves = initialPlacement.allowed;
         }
 
