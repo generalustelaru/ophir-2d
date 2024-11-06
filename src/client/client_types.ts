@@ -69,6 +69,11 @@ export interface PlayMatInterface {
     updateHold: (items: CargoManifest) => void,
 }
 
+export interface PlayMatInterface {
+    getElement: () => Konva.Group,
+    updateHold: (items: CargoManifest) => void,
+}
+
 export type EventPayload =
     | InfoEventPayload
     | ActionEventPayload
