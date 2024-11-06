@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { PlayMatInterface, HexaColor } from '../client_types';
+import { PlayMatInterface, Color } from '../client_types';
 import { CargoManifest, ManifestItem } from '../../shared_types';
 import clientConstants from '../client_constants';
 
@@ -18,9 +18,8 @@ export class PlayMat implements PlayMatInterface {
     cargoData: Array<CargoSlot>;
 
     constructor(
-        color: HexaColor,
+        color: Color,
         isLargeHold: boolean = false,
-        // manifest: CargoManifest = [],
     ) {
         this.playMat = new Konva.Group({
             width: 40,

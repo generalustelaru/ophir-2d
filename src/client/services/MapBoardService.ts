@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { PlayerId, Coordinates, SharedState } from '../../shared_types';
-import { HexaColor, InfoEventPayload, } from '../client_types';
+import { Color, InfoEventPayload, } from '../client_types';
 import { Service, ServiceInterface } from "./Service";
 import { Ship } from '../canvas_objects/ship';
 import { PlayerShip } from '../canvas_objects/playerShip';
@@ -154,7 +154,7 @@ export class MapBoardService extends Service implements MapBoardInterface {
         }
     }
 
-    private matchCargoHoldColor(playerColor: string): HexaColor {
+    private matchCargoHoldColor(playerColor: string): Color {
         switch (playerColor) {
             case COLOR.playerRed:
                 return COLOR.holdDarkRed;

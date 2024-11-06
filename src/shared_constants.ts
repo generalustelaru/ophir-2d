@@ -13,7 +13,6 @@ const sharedConstants: SharedConstants = {
     ACTION: {
         inquire: "inquire",
         enroll: "enroll",
-        setup: "setup",
         start: "start",
         move: "move",
         favor: "favor",

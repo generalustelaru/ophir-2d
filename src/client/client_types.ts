@@ -2,10 +2,10 @@ import { Vector2d } from 'konva/lib/types';
 import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, CargoManifest, PreSessionSharedState } from '../shared_types';
 import Konva from 'konva';
 
-export type HexaColor = `#${string}`;
+export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
-export type SettlementData = { shape: string, fill: HexaColor };
-export type ItemData = { shape: string, fill: HexaColor };
+export type SettlementData = { shape: string, fill: Color };
+export type ItemData = { shape: string, fill: Color };
 export type IslandData = { x: number , y: number, shape: string };
 export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 
@@ -29,7 +29,7 @@ export type ClientConstants = {
     CONNECTION: {
         wsAddress: string
     },
-    COLOR: Record<string, HexaColor>,
+    COLOR: Record<string, Color>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<HexId, IslandData>,
     SETTLEMENT_DATA: Record<SettlementId, SettlementData>,
@@ -44,7 +44,7 @@ export type ClientConstants = {
 export interface MapHexInterface {
     getElement(): Konva.Group,
     getId(): HexId,
-    setFill(color: HexaColor): void,
+    setFill(color: Color): void,
     isIntersecting(coordinates: Vector2d): boolean,
 }
 
@@ -61,11 +61,6 @@ export interface PlayerShipInterface {
     getElement(): Konva.Group,
     setInfluence(value: number): void,
     setPosition(coordinates: Coordinates): void,
-}
-
-export interface PlayMatInterface {
-    getElement(): Konva.Group,
-    updateHold(items: CargoManifest): void,
 }
 
 export interface PlayMatInterface {
