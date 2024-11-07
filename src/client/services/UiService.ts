@@ -64,6 +64,7 @@ export class UserInterfaceService extends Service implements UiInterface {
                 }
 
                 for (let i = 0; i < manifest.length; i++) {
+
                     if (manifest[i] === 'empty') {
                         continue;
                     }
@@ -86,7 +87,8 @@ export class UserInterfaceService extends Service implements UiInterface {
                 titleOption.selected = true;
                 element.appendChild(titleOption);
                 element.removeEventListener('change', this.requestItemDrop);
-                element.disabled = true},
+                element.disabled = true;
+            },
         }
 
         this.favorButton = new Button('favorButton', this.processFavor);
