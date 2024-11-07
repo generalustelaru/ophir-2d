@@ -24,7 +24,7 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
     }
 
     public drawElements(): void {
-        const serverState = clientState.sharedState as SharedState;
+        const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
@@ -98,7 +98,7 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
     }
 
     public updateElements() {
-        const serverState = clientState.sharedState as SharedState;
+        const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const mapState = clientState.konva;

@@ -69,7 +69,7 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.on('dragmove', () => {
 
-            const serverState = clientState.sharedState as SharedState
+            const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
 
             if (!player) {
@@ -120,7 +120,7 @@ export class PlayerShip implements PlayerShipInterface {
             );
 
             const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
-            const serverState = clientState.sharedState as SharedState
+            const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
 
             if (!player) {

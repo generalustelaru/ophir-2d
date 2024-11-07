@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, CargoManifest, NewState } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Player } from '../shared_types';
 import Konva from 'konva';
 import { ServiceInterface } from './services/Service';
 
@@ -13,14 +13,14 @@ export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 export type ClientState = {
     localPlayerId: PlayerId|null,
     isBoardDrawn: boolean,
-    sharedState: SharedState|NewState,
+    received: SharedState|NewState,
     konva: {
         localShip: {
             object: PlayerShipInterface|null
             homePosition: Coordinates,
             isDestinationValid: boolean,
         },
-        localCargoHold: PlayMatInterface|null,
+        playMats: Array<PlayMatInterface>,
         opponentShips: Array<ShipInterface>,
         hexes: Array<MapHexInterface>,
     },
@@ -71,7 +71,8 @@ export interface CanvasSegmentInterface extends ServiceInterface {
 
 export interface PlayMatInterface {
     getElement(): Konva.Group,
-    updateHold(items: CargoManifest): void,
+    updateElements(player: Player): void,
+    getId(): PlayerId,
 }
 
 export type EventPayload = InfoEventPayload|ActionEventPayload|ErrorEventPayload|SetupEventPayload|null;

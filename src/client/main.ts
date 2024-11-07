@@ -46,7 +46,7 @@ window.addEventListener(
 window.addEventListener(
     EVENT.update,
     () => {
-    const sharedState = clientState.sharedState as SharedState;
+    const sharedState = clientState.received as SharedState;
 
     if (sharedState.gameStatus === STATUS.started) {
 

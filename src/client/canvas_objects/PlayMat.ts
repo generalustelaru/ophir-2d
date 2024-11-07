@@ -1,10 +1,10 @@
 
 import Konva from 'konva';
 import { PlayMatInterface, Color } from '../client_types';
-import { CargoManifest, ManifestItem } from '../../shared_types';
+import { CargoManifest, ManifestItem, Player, PlayerId } from '../../shared_types';
 import clientConstants from '../client_constants';
 
-const { CARGO_ITEM_DATA: CARGO_HOLD_DATA } = clientConstants;
+const { CARGO_ITEM_DATA: CARGO_HOLD_DATA, COLOR } = clientConstants;
 
 type CargoSlot = {
     x: number,
@@ -13,32 +13,53 @@ type CargoSlot = {
 }
 export class PlayMat implements PlayMatInterface {
 
-    playMat: Konva.Group;
-    hold: Konva.Rect;
-    cargoData: Array<CargoSlot>;
+    private playMat: Konva.Group;
+    private background: Konva.Rect;
+    private cargoHold: Konva.Rect;
+    private cargoDrawData: Array<CargoSlot>;
+    private id: PlayerId;
+    private colors: { active: Color, inactive: Color };
 
     constructor(
-        color: Color,
+        id: PlayerId,
+        isLocalPlayer: boolean,
+        isActivePlayer: boolean,
+        activeColor: Color,
+        inactiveColor: Color,
+        yOffset: number,
         isLargeHold: boolean = false,
     ) {
+        this.id = id;
+        this.colors = { active: activeColor, inactive: inactiveColor };
         this.playMat = new Konva.Group({
-            width: 40,
-            height: 40,
+            width: 200,
+            height: 100,
             x: 525,
-            y: 25,
+            y: yOffset,
         });
 
-        this.hold = new Konva.Rect({
+        this.background = new Konva.Rect({
+            width: this.playMat.width(),
+            height: this.playMat.height(),
+            fill: isActivePlayer ? activeColor : inactiveColor,
+            stroke: 'gold',
+            cornerRadius: 15,
+            strokeWidth: isLocalPlayer ? 2 : 0,
+        });
+        this.playMat.add(this.background);
+
+        this.cargoHold = new Konva.Rect({
             width: 40,
             height: isLargeHold ? 40 : 25,
-            fill: color,
-            // cornerRadius: 15,
+            fill: COLOR['wood'],
+            cornerRadius: 5,
             strokeWidth: 1,
+            x: 10,
+            y: 10,
         });
+        this.playMat.add(this.cargoHold);
 
-        this.playMat.add(this.hold);
-
-        this.cargoData = [
+        this.cargoDrawData = [
             {x: 0, y: 0, element: null},
             {x: 15, y: 0, element: null},
             {x: 0, y: 15, element: null},
@@ -46,10 +67,15 @@ export class PlayMat implements PlayMatInterface {
         ];
     }
 
-    public updateHold(cargo: CargoManifest) {
+    public updateElements(player: Player): void {
+        this.updateHold(player.cargo);
+        this.updateMatColor(player.isActive);
+    }
 
-        for (let i = 0; i < this.cargoData.length; i++) {
-            const slot = this.cargoData[i];
+    private updateHold(cargo: CargoManifest) {
+
+        for (let i = 0; i < this.cargoDrawData.length; i++) {
+            const slot = this.cargoDrawData[i];
             if (slot.element) {
                 slot.element.destroy();
             }
@@ -57,7 +83,7 @@ export class PlayMat implements PlayMatInterface {
 
         for (let i = 0; i < cargo.length; i++) {
             const item = cargo[i];
-            const driftData = this.cargoData[i];
+            const driftData = this.cargoDrawData[i];
             if (item) {
                 this.addItem(item, driftData);
             }
@@ -67,8 +93,8 @@ export class PlayMat implements PlayMatInterface {
     private addItem(itemId: ManifestItem, cargoSlot: CargoSlot) {
         const itemData = CARGO_HOLD_DATA[itemId];
         const itemIcon = new Konva.Path({
-            x: cargoSlot.x,
-            y: cargoSlot.y,
+            x: cargoSlot.x + this.cargoHold.x(),
+            y: cargoSlot.y + this.cargoHold.y(),
             data: itemData.shape,
             fill: itemData.fill,
             stroke: 'white',
@@ -79,11 +105,18 @@ export class PlayMat implements PlayMatInterface {
         this.playMat.add(itemIcon);
     }
 
+    private updateMatColor(isActive: boolean) {
+        this.background.fill(isActive ? this.colors.active : this.colors.inactive);
+    }
+
+    public getId(): PlayerId {
+        return this.id;
+    }
     public getElement() {
         return this.playMat;
     }
 
     public upgradeHold() {
-        this.hold.height(40);
+        this.cargoHold.height(40);
     }
 }

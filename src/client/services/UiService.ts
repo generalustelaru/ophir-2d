@@ -30,7 +30,7 @@ export class UserInterfaceService extends Service implements UiInterface {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
                 this.playerColorSelect.element.disabled = false;
-                const players = clientState.sharedState.players
+                const players = clientState.received.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
                     const player = players.find(player => player.id === option.value);
                     option.disabled = !!player;
@@ -56,7 +56,7 @@ export class UserInterfaceService extends Service implements UiInterface {
                 titleOption.text = '--Drop Item--';
                 titleOption.selected = true;
                 element.appendChild(titleOption);
-                const serverState = clientState.sharedState as SharedState;
+                const serverState = clientState.received as SharedState;
                 const manifest = serverState.players.find(player => player.id === clientState.localPlayerId)?.cargo;
 
                 if (!manifest) {
@@ -112,7 +112,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     private processEnroll = (): void => {
-        const lobbyState = clientState.sharedState as NewState;
+        const lobbyState = clientState.received as NewState;
         const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
@@ -179,7 +179,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     public updateGameControls(): void {
         this.disableLobbyControls();
         this.disableGameControls();
-        const serverState = clientState.sharedState as SharedState;
+        const serverState = clientState.received as SharedState;
         const player = serverState.players.find(player => player.id === clientState.localPlayerId);
 
         this.favorCounter.set(player?.favor ?? 0);
@@ -211,7 +211,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     public updateLobbyControls(): void {
         this.disableLobbyControls();
 
-        switch (clientState.sharedState.gameStatus) {
+        switch (clientState.received.gameStatus) {
             case STATUS.empty: this.enableCreate(); break;
             case STATUS.created: this.enableJoinOrStart(); break;
             case STATUS.full: this.enableStartForOwner(); break;
@@ -226,7 +226,7 @@ export class UserInterfaceService extends Service implements UiInterface {
             return this.setInfo('A game is waiting for you');
         }
 
-        if (clientState.sharedState.sessionOwner === clientState.localPlayerId) {
+        if (clientState.received.sessionOwner === clientState.localPlayerId) {
             this.startButton.enable();
 
             return this.setInfo('You may wait for more player or start');
@@ -247,7 +247,7 @@ export class UserInterfaceService extends Service implements UiInterface {
             return this.setInfo('The game is full, sorry :(');
         }
 
-        if (clientState.localPlayerId === clientState.sharedState.sessionOwner) {
+        if (clientState.localPlayerId === clientState.received.sessionOwner) {
             this.startButton.enable();
 
             return this.setInfo('You may start whenever you want');
