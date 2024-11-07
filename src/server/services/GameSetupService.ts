@@ -66,7 +66,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
     private determineBarriers(): Array<BarrierId> {
 
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
-        let b2: BarrierId = b1;
+        let b2 = b1;
 
         while (!this.isArrangementLegal(b1, b2)) {
             b2 = Math.ceil(Math.random() * 12) as BarrierId;
@@ -134,10 +134,10 @@ export class GameSetupService extends Service implements GameSetupInterface {
 
                 if (moveRule.blockedBy.find(id => id === barrierId)) {
                     const neighborHex = BARRIER_CHECKS[barrierId].between
-                        .filter(hexId => hexId != moveRule.from)[0];
+                        .filter(hexId => hexId !== moveRule.from)[0];
 
                     moveRule.allowed = moveRule.allowed
-                        .filter(hexId => hexId != neighborHex);
+                        .filter(hexId => hexId !== neighborHex);
                 }
             });
 

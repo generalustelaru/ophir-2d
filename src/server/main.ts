@@ -149,7 +149,7 @@ function processPlayer(playerId: PlayerId): boolean {
     }
 
     sharedState.availableSlots = sharedState.availableSlots
-        .filter(slot => slot != playerId);
+        .filter(slot => slot !== playerId);
 
     if (sharedState.players === null) {
         sharedState.players = { [playerId]: DEFAULT_PLAYER_STATE } as PlayerStates;
