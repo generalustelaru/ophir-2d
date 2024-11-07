@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates, SharedState } from '../../shared_types';
-import { ActionEventPayload, MapHexInterface, PlayerShipInterface } from '../client_types';
+import { ActionEventPayload, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
@@ -122,8 +122,11 @@ export class PlayerShip implements PlayerShipInterface {
             const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
             const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
+            const locationHex = clientState.konva.hexes.find(
+                hex => hex.getId() === player?.location.hexId
+            );
 
-            if (!player) {
+            if (!player || !locationHex) {
                 throw new Error('Missing player data!');
             }
 
@@ -141,12 +144,11 @@ export class PlayerShip implements PlayerShipInterface {
                     }
                 });
             } else {
-                this.group.x(positionX);
-                this.group.y(positionY);
 
-                const locationHex = clientState.konva.hexes.find(
-                    hex => hex.getId() === player.location.hexId
-                ) as MapHexInterface;
+                if (locationHex !== targetHex) {
+                    this.group.x(positionX);
+                    this.group.y(positionY);
+                }
 
                 locationHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
             }
