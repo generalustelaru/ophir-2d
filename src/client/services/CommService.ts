@@ -55,9 +55,11 @@ export class CommunicationService extends Service implements CommunicationInterf
             return;
         }
 
-        const playerId = clientState.localPlayerId || null;
-
-        const message: WebsocketClientMessage = { playerId, action, details };
+        const message: WebsocketClientMessage = {
+            playerId: clientState.localPlayerId,
+            action,
+            details
+        };
 
         console.debug('->', message);
 
