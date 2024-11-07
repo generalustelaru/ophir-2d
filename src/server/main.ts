@@ -69,12 +69,12 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             playerRed: '\x1b[91mplayerRed\x1b[0m',
             playerGreen: '\x1b[92mplayerGreen\x1b[0m',
         }
-        const colorizedId = playerId ? colorized[playerId] : '?';
+        const clientName = playerId ? colorized[playerId] : 'anon';
         console.info(
             '%s -> %s%s',
-            colorizedId,
+            clientName,
             action ?? '?',
-            details ? `: ${JSON.stringify(details)}` : '',
+            details ? `: ${JSON.stringify(details)}` : ' { ¯\\_(ツ)_/¯ }',
         );
 
         if (action === ACTION.inquire) {
