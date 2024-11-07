@@ -164,14 +164,11 @@ export class GameSession implements GameSessionInterface {
         const registry: Array<RegistryItem> = [];
         const players = this.sharedState.players;
 
-        for (const id in players) {
-            const playerId = id as PlayerId;
-            const player = players.find(player => player.id === playerId);;
-
-            if (player?.location.hexId === destinationHex) {
-                registry.push({ id: playerId, influence: player.influence });
+        players.forEach(player => {
+            if (player.location.hexId === destinationHex) {
+                registry.push({ id: player.id, influence: player.influence });
             }
-        }
+        });
 
         if (registry.length === 0) {
             return false;
@@ -197,14 +194,13 @@ export class GameSession implements GameSessionInterface {
             return true;
         }
 
-        for (const id in this.sharedState.players) {
-            const playerId = id as PlayerId;
-            const player = this.sharedState.players.find(player => player.id === playerId);
+        registry.forEach(item => {
+            const player = this.sharedState.players.find(player => player.id === item.id);
 
             if (player?.influence === highestInfluence) {
                 player.influence -= 1;
             }
-        }
+        });
 
         return false;
     }
