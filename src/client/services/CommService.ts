@@ -1,4 +1,4 @@
-import { WebsocketClientMessage, Action, ActionDetails, PlayerId } from '../../shared_types';
+import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
 import { Service, ServiceInterface } from './Service';
 import clientState from '../state';
 import clientConstants from '../client_constants';
@@ -55,14 +55,7 @@ export class CommunicationService extends Service implements CommunicationInterf
             return;
         }
 
-        const playerId = clientState.localPlayerId;
-
-        if (!playerId) {
-            console.error('The local player is not set');
-            this.broadcastEvent(EVENT.error);
-
-            return;
-        }
+        const playerId = clientState.localPlayerId || null;
 
         const message: WebsocketClientMessage = { playerId, action, details };
 

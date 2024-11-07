@@ -74,7 +74,7 @@ export type ActionDetails = GameSetupDetails|MoveActionDetails|DropItemActionDet
 export type Coordinates = { x: number, y: number };
 
 export type WebsocketClientMessage = {
-    playerId: PlayerId,
+    playerId: PlayerId|null,
     action: Action,
     details: ActionDetails,
 }
