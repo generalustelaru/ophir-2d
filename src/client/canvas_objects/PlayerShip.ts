@@ -119,10 +119,6 @@ export class PlayerShip implements PlayerShipInterface {
                 hex => hex.isIntersecting(position)
             );
 
-            if (!targetHex) {
-                throw new Error('Target hex is null');
-            }
-
             const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
             const serverState = clientState.sharedState as SharedState
             const player = serverState.players.find(player => player.id === playerId);
@@ -135,7 +131,7 @@ export class PlayerShip implements PlayerShipInterface {
                 clientState.konva.hexes[i].setFill(COLOR.default);
             }
 
-            if (clientState.konva.localShip.isDestinationValid) {
+            if (targetHex && clientState.konva.localShip.isDestinationValid) {
                 targetHex.setFill(COLOR.anchored);
                 this.broadcastAction({
                     action: ACTION.move,
