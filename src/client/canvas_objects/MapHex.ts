@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { HexId } from '../../shared_types';
+import { Coordinates, HexId } from '../../shared_types';
 import { Color, MapHexInterface, IslandData, SettlementData } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
 import { LocationToken } from './LocationToken';
@@ -10,13 +10,13 @@ const { COLOR } = clientConstants;
 
 export class MapHex implements MapHexInterface {
 
-    group: Konva.Group;
-    hexagon: Konva.RegularPolygon;
-    island: Konva.Path;
-    settlement: Konva.Group;
+    private group: Konva.Group;
+    private hexagon: Konva.RegularPolygon;
+    private island: Konva.Path;
+    private settlement: Konva.Group;
 
     constructor(
-        center: {x: number, y: number},
+        center: Coordinates,
         name: HexId,
         offsetX:number,
         offsetY:number,
@@ -60,16 +60,16 @@ export class MapHex implements MapHexInterface {
         this.group.add(this.settlement);
     }
 
-    public getElement() {
+    public getElement(): Konva.Group {
         return this.group;
     }
-    public getId() {
+    public getId(): HexId {
         return this.group.attrs.id as HexId;
     }
-    public setFill(color: Color) {
+    public setFill(color: Color): void {
         this.hexagon.fill(color);
     }
-    public isIntersecting(vector: Vector2d) {
+    public isIntersecting(vector: Vector2d): boolean {
         return this.hexagon.intersects(vector);
     }
 }

@@ -111,18 +111,17 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return true;
     }
 
-    private assignTurnOneRules(states: PlayerStates, rules: Array<ProcessedMoveRule>): PlayerStates {
+    private assignTurnOneRules(players: PlayerStates, rules: Array<ProcessedMoveRule>): PlayerStates {
         const initialPlacement = rules[0];
 
-        for (const id in states) {
-            const playerId = id as PlayerId;
-            const player = states[playerId];
+        for (const id in players) {
+            const player = players[id as PlayerId];
 
             player.location.hexId = initialPlacement.from;
             player.allowedMoves = initialPlacement.allowed;
         }
 
-        return states;
+        return players;
     }
 
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
