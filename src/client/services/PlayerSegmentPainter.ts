@@ -4,7 +4,7 @@ import { Service } from "./Service";
 import { PlayMat } from '../canvas_objects/PlayMat';
 import  clientConstants from '../client_constants';
 import clientState from '../state';
-import { PlayerId, SharedState } from '../../shared_types';
+import { SharedState } from '../../shared_types';
 
 
 const { COLOR } = clientConstants;

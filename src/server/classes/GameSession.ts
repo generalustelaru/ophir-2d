@@ -22,6 +22,11 @@ export class GameSession implements GameSessionInterface {
 
     public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerId;
+
+        if (!id) {
+            return { error: 'No player ID provided' };
+        }
+
         switch (message.action) {
             case ACTION.favor:
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Illegal favor spend on ${id}` };

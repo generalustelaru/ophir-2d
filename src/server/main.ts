@@ -82,6 +82,12 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             return;
         }
 
+        if(!playerId) {
+            send(client, { error: 'Player ID is missing' });
+
+            return;
+        }
+
         if (action === ACTION.enroll) {
 
             if (processPlayer(playerId)) {
@@ -89,6 +95,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
             }
+
             return;
         }
 
@@ -100,6 +107,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             } else {
                 sendAll({ error: 'Game start failed' });
             }
+
             return;
         }
         // in-game player actions are handled in instantiable class
