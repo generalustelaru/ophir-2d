@@ -38,7 +38,7 @@ export type Player = {
 export type SharedState = {
     gameStatus: GameStatus,
     sessionOwner: PlayerId,
-    availableSlots: Array<never>,
+    availableSlots: Array<PlayerId>,
     players: Array<Player>,
     setup: GameSetup,
 }
