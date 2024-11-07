@@ -18,8 +18,14 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
     }
 
     public drawElements(): void {
+        const playerId = clientState.localPlayerId;
+
+        if (!playerId) {
+            throw new Error('Player ID is missing!');
+        }
+
         // MARK: draw cargo hold
-        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[clientState.localPlayerId as PlayerId]));
+        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[playerId]));
         this.layer.add(cargoHold.getElement());
         clientState.konva.localCargoHold = cargoHold;
     }
@@ -29,7 +35,6 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
         const localPlayer = serverState.players.find(player => player.id === clientState.localPlayerId);
 
         if (localPlayer) {
-
             const localCargoHold = clientState.konva.localCargoHold as PlayMat;
             localCargoHold.updateHold(localPlayer.cargo);
         }

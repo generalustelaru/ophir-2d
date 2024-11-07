@@ -40,11 +40,17 @@ export class PlayerShip implements PlayerShipInterface {
         fill: string
     ) {
 
+        const playerId = clientState.localPlayerId;
+
+        if (!playerId) {
+            throw new Error('Player ID is missing!');
+        }
+
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
             draggable: true,
-            id: clientState.localPlayerId as PlayerId,
+            id: playerId,
         });
 
         this.ship = new Konva.Path({
@@ -64,7 +70,7 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.on('dragmove', () => {
 
             const serverState = clientState.sharedState as SharedState
-            const player = serverState.players.find(player => player.id === clientState.localPlayerId);
+            const player = serverState.players.find(player => player.id === playerId);
 
             if (!player) {
                 throw new Error('Missing player data!');
@@ -119,7 +125,7 @@ export class PlayerShip implements PlayerShipInterface {
 
             const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
             const serverState = clientState.sharedState as SharedState
-            const player = serverState.players.find(player => player.id === clientState.localPlayerId);
+            const player = serverState.players.find(player => player.id === playerId);
 
             if (!player) {
                 throw new Error('Missing player data!');
@@ -154,9 +160,7 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.add(this.ship);
 
-        const influenceTextColor =
-            clientState.localPlayerId === 'playerYellow'
-                || clientState.localPlayerId === 'playerGreen'
+        const influenceTextColor = playerId === 'playerYellow' || playerId === 'playerGreen'
                 ? 'black'
                 : 'white';
 
