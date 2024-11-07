@@ -53,20 +53,20 @@ export class Ship implements ShipInterface {
         this.group.add(this.influence);
     }
 
-    public setInfluence(value: number) {
+    public setInfluence(value: number): void {
         this.influence.text(value.toString());
     }
-    public getElement() {
+    public getElement(): Konva.Group {
         return this.group
     }
-    public getId() {
+    public getId(): PlayerId {
         return this.group.attrs.id as PlayerId
     }
-    public setPosition(coordinates: Coordinates) {
+    public setPosition(coordinates: Coordinates): void {
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };
-    public destroy() {
+    public destroy(): void {
         this.group.destroy()
     }
 }
