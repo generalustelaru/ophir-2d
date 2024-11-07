@@ -86,8 +86,7 @@ export class PlayerShip implements PlayerShipInterface {
                 hex => hex.isIntersecting(position)
             );
 
-
-const shipState = clientState.konva.localShip;
+            const shipState = clientState.konva.localShip;
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 clientState.konva.hexes[i].setFill(COLOR.default);
@@ -165,13 +164,9 @@ const shipState = clientState.konva.localShip;
 
             layer.batchDraw();
         });
-
         this.group.add(this.ship);
 
-        const influenceTextColor = playerId === 'playerYellow' || playerId === 'playerGreen'
-                ? 'black'
-                : 'white';
-
+        const influenceTextColor = ['playerYellow', 'playerGreen'].includes(playerId) ? 'black' : 'white';
         this.influence = new Konva.Text({
             x: 6,
             y: 4,
@@ -179,7 +174,6 @@ const shipState = clientState.konva.localShip;
             fontStyle: 'bold',
             fill: influenceTextColor,
         });
-
         this.group.add(this.influence);
     }
 
