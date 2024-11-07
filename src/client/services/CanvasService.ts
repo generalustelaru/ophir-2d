@@ -1,7 +1,8 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
-import { MapBoardService, MapBoardInterface } from './MapBoardService';
+import { MapSegmentPainter } from './MapBoardService';
+import { PlayerSegmentPainter } from './PlayerZoneService';
 import clientConstants from '../client_constants';
 export interface CanvasInterface extends ServiceInterface {
     getSetupCoordinates(): GameSetupDetails,
@@ -12,12 +13,13 @@ export interface CanvasInterface extends ServiceInterface {
 const { SHIP_DATA } = clientConstants;
 
 export class CanvasService extends Service implements CanvasInterface {
-    stage: Konva.Stage;
-    layer: Konva.Layer;
-    mapBoardService: MapBoardInterface;
-    centerPoint: Coordinates;
+    private stage: Konva.Stage;
+    private layer: Konva.Layer;
+    private mapSegment: MapSegmentPainter;
+    private playerSegment: PlayerSegmentPainter;
+    private centerPoint: Coordinates;
 
-    constructor() {
+    public constructor() {
         super();
         this.stage = new Konva.Stage({
             container: 'canvas',
@@ -31,7 +33,8 @@ export class CanvasService extends Service implements CanvasInterface {
         this.stage.add(this.layer);
         this.layer.draw();
 
-        this.mapBoardService = MapBoardService.getInstance([this.stage, this.layer, this.centerPoint]);
+        this.mapSegment = MapSegmentPainter.getInstance([this.stage, this.centerPoint]);
+        this.playerSegment = PlayerSegmentPainter.getInstance([this.layer]);
     }
 
     public getSetupCoordinates(): GameSetupDetails {
@@ -48,10 +51,12 @@ export class CanvasService extends Service implements CanvasInterface {
     }
 
     public drawElements(): void {
-        this.mapBoardService.drawBoard();
+        this.mapSegment.drawElements();
+        this.playerSegment.drawElements();
     }
 
     public updateElements(): void {
-        this.mapBoardService.updateBoard();
+        this.mapSegment.updateElements();
+        this.playerSegment.updateElements();
     }
 }

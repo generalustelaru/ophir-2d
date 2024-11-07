@@ -1,6 +1,7 @@
 import { Vector2d } from 'konva/lib/types';
 import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, CargoManifest, PreSessionSharedState } from '../shared_types';
 import Konva from 'konva';
+import { ServiceInterface } from './services/Service';
 
 export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
@@ -9,7 +10,7 @@ export type ItemData = { shape: string, fill: Color };
 export type IslandData = { x: number , y: number, shape: string };
 export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 
-export type ClientState = {
+export type ClientState = { // TODO: create a PreSessionClientState to remove the need to use "as" syntax for nullables
     localPlayerId: PlayerId|null,
     isBoardDrawn: boolean,
     server: SharedState|PreSessionSharedState,
@@ -61,6 +62,11 @@ export interface PlayerShipInterface {
     getElement(): Konva.Group,
     setInfluence(value: number): void,
     setPosition(coordinates: Coordinates): void,
+}
+
+export interface CanvasSegmentInterface extends ServiceInterface {
+    drawElements(): void,
+    updateElements(): void,
 }
 
 export interface PlayMatInterface {
