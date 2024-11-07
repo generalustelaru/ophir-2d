@@ -4,7 +4,6 @@ import { ActionEventPayload, MapHexInterface, PlayerShipInterface } from '../cli
 import clientState from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
-import { Vector2d } from 'konva/lib/types';
 
 const { ACTION } = sharedConstants;
 const { EVENT, COLOR, SHIP_DATA } = clientConstants;
@@ -66,10 +65,14 @@ export class PlayerShip implements PlayerShipInterface {
 
             const serverState = clientState.sharedState as SharedState
             const player = serverState.players[clientState.localPlayerId as PlayerId];
-
+            const position = stage.getPointerPosition();
+            if (!position) {
+                throw new Error('Position is null');
+            }
             const targetHex = clientState.konva.hexes.find(
-                hex => hex.isIntersecting(stage.getPointerPosition() as Vector2d)
+                hex => hex.isIntersecting(position)
             );
+
 
             const shipState = clientState.konva.localShip;
 
@@ -97,9 +100,18 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.on('dragend', () => {
 
+            const position = stage.getPointerPosition();
+            if (!position) {
+                throw new Error('Position is null');
+            }
+
             const targetHex = clientState.konva.hexes.find(
-                hex => hex.isIntersecting(stage.getPointerPosition() as Vector2d)
-            ) as MapHexInterface;
+                hex => hex.isIntersecting(position)
+            );
+
+            if (!targetHex) {
+                throw new Error('Target hex is null');
+            }
 
             const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
             const serverState = clientState.sharedState as SharedState

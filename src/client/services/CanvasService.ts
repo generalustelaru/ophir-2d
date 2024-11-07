@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
-import { MapSegmentPainter } from './MapBoardService';
-import { PlayerSegmentPainter } from './PlayerZoneService';
+import { MapSegmentPainter } from './MapSegmentPainter';
+import { PlayerSegmentPainter } from './PlayerSegmentPainter';
 import clientConstants from '../client_constants';
 export interface CanvasInterface extends ServiceInterface {
     getSetupCoordinates(): GameSetupDetails,
