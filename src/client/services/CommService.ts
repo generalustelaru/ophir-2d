@@ -40,7 +40,7 @@ export class CommunicationService extends Service implements CommunicationInterf
 
             console.debug('<-', data);
 
-            clientState.sharedState = data;
+            clientState.received = data;
 
             this.broadcastEvent(EVENT.update);
         }

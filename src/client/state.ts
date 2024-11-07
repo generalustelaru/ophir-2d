@@ -4,7 +4,7 @@ import { ClientState } from './client_types';
 const clientState: ClientState = {
     localPlayerId: null,
     isBoardDrawn: false,
-    sharedState: {
+    received: {
         gameStatus: 'empty',
         sessionOwner: null,
         availableSlots: [],
@@ -17,7 +17,7 @@ const clientState: ClientState = {
             homePosition: { x: 0, y: 0 },
             isDestinationValid: false,
         },
-        localCargoHold: null,
+        playMats: [],
         opponentShips: [],
         hexes: [],
     },

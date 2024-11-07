@@ -4,7 +4,6 @@ import { Service } from "./Service";
 import { PlayMat } from '../canvas_objects/PlayMat';
 import  clientConstants from '../client_constants';
 import clientState from '../state';
-import { SharedState } from '../../shared_types';
 
 
 const { COLOR } = clientConstants;
@@ -18,29 +17,39 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
     }
 
     public drawElements(): void {
-        const playerId = clientState.localPlayerId;
+        const thisPlayerId = clientState.localPlayerId;
+        const activePlayer = clientState.received.players.find(player => player.isActive);
 
-        if (!playerId) {
+        if (!thisPlayerId) {
             throw new Error('Player ID is missing!');
         }
 
-        // MARK: draw cargo hold
-        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[playerId]));
-        this.layer.add(cargoHold.getElement());
-        clientState.konva.localCargoHold = cargoHold;
+        const matOffsets = [20, 140, 260, 380];
+
+        clientState.received.players.forEach((player) => {
+            const isLocalPlayer = player.id === thisPlayerId;
+            const isPlayerActive = thisPlayerId === activePlayer?.id;
+            const matOffset = matOffsets.shift() as number;
+            const playMat = new PlayMat(player.id, isLocalPlayer, isPlayerActive, COLOR[player.id], this.matchPlayerColor(COLOR[player.id]), matOffset);
+            this.layer.add(playMat.getElement());
+            clientState.konva.playMats.push(playMat);
+        });
     }
 
     public updateElements(): void {
-        const serverState = clientState.sharedState as SharedState;
-        const localPlayer = serverState.players.find(player => player.id === clientState.localPlayerId);
 
-        if (localPlayer) {
-            const localCargoHold = clientState.konva.localCargoHold as PlayMat;
-            localCargoHold.updateHold(localPlayer.cargo);
-        }
+        clientState.konva.playMats.forEach((playMat) => {
+            const player = clientState.received.players.find((player) => player.id === playMat.getId());
+
+            if (player) {
+                playMat.updateElements(player);
+            } else {
+                playMat.getElement().destroy();
+            }
+        });
     }
 
-    private matchCargoHoldColor(playerColor: string): Color {
+    private matchPlayerColor(playerColor: string): Color {
         switch (playerColor) {
             case COLOR.playerRed:
                 return COLOR.holdDarkRed;
