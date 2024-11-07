@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, PlayerId, SharedState } from '../../shared_types';
 import { ActionEventPayload, MapHexInterface, PlayerShipInterface } from '../client_types';
-import state from '../state';
+import clientState from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
 import { Vector2d } from 'konva/lib/types';
@@ -45,7 +45,7 @@ export class PlayerShip implements PlayerShipInterface {
             x: offsetX,
             y: offsetY,
             draggable: true,
-            id: state.localPlayerId as PlayerId,
+            id: clientState.localPlayerId as PlayerId,
         });
 
         this.ship = new Konva.Path({
@@ -59,22 +59,22 @@ export class PlayerShip implements PlayerShipInterface {
         });
 
         this.group.on('dragstart', () => {
-            state.konva.localShip.homePosition = { x: this.group.x(), y: this.group.y() }
+            clientState.konva.localShip.homePosition = { x: this.group.x(), y: this.group.y() }
         });
 
         this.group.on('dragmove', () => {
 
-            const serverState = state.server as SharedState
-            const player = serverState.players[state.localPlayerId as PlayerId];
+            const serverState = clientState.sharedState as SharedState
+            const player = serverState.players[clientState.localPlayerId as PlayerId];
 
-            const targetHex = state.konva.hexes.find(
+            const targetHex = clientState.konva.hexes.find(
                 hex => hex.isIntersecting(stage.getPointerPosition() as Vector2d)
             );
 
-            const shipState = state.konva.localShip;
+            const shipState = clientState.konva.localShip;
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                state.konva.hexes[i].setFill(COLOR.default);
+                clientState.konva.hexes[i].setFill(COLOR.default);
             }
 
             shipState.isDestinationValid = false;
@@ -97,19 +97,19 @@ export class PlayerShip implements PlayerShipInterface {
 
         this.group.on('dragend', () => {
 
-            const targetHex = state.konva.hexes.find(
+            const targetHex = clientState.konva.hexes.find(
                 hex => hex.isIntersecting(stage.getPointerPosition() as Vector2d)
             ) as MapHexInterface;
 
-            const { x: positionX, y: positionY } = state.konva.localShip.homePosition;
-            const serverState = state.server as SharedState
-            const player = serverState.players[state.localPlayerId as PlayerId];
+            const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
+            const serverState = clientState.sharedState as SharedState
+            const player = serverState.players[clientState.localPlayerId as PlayerId];
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                state.konva.hexes[i].setFill(COLOR.default);
+                clientState.konva.hexes[i].setFill(COLOR.default);
             }
 
-            if (state.konva.localShip.isDestinationValid) {
+            if (clientState.konva.localShip.isDestinationValid) {
                 targetHex.setFill(COLOR.anchored);
                 this.broadcastAction({
                     action: ACTION.move,
@@ -122,7 +122,7 @@ export class PlayerShip implements PlayerShipInterface {
                 this.group.x(positionX);
                 this.group.y(positionY);
 
-                const locationHex = state.konva.hexes.find(
+                const locationHex = clientState.konva.hexes.find(
                     hex => hex.getId() === player.location.hexId
                 ) as MapHexInterface;
 
@@ -135,8 +135,8 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.add(this.ship);
 
         const influenceTextColor =
-            state.localPlayerId === 'playerYellow'
-                || state.localPlayerId === 'playerGreen'
+            clientState.localPlayerId === 'playerYellow'
+                || clientState.localPlayerId === 'playerGreen'
                 ? 'black'
                 : 'white';
 

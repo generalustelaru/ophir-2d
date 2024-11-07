@@ -1,7 +1,7 @@
 import { ManifestItem, PlayerId, PreSessionSharedState, SharedState } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
 import { Service, ServiceInterface } from './Service';
-import state from '../state';
+import clientState from '../state';
 import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
 import { Button } from '../html_behaviors/button';
@@ -30,7 +30,7 @@ export class UserInterfaceService extends Service implements UiInterface {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
                 this.playerColorSelect.element.disabled = false;
-                const players = state.server.players
+                const players = clientState.sharedState.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
                     switch (true) {
                         case players && (option.value in players):
@@ -59,8 +59,8 @@ export class UserInterfaceService extends Service implements UiInterface {
                 titleOption.text = '--Drop Item--';
                 titleOption.selected = true;
                 element.appendChild(titleOption);
-                const serverState = state.server as SharedState;
-                const manifest = serverState.players[state.localPlayerId as PlayerId].cargo;
+                const serverState = clientState.sharedState as SharedState;
+                const manifest = serverState.players[clientState.localPlayerId as PlayerId].cargo;
                 for (let i = 0; i < manifest.length; i++) {
                     if (manifest[i] === 'empty') {
                         continue;
@@ -108,7 +108,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     private processEnroll = (): void => {
-        const lobbyState = state.server as PreSessionSharedState;
+        const lobbyState = clientState.sharedState as PreSessionSharedState;
         const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
@@ -116,7 +116,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
 
         if (lobbyState.availableSlots.includes(selectedId)) {
-            state.localPlayerId = selectedId as PlayerId;
+            clientState.localPlayerId = selectedId;
             const payload: ActionEventPayload = { action: ACTION.enroll, details: null };
 
             return this.broadcastEvent(EVENT.action, payload);
@@ -175,8 +175,8 @@ export class UserInterfaceService extends Service implements UiInterface {
     public updateGameControls(): void {
         this.disableLobbyControls();
         this.disableGameControls();
-        const serverState = state.server as SharedState;
-        const player = serverState.players[state.localPlayerId as PlayerId];
+        const serverState = clientState.sharedState as SharedState;
+        const player = serverState.players[clientState.localPlayerId as PlayerId];
 
         this.favorCounter.set(player?.favor ?? 0);
 
@@ -207,7 +207,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     public updateLobbyControls(): void {
         this.disableLobbyControls();
 
-        switch (state.server.gameStatus) {
+        switch (clientState.sharedState.gameStatus) {
             case STATUS.empty: this.enableCreate(); break;
             case STATUS.created: this.enableJoinOrStart(); break;
             case STATUS.full: this.enableStartForOwner(); break;
@@ -216,13 +216,13 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private enableJoinOrStart(): void {
 
-        if (!state.localPlayerId) {
+        if (!clientState.localPlayerId) {
             this.enableElements(this.joinButton, this.playerColorSelect);
 
             return this.setInfo('A game is waiting for you');
         }
 
-        if (state.server.sessionOwner === state.localPlayerId) {
+        if (clientState.sharedState.sessionOwner === clientState.localPlayerId) {
             this.startButton.enable();
 
             return this.setInfo('You may wait for more player or start');
@@ -239,11 +239,11 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private enableStartForOwner(): void {
 
-        if (!state.localPlayerId) {
+        if (!clientState.localPlayerId) {
             return this.setInfo('The game is full, sorry :(');
         }
 
-        if (state.localPlayerId === state.server.sessionOwner) {
+        if (clientState.localPlayerId === clientState.sharedState.sessionOwner) {
             this.startButton.enable();
 
             return this.setInfo('You may start whenever you want');

@@ -3,7 +3,7 @@ import { CanvasSegmentInterface, Color} from '../client_types';
 import { Service } from "./Service";
 import { PlayMat } from '../canvas_objects/PlayMat';
 import  clientConstants from '../client_constants';
-import state from '../state';
+import clientState from '../state';
 import { PlayerId, SharedState } from '../../shared_types';
 
 
@@ -19,18 +19,18 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
 
     public drawElements(): void {
         // MARK: draw cargo hold
-        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[state.localPlayerId as PlayerId]));
+        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[clientState.localPlayerId as PlayerId]));
         this.layer.add(cargoHold.getElement());
-        state.konva.localCargoHold = cargoHold;
+        clientState.konva.localCargoHold = cargoHold;
     }
 
     public updateElements(): void {
-        const serverState = state.server as SharedState;
-        const localPlayer = serverState.players[state.localPlayerId as PlayerId];
+        const serverState = clientState.sharedState as SharedState;
+        const localPlayer = serverState.players[clientState.localPlayerId as PlayerId];
 
         if (localPlayer) {
 
-            const localCargoHold = state.konva.localCargoHold as PlayMat;
+            const localCargoHold = clientState.konva.localCargoHold as PlayMat;
             localCargoHold.updateHold(localPlayer.cargo);
         }
     }

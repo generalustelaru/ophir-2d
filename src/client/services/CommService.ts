@@ -1,6 +1,6 @@
 import { WebsocketClientMessage, Action, ActionDetails, PlayerId } from '../../shared_types';
 import { Service, ServiceInterface } from './Service';
-import state from '../state';
+import clientState from '../state';
 import clientConstants from '../client_constants';
 
 export interface CommunicationInterface extends ServiceInterface {
@@ -40,7 +40,7 @@ export class CommunicationService extends Service implements CommunicationInterf
 
             console.debug('<-', data);
 
-            state.server = data;
+            clientState.sharedState = data;
 
             this.broadcastEvent(EVENT.update);
         }
@@ -56,7 +56,7 @@ export class CommunicationService extends Service implements CommunicationInterf
         }
 
         const message: WebsocketClientMessage = {
-            playerId: state.localPlayerId as PlayerId,
+            playerId: clientState.localPlayerId as PlayerId,
             action,
             details,
         };
