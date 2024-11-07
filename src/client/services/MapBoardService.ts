@@ -1,35 +1,29 @@
 import Konva from 'konva';
 import { PlayerId, Coordinates, SharedState } from '../../shared_types';
-import { Color, InfoEventPayload, } from '../client_types';
-import { Service, ServiceInterface } from "./Service";
-import { Ship } from '../canvas_objects/ship';
-import { PlayerShip } from '../canvas_objects/playerShip';
-import { MapHex } from '../canvas_objects/mapHex';
-import { Barrier } from '../canvas_objects/barrier';
-import { PlayMat } from '../canvas_objects/playMat';
+import { CanvasSegmentInterface, InfoEventPayload, } from '../client_types';
+import { Service } from "./Service";
+import { Ship } from '../canvas_objects/Ship';
+import { PlayerShip } from '../canvas_objects/PlayerShip';
+import { MapHex } from '../canvas_objects/MapHex';
+import { Barrier } from '../canvas_objects/Barrier';
 import state from '../state';
 import clientConstants from '../client_constants';
 
-export interface MapBoardInterface extends ServiceInterface {
-    drawBoard(): void,
-    updateBoard(): void,
-}
-
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
 
-export class MapBoardService extends Service implements MapBoardInterface {
-    stage: Konva.Stage;
-    layer: Konva.Layer;
-    centerPoint: Coordinates;
+export class MapSegmentPainter extends Service implements CanvasSegmentInterface {
+    private stage: Konva.Stage;
+    private layer: Konva.Layer;
+    private centerPoint: Coordinates;
 
-    constructor(stage: Konva.Stage, layer: Konva.Layer, center: Coordinates) {
+    constructor(stage: Konva.Stage, center: Coordinates) {
         super();
         this.stage = stage;
-        this.layer = layer;
+        this.layer = stage.getLayers()[0];
         this.centerPoint = center;
     }
 
-    public drawBoard(): void {
+    public drawElements(): void {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
@@ -100,12 +94,12 @@ export class MapBoardService extends Service implements MapBoardInterface {
         state.konva.localShip.object = playerShip;
 
         // MARK: draw cargo hold
-        const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
-        this.layer.add(cargoHold.getElement());
-        state.konva.localCargoHold = cargoHold;
-    }
+        // const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
+        // this.layer.add(cargoHold.getElement());
+        // state.konva.localCargoHold = cargoHold;
+}
 
-    public updateBoard() {
+    public updateElements() {
         const serverState = state.server as SharedState;
         const players = serverState.players;
         const localPlayer = players[state.localPlayerId as PlayerId];
@@ -149,23 +143,8 @@ export class MapBoardService extends Service implements MapBoardInterface {
             localShip.setPosition(localPlayer.location.position);
             localShip.setInfluence(localPlayer.influence);
 
-            const localCargoHold = mapState.localCargoHold as PlayMat;
-            localCargoHold.updateHold(localPlayer.cargo);
-        }
-    }
-
-    private matchCargoHoldColor(playerColor: string): Color {
-        switch (playerColor) {
-            case COLOR.playerRed:
-                return COLOR.holdDarkRed;
-            case COLOR.playerPurple:
-                return COLOR.holdDarkPurple;
-            case COLOR.playerGreen:
-                return COLOR.holdDarkGreen;
-            case COLOR.playerYellow:
-                return COLOR.holdDarkYellow;
-            default:
-                return COLOR.holdDarkRed;
+            // const localCargoHold = mapState.localCargoHold as PlayMat;
+            // localCargoHold.updateHold(localPlayer.cargo);
         }
     }
 }
