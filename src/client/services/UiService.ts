@@ -1,4 +1,4 @@
-import { ManifestItem, PlayerId, PreSessionSharedState, SharedState } from '../../shared_types';
+import { ManifestItem, PlayerId, NewState, SharedState } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
 import { Service, ServiceInterface } from './Service';
 import clientState from '../state';
@@ -60,7 +60,12 @@ export class UserInterfaceService extends Service implements UiInterface {
                 titleOption.selected = true;
                 element.appendChild(titleOption);
                 const serverState = clientState.sharedState as SharedState;
-                const manifest = serverState.players[clientState.localPlayerId as PlayerId].cargo;
+                const manifest = serverState.players.find(player => player.id === clientState.localPlayerId)?.cargo;
+
+                if (!manifest) {
+                    throw new Error('Player not found');
+                }
+
                 for (let i = 0; i < manifest.length; i++) {
                     if (manifest[i] === 'empty') {
                         continue;
@@ -108,7 +113,7 @@ export class UserInterfaceService extends Service implements UiInterface {
     }
 
     private processEnroll = (): void => {
-        const lobbyState = clientState.sharedState as PreSessionSharedState;
+        const lobbyState = clientState.sharedState as NewState;
         const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
@@ -176,7 +181,7 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.disableLobbyControls();
         this.disableGameControls();
         const serverState = clientState.sharedState as SharedState;
-        const player = serverState.players[clientState.localPlayerId as PlayerId];
+        const player = serverState.players.find(player => player.id === clientState.localPlayerId);
 
         this.favorCounter.set(player?.favor ?? 0);
 

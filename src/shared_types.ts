@@ -13,7 +13,8 @@ export type GameStatus = "empty"|"created"|"full"|"started";
 export type ManifestItem = GoodId|MetalId|"empty";
 export type CargoManifest  = Array<ManifestItem>;
 
-export type PlayerState = {
+export type Player = {
+    id: PlayerId,
     turnOrder: number,
     isActive: boolean,
     location: {
@@ -31,8 +32,6 @@ export type PlayerState = {
     cargo: CargoManifest,
 }
 
-export type PlayerStates = Record<PlayerId, PlayerState>;
-
 /**
  * @description Shared between players and server in a session
  */
@@ -40,15 +39,15 @@ export type SharedState = {
     gameStatus: GameStatus,
     sessionOwner: PlayerId,
     availableSlots: Array<never>,
-    players: PlayerStates,
+    players: Array<Player>,
     setup: GameSetup,
 }
 
-export type PreSessionSharedState = {
+export type NewState = {
     gameStatus: GameStatus,
     sessionOwner: PlayerId|null,
     availableSlots: Array<PlayerId>,
-    players: PlayerStates|null,
+    players: Array<Player>,
     setup: null,
 }
 

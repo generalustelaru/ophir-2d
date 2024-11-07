@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, PlayerState, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
 
 const { ACTION } = sharedConstants;
@@ -41,8 +41,12 @@ export class GameSession implements GameSessionInterface {
     // Player action processing methods
     private processMove(message: WebsocketClientMessage): boolean {
         const details = message.details as MoveActionDetails;
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
 
-        const player = this.sharedState.players[message.playerId] as PlayerState;
+        if (!player) {
+            return false;
+        }
+
         const departure = player.location.hexId;
         const destination = details.hexId;
         const remainingMoves = player.moveActions;
@@ -76,9 +80,9 @@ export class GameSession implements GameSessionInterface {
     }
 
     private processFavorSpending(playerId: PlayerId): boolean {
-        const player = this.sharedState.players[playerId];
+        const player = this.sharedState.players.find(player => player.id === playerId);
 
-        if (player.favor > 0 && player.hasSpentFavor === false) {
+        if (player && player.favor > 0 && player.hasSpentFavor === false) {
             player.favor -= 1;
             player.hasSpentFavor = true;
             player.isAnchored = true;
@@ -93,10 +97,10 @@ export class GameSession implements GameSessionInterface {
     private processItemDrop(message: WebsocketClientMessage): boolean {
         const details = message.details as DropItemActionDetails
 
-        const player = this.sharedState.players[message.playerId];
-        const manifest = player.cargo;
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const manifest = player?.cargo;
 
-        if (!manifest.includes(details.item)) {
+        if (!manifest || !manifest.includes(details.item)) {
             return false;
         }
 
@@ -114,7 +118,12 @@ export class GameSession implements GameSessionInterface {
     }
 
     private processGoodPickup(playerId: PlayerId): boolean {
-        const player = this.sharedState.players[playerId];
+        const player = this.sharedState.players.find(player => player.id === playerId);
+
+        if (!player) {
+            return false;
+        }
+
         const canPickupGood = this.canItemBeLoaded(player, 'pickup_good');
         const localGood = this.getMatchingGood(player.location.hexId);
 
@@ -139,9 +148,9 @@ export class GameSession implements GameSessionInterface {
     }
 
     private processEndTurn(playerId: PlayerId): boolean {
-        const player = this.sharedState.players[playerId];
+        const player = this.sharedState.players.find(player => player.id === playerId);
 
-        if (player.isActive && player.isAnchored) {
+        if (player?.isActive && player.isAnchored) {
             this.passActiveStatus();
 
             return true;
@@ -157,9 +166,9 @@ export class GameSession implements GameSessionInterface {
 
         for (const id in players) {
             const playerId = id as PlayerId;
-            const player = players[playerId];
+            const player = players.find(player => player.id === playerId);;
 
-            if (player.location.hexId === destinationHex) {
+            if (player?.location.hexId === destinationHex) {
                 registry.push({ id: playerId, influence: player.influence });
             }
         }
@@ -171,7 +180,7 @@ export class GameSession implements GameSessionInterface {
         return registry;
     }
 
-    private processInfluenceRoll(activePlayer: PlayerState, registry: Array<RegistryItem>): boolean {
+    private processInfluenceRoll(activePlayer: Player, registry: Array<RegistryItem>): boolean {
         let canMove = true;
 
         activePlayer.influence = Math.ceil(Math.random() * 6);
@@ -190,9 +199,9 @@ export class GameSession implements GameSessionInterface {
 
         for (const id in this.sharedState.players) {
             const playerId = id as PlayerId;
-            const player = this.sharedState.players[playerId];
+            const player = this.sharedState.players.find(player => player.id === playerId);
 
-            if (player.influence === highestInfluence) {
+            if (player?.influence === highestInfluence) {
                 player.influence -= 1;
             }
         }
@@ -202,22 +211,26 @@ export class GameSession implements GameSessionInterface {
 
     private passActiveStatus(): void {
         const players = this.sharedState.players;
-        const playerCount = Object.keys(players).length;
+        const playerCount = players.length;
 
-        const activePlayer = players[this.findActivePlayer()];
+        const activePlayer = players.find(player => player.isActive);
+
+        if (!activePlayer) {
+            throw new Error('No active player found');
+        }
+
         activePlayer.isActive = false;
 
         const nextToken = activePlayer.turnOrder === playerCount
             ? 1
             : activePlayer.turnOrder + 1;
 
-        for (const id in players) {
-            const playerId = id as PlayerId;
-            const player: PlayerState = players[playerId];
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
 
             if (player.turnOrder === nextToken) {
                 player.isActive = true;
-                this.setTurnStartConditions(playerId);
+                this.setTurnStartConditions(player.id);
                 break;
             }
         }
@@ -226,11 +239,11 @@ export class GameSession implements GameSessionInterface {
     private findActivePlayer(): PlayerId {
         const players = this.sharedState.players;
 
-        for (const id in players) {
-            const playerId = id as PlayerId;
+        for (let i = 0; i < players.length; i++) {
+            const player = players[i];
 
-            if (players[playerId].isActive) {
-                return playerId;
+            if (player.isActive) {
+                return player.id;
             }
         }
 
@@ -238,7 +251,11 @@ export class GameSession implements GameSessionInterface {
     }
 
     private setTurnStartConditions(playerId: PlayerId): void {
-        const player = this.sharedState.players[playerId];
+        const player = this.sharedState.players.find(player => player.id === playerId);
+
+        if (!player) {
+            throw new Error('No player found');
+        }
 
         player.isAnchored = false;
         player.hasSpentFavor = false;
@@ -264,7 +281,7 @@ export class GameSession implements GameSessionInterface {
         }
     }
 
-    private getAllowedSettlementActionFromLocation(playerState: PlayerState, hexId: HexId|null = null): SettlementAction|null {
+    private getAllowedSettlementActionFromLocation(playerState: Player, hexId: HexId|null = null): SettlementAction|null {
         const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
 
         switch (true) {
@@ -278,7 +295,7 @@ export class GameSession implements GameSessionInterface {
         }
     }
 
-    private canItemBeLoaded(player: PlayerState, desired: SettlementAction): boolean
+    private canItemBeLoaded(player: Player, desired: SettlementAction): boolean
     {
         if (desired !== 'buy_metals' && desired !== 'pickup_good') {
             console.error(`Incompatible settlement action: ${desired}`);

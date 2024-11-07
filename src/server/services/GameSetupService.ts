@@ -1,5 +1,5 @@
 
-import { PlayerId, PlayerStates, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service, ServiceInterface } from './Service';
@@ -38,20 +38,25 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return bundle;
     };
 
-    private assignTurnOrderAndPosition(states: PlayerStates, setupCoordinates: Array<Coordinates>): PlayerStates {
-        const playerIds = Object.keys(states) as Array<PlayerId>;
+    private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
+        const playerIds = players.reduce((acc: Array<PlayerId>, player: Player) => {
+            acc.push(player.id);
+            return acc;
+        }, []);
+
         let tokenCount = playerIds.length;
 
         while (tokenCount > 0) {
             const pick = Math.floor(Math.random() * playerIds.length);
             const playerId = playerIds.splice(pick, 1)[0];
-            states[playerId].turnOrder = tokenCount;
-            states[playerId].isActive = tokenCount === 1;
-            states[playerId].location.position = setupCoordinates.pop() as Coordinates;
+            const player = players.find(player => player.id === playerId) as Player;
+            player.turnOrder = tokenCount;
+            player.isActive = tokenCount === 1;
+            player.location.position = setupCoordinates.pop() as Coordinates;
             tokenCount -= 1;
         }
 
-        return states;
+        return players;
     }
 
     private determineBoardPieces(): GameSetup {
@@ -111,15 +116,13 @@ export class GameSetupService extends Service implements GameSetupInterface {
         return true;
     }
 
-    private assignTurnOneRules(players: PlayerStates, rules: Array<ProcessedMoveRule>): PlayerStates {
+    private assignTurnOneRules(players: Array<Player>, rules: Array<ProcessedMoveRule>): Array<Player> {
         const initialPlacement = rules[0];
 
-        for (const id in players) {
-            const player = players[id as PlayerId];
-
+        players.forEach(player => {
             player.location.hexId = initialPlacement.from;
             player.allowedMoves = initialPlacement.allowed;
-        }
+        });
 
         return players;
     }

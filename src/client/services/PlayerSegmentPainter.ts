@@ -26,7 +26,7 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
 
     public updateElements(): void {
         const serverState = clientState.sharedState as SharedState;
-        const localPlayer = serverState.players[clientState.localPlayerId as PlayerId];
+        const localPlayer = serverState.players.find(player => player.id === clientState.localPlayerId);
 
         if (localPlayer) {
 

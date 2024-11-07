@@ -8,7 +8,7 @@ const clientState: ClientState = {
         gameStatus: 'empty',
         sessionOwner: null,
         availableSlots: [],
-        players: null,
+        players: [],
         setup: null,
     },
     konva: {
