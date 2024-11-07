@@ -15,6 +15,7 @@ const sharedConstants: SharedConstants = {
         enroll: "enroll",
         start: "start",
         move: "move",
+        reposition: "reposition",
         favor: "favor",
         drop_item: "drop_item",
         refresh: "refresh",

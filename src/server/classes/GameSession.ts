@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, RepositioningActionDetails } from "../../shared_types";
 import sharedConstants from "../../shared_constants";
 
 const { ACTION } = sharedConstants;
@@ -32,6 +32,8 @@ export class GameSession implements GameSessionInterface {
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Illegal favor spend on ${id}` };
             case ACTION.move:
                 return this.processMove(message) ? this.sharedState : { error: `Illegal move on ${id}` };
+            case ACTION.reposition:
+                return this.processRepositioning(message) ? this.sharedState : { error: `Illegal reposition on ${id}` };
             case ACTION.pickup_good:
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
             case ACTION.turn:
@@ -80,6 +82,19 @@ export class GameSession implements GameSessionInterface {
         if (player.moveActions === 0 && !sailSuccess) {
             this.passActiveStatus();
         }
+
+        return true;
+    }
+
+    processRepositioning(message: WebsocketClientMessage): boolean {
+        const details = message.details as RepositioningActionDetails;
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
+
+        if (!player) {
+            return false;
+        }
+
+        player.location.position = details.repositioning;
 
         return true;
     }
