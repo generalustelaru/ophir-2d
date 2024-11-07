@@ -75,16 +75,19 @@ export class PlayerShip implements PlayerShipInterface {
             if (!player) {
                 throw new Error('Missing player data!');
             }
+
             const position = stage.getPointerPosition();
+
             if (!position) {
-                throw new Error('Position is illegal!');
+                throw new Error('Cannot determine position!');
             }
+
             const targetHex = clientState.konva.hexes.find(
                 hex => hex.isIntersecting(position)
             );
 
 
-            const shipState = clientState.konva.localShip;
+const shipState = clientState.konva.localShip;
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 clientState.konva.hexes[i].setFill(COLOR.default);
@@ -148,6 +151,13 @@ export class PlayerShip implements PlayerShipInterface {
                 if (locationHex !== targetHex) {
                     this.group.x(positionX);
                     this.group.y(positionY);
+                } else {
+                    this.broadcastAction({
+                        action: ACTION.reposition,
+                        details: {
+                            repositioning: { x: this.group.x(), y: this.group.y() }
+                        }
+                    });
                 }
 
                 locationHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
