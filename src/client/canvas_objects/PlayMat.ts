@@ -21,15 +21,14 @@ export class PlayMat implements PlayMatInterface {
     private colors: { active: Color, inactive: Color };
 
     constructor(
-        id: PlayerId,
+        player: Player,
         isLocalPlayer: boolean,
-        isActivePlayer: boolean,
         activeColor: Color,
         inactiveColor: Color,
         yOffset: number,
         isLargeHold: boolean = false,
     ) {
-        this.id = id;
+        this.id = player.id;
         this.colors = { active: activeColor, inactive: inactiveColor };
         this.playMat = new Konva.Group({
             width: 200,
@@ -41,7 +40,7 @@ export class PlayMat implements PlayMatInterface {
         this.background = new Konva.Rect({
             width: this.playMat.width(),
             height: this.playMat.height(),
-            fill: isActivePlayer ? activeColor : inactiveColor,
+            fill: player.isActive ? activeColor : inactiveColor,
             stroke: 'gold',
             cornerRadius: 15,
             strokeWidth: isLocalPlayer ? 2 : 0,
