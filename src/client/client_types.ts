@@ -13,7 +13,7 @@ export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 export type ClientState = { // TODO: create a PreSessionClientState to remove the need to use "as" syntax for nullables
     localPlayerId: PlayerId|null,
     isBoardDrawn: boolean,
-    server: SharedState|PreSessionSharedState,
+    sharedState: SharedState|PreSessionSharedState,
     konva: {
         localShip: {
             object: PlayerShipInterface|null

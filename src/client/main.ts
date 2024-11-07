@@ -1,5 +1,5 @@
 import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
-import state from "./state";
+import clientState from "./state";
 import { CommunicationService, CommunicationInterface } from "./services/CommService";
 import { CanvasService, CanvasInterface } from "./services/CanvasService";
 import { UserInterfaceService, UiInterface } from "./services/UiService";
@@ -46,16 +46,16 @@ window.addEventListener(
 window.addEventListener(
     EVENT.update,
     () => {
-    const serverState = state.server as SharedState;
+    const sharedState = clientState.sharedState as SharedState;
 
-    if (serverState.gameStatus === STATUS.started) {
+    if (sharedState.gameStatus === STATUS.started) {
 
-        if (state.isBoardDrawn) {
+        if (clientState.isBoardDrawn) {
             canvasService.updateElements();
         } else {
             uiService.setInfo('The game has started');
             canvasService.drawElements();
-            state.isBoardDrawn = true;
+            clientState.isBoardDrawn = true;
         }
         uiService.updateGameControls();
     } else {
