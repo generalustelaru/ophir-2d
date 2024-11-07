@@ -32,11 +32,8 @@ export class UserInterfaceService extends Service implements UiInterface {
                 this.playerColorSelect.element.disabled = false;
                 const players = clientState.sharedState.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
-                    switch (true) {
-                        case players && (option.value in players):
-                        case option.value === '': option.disabled = true; break;
-                        default: option.disabled = false; break
-                    }
+                    const player = players.find(player => player.id === option.value);
+                    option.disabled = !!player;
                 });
             },
 
