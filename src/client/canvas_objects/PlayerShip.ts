@@ -64,10 +64,14 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.on('dragmove', () => {
 
             const serverState = clientState.sharedState as SharedState
-            const player = serverState.players[clientState.localPlayerId as PlayerId];
+            const player = serverState.players.find(player => player.id === clientState.localPlayerId);
+
+            if (!player) {
+                throw new Error('Missing player data!');
+            }
             const position = stage.getPointerPosition();
             if (!position) {
-                throw new Error('Position is null');
+                throw new Error('Position is illegal!');
             }
             const targetHex = clientState.konva.hexes.find(
                 hex => hex.isIntersecting(position)
@@ -115,7 +119,11 @@ export class PlayerShip implements PlayerShipInterface {
 
             const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
             const serverState = clientState.sharedState as SharedState
-            const player = serverState.players[clientState.localPlayerId as PlayerId];
+            const player = serverState.players.find(player => player.id === clientState.localPlayerId);
+
+            if (!player) {
+                throw new Error('Missing player data!');
+            }
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 clientState.konva.hexes[i].setFill(COLOR.default);

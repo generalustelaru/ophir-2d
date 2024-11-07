@@ -1,6 +1,6 @@
-import { SharedState, BarrierId, HexId, PlayerId, PlayerState, PreSessionSharedState} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState} from '../shared_types';
 
-export type WssMessage = SharedState|PreSessionSharedState|{ error: string};
+export type WssMessage = SharedState|NewState|{ error: string};
 export type DefaultMoveRule = {
     from: HexId;
     allowed: Array<HexId>;
@@ -39,5 +39,5 @@ export type ServerConstants = {
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
-    DEFAULT_PLAYER_STATE: PlayerState,
+    DEFAULT_PLAYER_STATE: Player,
 }

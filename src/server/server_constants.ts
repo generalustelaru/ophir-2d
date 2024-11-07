@@ -40,6 +40,7 @@ const serverConstants: ServerConstants = {
     ],
 
     DEFAULT_PLAYER_STATE: {
+        id: 'playerPurple',
         turnOrder: 0,
         isActive: false,
         location: {hexId: "center", position: {x: 0, y: 0}},

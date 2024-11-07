@@ -3,7 +3,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
-import { SharedState, PlayerStates, PlayerId, WebsocketClientMessage, PreSessionSharedState, GameSetupDetails } from '../shared_types';
+import { SharedState, PlayerId, WebsocketClientMessage, NewState, GameSetupDetails } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/GameSetupService';
 import { ToolService, ToolInterface } from './services/ToolService';
@@ -17,11 +17,11 @@ const privateState: PrivateState = {
     moveRules: [],
 }
 
-const sharedState: PreSessionSharedState|SharedState = {
+const sharedState: NewState|SharedState = {
     gameStatus: STATUS.empty,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
-    players: null,
+    players: [],
     setup: null,
 }
 
@@ -148,14 +148,11 @@ function processPlayer(playerId: PlayerId): boolean {
         return false;
     }
 
-    sharedState.availableSlots = sharedState.availableSlots
-        .filter(slot => slot !== playerId);
+    sharedState.availableSlots = sharedState.availableSlots.filter(slot => slot !== playerId);
 
-    if (sharedState.players === null) {
-        sharedState.players = { [playerId]: DEFAULT_PLAYER_STATE } as PlayerStates;
-    } else {
-        sharedState.players[playerId] = DEFAULT_PLAYER_STATE;
-    }
+    const newPlayer = tools.getCopy(DEFAULT_PLAYER_STATE);
+    newPlayer.id = playerId;
+    sharedState.players.push(newPlayer);
 
     console.log(`${playerId} enrolled`);
 

@@ -26,7 +26,7 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
     public drawElements(): void {
         const serverState = clientState.sharedState as SharedState;
         const players = serverState.players;
-        const localPlayer = players[clientState.localPlayerId as PlayerId];
+        const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
         const settlements = serverState.setup.settlements
         //MARK: draw hexes
@@ -53,17 +53,15 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
         this.layer.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: draw other ships
-        const playerIds = Object.keys(players) as Array<PlayerId>;
-        playerIds.forEach((id) => {
-            if (players[id] && id !== clientState.localPlayerId) {
+        players.forEach(player => {
 
-                const player = players[id];
+            if (player.id && player.id !== clientState.localPlayerId) {
                 const shipPosition = player.location.position;
                 const ship = new Ship(
                     shipPosition.x,
                     shipPosition.y,
-                    COLOR[id],
-                    id
+                    COLOR[player.id],
+                    player.id
                 );
                 ship.setInfluence(player.influence);
                 clientState.konva.opponentShips.push(ship);
@@ -79,7 +77,12 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
         }
 
         //MARK: draw local ship
-        const shipPosition = localPlayer.location.position;
+        const shipPosition = localPlayer?.location.position;
+
+        if (!shipPosition) {
+            throw new Error('Missing player data!');
+        }
+
         const playerShip = new PlayerShip(
             this.stage,
             this.layer,
@@ -92,17 +95,12 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
 
         this.layer.add(playerShip.getElement());
         clientState.konva.localShip.object = playerShip;
-
-        // MARK: draw cargo hold
-        // const cargoHold = new PlayMat(this.matchCargoHoldColor(COLOR[state.localPlayerId]));
-        // this.layer.add(cargoHold.getElement());
-        // state.konva.localCargoHold = cargoHold;
-}
+    }
 
     public updateElements() {
         const serverState = clientState.sharedState as SharedState;
         const players = serverState.players;
-        const localPlayer = players[clientState.localPlayerId as PlayerId];
+        const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const mapState = clientState.konva;
         //MARK: update hexes
         mapState.hexes.forEach(hex => {
@@ -121,10 +119,11 @@ export class MapSegmentPainter extends Service implements CanvasSegmentInterface
         mapState.opponentShips.forEach(ship => {
             const opponentId: PlayerId = ship.getId();
 
-            if (players[opponentId]) {
-                const shipPosition = players[opponentId].location.position;
+            const player = players.find(player => player.id === opponentId);
+            if (player) {
+                const shipPosition = player.location.position;
                 ship.setPosition(shipPosition);
-                ship.setInfluence(players[opponentId].influence);
+                ship.setInfluence(player.influence);
                 this.layer.batchDraw();
             } else {
                 const payload: InfoEventPayload = {

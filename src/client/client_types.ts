@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, CargoManifest, PreSessionSharedState } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, CargoManifest, NewState } from '../shared_types';
 import Konva from 'konva';
 import { ServiceInterface } from './services/Service';
 
@@ -13,7 +13,7 @@ export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 export type ClientState = { // TODO: create a PreSessionClientState to remove the need to use "as" syntax for nullables
     localPlayerId: PlayerId|null,
     isBoardDrawn: boolean,
-    sharedState: SharedState|PreSessionSharedState,
+    sharedState: SharedState|NewState,
     konva: {
         localShip: {
             object: PlayerShipInterface|null
