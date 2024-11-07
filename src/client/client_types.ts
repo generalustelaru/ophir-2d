@@ -10,7 +10,7 @@ export type ItemData = { shape: string, fill: Color };
 export type IslandData = { x: number , y: number, shape: string };
 export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 
-export type ClientState = { // TODO: create a PreSessionClientState to remove the need to use "as" syntax for nullables
+export type ClientState = {
     localPlayerId: PlayerId|null,
     isBoardDrawn: boolean,
     sharedState: SharedState|NewState,
