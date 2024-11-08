@@ -28,11 +28,11 @@ export class PlayMat implements PlayMatInterface {
         isLargeHold: boolean = false,
     ) {
         this.id = player.id;
-        this.defaultX = 525;
+        this.defaultX = 25;
         this.playMat = new Konva.Group({
             width: 200,
             height: 100,
-            x: player.isActive ? 500 : this.defaultX,
+            x: player.isActive ? 0 : this.defaultX,
             y: yOffset,
         });
 

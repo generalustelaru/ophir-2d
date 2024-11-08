@@ -11,16 +11,16 @@ import clientConstants from '../client_constants';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
 
-export class MapSegmentPainter extends Service implements CanvasSegmentInterface {
+export class MapGroup extends Service implements CanvasSegmentInterface {
     private stage: Konva.Stage;
     private layer: Konva.Layer;
     private centerPoint: Coordinates;
 
-    constructor(stage: Konva.Stage, center: Coordinates) {
+    constructor(stage: Konva.Stage) {
         super();
         this.stage = stage;
         this.layer = stage.getLayers()[0];
-        this.centerPoint = center;
+        this.centerPoint = { x: this.stage.width()/2, y: this.stage.height()/2 };
     }
 
     public drawElements(): void {
