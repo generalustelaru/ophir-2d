@@ -67,14 +67,6 @@ const clientConstants: ClientConstants = {
         gold_b: {fill: '#ff601e', shape: 'm 1.322917,17.197917 h 23.8125 l -3.36383,-7.9375 H 4.686777 Z'},
         empty: {fill:'#ffffff', shape: 'm 0,0 0,0 0,0 0,0 z'},
     },
-    EVENT: {
-        connected: 'connected',
-        action: 'action',
-        update: 'update',
-        error: 'error',
-        info: 'info',
-        setup: 'setup',
-    }
 }
 
 export default clientConstants;

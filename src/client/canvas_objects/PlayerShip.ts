@@ -2,11 +2,9 @@ import Konva from 'konva';
 import { Coordinates, SharedState } from '../../shared_types';
 import { ActionEventPayload, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
-import sharedConstants from '../../shared_constants';
 import clientConstants from '../client_constants';
 
-const { ACTION } = sharedConstants;
-const { EVENT, COLOR, SHIP_DATA } = clientConstants;
+const { COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
 
 export class PlayerShip implements PlayerShipInterface {
@@ -139,7 +137,7 @@ export class PlayerShip implements PlayerShipInterface {
             if (targetHex && clientState.konva.localShip.isDestinationValid) {
                 targetHex.setFill(COLOR.anchored);
                 this.broadcastAction({
-                    action: ACTION.move,
+                    action: 'move',
                     details: {
                         hexId: targetHex.getId(),
                         position: { x: this.group.x(), y: this.group.y() }
@@ -152,7 +150,7 @@ export class PlayerShip implements PlayerShipInterface {
                     this.group.y(positionY);
                 } else {
                     this.broadcastAction({
-                        action: ACTION.reposition,
+                        action: 'reposition',
                         details: {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
@@ -179,7 +177,7 @@ export class PlayerShip implements PlayerShipInterface {
 
     private broadcastAction(detail: ActionEventPayload) {
         window.dispatchEvent(new CustomEvent(
-            EVENT.action,
+            'action',
             { detail: detail }
         ));
     }

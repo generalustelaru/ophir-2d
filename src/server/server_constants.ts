@@ -1,11 +1,6 @@
 import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
-    WS_SIGNAL: {
-        connection: 'connection',
-        message: 'message',
-        close: 'close',
-    },
 
     DEFAULT_MOVE_RULES: [
         { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },

@@ -17,7 +17,6 @@ export class GameSetupService extends Service implements GameSetupInterface {
     }
 
     public produceGameData(state: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
-        // state.status = STATUS.setup; TODO: for when players will need to draft their characters
         state.players = this.assignTurnOrderAndPosition(state.players, setupCoordinates);
         state.setup = this.determineBoardPieces();
 
@@ -81,7 +80,10 @@ export class GameSetupService extends Service implements GameSetupInterface {
     }
 
     private determineSettlements(): Record<HexId, SettlementId> {
-        const settlementIds: Array<SettlementId> = ["temple", "market", "exchange", "quary", "forest", "mines", "farms"];
+        const settlementIds: Array<SettlementId> = [
+            "temple", "market", "exchange",
+            "quary", "forest", "mines", "farms",
+        ];
         const pairing: Record<HexId, null|SettlementId> = {
             center: null,
             topRight: null,

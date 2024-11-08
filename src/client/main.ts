@@ -4,10 +4,8 @@ import { CommunicationService, CommunicationInterface } from "./services/CommSer
 import { CanvasService, CanvasInterface } from "./services/CanvasService";
 import { UserInterfaceService, UiInterface } from "./services/UiService";
 import sharedConstants from "../shared_constants";
-import clientConstants from "./client_constants";
 import { SharedState } from "../shared_types";
-const { ACTION, STATUS, CONNECTION } = sharedConstants;
-const { EVENT } = clientConstants;
+const { CONNECTION } = sharedConstants;
 
 // Initializations
 const commService: CommunicationInterface = CommunicationService.getInstance([CONNECTION.wsAddress]);
@@ -16,7 +14,7 @@ const uiService: UiInterface = UserInterfaceService.getInstance([]);
 
 //Send player action to server
 window.addEventListener(
-    EVENT.action as any,
+    'action' as any,
     (event) => {
         const payload: ActionEventPayload = event.detail;
         commService.sendMessage(
@@ -28,7 +26,7 @@ window.addEventListener(
 
 //Display errors
 window.addEventListener(
-    EVENT.error as any,
+    'error' as any,
     (event) => {
         const payload: ErrorEventPayload = event.detail;
         console.error(payload.error);
@@ -38,17 +36,17 @@ window.addEventListener(
 
 // Get server data on connection
 window.addEventListener(
-    EVENT.connected,
-    () => commService.sendMessage(ACTION.inquire),
+    'connected',
+    () => commService.sendMessage('inquire'),
 );
 
 // Update client on server state update
 window.addEventListener(
-    EVENT.update,
+    'update',
     () => {
     const sharedState = clientState.received as SharedState;
 
-    if (sharedState.gameStatus === STATUS.started) {
+    if (sharedState.gameStatus === 'started') {
 
         if (clientState.isBoardDrawn) {
             canvasService.updateElements();
@@ -64,7 +62,7 @@ window.addEventListener(
 });
 
 window.addEventListener(
-    EVENT.info as any,
+    'info' as any,
     (event) => {
         const payload: InfoEventPayload = event.detail;
         uiService.setInfo(payload.text)

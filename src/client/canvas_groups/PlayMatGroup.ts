@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { CanvasGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayMat } from '../canvas_objects/PlayMat';
-import  clientConstants from '../client_constants';
+import clientConstants from '../client_constants';
 import clientState from '../state';
 
 const { COLOR } = clientConstants;
-export class PlayMatGroup implements CanvasGroupInterface {
 
+export class PlayMatGroup implements CanvasGroupInterface {
     private group: Konva.Group;
 
     constructor(layer: Konva.Layer, layout: GroupLayoutData) {
