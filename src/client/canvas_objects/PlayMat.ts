@@ -41,7 +41,7 @@ export class PlayMat implements PlayMatInterface {
             width: this.playMat.width(),
             height: this.playMat.height(),
             fill: player.isActive ? activeColor : inactiveColor,
-            stroke: 'gold',
+            stroke: 'white',
             cornerRadius: 15,
             strokeWidth: isLocalPlayer ? 2 : 0,
         });

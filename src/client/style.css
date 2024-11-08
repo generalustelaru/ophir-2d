@@ -9,13 +9,13 @@ html, body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: blue;
+    background-color: rgba(64, 64, 190, 0.452);
 }
 
 #canvas {
     border: 1px solid black;
-    width: 750px;
-    height: 500px;
+    width: auto;
+    height: auto;
 }
 
 #controls {
