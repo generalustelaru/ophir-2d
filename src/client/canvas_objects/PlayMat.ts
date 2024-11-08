@@ -18,32 +18,32 @@ export class PlayMat implements PlayMatInterface {
     private cargoHold: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
     private id: PlayerId;
-    private colors: { active: Color, inactive: Color };
+    private defaultX: number;
 
     constructor(
         player: Player,
         isLocalPlayer: boolean,
-        activeColor: Color,
-        inactiveColor: Color,
+        color: Color,
         yOffset: number,
         isLargeHold: boolean = false,
     ) {
         this.id = player.id;
-        this.colors = { active: activeColor, inactive: inactiveColor };
+        this.defaultX = 525;
         this.playMat = new Konva.Group({
             width: 200,
             height: 100,
-            x: 525,
+            x: player.isActive ? 500 : this.defaultX,
             y: yOffset,
         });
+
 
         this.background = new Konva.Rect({
             width: this.playMat.width(),
             height: this.playMat.height(),
-            fill: player.isActive ? activeColor : inactiveColor,
+            fill: color,
             stroke: 'white',
             cornerRadius: 15,
-            strokeWidth: isLocalPlayer ? 2 : 0,
+            strokeWidth: isLocalPlayer ? 3 : 0,
         });
         this.playMat.add(this.background);
 
@@ -105,7 +105,7 @@ export class PlayMat implements PlayMatInterface {
     }
 
     private updateHighlight(isActive: boolean) {
-        this.background.fill(isActive ? this.colors.active : this.colors.inactive);
+        this.playMat.x(isActive ? this.defaultX - 25 : this.defaultX);
     }
 
     public getId(): PlayerId {
