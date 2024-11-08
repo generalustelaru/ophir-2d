@@ -2,8 +2,6 @@ import { ManifestItem, PlayerId, NewState, SharedState } from '../../shared_type
 import { ActionEventPayload } from '../client_types';
 import { Service, ServiceInterface } from './Service';
 import clientState from '../state';
-import sharedConstants from '../../shared_constants';
-import clientConstants from '../client_constants';
 import { Button } from '../html_behaviors/button';
 import { CanvasService, CanvasInterface } from "./CanvasService";
 
@@ -12,9 +10,6 @@ export interface UiInterface extends ServiceInterface {
     updateLobbyControls(): void,
     updateGameControls(): void,
 }
-
-const { ACTION, STATUS } = sharedConstants;
-const { EVENT } = clientConstants;
 
 export class UserInterfaceService extends Service implements UiInterface {
 
@@ -104,11 +99,11 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.startButton.disable();
         const canvasService: CanvasInterface = CanvasService.getInstance([]);
         const payload: ActionEventPayload = {
-            action: ACTION.start,
+            action: 'start',
             details: canvasService.getSetupCoordinates(),
         };
 
-        return this.broadcastEvent(EVENT.action, payload);
+        return this.broadcastEvent('action', payload);
     }
 
     private processEnroll = (): void => {
@@ -121,36 +116,36 @@ export class UserInterfaceService extends Service implements UiInterface {
 
         if (lobbyState.availableSlots.includes(selectedId)) {
             clientState.localPlayerId = selectedId;
-            const payload: ActionEventPayload = { action: ACTION.enroll, details: null };
+            const payload: ActionEventPayload = { action: 'enroll', details: null };
 
-            return this.broadcastEvent(EVENT.action, payload);
+            return this.broadcastEvent('action', payload);
         }
 
         return this.setInfo('This color has just been taken :(');
     }
 
     private processFavor = (): void => {
-        const payload: ActionEventPayload = { action: ACTION.favor, details: null };
+        const payload: ActionEventPayload = { action: 'favor', details: null };
 
-        return this.broadcastEvent(EVENT.action, payload);
+        return this.broadcastEvent('action', payload);
     }
 
     private processPickup = (): void => {
-        const payload: ActionEventPayload = { action: ACTION.pickup_good, details: null };
+        const payload: ActionEventPayload = { action: 'pickup_good', details: null };
 
-        return this.broadcastEvent(EVENT.action, payload);
+        return this.broadcastEvent('action', payload);
     }
 
     private requestItemDrop = (): void => {
         const item = this.dropItemSelect.element.value as ManifestItem;
-        const payload: ActionEventPayload = { action: ACTION.drop_item, details: { item } };
+        const payload: ActionEventPayload = { action: 'drop_item', details: { item } };
 
-        return this.broadcastEvent(EVENT.action, payload);
+        return this.broadcastEvent('action', payload);
     }
     private processEndTurn = (): void => {
-        const payload: ActionEventPayload = { action: ACTION.turn, details: null };
+        const payload: ActionEventPayload = { action: 'turn', details: null };
 
-        return this.broadcastEvent(EVENT.action, payload);
+        return this.broadcastEvent('action', payload);
     }
 
     public setInfo(text: string): void {
@@ -196,7 +191,7 @@ export class UserInterfaceService extends Service implements UiInterface {
             }
 
             if (
-                player.allowedSettlementAction === ACTION.pickup_good // will probably become a switch as new actions are added
+                player.allowedSettlementAction === 'pickup_good' // will probably become a switch as new actions are added
                 && player.cargo.find(item => item === 'empty')
             ) {
                 this.pickupGoodButton.enable();
@@ -212,9 +207,9 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.disableLobbyControls();
 
         switch (clientState.received.gameStatus) {
-            case STATUS.empty: this.enableCreate(); break;
-            case STATUS.created: this.enableJoinOrStart(); break;
-            case STATUS.full: this.enableStartForOwner(); break;
+            case 'empty': this.enableCreate(); break;
+            case 'created': this.enableJoinOrStart(); break;
+            case 'full': this.enableStartForOwner(); break;
         }
     }
 

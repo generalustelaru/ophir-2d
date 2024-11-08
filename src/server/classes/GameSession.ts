@@ -1,8 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
 import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, RepositioningActionDetails } from "../../shared_types";
-import sharedConstants from "../../shared_constants";
-
-const { ACTION } = sharedConstants;
 
 type RegistryItem = { id: PlayerId, influence: number };
 export interface GameSessionInterface {
@@ -28,17 +25,17 @@ export class GameSession implements GameSessionInterface {
         }
 
         switch (message.action) {
-            case ACTION.favor:
+            case 'favor':
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Illegal favor spend on ${id}` };
-            case ACTION.move:
+            case 'move':
                 return this.processMove(message) ? this.sharedState : { error: `Illegal move on ${id}` };
-            case ACTION.reposition:
+            case 'reposition':
                 return this.processRepositioning(message) ? this.sharedState : { error: `Illegal reposition on ${id}` };
-            case ACTION.pickup_good:
+            case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
-            case ACTION.turn:
+            case 'turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Illegal turn end on ${id}` };
-            case ACTION.drop_item:
+            case 'drop_item':
                 return this.processItemDrop(message) ? this.sharedState : { error: `Illegal drop on ${id}` };
             default:
                 return { error: `Unknown action on ${id}` };

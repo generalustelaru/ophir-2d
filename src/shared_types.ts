@@ -1,6 +1,4 @@
 //TODO: Research and implement namespaces for type files
-
-// TODO: Research and implement enums to reduce the number of type definitions
 export type BarrierId = 1|2|3|4|5|6|7|8|9|10|11|12;
 export type PlayerId = "playerPurple"|"playerYellow"|"playerRed"|"playerGreen";
 export type HexId = "center"|"topRight"|"right"|"bottomRight"|"bottomLeft"|"left"|"topLeft";
@@ -11,7 +9,7 @@ export type Action = "inquire"|"enroll"|"start"|"move"|"reposition"|"favor"|"dro
 export type SettlementAction = "visit_temple"|"sell_goods"|"buy_metals"|"pickup_good";
 export type GameStatus = "empty"|"created"|"full"|"started";
 export type ManifestItem = GoodId|MetalId|"empty";
-export type CargoManifest  = Array<ManifestItem>;
+export type CargoManifest = Array<ManifestItem>;
 
 export type Player = {
     id: PlayerId,
@@ -87,6 +85,4 @@ export type SharedConstants = {
     CONNECTION: {
         wsAddress: string
     },
-    STATUS: Record<GameStatus, GameStatus>,
-    ACTION: Record<Action, Action>,
 };

@@ -1,14 +1,11 @@
 import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
 import { Service, ServiceInterface } from './Service';
 import clientState from '../state';
-import clientConstants from '../client_constants';
 
 export interface CommunicationInterface extends ServiceInterface {
     createConnection(): void,
     sendMessage: (action: Action, details?: ActionDetails) => void,
 }
-
-const { EVENT } = clientConstants;
 
 export class CommunicationService extends Service implements CommunicationInterface {
 
@@ -22,18 +19,18 @@ export class CommunicationService extends Service implements CommunicationInterf
     public createConnection() {
         this.socket.onopen = () => {
             console.info('Connected to the server');
-            this.broadcastEvent(EVENT.connected);
+            this.broadcastEvent('connected');
         }
         this.socket.onerror = (error) => {
             console.error(error);
-            this.broadcastEvent(EVENT.error, { error: 'The connection encountered an error' });
+            this.broadcastEvent('error', { error: 'The connection encountered an error' });
         }
         this.socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
 
             if (data.error) {
                 console.error('<-', data.error);
-                this.broadcastEvent(EVENT.error, { error: data.error });
+                this.broadcastEvent('error', { error: data.error });
 
                 return;
             }
@@ -42,7 +39,7 @@ export class CommunicationService extends Service implements CommunicationInterf
 
             clientState.received = data;
 
-            this.broadcastEvent(EVENT.update);
+            this.broadcastEvent('update');
         }
     }
 
@@ -50,7 +47,7 @@ export class CommunicationService extends Service implements CommunicationInterf
 
         if (!this.socket.readyState) {
             console.error('The connection is not open');
-            this.broadcastEvent(EVENT.error);
+            this.broadcastEvent('error');
 
             return;
         }

@@ -38,7 +38,6 @@ export type ClientConstants = {
         shape: string
     },
     CARGO_ITEM_DATA: Record<ManifestItem, ItemData>,
-    EVENT: Record<EventTitle, EventTitle>, // TODO: cull constants that are replaceable by types
 }
 
 export interface MapHexInterface {

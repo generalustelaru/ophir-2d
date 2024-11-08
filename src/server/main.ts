@@ -1,9 +1,8 @@
 
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
-import sharedConstants from '../shared_constants';
 import serverConstants from './server_constants';
-import { SharedState, PlayerId, WebsocketClientMessage, NewState, GameSetupDetails } from '../shared_types';
+import { SharedState, PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
 import { GameSetupService, GameSetupInterface } from './services/GameSetupService';
 import { ToolService, ToolInterface } from './services/ToolService';
@@ -11,14 +10,13 @@ import { GameSession } from './classes/GameSession';
 const httpPort = 3000;
 const wsPort = 8080;
 
-const { ACTION, STATUS } = sharedConstants;
-const { PLAYER_IDS, WS_SIGNAL, DEFAULT_PLAYER_STATE } = serverConstants;
+const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
 const privateState: PrivateState = {
     moveRules: [],
 }
 
 const sharedState: NewState|SharedState = {
-    gameStatus: STATUS.empty,
+    gameStatus: 'empty',
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
     players: [],
@@ -55,11 +53,11 @@ const send = (client: any, message: WssMessage) => {
     client.send(JSON.stringify(message));
 }
 
-socketServer.on(WS_SIGNAL.connection, function connection(client) {
+socketServer.on('connection', function connection(client) {
 
     socketClients.push(client);
 
-    client.on(WS_SIGNAL.message, function incoming(message: string) {
+    client.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
         const { playerId, action, details } = parsedMessage;
@@ -77,7 +75,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             details ? `: ${JSON.stringify(details)}` : ' { ¯\\_(ツ)_/¯ }',
         );
 
-        if (action === ACTION.inquire) {
+        if (action === 'inquire') {
             send(client, sharedState);
             return;
         }
@@ -88,7 +86,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             return;
         }
 
-        if (action === ACTION.enroll) {
+        if (action === 'enroll') {
 
             if (processPlayer(playerId)) {
                 sendAll(sharedState);
@@ -99,7 +97,7 @@ socketServer.on(WS_SIGNAL.connection, function connection(client) {
             return;
         }
 
-        if (action === ACTION.start) {
+        if (action === 'start') {
             const setupDetails = details as GameSetupDetails;
 
             if (processGameStart(setupDetails)) {
@@ -120,7 +118,7 @@ function processGameStart(details: GameSetupDetails): boolean {
 
     try {
         const gameState = sharedState as SharedState;
-        gameState.gameStatus = STATUS.started;
+        gameState.gameStatus = 'started';
         gameState.availableSlots = [];
 
         const bundle: StateBundle = setupService.produceGameData(
@@ -143,8 +141,9 @@ function processGameStart(details: GameSetupDetails): boolean {
 }
 
 function processPlayer(playerId: PlayerId): boolean {
+    const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
-    if ([STATUS.started, STATUS.full].includes(sharedState.gameStatus)) {
+    if (incompatibleStatuses.includes(sharedState.gameStatus)) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
@@ -165,13 +164,13 @@ function processPlayer(playerId: PlayerId): boolean {
     console.log(`${playerId} enrolled`);
 
     if (sharedState.sessionOwner === null) {
-        sharedState.gameStatus = STATUS.created;
+        sharedState.gameStatus = 'created';
         sharedState.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
 
     if (sharedState.availableSlots.length === 0) {
-        sharedState.gameStatus = STATUS.full;
+        sharedState.gameStatus = 'full';
         console.log(`Session is full`);
     }
 
