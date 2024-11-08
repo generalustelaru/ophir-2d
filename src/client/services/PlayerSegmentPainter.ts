@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { CanvasSegmentInterface, Color} from '../client_types';
+import { CanvasSegmentInterface } from '../client_types';
 import { Service } from "./Service";
 import { PlayMat } from '../canvas_objects/PlayMat';
 import  clientConstants from '../client_constants';
@@ -27,7 +27,6 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
                 player,
                 isLocalPlayer,
                 COLOR[player.id],
-                this.matchPlayerColor(COLOR[player.id]),
                 matOffset
             );
             this.layer.add(playMat.getElement());
@@ -45,20 +44,5 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
                 playMat.getElement().destroy();
             }
         });
-    }
-
-    private matchPlayerColor(playerColor: string): Color {
-        switch (playerColor) {
-            case COLOR.playerRed:
-                return COLOR.holdDarkRed;
-            case COLOR.playerPurple:
-                return COLOR.holdDarkPurple;
-            case COLOR.playerGreen:
-                return COLOR.holdDarkGreen;
-            case COLOR.playerYellow:
-                return COLOR.holdDarkYellow;
-            default:
-                return COLOR.holdDarkRed;
-        }
     }
 }
