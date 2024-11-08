@@ -18,16 +18,16 @@ export class PlayerSegmentPainter extends Service implements CanvasSegmentInterf
     public drawElements(): void {
         const thisPlayerId = clientState.localPlayerId;
         // MARK: draw playmats
-        const matOffsets = [20, 140, 260, 380];
+        const verticalOffsets = [20, 140, 260, 380];
         clientState.received.players.forEach(player => {
-            const matOffset = matOffsets.shift() as number;
+            const offset = verticalOffsets.shift() as number;
             const isLocalPlayer = player.id === thisPlayerId;
 
             const playMat = new PlayMat(
                 player,
                 isLocalPlayer,
                 COLOR[player.id],
-                matOffset
+                offset
             );
             this.layer.add(playMat.getElement());
             clientState.konva.playMats.push(playMat);
