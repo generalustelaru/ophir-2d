@@ -68,7 +68,7 @@ export class PlayMat implements PlayMatInterface {
 
     public updateElements(player: Player): void {
         this.updateHold(player.cargo);
-        this.updateMatColor(player.isActive);
+        this.updateHighlight(player.isActive);
     }
 
     private updateHold(cargo: CargoManifest) {
@@ -104,7 +104,7 @@ export class PlayMat implements PlayMatInterface {
         this.playMat.add(itemIcon);
     }
 
-    private updateMatColor(isActive: boolean) {
+    private updateHighlight(isActive: boolean) {
         this.background.fill(isActive ? this.colors.active : this.colors.inactive);
     }
 
