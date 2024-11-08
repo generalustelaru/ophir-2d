@@ -5,6 +5,7 @@ import { MapGroup } from '../canvas_groups/MapGroup';
 import { PlayMatGroup } from '../canvas_groups/PlayMatGroup';
 import clientConstants from '../client_constants';
 import { GroupLayoutData } from '../client_types';
+import clientState from '../state';
 
 export interface CanvasInterface extends ServiceInterface {
     getSetupCoordinates(): GameSetupDetails,
@@ -63,6 +64,10 @@ export class CanvasService extends Service implements CanvasInterface {
     public drawElements(): void {
         this.mapGroup.drawElements();
         this.playMatGroup.drawElements();
+
+        if (!clientState.localPlayerId) {
+            this.broadcastEvent('info', {text: 'You are a spectator'});
+        }
     }
 
     public updateElements(): void {
