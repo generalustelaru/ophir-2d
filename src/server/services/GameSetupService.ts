@@ -56,7 +56,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
             tokenCount -= 1;
         }
 
-        return players;
+        return players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
 
     private determineBoardPieces(): GameSetup {
