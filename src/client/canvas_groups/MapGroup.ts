@@ -1,7 +1,6 @@
 import Konva from 'konva';
 import { PlayerId, Coordinates, SharedState } from '../../shared_types';
-import { CanvasSegmentInterface, InfoEventPayload, } from '../client_types';
-import { Service } from "./Service";
+import { CanvasGroupInterface } from '../client_types';
 import { Ship } from '../canvas_objects/Ship';
 import { PlayerShip } from '../canvas_objects/PlayerShip';
 import { MapHex } from '../canvas_objects/MapHex';
@@ -9,15 +8,14 @@ import { Barrier } from '../canvas_objects/Barrier';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, EVENT } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA } = clientConstants;
 
-export class MapGroup extends Service implements CanvasSegmentInterface {
+export class MapGroup implements CanvasGroupInterface {
     private stage: Konva.Stage;
     private layer: Konva.Layer;
     private centerPoint: Coordinates;
 
     constructor(stage: Konva.Stage) {
-        super();
         this.stage = stage;
         this.layer = stage.getLayers()[0];
         this.centerPoint = { x: this.stage.width()/2, y: this.stage.height()/2 };
@@ -70,9 +68,6 @@ export class MapGroup extends Service implements CanvasSegmentInterface {
         });
 
         if (!clientState.localPlayerId) {
-            const payload: InfoEventPayload = { text: 'You are a spectator' };
-            this.broadcastEvent(EVENT.info, payload);
-
             return;
         }
 
@@ -126,10 +121,6 @@ export class MapGroup extends Service implements CanvasSegmentInterface {
                 ship.setInfluence(player.influence);
                 this.layer.batchDraw();
             } else {
-                const payload: InfoEventPayload = {
-                    text: `${opponentId} has left the game`
-                };
-                this.broadcastEvent(EVENT.info, payload);
                 ship.destroy();
                 // TODO: remove ship element from layer
                 // TODO: implement a forfeit action to update the server state

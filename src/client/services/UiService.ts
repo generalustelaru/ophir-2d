@@ -102,7 +102,7 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private processStart = (): void => {
         this.startButton.disable();
-        const canvasService = CanvasService.getInstance([]) as CanvasInterface;
+        const canvasService: CanvasInterface = CanvasService.getInstance([]);
         const payload: ActionEventPayload = {
             action: ACTION.start,
             details: canvasService.getSetupCoordinates(),
