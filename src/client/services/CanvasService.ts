@@ -1,9 +1,10 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
-import { MapSegmentPainter } from './MapSegmentPainter';
-import { PlayerSegmentPainter } from './PlayerSegmentPainter';
+import { MapGroup } from './MapSegmentPainter';
+import { PlayMatGroup } from './PlayerSegmentPainter';
 import clientConstants from '../client_constants';
+import { GroupLayoutData } from '../client_types';
 export interface CanvasInterface extends ServiceInterface {
     getSetupCoordinates(): GameSetupDetails,
     drawElements(): void,
@@ -15,8 +16,9 @@ const { SHIP_DATA } = clientConstants;
 export class CanvasService extends Service implements CanvasInterface {
     private stage: Konva.Stage;
     private layer: Konva.Layer;
-    private mapSegment: MapSegmentPainter;
-    private playerSegment: PlayerSegmentPainter;
+    private mapGroup: MapGroup;
+    private playMatGroup: PlayMatGroup;
+    // private locationsGroup: LocationsGroup;
     private centerPoint: Coordinates;
 
     public constructor() {
@@ -25,16 +27,24 @@ export class CanvasService extends Service implements CanvasInterface {
             container: 'canvas',
             visible: true,
             opacity: 1,
-            width: 750,
+            width: 1200,
             height: 500,
         });
-        this.centerPoint = { x: 250, y: this.stage.height() / 2 };
         this.layer = new Konva.Layer();
         this.stage.add(this.layer);
         this.layer.draw();
+        this.centerPoint = { x: this.stage.width()/2, y: this.stage.height()/2 };
+        const segmentWidth = this.stage.width()/4;
 
-        this.mapSegment = MapSegmentPainter.getInstance([this.stage, this.centerPoint]);
-        this.playerSegment = PlayerSegmentPainter.getInstance([this.layer]);
+        const layout: GroupLayoutData = {
+            width: segmentWidth,
+            height: this.stage.height(),
+            x: 0,
+            setX: function(drift: number) { this.x = drift; return this; },
+        };
+
+        this.mapGroup = MapGroup.getInstance([this.stage]);
+        this.playMatGroup = PlayMatGroup.getInstance([this.layer, layout.setX(segmentWidth*3)]);
     }
 
     public getSetupCoordinates(): GameSetupDetails {
@@ -51,12 +61,12 @@ export class CanvasService extends Service implements CanvasInterface {
     }
 
     public drawElements(): void {
-        this.mapSegment.drawElements();
-        this.playerSegment.drawElements();
+        this.mapGroup.drawElements();
+        this.playMatGroup.drawElements();
     }
 
     public updateElements(): void {
-        this.mapSegment.updateElements();
-        this.playerSegment.updateElements();
+        this.mapGroup.updateElements();
+        this.playMatGroup.updateElements();
     }
 }
