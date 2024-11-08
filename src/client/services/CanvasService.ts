@@ -1,10 +1,11 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
-import { MapGroup } from './MapSegmentPainter';
-import { PlayMatGroup } from './PlayerSegmentPainter';
+import { MapGroup } from '../canvas_groups/MapGroup';
+import { PlayMatGroup } from '../canvas_groups/PlayMatGroup';
 import clientConstants from '../client_constants';
 import { GroupLayoutData } from '../client_types';
+
 export interface CanvasInterface extends ServiceInterface {
     getSetupCoordinates(): GameSetupDetails,
     drawElements(): void,
@@ -18,7 +19,6 @@ export class CanvasService extends Service implements CanvasInterface {
     private layer: Konva.Layer;
     private mapGroup: MapGroup;
     private playMatGroup: PlayMatGroup;
-    // private locationsGroup: LocationsGroup;
     private centerPoint: Coordinates;
 
     public constructor() {
@@ -43,8 +43,8 @@ export class CanvasService extends Service implements CanvasInterface {
             setX: function(drift: number) { this.x = drift; return this; },
         };
 
-        this.mapGroup = MapGroup.getInstance([this.stage]);
-        this.playMatGroup = PlayMatGroup.getInstance([this.layer, layout.setX(segmentWidth*3)]);
+        this.mapGroup = new MapGroup(this.stage);
+        this.playMatGroup = new PlayMatGroup(this.layer, layout.setX(segmentWidth*3));
     }
 
     public getSetupCoordinates(): GameSetupDetails {

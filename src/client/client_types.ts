@@ -1,7 +1,6 @@
 import { Vector2d } from 'konva/lib/types';
 import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Player } from '../shared_types';
 import Konva from 'konva';
-import { ServiceInterface } from './services/Service';
 
 export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
@@ -64,7 +63,7 @@ export interface PlayerShipInterface {
     setPosition(coordinates: Coordinates): void,
 }
 
-export interface CanvasSegmentInterface extends ServiceInterface {
+export interface CanvasGroupInterface {
     drawElements(): void,
     updateElements(): void,
 }
