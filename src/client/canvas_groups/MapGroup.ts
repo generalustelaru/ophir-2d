@@ -7,6 +7,7 @@ import { MapHex } from '../canvas_objects/MapHex';
 import { Barrier } from '../canvas_objects/Barrier';
 import clientState from '../state';
 import clientConstants from '../client_constants';
+import { AnchorDial } from '../canvas_objects/AnchorDial';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA } = clientConstants;
 
@@ -14,6 +15,7 @@ export class MapGroup implements CanvasGroupInterface {
     private stage: Konva.Stage;
     private layer: Konva.Layer;
     private centerPoint: Coordinates;
+    private anchorDial: AnchorDial|null = null;
 
     constructor(stage: Konva.Stage) {
         this.stage = stage;
@@ -26,7 +28,13 @@ export class MapGroup implements CanvasGroupInterface {
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
-        const settlements = serverState.setup.settlements
+        const settlements = serverState.setup.settlements;
+
+        //MARK: draw anchor
+        if (localPlayer) {
+            this.anchorDial = new AnchorDial(this.layer, localPlayer.isAnchored);
+            this.layer.add(this.anchorDial.getElement());
+        }
         //MARK: draw hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
@@ -97,6 +105,12 @@ export class MapGroup implements CanvasGroupInterface {
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const mapState = clientState.konva;
+
+        //MARK: update anchor
+        if (localPlayer) {
+            this.anchorDial?.updateElements(localPlayer.isAnchored);
+        }
+
         //MARK: update hexes
         mapState.hexes.forEach(hex => {
             const hexId = hex.getId();
