@@ -164,7 +164,8 @@ export class PlayerShip implements PlayerShipInterface {
         });
         this.group.add(this.ship);
 
-        const influenceTextColor = ['playerYellow', 'playerGreen'].includes(playerId) ? 'black' : 'white';
+        const lightColored: Array<PlayerId> = ['playerYellow', 'playerGreen'];
+        const influenceTextColor = lightColored.includes(playerId) ? 'black' : 'white';
         this.influence = new Konva.Text({
             x: 6,
             y: 4,
