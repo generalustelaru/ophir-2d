@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Player } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Player, IconKey } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -38,6 +38,7 @@ export type ClientConstants = {
         shape: string
     },
     CARGO_ITEM_DATA: Record<ManifestItem, ItemData>,
+    ICON_DATA: Record<IconKey, ItemData>,
 }
 
 export interface MapHexInterface {
