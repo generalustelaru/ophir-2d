@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, SharedState } from '../../shared_types';
+import { Coordinates, PlayerId, SharedState } from '../../shared_types';
 import { ActionEventPayload, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
@@ -99,7 +99,7 @@ export class PlayerShip implements PlayerShipInterface {
             if (targetHex.getId() === player.location.hexId) {
                 targetHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
 
-            } else if (player.allowedMoves.includes(targetHex.getId())) {
+            } else if (player.moveActions && player.allowedMoves.includes(targetHex.getId())) {
                 targetHex.setFill(COLOR.valid);
                 shipState.isDestinationValid = true;
 

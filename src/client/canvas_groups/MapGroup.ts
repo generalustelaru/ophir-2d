@@ -129,12 +129,9 @@ export class MapGroup implements CanvasGroupInterface {
 
         if (localPlayer) {
             const localShip = mapState.localShip.object as PlayerShip;
-            localShip.switchControl(localPlayer.isActive && localPlayer.moveActions > 0);
+            localShip.switchControl(localPlayer.isActive);
             localShip.setPosition(localPlayer.location.position);
             localShip.setInfluence(localPlayer.influence);
-
-            // const localCargoHold = mapState.localCargoHold as PlayMat;
-            // localCargoHold.updateHold(localPlayer.cargo);
         }
     }
 }
