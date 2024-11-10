@@ -3,15 +3,19 @@ import { Coordinates, PlayerId, SharedState } from '../../shared_types';
 import { ActionEventPayload, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
+import { MapHex } from './MapHex';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
 
 export class PlayerShip implements PlayerShipInterface {
 
-    ship: Konva.Path;
-    influence: Konva.Text;
-    group: Konva.Group;
+    private ship: Konva.Path;
+    private influence: Konva.Text;
+    private group: Konva.Group;
+    private homePosition: Coordinates = { x: 0, y: 0 };
+    private isDestinationValid: boolean = false;
+    private mapHexes: Array<MapHex> = [];
 
     public switchControl(isActivePlayer: boolean) {
         this.group.draggable(isActivePlayer);
@@ -34,8 +38,10 @@ export class PlayerShip implements PlayerShipInterface {
         stage: Konva.Stage,
         offsetX: number,
         offsetY: number,
-        fill: string
+        fill: string,
+        mapHexes: Array<MapHex>
     ) {
+        this.mapHexes = mapHexes;
         const playerId = clientState.localPlayerId;
 
         if (!playerId) {
@@ -60,7 +66,7 @@ export class PlayerShip implements PlayerShipInterface {
         });
 
         this.group.on('dragstart', () => {
-            clientState.konva.localShip.homePosition = { x: this.group.x(), y: this.group.y() }
+            this.homePosition = { x: this.group.x(), y: this.group.y() }
         });
 
         this.group.on('dragmove', () => {
@@ -77,14 +83,14 @@ export class PlayerShip implements PlayerShipInterface {
                 throw new Error('Cannot determine position!');
             }
 
-            const targetHex = clientState.konva.hexes.find(
+            const targetHex = this.mapHexes.find(
                 hex => hex.isIntersecting(position)
             );
 
-            const shipState = clientState.konva.localShip;
+            const shipState = this;
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                clientState.konva.hexes[i].setFill(COLOR.default);
+                this.mapHexes[i].setFill(COLOR.default);
             }
 
             shipState.isDestinationValid = false;
@@ -98,7 +104,7 @@ export class PlayerShip implements PlayerShipInterface {
 
             } else if (player.moveActions && player.allowedMoves.includes(targetHex.getId())) {
                 targetHex.setFill(COLOR.valid);
-                shipState.isDestinationValid = true;
+                this.isDestinationValid = true;
 
             } else {
                 targetHex.setFill(COLOR.illegal);
@@ -112,14 +118,14 @@ export class PlayerShip implements PlayerShipInterface {
                 throw new Error('Could not find pointer position!');
             }
 
-            const targetHex = clientState.konva.hexes.find(
+            const targetHex = this.mapHexes.find(
                 hex => hex.isIntersecting(position)
             );
 
-            const { x: positionX, y: positionY } = clientState.konva.localShip.homePosition;
+            const { x: positionX, y: positionY } = this.homePosition;
             const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
-            const locationHex = clientState.konva.hexes.find(
+            const locationHex = this.mapHexes.find(
                 hex => hex.getId() === player?.location.hexId
             );
 
@@ -128,10 +134,10 @@ export class PlayerShip implements PlayerShipInterface {
             }
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                clientState.konva.hexes[i].setFill(COLOR.default);
+                this.mapHexes[i].setFill(COLOR.default);
             }
 
-            if (targetHex && clientState.konva.localShip.isDestinationValid) {
+            if (targetHex && this.isDestinationValid) {
                 targetHex.setFill(COLOR.anchored);
                 this.broadcastAction({
                     action: 'move',

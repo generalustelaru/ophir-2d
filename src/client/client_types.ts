@@ -13,16 +13,6 @@ export type ClientState = {
     localPlayerId: PlayerId|null,
     isBoardDrawn: boolean,
     received: SharedState|NewState,
-    konva: {
-        localShip: {
-            object: PlayerShipInterface|null
-            homePosition: Coordinates,
-            isDestinationValid: boolean,
-        },
-        playMats: Array<PlayMatInterface>,
-        opponentShips: Array<ShipInterface>,
-        hexes: Array<MapHexInterface>,
-    },
 }
 
 export type ClientConstants = {
