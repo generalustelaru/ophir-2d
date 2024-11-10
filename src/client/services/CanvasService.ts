@@ -1,9 +1,8 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails } from '../../shared_types';
+import { GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
 import { MapGroup } from '../canvas_groups/MapGroup';
 import { PlayMatGroup } from '../canvas_groups/PlayMatGroup';
-import clientConstants from '../client_constants';
 import { GroupLayoutData } from '../client_types';
 import clientState from '../state';
 
@@ -13,14 +12,10 @@ export interface CanvasInterface extends ServiceInterface {
     updateElements(): void,
 }
 
-const { SHIP_DATA } = clientConstants;
-
 export class CanvasService extends Service implements CanvasInterface {
     private stage: Konva.Stage;
-    private layer: Konva.Layer;
     private mapGroup: MapGroup;
     private playMatGroup: PlayMatGroup;
-    private centerPoint: Coordinates;
 
     public constructor() {
         super();
@@ -31,34 +26,25 @@ export class CanvasService extends Service implements CanvasInterface {
             width: 1200,
             height: 500,
         });
-        this.layer = new Konva.Layer();
-        this.stage.add(this.layer);
-        this.layer.draw();
-        this.centerPoint = { x: this.stage.width()/2, y: this.stage.height()/2 };
-        const segmentWidth = this.stage.width()/4;
+        const layer = new Konva.Layer();
+        this.stage.add(layer);
+        layer.draw();
 
+        const segmentWidth = this.stage.width()/4;
         const layout: GroupLayoutData = {
-            width: segmentWidth,
             height: this.stage.height(),
-            x: 0,
-            setX: function(drift: number) { this.x = drift; return this; },
+            width: segmentWidth,
+            x: segmentWidth,
+            setWidth: function(width: number) { this.width = width; return this; },
+            setX: function(rightDrift: number) { this.x = rightDrift; return this; },
         };
 
-        this.mapGroup = new MapGroup(this.stage);
-        this.playMatGroup = new PlayMatGroup(this.layer, layout.setX(segmentWidth*3));
+        this.mapGroup = new MapGroup(this.stage, layout.setWidth(segmentWidth*2).setX(segmentWidth)); // mapGroup covers half the canvas (2 segments), sitting in the middle
+        this.playMatGroup = new PlayMatGroup(this.stage, layout.setX(segmentWidth*3));
     }
 
     public getSetupCoordinates(): GameSetupDetails {
-        const startingPositions: Array<Coordinates> = [];
-
-        SHIP_DATA.setupDrifts.forEach((drift) => {
-            startingPositions.push({
-                x: this.centerPoint.x + drift.x,
-                y: this.centerPoint.y + drift.y
-            });
-        });
-
-        return { setupCoordinates: startingPositions };
+        return this.mapGroup.calculateShipPositions();
     }
 
     public drawElements(): void {

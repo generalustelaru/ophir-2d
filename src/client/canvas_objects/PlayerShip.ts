@@ -32,12 +32,10 @@ export class PlayerShip implements PlayerShipInterface {
 
     constructor(
         stage: Konva.Stage,
-        layer: Konva.Layer,
         offsetX: number,
         offsetY: number,
         fill: string
     ) {
-
         const playerId = clientState.localPlayerId;
 
         if (!playerId) {
@@ -66,7 +64,6 @@ export class PlayerShip implements PlayerShipInterface {
         });
 
         this.group.on('dragmove', () => {
-
             const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
 
@@ -109,10 +106,10 @@ export class PlayerShip implements PlayerShipInterface {
         });
 
         this.group.on('dragend', () => {
-
             const position = stage.getPointerPosition();
+
             if (!position) {
-                throw new Error('Position is null');
+                throw new Error('Could not find pointer position!');
             }
 
             const targetHex = clientState.konva.hexes.find(
@@ -159,8 +156,6 @@ export class PlayerShip implements PlayerShipInterface {
 
                 locationHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
             }
-
-            layer.batchDraw();
         });
         this.group.add(this.ship);
 
