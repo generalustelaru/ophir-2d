@@ -5,6 +5,7 @@ import clientState from '../state';
 
 export class PlayMatGroup implements CanvasGroupInterface {
     private group: Konva.Group;
+    private playMats: Array<PlayMat> = [];
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -22,14 +23,14 @@ export class PlayMatGroup implements CanvasGroupInterface {
         clientState.received.players.forEach(player => {
             const playMat = new PlayMat(player, clientState.localPlayerId, verticalOffsets.shift() as number);
             this.group.add(playMat.getElement());
-            clientState.konva.playMats.push(playMat);
+            this.playMats.push(playMat);
         });
     }
 
     // MARK: UPDATE
     public updateElements(): void {
 
-        clientState.konva.playMats.forEach(playMat => {
+        this.playMats.forEach(playMat => {
             const player = clientState.received.players.find(player => player.id === playMat.getId());
             if (player) {
                 playMat.updateElements(player);
