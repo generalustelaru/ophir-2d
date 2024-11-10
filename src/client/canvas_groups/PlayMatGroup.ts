@@ -1,10 +1,7 @@
 import Konva from 'konva';
 import { CanvasGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayMat } from '../canvas_objects/PlayMat';
-import clientConstants from '../client_constants';
 import clientState from '../state';
-
-const { COLOR } = clientConstants;
 
 export class PlayMatGroup implements CanvasGroupInterface {
     private group: Konva.Group;
@@ -18,25 +15,18 @@ export class PlayMatGroup implements CanvasGroupInterface {
         stage.getLayers()[0].add(this.group);
     }
 
+    // MARK: DRAW
     public drawElements(): void {
-        const thisPlayerId = clientState.localPlayerId;
-
-        // MARK: draw playmats
         const verticalOffsets = [20, 140, 260, 380];
+
         clientState.received.players.forEach(player => {
-            const offset = verticalOffsets.shift() as number;
-            const isLocalPlayer = player.id === thisPlayerId;
-            const playMat = new PlayMat(
-                player,
-                isLocalPlayer,
-                COLOR[player.id],
-                offset
-            );
+            const playMat = new PlayMat(player, clientState.localPlayerId, verticalOffsets.shift() as number);
             this.group.add(playMat.getElement());
             clientState.konva.playMats.push(playMat);
         });
     }
 
+    // MARK: UPDATE
     public updateElements(): void {
 
         clientState.konva.playMats.forEach(playMat => {
