@@ -90,7 +90,7 @@ export class PlayerShip implements PlayerShipInterface {
             const shipState = this;
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                this.mapHexes[i].setFill(COLOR.default);
+                this.mapHexes[i].setFill(COLOR.defaultHex);
             }
 
             shipState.isDestinationValid = false;
@@ -100,10 +100,10 @@ export class PlayerShip implements PlayerShipInterface {
             }
 
             if (targetHex.getId() === player.location.hexId) {
-                targetHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
+                targetHex.setFill(player.isAnchored ? COLOR.locationHex : COLOR.illegal); // TODO: replace illegal color with illegal icon 
 
             } else if (player.moveActions && player.allowedMoves.includes(targetHex.getId())) {
-                targetHex.setFill(COLOR.valid);
+                targetHex.setFill(COLOR.validHex);
                 this.isDestinationValid = true;
 
             } else {
@@ -134,11 +134,11 @@ export class PlayerShip implements PlayerShipInterface {
             }
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                this.mapHexes[i].setFill(COLOR.default);
+                this.mapHexes[i].setFill(COLOR.defaultHex);
             }
 
             if (targetHex && this.isDestinationValid) {
-                targetHex.setFill(COLOR.anchored);
+                targetHex.setFill(COLOR.locationHex);
                 this.broadcastAction({
                     action: 'move',
                     details: {
@@ -160,7 +160,7 @@ export class PlayerShip implements PlayerShipInterface {
                     });
                 }
 
-                locationHex.setFill(player.isAnchored ? COLOR.anchored : COLOR.illegal);
+                locationHex.setFill(player.isAnchored ? COLOR.locationHex : COLOR.illegal);
             }
         });
         this.group.add(this.ship);

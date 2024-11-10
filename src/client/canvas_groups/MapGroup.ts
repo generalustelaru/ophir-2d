@@ -58,9 +58,7 @@ export class MapGroup implements CanvasGroupInterface {
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
                 SETTLEMENT_DATA[serverState.setup.settlements[hexItem.id]],
-                localPlayer?.location.hexId === hexItem.id
-                    ? (localPlayer?.isActive ? COLOR.illegal : COLOR.anchored)
-                    : COLOR.default
+                localPlayer?.isActive && localPlayer?.location.hexId === hexItem.id ? COLOR.locationHex : COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
             this.group.add(mapHex.getElement());
@@ -129,19 +127,16 @@ export class MapGroup implements CanvasGroupInterface {
             this.movesDial?.updadeElements(localPlayer);
         }
 
-        //MARK: hexes
-        this.mapHexes.forEach(hex => {
-            const hexId = hex.getId();
-            let hexColor = COLOR.default;
+        //MARK: location hex
+        if (localPlayer) {
+            const mapHex = this.mapHexes.find(hex => hex.getId() === localPlayer.location.hexId);
 
-            if (localPlayer?.location.hexId === hexId) {
-                hexColor = localPlayer.isActive && !localPlayer.isAnchored
-                    ? COLOR.illegal
-                    : COLOR.anchored;
+            if (!mapHex) {
+                throw new Error('Could not find hex!');
             }
 
-            hex.setFill(hexColor);
-        });
+            mapHex.setFill(localPlayer.isActive ? COLOR.locationHex : COLOR.defaultHex);
+        }
 
         // MARK: ships
         this.opponentShips.forEach(ship => {

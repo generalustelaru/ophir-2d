@@ -42,7 +42,6 @@ export class MapHex implements MapHexInterface {
             stroke: 'black',
             strokeWidth: 1,
         });
-
         this.group.add(this.hexagon);
 
         this.island = new Konva.Path({
@@ -53,7 +52,6 @@ export class MapHex implements MapHexInterface {
             scale: {x: 7.5, y: 7.5},
             strokeWidth: 1,
         });
-
         this.group.add(this.island);
 
         this.settlement = new LocationToken(settlement).getElement();
