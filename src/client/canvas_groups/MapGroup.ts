@@ -8,6 +8,7 @@ import { Barrier } from '../canvas_objects/Barrier';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 import { AnchorDial } from '../canvas_objects/AnchorDial';
+import { MovesDial } from '../canvas_objects/MovesDial';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clientConstants;
 
@@ -15,6 +16,7 @@ export class MapGroup implements CanvasGroupInterface {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private anchorDial: AnchorDial|null = null;
+    private movesDial: MovesDial|null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.stage = stage;
@@ -39,6 +41,9 @@ export class MapGroup implements CanvasGroupInterface {
         if (localPlayer) {
             this.anchorDial = new AnchorDial(this.group, localPlayer.isActive);
             this.group.add(this.anchorDial.getElement());
+
+            this.movesDial = new MovesDial(this.group, localPlayer.isActive);
+            this.group.add(this.movesDial.getElement());
         }
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
@@ -114,6 +119,11 @@ export class MapGroup implements CanvasGroupInterface {
         //MARK: anchor
         if (localPlayer) {
             this.anchorDial?.updateElements(localPlayer);
+        }
+
+        //MARK: moves dial
+        if (localPlayer) {
+            this.movesDial?.updadeElements(localPlayer);
         }
 
         //MARK: hexes
