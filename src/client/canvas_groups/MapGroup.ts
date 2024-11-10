@@ -28,18 +28,19 @@ export class MapGroup implements CanvasGroupInterface {
         layer.add(this.group);
     }
 
+    // MARK: DRAW
     public drawElements(): void {
         const centerPoint = { x: this.group.width()/2, y: this.group.height()/2 };
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
 
-        //MARK: draw anchor
+        //MARK: anchor
         if (localPlayer) {
             this.anchorDial = new AnchorDial(this.group, localPlayer.isActive);
             this.group.add(this.anchorDial.getElement());
         }
-        //MARK: draw hexes
+        //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
                 centerPoint,
@@ -56,13 +57,13 @@ export class MapGroup implements CanvasGroupInterface {
             this.group.add(mapHex.getElement());
         });
 
-        // MARK: draw barriers
+        // MARK: barriers
         const barriers = serverState.setup.barriers
         const barrier_1 = new Barrier(centerPoint, barriers[0]);
         const barrier_2 = new Barrier(centerPoint, barriers[1]);
         this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
-        //MARK: draw other ships
+        //MARK: ships
         players.forEach(player => {
 
             if (player.id && player.id !== clientState.localPlayerId) {
@@ -83,7 +84,7 @@ export class MapGroup implements CanvasGroupInterface {
             return;
         }
 
-        //MARK: draw local ship
+        //MARK: player ship
         const shipPosition = localPlayer?.location.position;
 
         if (!shipPosition) {
@@ -103,18 +104,19 @@ export class MapGroup implements CanvasGroupInterface {
         clientState.konva.localShip.object = playerShip;
     }
 
+    // MARK: UPDATE
     public updateElements() {
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
         const mapState = clientState.konva;
 
-        //MARK: update anchor
+        //MARK: anchor
         if (localPlayer) {
             this.anchorDial?.updateElements(localPlayer);
         }
 
-        //MARK: update hexes
+        //MARK: hexes
         mapState.hexes.forEach(hex => {
             const hexId = hex.getId();
             let hexColor = COLOR.default;
@@ -127,7 +129,8 @@ export class MapGroup implements CanvasGroupInterface {
 
             hex.setFill(hexColor);
         });
-        // MARK: update other ships
+
+        // MARK: ships
         mapState.opponentShips.forEach(ship => {
             const opponentId: PlayerId = ship.getId();
 
