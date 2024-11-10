@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { PlayMatInterface, Color } from '../client_types';
+import { PlayMatInterface } from '../client_types';
 import { CargoManifest, ManifestItem, Player, PlayerId } from '../../shared_types';
 import clientConstants from '../client_constants';
 
@@ -18,32 +18,28 @@ export class PlayMat implements PlayMatInterface {
     private cargoHold: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
     private id: PlayerId;
-    private defaultX: number;
 
     constructor(
         player: Player,
-        isLocalPlayer: boolean,
-        color: Color,
+        localPlayerId: PlayerId|null,
         yOffset: number,
         isLargeHold: boolean = false,
     ) {
         this.id = player.id;
-        this.defaultX = 25;
         this.playMat = new Konva.Group({
             width: 200,
             height: 100,
-            x: player.isActive ? 0 : this.defaultX,
+            x: localPlayerId === player.id ? 0 : 25,
             y: yOffset,
         });
-
 
         this.background = new Konva.Rect({
             width: this.playMat.width(),
             height: this.playMat.height(),
-            fill: color,
+            fill: COLOR[player.id],
             stroke: 'white',
             cornerRadius: 15,
-            strokeWidth: isLocalPlayer ? 3 : 0,
+            strokeWidth: player.isActive ? 3 : 0,
         });
         this.playMat.add(this.background);
 
@@ -98,14 +94,13 @@ export class PlayMat implements PlayMatInterface {
             fill: itemData.fill,
             stroke: 'white',
             strokeWidth: 1,
-            // scale: {x: 5, y: 5},
         });
         cargoSlot.element = itemIcon;
         this.playMat.add(itemIcon);
     }
 
     private updateHighlight(isActive: boolean) {
-        this.playMat.x(isActive ? this.defaultX - 25 : this.defaultX);
+        this.background.strokeWidth(isActive ? 3: 0);
     }
 
     public getId(): PlayerId {
