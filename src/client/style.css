@@ -50,6 +50,10 @@ button, select {
     height: 40px;
 }
 
+#info {
+    color: aliceblue;
+}
+
 .test {
     background-color: red;
 }
