@@ -6,7 +6,7 @@ import { Vector2d } from 'konva/lib/types';
 import { LocationToken } from './LocationToken';
 import clientConstants from '../client_constants';
 
-const { COLOR } = clientConstants;
+const { COLOR, ICON_DATA } = clientConstants;
 
 export class MapHex implements MapHexInterface {
 
@@ -14,6 +14,7 @@ export class MapHex implements MapHexInterface {
     private hexagon: Konva.RegularPolygon;
     private island: Konva.Path;
     private settlement: Konva.Group;
+    private restrictedIcon: Konva.Path;
 
     constructor(
         center: Coordinates,
@@ -56,6 +57,16 @@ export class MapHex implements MapHexInterface {
 
         this.settlement = new LocationToken(settlement).getElement();
         this.group.add(this.settlement);
+
+        this.restrictedIcon = new Konva.Path({
+            x: -75,
+            y: -75,
+            data: ICON_DATA.restricted.shape,
+            fill: ICON_DATA.restricted.fill,
+            scale: {x: 2, y: 2},
+            visible: false,
+        });
+        this.group.add(this.restrictedIcon);
     }
 
     public getElement(): Konva.Group {
@@ -66,6 +77,10 @@ export class MapHex implements MapHexInterface {
     }
     public setFill(color: Color): void {
         this.hexagon.fill(color);
+    }
+    public setRestricted(how: boolean): void { //TODO: implement multiple states and control the details from here (icon and fill)
+        this.restrictedIcon.visible(how);
+        this.setFill(how ? COLOR.emptyHex : COLOR.emptyHex);
     }
     public isIntersecting(vector: Vector2d): boolean {
         return this.hexagon.intersects(vector);
