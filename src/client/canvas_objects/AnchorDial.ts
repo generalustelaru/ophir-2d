@@ -13,7 +13,7 @@ export class AnchorDial {
         const data = isActivePlayer ? ICON_DATA.not_anchored : ICON_DATA.anchored;
         this.anchor = new Konva.Path({
             x: parent.width() - 100,
-            y: parent.height() - 100,
+            y: parent.height() - 130,
             data: data.shape,
             fill: isActivePlayer ? data.fill : COLOR.disabled,
             scale: { x: 1.5, y: 1.5 },
