@@ -24,6 +24,7 @@ const clientConstants: ClientConstants = {
         holdDarkRed: '#990020',
         holdDarkGreen: '#667F1A',
         wood: '#8B4513',
+        disabled: '#A9A9A9',
     },
     HEX_OFFSET_DATA: [
         { id: 'center', x: 0, y: 0 },

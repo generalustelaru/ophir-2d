@@ -1,20 +1,21 @@
 import Konva from 'konva';
 import constants from '../client_constants';
+import { Player } from '../../shared_types';
 
-const { ICON_DATA } = constants;
+const { ICON_DATA, COLOR } = constants;
 
 export class AnchorDial {
     private group: Konva.Group;
     private anchor: Konva.Path
 
-    constructor(isAnchored: boolean) {
+    constructor(parent: Konva.Group, isActivePlayer: boolean) {
         this.group = new Konva.Group();
-        const data = isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
+        const data = isActivePlayer ? ICON_DATA.not_anchored : ICON_DATA.anchored;
         this.anchor = new Konva.Path({
-            x: 0,
-            y: 0,
+            x: parent.width() - 100,
+            y: parent.height() - 100,
             data: data.shape,
-            fill: data.fill,
+            fill: isActivePlayer ? data.fill : COLOR.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
         this.group.add(this.anchor);
@@ -24,9 +25,9 @@ export class AnchorDial {
         return this.group;
     }
 
-    public updateElements(isAnchored: boolean) {
-        const data = isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
-        this.anchor.data(data.shape);
-        this.anchor.fill(data.fill);
+    public updateElements(player: Player) {
+            const data = player.isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
+            this.anchor.data(data.shape);
+            this.anchor.fill(player.isActive ? data.fill : COLOR.disabled);
     }
 }

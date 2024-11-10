@@ -36,7 +36,7 @@ export class MapGroup implements CanvasGroupInterface {
 
         //MARK: draw anchor
         if (localPlayer) {
-            this.anchorDial = new AnchorDial(localPlayer.isAnchored);
+            this.anchorDial = new AnchorDial(this.group, localPlayer.isActive);
             this.group.add(this.anchorDial.getElement());
         }
         //MARK: draw hexes
@@ -111,7 +111,7 @@ export class MapGroup implements CanvasGroupInterface {
 
         //MARK: update anchor
         if (localPlayer) {
-            this.anchorDial?.updateElements(localPlayer.isAnchored);
+            this.anchorDial?.updateElements(localPlayer);
         }
 
         //MARK: update hexes
