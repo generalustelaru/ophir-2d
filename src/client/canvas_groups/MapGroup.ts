@@ -45,6 +45,7 @@ export class MapGroup implements CanvasGroupInterface {
             this.movesDial = new MovesDial(this.group, localPlayer.isActive);
             this.group.add(this.movesDial.getElement());
         }
+
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
