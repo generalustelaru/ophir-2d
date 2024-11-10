@@ -11,7 +11,7 @@ const clientState: ClientState = {
         players: [],
         setup: null,
     },
-    konva: {
+    konva: { // TODO: store these objects inside their group/object classes to reduce state clutter.
         localShip: {
             object: null,
             homePosition: { x: 0, y: 0 },
