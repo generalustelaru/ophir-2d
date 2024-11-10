@@ -73,6 +73,7 @@ export type GroupLayoutData = {
     height: number,
     x: number,
     setX(drift: number): GroupLayoutData,
+    setWidth(width: number): GroupLayoutData,
 };
 
 export interface PlayMatInterface {

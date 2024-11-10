@@ -7,10 +7,8 @@ export class AnchorDial {
     private group: Konva.Group;
     private anchor: Konva.Path
 
-    constructor(layer: Konva.Layer, isAnchored: boolean) {
-        this.group = new Konva.Group({});
-        layer.add(this.group);
-
+    constructor(isAnchored: boolean) {
+        this.group = new Konva.Group();
         const data = isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
         this.anchor = new Konva.Path({
             x: 0,
@@ -19,7 +17,6 @@ export class AnchorDial {
             fill: data.fill,
             scale: { x: 1.5, y: 1.5 },
         });
-
         this.group.add(this.anchor);
     }
 

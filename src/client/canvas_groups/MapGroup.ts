@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { PlayerId, Coordinates, SharedState } from '../../shared_types';
-import { CanvasGroupInterface } from '../client_types';
+import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
+import { CanvasGroupInterface, GroupLayoutData } from '../client_types';
 import { Ship } from '../canvas_objects/Ship';
 import { PlayerShip } from '../canvas_objects/PlayerShip';
 import { MapHex } from '../canvas_objects/MapHex';
@@ -9,54 +9,58 @@ import clientState from '../state';
 import clientConstants from '../client_constants';
 import { AnchorDial } from '../canvas_objects/AnchorDial';
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clientConstants;
 
 export class MapGroup implements CanvasGroupInterface {
+    private group: Konva.Group;
     private stage: Konva.Stage;
-    private layer: Konva.Layer;
-    private centerPoint: Coordinates;
     private anchorDial: AnchorDial|null = null;
 
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.stage = stage;
-        this.layer = stage.getLayers()[0];
-        this.centerPoint = { x: this.stage.width()/2, y: this.stage.height()/2 };
+        const layer = stage.getLayers()[0];
+
+        this.group = new Konva.Group({
+            width: layout.width,
+            height: layout.height,
+            x: layout.x,
+        });
+        layer.add(this.group);
     }
 
     public drawElements(): void {
+        const centerPoint = { x: this.group.width()/2, y: this.group.height()/2 };
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
-        const localPlayerHexColor = localPlayer?.isActive ? COLOR.illegal : COLOR.anchored;
-        const settlements = serverState.setup.settlements;
 
         //MARK: draw anchor
         if (localPlayer) {
-            this.anchorDial = new AnchorDial(this.layer, localPlayer.isAnchored);
-            this.layer.add(this.anchorDial.getElement());
+            this.anchorDial = new AnchorDial(localPlayer.isAnchored);
+            this.group.add(this.anchorDial.getElement());
         }
         //MARK: draw hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
-                this.centerPoint,
+                centerPoint,
                 hexItem.id,
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                SETTLEMENT_DATA[settlements[hexItem.id]],
+                SETTLEMENT_DATA[serverState.setup.settlements[hexItem.id]],
                 localPlayer?.location.hexId === hexItem.id
-                    ? localPlayerHexColor
+                    ? (localPlayer?.isActive ? COLOR.illegal : COLOR.anchored)
                     : COLOR.default
             );
             clientState.konva.hexes.push(mapHex);
-            this.layer.add(mapHex.getElement());
+            this.group.add(mapHex.getElement());
         });
 
         // MARK: draw barriers
         const barriers = serverState.setup.barriers
-        const barrier_1 = new Barrier(this.centerPoint, barriers[0]);
-        const barrier_2 = new Barrier(this.centerPoint, barriers[1]);
-        this.layer.add(barrier_1.getElement(), barrier_2.getElement());
+        const barrier_1 = new Barrier(centerPoint, barriers[0]);
+        const barrier_2 = new Barrier(centerPoint, barriers[1]);
+        this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: draw other ships
         players.forEach(player => {
@@ -71,7 +75,7 @@ export class MapGroup implements CanvasGroupInterface {
                 );
                 ship.setInfluence(player.influence);
                 clientState.konva.opponentShips.push(ship);
-                this.layer.add(ship.getElement());
+                this.group.add(ship.getElement());
             }
         });
 
@@ -88,7 +92,6 @@ export class MapGroup implements CanvasGroupInterface {
 
         const playerShip = new PlayerShip(
             this.stage,
-            this.layer,
             shipPosition.x,
             shipPosition.y,
             COLOR[clientState.localPlayerId],
@@ -96,7 +99,7 @@ export class MapGroup implements CanvasGroupInterface {
         playerShip.setInfluence(localPlayer.influence);
         playerShip.switchControl(localPlayer.isActive);
 
-        this.layer.add(playerShip.getElement());
+        this.group.add(playerShip.getElement());
         clientState.konva.localShip.object = playerShip;
     }
 
@@ -133,7 +136,6 @@ export class MapGroup implements CanvasGroupInterface {
                 const shipPosition = player.location.position;
                 ship.setPosition(shipPosition);
                 ship.setInfluence(player.influence);
-                this.layer.batchDraw();
             } else {
                 ship.destroy();
                 // TODO: remove ship element from layer
@@ -147,5 +149,18 @@ export class MapGroup implements CanvasGroupInterface {
             localShip.setPosition(localPlayer.location.position);
             localShip.setInfluence(localPlayer.influence);
         }
+    }
+
+    public calculateShipPositions(): GameSetupDetails {
+        const startingPositions: Array<Coordinates> = [];
+
+        SHIP_DATA.setupDrifts.forEach((drift) => {
+            startingPositions.push({
+                x: this.group.width()/2 + drift.x,
+                y: this.group.height()/2 + drift.y
+            });
+        });
+
+        return { setupCoordinates: startingPositions };
     }
 }
