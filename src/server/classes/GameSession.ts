@@ -1,7 +1,8 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
 import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, RepositioningActionDetails } from "../../shared_types";
+import { DiceSix } from "../../client/client_types";
 
-type RegistryItem = { id: PlayerId, influence: number };
+type RegistryItem = { id: PlayerId, influence: DiceSix };
 export interface GameSessionInterface {
     processAction: (action: any) => WssMessage;
 }
@@ -197,7 +198,7 @@ export class GameSession implements GameSessionInterface {
     private processInfluenceRoll(activePlayer: Player, registry: Array<RegistryItem>): boolean {
         let canMove = true;
 
-        activePlayer.influence = Math.ceil(Math.random() * 6);
+        activePlayer.influence = Math.ceil(Math.random() * 6) as DiceSix;
         let highestInfluence = activePlayer.influence;
 
         registry.forEach(item => {

@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, PlayerId, SharedState } from '../../shared_types';
-import { ActionEventPayload, PlayerShipInterface } from '../client_types';
+import { Coordinates, HexId, PlayerId, SharedState } from '../../shared_types';
+import { ActionEventPayload, DiceSix, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 import { MapHex } from './MapHex';
@@ -80,12 +80,13 @@ export class PlayerShip implements PlayerShipInterface {
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
             if (!player || !position || !targetHex) {
-                throw new Error('Missing state data to compute dragging!');
+                return;
             }
 
             for (let i = 0; i < HEX_COUNT; i++) {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
+                mapHex.setBoneIcon(false);
                 mapHex.setFill(player.location.hexId === mapHex.getId()
                     ? COLOR.locationHex
                     : COLOR.defaultHex
@@ -99,6 +100,7 @@ export class PlayerShip implements PlayerShipInterface {
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
+                    targetHex.setBoneIcon(this.CalculateToSailValue(targetHex.getId()));
                     break;
                 default:
                     targetHex.setRestricted(true);
@@ -112,6 +114,7 @@ export class PlayerShip implements PlayerShipInterface {
             for (let i = 0; i < HEX_COUNT; i++) {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
+                mapHex.setBoneIcon(false);
                 mapHex.setFill(COLOR.defaultHex);
             }
 
@@ -170,5 +173,13 @@ export class PlayerShip implements PlayerShipInterface {
             'action',
             { detail: detail }
         ));
+    }
+    private CalculateToSailValue(targetHexId: HexId): DiceSix|false {
+        const influencePool = clientState.received.players.map(player => {
+            return player.location.hexId === targetHexId ? player.influence : 0;
+        });
+        const highestInfluence = Math.max(...influencePool) as DiceSix;
+
+        return highestInfluence > 0 ? highestInfluence : false;
     }
 }

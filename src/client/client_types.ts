@@ -8,6 +8,7 @@ export type SettlementData = { shape: string, fill: Color };
 export type ItemData = { shape: string, fill: Color };
 export type IslandData = { x: number , y: number, shape: string };
 export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
+export type DiceSix = 1|2|3|4|5|6;
 
 export type ClientState = {
     localPlayerId: PlayerId|null,

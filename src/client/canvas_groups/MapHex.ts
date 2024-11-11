@@ -1,10 +1,11 @@
 
 import Konva from 'konva';
 import { Coordinates, HexId } from '../../shared_types';
-import { Color, MapHexInterface, IslandData, SettlementData } from '../client_types';
+import { Color, MapHexInterface, IslandData, SettlementData, DiceSix } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
 import { LocationToken } from './LocationToken';
 import clientConstants from '../client_constants';
+import { BoneIcon } from './BoneIcon';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
@@ -15,6 +16,7 @@ export class MapHex implements MapHexInterface {
     private island: Konva.Path;
     private settlement: Konva.Group;
     private restrictedIcon: Konva.Path;
+    private boneIcon: BoneIcon;
 
     constructor(
         center: Coordinates,
@@ -67,6 +69,9 @@ export class MapHex implements MapHexInterface {
             visible: false,
         });
         this.group.add(this.restrictedIcon);
+
+        this.boneIcon = new BoneIcon();
+        this.group.add(this.boneIcon.getElement());
     }
 
     public getElement(): Konva.Group {
@@ -81,6 +86,10 @@ export class MapHex implements MapHexInterface {
     public setRestricted(how: boolean): void { //TODO: implement multiple states and control the details from here (icon and fill)
         this.restrictedIcon.visible(how);
         this.setFill(how ? COLOR.emptyHex : COLOR.emptyHex);
+    }
+
+    public setBoneIcon(value: DiceSix|false): void {
+        this.boneIcon.display(value);
     }
     public isIntersecting(vector: Vector2d|null): boolean {
         if (!vector) {
