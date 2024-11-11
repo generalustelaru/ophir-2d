@@ -82,7 +82,11 @@ export class MapHex implements MapHexInterface {
         this.restrictedIcon.visible(how);
         this.setFill(how ? COLOR.emptyHex : COLOR.emptyHex);
     }
-    public isIntersecting(vector: Vector2d): boolean {
+    public isIntersecting(vector: Vector2d|null): boolean {
+        if (!vector) {
+            return false;
+        }
+
         return this.hexagon.intersects(vector);
     }
 }
