@@ -34,6 +34,7 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.y(coordinates.y);
     };
 
+    // MARK: - Constructor
     constructor(
         stage: Konva.Stage,
         offsetX: number,
@@ -65,10 +66,12 @@ export class PlayerShip implements PlayerShipInterface {
             strokeWidth: 2,
         });
 
+        // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
             this.homePosition = { x: this.group.x(), y: this.group.y() }
         });
 
+        // MARK: - Dragging (move)
         this.group.on('dragmove', () => {
             const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
@@ -87,13 +90,11 @@ export class PlayerShip implements PlayerShipInterface {
                 hex => hex.isIntersecting(position)
             );
 
-            const shipState = this;
-
             for (let i = 0; i < HEX_COUNT; i++) {
                 this.mapHexes[i].setFill(COLOR.defaultHex);
             }
 
-            shipState.isDestinationValid = false;
+            this.isDestinationValid = false;
 
             if (!targetHex) {
                 return;
@@ -111,6 +112,7 @@ export class PlayerShip implements PlayerShipInterface {
             }
         });
 
+        // MARK: - Dragging (end)
         this.group.on('dragend', () => {
             const position = stage.getPointerPosition();
 
@@ -165,6 +167,7 @@ export class PlayerShip implements PlayerShipInterface {
         });
         this.group.add(this.ship);
 
+        // MARK: - Influence text
         const lightColored: Array<PlayerId> = ['playerYellow', 'playerGreen'];
         const influenceTextColor = lightColored.includes(playerId) ? 'black' : 'white';
         this.influence = new Konva.Text({
