@@ -13,7 +13,7 @@ export class PlayerShip implements PlayerShipInterface {
     private ship: Konva.Path;
     private influence: Konva.Text;
     private group: Konva.Group;
-    private homePosition: Coordinates = { x: 0, y: 0 };
+    private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
     private mapHexes: Array<MapHex> = [];
 
@@ -68,101 +68,86 @@ export class PlayerShip implements PlayerShipInterface {
 
         // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
-            this.homePosition = { x: this.group.x(), y: this.group.y() }
+            this.initialPosition = { x: this.group.x(), y: this.group.y() }
         });
 
         // MARK: - Dragging (move)
         this.group.on('dragmove', () => {
+            this.isDestinationValid = false;
             const serverState = clientState.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
-
-            if (!player) {
-                throw new Error('Missing player data!');
-            }
-
             const position = stage.getPointerPosition();
+            const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
-            if (!position) {
-                throw new Error('Cannot determine position!');
+            if (!player || !position || !targetHex) {
+                throw new Error('Missing state data to compute dragging!');
             }
-
-            const targetHex = this.mapHexes.find(
-                hex => hex.isIntersecting(position)
-            );
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                this.mapHexes[i].setFill(COLOR.defaultHex);
+                const mapHex = this.mapHexes[i];
+                mapHex.setRestricted(false);
+                mapHex.setFill(player.location.hexId === mapHex.getId()
+                    ? COLOR.locationHex
+                    : COLOR.defaultHex
+                );
             }
 
-            this.isDestinationValid = false;
-
-            if (!targetHex) {
-                return;
-            }
-
-            if (targetHex.getId() === player.location.hexId) {
-                targetHex.setFill(player.isAnchored ? COLOR.locationHex : COLOR.illegal); // TODO: replace illegal color with illegal icon 
-
-            } else if (player.moveActions && player.allowedMoves.includes(targetHex.getId())) {
-                targetHex.setFill(COLOR.validHex);
-                this.isDestinationValid = true;
-
-            } else {
-                targetHex.setFill(COLOR.illegal);
+            switch (true) {
+                case targetHex.getId() === player.location.hexId:
+                    targetHex.setFill(COLOR.locationHex);
+                    break;
+                case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
+                    targetHex.setFill(COLOR.validHex);
+                    this.isDestinationValid = true;
+                    break;
+                default:
+                    targetHex.setRestricted(true);
+                    targetHex.setFill(COLOR.illegal);
             }
         });
 
         // MARK: - Dragging (end)
         this.group.on('dragend', () => {
-            const position = stage.getPointerPosition();
-
-            if (!position) {
-                throw new Error('Could not find pointer position!');
-            }
-
-            const targetHex = this.mapHexes.find(
-                hex => hex.isIntersecting(position)
-            );
-
-            const { x: positionX, y: positionY } = this.homePosition;
-            const serverState = clientState.received as SharedState
-            const player = serverState.players.find(player => player.id === playerId);
-            const locationHex = this.mapHexes.find(
-                hex => hex.getId() === player?.location.hexId
-            );
-
-            if (!player || !locationHex) {
-                throw new Error('Missing player data!');
-            }
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                this.mapHexes[i].setFill(COLOR.defaultHex);
+                const mapHex = this.mapHexes[i];
+                mapHex.setRestricted(false);
+                mapHex.setFill(COLOR.defaultHex);
             }
 
-            if (targetHex && this.isDestinationValid) {
-                targetHex.setFill(COLOR.locationHex);
-                this.broadcastAction({
-                    action: 'move',
-                    details: {
-                        hexId: targetHex.getId(),
-                        position: { x: this.group.x(), y: this.group.y() }
-                    }
-                });
-            } else {
+            const player = clientState.received.players.find(player => player.id === playerId);
+            const position = stage.getPointerPosition();
+            const departureHex = this.mapHexes.find(hex => hex.getId() === player?.location.hexId);
+            const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
-                if (locationHex !== targetHex) {
-                    this.group.x(positionX);
-                    this.group.y(positionY);
-                } else {
+            if (!targetHex || !departureHex) {
+                throw new Error('Missing state data compute repositioning/moving!');
+            }
+
+            switch (true) {
+                case targetHex && this.isDestinationValid:
+                    targetHex.setFill(COLOR.locationHex);
+                    this.broadcastAction({
+                        action: 'move',
+                        details: {
+                            hexId: targetHex.getId(),
+                            position: { x: this.group.x(), y: this.group.y() }
+                        }
+                    });
+                    break;
+                case departureHex === targetHex:
                     this.broadcastAction({
                         action: 'reposition',
                         details: {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
                     });
-                }
-
-                locationHex.setFill(player.isAnchored ? COLOR.locationHex : COLOR.illegal);
+                    departureHex.setFill(COLOR.locationHex);
+                    break;
+                default:
+                    this.group.x(this.initialPosition.x);
+                    this.group.y(this.initialPosition.y);
+                    departureHex.setFill(COLOR.locationHex);
             }
         });
         this.group.add(this.ship);
