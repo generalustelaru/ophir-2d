@@ -1,6 +1,7 @@
 import Konva from 'konva';
 import { GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
+import { LocationGroup } from '../canvas_mega_groups/LocationGroup';
 import { MapGroup } from '../canvas_mega_groups/MapGroup';
 import { PlayMatGroup } from '../canvas_mega_groups/PlayMatGroup';
 import { GroupLayoutData } from '../client_types';
@@ -14,6 +15,7 @@ export interface CanvasInterface extends ServiceInterface {
 
 export class CanvasService extends Service implements CanvasInterface {
     private stage: Konva.Stage;
+    private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
     private playMatGroup: PlayMatGroup;
 
@@ -39,6 +41,7 @@ export class CanvasService extends Service implements CanvasInterface {
             setX: function(rightDrift: number) { this.x = rightDrift; return this; },
         };
 
+        this.locationGroup = new LocationGroup();
         this.mapGroup = new MapGroup(this.stage, layout.setWidth(segmentWidth*2).setX(segmentWidth)); // mapGroup covers half the canvas (2 segments), sitting in the middle
         this.playMatGroup = new PlayMatGroup(this.stage, layout.setX(segmentWidth*3));
     }
@@ -48,6 +51,7 @@ export class CanvasService extends Service implements CanvasInterface {
     }
 
     public drawElements(): void {
+        this.locationGroup.drawElements();
         this.mapGroup.drawElements();
         this.playMatGroup.drawElements();
 
@@ -57,6 +61,7 @@ export class CanvasService extends Service implements CanvasInterface {
     }
 
     public updateElements(): void {
+        this.locationGroup.updateElements();
         this.mapGroup.updateElements();
         this.playMatGroup.updateElements();
     }
