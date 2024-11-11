@@ -44,17 +44,15 @@ export interface ShipInterface {
     getId(): PlayerId,
     setPosition(coordinates: Coordinates): void,
     setInfluence(value: number): void,
+    switchHighlight(isHighlighted: boolean): void,
     destroy(): void,
 }
 
-export interface PlayerShipInterface {
+export interface PlayerShipInterface extends ShipInterface {
     switchControl(isActivePlayer: boolean): void,
-    getElement(): Konva.Group,
-    setInfluence(value: number): void,
-    setPosition(coordinates: Coordinates): void,
 }
 
-export interface CanvasGroupInterface {
+export interface CanvasMegaGroupInterface {
     drawElements(): void,
     updateElements(): void,
 }
