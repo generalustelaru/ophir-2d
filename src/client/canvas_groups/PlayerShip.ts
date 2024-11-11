@@ -100,7 +100,7 @@ export class PlayerShip implements PlayerShipInterface {
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
-                    targetHex.setBoneIcon(this.CalculateToSailValue(targetHex.getId()));
+                    targetHex.setBoneIcon(player.hasSpentFavor ? false : this.calculateToSailValue(targetHex.getId()));
                     break;
                 default:
                     targetHex.setRestricted(true);
@@ -174,10 +174,9 @@ export class PlayerShip implements PlayerShipInterface {
             { detail: detail }
         ));
     }
-    private CalculateToSailValue(targetHexId: HexId): DiceSix|false {
-        const influencePool = clientState.received.players.map(player => {
-            return player.location.hexId === targetHexId ? player.influence : 0;
-        });
+    private calculateToSailValue(targetHexId: HexId): DiceSix|false {
+        const influencePool = clientState.received.players
+            .map(player => {return player.location.hexId === targetHexId ? player.influence : 0});
         const highestInfluence = Math.max(...influencePool) as DiceSix;
 
         return highestInfluence > 0 ? highestInfluence : false;
