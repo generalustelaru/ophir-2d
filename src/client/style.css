@@ -18,17 +18,6 @@ html, body {
     height: auto;
 }
 
-#controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 50px;
-    width: 750px;
-}
-
-/* #lobby-controls {
-} */
-
 #game-controls {
     & #favorCounter {
         height: 35px;
