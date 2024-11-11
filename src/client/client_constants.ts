@@ -8,7 +8,7 @@ const clientConstants: ClientConstants = {
     COLOR: {
         barrierDefault: '#003C43',
         barrierNavigator: '#FFFDD7',
-        localShipBorder: '#FFFFFF',
+        activeShipBorder: '#FFFFFF',
         shipBorder: '#000000',
         playerPurple: '#A55A9A',
         playerYellow: '#FFC94A',

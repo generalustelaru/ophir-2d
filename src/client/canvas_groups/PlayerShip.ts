@@ -40,6 +40,7 @@ export class PlayerShip implements PlayerShipInterface {
         offsetX: number,
         offsetY: number,
         fill: string,
+        isActivePlayer: boolean,
         mapHexes: Array<MapHex>
     ) {
         this.mapHexes = mapHexes;
@@ -62,7 +63,7 @@ export class PlayerShip implements PlayerShipInterface {
             data: SHIP_DATA.shape,
             fill,
             scale: { x: 1.5, y: 1.5 },
-            stroke: COLOR.localShipBorder,
+            stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder,
             strokeWidth: 2,
         });
 
@@ -168,7 +169,11 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.add(this.influence);
     }
 
-    private broadcastAction(detail: ActionEventPayload) {
+    public switchHighlight(isHighlighted: boolean): void {
+        this.ship.stroke(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
+    }
+
+    private broadcastAction(detail: ActionEventPayload): void {
         window.dispatchEvent(new CustomEvent(
             'action',
             { detail: detail }
