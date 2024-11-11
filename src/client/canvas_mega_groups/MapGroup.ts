@@ -129,13 +129,13 @@ export class MapGroup implements CanvasGroupInterface {
 
         //MARK: location hex
         if (localPlayer) {
-            const mapHex = this.mapHexes.find(hex => hex.getId() === localPlayer.location.hexId);
 
-            if (!mapHex) {
-                throw new Error('Could not find hex!');
+            for (const mapHex of this.mapHexes) {
+                mapHex.setFill(localPlayer.isActive && localPlayer.location.hexId === mapHex.getId()
+                    ? COLOR.locationHex
+                    : COLOR.defaultHex
+                );
             }
-
-            mapHex.setFill(localPlayer.isActive ? COLOR.locationHex : COLOR.defaultHex);
         }
 
         // MARK: ships
