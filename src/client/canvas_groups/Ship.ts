@@ -15,6 +15,7 @@ export class Ship implements ShipInterface {
         offsetX: number,
         offsetY: number,
         fill: string,
+        isActivePlayer: boolean,
         id: PlayerId,
     ) {
         this.group = new Konva.Group({
@@ -31,7 +32,7 @@ export class Ship implements ShipInterface {
             data: SHIP_DATA.shape,
             fill,
             scale: {x: 1.5, y: 1.5},
-            stroke: COLOR.shipBorder,
+            stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder,
             strokeWidth: 2,
         });
 
@@ -55,6 +56,9 @@ export class Ship implements ShipInterface {
 
     public setInfluence(value: number): void {
         this.influence.text(value.toString());
+    }
+    public switchHighlight(isHighlighted: boolean): void {
+        this.ship.stroke(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
     }
     public getElement(): Konva.Group {
         return this.group

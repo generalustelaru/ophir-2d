@@ -79,6 +79,7 @@ export class MapGroup implements CanvasGroupInterface {
                     shipPosition.x,
                     shipPosition.y,
                     COLOR[player.id],
+                    player.isActive,
                     player.id
                 );
                 ship.setInfluence(player.influence);
@@ -103,6 +104,7 @@ export class MapGroup implements CanvasGroupInterface {
             shipPosition.x,
             shipPosition.y,
             COLOR[clientState.localPlayerId],
+            localPlayer.isActive,
             this.mapHexes,
         );
         this.localShip.setInfluence(localPlayer.influence);
@@ -147,6 +149,7 @@ export class MapGroup implements CanvasGroupInterface {
                 const shipPosition = player.location.position;
                 ship.setPosition(shipPosition);
                 ship.setInfluence(player.influence);
+                ship.switchHighlight(player.isActive);
             } else {
                 ship.destroy();
                 // TODO: remove ship element from layer
@@ -157,6 +160,7 @@ export class MapGroup implements CanvasGroupInterface {
         if (localPlayer) {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
+            localShip.switchHighlight(localPlayer.isActive);
             localShip.setPosition(localPlayer.location.position);
             localShip.setInfluence(localPlayer.influence);
         }
