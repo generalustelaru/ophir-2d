@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
-import { MapGroup } from '../canvas_groups/MapGroup';
-import { PlayMatGroup } from '../canvas_groups/PlayMatGroup';
+import { MapGroup } from '../canvas_mega_groups/MapGroup';
+import { PlayMatGroup } from '../canvas_mega_groups/PlayMatGroup';
 import { GroupLayoutData } from '../client_types';
 import clientState from '../state';
 

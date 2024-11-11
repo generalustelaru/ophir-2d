@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { CanvasGroupInterface, GroupLayoutData } from '../client_types';
-import { PlayMat } from '../canvas_objects/PlayMat';
+import { PlayMat } from '../canvas_groups/PlayMat';
 import clientState from '../state';
 
 export class PlayMatGroup implements CanvasGroupInterface {
