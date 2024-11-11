@@ -26,6 +26,7 @@ const clientConstants: ClientConstants = {
         wood: '#8B4513',
         disabled: '#A9A9A9',
         sunset: '#FFA07A',
+        boneWhite: '#EDEDED',
     },
     HEX_OFFSET_DATA: [
         { id: 'center', x: 0, y: 0 },
