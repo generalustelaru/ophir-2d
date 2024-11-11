@@ -169,6 +169,14 @@ export class PlayerShip implements PlayerShipInterface {
         this.group.add(this.influence);
     }
 
+    public getId(): PlayerId {
+        return this.group.attrs.id() as PlayerId;
+    }
+
+    public destroy(): void {
+        this.group.destroy()
+    }
+
     public switchHighlight(isHighlighted: boolean): void {
         this.ship.stroke(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
     }
