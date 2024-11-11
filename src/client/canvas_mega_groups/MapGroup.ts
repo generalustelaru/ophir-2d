@@ -1,14 +1,14 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { CanvasGroupInterface, GroupLayoutData } from '../client_types';
-import { Ship } from '../canvas_objects/Ship';
-import { PlayerShip } from '../canvas_objects/PlayerShip';
-import { MapHex } from '../canvas_objects/MapHex';
-import { Barrier } from '../canvas_objects/Barrier';
+import { Ship } from '../canvas_groups/Ship';
+import { PlayerShip } from '../canvas_groups/PlayerShip';
+import { MapHex } from '../canvas_groups/MapHex';
+import { Barrier } from '../canvas_groups/Barrier';
 import clientState from '../state';
 import clientConstants from '../client_constants';
-import { AnchorDial } from '../canvas_objects/AnchorDial';
-import { MovesDial } from '../canvas_objects/MovesDial';
+import { AnchorDial } from '../canvas_groups/AnchorDial';
+import { MovesDial } from '../canvas_groups/MovesDial';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clientConstants;
 
