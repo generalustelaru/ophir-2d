@@ -78,7 +78,8 @@ export class GameSession implements GameSessionInterface {
         }
 
         if (player.moveActions === 0 && !sailSuccess) {
-            this.passActiveStatus();
+            player.isAnchored = true;
+            player.allowedSettlementAction = null;
         }
 
         return true;
