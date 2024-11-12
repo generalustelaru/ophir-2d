@@ -105,7 +105,7 @@ export class GameSetupService extends Service implements GameSetupInterface {
 
     private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {
 
-        if (!b2 || b1 === b2) {
+        if (b1 === b2) {
             return false;
         }
 
