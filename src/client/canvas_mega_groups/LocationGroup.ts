@@ -1,10 +1,15 @@
 import Konva from "konva";
 import { CanvasMegaGroupInterface, GroupLayoutData } from "../client_types";
+import { MarketCard } from "../canvas_groups/CanvasGroups";
 
 export class LocationGroup implements CanvasMegaGroupInterface {
 
     private group: Konva.Group;
+    private layout: GroupLayoutData;
+    private marketCard: MarketCard|null = null;
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
+        this.layout = layout;
+
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -13,23 +18,12 @@ export class LocationGroup implements CanvasMegaGroupInterface {
 
         stage.getLayers()[0].add(this.group);
     }
+
     drawElements(): void {
-        const testRect = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: this.group.width(),
-            height: this.group.height(),
-            fill: 'red',
-        });
-        const testText = new Konva.Text({
-            x: 10,
-            y: 10,
-            text: 'Location Group',
-            fontSize: 20,
-            fill: 'white',
-        });
-        this.group.add(testRect, testText);
+        this.marketCard = new MarketCard(this.layout);
+        this.group.add(this.marketCard.getElement());
     }
+
     updateElements(): void {
         console.warn('updateElements: Method not implemented.');
     }

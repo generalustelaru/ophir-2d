@@ -28,6 +28,7 @@ const clientConstants: ClientConstants = {
         sunset: '#FFA07A',
         boneWhite: '#EDEDED',
         stampEdge: '#850c03',
+        marketOrange: '#ff601e',
     },
     HEX_OFFSET_DATA: [
         { id: 'center', x: 0, y: 0 },
