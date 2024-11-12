@@ -3,9 +3,8 @@ import Konva from 'konva';
 import { Coordinates, HexId } from '../../shared_types';
 import { Color, MapHexInterface, IslandData, SettlementData, DiceSix } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
-import { LocationToken } from './LocationToken';
 import clientConstants from '../client_constants';
-import { BoneIcon } from './BoneIcon';
+import { BoneIcon, LocationToken } from './CanvasGroups';
 
 const { COLOR, ICON_DATA } = clientConstants;
 

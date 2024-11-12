@@ -3,12 +3,13 @@ import clientConstants from "../client_constants";
 import { DiceSix } from "../client_types";
 import { Coordinates } from "../../shared_types";
 
-type DotData = Array<{position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}>
+type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
+type PipData = Array<PipDataElement>
 const { COLOR } = clientConstants;
 export class BoneIcon {
     private group: Konva.Group;
     private body: Konva.Rect;
-    private dotMatrix: DotData;
+    private dotMatrix: PipData;
 
     constructor() {
         this.group = new Konva.Group({
@@ -26,7 +27,7 @@ export class BoneIcon {
         });
         this.group.add(this.body);
 
-        const dotData: DotData = [
+        const pipData: PipData = [
             { position: {x: 10, y: 10}, included: [2,3,4,5,6], element: null },
             { position: {x: 10, y: 25}, included: [6], element: null },
             { position: {x: 10, y: 40}, included: [4,5,6], element: null },
@@ -35,21 +36,20 @@ export class BoneIcon {
             { position: {x: 40, y: 40}, included: [2,3,4,5,6], element: null },
             { position: {x: 25, y: 25}, included: [1,3,5], element: null },
         ];
-        const length = dotData.length;
+        // const length = pipData.length;
 
-        for (let i = 0; i < length; i++) {
-            const dot = dotData[i];
+        pipData.forEach(pip => {
             const element = new Konva.Circle({
-                x: dot.position.x,
-                y: dot.position.y,
+                x: pip.position.x,
+                y: pip.position.y,
                 radius: 6,
                 fill: 'black',
             });
-            dot.element = element;
+            pip.element = element;
             this.group.add(element);
-        }
+        });
 
-        this.dotMatrix = dotData;
+        this.dotMatrix = pipData;
         this.group.hide();
     }
 
