@@ -38,10 +38,8 @@ export class Ship implements ShipInterface {
 
         this.group.add(this.ship);
 
-        const influenceTextColor =
-            id === 'playerGreen' || id === 'playerYellow'
-                ? 'black'
-                : 'white';
+        const darkColored: Array<PlayerId> = ['playerPurple', 'playerGreen'];
+        const influenceTextColor = darkColored.includes(id) ? 'white' : 'black';
 
         this.influence = new Konva.Text({
             x: 6,

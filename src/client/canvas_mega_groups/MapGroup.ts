@@ -152,6 +152,7 @@ export class MapGroup implements CanvasMegaGroupInterface {
             }
         });
 
+        //MARK: player ship
         if (localPlayer) {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
