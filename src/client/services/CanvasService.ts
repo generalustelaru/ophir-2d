@@ -3,7 +3,7 @@ import { GameSetupDetails } from '../../shared_types';
 import { Service, ServiceInterface } from "./Service";
 import { LocationGroup } from '../canvas_mega_groups/LocationGroup';
 import { MapGroup } from '../canvas_mega_groups/MapGroup';
-import { PlayMatGroup } from '../canvas_mega_groups/PlayMatGroup';
+import { PlayerCardGroup } from '../canvas_mega_groups/PlayerCardGroup';
 import { GroupLayoutData } from '../client_types';
 import clientState from '../state';
 
@@ -17,7 +17,7 @@ export class CanvasService extends Service implements CanvasInterface {
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
-    private playMatGroup: PlayMatGroup;
+    private playerCardGroup: PlayerCardGroup;
 
     public constructor() {
         super();
@@ -33,17 +33,27 @@ export class CanvasService extends Service implements CanvasInterface {
         layer.draw();
 
         const segmentWidth = this.stage.width()/4;
-        const layout: GroupLayoutData = {
+
+        const locationLayout: GroupLayoutData = {
             height: this.stage.height(),
             width: segmentWidth,
-            x: segmentWidth,
-            setWidth: function(width: number) { this.width = width; return this; },
-            setX: function(rightDrift: number) { this.x = rightDrift; return this; },
+            x: 0,
         };
+        this.locationGroup = new LocationGroup(this.stage, locationLayout); // locationGroup covers 1 segment, sitting on the left
 
-        this.locationGroup = new LocationGroup(this.stage, layout.setX(0)); // locationGroup covers 1 segment, sitting on the left
-        this.mapGroup = new MapGroup(this.stage, layout.setWidth(segmentWidth*2).setX(segmentWidth)); // mapGroup covers half the canvas (2 segments), sitting in the middle
-        this.playMatGroup = new PlayMatGroup(this.stage, layout.setX(segmentWidth*3));
+        const mapLayout: GroupLayoutData = {
+            height: this.stage.height(),
+            width: segmentWidth*2,
+            x: segmentWidth,
+        };
+        this.mapGroup = new MapGroup(this.stage, mapLayout); // mapGroup covers half the canvas (2 segments), sitting in the middle
+
+        const playerCardLayout: GroupLayoutData = {
+            height: this.stage.height(),
+            width: segmentWidth,
+            x: segmentWidth*3,
+        };
+        this.playerCardGroup = new PlayerCardGroup(this.stage, playerCardLayout);
     }
 
     public getSetupCoordinates(): GameSetupDetails {
@@ -53,7 +63,7 @@ export class CanvasService extends Service implements CanvasInterface {
     public drawElements(): void {
         this.locationGroup.drawElements();
         this.mapGroup.drawElements();
-        this.playMatGroup.drawElements();
+        this.playerCardGroup.drawElements();
 
         if (!clientState.localPlayerId) {
             this.broadcastEvent('info', {text: 'You are a spectator'});
@@ -63,6 +73,6 @@ export class CanvasService extends Service implements CanvasInterface {
     public updateElements(): void {
         this.locationGroup.updateElements();
         this.mapGroup.updateElements();
-        this.playMatGroup.updateElements();
+        this.playerCardGroup.updateElements();
     }
 }

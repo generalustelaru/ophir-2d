@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import { CanvasMegaGroupInterface, GroupLayoutData } from '../client_types';
-import { PlayMat } from '../canvas_groups/CanvasGroups';
+import { PlayerCard } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 
-export class PlayMatGroup implements CanvasMegaGroupInterface {
+export class PlayerCardGroup implements CanvasMegaGroupInterface {
     private group: Konva.Group;
-    private playMats: Array<PlayMat> = [];
+    private playerCards: Array<PlayerCard> = [];
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -21,21 +21,21 @@ export class PlayMatGroup implements CanvasMegaGroupInterface {
         const verticalOffsets = [20, 140, 260, 380];
 
         clientState.received.players.forEach(player => {
-            const playMat = new PlayMat(player, clientState.localPlayerId, verticalOffsets.shift() as number);
-            this.group.add(playMat.getElement());
-            this.playMats.push(playMat);
+            const playerCard = new PlayerCard(player, clientState.localPlayerId, verticalOffsets.shift() as number);
+            this.group.add(playerCard.getElement());
+            this.playerCards.push(playerCard);
         });
     }
 
     // MARK: UPDATE
     public updateElements(): void {
 
-        this.playMats.forEach(playMat => {
-            const player = clientState.received.players.find(player => player.id === playMat.getId());
+        this.playerCards.forEach(playerCard => {
+            const player = clientState.received.players.find(player => player.id === playerCard.getId());
             if (player) {
-                playMat.updateElement(player);
+                playerCard.updateElement(player);
             } else {
-                playMat.getElement().destroy();
+                playerCard.getElement().destroy();
             }
         });
     }

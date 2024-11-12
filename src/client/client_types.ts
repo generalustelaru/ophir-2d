@@ -56,8 +56,6 @@ export type GroupLayoutData = {
     width: number,
     height: number,
     x: number,
-    setX(drift: number): GroupLayoutData,
-    setWidth(width: number): GroupLayoutData,
 };
 
 export type EventPayload = InfoEventPayload|ActionEventPayload|ErrorEventPayload|SetupEventPayload|null;
