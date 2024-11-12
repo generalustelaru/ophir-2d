@@ -1,13 +1,8 @@
 import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
-import { Service, ServiceInterface } from './Service';
+import { Service } from './Service';
 import clientState from '../state';
 
-export interface CommunicationInterface extends ServiceInterface {
-    createConnection(): void,
-    sendMessage: (action: Action, details?: ActionDetails) => void,
-}
-
-export class CommunicationService extends Service implements CommunicationInterface {
+export class CommunicationService extends Service {
 
     socket: WebSocket;
 

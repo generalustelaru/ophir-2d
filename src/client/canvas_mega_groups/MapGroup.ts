@@ -1,13 +1,13 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
-import { CanvasMegaGroupInterface, GroupLayoutData } from '../client_types';
+import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { MapHex, Barrier, Ship, PlayerShip, AnchorDial, MovesDial } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clientConstants;
 
-export class MapGroup implements CanvasMegaGroupInterface {
+export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private anchorDial: AnchorDial|null = null;

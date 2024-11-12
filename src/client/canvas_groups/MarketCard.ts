@@ -1,10 +1,10 @@
 import Konva from "konva";
-import { CanvasGroupInterface, GroupLayoutData } from "../client_types";
+import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import clientConstants from "../client_constants";
 
 const { COLOR } = clientConstants;
 type Market = any;
-export class MarketCard implements CanvasGroupInterface<any> {
+export class MarketCard implements DynamicGroupInterface<any> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

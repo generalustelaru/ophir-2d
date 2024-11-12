@@ -1,17 +1,10 @@
 import { EventPayload, EventTitle } from "../client_types";
 
-export interface ServiceStaticInterface {
-    new(): ServiceInterface;
-    getInstance(deps : Array<any>): ServiceInterface;
-}
-export interface ServiceInterface {
-    broadcastEvent(event: EventTitle, payload: EventPayload): void,
-}
-export class Service implements ServiceInterface {
+export class Service {
     static instance: Service|null = null;
 
     // @ts-ignore
-    constructor(...deps: Array<any>) {
+    constructor(...deps: Array<T>) {
         // Initialize with dependencies if needed
     }
 
@@ -22,7 +15,7 @@ export class Service implements ServiceInterface {
         window.dispatchEvent(new CustomEvent(eventType, { detail: detail }));
     }
 
-    public static getInstance<I extends ServiceInterface>(deps: Array<any>): I {
+    public static getInstance<T,I>(deps: Array<T>): I {
 
         if (!this.instance) {
             this.instance = new this(...deps);

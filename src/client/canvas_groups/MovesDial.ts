@@ -1,10 +1,10 @@
 import Konva from "konva";
 import constants from "../client_constants";
 import { Player } from "../../shared_types";
-import { CanvasGroupInterface } from "../client_types";
+import { DynamicGroupInterface } from "../client_types";
 
 const { ICON_DATA, COLOR } = constants;
-export class MovesDial implements CanvasGroupInterface<Player> {
+export class MovesDial implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private luminary: Konva.Path;

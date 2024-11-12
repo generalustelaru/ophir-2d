@@ -2,12 +2,12 @@ import Konva from "konva";
 import clientConstants from "../client_constants";
 import { DiceSix } from "../../shared_types";
 import { Coordinates } from "../../shared_types";
-import { CanvasGroupInterface } from "../client_types";
+import { DynamicGroupInterface } from "../client_types";
 
 type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
 type PipData = Array<PipDataElement>
 const { COLOR } = clientConstants;
-export class BoneIcon implements CanvasGroupInterface<DiceSix|false> {
+export class BoneIcon implements DynamicGroupInterface<DiceSix|false> {
     private group: Konva.Group;
     private body: Konva.Rect;
     private dotMatrix: PipData;

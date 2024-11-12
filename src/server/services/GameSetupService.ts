@@ -2,19 +2,11 @@
 import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player } from '../../shared_types';
 import { ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
-import { Service, ServiceInterface } from './Service';
+import { Service } from './Service';
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 
-export interface GameSetupInterface extends ServiceInterface {
-    produceGameData: (state: SharedState, setupCoordinates: Array<Coordinates>) => StateBundle,
-}
-
-export class GameSetupService extends Service implements GameSetupInterface {
-
-    constructor() {
-        super();
-    }
+export class GameSetupService extends Service {
 
     public produceGameData(state: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
         state.players = this.assignTurnOrderAndPosition(state.players, setupCoordinates);

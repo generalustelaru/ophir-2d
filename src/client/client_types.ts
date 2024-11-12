@@ -1,4 +1,3 @@
-import { Vector2d } from 'konva/lib/types';
 import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, IconKey } from '../shared_types';
 import Konva from 'konva';
 
@@ -31,24 +30,17 @@ export type ClientConstants = {
     ICON_DATA: Record<IconKey, ItemData>,
 }
 
-export interface MapHexInterface {
-    getElement(): Konva.Group,
-    getId(): HexId,
-    setFill(color: Color): void,
-    isIntersecting(coordinates: Vector2d): boolean,
-}
-
-export interface CanvasMegaGroupInterface {
+export interface MegaGroupInterface {
     drawElements(): void,
     updateElements(): void,
 }
 
-export interface CanvasGroupInterface<T> {
+export interface DynamicGroupInterface<T> {
     getElement(): Konva.Group,
     updateElement(arg: T): void,
 }
 
-export interface CanvasStaticGroupInterface {
+export interface StaticGroupInterface {
     getElement(): Konva.Group,
 }
 
