@@ -11,7 +11,7 @@ export type Action = "inquire"|"enroll"|"start"|"move"|"reposition"|"favor"|"dro
 export type SettlementAction = "visit_temple"|"sell_goods"|"buy_metals"|"pickup_good";
 export type GameStatus = "empty"|"created"|"full"|"started";
 export type ManifestItem = GoodId|MetalId|"empty";
-export type IconKey = "anchored"|"not_anchored"|"restricted"|"sun"|"moon"|"ocean_wave";
+export type IconKey = "anchored"|"not_anchored"|"restricted"|"sun"|"moon"|"ocean_wave"|"favor_stamp_outer"|"favor_stamp_inner";
 export type CargoManifest = Array<ManifestItem>;
 
 export type Player = {

@@ -7,5 +7,6 @@ import { MovesDial } from './MovesDial';
 import { PlayerShip } from './PlayerShip';
 import { Ship } from './Ship';
 import { PlayMat } from './PlayMat';
+import { FavorDial } from './FavorDial';
 
-export { AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip, Ship, PlayMat };
+export { AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip, Ship, PlayMat, FavorDial };

@@ -2,6 +2,7 @@
 import Konva from 'konva';
 import { PlayMatInterface } from '../client_types';
 import { CargoManifest, ManifestItem, Player, PlayerId } from '../../shared_types';
+import { FavorDial } from './CanvasGroups';
 import clientConstants from '../client_constants';
 
 const { CARGO_ITEM_DATA: CARGO_HOLD_DATA, COLOR } = clientConstants;
@@ -13,10 +14,11 @@ type CargoSlot = {
 }
 export class PlayMat implements PlayMatInterface {
 
-    private playMat: Konva.Group;
+    private group: Konva.Group;
     private background: Konva.Rect;
     private cargoHold: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
+    private favorDial: FavorDial;
     private id: PlayerId;
 
     constructor(
@@ -26,7 +28,7 @@ export class PlayMat implements PlayMatInterface {
         isLargeHold: boolean = false,
     ) {
         this.id = player.id;
-        this.playMat = new Konva.Group({
+        this.group = new Konva.Group({
             width: 200,
             height: 100,
             x: localPlayerId === player.id ? 0 : 25,
@@ -34,14 +36,14 @@ export class PlayMat implements PlayMatInterface {
         });
 
         this.background = new Konva.Rect({
-            width: this.playMat.width(),
-            height: this.playMat.height(),
+            width: this.group.width(),
+            height: this.group.height(),
             fill: COLOR[player.id],
             stroke: 'white',
             cornerRadius: 15,
             strokeWidth: player.isActive ? 3 : 0,
         });
-        this.playMat.add(this.background);
+        this.group.add(this.background);
 
         this.cargoHold = new Konva.Rect({
             width: 40,
@@ -52,7 +54,7 @@ export class PlayMat implements PlayMatInterface {
             x: 10,
             y: 10,
         });
-        this.playMat.add(this.cargoHold);
+        this.group.add(this.cargoHold);
 
         this.cargoDrawData = [
             {x: 0, y: 0, element: null},
@@ -60,11 +62,15 @@ export class PlayMat implements PlayMatInterface {
             {x: 0, y: 15, element: null},
             {x: 15, y: 15, element: null},
         ];
+
+        this.favorDial = new FavorDial(player.favor);
+        this.group.add(this.favorDial.getElement());
     }
 
     public updateElements(player: Player): void {
         this.updateHold(player.cargo);
         this.updateHighlight(player.isActive);
+        this.favorDial.setFavor(player.favor);
     }
 
     private updateHold(cargo: CargoManifest) {
@@ -96,7 +102,7 @@ export class PlayMat implements PlayMatInterface {
             strokeWidth: 1,
         });
         cargoSlot.element = itemIcon;
-        this.playMat.add(itemIcon);
+        this.group.add(itemIcon);
     }
 
     private updateHighlight(isActive: boolean) {
@@ -107,10 +113,11 @@ export class PlayMat implements PlayMatInterface {
         return this.id;
     }
     public getElement() {
-        return this.playMat;
+        return this.group;
     }
 
     public upgradeHold() {
-        this.cargoHold.height(40);
+        const currentWidth = this.cargoHold.width();
+        this.cargoHold.width(currentWidth + 20);
     }
 }
