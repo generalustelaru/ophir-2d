@@ -14,7 +14,7 @@ export interface UiInterface extends ServiceInterface {
 export class UserInterfaceService extends Service implements UiInterface {
 
     createButton; joinButton; startButton; playerColorSelect;
-    favorButton; favorCounter; pickupGoodButton; dropItemSelect; endTurnButton;
+    favorButton; pickupGoodButton; dropItemSelect; endTurnButton;
 
     constructor() {
         super();
@@ -87,10 +87,6 @@ export class UserInterfaceService extends Service implements UiInterface {
         }
 
         this.favorButton = new Button('favorButton', this.processFavor);
-        this.favorCounter = {
-            element: document.getElementById('favorCounter') as HTMLInputElement,
-            set: (value: number) => this.favorCounter.element.value = value.toString(),
-        }
         this.pickupGoodButton = new Button('pickupGoodButton', this.processPickup);
         this.endTurnButton = new Button('endTurnButton', this.processEndTurn);
     }
@@ -176,8 +172,6 @@ export class UserInterfaceService extends Service implements UiInterface {
         this.disableGameControls();
         const serverState = clientState.received as SharedState;
         const player = serverState.players.find(player => player.id === clientState.localPlayerId);
-
-        this.favorCounter.set(player?.favor ?? 0);
 
         if (player?.isActive) {
 
