@@ -64,8 +64,7 @@ export class Ship implements CanvasGroupInterface<Player> {
         return this.group.attrs.id as PlayerId
     }
 
-    public updateElement(arg: Player): void {
-        const player = arg;
+    public updateElement(player: Player): void {
         this.group.x(player.location.position.x);
         this.group.y(player.location.position.y);
         this.ship.stroke(player.isActive ? COLOR.activeShipBorder : COLOR.shipBorder);
