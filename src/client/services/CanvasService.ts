@@ -41,7 +41,7 @@ export class CanvasService extends Service implements CanvasInterface {
             setX: function(rightDrift: number) { this.x = rightDrift; return this; },
         };
 
-        this.locationGroup = new LocationGroup();
+        this.locationGroup = new LocationGroup(this.stage, layout.setX(0)); // locationGroup covers 1 segment, sitting on the left
         this.mapGroup = new MapGroup(this.stage, layout.setWidth(segmentWidth*2).setX(segmentWidth)); // mapGroup covers half the canvas (2 segments), sitting in the middle
         this.playMatGroup = new PlayMatGroup(this.stage, layout.setX(segmentWidth*3));
     }
