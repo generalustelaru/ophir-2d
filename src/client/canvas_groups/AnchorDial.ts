@@ -26,8 +26,7 @@ export class AnchorDial implements CanvasGroupInterface<Player> {
         return this.group;
     }
 
-    public updateElement(arg: Player): void {
-            const player = arg;
+    public updateElement(player: Player): void {
             const data = player.isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
             this.anchor.data(data.shape);
             this.anchor.fill(player.isActive ? data.fill : COLOR.disabled);
