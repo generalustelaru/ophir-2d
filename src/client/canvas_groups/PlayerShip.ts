@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, HexId, PlayerId, SharedState } from '../../shared_types';
-import { ActionEventPayload, DiceSix, PlayerShipInterface } from '../client_types';
+import { Coordinates, HexId, PlayerId, SharedState, DiceSix } from '../../shared_types';
+import { ActionEventPayload, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 import { MapHex } from './CanvasGroups';
