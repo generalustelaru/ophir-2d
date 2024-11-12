@@ -14,17 +14,17 @@ const serverConstants: ServerConstants = {
 
     BARRIER_CHECKS: {
         1: { between: ['topLeft', 'topRight'], incompatible: [11, 12, 2, 3] },
-        2: { between: ['topRight', 'center'], incompatible: [12, 1, 3, 4] },
+        2: { between: ['topRight', 'center'], incompatible: [1, 3] },
         3: { between: ['topRight', 'right'], incompatible: [1, 2, 4, 5] },
-        4: { between: ['right', 'center'], incompatible: [2, 3, 5, 6] },
+        4: { between: ['right', 'center'], incompatible: [3, 5] },
         5: { between: ['right', 'bottomRight'], incompatible: [3, 4, 6, 7] },
-        6: { between: ['bottomRight', 'center'], incompatible: [4, 5, 7, 8] },
+        6: { between: ['bottomRight', 'center'], incompatible: [5, 7] },
         7: { between: ['bottomRight', 'bottomLeft'], incompatible: [5, 6, 8, 9] },
-        8: { between: ['bottomLeft', 'center'], incompatible: [6, 7, 9, 10] },
+        8: { between: ['bottomLeft', 'center'], incompatible: [7, 9, 10] },
         9: { between: ['bottomLeft', 'left'], incompatible: [7, 8, 10, 11] },
-        10: { between: ['left', 'center'], incompatible: [8, 9, 11, 12] },
+        10: { between: ['left', 'center'], incompatible: [9, 11] },
         11: { between: ['left', 'topLeft'], incompatible: [9, 10, 12, 1] },
-        12: { between: ['topLeft', 'center'], incompatible: [10, 11, 1, 2] },
+        12: { between: ['topLeft', 'center'], incompatible: [11, 1] },
     },
 
     PLAYER_IDS: [
