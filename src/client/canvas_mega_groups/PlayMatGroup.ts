@@ -33,7 +33,7 @@ export class PlayMatGroup implements CanvasMegaGroupInterface {
         this.playMats.forEach(playMat => {
             const player = clientState.received.players.find(player => player.id === playMat.getId());
             if (player) {
-                playMat.updateElements(player);
+                playMat.updateElement(player);
             } else {
                 playMat.getElement().destroy();
             }

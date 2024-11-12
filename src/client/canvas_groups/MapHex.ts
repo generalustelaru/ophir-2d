@@ -88,7 +88,7 @@ export class MapHex implements MapHexInterface {
     }
 
     public setBoneIcon(value: DiceSix|false): void {
-        this.boneIcon.display(value);
+        this.boneIcon.updateElement(value);
     }
     public isIntersecting(vector: Vector2d|null): boolean {
         if (!vector) {

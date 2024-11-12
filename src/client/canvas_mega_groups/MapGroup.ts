@@ -116,12 +116,12 @@ export class MapGroup implements CanvasMegaGroupInterface {
 
         //MARK: anchor
         if (localPlayer) {
-            this.anchorDial?.updateElements(localPlayer);
+            this.anchorDial?.updateElement(localPlayer);
         }
 
         //MARK: moves dial
         if (localPlayer) {
-            this.movesDial?.updadeElements(localPlayer);
+            this.movesDial?.updateElement(localPlayer);
         }
 
         //MARK: location hex
@@ -141,10 +141,7 @@ export class MapGroup implements CanvasMegaGroupInterface {
             const player = players.find(player => player.id === opponentId);
 
             if (player) {
-                const shipPosition = player.location.position;
-                ship.setPosition(shipPosition);
-                ship.setInfluence(player.influence);
-                ship.switchHighlight(player.isActive);
+                ship.updateElement(player);
             } else {
                 ship.destroy();
                 // TODO: remove ship element from layer
@@ -157,7 +154,7 @@ export class MapGroup implements CanvasMegaGroupInterface {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
             localShip.switchHighlight(localPlayer.isActive);
-            localShip.setPosition(localPlayer.location.position);
+            localShip.updateElement(localPlayer.location.position);
             localShip.setInfluence(localPlayer.influence);
         }
     }

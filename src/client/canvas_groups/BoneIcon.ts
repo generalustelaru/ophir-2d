@@ -2,11 +2,12 @@ import Konva from "konva";
 import clientConstants from "../client_constants";
 import { DiceSix } from "../../shared_types";
 import { Coordinates } from "../../shared_types";
+import { CanvasGroupInterface } from "../client_types";
 
 type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
 type PipData = Array<PipDataElement>
 const { COLOR } = clientConstants;
-export class BoneIcon {
+export class BoneIcon implements CanvasGroupInterface<DiceSix|false> {
     private group: Konva.Group;
     private body: Konva.Rect;
     private dotMatrix: PipData;
@@ -53,7 +54,7 @@ export class BoneIcon {
         this.group.hide();
     }
 
-    public display(value: DiceSix|false): void {
+    public updateElement(value: DiceSix|false): void {
 
         if (value === false) {
             this.group.hide();

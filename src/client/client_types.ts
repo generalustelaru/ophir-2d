@@ -1,5 +1,5 @@
 import { Vector2d } from 'konva/lib/types';
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Player, IconKey } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, IconKey } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -38,22 +38,18 @@ export interface MapHexInterface {
     isIntersecting(coordinates: Vector2d): boolean,
 }
 
-export interface ShipInterface {
-    getElement(): Konva.Group,
-    getId(): PlayerId,
-    setPosition(coordinates: Coordinates): void,
-    setInfluence(value: number): void,
-    switchHighlight(isHighlighted: boolean): void,
-    destroy(): void,
-}
-
-export interface PlayerShipInterface extends ShipInterface {
-    switchControl(isActivePlayer: boolean): void,
-}
-
 export interface CanvasMegaGroupInterface {
     drawElements(): void,
     updateElements(): void,
+}
+
+export interface CanvasGroupInterface<T> {
+    getElement(): Konva.Group,
+    updateElement(arg: T): void,
+}
+
+export interface CanvasStaticGroupInterface {
+    getElement(): Konva.Group,
 }
 
 export type GroupLayoutData = {
@@ -63,12 +59,6 @@ export type GroupLayoutData = {
     setX(drift: number): GroupLayoutData,
     setWidth(width: number): GroupLayoutData,
 };
-
-export interface PlayMatInterface {
-    getElement(): Konva.Group,
-    updateElements(player: Player): void,
-    getId(): PlayerId,
-}
 
 export type EventPayload = InfoEventPayload|ActionEventPayload|ErrorEventPayload|SetupEventPayload|null;
 

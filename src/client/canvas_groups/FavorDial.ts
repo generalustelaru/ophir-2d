@@ -1,9 +1,9 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
+import { CanvasGroupInterface } from '../client_types';
 
 const { ICON_DATA, COLOR } = clientConstants;
-export class FavorDial
-{
+export class FavorDial implements CanvasGroupInterface<number> {
     private group: Konva.Group;
     private favor: Konva.Text;
 
@@ -47,7 +47,7 @@ export class FavorDial
         return this.group;
     }
 
-    public setFavor(value: number): void {
+    public updateElement(value: number): void {
         this.favor.text(value.toString());
     }
 }

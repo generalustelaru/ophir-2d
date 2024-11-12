@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { SettlementData } from '../client_types';
+import { CanvasStaticGroupInterface, SettlementData } from '../client_types';
 
-export class LocationToken {
+export class LocationToken implements CanvasStaticGroupInterface{
 
     group: Konva.Group;
     icon: Konva.Path;
