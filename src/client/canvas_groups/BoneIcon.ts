@@ -1,6 +1,6 @@
 import Konva from "konva";
 import clientConstants from "../client_constants";
-import { DiceSix } from "../client_types";
+import { DiceSix } from "../../shared_types";
 import { Coordinates } from "../../shared_types";
 
 type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
