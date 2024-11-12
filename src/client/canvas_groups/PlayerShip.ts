@@ -3,7 +3,7 @@ import { Coordinates, HexId, PlayerId, SharedState } from '../../shared_types';
 import { ActionEventPayload, DiceSix, PlayerShipInterface } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
-import { MapHex } from './MapHex';
+import { MapHex } from './CanvasGroups';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
