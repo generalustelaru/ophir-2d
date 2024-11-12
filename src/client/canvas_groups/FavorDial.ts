@@ -26,7 +26,7 @@ export class FavorDial
             scale: { x: 2, y: 2 },
         });
 
-        const stampCenter = outerStamp.getClientRect().width / 2;
+        const stampCenter = outerStamp.getClientRect().width/2;
         this.favor = new Konva.Text({
             x: stampCenter - 7,
             y: stampCenter - 12,
