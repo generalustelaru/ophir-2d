@@ -1,11 +1,11 @@
 import Konva from 'konva';
-import { Coordinates, PlayerId } from '../../shared_types';
-import { ShipInterface } from '../client_types';
+import { Player, PlayerId } from '../../shared_types';
+import { CanvasGroupInterface } from '../client_types';
 import clientConstants from '../client_constants';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 
-export class Ship implements ShipInterface {
+export class Ship implements CanvasGroupInterface<Player> {
 
     ship: Konva.Path;
     influence: Konva.Text;
@@ -55,19 +55,23 @@ export class Ship implements ShipInterface {
     public setInfluence(value: number): void {
         this.influence.text(value.toString());
     }
-    public switchHighlight(isHighlighted: boolean): void {
-        this.ship.stroke(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
-    }
+
     public getElement(): Konva.Group {
         return this.group
     }
+
     public getId(): PlayerId {
         return this.group.attrs.id as PlayerId
     }
-    public setPosition(coordinates: Coordinates): void {
-        this.group.x(coordinates.x);
-        this.group.y(coordinates.y);
+
+    public updateElement(arg: Player): void {
+        const player = arg;
+        this.group.x(player.location.position.x);
+        this.group.y(player.location.position.y);
+        this.ship.stroke(player.isActive ? COLOR.activeShipBorder : COLOR.shipBorder);
+        this.setInfluence(player.influence);
     };
+
     public destroy(): void {
         this.group.destroy()
     }

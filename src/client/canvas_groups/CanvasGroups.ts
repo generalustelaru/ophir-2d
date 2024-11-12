@@ -6,8 +6,8 @@ import { MapHex } from './MapHex';
 import { MovesDial } from './MovesDial';
 import { PlayerShip } from './PlayerShip';
 import { Ship } from './Ship';
-import { PlayMat } from './PlayMat';
+import { PlayerCard } from './PlayerCard';
 import { FavorDial } from './FavorDial';
 import { CargoDisplay } from './CargoDisplay';
 
-export { AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip, Ship, PlayMat, FavorDial, CargoDisplay };
+export { AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip, Ship, PlayerCard as PlayMat, FavorDial, CargoDisplay };

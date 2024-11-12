@@ -1,13 +1,13 @@
 
 import Konva from 'konva';
-import { PlayMatInterface } from '../client_types';
+import { CanvasGroupInterface } from '../client_types';
 import { Player, PlayerId } from '../../shared_types';
 import { FavorDial, CargoDisplay } from './CanvasGroups';
 import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;
 
-export class PlayMat implements PlayMatInterface {
+export class PlayerCard implements CanvasGroupInterface<Player> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -47,14 +47,10 @@ export class PlayMat implements PlayMatInterface {
         );
     }
 
-    public updateElements(player: Player): void {
-        this.cargoDisplay.updateDisplayContent(player.cargo);
-        this.updateHighlight(player.isActive);
-        this.favorDial.setFavor(player.favor);
-    }
-
-    private updateHighlight(isActive: boolean) {
-        this.background.strokeWidth(isActive ? 3: 0);
+    public updateElement(player: Player): void {
+        this.cargoDisplay.updateElement(player.cargo);
+        this.background.strokeWidth(player.isActive ? 3 : 0);
+        this.favorDial.updateElement(player.favor);
     }
 
     public getId(): PlayerId {

@@ -72,7 +72,7 @@ socketServer.on('connection', function connection(client) {
             '%s -> %s%s',
             clientName,
             action ?? '?',
-            details ? `: ${JSON.stringify(details)}` : ' { ¯\\_(ツ)_/¯ }',
+            details ? `: ${JSON.stringify(details)}` : ': { ¯\\_(ツ)_/¯ }',
         );
 
         if (action === 'inquire') {

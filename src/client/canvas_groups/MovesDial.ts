@@ -1,9 +1,10 @@
 import Konva from "konva";
 import constants from "../client_constants";
 import { Player } from "../../shared_types";
+import { CanvasGroupInterface } from "../client_types";
 
 const { ICON_DATA, COLOR } = constants;
-export class MovesDial {
+export class MovesDial implements CanvasGroupInterface<Player> {
 
     private group: Konva.Group;
     private luminary: Konva.Path;
@@ -25,7 +26,7 @@ export class MovesDial {
         return this.group;
     }
 
-    public updadeElements(player: Player) {
+    public updateElement(player: Player) {
 
         if (!player.isActive || player.moveActions === 0) {
             this.luminary.data(ICON_DATA.moon.shape);

@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates, HexId, PlayerId, SharedState, DiceSix } from '../../shared_types';
-import { ActionEventPayload, PlayerShipInterface } from '../client_types';
+import { ActionEventPayload } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 import { MapHex } from './CanvasGroups';
@@ -8,7 +8,7 @@ import { MapHex } from './CanvasGroups';
 const { COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
 
-export class PlayerShip implements PlayerShipInterface {
+export class PlayerShip {
 
     private ship: Konva.Path;
     private influence: Konva.Text;
@@ -29,7 +29,7 @@ export class PlayerShip implements PlayerShipInterface {
         this.influence.text(value.toString());
     }
 
-    public setPosition(coordinates: Coordinates) {
+    public updateElement(coordinates: Coordinates) {
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };

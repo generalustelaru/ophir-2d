@@ -1,10 +1,11 @@
 import Konva from 'konva';
 import constants from '../client_constants';
 import { Player } from '../../shared_types';
+import { CanvasGroupInterface } from '../client_types';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class AnchorDial {
+export class AnchorDial implements CanvasGroupInterface<Player> {
     private group: Konva.Group;
     private anchor: Konva.Path
 
@@ -25,7 +26,8 @@ export class AnchorDial {
         return this.group;
     }
 
-    public updateElements(player: Player) {
+    public updateElement(arg: Player): void {
+            const player = arg;
             const data = player.isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
             this.anchor.data(data.shape);
             this.anchor.fill(player.isActive ? data.fill : COLOR.disabled);
