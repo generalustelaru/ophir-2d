@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { CanvasMegaGroupInterface, GroupLayoutData } from '../client_types';
+import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerCard } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 
-export class PlayerCardGroup implements CanvasMegaGroupInterface {
+export class PlayerCardGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private playerCards: Array<PlayerCard> = [];
 

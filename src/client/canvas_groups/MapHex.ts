@@ -1,14 +1,14 @@
 
 import Konva from 'konva';
 import { Coordinates, HexId, DiceSix } from '../../shared_types';
-import { Color, MapHexInterface, IslandData, SettlementData } from '../client_types';
+import { Color, IslandData, SettlementData } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../client_constants';
 import { BoneIcon, LocationToken } from './CanvasGroups';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
-export class MapHex implements MapHexInterface {
+export class MapHex {
 
     private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;

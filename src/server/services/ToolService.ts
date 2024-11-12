@@ -1,10 +1,6 @@
-import { Service, ServiceInterface } from './Service';
+import { Service } from './Service';
 
-export interface ToolInterface extends ServiceInterface {
-    isRecord: (obj: object) => boolean;
-    getCopy: <O extends object>(obj: O) => O;
-}
-export class ToolService extends Service implements ToolInterface {
+export class ToolService extends Service {
 
     public isRecord(obj: object): boolean {
 

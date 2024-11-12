@@ -1,19 +1,13 @@
 import Konva from 'konva';
 import { GameSetupDetails } from '../../shared_types';
-import { Service, ServiceInterface } from "./Service";
+import { Service } from "./Service";
 import { LocationGroup } from '../canvas_mega_groups/LocationGroup';
 import { MapGroup } from '../canvas_mega_groups/MapGroup';
 import { PlayerCardGroup } from '../canvas_mega_groups/PlayerCardGroup';
 import { GroupLayoutData } from '../client_types';
 import clientState from '../state';
 
-export interface CanvasInterface extends ServiceInterface {
-    getSetupCoordinates(): GameSetupDetails,
-    drawElements(): void,
-    updateElements(): void,
-}
-
-export class CanvasService extends Service implements CanvasInterface {
+export class CanvasService extends Service {
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;

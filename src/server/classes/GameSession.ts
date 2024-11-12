@@ -2,10 +2,8 @@ import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../ser
 import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, DiceSix, RepositioningActionDetails } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
-export interface GameSessionInterface {
-    processAction: (action: any) => WssMessage;
-}
-export class GameSession implements GameSessionInterface {
+
+export class GameSession {
 
     private privateState: PrivateState;
     private sharedState: SharedState;

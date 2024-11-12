@@ -1,16 +1,16 @@
 import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
 import clientState from "./state";
-import { CommunicationService, CommunicationInterface } from "./services/CommService";
-import { CanvasService, CanvasInterface } from "./services/CanvasService";
-import { UserInterfaceService, UiInterface } from "./services/UiService";
+import { CommunicationService } from "./services/CommService";
+import { CanvasService } from "./services/CanvasService";
+import { UserInterfaceService } from "./services/UiService";
 import sharedConstants from "../shared_constants";
 import { SharedState } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
 // Initializations
-const commService: CommunicationInterface = CommunicationService.getInstance([CONNECTION.wsAddress]);
-const canvasService: CanvasInterface = CanvasService.getInstance([]);
-const uiService: UiInterface = UserInterfaceService.getInstance([]);
+const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
+const canvasService: CanvasService = CanvasService.getInstance([]);
+const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
 
 //Send player action to server
 window.addEventListener(

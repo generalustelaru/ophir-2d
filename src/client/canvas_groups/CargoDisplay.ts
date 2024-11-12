@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
 import { CargoManifest, ManifestItem } from '../../shared_types';
-import { CanvasGroupInterface } from '../client_types';
+import { DynamicGroupInterface } from '../client_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
@@ -10,7 +10,7 @@ type CargoSlot = {
     y: number,
     element: Konva.Path|null,
 }
-export class CargoDisplay implements CanvasGroupInterface<CargoManifest>{
+export class CargoDisplay implements DynamicGroupInterface<CargoManifest>{
     private group: Konva.Group;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;

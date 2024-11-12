@@ -4,8 +4,8 @@ import { WebSocketServer } from 'ws';
 import serverConstants from './server_constants';
 import { SharedState, PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
 import { PrivateState, WssMessage, StateBundle } from './server_types';
-import { GameSetupService, GameSetupInterface } from './services/GameSetupService';
-import { ToolService, ToolInterface } from './services/ToolService';
+import { GameSetupService } from './services/GameSetupService';
+import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
 const httpPort = 3000;
 const wsPort = 8080;
@@ -40,8 +40,8 @@ app.listen(httpPort, () => {
 
 const socketClients: Array<any> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
-const setupService: GameSetupInterface = GameSetupService.getInstance();
-const tools: ToolInterface = ToolService.getInstance();
+const setupService: GameSetupService = GameSetupService.getInstance();
+const tools: ToolService = ToolService.getInstance();
 
 const sendAll = (message: WssMessage) => {
     socketClients.forEach(client => {

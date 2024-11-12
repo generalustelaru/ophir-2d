@@ -1,17 +1,11 @@
 import { ManifestItem, PlayerId, NewState, SharedState } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
-import { Service, ServiceInterface } from './Service';
+import { Service } from './Service';
 import clientState from '../state';
 import { Button } from '../html_behaviors/button';
-import { CanvasService, CanvasInterface } from "./CanvasService";
+import { CanvasService } from "./CanvasService";
 
-export interface UiInterface extends ServiceInterface {
-    setInfo: (text: string) => void,
-    updateLobbyControls(): void,
-    updateGameControls(): void,
-}
-
-export class UserInterfaceService extends Service implements UiInterface {
+export class UserInterfaceService extends Service {
 
     createButton; joinButton; startButton; playerColorSelect;
     favorButton; pickupGoodButton; dropItemSelect; endTurnButton;
@@ -93,7 +87,7 @@ export class UserInterfaceService extends Service implements UiInterface {
 
     private processStart = (): void => {
         this.startButton.disable();
-        const canvasService: CanvasInterface = CanvasService.getInstance([]);
+        const canvasService: CanvasService = CanvasService.getInstance([]);
         const payload: ActionEventPayload = {
             action: 'start',
             details: canvasService.getSetupCoordinates(),

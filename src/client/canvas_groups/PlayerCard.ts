@@ -1,13 +1,13 @@
 
 import Konva from 'konva';
-import { CanvasGroupInterface } from '../client_types';
+import { DynamicGroupInterface } from '../client_types';
 import { Player, PlayerId } from '../../shared_types';
 import { FavorDial, CargoDisplay } from './CanvasGroups';
 import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;
 
-export class PlayerCard implements CanvasGroupInterface<Player> {
+export class PlayerCard implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

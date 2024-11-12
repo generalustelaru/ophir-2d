@@ -1,8 +1,8 @@
 import Konva from "konva";
-import { CanvasMegaGroupInterface, GroupLayoutData } from "../client_types";
+import { MegaGroupInterface, GroupLayoutData } from "../client_types";
 import { MarketCard } from "../canvas_groups/CanvasGroups";
 
-export class LocationGroup implements CanvasMegaGroupInterface {
+export class LocationGroup implements MegaGroupInterface {
 
     private group: Konva.Group;
     private layout: GroupLayoutData;

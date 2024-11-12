@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import constants from '../client_constants';
 import { BarrierId } from '../../shared_types';
-import { CanvasStaticGroupInterface } from '../client_types';
+import { StaticGroupInterface } from '../client_types';
 
 const { COLOR } = constants;
 
@@ -22,7 +22,7 @@ const barrierOffsets: Record <BarrierId, OffsetData> = {
     12: { x: -6, y: -111, rotation: 60 },
 }
 
-export class Barrier implements CanvasStaticGroupInterface {
+export class Barrier implements StaticGroupInterface {
 
     private group: Konva.Group;
     constructor(

@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import { Player, PlayerId } from '../../shared_types';
-import { CanvasGroupInterface } from '../client_types';
+import { DynamicGroupInterface } from '../client_types';
 import clientConstants from '../client_constants';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 
-export class Ship implements CanvasGroupInterface<Player> {
+export class Ship implements DynamicGroupInterface<Player> {
 
     ship: Konva.Path;
     influence: Konva.Text;
