@@ -1,6 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, RepositioningActionDetails } from "../../shared_types";
-import { DiceSix } from "../../client/client_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, DiceSix, RepositioningActionDetails } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 export interface GameSessionInterface {
@@ -31,7 +30,7 @@ export class GameSession implements GameSessionInterface {
             case 'move':
                 return this.processMove(message) ? this.sharedState : { error: `Illegal move on ${id}` };
             case 'reposition':
-                return this.processRepositioning(message) ? this.sharedState : { error: `Illegal reposition on ${id}` };
+                return this.processRepositioning(message) ? this.sharedState : { error: `Illegal repositioning on ${id}` };
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
             case 'turn':
