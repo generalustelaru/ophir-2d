@@ -4,7 +4,7 @@ import clientConstants from "../client_constants";
 
 const { COLOR } = clientConstants;
 
-export class MarketCard implements DynamicGroupInterface<any> {
+export class TempleCard implements DynamicGroupInterface<any> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -22,7 +22,7 @@ export class MarketCard implements DynamicGroupInterface<any> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.marketOrange,
+            fill: COLOR.templeBlue,
             stroke: 'white',
             cornerRadius: 15,
             strokeWidth: 3,
@@ -34,7 +34,7 @@ export class MarketCard implements DynamicGroupInterface<any> {
     }
 
     public updateElement(arg: any): void {
-        console.log('MarketCard.updateElement', arg);
+        console.log('TempleCard.updateElement', arg);
     }
 
     public getElement(): Konva.Group {

@@ -15,8 +15,8 @@ export class ExchangeCard implements DynamicGroupInterface<any> {
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
-            x: layout.x + 10,
-            y: layout.y + 10,
+            x: layout.x,
+            y: layout.y,
         });
 
         this.background = new Konva.Rect({
