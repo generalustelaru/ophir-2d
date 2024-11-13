@@ -4,7 +4,6 @@ import { Service } from "./Service";
 import { LocationGroup } from '../canvas_mega_groups/LocationGroup';
 import { MapGroup } from '../canvas_mega_groups/MapGroup';
 import { PlayerCardGroup } from '../canvas_mega_groups/PlayerCardGroup';
-import { GroupLayoutData } from '../client_types';
 import clientState from '../state';
 
 export class CanvasService extends Service {
@@ -28,26 +27,35 @@ export class CanvasService extends Service {
 
         const segmentWidth = this.stage.width()/4;
 
-        const locationLayout: GroupLayoutData = {
-            height: this.stage.height(),
-            width: segmentWidth,
-            x: 0,
-        };
-        this.locationGroup = new LocationGroup(this.stage, locationLayout); // locationGroup covers 1 segment, sitting on the left
+        this.locationGroup = new LocationGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth,
+                x: 0,
+                y: 0,
+            },
+        ); // locationGroup covers 1 segment, sitting on the left
 
-        const mapLayout: GroupLayoutData = {
-            height: this.stage.height(),
-            width: segmentWidth*2,
-            x: segmentWidth,
-        };
-        this.mapGroup = new MapGroup(this.stage, mapLayout); // mapGroup covers half the canvas (2 segments), sitting in the middle
+        this.mapGroup = new MapGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth*2,
+                x: segmentWidth,
+                y: 0,
+            },
+        ); // mapGroup covers half the canvas (2 segments), sitting in the middle
 
-        const playerCardLayout: GroupLayoutData = {
-            height: this.stage.height(),
-            width: segmentWidth,
-            x: segmentWidth*3,
-        };
-        this.playerCardGroup = new PlayerCardGroup(this.stage, playerCardLayout);
+        this.playerCardGroup = new PlayerCardGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth,
+                x: segmentWidth*3,
+                y: 0,
+            },
+        );
     }
 
     public getSetupCoordinates(): GameSetupDetails {

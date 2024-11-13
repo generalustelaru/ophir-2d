@@ -48,6 +48,7 @@ export type GroupLayoutData = {
     width: number,
     height: number,
     x: number,
+    y: number,
 };
 
 export type EventPayload = InfoEventPayload|ActionEventPayload|ErrorEventPayload|SetupEventPayload|null;

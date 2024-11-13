@@ -12,6 +12,7 @@ export class PlayerCardGroup implements MegaGroupInterface {
             width: layout.width,
             height: layout.height,
             x: layout.x,
+            y: layout.y,
         });
         stage.getLayers()[0].add(this.group);
     }
