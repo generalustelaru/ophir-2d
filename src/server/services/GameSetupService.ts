@@ -1,8 +1,9 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player } from '../../shared_types';
-import { ProcessedMoveRule, StateBundle } from '../server_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations } from '../../shared_types';
+import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
+import { ToolService } from '../services/ToolService';
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 
@@ -12,8 +13,11 @@ export class GameSetupService extends Service {
         state.players = this.assignTurnOrderAndPosition(state.players, setupCoordinates);
         state.setup = this.determineBoardPieces();
 
-        const privateState = {
+        const tools: ToolService = ToolService.getInstance();
+
+        const privateState: PrivateState = {
             moveRules: this.produceMoveRules(state.setup.barriers),
+            marketContracts: tools.getCopy(serverConstants.MARKET_CONTRACTS),
         }
 
         state.players = this.assignTurnOneRules(
@@ -54,6 +58,7 @@ export class GameSetupService extends Service {
         const setup = {
             barriers: this.determineBarriers(),
             settlements: this.determineSettlements(),
+            marketFluctuations: this.determineFluctuations(),
         }
 
         return setup;
@@ -144,5 +149,19 @@ export class GameSetupService extends Service {
         });
 
         return rules;
+    }
+
+    private determineFluctuations(): MarketFluctuations {
+        const pool = [-1, 0, 1];
+        const keys = ['slot_1', 'slot_2', 'slot_3'];
+        const result: any = {};
+
+        for (const key of keys) {
+            const pick = Math.floor(Math.random() * pool.length);
+            result[key] = pool.splice(pick, 1)[0];
+        }
+
+        return result as MarketFluctuations;
+
     }
 }
