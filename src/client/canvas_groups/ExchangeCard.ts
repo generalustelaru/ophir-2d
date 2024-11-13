@@ -1,10 +1,10 @@
-import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
-import clientConstants from "../client_constants";
+import Konva from 'konva';
+import { DynamicGroupInterface, GroupLayoutData } from '../client_types';
+import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;
 
-export class MarketCard implements DynamicGroupInterface<any> {
+export class ExchangeCard implements DynamicGroupInterface<any> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -22,7 +22,7 @@ export class MarketCard implements DynamicGroupInterface<any> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.marketOrange,
+            fill: COLOR.exchangeGold,
             stroke: 'white',
             cornerRadius: 15,
             strokeWidth: 3,

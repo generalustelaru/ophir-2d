@@ -5,7 +5,7 @@ import { DynamicGroupInterface } from '../client_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 const SLOT_WIDTH = 15;
-const BACKDRIFT = -6;
+
 type CargoSlot = {
     x: number,
     element: Konva.Path | null,
@@ -22,12 +22,12 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
             x: 10,
             y: 10,
         });
-
+        const pathBackDrift = -6;
         this.cargoDrawData = [
-            { x: BACKDRIFT, element: null },
-            { x: BACKDRIFT + SLOT_WIDTH, element: null },
-            { x: BACKDRIFT + SLOT_WIDTH * 2, element: null },
-            { x: BACKDRIFT + SLOT_WIDTH * 3, element: null },
+            { x: pathBackDrift, element: null },
+            { x: pathBackDrift + SLOT_WIDTH, element: null },
+            { x: pathBackDrift + SLOT_WIDTH * 2, element: null },
+            { x: pathBackDrift + SLOT_WIDTH * 3, element: null },
         ];
         this.cargoDisplay = new Konva.Rect({
             width: cargo.length * SLOT_WIDTH,

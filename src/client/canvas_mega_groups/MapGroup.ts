@@ -24,6 +24,7 @@ export class MapGroup implements MegaGroupInterface {
             width: layout.width,
             height: layout.height,
             x: layout.x,
+            y: layout.y,
         });
         layer.add(this.group);
     }
