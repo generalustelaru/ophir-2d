@@ -48,6 +48,7 @@ const serverConstants: ServerConstants = {
         moveActions: 2,
         cargo: ['empty', 'empty'],
         hasCargo: false,
+        coins: 0,
     },
 }
 

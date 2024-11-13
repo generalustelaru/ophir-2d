@@ -10,6 +10,11 @@ export class FavorDial implements DynamicGroupInterface<number> {
     constructor(
         favor: number,
     ) {
+        this.group = new Konva.Group({
+            x: 15,
+            y: 40,
+        });
+
         const outerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_outer.shape,
             fill: ICON_DATA.favor_stamp_outer.fill,
@@ -36,10 +41,6 @@ export class FavorDial implements DynamicGroupInterface<number> {
             fontFamily: 'Arial',
         });
 
-        this.group = new Konva.Group({
-            x: 10,
-            y: 40,
-        });
         this.group.add(outerStamp, innerStamp, this.favor);
     }
 

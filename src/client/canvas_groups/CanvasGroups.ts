@@ -10,5 +10,9 @@ import { PlayerCard } from './PlayerCard';
 import { FavorDial } from './FavorDial';
 import { CargoDisplay } from './CargoDisplay';
 import { MarketCard } from './MarketCard';
+import { CoinDial } from "./CoinDial";
 
-export { AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip, Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard };
+export {
+    AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip,
+    Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial,
+};

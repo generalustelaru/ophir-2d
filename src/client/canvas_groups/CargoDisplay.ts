@@ -4,33 +4,33 @@ import { CargoManifest, ManifestItem } from '../../shared_types';
 import { DynamicGroupInterface } from '../client_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
-
+const SLOT_WIDTH = 15;
+const BACKDRIFT = -6;
 type CargoSlot = {
     x: number,
-    y: number,
-    element: Konva.Path|null,
+    element: Konva.Path | null,
 }
-export class CargoDisplay implements DynamicGroupInterface<CargoManifest>{
+export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
     private group: Konva.Group;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
 
-    constructor(isMaxHold: boolean = false) {
+    constructor(cargo: CargoManifest) {
         this.group = new Konva.Group({
-            width: 80,
+            width: 60,
             height: 25,
             x: 10,
             y: 10,
         });
 
         this.cargoDrawData = [
-            {x: 0, y: 0, element: null},
-            {x: 15, y: 0, element: null},
-            {x: 0, y: 15, element: null},
-            {x: 15, y: 15, element: null},
+            { x: BACKDRIFT, element: null },
+            { x: BACKDRIFT + SLOT_WIDTH, element: null },
+            { x: BACKDRIFT + SLOT_WIDTH * 2, element: null },
+            { x: BACKDRIFT + SLOT_WIDTH * 3, element: null },
         ];
         this.cargoDisplay = new Konva.Rect({
-            width: isMaxHold ? 80 : 40,
+            width: cargo.length * SLOT_WIDTH,
             height: 25,
             fill: COLOR['wood'],
             cornerRadius: 5,
@@ -39,29 +39,26 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest>{
         this.group.add(this.cargoDisplay);
     }
 
-    public updateElement(cargo: CargoManifest) {
+    public updateElement(cargo: CargoManifest): void {
+        this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
 
-        for (let i = 0; i < this.cargoDrawData.length; i++) {
-            const slot = this.cargoDrawData[i];
-            if (slot.element) {
-                slot.element.destroy();
-            }
+        for (const slot of this.cargoDrawData) {
+            slot.element?.destroy();
         }
 
         for (let i = 0; i < cargo.length; i++) {
             const item = cargo[i];
-            const driftData = this.cargoDrawData[i];
             if (item) {
-                this.addItem(item, driftData);
+                const slot = this.cargoDrawData[i];
+                this.addItem(item, slot);
             }
         }
     };
 
-    private addItem(itemId: ManifestItem, cargoSlot: CargoSlot) {
+    private addItem(itemId: ManifestItem, cargoSlot: CargoSlot): void {
         const itemData = CARGO_ITEM_DATA[itemId];
         const itemIcon = new Konva.Path({
-            x: cargoSlot.x + this.cargoDisplay.x(),
-            y: cargoSlot.y + this.cargoDisplay.y(),
+            x: cargoSlot.x,
             data: itemData.shape,
             fill: itemData.fill,
             stroke: 'white',
@@ -69,11 +66,6 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest>{
         });
         cargoSlot.element = itemIcon;
         this.group.add(itemIcon);
-    }
-
-    public increaseDisplayWidth() {
-        const currentWidth = this.cargoDisplay.width();
-        this.cargoDisplay.width(currentWidth + 20);
     }
 
     public getElement() {
