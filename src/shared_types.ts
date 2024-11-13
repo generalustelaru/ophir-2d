@@ -15,6 +15,7 @@ export type IconKey = "anchored"|"not_anchored"|"restricted"|"sun"|"moon"|"ocean
 export type CargoManifest = Array<ManifestItem>;
 export type Contract = { request: Array<ManifestItem>, reward: ContractReward };
 export type ContractReward = { coins: number, favorAndVp: number }
+export type Fluctuation = -1|0|1;
 
 export type Player = {
     id: PlayerId,
@@ -34,6 +35,19 @@ export type Player = {
     hasCargo: boolean,
     cargo: CargoManifest,
     coins: number,
+}
+
+export type MarketOffer = {
+    future: Contract,
+    slot_1: Contract,
+    slot_2: Contract,
+    slot_3: Contract,
+}
+
+export type MarketFluctuations = {
+    slot_1: Fluctuation,
+    slot_2: Fluctuation,
+    slot_3: Fluctuation,
 }
 
 /**
@@ -58,6 +72,7 @@ export type NewState = {
 export type GameSetup = {
     barriers: Array<BarrierId>,
     settlements: Record<HexId, SettlementId>,
+    marketFluctuations: MarketFluctuations,
 }
 
 export type MoveActionDetails = {

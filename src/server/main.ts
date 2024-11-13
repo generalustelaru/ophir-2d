@@ -13,6 +13,7 @@ const wsPort = 8080;
 const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
 const privateState: PrivateState = {
     moveRules: [],
+    marketContracts: [],
 }
 
 const sharedState: NewState|SharedState = {

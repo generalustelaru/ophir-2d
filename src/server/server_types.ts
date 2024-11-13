@@ -19,6 +19,7 @@ export type ProcessedMoveRule = {
 */
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
+    marketContracts: Array<Contract>,
 }
 
 export type StateBundle = {
