@@ -31,6 +31,7 @@ export type Player = {
     allowedMoves: Array<HexId>,
     hasCargo: boolean,
     cargo: CargoManifest,
+    coins: number,
 }
 
 /**
