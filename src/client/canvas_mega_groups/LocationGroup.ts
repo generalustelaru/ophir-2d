@@ -2,7 +2,6 @@ import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData } from "../client_types";
 import { MarketCard, ExchangeCard, TempleCard } from "../canvas_groups/CanvasGroups";
 
-// type CardLayoutData = {width: number, height: number, x: number, y: number};
 export class LocationGroup implements MegaGroupInterface {
 
     private group: Konva.Group;
@@ -27,21 +26,21 @@ export class LocationGroup implements MegaGroupInterface {
             width: this.group.width(),
             height: heightSegment * 2,
             x: 0,
-            y: 0
+            y: 0,
         });
 
         this.exchangeCard = new ExchangeCard({
             width: this.group.width(),
             height: heightSegment,
             x: 0,
-            y: heightSegment * 2
+            y: heightSegment * 2,
         });
 
         this.templeCard = new TempleCard({
             width: this.group.width(),
             height: heightSegment * 2,
             x: 0,
-            y: heightSegment * 3
+            y: heightSegment * 3,
         });
 
         this.group.add(
