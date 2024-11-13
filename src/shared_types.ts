@@ -13,6 +13,8 @@ export type GameStatus = "empty"|"created"|"full"|"started";
 export type ManifestItem = GoodId|MetalId|"empty";
 export type IconKey = "anchored"|"not_anchored"|"restricted"|"sun"|"moon"|"ocean_wave"|"favor_stamp_outer"|"favor_stamp_inner";
 export type CargoManifest = Array<ManifestItem>;
+export type Contract = { request: Array<ManifestItem>, reward: ContractReward };
+export type ContractReward = { coins: number, favorAndVp: number }
 
 export type Player = {
     id: PlayerId,
