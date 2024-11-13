@@ -1,8 +1,9 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Contract} from '../shared_types';
 
 export type WsSignal = 'connection'|'message'|'close';
 
 export type WssMessage = SharedState|NewState|{ error: string};
+
 export type DefaultMoveRule = {
     from: HexId;
     allowed: Array<HexId>;
@@ -37,4 +38,5 @@ export type ServerConstants = {
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
     DEFAULT_PLAYER_STATE: Player,
+    MARKET_CONTRACTS: Array<Contract>,
 }

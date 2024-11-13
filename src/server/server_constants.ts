@@ -2,6 +2,23 @@ import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
 
+    MARKET_CONTRACTS: [
+        { request: ['gem', 'stone'], reward: { coins: 3, favorAndVp: 2 } },
+        { request: ['wood'], reward: { coins: 1, favorAndVp: 1 } },
+        { request: ['stone'], reward: { coins: 2, favorAndVp: 1 } },
+        { request: ['cloth'], reward: { coins: 2, favorAndVp: 1 } },
+        { request: ['gem', 'wood'], reward: { coins: 2, favorAndVp: 1 } },
+        { request: ['gem', 'cloth'], reward: { coins: 2, favorAndVp: 1 } },
+        { request: ['wood', 'stone'], reward: { coins: 2, favorAndVp: 1 } },
+        { request: ['stone', 'cloth'], reward: { coins: 2, favorAndVp: 1 } },
+        { request: ['wood', 'cloth'], reward: { coins: 2, favorAndVp: 1 } },
+        // { request: ['gem', 'wood', 'stone'], reward: { coins: 3, favorAndVp: 2 } },
+        // { request: ['gem', 'wood', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
+        // { request: ['wood', 'stone', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
+        // { request: ['gem', 'stone', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
+        // { request: ['gem', 'wood', 'stone', 'cloth'], reward: { coins: 4, favorAndVp: 3 } },
+    ],
+
     DEFAULT_MOVE_RULES: [
         { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
         { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1, 2, 3] },
