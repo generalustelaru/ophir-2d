@@ -28,10 +28,8 @@ export class ExchangeCard implements DynamicGroupInterface<HexId> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.exchangeGold,
-            stroke: 'white',
+            fill: COLOR.exchangeDarkGold,
             cornerRadius: 15,
-            strokeWidth: 0,
         });
 
         this.group.add(
@@ -41,9 +39,9 @@ export class ExchangeCard implements DynamicGroupInterface<HexId> {
 
     public updateElement(playerLocation: HexId): void {
         if (playerLocation === this.exchangeLocation) {
-            this.background.strokeWidth(3);
+            this.background.fill(COLOR.exchangeGold);
         } else {
-            this.background.strokeWidth(0);
+            this.background.fill(COLOR.exchangeDarkGold);
         }
     }
 
