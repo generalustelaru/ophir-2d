@@ -9,6 +9,7 @@ const clientState: ClientState = {
         sessionOwner: null,
         availableSlots: [],
         players: [],
+        market: null,
         setup: null,
     },
 }

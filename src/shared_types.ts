@@ -58,6 +58,7 @@ export type SharedState = {
     sessionOwner: PlayerId,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
+    market: MarketOffer,
     setup: GameSetup,
 }
 
@@ -66,6 +67,7 @@ export type NewState = {
     sessionOwner: PlayerId|null,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
+    market: null,
     setup: null,
 }
 

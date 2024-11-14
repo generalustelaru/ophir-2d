@@ -1,5 +1,5 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, Contract, MarketOffer } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -9,26 +9,29 @@ const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 
 export class GameSetupService extends Service {
 
-    public produceGameData(state: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
-        state.players = this.assignTurnOrderAndPosition(state.players, setupCoordinates);
-        state.setup = this.determineBoardPieces();
+    public produceGameData(sharedState: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
+        sharedState.players = this.assignTurnOrderAndPosition(sharedState.players, setupCoordinates);
+        sharedState.setup = this.determineBoardPieces();
 
         const tools: ToolService = ToolService.getInstance();
 
         const privateState: PrivateState = {
-            moveRules: this.produceMoveRules(state.setup.barriers),
+            moveRules: this.produceMoveRules(sharedState.setup.barriers),
             marketContracts: tools.getCopy(serverConstants.MARKET_CONTRACTS),
         }
 
-        state.players = this.assignTurnOneRules(
-            state.players,
-            privateState.moveRules
-        );
+        sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
+
+        const { contractDeck, marketOffer } = this.determineStartingContracts(tools.getCopy(privateState.marketContracts));
+        privateState.marketContracts = contractDeck;
+        sharedState.market = marketOffer;
 
         const bundle: StateBundle = {
-            sharedState: state,
+            sharedState: sharedState,
             privateState: privateState,
         }
+
+        console.log(bundle.sharedState.market);
 
         return bundle;
     };
@@ -115,8 +118,8 @@ export class GameSetupService extends Service {
         return true;
     }
 
-    private assignTurnOneRules(players: Array<Player>, rules: Array<ProcessedMoveRule>): Array<Player> {
-        const initialPlacement = rules[0];
+    private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
+        const initialPlacement = moveRules[0];
 
         players.forEach(player => {
             player.location.hexId = initialPlacement.from;
@@ -162,6 +165,17 @@ export class GameSetupService extends Service {
         }
 
         return result as MarketFluctuations;
+    }
 
+    private determineStartingContracts(contracts: Array<Contract>): {contractDeck: Array<Contract>, marketOffer: MarketOffer} {
+        const keys = ['future', 'slot_1', 'slot_2', 'slot_3'];
+        const marketOffer = {} as any;
+
+        keys.forEach(key => {
+            const pick = Math.floor(Math.random() * contracts.length);
+            marketOffer[key] = contracts.splice(pick, 1).shift();
+        });
+
+        return { contractDeck: contracts, marketOffer: marketOffer as MarketOffer };
     }
 }
