@@ -67,6 +67,14 @@ export class PlayerShip {
             strokeWidth: 2,
         });
 
+        this.group.on('mouseenter', () => {
+            stage.container().style.cursor = 'pointer';
+        });
+
+        this.group.on('mouseleave', () => {
+            stage.container().style.cursor = 'default';
+        });
+
         // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
             this.initialPosition = { x: this.group.x(), y: this.group.y() }
@@ -187,9 +195,9 @@ export class PlayerShip {
             { detail: detail }
         ));
     }
-    private calculateToSailValue(targetHexId: HexId): DiceSix|false {
+    private calculateToSailValue(targetHexId: HexId): DiceSix | false {
         const influencePool = clientState.received.players
-            .map(player => {return player.location.hexId === targetHexId ? player.influence : 0});
+            .map(player => { return player.location.hexId === targetHexId ? player.influence : 0 });
         const highestInfluence = Math.max(...influencePool) as DiceSix;
 
         return highestInfluence > 0 ? highestInfluence : false;
