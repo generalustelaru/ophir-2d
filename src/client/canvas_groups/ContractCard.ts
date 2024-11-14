@@ -20,13 +20,13 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
             y: layout.y,
         });
 
-        this.coinDial = new CoinDial(contract.reward.coins);
         const cardBorder = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
             fill: COLOR.boneWhite,
             cornerRadius: 15,
         });
+
         const cardInterior = new Konva.Rect({
             width: this.group.width() - 10,
             height: this.group.height() - 10,
@@ -35,6 +35,11 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
             fill: COLOR.wood,
             cornerRadius: 15,
         });
+
+        this.coinDial = new CoinDial(
+            {x: 38, y: 35 },
+            contract.reward.coins
+        );
 
         this.group.add(
             cardBorder,
