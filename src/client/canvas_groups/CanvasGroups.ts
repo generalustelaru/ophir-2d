@@ -13,9 +13,11 @@ import { MarketCard } from './MarketCard';
 import { CoinDial } from "./CoinDial";
 import { ExchangeCard } from "./ExchangeCard";
 import { TempleCard } from './TempleCard';
+import { FutureContractDisplay } from './FutureContractDisplay';
+import { ContractCard } from './ContractCard';
 
 export {
     AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip,
     Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial, ExchangeCard,
-    TempleCard
+    TempleCard, FutureContractDisplay, ContractCard,
 };
