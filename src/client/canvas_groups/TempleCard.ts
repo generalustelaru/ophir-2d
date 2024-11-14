@@ -1,17 +1,22 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import clientConstants from "../client_constants";
+import { HexId } from "../../shared_types";
 
 const { COLOR } = clientConstants;
 
-export class TempleCard implements DynamicGroupInterface<any> {
+export class TempleCard implements DynamicGroupInterface<HexId> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
+    private templeLocation: HexId;
 
     constructor(
+        location: HexId,
         layout: GroupLayoutData,
     ) {
+        this.templeLocation = location;
+
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -25,7 +30,7 @@ export class TempleCard implements DynamicGroupInterface<any> {
             fill: COLOR.templeBlue,
             stroke: 'white',
             cornerRadius: 15,
-            strokeWidth: 3,
+            strokeWidth: 0,
         });
 
         this.group.add(
@@ -33,8 +38,12 @@ export class TempleCard implements DynamicGroupInterface<any> {
         );
     }
 
-    public updateElement(arg: any): void {
-        console.log('TempleCard.updateElement', arg);
+    public updateElement(playerLocation: HexId): void {
+        if (playerLocation === this.templeLocation) {
+            this.background.strokeWidth(3);
+        } else {
+            this.background.strokeWidth(0);
+        }
     }
 
     public getElement(): Konva.Group {

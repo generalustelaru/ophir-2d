@@ -1,17 +1,22 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import clientConstants from "../client_constants";
+import { HexId } from "../../shared_types";
 
 const { COLOR } = clientConstants;
 
-export class MarketCard implements DynamicGroupInterface<any> {
+export class MarketCard implements DynamicGroupInterface<HexId> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
+    private marketLocation: HexId;
 
     constructor(
+        location: HexId,
         layout: GroupLayoutData,
     ) {
+        this.marketLocation = location;
+
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -25,7 +30,7 @@ export class MarketCard implements DynamicGroupInterface<any> {
             fill: COLOR.marketOrange,
             stroke: 'white',
             cornerRadius: 15,
-            strokeWidth: 3,
+            strokeWidth: 0,
         });
 
         this.group.add(
@@ -33,8 +38,12 @@ export class MarketCard implements DynamicGroupInterface<any> {
         );
     }
 
-    public updateElement(arg: any): void {
-        console.log('MarketCard.updateElement', arg);
+    public updateElement(playerLocation: HexId): void {
+        if (playerLocation === this.marketLocation) {
+            this.background.strokeWidth(3);
+        } else {
+            this.background.strokeWidth(0);
+        }
     }
 
     public getElement(): Konva.Group {
