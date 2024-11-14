@@ -25,7 +25,7 @@ export class CanvasService extends Service {
         this.stage.add(layer);
         layer.draw();
 
-        const segmentWidth = this.stage.width()/4;
+        const segmentWidth = this.stage.width() / 4;
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -41,7 +41,7 @@ export class CanvasService extends Service {
             this.stage,
             {
                 height: this.stage.height(),
-                width: segmentWidth*2,
+                width: segmentWidth * 2,
                 x: segmentWidth,
                 y: 0,
             },
@@ -52,7 +52,7 @@ export class CanvasService extends Service {
             {
                 height: this.stage.height(),
                 width: segmentWidth,
-                x: segmentWidth*3,
+                x: segmentWidth * 3,
                 y: 0,
             },
         );
@@ -68,7 +68,7 @@ export class CanvasService extends Service {
         this.playerCardGroup.drawElements();
 
         if (!clientState.localPlayerId) {
-            this.broadcastEvent('info', {text: 'You are a spectator'});
+            this.broadcastEvent('info', { text: 'You are a spectator' });
         }
     }
 

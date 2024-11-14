@@ -27,10 +27,8 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.marketOrange,
-            stroke: 'white',
+            fill: COLOR.marketDarkOrange,
             cornerRadius: 15,
-            strokeWidth: 0,
         });
 
         this.group.add(
@@ -40,9 +38,9 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
 
     public updateElement(playerLocation: HexId): void {
         if (playerLocation === this.marketLocation) {
-            this.background.strokeWidth(3);
+            this.background.fill(COLOR.marketOrange);
         } else {
-            this.background.strokeWidth(0);
+            this.background.fill(COLOR.marketDarkOrange);
         }
     }
 

@@ -54,7 +54,7 @@ export class LocationGroup implements MegaGroupInterface {
                 width: this.group.width(),
                 height: heightSegment,
                 x: 0,
-                y: heightSegment * 2,
+                y: this.marketCard.getElement().height(),
             }
         );
 
@@ -64,7 +64,7 @@ export class LocationGroup implements MegaGroupInterface {
                 width: this.group.width(),
                 height: heightSegment * 2,
                 x: 0,
-                y: heightSegment * 3,
+                y: this.marketCard.getElement().height() + this.exchangeCard.getElement().height(),
             }
         );
 

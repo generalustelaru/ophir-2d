@@ -27,10 +27,8 @@ export class TempleCard implements DynamicGroupInterface<HexId> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeBlue,
-            stroke: 'white',
+            fill: COLOR.templeDarkBlue,
             cornerRadius: 15,
-            strokeWidth: 0,
         });
 
         this.group.add(
@@ -40,9 +38,9 @@ export class TempleCard implements DynamicGroupInterface<HexId> {
 
     public updateElement(playerLocation: HexId): void {
         if (playerLocation === this.templeLocation) {
-            this.background.strokeWidth(3);
+            this.background.fill(COLOR.templeBlue);
         } else {
-            this.background.strokeWidth(0);
+            this.background.fill(COLOR.templeDarkBlue);
         }
     }
 
