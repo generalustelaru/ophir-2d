@@ -36,9 +36,8 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         this.locations = this.matchLocations(setup.settlements);
-        console.table(this.locations);
-        const heightSegment = this.group.height() / 5;
 
+        const heightSegment = this.group.height() / 5;
         this.marketCard = new MarketCard(
             this.locations.market,
             {
