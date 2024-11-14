@@ -40,7 +40,10 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
 
         this.cargoDisplay = new CargoDisplay(player.cargo);
         this.favorDial = new FavorDial(player.favor);
-        this.coinDial = new CoinDial(player.coins);
+        this.coinDial = new CoinDial(
+            { x: 105, y: 63 },
+            player.coins
+        );
 
         this.group.add(
             this.background,

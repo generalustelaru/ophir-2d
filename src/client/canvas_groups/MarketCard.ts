@@ -36,7 +36,7 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
             width: this.group.width(),
             height: this.group.height(),
             fill: COLOR.marketDarkOrange,
-            cornerRadius: 15,
+            cornerRadius: 10,
         });
 
         const contractCardWidth = this.group.width() / 4;
