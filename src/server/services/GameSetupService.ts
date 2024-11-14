@@ -31,8 +31,6 @@ export class GameSetupService extends Service {
             privateState: privateState,
         }
 
-        console.log(bundle.sharedState.market);
-
         return bundle;
     };
 
