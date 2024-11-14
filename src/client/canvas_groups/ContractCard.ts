@@ -28,10 +28,10 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
         });
 
         const cardInterior = new Konva.Rect({
-            width: this.group.width() - 10,
-            height: this.group.height() - 10,
-            x: 5,
-            y: 5,
+            width: this.group.width() - 6,
+            height: this.group.height() - 6,
+            x: 3,
+            y: 3,
             fill: COLOR.wood,
             cornerRadius: 15,
         });

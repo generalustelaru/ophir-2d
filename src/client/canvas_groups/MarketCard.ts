@@ -2,7 +2,7 @@ import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import clientConstants from "../client_constants";
 import { HexId, MarketFluctuations, MarketOffer } from "../../shared_types";
-import { FutureContractDisplay } from "./CanvasGroups";
+import { FutureContractDisplay, OpenContractDisplay } from "./CanvasGroups";
 
 const { COLOR } = clientConstants;
 
@@ -14,6 +14,9 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
     private fluctuations: MarketFluctuations;
     private market: MarketOffer;
     private futureDisplay: FutureContractDisplay;
+    private slot_1: OpenContractDisplay;
+    private slot_2: OpenContractDisplay;
+    private slot_3: OpenContractDisplay;
 
     constructor(
         location: HexId,
@@ -39,24 +42,53 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
             cornerRadius: 10,
         });
 
+        const totalHeight = this.group.height();
         const contractCardWidth = this.group.width() / 4;
-        const contractCardHeight = (this.group.height() / 6) * 4;
 
         this.futureDisplay = new FutureContractDisplay({
                 width: contractCardWidth,
-                height: contractCardHeight,
+                height: totalHeight,
                 x: 0,
                 y: 0,
             },
             this.market.future,
         );
 
+        this.slot_1 = new OpenContractDisplay({
+                width: contractCardWidth,
+                height: totalHeight,
+                x: contractCardWidth,
+                y: 0,
+            },
+            this.market.slot_1,
+        );
+
+        this.slot_2 = new OpenContractDisplay({
+                width: contractCardWidth,
+                height: totalHeight,
+                x: contractCardWidth * 2,
+                y: 0,
+            },
+            this.market.slot_2,
+        );
+
+        this.slot_3 = new OpenContractDisplay({
+                width: contractCardWidth,
+                height: totalHeight,
+                x: contractCardWidth * 3,
+                y: 0,
+            },
+            this.market.slot_3,
+        );
+
         console.log(this.fluctuations);
-        console.log(this.market);
 
         this.group.add(
             this.background,
             this.futureDisplay.getElement(),
+            this.slot_1.getElement(),
+            this.slot_2.getElement(),
+            this.slot_3.getElement(),
         );
     }
 
