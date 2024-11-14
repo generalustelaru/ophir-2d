@@ -21,6 +21,7 @@ const sharedState: NewState|SharedState = {
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
     players: [],
+    market: null,
     setup: null,
 }
 
@@ -122,10 +123,7 @@ function processGameStart(details: GameSetupDetails): boolean {
         gameState.gameStatus = 'started';
         gameState.availableSlots = [];
 
-        const bundle: StateBundle = setupService.produceGameData(
-            tools.getCopy(gameState),
-            details.setupCoordinates
-        );
+        const bundle: StateBundle = setupService.produceGameData(gameState, details.setupCoordinates);
 
         singleSession = new GameSession(bundle);
 
