@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { Contract } from "../../shared_types";
-import { CoinDial } from "./CanvasGroups";
+import { CoinDial, GoodsOrderDisplay } from "./CanvasGroups";
 import clientConstants from "../client_constants";
 
 const { COLOR } = clientConstants;
@@ -9,7 +9,7 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
 
     private group: Konva.Group;
     private coinDial: CoinDial;
-    private cargoDisplay: Konva.Group;
+    private goodsDisplay: GoodsOrderDisplay;
     constructor(
         layout: GroupLayoutData,
         contract: Contract,
@@ -42,33 +42,27 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
             contract.reward.coins
         );
 
-        this.cargoDisplay = new Konva.Group({
-            width: cardInterior.width(),
-            height: cardInterior.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
-            x: cardInterior.x(),
-            y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
-        });
-        const testRect = new Konva.Rect({
-            width: this.cargoDisplay.width(),
-            height: this.cargoDisplay.height(),
-            fill: 'red',
-        });
-
-        this.cargoDisplay.add(
-            testRect
+        this.goodsDisplay = new GoodsOrderDisplay(
+            {
+                width: cardInterior.width(),
+                height: cardInterior.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
+                x: cardInterior.x(),
+                y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
+            },
+            contract.request
         );
 
         this.group.add(
             cardBorder,
             cardInterior,
             this.coinDial.getElement(),
-            this.cargoDisplay,
+            this.goodsDisplay.getElement(),
         );
     }
 
     public updateElement(contract: Contract): void {
-        console.log(contract);
         this.coinDial.updateElement(contract.reward.coins);
+        this.goodsDisplay.updateElement(contract.request);
     }
 
     public getElement(): Konva.Group {
