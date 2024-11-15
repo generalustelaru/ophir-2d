@@ -68,7 +68,7 @@ export class PlayerShip {
         });
 
         this.group.on('mouseenter', () => {
-            stage.container().style.cursor = 'pointer';
+            stage.container().style.cursor = 'grab';
         });
 
         this.group.on('mouseleave', () => {
