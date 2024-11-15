@@ -121,13 +121,15 @@ export class GameSession {
         }
 
         manifest.splice(manifest.indexOf(details.item), 1, 'empty');
-
         let hasCargo = false;
+
         manifest.forEach(item => {
+
             if (item !== 'empty') {
                 hasCargo = true;
             }
         });
+
         player.feasibleContracts = hasCargo ? this.getFeasableContracts(manifest) : [];
         player.hasCargo = hasCargo;
 
