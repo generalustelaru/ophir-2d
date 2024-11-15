@@ -17,7 +17,7 @@ export class GameSetupService extends Service {
 
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(sharedState.setup.barriers),
-            marketContracts: tools.getCopy(serverConstants.MARKET_CONTRACTS),
+            marketContracts: tools.getCopy(serverConstants.MARKET_CONTRACTS_A),
         }
 
         sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);

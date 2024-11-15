@@ -39,5 +39,6 @@ export type ServerConstants = {
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
     DEFAULT_PLAYER_STATE: Player,
-    MARKET_CONTRACTS: Array<Contract>,
+    MARKET_CONTRACTS_A: Array<Contract>,
+    MARKET_CONTRACTS_B: Array<Contract>,
 }
