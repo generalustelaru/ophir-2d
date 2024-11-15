@@ -1,10 +1,10 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, IconKey } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
 export type SettlementData = { shape: string, fill: Color };
-export type ItemData = { shape: string, fill: Color };
+export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number , y: number, shape: string };
 export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
 
@@ -26,8 +26,8 @@ export type ClientConstants = {
         setupDrifts: Array<Coordinates>,
         shape: string
     },
-    CARGO_ITEM_DATA: Record<ManifestItem, ItemData>,
-    ICON_DATA: Record<IconKey, ItemData>,
+    CARGO_ITEM_DATA: Record<ManifestItem, PathData>,
+    ICON_DATA: Record<string, PathData>,
 }
 
 export interface MegaGroupInterface {

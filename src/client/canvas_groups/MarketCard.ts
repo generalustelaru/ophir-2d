@@ -51,7 +51,7 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
                 x: 0,
                 y: 0,
             },
-            this.market.future,
+            market.future,
         );
 
         this.slot_1 = new OpenContractDisplay({
@@ -60,7 +60,8 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
                 x: contractCardWidth,
                 y: 0,
             },
-            this.market.slot_1,
+            market.slot_1,
+            marketFluctuations.slot_1,
         );
 
         this.slot_2 = new OpenContractDisplay({
@@ -69,7 +70,8 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
                 x: contractCardWidth * 2,
                 y: 0,
             },
-            this.market.slot_2,
+            market.slot_2,
+            marketFluctuations.slot_2,
         );
 
         this.slot_3 = new OpenContractDisplay({
@@ -78,10 +80,9 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
                 x: contractCardWidth * 3,
                 y: 0,
             },
-            this.market.slot_3,
+            market.slot_3,
+            marketFluctuations.slot_3,
         );
-
-        console.log(this.fluctuations);
 
         this.group.add(
             this.background,
@@ -98,6 +99,7 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
         } else {
             this.background.fill(COLOR.marketDarkOrange);
         }
+        console.dir({m: this.market, f: this.fluctuations}, );
     }
 
     public getElement(): Konva.Group {
