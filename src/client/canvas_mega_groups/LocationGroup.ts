@@ -85,6 +85,7 @@ export class LocationGroup implements MegaGroupInterface {
             throw new Error('No active player found.');
         }
 
+        //TODO: implement appropriate state changes for location cards
         const activeHex = activePlayer.location.hexId;
         this.marketCard?.updateElement(activeHex);
         this.exchangeCard?.updateElement(activeHex);

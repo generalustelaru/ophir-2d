@@ -80,7 +80,7 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
                 SETTLEMENT_DATA[serverState.setup.settlements[hexItem.id]],
-                localPlayer?.isActive && localPlayer?.location.hexId === hexItem.id ? COLOR.locationHex : COLOR.defaultHex,
+                COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
             this.group.add(mapHex.getElement());
@@ -152,9 +152,12 @@ export class MapGroup implements MegaGroupInterface {
 
             //MARK: location hex
             for (const mapHex of this.mapHexes) {
-                mapHex.setFill(localPlayer.isActive && localPlayer.location.hexId === mapHex.getId()
-                    ? COLOR.locationHex
-                    : COLOR.defaultHex
+                mapHex.setFill(
+                    (
+                    localPlayer.isActive
+                    && localPlayer.location.hexId === mapHex.getId()
+                    && localPlayer.allowedSettlementAction
+                    ) ? COLOR.locationHex : COLOR.defaultHex
                 );
             }
         }
