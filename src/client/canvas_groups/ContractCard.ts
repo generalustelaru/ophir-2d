@@ -9,6 +9,7 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
 
     private group: Konva.Group;
     private coinDial: CoinDial;
+    private cargoDisplay: Konva.Group;
     constructor(
         layout: GroupLayoutData,
         contract: Contract,
@@ -41,10 +42,27 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
             contract.reward.coins
         );
 
+        this.cargoDisplay = new Konva.Group({
+            width: cardInterior.width(),
+            height: cardInterior.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
+            x: cardInterior.x(),
+            y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
+        });
+        const testRect = new Konva.Rect({
+            width: this.cargoDisplay.width(),
+            height: this.cargoDisplay.height(),
+            fill: 'red',
+        });
+
+        this.cargoDisplay.add(
+            testRect
+        );
+
         this.group.add(
             cardBorder,
             cardInterior,
             this.coinDial.getElement(),
+            this.cargoDisplay,
         );
     }
 
