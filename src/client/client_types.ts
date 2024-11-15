@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, MarketKey } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -49,6 +49,11 @@ export type GroupLayoutData = {
     height: number,
     x: number,
     y: number,
+};
+
+export type LocationCardUpdate = {
+    playerLocation: HexId,
+    feasibleContracts: Array<MarketKey>,
 };
 
 export type EventPayload = InfoEventPayload|ActionEventPayload|ErrorEventPayload|SetupEventPayload|null;

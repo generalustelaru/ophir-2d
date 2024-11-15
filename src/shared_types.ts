@@ -13,6 +13,7 @@ export type Action =
 export type SettlementAction = "visit_temple" | "sell_goods" | "buy_metals" | "pickup_good";
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";
+export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ManifestItem>;
 export type Contract = { request: Array<GoodId>, reward: PayAndReward };
 export type PayAndReward = { coins: number, favorAndVp: number }
@@ -35,6 +36,7 @@ export type Player = {
     allowedMoves: Array<HexId>,
     hasCargo: boolean,
     cargo: CargoManifest,
+    feasibleContracts: Array<MarketKey>
     coins: number,
 }
 

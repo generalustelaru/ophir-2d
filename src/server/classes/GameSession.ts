@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, DiceSix, RepositioningActionDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, DiceSix, RepositioningActionDetails, CargoManifest, MarketKey, ManifestItem } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -128,6 +128,7 @@ export class GameSession {
                 hasCargo = true;
             }
         });
+        player.feasibleContracts = hasCargo ? this.getFeasableContracts(manifest) : [];
         player.hasCargo = hasCargo;
 
         return true;
@@ -155,6 +156,7 @@ export class GameSession {
                 player.allowedSettlementAction = null;
                 player.moveActions = 0;
                 player.hasCargo = true;
+                player.feasibleContracts = this.getFeasableContracts(player.cargo);
 
                 return true;
             }
@@ -176,7 +178,7 @@ export class GameSession {
     }
 
     // Helper methods
-    private getPortRegistry(destinationHex: HexId): Array<RegistryItem>|false {
+    private getPortRegistry(destinationHex: HexId): Array<RegistryItem> | false {
         const registry: Array<RegistryItem> = [];
         const players = this.sharedState.players;
 
@@ -281,7 +283,7 @@ export class GameSession {
         player.allowedMoves = rules.allowed as Array<HexId>;
     }
 
-    private getMatchingGood(hexId: HexId): GoodId|false {
+    private getMatchingGood(hexId: HexId): GoodId | false {
         const settlement = this.sharedState.setup.settlements[hexId];
 
         switch (settlement) {
@@ -293,7 +295,7 @@ export class GameSession {
         }
     }
 
-    private getAllowedSettlementActionFromLocation(playerState: Player, hexId: HexId|null = null): SettlementAction|null {
+    private getAllowedSettlementActionFromLocation(playerState: Player, hexId: HexId | null = null): SettlementAction | null {
         const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
 
         switch (true) {
@@ -307,8 +309,7 @@ export class GameSession {
         }
     }
 
-    private canItemBeLoaded(player: Player, desired: SettlementAction): boolean
-    {
+    private canItemBeLoaded(player: Player, desired: SettlementAction): boolean {
         if (desired !== 'buy_metals' && desired !== 'pickup_good') {
             console.error(`Incompatible settlement action: ${desired}`);
 
@@ -320,5 +321,38 @@ export class GameSession {
         const cargoReq = desired === 'pickup_good' ? 1 : 2;
 
         return emptySlots >= cargoReq;
+    }
+
+    private getFeasableContracts(cargo: CargoManifest) {
+        const contracts = this.sharedState.market;
+        const feasable: Array<MarketKey> = [];
+        const nonGoods: Array<ManifestItem> = ['empty', 'gold_a', 'gold_b', 'silver_a', 'silver_b'];
+        const slots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
+
+        slots.forEach(key => {
+            const request = [...contracts[key].request];
+
+            for (let i = 0; i < cargo.length; i++) {
+
+                if (nonGoods.includes(cargo[i])) {
+
+                    continue;
+                }
+
+                const carriedGood = cargo[i] as GoodId;
+                const match = request.indexOf(carriedGood);
+
+                if (match !== -1) {
+                    request.splice(match, 1);
+                }
+
+            }
+
+            if (request.length === 0) {
+                feasable.push(key);
+            }
+        });
+
+        return feasable;
     }
 }

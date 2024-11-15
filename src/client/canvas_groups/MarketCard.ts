@@ -1,17 +1,17 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
+import { DynamicGroupInterface, GroupLayoutData, LocationCardUpdate } from "../client_types";
 import clientConstants from "../client_constants";
 import { HexId, MarketFluctuations, MarketOffer } from "../../shared_types";
 import { FutureContractDisplay, OpenContractDisplay } from "./CanvasGroups";
 
 const { COLOR } = clientConstants;
 
-export class MarketCard implements DynamicGroupInterface<HexId> {
+export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
     private marketLocation: HexId;
-    private fluctuations: MarketFluctuations;
+    // private fluctuations: MarketFluctuations;
     private market: MarketOffer;
     private futureDisplay: FutureContractDisplay;
     private slot_1: OpenContractDisplay;
@@ -25,7 +25,7 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
         layout: GroupLayoutData,
     ) {
         this.marketLocation = location;
-        this.fluctuations = marketFluctuations;
+        // this.fluctuations = marketFluctuations;
         this.market = market;
 
         this.group = new Konva.Group({
@@ -93,13 +93,15 @@ export class MarketCard implements DynamicGroupInterface<HexId> {
         );
     }
 
-    public updateElement(playerLocation: HexId): void {
-        if (playerLocation === this.marketLocation) {
+    public updateElement(data: LocationCardUpdate): void {
+
+        if (data.playerLocation === this.marketLocation && data.feasibleContracts.length > 0) {
             this.background.fill(COLOR.marketOrange);
         } else {
             this.background.fill(COLOR.marketDarkOrange);
         }
-        console.dir({m: this.market, f: this.fluctuations}, );
+
+        console.dir({m: this.market}, );
     }
 
     public getElement(): Konva.Group {

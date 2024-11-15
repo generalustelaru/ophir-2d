@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { MegaGroupInterface, GroupLayoutData } from "../client_types";
+import { MegaGroupInterface, GroupLayoutData, LocationCardUpdate } from "../client_types";
 import { MarketCard, ExchangeCard, TempleCard } from "../canvas_groups/CanvasGroups";
 import clientState from '../state';
 import { HexId, SettlementId } from "../../shared_types";
@@ -86,10 +86,13 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         //TODO: implement appropriate state changes for location cards
-        const activeHex = activePlayer.location.hexId;
-        this.marketCard?.updateElement(activeHex);
-        this.exchangeCard?.updateElement(activeHex);
-        this.templeCard?.updateElement(activeHex);
+        const cardData: LocationCardUpdate = {
+            playerLocation: activePlayer.location.hexId,
+            feasibleContracts: activePlayer.feasibleContracts,
+        }
+        this.marketCard?.updateElement(cardData);
+        this.exchangeCard?.updateElement(cardData.playerLocation);
+        this.templeCard?.updateElement(cardData.playerLocation);
     }
 
     private matchLocations(settlements: Record<HexId, SettlementId>|null): Locations {
