@@ -13,10 +13,10 @@ const serverConstants: ServerConstants = {
         { request: ['stone', 'cloth'], reward: { coins: 2, favorAndVp: 1 } },
         { request: ['wood', 'stone'], reward: { coins: 3, favorAndVp: 2 } },
         { request: ['wood', 'cloth'], reward: { coins: 2, favorAndVp: 1 } },
-        // { request: ['gem', 'wood', 'stone'], reward: { coins: 3, favorAndVp: 2 } },
-        // { request: ['gem', 'wood', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
-        // { request: ['gem', 'stone', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
-        // { request: ['gem', 'wood', 'stone'], reward: { coins: 4, favorAndVp: 3 } },
+        { request: ['gem', 'wood', 'stone'], reward: { coins: 3, favorAndVp: 2 } },
+        { request: ['gem', 'wood', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
+        { request: ['gem', 'stone', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
+        { request: ['gem', 'wood', 'stone'], reward: { coins: 4, favorAndVp: 3 } },
     ],
 
     DEFAULT_MOVE_RULES: [
