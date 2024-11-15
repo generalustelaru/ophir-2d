@@ -95,8 +95,9 @@ const serverConstants: ServerConstants = {
         isAnchored: true,
         allowedSettlementAction: null,
         moveActions: 2,
-        cargo: ['empty', 'empty'],
         hasCargo: false,
+        cargo: ['empty', 'empty'],
+        feasibleContracts: [],
         coins: 0,
     },
 }
