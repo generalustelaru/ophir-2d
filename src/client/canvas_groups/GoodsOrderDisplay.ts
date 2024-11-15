@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GoodId } from '../../shared_types';
+import { Coordinates, GoodId } from '../../shared_types';
 import { DynamicGroupInterface, GroupLayoutData} from '../client_types';
 import clientConstants from '../client_constants';
 
@@ -25,7 +25,7 @@ export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
                 case 1:
                     return this.getSingleGoodGroup(goods);
                 default:
-                    return this.getSingleGoodGroup(goods);
+                    return this.getDoubleGoodGroup(goods);
             }
         }
 
@@ -62,6 +62,38 @@ export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
         group.add(
             goodShape
         );
+
+        return group;
+    }
+
+    private getDoubleGoodGroup(goods: Array<GoodId>): Konva.Group {
+        const group = new Konva.Group({
+            width: this.group.width(),
+            height: this.group.height(),
+        });
+
+        const doubleLayout: Array<Coordinates> = [
+            {x: this.group.width()/2 - 19, y: this.group.height()/2 - 20},
+            {x: this.group.width()/2 - 19, y: this.group.height()/2 + 10},
+        ]
+
+        goods.forEach((good, index) => {
+            const goodData = CARGO_ITEM_DATA[good];
+            const layout = doubleLayout[index];
+            const goodShape = new Konva.Path({
+                x: layout.x,
+                y: layout.y,
+                data: goodData.shape,
+                fill: goodData.fill,
+                stroke: 'white',
+                strokeWidth: 1,
+                scale: {x: 1.5, y: 1.5},
+            });
+
+            group.add(
+                goodShape
+            );
+        });
 
         return group;
     }
