@@ -96,7 +96,7 @@ export class PlayerShip {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
                 mapHex.setBoneIcon(false);
-                mapHex.setFill(player.location.hexId === mapHex.getId()
+                mapHex.setFill(player.location.hexId === mapHex.getId() && player.allowedSettlementAction
                     ? COLOR.locationHex
                     : COLOR.defaultHex
                 );
@@ -104,7 +104,7 @@ export class PlayerShip {
 
             switch (true) {
                 case targetHex.getId() === player.location.hexId:
-                    targetHex.setFill(COLOR.locationHex);
+                    targetHex.setFill(player.allowedSettlementAction ? COLOR.locationHex : COLOR.defaultHex);
                     break;
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
@@ -154,12 +154,12 @@ export class PlayerShip {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
                     });
-                    departureHex.setFill(COLOR.locationHex);
+                    departureHex.setFill(player?.allowedSettlementAction ? COLOR.locationHex : COLOR.defaultHex);
                     break;
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
-                    departureHex.setFill(COLOR.locationHex);
+                    departureHex.setFill(player?.allowedSettlementAction ? COLOR.locationHex: COLOR.defaultHex);
             }
         });
         this.group.add(this.ship);
