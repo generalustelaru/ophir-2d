@@ -21,7 +21,7 @@ export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
 
         const count = goods.length;
 
-        if (count === 0 || count > 3) {
+        if (count < 1 || count > 3) {
             throw new Error('Invalid number of goods in goods order display');
         }
 
@@ -31,8 +31,10 @@ export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
                     return this.getSingleGoodGroup(goods);
                 case 2:
                     return this.getDoubleGoodGroup(goods);
-                default:
+                case 3:
                     return this.getTripleGoodGroup(goods);
+                default:
+                    throw new Error('Invalid number of goods in goods order display');
             }
         }
 

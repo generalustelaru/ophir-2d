@@ -10,9 +10,11 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
     private group: Konva.Group;
     private coinDial: CoinDial;
     private goodsDisplay: GoodsOrderDisplay;
+    private fluctuation: number | null = null;
     constructor(
         layout: GroupLayoutData,
         contract: Contract,
+        fluctuation: number | null = null,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -39,7 +41,7 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
 
         this.coinDial = new CoinDial(
             {x: 38, y: 35 },
-            contract.reward.coins
+            contract.reward.coins + (fluctuation ?? 0)
         );
 
         this.goodsDisplay = new GoodsOrderDisplay(
@@ -61,7 +63,7 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
     }
 
     public updateElement(contract: Contract): void {
-        this.coinDial.updateElement(contract.reward.coins);
+        this.coinDial.updateElement(contract.reward.coins + (this.fluctuation ?? 0));
         this.goodsDisplay.updateElement(contract.request);
     }
 
