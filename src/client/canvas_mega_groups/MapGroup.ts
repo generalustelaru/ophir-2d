@@ -40,9 +40,10 @@ export class MapGroup implements MegaGroupInterface {
 
         if (localPlayer) {
             this.localPlayer = localPlayer;
-            this.anchorDial = new AnchorDial(this.group, localPlayer.isActive);
-            this.group.add(this.anchorDial.getElement());
         }
+
+        this.anchorDial = new AnchorDial(this.group, localPlayer?.isActive ?? false);
+        this.group.add(this.anchorDial.getElement());
 
         //MARK: anchor
         this.anchorDial?.getElement().on('mouseenter', () => {
