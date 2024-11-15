@@ -1,20 +1,22 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
+import { Coordinates, GameSetupDetails, Player, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { MapHex, Barrier, Ship, PlayerShip, AnchorDial, MovesDial } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
+import { Dispatcher } from '../Dispatcher';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clientConstants;
 
 export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private stage: Konva.Stage;
-    private anchorDial: AnchorDial|null = null;
-    private movesDial: MovesDial|null = null;
+    private anchorDial: AnchorDial | null = null;
+    private movesDial: MovesDial | null = null;
     private mapHexes: Array<MapHex> = [];
     private opponentShips: Array<Ship> = [];
-    private localShip: PlayerShip|null = null;
+    private localShip: PlayerShip | null = null;
+    private localPlayer: Player | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.stage = stage;
@@ -31,19 +33,42 @@ export class MapGroup implements MegaGroupInterface {
 
     // MARK: DRAW
     public drawElements(): void {
-        const centerPoint = { x: this.group.width()/2, y: this.group.height()/2 };
+        const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
 
-        //MARK: anchor
         if (localPlayer) {
+            this.localPlayer = localPlayer;
             this.anchorDial = new AnchorDial(this.group, localPlayer.isActive);
             this.group.add(this.anchorDial.getElement());
-
-            this.movesDial = new MovesDial(this.group, localPlayer.isActive);
-            this.group.add(this.movesDial.getElement());
         }
+
+        //MARK: anchor
+        this.anchorDial?.getElement().on('mouseenter', () => {
+            if (this.localPlayer?.isActive) {
+                this.stage.container().style.cursor = 'pointer';
+            }
+        });
+
+        this.anchorDial?.getElement().on('mouseleave', () => {
+            this.stage.container().style.cursor = 'default';
+        });
+
+        this.anchorDial?.getElement().on('click', () => {
+
+            if (this.localPlayer?.isActive && this.localPlayer.isAnchored) {
+
+                return Dispatcher.getInstance().broadcastEvent(
+                    'action',
+                    { action: 'turn', details: null }
+                );
+            }
+        });
+
+        this.movesDial = new MovesDial(this.group, localPlayer?.isActive ?? false);
+        this.group.add(this.movesDial.getElement());
+
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
@@ -115,19 +140,16 @@ export class MapGroup implements MegaGroupInterface {
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
 
-        //MARK: anchor
         if (localPlayer) {
+            this.localPlayer = localPlayer;
+
+            //MARK: anchor
             this.anchorDial?.updateElement(localPlayer);
-        }
 
-        //MARK: moves dial
-        if (localPlayer) {
+            //MARK: moves dial
             this.movesDial?.updateElement(localPlayer);
-        }
 
-        //MARK: location hex
-        if (localPlayer) {
-
+            //MARK: location hex
             for (const mapHex of this.mapHexes) {
                 mapHex.setFill(localPlayer.isActive && localPlayer.location.hexId === mapHex.getId()
                     ? COLOR.locationHex
@@ -165,8 +187,8 @@ export class MapGroup implements MegaGroupInterface {
 
         SHIP_DATA.setupDrifts.forEach((drift) => {
             startingPositions.push({
-                x: this.group.width()/2 + drift.x,
-                y: this.group.height()/2 + drift.y
+                x: this.group.width() / 2 + drift.x,
+                y: this.group.height() / 2 + drift.y
             });
         });
 

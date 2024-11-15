@@ -10,16 +10,30 @@ export class AnchorDial implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 
     constructor(parent: Konva.Group, isActivePlayer: boolean) {
-        this.group = new Konva.Group();
+        this.group = new Konva.Group(
+            {
+                width: 50,
+                height: 50,
+                x: parent.width() - 100,
+                y: parent.height() - 130,
+            }
+        );
+
+        const hoverZone = new Konva.Rect({
+            width: this.group.width(),
+            height: this.group.height(),
+            hidden: true,
+        });
+
         const data = isActivePlayer ? ICON_DATA.not_anchored : ICON_DATA.anchored;
+
         this.anchor = new Konva.Path({
-            x: parent.width() - 100,
-            y: parent.height() - 130,
             data: data.shape,
             fill: isActivePlayer ? data.fill : COLOR.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
-        this.group.add(this.anchor);
+
+        this.group.add( hoverZone, this.anchor, );
     }
 
     public getElement() {
