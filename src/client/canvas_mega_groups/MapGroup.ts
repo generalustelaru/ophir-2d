@@ -45,7 +45,7 @@ export class MapGroup implements MegaGroupInterface {
         this.anchorDial = new AnchorDial(this.group, localPlayer?.isActive ?? false);
         this.group.add(this.anchorDial.getElement());
 
-        //MARK: anchor
+        //MARK: anchor // TODO: create an extendable class for interactive elements
         this.anchorDial?.getElement().on('mouseenter', () => {
             if (this.localPlayer?.isActive) {
                 this.stage.container().style.cursor = 'pointer';
