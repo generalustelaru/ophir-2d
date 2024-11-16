@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, LocationCardUpdate } from "../client_types";
 import clientConstants from "../client_constants";
-import { HexId, MarketFluctuations, MarketOffer } from "../../shared_types";
+import { HexId, MarketFluctuations, MarketKey, MarketOffer } from "../../shared_types";
 import { FutureContractDisplay, OpenContractDisplay } from "./CanvasGroups";
 
 const { COLOR } = clientConstants;
@@ -93,19 +93,15 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
     }
 
     public updateElement(data: LocationCardUpdate): void {
-        const activePlayerIsHere = data.playerLocation === this.marketLocation;
         this.futureDisplay.updateElement(data.contracts.future);
-        this.slot_1.updateElement({
-            contract: data.contracts.slot_1,
-            isFeasible: activePlayerIsHere && data.feasibleContracts.includes('slot_1')
-        });
-        this.slot_2.updateElement({
-            contract: data.contracts.slot_2,
-            isFeasible: activePlayerIsHere && data.feasibleContracts.includes('slot_2')
-        });
-        this.slot_3.updateElement({
-            contract: data.contracts.slot_3,
-            isFeasible: activePlayerIsHere && data.feasibleContracts.includes('slot_3')
+        const activePlayerIsHere = data.playerLocation === this.marketLocation;
+        const cardSlots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
+
+        cardSlots.forEach(slot => {
+            this[slot].updateElement({
+                contract: data.contracts.slot_1,
+                isFeasible: activePlayerIsHere && data.feasibleContracts.includes(slot),
+            });
         });
     }
 
