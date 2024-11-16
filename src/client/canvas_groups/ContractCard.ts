@@ -1,15 +1,17 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
+import { ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { Contract } from "../../shared_types";
 import { CoinDial, GoodsOrderDisplay } from "./CanvasGroups";
 import clientConstants from "../client_constants";
 
 const { COLOR } = clientConstants;
-export class ContractCard implements DynamicGroupInterface<Contract> {
+export class ContractCard implements DynamicGroupInterface<ContractCardUpdate> {
 
     private group: Konva.Group;
     private coinDial: CoinDial;
     private goodsDisplay: GoodsOrderDisplay;
+    private cardInterior: Konva.Rect;
+    private cardBorder: Konva.Rect;
     private fluctuation: number | null = null;
     constructor(
         layout: GroupLayoutData,
@@ -23,14 +25,14 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
             y: layout.y,
         });
 
-        const cardBorder = new Konva.Rect({
+        this.cardBorder = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
             fill: COLOR.boneWhite,
             cornerRadius: 15,
         });
 
-        const cardInterior = new Konva.Rect({
+        this.cardInterior = new Konva.Rect({
             width: this.group.width() - 6,
             height: this.group.height() - 6,
             x: 3,
@@ -46,25 +48,27 @@ export class ContractCard implements DynamicGroupInterface<Contract> {
 
         this.goodsDisplay = new GoodsOrderDisplay(
             {
-                width: cardInterior.width(),
-                height: cardInterior.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
-                x: cardInterior.x(),
+                width: this.cardInterior.width(),
+                height: this.cardInterior.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
+                x: this.cardInterior.x(),
                 y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
             },
             contract.request
         );
 
         this.group.add(
-            cardBorder,
-            cardInterior,
+            this.cardBorder,
+            this.cardInterior,
             this.coinDial.getElement(),
             this.goodsDisplay.getElement(),
         );
     }
 
-    public updateElement(contract: Contract): void {
-        this.coinDial.updateElement(contract.reward.coins + (this.fluctuation ?? 0));
-        this.goodsDisplay.updateElement(contract.request);
+    public updateElement(data: ContractCardUpdate): void {
+        this.coinDial.updateElement(data.contract.reward.coins + (this.fluctuation ?? 0));
+        this.goodsDisplay.updateElement(data.contract.request);
+        this.cardInterior.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
+        this.cardBorder.fill(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
     }
 
     public getElement(): Konva.Group {

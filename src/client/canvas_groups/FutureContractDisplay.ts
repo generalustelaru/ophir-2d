@@ -3,7 +3,7 @@ import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { ContractCard } from "./CanvasGroups";
 import { Contract } from "../../shared_types";
 
-export class FutureContractDisplay implements DynamicGroupInterface<any>
+export class FutureContractDisplay implements DynamicGroupInterface<Contract>
 {
     private group: Konva.Group;
     private contractCard: ContractCard;
@@ -50,7 +50,7 @@ export class FutureContractDisplay implements DynamicGroupInterface<any>
         return this.group;
     }
 
-    public updateElement(arg: any): void {
-        console.log(arg);
+    public updateElement(contract: Contract): void {
+        this.contractCard.updateElement({contract: contract, isFeasible: false});
     }
 }

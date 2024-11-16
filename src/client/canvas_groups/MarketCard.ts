@@ -11,8 +11,6 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private marketLocation: HexId;
-    // private fluctuations: MarketFluctuations;
-    private market: MarketOffer;
     private futureDisplay: FutureContractDisplay;
     private slot_1: OpenContractDisplay;
     private slot_2: OpenContractDisplay;
@@ -25,8 +23,6 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
         layout: GroupLayoutData,
     ) {
         this.marketLocation = location;
-        // this.fluctuations = marketFluctuations;
-        this.market = market;
 
         this.group = new Konva.Group({
             width: layout.width,
@@ -54,7 +50,8 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
             market.future,
         );
 
-        this.slot_1 = new OpenContractDisplay({
+        this.slot_1 = new OpenContractDisplay(
+            {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: contractCardWidth,
@@ -64,7 +61,8 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
             marketFluctuations.slot_1,
         );
 
-        this.slot_2 = new OpenContractDisplay({
+        this.slot_2 = new OpenContractDisplay(
+            {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: contractCardWidth * 2,
@@ -74,7 +72,8 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
             marketFluctuations.slot_2,
         );
 
-        this.slot_3 = new OpenContractDisplay({
+        this.slot_3 = new OpenContractDisplay(
+            {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: contractCardWidth * 3,
@@ -94,14 +93,20 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
     }
 
     public updateElement(data: LocationCardUpdate): void {
-
-        if (data.playerLocation === this.marketLocation && data.feasibleContracts.length > 0) {
-            this.background.fill(COLOR.marketOrange);
-        } else {
-            this.background.fill(COLOR.marketDarkOrange);
-        }
-
-        console.dir({m: this.market}, );
+        const activePlayerIsHere = data.playerLocation === this.marketLocation;
+        this.futureDisplay.updateElement(data.contracts.future);
+        this.slot_1.updateElement({
+            contract: data.contracts.slot_1,
+            isFeasible: activePlayerIsHere && data.feasibleContracts.includes('slot_1')
+        });
+        this.slot_2.updateElement({
+            contract: data.contracts.slot_2,
+            isFeasible: activePlayerIsHere && data.feasibleContracts.includes('slot_2')
+        });
+        this.slot_3.updateElement({
+            contract: data.contracts.slot_3,
+            isFeasible: activePlayerIsHere && data.feasibleContracts.includes('slot_3')
+        });
     }
 
     public getElement(): Konva.Group {

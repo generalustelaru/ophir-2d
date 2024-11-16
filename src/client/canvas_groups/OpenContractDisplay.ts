@@ -1,20 +1,18 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
+import { ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { ContractCard } from "./CanvasGroups";
 import { Contract, Fluctuation } from "../../shared_types";
 import clientConstants from "../client_constants";
 
 const { ICON_DATA } = clientConstants;
 
-export class OpenContractDisplay implements DynamicGroupInterface<any>
-{
+export class OpenContractDisplay implements DynamicGroupInterface<ContractCardUpdate> {
     private group: Konva.Group;
     private contractCard: ContractCard;
-    private fluctuationSymbol: Konva.Path;
 
     constructor(
         layout: GroupLayoutData,
-        futureContract: Contract,
+        contract: Contract,
         fluctuation: Fluctuation,
     ) {
         this.group = new Konva.Group({
@@ -33,15 +31,15 @@ export class OpenContractDisplay implements DynamicGroupInterface<any>
                 x: 0,
                 y: segmentHeight,
             },
-            futureContract,
+            contract,
             fluctuation
         );
 
-        this.fluctuationSymbol = this.getFluctuationSymbol(fluctuation);
+        const fluctuationSymbol = this.getFluctuationSymbol(fluctuation);
 
         this.group.add(
             this.contractCard.getElement(),
-            this.fluctuationSymbol
+            fluctuationSymbol
         );
     }
 
@@ -49,9 +47,8 @@ export class OpenContractDisplay implements DynamicGroupInterface<any>
         return this.group;
     }
 
-    public updateElement(arg: any): void {
-        console.log(arg);
-        console.log(this.fluctuationSymbol.x());
+    public updateElement(data: ContractCardUpdate): void {
+        this.contractCard.updateElement(data);
     }
 
     private getFluctuationSymbol(fluctuation: Fluctuation): Konva.Path {

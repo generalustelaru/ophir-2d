@@ -79,15 +79,16 @@ export class LocationGroup implements MegaGroupInterface {
 
     public updateElements(): void {
 
-        const activePlayer = clientState.received.players.find(player => player.isActive);
-
-        if (!activePlayer) {
-            throw new Error('No active player found.');
+        const sharedState = clientState.received;
+        const activePlayer = sharedState.players.find(player => player.isActive);
+        const marketOffer = sharedState.market
+        if (!activePlayer || !marketOffer) {
+            throw new Error(`Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`);
         }
 
-        //TODO: implement appropriate state changes for location cards
         const cardData: LocationCardUpdate = {
             playerLocation: activePlayer.location.hexId,
+            contracts: marketOffer,
             feasibleContracts: activePlayer.feasibleContracts,
         }
         this.marketCard?.updateElement(cardData);
