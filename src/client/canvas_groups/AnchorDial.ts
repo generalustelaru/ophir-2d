@@ -1,23 +1,29 @@
 import Konva from 'konva';
 import constants from '../client_constants';
 import { Player } from '../../shared_types';
-import { DynamicGroupInterface } from '../client_types';
+import { ActionEventPayload, DynamicGroupInterface } from '../client_types';
+import { ResponsiveGroup } from './ResponsiveGroup';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class AnchorDial implements DynamicGroupInterface<Player> {
-    private group: Konva.Group;
+export class AnchorDial extends ResponsiveGroup implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 
-    constructor(parent: Konva.Group, isActivePlayer: boolean) {
-        this.group = new Konva.Group(
-            {
-                width: 50,
-                height: 50,
-                x: parent.width() - 100,
-                y: parent.height() - 130,
-            }
-        );
+    constructor(
+        stage: Konva.Stage,
+        parent: Konva.Group,
+        actionPayload: ActionEventPayload,
+        isActivePlayer: boolean
+    ) {
+
+        const layout = {
+            width: 50,
+            height: 50,
+            x: parent.width() - 100,
+            y: parent.height() - 130,
+        }
+
+        super(stage, layout, actionPayload);
 
         const hoverZone = new Konva.Rect({
             width: this.group.width(),
@@ -44,5 +50,6 @@ export class AnchorDial implements DynamicGroupInterface<Player> {
             const data = player.isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
             this.anchor.data(data.shape);
             this.anchor.fill(player.isActive ? data.fill : COLOR.disabled);
+            this.setEnabled(player.isActive && player.isAnchored);
     }
 }

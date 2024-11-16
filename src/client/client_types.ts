@@ -5,13 +5,13 @@ export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
 export type SettlementData = { shape: string, fill: Color };
 export type PathData = { shape: string, fill: Color };
-export type IslandData = { x: number , y: number, shape: string };
-export type EventTitle = "connected"|"action"|"update"|"error"|"info"|"setup";
+export type IslandData = { x: number, y: number, shape: string };
+export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
 
 export type ClientState = {
-    localPlayerId: PlayerId|null,
+    localPlayerId: PlayerId | null,
     isBoardDrawn: boolean,
-    received: SharedState|NewState,
+    received: SharedState | NewState,
 }
 
 export type ClientConstants = {
@@ -62,7 +62,7 @@ export type LocationCardUpdate = {
     feasibleContracts: Array<MarketKey>,
 };
 
-export type EventPayload = InfoEventPayload|ActionEventPayload|ErrorEventPayload|SetupEventPayload|null;
+export type EventPayload = InfoEventPayload | ActionEventPayload | ErrorEventPayload | SetupEventPayload | null;
 
 export type InfoEventPayload = {
     text: string,
