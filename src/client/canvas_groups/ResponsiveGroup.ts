@@ -3,10 +3,10 @@ import { ActionEventPayload, GroupLayoutData } from '../client_types';
 export class ResponsiveGroup {
     protected group: Konva.Group;
     private stage: Konva.Stage;
-    private payload: ActionEventPayload;
+    private payload: ActionEventPayload | null;
     private isActive: boolean = false;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, actionPayload: ActionEventPayload) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, actionPayload: ActionEventPayload | null) {
         this.stage = stage;
         this.payload = actionPayload;
         const layer = stage.getLayers()[0];
@@ -18,6 +18,10 @@ export class ResponsiveGroup {
             y: layout.y,
         });
         layer.add(this.group);
+
+        if (!actionPayload) {
+            return;
+        }
 
         this.group.on('mouseenter', () => {
             this.stage.container().style.cursor = this.isActive ? 'pointer' : 'not-allowed';

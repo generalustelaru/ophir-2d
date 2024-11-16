@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MoveActionDetails, DropItemActionDetails, DiceSix, RepositioningActionDetails, CargoManifest, MarketKey, ManifestItem } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -42,7 +42,7 @@ export class GameSession {
 
     // Player action processing methods
     private processMove(message: WebsocketClientMessage): boolean {
-        const details = message.details as MoveActionDetails;
+        const details = message.details as MovementDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerId);
 
         if (!player) {
@@ -83,7 +83,7 @@ export class GameSession {
     }
 
     processRepositioning(message: WebsocketClientMessage): boolean {
-        const details = message.details as RepositioningActionDetails;
+        const details = message.details as RepositioningDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerId);
 
         if (!player) {
@@ -111,7 +111,7 @@ export class GameSession {
     }
 
     private processItemDrop(message: WebsocketClientMessage): boolean {
-        const details = message.details as DropItemActionDetails
+        const details = message.details as DropItemDetails
 
         const player = this.sharedState.players.find(player => player.id === message.playerId);
         const manifest = player?.cargo;

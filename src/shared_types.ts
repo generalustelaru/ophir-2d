@@ -80,12 +80,12 @@ export type GameSetup = {
     marketFluctuations: MarketFluctuations,
 }
 
-export type MoveActionDetails = {
+export type MovementDetails = {
     hexId: HexId,
     position: Coordinates,
 }
 
-export type RepositioningActionDetails = {
+export type RepositioningDetails = {
     repositioning: Coordinates,
 }
 
@@ -93,12 +93,16 @@ export type GameSetupDetails = {
     setupCoordinates: Array<Coordinates>,
 }
 
-export type DropItemActionDetails = {
+export type DropItemDetails = {
     item: ManifestItem,
 }
 
+export type ContractFulfillmentDetails = {
+    contract: MarketKey,
+}
+
 export type ActionDetails =
-    | GameSetupDetails | MoveActionDetails | DropItemActionDetails | RepositioningActionDetails | null;
+    | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | ContractFulfillmentDetails | null;
 
 export type Coordinates = { x: number, y: number };
 

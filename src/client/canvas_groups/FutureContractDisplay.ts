@@ -9,6 +9,7 @@ export class FutureContractDisplay implements DynamicGroupInterface<Contract>
     private contractCard: ContractCard;
 
     constructor(
+        stage: Konva.Stage,
         layout: GroupLayoutData,
         futureContract: Contract,
     ) {
@@ -22,12 +23,14 @@ export class FutureContractDisplay implements DynamicGroupInterface<Contract>
         const segmentHeight = this.group.height() / 6;
 
         this.contractCard = new ContractCard(
+            stage,
             {
                 width: this.group.width(),
                 height: segmentHeight * 4,
                 x: 0,
                 y: segmentHeight,
             },
+            null,
             futureContract,
         );
 
