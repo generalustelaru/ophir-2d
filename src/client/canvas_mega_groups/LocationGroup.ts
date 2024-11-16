@@ -12,6 +12,7 @@ type Locations = {
 
 export class LocationGroup implements MegaGroupInterface {
 
+    private stage: Konva.Stage;
     private group: Konva.Group;
     private marketCard: MarketCard | null = null;
     private exchangeCard: ExchangeCard | null = null;
@@ -26,6 +27,7 @@ export class LocationGroup implements MegaGroupInterface {
             y: layout.y + 10,
         });
         stage.getLayers()[0].add(this.group);
+        this.stage = stage;
     }
 
     public drawElements(): void {
@@ -39,6 +41,7 @@ export class LocationGroup implements MegaGroupInterface {
         const heightSegment = this.group.height() / 5;
 
         this.marketCard = new MarketCard(
+            this.stage,
             this.locations.market,
             clientState.received.setup.marketFluctuations,
             clientState.received.market,

@@ -1,29 +1,27 @@
 import Konva from "konva";
-import { ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
+import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { Contract } from "../../shared_types";
 import { CoinDial, GoodsOrderDisplay } from "./CanvasGroups";
 import clientConstants from "../client_constants";
+import { ResponsiveGroup } from "./ResponsiveGroup";
 
 const { COLOR } = clientConstants;
-export class ContractCard implements DynamicGroupInterface<ContractCardUpdate> {
+export class ContractCard extends ResponsiveGroup implements DynamicGroupInterface<ContractCardUpdate> {
 
-    private group: Konva.Group;
+    // private group: Konva.Group;
     private coinDial: CoinDial;
     private goodsDisplay: GoodsOrderDisplay;
     private cardInterior: Konva.Rect;
     private cardBorder: Konva.Rect;
     private fluctuation: number | null = null;
     constructor(
+        stage: Konva.Stage,
         layout: GroupLayoutData,
+        actionPayload: ActionEventPayload | null,
         contract: Contract,
         fluctuation: number | null = null,
     ) {
-        this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            x: layout.x,
-            y: layout.y,
-        });
+        super(stage, layout, actionPayload);
 
         this.cardBorder = new Konva.Rect({
             width: this.group.width(),
@@ -69,6 +67,7 @@ export class ContractCard implements DynamicGroupInterface<ContractCardUpdate> {
         this.goodsDisplay.updateElement(data.contract.request);
         this.cardInterior.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
         this.cardBorder.fill(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
+        this.setEnabled(data.isFeasible);
     }
 
     public getElement(): Konva.Group {

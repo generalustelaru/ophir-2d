@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { ContractCard } from "./CanvasGroups";
-import { Contract, Fluctuation } from "../../shared_types";
+import { Contract, Fluctuation, MarketKey } from "../../shared_types";
 import clientConstants from "../client_constants";
 
 const { ICON_DATA } = clientConstants;
@@ -11,7 +11,9 @@ export class OpenContractDisplay implements DynamicGroupInterface<ContractCardUp
     private contractCard: ContractCard;
 
     constructor(
+        stage: Konva.Stage,
         layout: GroupLayoutData,
+        marketKey: MarketKey,
         contract: Contract,
         fluctuation: Fluctuation,
     ) {
@@ -23,14 +25,15 @@ export class OpenContractDisplay implements DynamicGroupInterface<ContractCardUp
         });
 
         const segmentHeight = this.group.height() / 6;
-
         this.contractCard = new ContractCard(
+            stage,
             {
                 width: this.group.width(),
                 height: segmentHeight * 4,
                 x: 0,
                 y: segmentHeight,
             },
+            { action: 'sell_goods', details: { contract: marketKey } },
             contract,
             fluctuation
         );

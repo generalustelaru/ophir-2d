@@ -17,6 +17,7 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
     private slot_3: OpenContractDisplay;
 
     constructor(
+        stage: Konva.Stage,
         location: HexId,
         marketFluctuations: MarketFluctuations,
         market: MarketOffer,
@@ -41,7 +42,9 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
         const totalHeight = this.group.height();
         const contractCardWidth = this.group.width() / 4;
 
-        this.futureDisplay = new FutureContractDisplay({
+        this.futureDisplay = new FutureContractDisplay(
+            stage,
+            {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: 0,
@@ -51,34 +54,40 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
         );
 
         this.slot_1 = new OpenContractDisplay(
+            stage,
             {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: contractCardWidth,
                 y: 0,
             },
+            'slot_1',
             market.slot_1,
             marketFluctuations.slot_1,
         );
 
         this.slot_2 = new OpenContractDisplay(
+            stage,
             {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: contractCardWidth * 2,
                 y: 0,
             },
+            'slot_2',
             market.slot_2,
             marketFluctuations.slot_2,
         );
 
         this.slot_3 = new OpenContractDisplay(
+            stage,
             {
                 width: contractCardWidth,
                 height: totalHeight,
                 x: contractCardWidth * 3,
                 y: 0,
             },
+            'slot_3',
             market.slot_3,
             marketFluctuations.slot_3,
         );
