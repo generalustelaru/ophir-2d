@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, MarketKey, Contract, MarketOffer, SettlementAction } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, MarketKey, Contract, MarketOffer, SettlementAction, Player } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -63,6 +63,11 @@ export type LocationCardUpdate = {
     contracts: MarketOffer,
     feasibleContracts: Array<MarketKey>,
 };
+
+export type MarketUpdate = {
+    localPlayer: Player | null,
+    contracts: MarketOffer,
+}
 
 export type EventPayload = InfoEventPayload | ActionEventPayload | ErrorEventPayload | SetupEventPayload | null;
 

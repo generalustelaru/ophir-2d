@@ -1,16 +1,15 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData, LocationCardUpdate } from "../client_types";
+import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from "../client_types";
 import clientConstants from "../client_constants";
-import { HexId, MarketFluctuations, MarketKey, MarketOffer } from "../../shared_types";
+import { MarketFluctuations, MarketKey, MarketOffer } from "../../shared_types";
 import { FutureContractDisplay, OpenContractDisplay } from "./CanvasGroups";
 
 const { COLOR } = clientConstants;
 
-export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
+export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private marketLocation: HexId;
     private futureDisplay: FutureContractDisplay;
     private slot_1: OpenContractDisplay;
     private slot_2: OpenContractDisplay;
@@ -18,13 +17,10 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
 
     constructor(
         stage: Konva.Stage,
-        location: HexId,
         marketFluctuations: MarketFluctuations,
         market: MarketOffer,
         layout: GroupLayoutData,
     ) {
-        this.marketLocation = location;
-
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -101,17 +97,20 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
         );
     }
 
-    public updateElement(data: LocationCardUpdate): void {
+    public updateElement(data: MarketUpdate): void {
         this.futureDisplay.updateElement(data.contracts.future);
 
-        const activePlayerMayAct =
-            data.playerLocation === this.marketLocation
-            && data.playerAllowedSettlementAction === 'sell_goods';
+        const localPlayer = data.localPlayer;
+
+        const localPLayerMaySell = !!(
+            localPlayer?.isActive
+            && localPlayer?.allowedSettlementAction === 'sell_goods'
+        )
 
         const cardSlots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
 
         cardSlots.forEach(slot => {
-            const isFeasible = activePlayerMayAct && data.feasibleContracts.includes(slot)
+            const isFeasible = localPLayerMaySell && localPlayer.feasibleContracts.includes(slot)
             this[slot].updateElement({
                 contract: data.contracts[slot],
                 isFeasible,
