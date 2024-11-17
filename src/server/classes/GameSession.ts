@@ -192,6 +192,7 @@ export class GameSession {
 
         player.hasCargo = playerCargo.find(item => item !== 'empty') ? true : false;
         player.allowedSettlementAction = null;
+        player.moveActions = 0;
 
         const isNewContract = this.shiftMarket();
 
