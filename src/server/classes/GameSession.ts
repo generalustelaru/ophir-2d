@@ -100,7 +100,7 @@ export class GameSession {
     private processFavorSpending(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
-        if (player && player.favor > 0 && player.hasSpentFavor === false) {
+        if (player?.isActive && player.favor > 0 && player.hasSpentFavor === false) {
             player.favor -= 1;
             player.hasSpentFavor = true;
             player.isAnchored = true;

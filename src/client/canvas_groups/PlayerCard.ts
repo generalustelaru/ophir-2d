@@ -17,6 +17,7 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
     private id: PlayerId;
 
     constructor(
+        stage: Konva.Stage,
         player: Player,
         localPlayerId: PlayerId|null,
         yOffset: number,
@@ -39,7 +40,14 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
         });
 
         this.cargoDisplay = new CargoDisplay(player.cargo);
-        this.favorDial = new FavorDial(player.favor);
+
+        this.favorDial = new FavorDial(
+            stage,
+            { action: 'favor', details: null },
+            player,
+            localPlayerId
+        );
+
         this.coinDial = new CoinDial(
             { x: 105, y: 63 },
             player.coins
@@ -56,7 +64,7 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
     public updateElement(player: Player): void {
         this.cargoDisplay.updateElement(player.cargo);
         this.background.strokeWidth(player.isActive ? 3 : 0);
-        this.favorDial.updateElement(player.favor);
+        this.favorDial.updateElement(player);
         this.coinDial.updateElement(player.coins);
     }
 
