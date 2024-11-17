@@ -8,7 +8,6 @@ import { ResponsiveGroup } from "./ResponsiveGroup";
 const { COLOR } = clientConstants;
 export class ContractCard extends ResponsiveGroup implements DynamicGroupInterface<ContractCardUpdate> {
 
-    // private group: Konva.Group;
     private coinDial: CoinDial;
     private goodsDisplay: GoodsOrderDisplay;
     private cardInterior: Konva.Rect;
@@ -42,7 +41,7 @@ export class ContractCard extends ResponsiveGroup implements DynamicGroupInterfa
         });
 
         this.coinDial = new CoinDial(
-            {x: 38, y: 35 },
+            { x: 38, y: 35 },
             contract.reward.coins + (fluctuation ?? 0)
         );
 

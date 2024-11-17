@@ -48,7 +48,7 @@ export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
     }
 
     public updateElement(goodsOrder: Array<GoodId>): void {
-        console.log('Updating goods order display', goodsOrder);
+        console.log('GoodOrderDisplay', goodsOrder);
     }
 
     private getSingleGoodGroup(goods: Array<GoodId>): Konva.Group {
