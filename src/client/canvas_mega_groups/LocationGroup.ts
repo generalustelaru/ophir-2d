@@ -42,7 +42,6 @@ export class LocationGroup implements MegaGroupInterface {
 
         this.marketCard = new MarketCard(
             this.stage,
-            this.locations.market,
             clientState.received.setup.marketFluctuations,
             clientState.received.market,
             {
@@ -95,7 +94,14 @@ export class LocationGroup implements MegaGroupInterface {
             contracts: marketOffer,
             feasibleContracts: activePlayer.feasibleContracts,
         }
-        this.marketCard?.updateElement(cardData);
+
+        const localPlayer = sharedState.players.find(player => player.id === clientState.localPlayerId);
+        const marketUpdate = {
+            localPlayer: localPlayer ?? null,
+            contracts: marketOffer,
+        }
+
+        this.marketCard?.updateElement(marketUpdate);
         this.exchangeCard?.updateElement(cardData.playerLocation);
         this.templeCard?.updateElement(cardData.playerLocation);
     }
