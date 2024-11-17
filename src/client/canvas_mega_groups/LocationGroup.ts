@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { MegaGroupInterface, GroupLayoutData, LocationCardUpdate } from "../client_types";
+import { MegaGroupInterface, GroupLayoutData } from "../client_types";
 import { MarketCard, ExchangeCard, TempleCard } from "../canvas_groups/CanvasGroups";
 import clientState from '../state';
 import { HexId, SettlementId } from "../../shared_types";
@@ -88,13 +88,6 @@ export class LocationGroup implements MegaGroupInterface {
             throw new Error(`Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`);
         }
 
-        const cardData: LocationCardUpdate = {
-            playerLocation: activePlayer.location.hexId,
-            playerAllowedSettlementAction: activePlayer.allowedSettlementAction,
-            contracts: marketOffer,
-            feasibleContracts: activePlayer.feasibleContracts,
-        }
-
         const localPlayer = sharedState.players.find(player => player.id === clientState.localPlayerId);
         const marketUpdate = {
             localPlayer: localPlayer ?? null,
@@ -102,8 +95,8 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         this.marketCard?.updateElement(marketUpdate);
-        this.exchangeCard?.updateElement(cardData.playerLocation);
-        this.templeCard?.updateElement(cardData.playerLocation);
+        this.exchangeCard?.updateElement(activePlayer.location.hexId);
+        this.templeCard?.updateElement(activePlayer.location.hexId);
     }
 
     private matchLocations(settlements: Record<HexId, SettlementId>|null): Locations {

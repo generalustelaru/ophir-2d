@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, MarketKey, Contract, MarketOffer, SettlementAction, Player } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Contract, MarketOffer, Player } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -55,14 +55,6 @@ export type ContractCardUpdate = {
     contract: Contract,
     isFeasible: boolean,
 }
-
-export type LocationCardUpdate = {
-    // localPlayer // TODO: reconsider the payload composition. shouldn't be necessary to pass the local player here?
-    playerLocation: HexId,
-    playerAllowedSettlementAction: SettlementAction | null,
-    contracts: MarketOffer,
-    feasibleContracts: Array<MarketKey>,
-};
 
 export type MarketUpdate = {
     localPlayer: Player | null,
