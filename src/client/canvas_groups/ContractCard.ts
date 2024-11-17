@@ -23,6 +23,8 @@ export class ContractCard extends ResponsiveGroup implements DynamicGroupInterfa
     ) {
         super(stage, layout, actionPayload);
 
+        this.fluctuation = fluctuation;
+
         this.cardBorder = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
