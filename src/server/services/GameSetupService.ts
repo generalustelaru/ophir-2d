@@ -22,7 +22,7 @@ export class GameSetupService extends Service {
 
         sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
 
-        const { contractDeck, marketOffer } = this.determineStartingContracts(tools.getCopy(privateState.marketContracts));
+        const { contractDeck, marketOffer } = this.extractInitialContracts(tools.getCopy(privateState.marketContracts));
         privateState.marketContracts = contractDeck;
         sharedState.market = marketOffer;
 
@@ -165,7 +165,7 @@ export class GameSetupService extends Service {
         return result as MarketFluctuations;
     }
 
-    private determineStartingContracts(contracts: Array<Contract>): {contractDeck: Array<Contract>, marketOffer: MarketOffer} {
+    private extractInitialContracts(contracts: Array<Contract>): {contractDeck: Array<Contract>, marketOffer: MarketOffer} {
         const keys = ['future', 'slot_1', 'slot_2', 'slot_3'];
         const marketOffer = {} as any;
 

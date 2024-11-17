@@ -196,8 +196,8 @@ export class GameSession {
 
             playerCargo[cargoSlot] = 'empty';
         }
-        // update contracts
-        // update feasible contracts on each player
+        // TODO: update contracts
+        // TODO: update feasible contracts on each player
 
         return true;
     }
