@@ -69,9 +69,11 @@ export class GameSession {
 
         if (sailSuccess) {
             player.location = { hexId: destination, position: details.position };
-            player.allowedMoves = this.privateState.moveRules
+            player.allowedMoves = (
+                this.privateState.moveRules
                 .find(rule => rule.from === destination)?.allowed
-                .filter(move => move !== departure) as Array<HexId>;
+                .filter(move => move !== departure) as Array<HexId>
+            );
             player.isAnchored = true;
             player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player, destination);
         }
