@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, ContractFulfillmentDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, ContractFulfillmentDetails, SettlementId } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -334,9 +334,10 @@ export class GameSession {
 
     private getAllowedSettlementActionFromLocation(playerState: Player, hexId: HexId | null = null): SettlementAction | null {
         const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
+        const pickupSettlement: Array<SettlementId> = ['farms', 'mines', 'forest', 'quary'];
 
         switch (true) {
-            case ['farms', 'mines', 'forest', 'quary'].includes(settlementId): return 'pickup_good';
+            case pickupSettlement.includes(settlementId): return 'pickup_good';
             case 'market' == settlementId: return 'sell_goods';
             case 'exchange' == settlementId: return 'buy_metals';
             case 'temple' == settlementId: return 'visit_temple';
