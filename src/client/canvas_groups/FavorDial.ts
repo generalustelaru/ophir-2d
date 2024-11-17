@@ -1,19 +1,25 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
-import { DynamicGroupInterface } from '../client_types';
+import { ActionEventPayload, DynamicGroupInterface } from '../client_types';
+import { ResponsiveGroup } from './ResponsiveGroup';
+import { Player, PlayerId } from '../../shared_types';
 
 const { ICON_DATA, COLOR } = clientConstants;
-export class FavorDial implements DynamicGroupInterface<number> {
-    private group: Konva.Group;
+export class FavorDial extends ResponsiveGroup implements DynamicGroupInterface<Player> {
     private favor: Konva.Text;
+    private localPlayerId: PlayerId | null;
 
     constructor(
-        favor: number,
+        stage: Konva.Stage,
+        actionPayload: ActionEventPayload | null,
+        player: Player,
+        localPlayerId: PlayerId | null
     ) {
-        this.group = new Konva.Group({
-            x: 15,
-            y: 40,
-        });
+        super(
+            stage,
+            { width: 100, height: 100, x: 15, y: 40 },
+            actionPayload
+        );
 
         const outerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_outer.shape,
@@ -31,24 +37,35 @@ export class FavorDial implements DynamicGroupInterface<number> {
             scale: { x: 2, y: 2 },
         });
 
-        const stampCenter = outerStamp.getClientRect().width/2;
+        const stampCenter = outerStamp.getClientRect().width / 2;
         this.favor = new Konva.Text({
             x: stampCenter - 7,
             y: stampCenter - 12,
-            text: favor.toString(),
+            text: player.favor.toString(),
             fontSize: 20,
             fill: COLOR.boneWhite,
             fontFamily: 'Arial',
         });
 
         this.group.add(outerStamp, innerStamp, this.favor);
+
+        this.setEnabled(player.id === localPlayerId && player.isActive && player.favor > 0);
+        this.localPlayerId = localPlayerId;
     }
 
     public getElement(): Konva.Group {
         return this.group;
     }
 
-    public updateElement(value: number): void {
-        this.favor.text(value.toString());
+    public updateElement(player: Player): void {
+        this.setEnabled((
+            player.id === this.localPlayerId
+            && player.isActive
+            && player.favor > 0
+            && !player.hasSpentFavor
+            && player.moveActions > 0
+        ));
+
+        this.favor.text(player.favor.toString());
     }
 }
