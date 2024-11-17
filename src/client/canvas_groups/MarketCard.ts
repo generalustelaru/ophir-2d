@@ -108,7 +108,7 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
 
         cardSlots.forEach(slot => {
             this[slot].updateElement({
-                contract: data.contracts.slot_1,
+                contract: data.contracts[slot],
                 isFeasible: activePlayerIsHere && data.feasibleContracts.includes(slot),
             });
         });
