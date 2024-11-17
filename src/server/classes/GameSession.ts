@@ -123,14 +123,8 @@ export class GameSession {
         }
 
         manifest.splice(manifest.indexOf(details.item), 1, 'empty');
-        let hasCargo = false;
 
-        manifest.forEach(item => {
-
-            if (item !== 'empty') {
-                hasCargo = true;
-            }
-        });
+        const hasCargo = manifest.find(item => item !== 'empty') ? true : false;
 
         player.feasibleContracts = hasCargo ? this.getFeasableContracts(manifest) : [];
         player.hasCargo = hasCargo;
@@ -174,15 +168,14 @@ export class GameSession {
         const details = message.details as ContractFulfillmentDetails;
         const marketKey = details.contract;
 
-        if (!player?.feasibleContracts.includes(marketKey)) {
+        if (!player?.feasibleContracts.includes(marketKey) || !player.allowedSettlementAction) {
             return false;
         }
 
-        // update player coins
         const contract = this.sharedState.market[marketKey];
         const modifier = this.sharedState.setup.marketFluctuations[marketKey];
         player.coins += contract.reward.coins + modifier;
-        // remove contract goods from player cargo
+
         const soldGoods = contract.request;
         const playerCargo = player.cargo;
 
@@ -196,8 +189,21 @@ export class GameSession {
 
             playerCargo[cargoSlot] = 'empty';
         }
-        // TODO: update contracts
-        // TODO: update feasible contracts on each player
+
+        player.hasCargo = playerCargo.find(item => item !== 'empty') ? true : false;
+        player.allowedSettlementAction = null;
+
+        const isNewContract = this.shiftMarket();
+
+        if (!isNewContract) {
+            return false;
+        }
+
+        const players = this.sharedState.players;
+
+        players.forEach(player => {
+            player.feasibleContracts = this.getFeasableContracts(player.cargo);
+        });
 
         return true;
     }
@@ -390,5 +396,27 @@ export class GameSession {
         });
 
         return feasable;
+    }
+
+    private shiftMarket(): boolean {
+        const market = this.sharedState.market;
+
+        market.slot_3 = market.slot_2;
+        market.slot_2 = market.slot_1;
+        market.slot_1 = market.future;
+
+        const contractDeck = this.privateState.marketContracts;
+        const pick = Math.floor(Math.random() * contractDeck.length);
+        const newContract = contractDeck.splice(pick, 1).shift();
+
+        if (!newContract) {
+            console.error('No contract drawn');
+
+            return false;
+        }
+
+        market.future = newContract;
+
+        return true;
     }
 }

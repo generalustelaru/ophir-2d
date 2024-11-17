@@ -91,6 +91,7 @@ export class LocationGroup implements MegaGroupInterface {
 
         const cardData: LocationCardUpdate = {
             playerLocation: activePlayer.location.hexId,
+            playerAllowedSettlementAction: activePlayer.allowedSettlementAction,
             contracts: marketOffer,
             feasibleContracts: activePlayer.feasibleContracts,
         }

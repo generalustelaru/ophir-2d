@@ -103,13 +103,18 @@ export class MarketCard implements DynamicGroupInterface<LocationCardUpdate> {
 
     public updateElement(data: LocationCardUpdate): void {
         this.futureDisplay.updateElement(data.contracts.future);
-        const activePlayerIsHere = data.playerLocation === this.marketLocation;
+
+        const activePlayerMayAct =
+            data.playerLocation === this.marketLocation
+            && data.playerAllowedSettlementAction === 'sell_goods';
+
         const cardSlots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
 
         cardSlots.forEach(slot => {
+            const isFeasible = activePlayerMayAct && data.feasibleContracts.includes(slot)
             this[slot].updateElement({
                 contract: data.contracts[slot],
-                isFeasible: activePlayerIsHere && data.feasibleContracts.includes(slot),
+                isFeasible,
             });
         });
     }

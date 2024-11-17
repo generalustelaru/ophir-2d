@@ -19,36 +19,31 @@ export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
             y: layout.y,
         });
 
-        const count = goods.length;
-
-        if (count < 1 || count > 3) {
-            throw new Error('Invalid number of goods in goods order display');
-        }
-
-        const goodsGroup = (): Konva.Group => {
-            switch (count) {
-                case 1:
-                    return this.getSingleGoodGroup(goods);
-                case 2:
-                    return this.getDoubleGoodGroup(goods);
-                case 3:
-                    return this.getTripleGoodGroup(goods);
-                default:
-                    throw new Error('Invalid number of goods in goods order display');
-            }
-        }
-
-        this.group.add(
-            goodsGroup()
-        );
+        this.group.add(this.getGoodsGroup(goods));
     }
 
     public getElement(): Konva.Group {
         return this.group;
     }
 
-    public updateElement(goodsOrder: Array<GoodId>): void {
-        console.log('GoodOrderDisplay', goodsOrder);
+    public updateElement(goods: Array<GoodId>): void {
+        this.group.destroyChildren();
+        this.group.add(this.getGoodsGroup(goods));
+    }
+
+    private getGoodsGroup(goods: Array<GoodId>): Konva.Group {
+        const count = goods.length;
+
+        switch (count) {
+            case 1:
+                return this.getSingleGoodGroup(goods);
+            case 2:
+                return this.getDoubleGoodGroup(goods);
+            case 3:
+                return this.getTripleGoodGroup(goods);
+            default:
+                throw new Error('Invalid number of goods in goods order display');
+        }
     }
 
     private getSingleGoodGroup(goods: Array<GoodId>): Konva.Group {
