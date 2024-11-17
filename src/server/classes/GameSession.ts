@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, ContractFulfillmentDetails } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -31,6 +31,8 @@ export class GameSession {
                 return this.processRepositioning(message) ? this.sharedState : { error: `Illegal repositioning on ${id}` };
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
+            case 'sell_goods':
+                return this.processContractSale(message) ? this.sharedState : { error: `Illegal contract sale on ${id}` };
             case 'turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Illegal turn end on ${id}` };
             case 'drop_item':
@@ -165,6 +167,39 @@ export class GameSession {
         }
 
         return false;
+    }
+
+    private processContractSale(message: WebsocketClientMessage): boolean {
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const details = message.details as ContractFulfillmentDetails;
+        const marketKey = details.contract;
+
+        if (!player?.feasibleContracts.includes(marketKey)) {
+            return false;
+        }
+
+        // update player coins
+        const contract = this.sharedState.market[marketKey];
+        const modifier = this.sharedState.setup.marketFluctuations[marketKey];
+        player.coins += contract.reward.coins + modifier;
+        // remove contract goods from player cargo
+        const soldGoods = contract.request;
+        const playerCargo = player.cargo;
+
+        for (let i = 0; i < soldGoods.length; i++) {
+            const goodToUnload = soldGoods[i];
+            const cargoSlot = playerCargo.indexOf(goodToUnload);
+
+            if (cargoSlot === -1) {
+                return false;
+            }
+
+            playerCargo[cargoSlot] = 'empty';
+        }
+        // update contracts
+        // update feasible contracts on each player
+
+        return true;
     }
 
     private processEndTurn(playerId: PlayerId): boolean {
@@ -337,7 +372,6 @@ export class GameSession {
             for (let i = 0; i < cargo.length; i++) {
 
                 if (nonGoods.includes(cargo[i])) {
-
                     continue;
                 }
 
@@ -347,7 +381,6 @@ export class GameSession {
                 if (match !== -1) {
                     request.splice(match, 1);
                 }
-
             }
 
             if (request.length === 0) {
