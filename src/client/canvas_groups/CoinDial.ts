@@ -7,6 +7,7 @@ const { COLOR } = clientConstants;
 export class CoinDial implements DynamicGroupInterface<number> {
     private group: Konva.Group;
     private amount: Konva.Text;
+    private coinCenter: number;
     constructor(
         position: Coordinates,
         amount: number,
@@ -29,10 +30,10 @@ export class CoinDial implements DynamicGroupInterface<number> {
             fill: 'black',
         });
 
-        const coinCenter = this.group.getClientRect().width / 2;
+        this.coinCenter = this.group.getClientRect().width / 2;
         this.amount = new Konva.Text({
-            x: coinCenter - 5,
-            y: coinCenter - 10,
+            x: this.coinCenter - 5,
+            y: this.coinCenter - 10,
             text: amount.toString(),
             fontSize: 20,
             fill: 'black',
@@ -48,5 +49,6 @@ export class CoinDial implements DynamicGroupInterface<number> {
 
     public updateElement(value: number): void {
         this.amount.text(value.toString());
+        this.amount.x(value > 9 ? this.coinCenter - 12 : this.coinCenter - 5);
     }
 }
