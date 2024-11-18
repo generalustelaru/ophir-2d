@@ -1,23 +1,24 @@
 
 import Konva from 'konva';
-import { Coordinates, HexId, DiceSix } from '../../shared_types';
-import { Color, IslandData, SettlementData } from '../client_types';
+import { Coordinates, HexId, DiceSix, Player } from '../../shared_types';
+import { Color, DynamicGroupInterface, IslandData, SettlementData } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../client_constants';
 import { BoneIcon, LocationToken } from './CanvasGroups';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
-export class MapHex {
+export class MapHex implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;
     private island: Konva.Path;
-    private settlement: Konva.Group;
+    private settlement: LocationToken;
     private restrictedIcon: Konva.Path;
     private boneIcon: BoneIcon;
 
     constructor(
+        stage: Konva.Stage,
         center: Coordinates,
         name: HexId,
         offsetX:number,
@@ -56,8 +57,8 @@ export class MapHex {
         });
         this.group.add(this.island);
 
-        this.settlement = new LocationToken(settlement).getElement();
-        this.group.add(this.settlement);
+        this.settlement = new LocationToken(stage, settlement);
+        this.group.add(this.settlement.getElement());
 
         this.restrictedIcon = new Konva.Path({
             x: -75,
@@ -81,6 +82,22 @@ export class MapHex {
         this.group.add(this.boneIcon.getElement());
     }
 
+    updateElement(localPlayer: Player): void {
+        const hereAndNow = (
+            localPlayer.location.hexId === this.getId()
+            && localPlayer.isActive
+            && !!localPlayer.allowedSettlementAction
+        );
+
+        this.setFill(hereAndNow ? COLOR.locationHex : COLOR.defaultHex);
+
+        this.settlement.updateElement((
+            hereAndNow
+            && localPlayer.allowedSettlementAction === 'pickup_good'
+            && localPlayer.cargo.includes('empty')
+        ));
+    }
+
     public getElement(): Konva.Group {
         return this.group;
     }
@@ -98,6 +115,7 @@ export class MapHex {
     public setBoneIcon(value: DiceSix|false): void {
         this.boneIcon.updateElement(value);
     }
+
     public isIntersecting(vector: Vector2d|null): boolean {
         if (!vector) {
             return false;

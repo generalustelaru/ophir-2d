@@ -8,7 +8,7 @@ import { CanvasService } from "./CanvasService";
 export class UserInterfaceService extends Service {
 
     createButton; joinButton; startButton; playerColorSelect;
-    pickupGoodButton; dropItemSelect;
+    dropItemSelect;
 
     constructor() {
         super();
@@ -79,8 +79,6 @@ export class UserInterfaceService extends Service {
                 element.disabled = true;
             },
         }
-
-        this.pickupGoodButton = new Button('pickupGoodButton', this.processPickup);
     }
 
     private processStart = (): void => {
@@ -112,12 +110,6 @@ export class UserInterfaceService extends Service {
         return this.setInfo('This color has just been taken :(');
     }
 
-    private processPickup = (): void => {
-        const payload: ActionEventPayload = { action: 'pickup_good', details: null };
-
-        return this.broadcastEvent('action', payload);
-    }
-
     private requestItemDrop = (): void => {
         const item = this.dropItemSelect.element.value as ManifestItem;
         const payload: ActionEventPayload = { action: 'drop_item', details: { item } };
@@ -142,7 +134,6 @@ export class UserInterfaceService extends Service {
     }
 
     private disableGameControls(): void {
-        this.pickupGoodButton.disable();
         this.dropItemSelect.disable();
     }
 
@@ -156,13 +147,6 @@ export class UserInterfaceService extends Service {
 
             if (player.hasCargo) {
                 this.dropItemSelect.enable();
-            }
-
-            if (
-                player.allowedSettlementAction === 'pickup_good' // will probably become a switch as new actions are added
-                && player.cargo.find(item => item === 'empty')
-            ) {
-                this.pickupGoodButton.enable();
             }
         }
     }

@@ -3,7 +3,7 @@ import Konva from 'konva';
 
 export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
-export type SettlementData = { shape: string, fill: Color };
+export type SettlementData = { id: SettlementId, shape: string, fill: Color };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
