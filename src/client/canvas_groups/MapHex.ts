@@ -69,7 +69,15 @@ export class MapHex {
         });
         this.group.add(this.restrictedIcon);
 
-        this.boneIcon = new BoneIcon();
+        this.boneIcon = new BoneIcon(
+            {
+                width: 50,
+                height: 50,
+                x: 25,
+                y: 25,
+            },
+            COLOR.boneWhite
+        );
         this.group.add(this.boneIcon.getElement());
     }
 

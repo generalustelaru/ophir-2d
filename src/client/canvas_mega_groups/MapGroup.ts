@@ -82,7 +82,6 @@ export class MapGroup implements MegaGroupInterface {
                     player.isActive,
                     player.id
                 );
-                ship.setInfluence(player.influence);
                 this.opponentShips.push(ship);
                 this.group.add(ship.getElement());
             }
@@ -107,7 +106,6 @@ export class MapGroup implements MegaGroupInterface {
             localPlayer.isActive,
             this.mapHexes,
         );
-        this.localShip.setInfluence(localPlayer.influence);
         this.localShip.switchControl(localPlayer.isActive);
 
         this.group.add(this.localShip.getElement());
@@ -155,7 +153,6 @@ export class MapGroup implements MegaGroupInterface {
             localShip.switchControl(localPlayer.isActive);
             localShip.switchHighlight(localPlayer.isActive);
             localShip.updateElement(localPlayer.location.position);
-            localShip.setInfluence(localPlayer.influence);
         }
     }
 

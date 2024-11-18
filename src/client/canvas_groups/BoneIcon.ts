@@ -1,29 +1,30 @@
 import Konva from "konva";
-import clientConstants from "../client_constants";
 import { DiceSix } from "../../shared_types";
 import { Coordinates } from "../../shared_types";
-import { DynamicGroupInterface } from "../client_types";
+import { Color, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 
 type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
 type PipData = Array<PipDataElement>
-const { COLOR } = clientConstants;
 export class BoneIcon implements DynamicGroupInterface<DiceSix|false> {
     private group: Konva.Group;
     private body: Konva.Rect;
     private dotMatrix: PipData;
 
-    constructor() {
+    constructor(
+        layout: GroupLayoutData,
+        color: Color,
+    ) {
         this.group = new Konva.Group({
-            width: 50,
-            height: 50,
-            offsetX: 25,
-            offsetY: 25,
+            width: layout.width,
+            height: layout.height,
+            offsetX: layout.x,
+            offsetY: layout.y,
         });
 
         this.body = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.boneWhite,
+            fill: color,
             cornerRadius: 10,
         });
         this.group.add(this.body);

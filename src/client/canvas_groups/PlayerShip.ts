@@ -11,7 +11,6 @@ const HEX_COUNT = 7;
 export class PlayerShip {
 
     private ship: Konva.Path;
-    private influence: Konva.Text;
     private group: Konva.Group;
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
@@ -24,10 +23,6 @@ export class PlayerShip {
     public getElement() {
         return this.group
     };
-
-    public setInfluence(value: number) {
-        this.influence.text(value.toString());
-    }
 
     public updateElement(coordinates: Coordinates) {
         this.group.x(coordinates.x);
@@ -163,18 +158,6 @@ export class PlayerShip {
             }
         });
         this.group.add(this.ship);
-
-        // MARK: - Influence text
-        const lightColored: Array<PlayerId> = ['playerYellow', 'playerRed'];
-        const influenceTextColor = lightColored.includes(playerId) ? 'black' : 'white';
-        this.influence = new Konva.Text({
-            x: 6,
-            y: 4,
-            fontSize: 10,
-            fontStyle: 'bold',
-            fill: influenceTextColor,
-        });
-        this.group.add(this.influence);
     }
 
     public getId(): PlayerId {
