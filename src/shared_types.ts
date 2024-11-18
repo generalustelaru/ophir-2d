@@ -8,9 +8,9 @@ export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver_a" | "silver_b" | "gold_a" | "gold_b"; // metals cover two cargo spaces
 export type SettlementId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
 export type Action =
-    | "inquire" | "enroll" | "start" | "move" | "reposition" | "favor" | "drop_item" | "refresh" | "turn"
+    | "inquire" | "enroll" | "start" | "move" | "reposition" | "favor" | "drop_item" | "refresh" | "turn" | "upgrade"
     | SettlementAction;
-export type SettlementAction = "visit_temple" | "sell_goods" | "buy_metals" | "pickup_good";
+export type SettlementAction = "upgrade_hold" | "sell_goods" | "buy_metals" | "pickup_good";
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";

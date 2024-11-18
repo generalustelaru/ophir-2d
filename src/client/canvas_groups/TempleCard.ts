@@ -1,21 +1,21 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import clientConstants from "../client_constants";
-import { HexId } from "../../shared_types";
+import { Player } from "../../shared_types";
+import { UpgradeBox } from "./UpgradeBox";
 
 const { COLOR } = clientConstants;
 
-export class TempleCard implements DynamicGroupInterface<HexId> {
+export class TempleCard implements DynamicGroupInterface<Player | null> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private templeLocation: HexId;
+    private upgradeBox: UpgradeBox;
 
     constructor(
-        location: HexId,
+        stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        this.templeLocation = location;
 
         this.group = new Konva.Group({
             width: layout.width,
@@ -31,17 +31,30 @@ export class TempleCard implements DynamicGroupInterface<HexId> {
             cornerRadius: 15,
         });
 
+        this.upgradeBox = new UpgradeBox(
+            stage,
+            // this.templeLocation,
+            {
+                width: 100,
+                height: 25 + 20,
+                x: layout.width - 100,
+                y: layout.height - 25 - 20,
+            }
+        );
+
         this.group.add(
             this.background,
+            this.upgradeBox.getElement(),
         );
     }
 
-    public updateElement(playerLocation: HexId): void {
-        if (playerLocation === this.templeLocation) {
-            this.background.fill(COLOR.templeBlue);
-        } else {
-            this.background.fill(COLOR.templeDarkBlue);
-        }
+    public updateElement(localPlayer: Player | null): void {
+        const isUpgradeAvailable = (
+            localPlayer?.allowedSettlementAction === 'upgrade_hold'
+            && localPlayer.coins >= 2
+            && localPlayer.cargo.length < 4
+        );
+        this.upgradeBox.updateElement(isUpgradeAvailable);
     }
 
     public getElement(): Konva.Group {

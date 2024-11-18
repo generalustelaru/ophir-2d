@@ -24,19 +24,21 @@ export class GameSession {
 
         switch (message.action) {
             case 'favor':
-                return this.processFavorSpending(id) ? this.sharedState : { error: `Illegal favor spend on ${id}` };
+                return this.processFavorSpending(id) ? this.sharedState : { error: `Could not process favor spending on ${id}` };
             case 'move':
-                return this.processMove(message) ? this.sharedState : { error: `Illegal move on ${id}` };
+                return this.processMove(message) ? this.sharedState : { error: `Could not process move on ${id}` };
             case 'reposition':
-                return this.processRepositioning(message) ? this.sharedState : { error: `Illegal repositioning on ${id}` };
+                return this.processRepositioning(message) ? this.sharedState : { error: `Could process repositioning on ${id}` };
             case 'pickup_good':
-                return this.processGoodPickup(id) ? this.sharedState : { error: `Illegal pickup on ${id}` };
+                return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
             case 'sell_goods':
-                return this.processContractSale(message) ? this.sharedState : { error: `Illegal contract sale on ${id}` };
+                return this.processContractSale(message) ? this.sharedState : { error: `Could not process contract sale on ${id}` };
             case 'turn':
-                return this.processEndTurn(id) ? this.sharedState : { error: `Illegal turn end on ${id}` };
+                return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
+            case 'upgrade':
+                return this.processUpgrade(id) ? this.sharedState : { error: `Could not process upgrade on ${id}` };
             case 'drop_item':
-                return this.processItemDrop(message) ? this.sharedState : { error: `Illegal drop on ${id}` };
+                return this.processItemDrop(message) ? this.sharedState : { error: `Could not process item drop on ${id}` };
             default:
                 return { error: `Unknown action on ${id}` };
         }
@@ -223,6 +225,24 @@ export class GameSession {
         return false;
     }
 
+    private processUpgrade(playerId: PlayerId): boolean {
+        const player = this.sharedState.players.find(player => player.id === playerId);
+
+        if (
+            player?.allowedSettlementAction === 'upgrade_hold'
+            && player.coins >= 2
+            && player.cargo.length < 4
+        ) {
+            player.coins -= 2;
+            player.cargo.push('empty');
+            player.allowedSettlementAction = null;
+
+            return true;
+        }
+
+        return false;
+    }
+
     // Helper methods
     private getPortRegistry(destinationHex: HexId): Array<RegistryItem> | false {
         const registry: Array<RegistryItem> = [];
@@ -349,7 +369,7 @@ export class GameSession {
             case pickupSettlement.includes(settlementId): return 'pickup_good';
             case 'market' == settlementId: return 'sell_goods';
             case 'exchange' == settlementId: return 'buy_metals';
-            case 'temple' == settlementId: return 'visit_temple';
+            case 'temple' == settlementId: return 'upgrade_hold';
             default:
                 console.error(`Unknown settlement at ${hexId}`);
                 return null;

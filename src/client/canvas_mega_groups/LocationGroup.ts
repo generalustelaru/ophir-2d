@@ -63,7 +63,7 @@ export class LocationGroup implements MegaGroupInterface {
         );
 
         this.templeCard = new TempleCard(
-            this.locations.temple,
+            this.stage,
             {
                 width: this.group.width(),
                 height: heightSegment * 2,
@@ -96,7 +96,7 @@ export class LocationGroup implements MegaGroupInterface {
 
         this.marketCard?.updateElement(marketUpdate);
         this.exchangeCard?.updateElement(activePlayer.location.hexId);
-        this.templeCard?.updateElement(activePlayer.location.hexId);
+        this.templeCard?.updateElement(localPlayer ?? null);
     }
 
     private matchLocations(settlements: Record<HexId, SettlementId>|null): Locations {

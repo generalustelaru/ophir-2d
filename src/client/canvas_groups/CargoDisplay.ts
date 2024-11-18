@@ -32,7 +32,9 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
         this.cargoDisplay = new Konva.Rect({
             width: cargo.length * SLOT_WIDTH,
             height: 25,
-            fill: COLOR.wood,
+            fill: COLOR.holdDarkRed,
+            stroke: COLOR.stampEdge,
+            hitStrokeWidth: 2,
             cornerRadius: 5,
             strokeWidth: 1,
         });
