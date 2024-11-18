@@ -27,7 +27,7 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
         this.group = new Konva.Group({
             width: 200,
             height: 100,
-            x: localPlayerId === player.id ? 0 : 25,
+            x: localPlayerId === player.id ? 25 : 50,
             y: yOffset,
         });
 
@@ -54,7 +54,14 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
             player.coins
         );
 
-        this.influenceDial = new BoneIcon();
+        this.influenceDial = new BoneIcon(
+            {
+                width: 50,
+                height: 50,
+                x: 60,
+                y: -25,
+            },
+            COLOR[player.id]);
         this.influenceDial.updateElement(player.influence);
 
         this.group.add(
