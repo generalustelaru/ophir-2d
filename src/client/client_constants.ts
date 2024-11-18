@@ -36,6 +36,7 @@ const clientConstants: ClientConstants = {
         templeDarkBlue: '#134e7d',
         arrowUp: '#225500',
         arrowDown: '#501616',
+        upgradeBoxSilver:'#999999',
     },
     HEX_OFFSET_DATA: [
         { id: 'center', x: 0, y: 0 },
