@@ -52,6 +52,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const mapHex = new MapHex(
+                this.stage,
                 centerPoint,
                 hexItem.id,
                 hexItem.x,
@@ -112,7 +113,7 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public updateElements() {
+    public updateElements(): void {
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
@@ -123,13 +124,7 @@ export class MapGroup implements MegaGroupInterface {
             this.movesDial?.updateElement(localPlayer);
 
             for (const mapHex of this.mapHexes) {
-                mapHex.setFill(
-                    (
-                    localPlayer.isActive
-                    && localPlayer.location.hexId === mapHex.getId()
-                    && localPlayer.allowedSettlementAction
-                    ) ? COLOR.locationHex : COLOR.defaultHex
-                );
+                mapHex.updateElement(localPlayer);
             }
         }
 

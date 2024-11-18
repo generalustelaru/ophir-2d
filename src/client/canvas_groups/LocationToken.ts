@@ -1,13 +1,15 @@
 import Konva from 'konva';
-import { StaticGroupInterface, SettlementData } from '../client_types';
+import { SettlementData, DynamicGroupInterface } from '../client_types';
+import { ResponsiveGroup } from './ResponsiveGroup';
 
-export class LocationToken implements StaticGroupInterface{
-
-    group: Konva.Group;
+export class LocationToken extends ResponsiveGroup implements DynamicGroupInterface<boolean> {
     icon: Konva.Path;
 
-    constructor(settlement: SettlementData) {
-        this.group = new Konva.Group({});
+    constructor(
+        stage: Konva.Stage,
+        settlement: SettlementData
+    ) {
+        super(stage, {width: 100, height: 100, x: 0, y: 0}, { action: 'pickup_good', details: null });
 
         this.icon = new Konva.Path({
             x: -26,
@@ -23,5 +25,9 @@ export class LocationToken implements StaticGroupInterface{
 
     public getElement() {
         return this.group;
+    }
+
+    public updateElement(mayPickup: boolean): void {
+        this.setEnabled(mayPickup);
     }
 }
