@@ -9,16 +9,22 @@ export class LocationToken extends ResponsiveGroup implements DynamicGroupInterf
         stage: Konva.Stage,
         settlement: SettlementData
     ) {
-        super(stage, {width: 100, height: 100, x: 0, y: 0}, { action: 'pickup_good', details: null });
+        const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(settlement.id);
+        const isExchage = settlement.id === 'exchange';
+        const makeLarger = isExchage || isPickup;
+        const scale = makeLarger ? 3 : 2;
+        const drift = makeLarger ? -39 : -26;
+
+        super(stage, {width: 100, height: 100, x: 0, y: 0}, isPickup ? { action: 'pickup_good', details: null } : null);
 
         this.icon = new Konva.Path({
-            x: -26,
-            y: -26,
+            x: drift,
+            y: drift,
             data: settlement.shape,
             fill: settlement.fill,
             stroke: 'white',
-            strokeWidth: 1,
-            scale: {x: 2, y: 2},
+            strokeWidth: makeLarger ? .75 : 1,
+            scale: {x: scale, y: scale},
         });
         this.group.add(this.icon);
     }
