@@ -40,7 +40,7 @@ export class MapGroup implements MegaGroupInterface {
         this.anchorDial = new AnchorDial(
             this.stage,
             this.group,
-            { action: 'turn', details: null },
+            { action: 'end_turn', details: null },
             localPlayer?.isActive ?? false,
             );
         this.group.add(this.anchorDial.getElement());
