@@ -9,6 +9,7 @@ const { COLOR } = clientConstants;
 export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface<boolean> {
 
     private background: Konva.Rect;
+    private plusSign: Konva.Text;
 
     constructor(
         stage: Konva.Stage,
@@ -25,9 +26,9 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
 
         const coin = new CoinDial({ x: 15, y: 20 }, 2);
 
-        const plusSign = new Konva.Text({
-            x: 45,
-            y: 8,
+        this.plusSign = new Konva.Text({
+            x: 50,
+            y: 5,
             text: '+',
             fontSize: 30,
             fontFamily: 'Calibri',
@@ -35,7 +36,7 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
         });
 
         const cargoIcon = new Konva.Rect({
-            x: 70,
+            x: 45,
             y: 5,
             height: 30,
             width: 25,
@@ -50,13 +51,14 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
             this.background,
             coin.getElement(),
             cargoIcon,
-            plusSign,
+            this.plusSign,
         );
     }
 
     public updateElement(canUpgrade: boolean): void {
         this.setEnabled(canUpgrade);
         this.background.fill(canUpgrade ? COLOR.boneWhite : COLOR.upgradeBoxSilver);
+        this.plusSign.fill(canUpgrade ? COLOR.boneWhite : 'black');
     }
 
     public getElement(): Konva.Group {
