@@ -39,7 +39,7 @@ export class EndTurnButton extends ActionGroup implements DynamicGroupInterface<
             scale: { x: 1.5, y: 1.5 },
         });
 
-        this.group.add( hoverZone, this.anchor, );
+        this.group.add(hoverZone, this.anchor);
     }
 
     public getElement() {
