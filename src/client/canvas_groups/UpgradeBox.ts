@@ -23,7 +23,7 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
             cornerRadius: 15,
         });
 
-        const coin = new CoinDial({ x: 15, y: 22 }, 2);
+        const coin = new CoinDial({ x: 15, y: 20 }, 2);
 
         const plusSign = new Konva.Text({
             x: 45,
@@ -36,9 +36,9 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
 
         const cargoIcon = new Konva.Rect({
             x: 70,
-            y: 10,
-            height: 25,
-            width: 15,
+            y: 5,
+            height: 30,
+            width: 25,
             fill: COLOR.holdDarkRed,
             stroke: COLOR.stampEdge,
             hitStrokeWidth: 2,

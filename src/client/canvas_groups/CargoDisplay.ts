@@ -4,7 +4,7 @@ import { CargoManifest, ManifestItem } from '../../shared_types';
 import { DynamicGroupInterface } from '../client_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
-const SLOT_WIDTH = 15;
+const SLOT_WIDTH = 25;
 
 type CargoSlot = {
     x: number,
@@ -17,12 +17,12 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
 
     constructor(cargo: CargoManifest) {
         this.group = new Konva.Group({
-            width: 60,
-            height: 25,
+            width: cargo.length * SLOT_WIDTH,
+            height: 30,
             x: 10,
-            y: 10,
+            y: 5,
         });
-        const pathBackDrift = -6;
+        const pathBackDrift = -14;
         this.cargoDrawData = [
             { x: pathBackDrift, element: null },
             { x: pathBackDrift + SLOT_WIDTH, element: null },
@@ -30,8 +30,8 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
             { x: pathBackDrift + SLOT_WIDTH * 3, element: null },
         ];
         this.cargoDisplay = new Konva.Rect({
-            width: cargo.length * SLOT_WIDTH,
-            height: 25,
+            width: this.group.width(),
+            height: this.group.height(),
             fill: COLOR.holdDarkRed,
             stroke: COLOR.stampEdge,
             hitStrokeWidth: 2,
@@ -61,10 +61,12 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
         const itemData = CARGO_ITEM_DATA[itemId];
         const itemIcon = new Konva.Path({
             x: cargoSlot.x,
+            y: - 12,
             data: itemData.shape,
             fill: itemData.fill,
             stroke: 'white',
             strokeWidth: 1,
+            scale: { x: 2, y: 2 },
         });
         cargoSlot.element = itemIcon;
         this.group.add(itemIcon);
