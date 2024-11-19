@@ -47,21 +47,16 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
             { action: 'spend_favor', details: null },
             player,
             localPlayerId,
-            { width: 100, height: 100, x: 15, y: 40 },
+            { width: 100, height: 100, x: 10, y: 42 },
         );
 
         this.coinDial = new CoinDial(
-            { x: 105, y: 63 },
+            { x: 85, y: 65 },
             player.coins
         );
 
         this.influenceDial = new BoneIcon(
-            {
-                width: 50,
-                height: 50,
-                x: 60,
-                y: -25,
-            },
+            { width: 50, height: 50, x: 60, y: -25 },
             COLOR[player.id]);
         this.influenceDial.updateElement(player.influence);
 

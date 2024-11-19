@@ -28,7 +28,7 @@ export class ActionDial implements DynamicGroupInterface<Player> {
 
     public updateElement(player: Player): void {
 
-        const pendingAction = player.isActive && player.allowedSettlementAction || player.moveActions === 2;
+        const pendingAction = player.isActive && (player.allowedSettlementAction || player.moveActions === 2);
 
         this.luminary.data(ICON_DATA[pendingAction ? 'sun' : 'moon'].shape);
         this.luminary.fill(ICON_DATA[pendingAction ? 'sun' : 'moon'].fill);

@@ -17,10 +17,11 @@ import { FutureContractDisplay } from './FutureContractDisplay';
 import { ContractCard } from './ContractCard';
 import { OpenContractDisplay } from './OpenContractDisplay';
 import { GoodsOrderDisplay } from './GoodsOrderDisplay';
+import { MovesDial } from './MovesDial';
 
 export {
     AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, ActionDial, PlayerShip,
     Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial, ExchangeCard,
     TempleCard, FutureContractDisplay, ContractCard, OpenContractDisplay,
-    GoodsOrderDisplay,
+    GoodsOrderDisplay, MovesDial,
 };
