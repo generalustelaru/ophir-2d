@@ -1,4 +1,4 @@
-import {EndTurnButton} from './AnchorDial';
+import { EndTurnButton } from './EndTurnButton';
 import { Barrier } from './Barrier';
 import { BoneIcon } from './BoneIcon';
 import { LocationToken } from './LocationToken';
