@@ -15,7 +15,7 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        super(stage, layout, { action: 'upgrade', details: null });
+        super(stage, layout, { action: 'upgrade_hold', details: null });
 
         this.background = new Konva.Rect({
             width: layout.width,
@@ -32,7 +32,7 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
             text: '+',
             fontSize: 30,
             fontFamily: 'Calibri',
-            fill: 'black',
+            fill: COLOR.boneWhite,
         });
 
         const cargoIcon = new Konva.Rect({
@@ -40,7 +40,7 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
             y: 5,
             height: 30,
             width: 25,
-            fill: COLOR.holdDarkRed,
+            fill: 'black',
             stroke: COLOR.stampEdge,
             hitStrokeWidth: 2,
             cornerRadius: 5,
@@ -58,7 +58,6 @@ export class UpgradeBox extends ResponsiveGroup implements DynamicGroupInterface
     public updateElement(canUpgrade: boolean): void {
         this.setEnabled(canUpgrade);
         this.background.fill(canUpgrade ? COLOR.boneWhite : COLOR.upgradeBoxSilver);
-        this.plusSign.fill(canUpgrade ? COLOR.boneWhite : 'black');
     }
 
     public getElement(): Konva.Group {

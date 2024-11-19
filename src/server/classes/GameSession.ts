@@ -23,7 +23,7 @@ export class GameSession {
         }
 
         switch (message.action) {
-            case 'favor':
+            case 'spend_favor':
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Could not process favor spending on ${id}` };
             case 'move':
                 return this.processMove(message) ? this.sharedState : { error: `Could not process move on ${id}` };
@@ -31,11 +31,11 @@ export class GameSession {
                 return this.processRepositioning(message) ? this.sharedState : { error: `Could process repositioning on ${id}` };
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
-            case 'sell_goods':
+            case 'fulfill_contract':
                 return this.processContractSale(message) ? this.sharedState : { error: `Could not process contract sale on ${id}` };
-            case 'turn':
+            case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
-            case 'upgrade':
+            case 'upgrade_hold':
                 return this.processUpgrade(id) ? this.sharedState : { error: `Could not process upgrade on ${id}` };
             case 'drop_item':
                 return this.processItemDrop(message) ? this.sharedState : { error: `Could not process item drop on ${id}` };
@@ -367,7 +367,7 @@ export class GameSession {
 
         switch (true) {
             case pickupSettlement.includes(settlementId): return 'pickup_good';
-            case 'market' == settlementId: return 'sell_goods';
+            case 'market' == settlementId: return 'fulfill_contract';
             case 'exchange' == settlementId: return 'buy_metals';
             case 'temple' == settlementId: return 'upgrade_hold';
             default:

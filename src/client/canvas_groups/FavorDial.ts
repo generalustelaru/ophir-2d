@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
-import { ActionEventPayload, DynamicGroupInterface } from '../client_types';
+import { ActionEventPayload, DynamicGroupInterface, GroupLayoutData } from '../client_types';
 import { ResponsiveGroup } from './ResponsiveGroup';
 import { Player, PlayerId } from '../../shared_types';
 
@@ -13,11 +13,12 @@ export class FavorDial extends ResponsiveGroup implements DynamicGroupInterface<
         stage: Konva.Stage,
         actionPayload: ActionEventPayload | null,
         player: Player,
-        localPlayerId: PlayerId | null
+        localPlayerId: PlayerId | null,
+        layout: GroupLayoutData,
     ) {
         super(
             stage,
-            { width: 100, height: 100, x: 15, y: 40 },
+            layout,
             actionPayload
         );
 

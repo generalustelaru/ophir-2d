@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
-import { CargoManifest, ManifestItem } from '../../shared_types';
-import { DynamicGroupInterface } from '../client_types';
+import { CargoManifest, ManifestItem, PlayerId } from '../../shared_types';
+import { Color, DynamicGroupInterface } from '../client_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 const SLOT_WIDTH = 25;
@@ -15,9 +15,9 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
 
-    constructor(cargo: CargoManifest) {
+    constructor(playerId: PlayerId, cargo: CargoManifest) {
         this.group = new Konva.Group({
-            width: cargo.length * SLOT_WIDTH,
+            width: SLOT_WIDTH * 4,
             height: 30,
             x: 10,
             y: 5,
@@ -29,16 +29,30 @@ export class CargoDisplay implements DynamicGroupInterface<CargoManifest> {
             { x: pathBackDrift + SLOT_WIDTH * 2, element: null },
             { x: pathBackDrift + SLOT_WIDTH * 3, element: null },
         ];
-        this.cargoDisplay = new Konva.Rect({
+        const backgroundMapping: Record<PlayerId, Color> = {
+            playerRed: COLOR.holdDarkRed,
+            playerPurple: COLOR.holdDarkPurple,
+            playerGreen: COLOR.holdDarkGreen,
+            playerYellow: COLOR.holdDarkYellow,
+        }
+        const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.holdDarkRed,
+            fill: backgroundMapping[playerId],
             stroke: COLOR.stampEdge,
-            hitStrokeWidth: 2,
             cornerRadius: 5,
             strokeWidth: 1,
         });
-        this.group.add(this.cargoDisplay);
+        this.cargoDisplay = new Konva.Rect({
+            width: cargo.length * SLOT_WIDTH,
+            height: this.group.height(),
+            fill: 'black',
+            cornerRadius: 5,
+        });
+        this.group.add(...[
+            background,
+            this.cargoDisplay
+        ]);
     }
 
     public updateElement(cargo: CargoManifest): void {

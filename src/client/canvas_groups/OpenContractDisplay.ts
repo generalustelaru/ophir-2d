@@ -33,7 +33,7 @@ export class OpenContractDisplay implements DynamicGroupInterface<ContractCardUp
                 x: 0,
                 y: segmentHeight,
             },
-            { action: 'sell_goods', details: { contract: marketKey } },
+            { action: 'fulfill_contract', details: { contract: marketKey } },
             contract,
             fluctuation
         );

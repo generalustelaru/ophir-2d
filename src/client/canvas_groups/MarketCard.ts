@@ -104,7 +104,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
 
         const localPLayerMaySell = !!(
             localPlayer?.isActive
-            && localPlayer?.allowedSettlementAction === 'sell_goods'
+            && localPlayer?.allowedSettlementAction === 'fulfill_contract'
         )
 
         const cardSlots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
