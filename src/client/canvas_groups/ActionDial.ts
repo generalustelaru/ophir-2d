@@ -4,7 +4,7 @@ import { Player } from "../../shared_types";
 import { DynamicGroupInterface } from "../client_types";
 
 const { ICON_DATA, COLOR } = constants;
-export class MovesDial implements DynamicGroupInterface<Player> {
+export class ActionDial implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private luminary: Konva.Path;
@@ -22,19 +22,15 @@ export class MovesDial implements DynamicGroupInterface<Player> {
         this.group.add(this.luminary);
     }
 
-    public getElement() {
+    public getElement(): Konva.Group {
         return this.group;
     }
 
-    public updateElement(player: Player) {
+    public updateElement(player: Player): void {
 
-        if (!player.isActive || player.moveActions === 0) {
-            this.luminary.data(ICON_DATA.moon.shape);
-            this.luminary.fill(ICON_DATA.moon.fill);
-            return;
-        }
+        const pendingAction = player.isActive && player.allowedSettlementAction || player.moveActions === 2;
 
-        this.luminary.data(ICON_DATA.sun.shape);
-        this.luminary.fill(player.moveActions > 1 ? ICON_DATA.sun.fill : COLOR.sunset);
+        this.luminary.data(ICON_DATA[pendingAction ? 'sun' : 'moon'].shape);
+        this.luminary.fill(ICON_DATA[pendingAction ? 'sun' : 'moon'].fill);
     }
 }
