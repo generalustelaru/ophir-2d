@@ -16,11 +16,7 @@ export class FavorDial extends ResponsiveGroup implements DynamicGroupInterface<
         localPlayerId: PlayerId | null,
         layout: GroupLayoutData,
     ) {
-        super(
-            stage,
-            layout,
-            actionPayload
-        );
+        super(stage, layout, actionPayload);
 
         const outerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_outer.shape,
