@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHex, Barrier, Ship, PlayerShip, AnchorDial, MovesDial } from '../canvas_groups/CanvasGroups';
+import { MapHex, Barrier, Ship, PlayerShip, AnchorDial, ActionDial } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
@@ -11,7 +11,7 @@ export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private anchorDial: AnchorDial | null = null;
-    private movesDial: MovesDial | null = null;
+    private movesDial: ActionDial | null = null;
     private mapHexes: Array<MapHex> = [];
     private opponentShips: Array<Ship> = [];
     private localShip: PlayerShip | null = null;
@@ -45,7 +45,7 @@ export class MapGroup implements MegaGroupInterface {
             );
         this.group.add(this.anchorDial.getElement());
 
-        this.movesDial = new MovesDial(this.group, localPlayer?.isActive ?? false);
+        this.movesDial = new ActionDial(this.group, localPlayer?.isActive ?? false);
         this.group.add(this.movesDial.getElement());
 
 

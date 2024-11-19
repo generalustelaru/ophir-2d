@@ -3,7 +3,7 @@ import { Barrier } from './Barrier';
 import { BoneIcon } from './BoneIcon';
 import { LocationToken } from './LocationToken';
 import { MapHex } from './MapHex';
-import { MovesDial } from './MovesDial';
+import { ActionDial } from './ActionDial';
 import { PlayerShip } from './PlayerShip';
 import { Ship } from './Ship';
 import { PlayerCard } from './PlayerCard';
@@ -19,7 +19,7 @@ import { OpenContractDisplay } from './OpenContractDisplay';
 import { GoodsOrderDisplay } from './GoodsOrderDisplay';
 
 export {
-    AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, MovesDial, PlayerShip,
+    AnchorDial, Barrier, BoneIcon, LocationToken, MapHex, ActionDial, PlayerShip,
     Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial, ExchangeCard,
     TempleCard, FutureContractDisplay, ContractCard, OpenContractDisplay,
     GoodsOrderDisplay,
