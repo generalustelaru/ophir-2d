@@ -64,8 +64,8 @@ export class CanvasService extends Service {
 
     public drawElements(): void {
         this.locationGroup.drawElements();
-        this.mapGroup.drawElements();
         this.playerCardGroup.drawElements();
+        this.mapGroup.drawElements();
 
         if (!clientState.localPlayerId) {
             this.broadcastEvent('info', { text: 'You are a spectator' });

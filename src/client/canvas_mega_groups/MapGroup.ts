@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHex, Barrier, Ship, PlayerShip, MovesDial, AnchorDial, ActionDial } from '../canvas_groups/CanvasGroups';
+import { MapHex, Barrier, Ship, PlayerShip, MovesDial, AnchorDial, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
@@ -13,6 +13,7 @@ export class MapGroup implements MegaGroupInterface {
     private movesDial: MovesDial | null = null;
     private anchorDial: AnchorDial | null = null;
     private actionDial: ActionDial | null = null;
+    private favorButton: FavorButton | null = null;
     private mapHexes: Array<MapHex> = [];
     private opponentShips: Array<Ship> = [];
     private localShip: PlayerShip | null = null;
@@ -47,12 +48,21 @@ export class MapGroup implements MegaGroupInterface {
             isActivePlayer,
         );
 
+        this.favorButton = new FavorButton(
+            this.stage,
+            { action: 'spend_favor', details: null },
+            isActivePlayer,
+            isActivePlayer && !!localPlayer && localPlayer.influence > 0,
+            { width: 100, height: 100, x: 250, y: 35 },
+        );
+
         this.actionDial = new ActionDial(this.group, isActivePlayer);
 
         this.group.add(...[
             this.movesDial.getElement(),
             this.anchorDial.getElement(),
             this.actionDial.getElement(),
+            this.favorButton.getElement(),
         ]);
 
         //MARK: hexes
@@ -129,6 +139,7 @@ export class MapGroup implements MegaGroupInterface {
             this.movesDial?.updateElement(localPlayer);
             this.anchorDial?.updateElement(localPlayer);
             this.actionDial?.updateElement(localPlayer);
+            this.favorButton?.updateElement(localPlayer);
 
             for (const mapHex of this.mapHexes) {
                 mapHex.updateElement(localPlayer);

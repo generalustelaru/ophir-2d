@@ -1,23 +1,20 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
-import { ActionEventPayload, DynamicGroupInterface, GroupLayoutData } from '../client_types';
-import { ActionGroup } from './ActionGroup';
-import { Player, PlayerId } from '../../shared_types';
+import { DynamicGroupInterface, GroupLayoutData } from '../client_types';
 
 const { ICON_DATA, COLOR } = clientConstants;
-export class FavorDial extends ActionGroup implements DynamicGroupInterface<Player> {
-    private favor: Konva.Text;
-    private localPlayerId: PlayerId | null;
+export class FavorDial implements DynamicGroupInterface<number | null> {
+    private group: Konva.Group;
+    private favorCount: Konva.Text | null;
 
     constructor(
-        stage: Konva.Stage,
-        actionPayload: ActionEventPayload | null,
-        player: Player,
-        localPlayerId: PlayerId | null,
+        favor: number | null,
         layout: GroupLayoutData,
     ) {
-        super(stage, layout, actionPayload);
-
+        this.group = new Konva.Group({
+            x: layout.x,
+            y: layout.y,
+        });
         const outerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_outer.shape,
             fill: ICON_DATA.favor_stamp_outer.fill,
@@ -35,34 +32,28 @@ export class FavorDial extends ActionGroup implements DynamicGroupInterface<Play
         });
 
         const stampCenter = outerStamp.getClientRect().width / 2;
-        this.favor = new Konva.Text({
+
+        this.favorCount = favor ? new Konva.Text({
             x: stampCenter - 7,
             y: stampCenter - 12,
-            text: player.favor.toString(),
+            text: favor.toString(),
             fontSize: 20,
             fill: COLOR.boneWhite,
             fontFamily: 'Arial',
-        });
+        }) : null;
 
-        this.group.add(outerStamp, innerStamp, this.favor);
+        this.group.add(outerStamp, innerStamp);
 
-        this.setEnabled(player.id === localPlayerId && player.isActive && player.favor > 0);
-        this.localPlayerId = localPlayerId;
+        if (this.favorCount) {
+            this.group.add(this.favorCount);
+        }
     }
 
     public getElement(): Konva.Group {
         return this.group;
     }
 
-    public updateElement(player: Player): void {
-        this.setEnabled((
-            player.id === this.localPlayerId
-            && player.isActive
-            && player.favor > 0
-            && !player.hasSpentFavor
-            && player.moveActions > 0
-        ));
-
-        this.favor.text(player.favor.toString());
+    public updateElement(favor: number): void {
+        this.favorCount?.text(favor.toString());
     }
 }
