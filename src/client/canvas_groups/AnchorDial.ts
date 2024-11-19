@@ -6,7 +6,7 @@ import { ActionGroup } from './ActionGroup';
 
 const { ICON_DATA, COLOR } = constants;
 // TODO: rename to EndTurnButton
-export class AnchorDial extends ActionGroup implements DynamicGroupInterface<Player> {
+export class EndTurnButton extends ActionGroup implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 
     constructor(

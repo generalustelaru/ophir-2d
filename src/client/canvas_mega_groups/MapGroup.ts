@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHex, Barrier, Ship, PlayerShip, MovesDial, AnchorDial, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
+import { MapHex, Barrier, Ship, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
@@ -11,7 +11,7 @@ export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private movesDial: MovesDial | null = null;
-    private anchorDial: AnchorDial | null = null;
+    private endTurnButton: EndTurnButton | null = null;
     private actionDial: ActionDial | null = null;
     private favorButton: FavorButton | null = null;
     private mapHexes: Array<MapHex> = [];
@@ -41,7 +41,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: dials
         this.movesDial = new MovesDial(isActivePlayer);
 
-        this.anchorDial = new AnchorDial(
+        this.endTurnButton = new EndTurnButton(
             this.stage,
             this.group,
             { action: 'end_turn', details: null },
@@ -60,7 +60,7 @@ export class MapGroup implements MegaGroupInterface {
 
         this.group.add(...[
             this.movesDial.getElement(),
-            this.anchorDial.getElement(),
+            this.endTurnButton.getElement(),
             this.actionDial.getElement(),
             this.favorButton.getElement(),
         ]);
@@ -137,7 +137,7 @@ export class MapGroup implements MegaGroupInterface {
         if (localPlayer) {
             //MARK: dials & hexes
             this.movesDial?.updateElement(localPlayer);
-            this.anchorDial?.updateElement(localPlayer);
+            this.endTurnButton?.updateElement(localPlayer);
             this.actionDial?.updateElement(localPlayer);
             this.favorButton?.updateElement(localPlayer);
 
