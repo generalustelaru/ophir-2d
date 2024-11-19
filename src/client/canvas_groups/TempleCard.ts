@@ -34,7 +34,7 @@ export class TempleCard implements DynamicGroupInterface<Player | null> {
         this.upgradeBox = new UpgradeBox(
             stage,
             {
-                width: 100,
+                width: 80,
                 height: 30 + 10,
                 x: layout.width - 100,
                 y: layout.height - 25 - 20,
