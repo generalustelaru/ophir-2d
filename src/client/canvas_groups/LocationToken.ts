@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { SettlementData, DynamicGroupInterface } from '../client_types';
-import { ResponsiveGroup } from './ResponsiveGroup';
+import { ActionGroup } from './ActionGroup';
 
-export class LocationToken extends ResponsiveGroup implements DynamicGroupInterface<boolean> {
+export class LocationToken extends ActionGroup implements DynamicGroupInterface<boolean> {
     icon: Konva.Path;
 
     constructor(

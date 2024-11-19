@@ -2,11 +2,11 @@ import Konva from 'konva';
 import constants from '../client_constants';
 import { Player } from '../../shared_types';
 import { ActionEventPayload, DynamicGroupInterface } from '../client_types';
-import { ResponsiveGroup } from './ResponsiveGroup';
+import { ActionGroup } from './ActionGroup';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class AnchorDial extends ResponsiveGroup implements DynamicGroupInterface<Player> {
+export class AnchorDial extends ActionGroup implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 
     constructor(

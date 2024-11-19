@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import clientConstants from '../client_constants';
 import { ActionEventPayload, DynamicGroupInterface, GroupLayoutData } from '../client_types';
-import { ResponsiveGroup } from './ResponsiveGroup';
+import { ActionGroup } from './ActionGroup';
 import { Player, PlayerId } from '../../shared_types';
 
 const { ICON_DATA, COLOR } = clientConstants;
-export class FavorDial extends ResponsiveGroup implements DynamicGroupInterface<Player> {
+export class FavorDial extends ActionGroup implements DynamicGroupInterface<Player> {
     private favor: Konva.Text;
     private localPlayerId: PlayerId | null;
 

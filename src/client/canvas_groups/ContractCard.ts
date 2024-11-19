@@ -3,10 +3,10 @@ import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLay
 import { Contract } from "../../shared_types";
 import { CoinDial, GoodsOrderDisplay } from "./CanvasGroups";
 import clientConstants from "../client_constants";
-import { ResponsiveGroup } from "./ResponsiveGroup";
+import { ActionGroup } from "./ActionGroup";
 
 const { COLOR } = clientConstants;
-export class ContractCard extends ResponsiveGroup implements DynamicGroupInterface<ContractCardUpdate> {
+export class ContractCard extends ActionGroup implements DynamicGroupInterface<ContractCardUpdate> {
 
     private coinDial: CoinDial;
     private goodsDisplay: GoodsOrderDisplay;
