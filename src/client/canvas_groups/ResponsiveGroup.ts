@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ActionEventPayload, GroupLayoutData } from '../client_types';
-export class ResponsiveGroup {
+export class ResponsiveGroup { // TODO: rename to ActionGroup
     protected group: Konva.Group;
     private stage: Konva.Stage;
     private payload: ActionEventPayload | null;

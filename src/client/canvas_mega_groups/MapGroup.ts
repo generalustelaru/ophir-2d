@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHex, Barrier, Ship, PlayerShip, AnchorDial, ActionDial } from '../canvas_groups/CanvasGroups';
+import { MapHex, Barrier, Ship, PlayerShip, MovesDial, AnchorDial, ActionDial } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
@@ -10,8 +10,9 @@ const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clie
 export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private stage: Konva.Stage;
+    private movesDial: MovesDial | null = null;
     private anchorDial: AnchorDial | null = null;
-    private movesDial: ActionDial | null = null;
+    private actionDial: ActionDial | null = null;
     private mapHexes: Array<MapHex> = [];
     private opponentShips: Array<Ship> = [];
     private localShip: PlayerShip | null = null;
@@ -35,19 +36,24 @@ export class MapGroup implements MegaGroupInterface {
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
-
+        const isActivePlayer = localPlayer?.isActive ?? false;
         //MARK: dials
+        this.movesDial = new MovesDial(isActivePlayer);
+
         this.anchorDial = new AnchorDial(
             this.stage,
             this.group,
             { action: 'end_turn', details: null },
-            localPlayer?.isActive ?? false,
-            );
-        this.group.add(this.anchorDial.getElement());
+            isActivePlayer,
+        );
 
-        this.movesDial = new ActionDial(this.group, localPlayer?.isActive ?? false);
-        this.group.add(this.movesDial.getElement());
+        this.actionDial = new ActionDial(this.group, isActivePlayer);
 
+        this.group.add(...[
+            this.movesDial.getElement(),
+            this.anchorDial.getElement(),
+            this.actionDial.getElement(),
+        ]);
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
@@ -120,8 +126,9 @@ export class MapGroup implements MegaGroupInterface {
 
         if (localPlayer) {
             //MARK: dials & hexes
-            this.anchorDial?.updateElement(localPlayer);
             this.movesDial?.updateElement(localPlayer);
+            this.anchorDial?.updateElement(localPlayer);
+            this.actionDial?.updateElement(localPlayer);
 
             for (const mapHex of this.mapHexes) {
                 mapHex.updateElement(localPlayer);
