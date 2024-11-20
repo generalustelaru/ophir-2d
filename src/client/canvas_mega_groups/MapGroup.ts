@@ -37,7 +37,7 @@ export class MapGroup implements MegaGroupInterface {
         const serverState = clientState.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
-        const isActivePlayer = localPlayer?.isActive ?? false;
+        const isActivePlayer = localPlayer?.isActive || false;
         //MARK: dials
         this.movesDial = new MovesDial(isActivePlayer);
 
@@ -51,9 +51,8 @@ export class MapGroup implements MegaGroupInterface {
         this.favorButton = new FavorButton(
             this.stage,
             { action: 'spend_favor', details: null },
-            isActivePlayer,
-            isActivePlayer && !!localPlayer && localPlayer.influence > 0,
-            { width: 100, height: 100, x: 250, y: 35 },
+            localPlayer || null,
+            { width: 50, height: 50, x: 500, y: 70 },
         );
 
         this.actionDial = new ActionDial(this.group, isActivePlayer);

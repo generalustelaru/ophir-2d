@@ -19,6 +19,7 @@ export type ClientConstants = {
         wsAddress: string
     },
     COLOR: Record<string, Color>,
+    COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<HexId, IslandData>,
     SETTLEMENT_DATA: Record<SettlementId, SettlementData>,
@@ -50,6 +51,12 @@ export type GroupLayoutData = {
     x: number,
     y: number,
 };
+
+export type ColorProfile = {
+    primary: Color,
+    secondary: Color,
+    tertiary: Color | null,
+}
 
 export type ContractCardUpdate = {
     contract: Contract,
