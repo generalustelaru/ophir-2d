@@ -47,6 +47,9 @@ export class MovesDial implements DynamicGroupInterface<Player> {
         if (player.isActive) {
             this.upperWave.fill(player.moveActions > 1 ? waveColor : COLOR.disabled);
             this.lowerWave.fill(player.moveActions > 0 ? waveColor : COLOR.disabled);
+        } else {
+            this.upperWave.fill(COLOR.disabled);
+            this.lowerWave.fill(COLOR.disabled);
         }
     }
 }

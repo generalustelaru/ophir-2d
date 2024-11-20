@@ -37,6 +37,12 @@ const clientConstants: ClientConstants = {
         arrowUp: '#225500',
         arrowDown: '#501616',
         upgradeBoxSilver:'#999999',
+        darkerSilver: '#666666',
+    },
+    COLOR_PROFILES: {
+        favorStampReady: { primary: '#aa0000', secondary: '#850c03', tertiary: null },
+        favorStampActive: { primary: '#e70000', secondary: '#aa0000', tertiary: null },
+        favorStampDisabled: { primary: '#999999', secondary: '#666666', tertiary: null },
     },
     HEX_OFFSET_DATA: [
         { id: 'center', x: 0, y: 0 },
@@ -92,6 +98,7 @@ const clientConstants: ClientConstants = {
         fluctuation_arrow_up: { fill: '#225500', shape: 'm 1.9816844,6.07273 h 4.521161 v 2.7942295 h -4.521161 z m 6.502848,1.2750995 H 4.2422664 0 L 2.1211324,3.67392 4.2422664,0 6.3633994,3.67392 Z' },
         fluctuation_arrow_down: { fill: '#501616', shape: 'M 6.5028502,2.79423 H 1.9816901 V 0 H 6.5028502 Z M 0,1.51913 h 4.2422702 4.24227 l -2.12114,3.67391 -2.12113,3.6739195 -2.12113,-3.6739195 z' },
         no_fluctuation_dash: { fill: '#000000', shape: 'M 0.11326315,3.0363643 H 8.3712692 v 2.794231 H 0.11326315 Z' },
+        active_favor_check: { fill: '#66ff00', shape: 'M 4.511921,14.54515 12.967438,20.18216 27.148041,5.8254 13.143595,23.08874 Z' },
     },
 }
 

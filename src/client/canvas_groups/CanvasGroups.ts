@@ -19,10 +19,11 @@ import { OpenContractDisplay } from './OpenContractDisplay';
 import { GoodsOrderDisplay } from './GoodsOrderDisplay';
 import { MovesDial } from './MovesDial';
 import { FavorButton } from './FavorButton';
+import { FavorIcon } from './FavorIcon';
 
 export {
     EndTurnButton, Barrier, BoneIcon, LocationToken, MapHex, ActionDial, PlayerShip,
     Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial, ExchangeCard,
     TempleCard, FutureContractDisplay, ContractCard, OpenContractDisplay,
-    GoodsOrderDisplay, MovesDial, FavorButton,
+    GoodsOrderDisplay, MovesDial, FavorButton, FavorIcon,
 };
