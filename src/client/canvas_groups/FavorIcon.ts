@@ -3,12 +3,12 @@ import Konva from 'konva';
 import clientConstants from '../client_constants';
 import { ColorProfile, DynamicGroupInterface, GroupLayoutData } from '../client_types';
 
-const { ICON_DATA, COLOR } = clientConstants;
+const { ICON_DATA, COLOR, SETTLEMENT_DATA } = clientConstants;
 
 export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
     private group: Konva.Group;
     public verticalAxis: number;
-
+    public templeIcon: Konva.Path;
     private innerStamp: Konva.Path;
     private outerStamp: Konva.Path;
 
@@ -37,9 +37,19 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
             scale: { x: 2, y: 2 },
         });
 
+        this.templeIcon = new Konva.Path({
+            data: SETTLEMENT_DATA.temple.shape,
+            fill: COLOR.stampEdge,
+            // stroke: COLOR.stampEdge,
+            // strokeWidth: 2,
+            scale: { x: 1, y: .7 },
+            x: 13,
+            y: 14,
+        });
+
         this.verticalAxis = this.outerStamp.getClientRect().width / 2;
 
-        this.group.add(this.outerStamp, this.innerStamp);
+        this.group.add(this.outerStamp, this.innerStamp, this.templeIcon);
     }
 
     public getElement(): Konva.Group {
@@ -50,9 +60,10 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
     }
 
     public updateElement(colorProfile: ColorProfile): void {
+        this.templeIcon.fill(colorProfile.secondary);
         this.innerStamp.fill(colorProfile.primary);
-        this.innerStamp.stroke(colorProfile.secondary);
         this.outerStamp.fill(colorProfile.primary);
+        this.innerStamp.stroke(colorProfile.secondary);
         this.outerStamp.stroke(colorProfile.secondary);
     }
 }

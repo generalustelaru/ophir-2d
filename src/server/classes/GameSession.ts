@@ -236,6 +236,7 @@ export class GameSession {
             player.coins -= 2;
             player.cargo.push('empty');
             player.allowedSettlementAction = null;
+            player.moveActions = 0;
 
             return true;
         }

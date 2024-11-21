@@ -35,11 +35,13 @@ export class FutureContractDisplay implements DynamicGroupInterface<Contract>
         );
 
         const deck = new Konva.Rect({
-            width: this.contractCard.getElement().width(),
+            width: this.contractCard.getElement().width() - 6,
             height: 50,
-            x: this.contractCard.getElement().x(),
+            x: this.contractCard.getElement().x() + 3,
             y: this.contractCard.getElement().y() + this.contractCard.getElement().height() - 30,
-            fill: 'black',
+            fill: 'gray',
+            stroke: 'gray',
+            strokeWidth: 2,
             cornerRadius: 15,
         })
 

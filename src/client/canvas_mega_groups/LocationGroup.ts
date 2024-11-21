@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { MegaGroupInterface, GroupLayoutData } from "../client_types";
+import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
 import { MarketCard, ExchangeCard, TempleCard } from "../canvas_groups/CanvasGroups";
 import clientState from '../state';
 import { HexId, SettlementId } from "../../shared_types";
@@ -43,6 +43,7 @@ export class LocationGroup implements MegaGroupInterface {
         this.marketCard = new MarketCard(
             this.stage,
             clientState.received.setup.marketFluctuations,
+            clientState.received.setup.templeTradeSlot,
             clientState.received.market,
             {
                 width: this.group.width(),
@@ -62,8 +63,12 @@ export class LocationGroup implements MegaGroupInterface {
             }
         );
 
+        const templeContractSlot = clientState.received.setup.templeTradeSlot;
+        const contract  = clientState.received.market[templeContractSlot];
+
         this.templeCard = new TempleCard(
             this.stage,
+            contract,
             {
                 width: this.group.width(),
                 height: heightSegment * 2,
@@ -93,10 +98,14 @@ export class LocationGroup implements MegaGroupInterface {
             localPlayer: localPlayer ?? null,
             contracts: marketOffer,
         }
+        const templeUpdate: TempleUpdate = {
+            localPlayer: localPlayer ?? null,
+            contract: sharedState.market[sharedState.setup.templeTradeSlot],
+        }
 
         this.marketCard?.updateElement(marketUpdate);
         this.exchangeCard?.updateElement(activePlayer.location.hexId);
-        this.templeCard?.updateElement(localPlayer ?? null);
+        this.templeCard?.updateElement(templeUpdate);
     }
 
     private matchLocations(settlements: Record<HexId, SettlementId>|null): Locations {

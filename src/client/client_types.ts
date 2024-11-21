@@ -68,6 +68,11 @@ export type MarketUpdate = {
     contracts: MarketOffer,
 }
 
+export type TempleUpdate = {
+    contract: Contract,
+    localPlayer: Player | null,
+}
+
 export type EventPayload = InfoEventPayload | ActionEventPayload | ErrorEventPayload | SetupEventPayload | null;
 
 export type InfoEventPayload = {
