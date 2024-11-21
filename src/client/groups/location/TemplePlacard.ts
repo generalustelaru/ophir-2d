@@ -6,7 +6,7 @@ import { UpgradeButton, ContractCard } from "../GroupList";
 
 const { COLOR } = clientConstants;
 
-export class TempleCard implements DynamicGroupInterface<TempleUpdate> {
+export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

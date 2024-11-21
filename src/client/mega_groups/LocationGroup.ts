@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
-import { MarketCard, ExchangePlacard, TempleCard } from "../groups/GroupList";
+import { MarketPlacard, ExchangePlacard, TemplePlacard } from "../groups/GroupList";
 import clientState from '../state';
 import { HexId, SettlementId } from "../../shared_types";
 
@@ -14,9 +14,9 @@ export class LocationGroup implements MegaGroupInterface {
 
     private stage: Konva.Stage;
     private group: Konva.Group;
-    private marketCard: MarketCard | null = null;
+    private marketPlacard: MarketPlacard | null = null;
     private exchangePlacard: ExchangePlacard | null = null;
-    private templeCard: TempleCard | null = null;
+    private templePlacard: TemplePlacard | null = null;
     private locations: Locations | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
@@ -40,7 +40,7 @@ export class LocationGroup implements MegaGroupInterface {
         this.locations = this.matchLocations(setup.settlements);
         const heightSegment = this.group.height() / 5;
 
-        this.marketCard = new MarketCard(
+        this.marketPlacard = new MarketPlacard(
             this.stage,
             clientState.received.setup.marketFluctuations,
             clientState.received.setup.templeTradeSlot,
@@ -59,28 +59,28 @@ export class LocationGroup implements MegaGroupInterface {
                 width: this.group.width(),
                 height: heightSegment,
                 x: 0,
-                y: this.marketCard.getElement().height(),
+                y: this.marketPlacard.getElement().height(),
             }
         );
 
         const templeContractSlot = clientState.received.setup.templeTradeSlot;
         const contract  = clientState.received.market[templeContractSlot];
 
-        this.templeCard = new TempleCard(
+        this.templePlacard = new TemplePlacard(
             this.stage,
             contract,
             {
                 width: this.group.width(),
                 height: heightSegment * 2,
                 x: 0,
-                y: this.marketCard.getElement().height() + this.exchangePlacard.getElement().height(),
+                y: this.marketPlacard.getElement().height() + this.exchangePlacard.getElement().height(),
             }
         );
 
         this.group.add(
-            this.marketCard.getElement(),
+            this.marketPlacard.getElement(),
             this.exchangePlacard.getElement(),
-            this.templeCard.getElement(),
+            this.templePlacard.getElement(),
         );
     }
 
@@ -103,9 +103,9 @@ export class LocationGroup implements MegaGroupInterface {
             contract: sharedState.market[sharedState.setup.templeTradeSlot],
         }
 
-        this.marketCard?.updateElement(marketUpdate);
+        this.marketPlacard?.updateElement(marketUpdate);
         this.exchangePlacard?.updateElement(activePlayer.location.hexId);
-        this.templeCard?.updateElement(templeUpdate);
+        this.templePlacard?.updateElement(templeUpdate);
     }
 
     private matchLocations(settlements: Record<HexId, SettlementId>|null): Locations {

@@ -9,10 +9,10 @@ import { ShipToken } from './map/ShipToken';
 import { PlayerPlacard } from './player/PlayerPlacard';
 import { FavorDial } from './player/FavorDial';
 import { CargoDial } from './player/CargoDial';
-import { MarketCard } from './location/MarketPlacard';
+import { MarketPlacard } from './location/MarketPlacard';
 import { CoinDial } from "./CoinDial";
 import { ExchangePlacard } from "./location/ExchangePlacard";
-import { TempleCard } from './location/TemplePlacard';
+import { TemplePlacard } from './location/TemplePlacard';
 import { MarketDeck } from './location/MarketDeck';
 import { ContractCard } from './location/MarketCardButton';
 import { MarketCardSlot } from './location/MarketCardSlot';
@@ -24,7 +24,7 @@ import { UpgradeButton } from './location/UpgradeButton';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHexagon, ActionDial, PlayerShip,
-    ShipToken, PlayerPlacard, FavorDial, CargoDial, MarketCard, CoinDial, ExchangePlacard,
-    TempleCard, MarketDeck, ContractCard, MarketCardSlot,
+    ShipToken, PlayerPlacard, FavorDial, CargoDial, MarketPlacard, CoinDial, ExchangePlacard,
+    TemplePlacard as TemplePlacard, MarketDeck, ContractCard, MarketCardSlot,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton,
 };
