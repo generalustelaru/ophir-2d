@@ -1,26 +1,26 @@
 import { EndTurnButton } from './EndTurnButton';
-import { Barrier } from './Barrier';
-import { BoneIcon } from './BoneIcon';
+import { Barrier } from './BarrierToken';
+import { BoneIcon } from './D6Dial';
 import { LocationToken } from './LocationToken';
-import { MapHex } from './MapHex';
+import { MapHex } from './MapHexagon';
 import { ActionDial } from './ActionDial';
 import { PlayerShip } from './PlayerShip';
-import { Ship } from './Ship';
-import { PlayerCard } from './PlayerCard';
+import { Ship } from './ShipToken';
+import { PlayerCard } from './PlayerPlacard';
 import { FavorDial } from './FavorDial';
-import { CargoDisplay } from './CargoDisplay';
-import { MarketCard } from './MarketCard';
+import { CargoDisplay } from './CargoDial';
+import { MarketCard } from './MarketPlacard';
 import { CoinDial } from "./CoinDial";
-import { ExchangeCard } from "./ExchangeCard";
-import { TempleCard } from './TempleCard';
-import { FutureContractDisplay } from './FutureContractDisplay';
-import { ContractCard } from './ContractCard';
-import { OpenContractDisplay } from './OpenContractDisplay';
-import { GoodsOrderDisplay } from './GoodsOrderDisplay';
+import { ExchangeCard } from "./ExchangePlacard";
+import { TempleCard } from './TemplePlacard';
+import { FutureContractDisplay } from './MarketDeck';
+import { ContractCard } from './MarketCardButton';
+import { OpenContractDisplay } from './MarketCardSlot';
+import { GoodsOrderDisplay } from './GoodsAssortment';
 import { MovesDial } from './MovesDial';
 import { FavorButton } from './FavorButton';
 import { FavorIcon } from './FavorIcon';
-import { UpgradeBox } from './UpgradeBox';
+import { UpgradeBox } from './UpgradeButton';
 
 export {
     EndTurnButton, Barrier, BoneIcon, LocationToken, MapHex, ActionDial, PlayerShip,
