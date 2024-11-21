@@ -3,7 +3,7 @@ import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerPlacard } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 
-export class PlayerCardGroup implements MegaGroupInterface {
+export class PlayerGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private playerPlacards: Array<PlayerPlacard> = [];
 
