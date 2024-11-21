@@ -22,7 +22,7 @@ const barrierOffsets: Record <BarrierId, OffsetData> = {
     12: { x: -6, y: -111, rotation: 60 },
 }
 
-export class Barrier implements StaticGroupInterface {
+export class BarrierToken implements StaticGroupInterface {
 
     private group: Konva.Group;
     constructor(
