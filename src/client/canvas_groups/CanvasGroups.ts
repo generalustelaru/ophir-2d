@@ -8,7 +8,7 @@ import { PlayerShip } from './PlayerShip';
 import { Ship } from './ShipToken';
 import { PlayerCard } from './PlayerPlacard';
 import { FavorDial } from './FavorDial';
-import { CargoDisplay } from './CargoDial';
+import { CargoDial } from './CargoDial';
 import { MarketCard } from './MarketPlacard';
 import { CoinDial } from "./CoinDial";
 import { ExchangeCard } from "./ExchangePlacard";
@@ -24,7 +24,7 @@ import { UpgradeBox } from './UpgradeButton';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHex, ActionDial, PlayerShip,
-    Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial, ExchangeCard,
+    Ship, PlayerCard, FavorDial, CargoDial, MarketCard, CoinDial, ExchangeCard,
     TempleCard, FutureContractDisplay, ContractCard, OpenContractDisplay,
     GoodsOrderDisplay, MovesDial, FavorButton, FavorIcon, UpgradeBox,
 };
