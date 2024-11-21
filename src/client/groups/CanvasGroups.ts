@@ -1,11 +1,11 @@
-import { EndTurnButton } from './EndTurnButton';
-import { BarrierToken } from './BarrierToken';
+import { EndTurnButton } from './map/EndTurnButton';
+import { BarrierToken } from './map/BarrierToken';
 import { InfluenceDial } from './InfluenceDial';
-import { LocationToken } from './LocationToken';
-import { MapHexagon } from './MapHexagon';
-import { ActionDial } from './ActionDial';
-import { PlayerShip } from './PlayerShip';
-import { ShipToken } from './ShipToken';
+import { LocationToken } from './map/LocationToken';
+import { MapHexagon } from './map/MapHexagon';
+import { ActionDial } from './map/ActionDial';
+import { PlayerShip } from './map/PlayerShip';
+import { ShipToken } from './map/ShipToken';
 import { PlayerPlacard } from './PlayerPlacard';
 import { FavorDial } from './FavorDial';
 import { CargoDial } from './CargoDial';
@@ -17,14 +17,14 @@ import { MarketDeck } from './location/MarketDeck';
 import { ContractCard } from './location/MarketCardButton';
 import { MarketCardSlot } from './location/MarketCardSlot';
 import { GoodsAssortment } from './location/GoodsAssortment';
-import { MovesDial } from './MovesDial';
-import { FavorButton } from './FavorButton';
+import { MovesDial } from './map/MovesDial';
+import { FavorButton } from './map/FavorButton';
 import { FavorIcon } from './FavorIcon';
 import { UpgradeButton } from './location/UpgradeButton';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHexagon, ActionDial, PlayerShip,
-    ShipToken as ShipToken, PlayerPlacard, FavorDial, CargoDial, MarketCard, CoinDial, ExchangePlacard,
+    ShipToken, PlayerPlacard, FavorDial, CargoDial, MarketCard, CoinDial, ExchangePlacard,
     TempleCard, MarketDeck, ContractCard, MarketCardSlot,
-    GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton as UpgradeButton,
+    GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton,
 };

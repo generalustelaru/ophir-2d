@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { SettlementData, DynamicGroupInterface } from '../client_types';
-import { ActionGroup } from './ActionGroup';
+import { SettlementData, DynamicGroupInterface } from '../../client_types';
+import { ActionGroup } from '../ActionGroup';
 
 export class LocationToken extends ActionGroup implements DynamicGroupInterface<boolean> {
     icon: Konva.Path;

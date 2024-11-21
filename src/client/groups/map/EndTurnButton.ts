@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import constants from '../client_constants';
-import { Player } from '../../shared_types';
-import { ActionEventPayload, DynamicGroupInterface } from '../client_types';
-import { ActionGroup } from './ActionGroup';
+import constants from '../../client_constants';
+import { Player } from '../../../shared_types';
+import { ActionEventPayload, DynamicGroupInterface } from '../../client_types';
+import { ActionGroup } from '../ActionGroup';
 
 const { ICON_DATA, COLOR } = constants;
 // TODO: rename to EndTurnButton
