@@ -2,7 +2,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../client_types';
 import { Player, PlayerId } from '../../shared_types';
-import { FavorDial, CargoDisplay, CoinDial, BoneIcon} from './CanvasGroups';
+import { FavorDial, CargoDisplay, CoinDial, InfluenceDial} from './CanvasGroups';
 import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;
@@ -14,7 +14,7 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
     private cargoDisplay: CargoDisplay;
     private favorDial: FavorDial;
     private coinDial: CoinDial;
-    private influenceDial: BoneIcon;
+    private influenceDial: InfluenceDial;
     private id: PlayerId;
 
     constructor(
@@ -51,7 +51,7 @@ export class PlayerCard implements DynamicGroupInterface<Player> {
             player.coins
         );
 
-        this.influenceDial = new BoneIcon(
+        this.influenceDial = new InfluenceDial(
             { width: 50, height: 50, x: 60, y: -25 },
             COLOR[player.id]);
         this.influenceDial.updateElement(player.influence);

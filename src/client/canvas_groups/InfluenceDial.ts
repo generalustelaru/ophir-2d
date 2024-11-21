@@ -5,7 +5,7 @@ import { Color, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 
 type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
 type PipData = Array<PipDataElement>
-export class BoneIcon implements DynamicGroupInterface<DiceSix|false> {
+export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
     private group: Konva.Group;
     private body: Konva.Rect;
     private dotMatrix: PipData;

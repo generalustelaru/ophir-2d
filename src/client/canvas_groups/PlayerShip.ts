@@ -90,7 +90,7 @@ export class PlayerShip {
             for (let i = 0; i < HEX_COUNT; i++) {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
-                mapHex.setBoneIcon(false);
+                mapHex.setToHitValue(false);
                 mapHex.setFill(player.location.hexId === mapHex.getId() && player.allowedSettlementAction
                     ? COLOR.locationHex
                     : COLOR.defaultHex
@@ -104,7 +104,7 @@ export class PlayerShip {
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
-                    targetHex.setBoneIcon(player.hasSpentFavor ? false : this.calculateToSailValue(targetHex.getId()));
+                    targetHex.setToHitValue(player.hasSpentFavor ? false : this.calculateToSailValue(targetHex.getId()));
                     break;
                 default:
                     targetHex.setRestricted(true);
@@ -118,7 +118,7 @@ export class PlayerShip {
             for (let i = 0; i < HEX_COUNT; i++) {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
-                mapHex.setBoneIcon(false);
+                mapHex.setToHitValue(false);
                 mapHex.setFill(COLOR.defaultHex);
             }
 
