@@ -10,7 +10,7 @@ export type SettlementId = "temple" | "market" | "exchange" | "quary" | "forest"
 export type Action =
     | SettlementAction | FreeAction
     | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";
-export type SettlementAction = "upgrade_hold" | "fulfill_contract" | "buy_metals" | "pickup_good";
+export type SettlementAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good";
 export type FreeAction = "reposition" | "drop_item"
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";

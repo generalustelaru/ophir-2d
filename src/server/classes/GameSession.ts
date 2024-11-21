@@ -31,7 +31,7 @@ export class GameSession {
                 return this.processRepositioning(message) ? this.sharedState : { error: `Could process repositioning on ${id}` };
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
-            case 'fulfill_contract':
+            case 'sell_goods':
                 return this.processContractSale(message) ? this.sharedState : { error: `Could not process contract sale on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
@@ -368,7 +368,7 @@ export class GameSession {
 
         switch (true) {
             case pickupSettlement.includes(settlementId): return 'pickup_good';
-            case 'market' == settlementId: return 'fulfill_contract';
+            case 'market' == settlementId: return 'sell_goods';
             case 'exchange' == settlementId: return 'buy_metals';
             case 'temple' == settlementId: return 'upgrade_hold';
             default:

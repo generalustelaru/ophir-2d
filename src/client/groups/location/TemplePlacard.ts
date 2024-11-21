@@ -45,6 +45,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         const cardWidth = this.group.width() / 4;
         const cardHeight = this.group.height() / 6 * 4;
+
         this.templeCard = new TempleCard(
             stage,
             {
