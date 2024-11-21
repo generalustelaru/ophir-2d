@@ -86,14 +86,14 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
         const hereAndNow = (
             localPlayer.location.hexId === this.getId()
             && localPlayer.isActive
-            && !!localPlayer.allowedSettlementAction
+            && !!localPlayer.locationActions
         );
 
         this.setFill(hereAndNow ? COLOR.locationHex : COLOR.defaultHex);
 
         this.settlement.updateElement((
             hereAndNow
-            && localPlayer.allowedSettlementAction === 'pickup_good'
+            && !!localPlayer.locationActions?.includes('pickup_good')
             && localPlayer.cargo.includes('empty')
         ));
     }

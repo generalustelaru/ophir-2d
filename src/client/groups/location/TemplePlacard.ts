@@ -70,7 +70,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         this.templeCard.updateElement({ contract: data.contract, isFeasible: false });
         const isUpgradeAvailable = (
-            localPlayer?.allowedSettlementAction === 'upgrade_hold'
+            !!localPlayer?.locationActions?.includes('upgrade_hold')
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
         );
