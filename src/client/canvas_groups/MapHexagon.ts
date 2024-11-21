@@ -4,7 +4,7 @@ import { Coordinates, HexId, DiceSix, Player } from '../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, SettlementData } from '../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../client_constants';
-import { BoneIcon, LocationToken } from './CanvasGroups';
+import { InfluenceDial, LocationToken } from './CanvasGroups';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
@@ -15,7 +15,7 @@ export class MapHex implements DynamicGroupInterface<Player> {
     private island: Konva.Path;
     private settlement: LocationToken;
     private restrictedIcon: Konva.Path;
-    private boneIcon: BoneIcon;
+    private influenceDial: InfluenceDial;
 
     constructor(
         stage: Konva.Stage,
@@ -70,7 +70,7 @@ export class MapHex implements DynamicGroupInterface<Player> {
         });
         this.group.add(this.restrictedIcon);
 
-        this.boneIcon = new BoneIcon(
+        this.influenceDial = new InfluenceDial(
             {
                 width: 50,
                 height: 50,
@@ -79,7 +79,7 @@ export class MapHex implements DynamicGroupInterface<Player> {
             },
             COLOR.boneWhite
         );
-        this.group.add(this.boneIcon.getElement());
+        this.group.add(this.influenceDial.getElement());
     }
 
     updateElement(localPlayer: Player): void {
@@ -112,8 +112,8 @@ export class MapHex implements DynamicGroupInterface<Player> {
         this.setFill(how ? COLOR.emptyHex : COLOR.emptyHex);
     }
 
-    public setBoneIcon(value: DiceSix|false): void {
-        this.boneIcon.updateElement(value);
+    public setToHitValue(value: DiceSix|false): void {
+        this.influenceDial.updateElement(value);
     }
 
     public isIntersecting(vector: Vector2d|null): boolean {
