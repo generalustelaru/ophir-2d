@@ -33,7 +33,8 @@ export type Player = {
     influence: DiceSix,
     moveActions: number,
     isAnchored: boolean,
-    allowedSettlementAction: SettlementAction | null,
+    locationActions: Array<SettlementAction> | null,
+    // locationFreeActions: Array<FreeAction>, TODO: Implement for location-sepcific actions that can be repeated on a turn (sell specialist good, donate metals, buying metals)
     allowedMoves: Array<HexId>,
     hasCargo: boolean,
     cargo: CargoManifest,
@@ -64,6 +65,7 @@ export type SharedState = {
     players: Array<Player>,
     market: MarketOffer,
     setup: GameSetup,
+    // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }
 
 export type NewState = {

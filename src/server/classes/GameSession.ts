@@ -12,7 +12,7 @@ export class GameSession {
         this.privateState = bundle.privateState;
         this.sharedState = bundle.sharedState;
 
-        this.setTurnStartConditions(this.findActivePlayer());
+        this.setTurnStartCondition(this.findActivePlayer());
     }
 
     public processAction(message: WebsocketClientMessage): WssMessage {
@@ -32,7 +32,7 @@ export class GameSession {
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
             case 'sell_goods':
-                return this.processContractSale(message) ? this.sharedState : { error: `Could not process contract sale on ${id}` };
+                return this.processGoodsSale(message) ? this.sharedState : { error: `Could not process contract sale on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
             case 'upgrade_hold':
@@ -77,12 +77,12 @@ export class GameSession {
                 .filter(move => move !== departure) as Array<HexId>
             );
             player.isAnchored = true;
-            player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player, destination);
+            player.locationActions = this.getlocationActionsFromLocation(player, destination);
         }
 
         if (player.moveActions === 0 && !sailSuccess) {
             player.isAnchored = true;
-            player.allowedSettlementAction = null;
+            player.locationActions = null;
         }
 
         return true;
@@ -108,7 +108,7 @@ export class GameSession {
             player.favor -= 1;
             player.hasSpentFavor = true;
             player.isAnchored = true;
-            player.allowedSettlementAction = this.getAllowedSettlementActionFromLocation(player);
+            player.locationActions = this.getlocationActionsFromLocation(player);
 
             return true;
         }
@@ -143,10 +143,15 @@ export class GameSession {
             return false;
         }
 
-        const canPickupGood = this.canItemBeLoaded(player, 'pickup_good');
         const localGood = this.getMatchingGood(player.location.hexId);
+        const actions = player.locationActions;
 
-        if (!player.allowedSettlementAction || !localGood || !canPickupGood) {
+        if (
+            !actions
+            || !localGood
+            || !actions.includes('pickup_good')
+            || !this.canItemBeLoaded(player, 'pickup_good')
+        ) {
             return false;
         }
 
@@ -154,11 +159,11 @@ export class GameSession {
             const item = player.cargo[i];
 
             if (item === 'empty') {
-                player.cargo[i] = localGood;
-                player.allowedSettlementAction = null;
-                player.moveActions = 0;
                 player.hasCargo = true;
+                player.cargo[i] = localGood;
                 player.feasibleContracts = this.getFeasableContracts(player.cargo);
+                player.moveActions = 0;
+                player.locationActions = this.removeAction(actions, 'pickup_good');
 
                 return true;
             }
@@ -167,12 +172,15 @@ export class GameSession {
         return false;
     }
 
-    private processContractSale(message: WebsocketClientMessage): boolean {
+    private processGoodsSale(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
         const details = message.details as ContractFulfillmentDetails;
         const marketKey = details.contract;
 
-        if (!player?.feasibleContracts.includes(marketKey) || !player.allowedSettlementAction) {
+        if (
+            !player?.locationActions?.includes('sell_goods')
+            || !player.feasibleContracts.includes(marketKey)
+        ) {
             return false;
         }
 
@@ -195,7 +203,7 @@ export class GameSession {
         }
 
         player.hasCargo = playerCargo.find(item => item !== 'empty') ? true : false;
-        player.allowedSettlementAction = null;
+        player.locationActions = this.removeAction(player.locationActions, 'sell_goods');
         player.moveActions = 0;
 
         const isNewContract = this.shiftMarket();
@@ -229,13 +237,13 @@ export class GameSession {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
         if (
-            player?.allowedSettlementAction === 'upgrade_hold'
+            player?.locationActions?.includes('upgrade_hold')
             && player.coins >= 2
             && player.cargo.length < 4
         ) {
             player.coins -= 2;
             player.cargo.push('empty');
-            player.allowedSettlementAction = null;
+            player.locationActions = this.removeAction(player.locationActions, 'upgrade_hold');
             player.moveActions = 0;
 
             return true;
@@ -292,8 +300,6 @@ export class GameSession {
 
     private passActiveStatus(): void {
         const players = this.sharedState.players;
-        const playerCount = players.length;
-
         const activePlayer = players.find(player => player.isActive);
 
         if (!activePlayer) {
@@ -301,19 +307,18 @@ export class GameSession {
         }
 
         activePlayer.isActive = false;
+        activePlayer.locationActions = null;
+        activePlayer.hasSpentFavor = false;
 
-        const nextToken = activePlayer.turnOrder === playerCount
+        const nextToken = activePlayer.turnOrder === players.length
             ? 1
             : activePlayer.turnOrder + 1;
 
-        for (let i = 0; i < players.length; i++) {
-            const player = players[i];
+        const nextActivePlayer = players.find(player => player.turnOrder === nextToken);
 
-            if (player.turnOrder === nextToken) {
-                player.isActive = true;
-                this.setTurnStartConditions(player.id);
-                break;
-            }
+        if (nextActivePlayer) {
+            nextActivePlayer.isActive = true;
+            this.setTurnStartCondition(nextActivePlayer.id);
         }
     }
 
@@ -331,7 +336,7 @@ export class GameSession {
         throw new Error('No active player found');
     }
 
-    private setTurnStartConditions(playerId: PlayerId): void {
+    private setTurnStartCondition(playerId: PlayerId): void {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
         if (!player) {
@@ -341,13 +346,25 @@ export class GameSession {
         player.isAnchored = false;
         player.hasSpentFavor = false;
         player.moveActions = 2;
-        player.allowedSettlementAction = null;
+        player.locationActions = null;
 
         const rules = this.privateState.moveRules.find(
             rule => rule.from === player.location.hexId
         ) as ProcessedMoveRule;
 
         player.allowedMoves = rules.allowed as Array<HexId>;
+    }
+
+    private removeAction(actions: Array<SettlementAction>, toRemove: SettlementAction): Array<SettlementAction> | null {
+        const index = actions.indexOf(toRemove);
+
+        if (index === -1) {
+            return null;
+        }
+
+        actions.splice(index, 1);
+
+        return actions || null;
     }
 
     private getMatchingGood(hexId: HexId): GoodId | false {
@@ -362,15 +379,15 @@ export class GameSession {
         }
     }
 
-    private getAllowedSettlementActionFromLocation(playerState: Player, hexId: HexId | null = null): SettlementAction | null {
+    private getlocationActionsFromLocation(playerState: Player, hexId: HexId | null = null): Array<SettlementAction> | null {
         const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
         const pickupSettlement: Array<SettlementId> = ['farms', 'mines', 'forest', 'quary'];
 
         switch (true) {
-            case pickupSettlement.includes(settlementId): return 'pickup_good';
-            case 'market' == settlementId: return 'sell_goods';
-            case 'exchange' == settlementId: return 'buy_metals';
-            case 'temple' == settlementId: return 'upgrade_hold';
+            case pickupSettlement.includes(settlementId): return ['pickup_good'];
+            case 'market' == settlementId: return ['sell_goods'];
+            case 'exchange' == settlementId: return ['buy_metals'];
+            case 'temple' == settlementId: return ['upgrade_hold'];
             default:
                 console.error(`Unknown settlement at ${hexId}`);
                 return null;

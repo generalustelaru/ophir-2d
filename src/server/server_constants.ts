@@ -93,7 +93,7 @@ const serverConstants: ServerConstants = {
         influence: 1,
         allowedMoves: [],
         isAnchored: true,
-        allowedSettlementAction: null,
+        locationActions: null,
         moveActions: 2,
         hasCargo: false,
         cargo: ['empty', 'empty'],
