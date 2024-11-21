@@ -2,7 +2,7 @@ import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
 import { Contract } from "../../../shared_types";
-import { UpgradeButton, ContractCard } from "../GroupList";
+import { UpgradeButton, MarketCardButton } from "../GroupList";
 
 const { COLOR } = clientConstants;
 
@@ -11,7 +11,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private upgradeButton: UpgradeButton;
-    private contractCard: ContractCard;
+    private marketCard: MarketCardButton;
 
     constructor(
         stage: Konva.Stage,
@@ -45,7 +45,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         const cardWidth = this.group.width() / 4;
         const cardHeight = this.group.height() / 6 * 4;
-        this.contractCard = new ContractCard(
+        this.marketCard = new MarketCardButton(
             stage,
             {
                 width: cardWidth,
@@ -60,7 +60,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         this.group.add(
             this.background,
-            this.contractCard.getElement(),
+            this.marketCard.getElement(),
             this.upgradeButton.getElement(),
         );
     }
@@ -68,7 +68,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     public updateElement(data: TempleUpdate): void {
         const localPlayer = data.localPlayer;
 
-        this.contractCard.updateElement({ contract: data.contract, isFeasible: false });
+        this.marketCard.updateElement({ contract: data.contract, isFeasible: false });
         const isUpgradeAvailable = (
             localPlayer?.allowedSettlementAction === 'upgrade_hold'
             && localPlayer.coins >= 2

@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ActionEventPayload, GroupLayoutData } from '../client_types';
-export class ActionGroup {
+export class ActionButton {
     protected group: Konva.Group;
     private stage: Konva.Stage;
     private payload: ActionEventPayload | null;
