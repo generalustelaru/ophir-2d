@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Coordinates, GoodId } from '../../shared_types';
-import { DynamicGroupInterface, GroupLayoutData} from '../client_types';
-import clientConstants from '../client_constants';
+import { Coordinates, GoodId } from '../../../shared_types';
+import { DynamicGroupInterface, GroupLayoutData} from '../../client_types';
+import clientConstants from '../../client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 

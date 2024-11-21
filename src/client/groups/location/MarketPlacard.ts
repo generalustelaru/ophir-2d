@@ -1,8 +1,8 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from "../client_types";
-import clientConstants from "../client_constants";
-import { MarketFluctuations, MarketKey, MarketOffer } from "../../shared_types";
-import { MarketDeck, MarketCardSlot } from "./CanvasGroups";
+import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from "../../client_types";
+import clientConstants from "../../client_constants";
+import { MarketFluctuations, MarketKey, MarketOffer } from "../../../shared_types";
+import { MarketDeck, MarketCardSlot } from "../CanvasGroups";
 
 const { COLOR, SETTLEMENT_DATA } = clientConstants;
 

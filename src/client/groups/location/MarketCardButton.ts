@@ -1,9 +1,9 @@
 import Konva from "konva";
-import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
-import { Contract } from "../../shared_types";
-import { CoinDial, GoodsAssortment } from "./CanvasGroups";
-import clientConstants from "../client_constants";
-import { ActionGroup } from "./ActionGroup";
+import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
+import { Contract } from "../../../shared_types";
+import { CoinDial, GoodsAssortment } from "../CanvasGroups";
+import clientConstants from "../../client_constants";
+import { ActionGroup } from "../ActionGroup";
 
 const { COLOR } = clientConstants;
 export class ContractCard extends ActionGroup implements DynamicGroupInterface<ContractCardUpdate> {
