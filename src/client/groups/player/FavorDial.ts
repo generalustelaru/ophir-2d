@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import clientConstants from '../client_constants';
-import { DynamicGroupInterface, GroupLayoutData } from '../client_types';
-import { FavorIcon } from './CanvasGroups';
+import clientConstants from '../../client_constants';
+import { DynamicGroupInterface, GroupLayoutData } from '../../client_types';
+import { FavorIcon } from '../GroupList';
 
 const { COLOR } = clientConstants;
 export class FavorDial implements DynamicGroupInterface<number> {

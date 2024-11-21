@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { ContractCard } from "../CanvasGroups";
+import { ContractCard } from "../GroupList";
 import { Contract } from "../../../shared_types";
 
 export class MarketDeck implements DynamicGroupInterface<Contract>

@@ -2,7 +2,7 @@ import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
 import { Contract } from "../../../shared_types";
-import { UpgradeButton, ContractCard } from "../CanvasGroups";
+import { UpgradeButton, ContractCard } from "../GroupList";
 
 const { COLOR } = clientConstants;
 
