@@ -1,5 +1,5 @@
 import { EndTurnButton } from './EndTurnButton';
-import { Barrier } from './BarrierToken';
+import { BarrierToken } from './BarrierToken';
 import { InfluenceDial } from './InfluenceDial';
 import { LocationToken } from './LocationToken';
 import { MapHex } from './MapHexagon';
@@ -23,7 +23,7 @@ import { FavorIcon } from './FavorIcon';
 import { UpgradeBox } from './UpgradeButton';
 
 export {
-    EndTurnButton, Barrier, InfluenceDial, LocationToken, MapHex, ActionDial, PlayerShip,
+    EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHex, ActionDial, PlayerShip,
     Ship, PlayerCard, FavorDial, CargoDisplay, MarketCard, CoinDial, ExchangeCard,
     TempleCard, FutureContractDisplay, ContractCard, OpenContractDisplay,
     GoodsOrderDisplay, MovesDial, FavorButton, FavorIcon, UpgradeBox,

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHex, Barrier, Ship, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
+import { MapHex, BarrierToken, Ship, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
@@ -81,9 +81,9 @@ export class MapGroup implements MegaGroupInterface {
         });
 
         // MARK: barriers
-        const barriers = serverState.setup.barriers
-        const barrier_1 = new Barrier(centerPoint, barriers[0]);
-        const barrier_2 = new Barrier(centerPoint, barriers[1]);
+        const barriersIds = serverState.setup.barriers
+        const barrier_1 = new BarrierToken(centerPoint, barriersIds[0]);
+        const barrier_2 = new BarrierToken(centerPoint, barriersIds[1]);
         this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: ships
