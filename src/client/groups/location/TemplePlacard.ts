@@ -1,8 +1,8 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
-import { Contract } from "../../../shared_types";
-import { UpgradeButton, MarketCardButton } from "../GroupList";
+import { TradeOffer } from "../../../shared_types";
+import { UpgradeButton, TempleCard } from "../GroupList";
 
 const { COLOR } = clientConstants;
 
@@ -11,11 +11,11 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private upgradeButton: UpgradeButton;
-    private marketCard: MarketCardButton;
+    private templeCard: TempleCard;
 
     constructor(
         stage: Konva.Stage,
-        contract: Contract,
+        contract: TradeOffer,
         layout: GroupLayoutData,
     ) {
 
@@ -45,7 +45,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         const cardWidth = this.group.width() / 4;
         const cardHeight = this.group.height() / 6 * 4;
-        this.marketCard = new MarketCardButton(
+        this.templeCard = new TempleCard(
             stage,
             {
                 width: cardWidth,
@@ -55,12 +55,11 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             },
             null,
             contract,
-            0,
         );
 
         this.group.add(
             this.background,
-            this.marketCard.getElement(),
+            this.templeCard.getElement(),
             this.upgradeButton.getElement(),
         );
     }
@@ -68,7 +67,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     public updateElement(data: TempleUpdate): void {
         const localPlayer = data.localPlayer;
 
-        this.marketCard.updateElement({ contract: data.contract, isFeasible: false });
+        this.templeCard.updateElement({ contract: data.contract, isFeasible: false });
         const isUpgradeAvailable = (
             localPlayer?.allowedSettlementAction === 'upgrade_hold'
             && localPlayer.coins >= 2

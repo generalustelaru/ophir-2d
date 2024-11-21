@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Contract} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, TradeOffer} from '../shared_types';
 
 export type WsSignal = 'connection'|'message'|'close';
 
@@ -19,7 +19,7 @@ export type ProcessedMoveRule = {
 */
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
-    marketContracts: Array<Contract>,
+    marketContracts: Array<TradeOffer>,
 }
 
 export type StateBundle = {
@@ -39,6 +39,6 @@ export type ServerConstants = {
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
     DEFAULT_PLAYER_STATE: Player,
-    MARKET_CONTRACTS_A: Array<Contract>,
-    MARKET_CONTRACTS_B: Array<Contract>,
+    MARKET_CONTRACTS_A: Array<TradeOffer>,
+    MARKET_CONTRACTS_B: Array<TradeOffer>,
 }

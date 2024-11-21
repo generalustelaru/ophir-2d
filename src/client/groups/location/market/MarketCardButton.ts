@@ -1,12 +1,12 @@
 import Konva from "konva";
-import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { Contract } from "../../../shared_types";
-import { CoinDial, GoodsAssortment } from "../GroupList";
-import clientConstants from "../../client_constants";
-import { ActionButton } from "../ActionButton";
+import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../../client_types";
+import { TradeOffer } from "../../../../shared_types";
+import { CoinDial, GoodsAssortment } from "../../GroupList";
+import clientConstants from "../../../client_constants";
+import { ActionButton } from "../../ActionButton";
 
 const { COLOR } = clientConstants;
-export class MarketCardButton extends ActionButton implements DynamicGroupInterface<ContractCardUpdate> {
+export class MarketCardButton extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
 
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
@@ -16,7 +16,7 @@ export class MarketCardButton extends ActionButton implements DynamicGroupInterf
         stage: Konva.Stage,
         layout: GroupLayoutData,
         actionPayload: ActionEventPayload | null,
-        contract: Contract,
+        contract: TradeOffer,
         fluctuation: number | null = null,
     ) {
         super(stage, layout, actionPayload);
@@ -56,7 +56,7 @@ export class MarketCardButton extends ActionButton implements DynamicGroupInterf
         ]);
     }
 
-    public updateElement(data: ContractCardUpdate): void {
+    public updateElement(data: MarketCardUpdate): void {
         this.coinDial.updateElement(data.contract.reward.coins + (this.fluctuation ?? 0));
         this.goodsAssortment.updateElement(data.contract.request);
         this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
