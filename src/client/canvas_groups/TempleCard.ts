@@ -1,19 +1,21 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
+import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
 import clientConstants from "../client_constants";
-import { Player } from "../../shared_types";
-import { UpgradeBox } from "./UpgradeBox";
+import { Contract } from "../../shared_types";
+import { UpgradeBox, ContractCard } from "./CanvasGroups";
 
 const { COLOR } = clientConstants;
 
-export class TempleCard implements DynamicGroupInterface<Player | null> {
+export class TempleCard implements DynamicGroupInterface<TempleUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
     private upgradeBox: UpgradeBox;
+    private contractCard: ContractCard;
 
     constructor(
         stage: Konva.Stage,
+        contract: Contract,
         layout: GroupLayoutData,
     ) {
 
@@ -36,18 +38,37 @@ export class TempleCard implements DynamicGroupInterface<Player | null> {
             {
                 width: 80,
                 height: 30 + 10,
-                x: layout.width - 100,
+                x: layout.width - 90,
                 y: layout.height - 25 - 20,
             }
         );
 
+        const cardWidth = this.group.width() / 4;
+        const cardHeight = this.group.height() / 6 * 4;
+        this.contractCard = new ContractCard(
+            stage,
+            {
+                width: cardWidth,
+                height: cardHeight,
+                x: this.group.width() - cardWidth - 10,
+                y: 10,
+            },
+            null,
+            contract,
+            0,
+        );
+
         this.group.add(
             this.background,
+            this.contractCard.getElement(),
             this.upgradeBox.getElement(),
         );
     }
 
-    public updateElement(localPlayer: Player | null): void {
+    public updateElement(data: TempleUpdate): void {
+        const localPlayer = data.localPlayer;
+
+        this.contractCard.updateElement({ contract: data.contract, isFeasible: false });
         const isUpgradeAvailable = (
             localPlayer?.allowedSettlementAction === 'upgrade_hold'
             && localPlayer.coins >= 2

@@ -79,6 +79,7 @@ export type GameSetup = {
     barriers: Array<BarrierId>,
     settlements: Record<HexId, SettlementId>,
     marketFluctuations: MarketFluctuations,
+    templeTradeSlot: MarketKey,
 }
 
 export type MovementDetails = {

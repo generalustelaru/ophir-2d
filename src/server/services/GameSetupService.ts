@@ -1,5 +1,5 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, Contract, MarketOffer } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, Contract, MarketOffer, MarketKey } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -60,6 +60,7 @@ export class GameSetupService extends Service {
             barriers: this.determineBarriers(),
             settlements: this.determineSettlements(),
             marketFluctuations: this.determineFluctuations(),
+            templeTradeSlot: this.determineTempleTradeSlot(),
         }
 
         return setup;
@@ -163,6 +164,12 @@ export class GameSetupService extends Service {
         }
 
         return result as MarketFluctuations;
+    }
+
+    private determineTempleTradeSlot(): MarketKey {
+        const pool = ['slot_1', 'slot_2', 'slot_3'];
+        const pick = Math.floor(Math.random() * pool.length);
+        return pool.splice(pick, 1)[0] as MarketKey;
     }
 
     private extractInitialContracts(contracts: Array<Contract>): {contractDeck: Array<Contract>, marketOffer: MarketOffer} {

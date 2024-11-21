@@ -4,7 +4,7 @@ import clientConstants from "../client_constants";
 import { MarketFluctuations, MarketKey, MarketOffer } from "../../shared_types";
 import { FutureContractDisplay, OpenContractDisplay } from "./CanvasGroups";
 
-const { COLOR } = clientConstants;
+const { COLOR, SETTLEMENT_DATA } = clientConstants;
 
 export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
 
@@ -18,6 +18,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
     constructor(
         stage: Konva.Stage,
         marketFluctuations: MarketFluctuations,
+        templeTradeSlot: MarketKey,
         market: MarketOffer,
         layout: GroupLayoutData,
     ) {
@@ -88,12 +89,20 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
             marketFluctuations.slot_3,
         );
 
+        const templeIcon = new Konva.Path({
+            data: SETTLEMENT_DATA.temple.shape,
+            fill: SETTLEMENT_DATA.temple.fill,
+            x: this[templeTradeSlot].getElement().x() + contractCardWidth / 2 - 12,
+            y: 5,
+        });
+
         this.group.add(
             this.background,
             this.futureDisplay.getElement(),
             this.slot_1.getElement(),
             this.slot_2.getElement(),
             this.slot_3.getElement(),
+            templeIcon,
         );
     }
 

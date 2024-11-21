@@ -10,8 +10,7 @@ export class ContractCard extends ActionGroup implements DynamicGroupInterface<C
 
     private coinDial: CoinDial;
     private goodsDisplay: GoodsOrderDisplay;
-    private cardInterior: Konva.Rect;
-    private cardBorder: Konva.Rect;
+    private background: Konva.Rect;
     private fluctuation: number | null = null;
     constructor(
         stage: Konva.Stage,
@@ -24,20 +23,15 @@ export class ContractCard extends ActionGroup implements DynamicGroupInterface<C
 
         this.fluctuation = fluctuation;
 
-        this.cardBorder = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
-            fill: COLOR.boneWhite,
-            cornerRadius: 15,
-        });
-
-        this.cardInterior = new Konva.Rect({
+        this.background = new Konva.Rect({
             width: this.group.width() - 6,
             height: this.group.height() - 6,
             x: 3,
             y: 3,
             fill: COLOR.wood,
             cornerRadius: 15,
+            stroke: COLOR.boneWhite,
+            strokeWidth: 2,
         });
 
         this.coinDial = new CoinDial(
@@ -47,27 +41,26 @@ export class ContractCard extends ActionGroup implements DynamicGroupInterface<C
 
         this.goodsDisplay = new GoodsOrderDisplay(
             {
-                width: this.cardInterior.width(),
-                height: this.cardInterior.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
-                x: this.cardInterior.x(),
+                width: this.background.width(),
+                height: this.background.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
+                x: this.background.x(),
                 y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
             },
             contract.request
         );
 
-        this.group.add(
-            this.cardBorder,
-            this.cardInterior,
+        this.group.add(...[
+            this.background,
             this.coinDial.getElement(),
             this.goodsDisplay.getElement(),
-        );
+        ]);
     }
 
     public updateElement(data: ContractCardUpdate): void {
         this.coinDial.updateElement(data.contract.reward.coins + (this.fluctuation ?? 0));
         this.goodsDisplay.updateElement(data.contract.request);
-        this.cardInterior.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
-        this.cardBorder.fill(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
+        this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
+        this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);
     }
 
