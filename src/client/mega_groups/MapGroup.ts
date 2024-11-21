@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/CanvasGroups';
+import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 

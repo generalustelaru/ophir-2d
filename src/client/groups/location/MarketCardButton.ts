@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { Contract } from "../../../shared_types";
-import { CoinDial, GoodsAssortment } from "../CanvasGroups";
+import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionGroup } from "../ActionGroup";
 

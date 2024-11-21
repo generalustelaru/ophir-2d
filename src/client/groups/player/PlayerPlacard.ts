@@ -1,9 +1,9 @@
 
 import Konva from 'konva';
-import { DynamicGroupInterface } from '../client_types';
-import { Player, PlayerId } from '../../shared_types';
-import { FavorDial, CargoDial, CoinDial, InfluenceDial} from './CanvasGroups';
-import clientConstants from '../client_constants';
+import { DynamicGroupInterface } from '../../client_types';
+import { Player, PlayerId } from '../../../shared_types';
+import { FavorDial, CargoDial, CoinDial, InfluenceDial} from '../GroupList';
+import clientConstants from '../../client_constants';
 
 const { COLOR } = clientConstants;
 

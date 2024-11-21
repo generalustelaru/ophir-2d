@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { ContractCard } from "../CanvasGroups";
+import { ContractCard } from "../GroupList";
 import { Contract, Fluctuation, MarketKey } from "../../../shared_types";
 import clientConstants from "../../client_constants";
 

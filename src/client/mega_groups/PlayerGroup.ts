@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { PlayerPlacard } from '../groups/CanvasGroups';
+import { PlayerPlacard } from '../groups/GroupList';
 import clientState from '../state';
 
 export class PlayerGroup implements MegaGroupInterface {

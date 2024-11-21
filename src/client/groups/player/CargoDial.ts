@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import clientConstants from '../client_constants';
-import { CargoManifest, ManifestItem, PlayerId } from '../../shared_types';
-import { Color, DynamicGroupInterface } from '../client_types';
+import clientConstants from '../../client_constants';
+import { CargoManifest, ManifestItem, PlayerId } from '../../../shared_types';
+import { Color, DynamicGroupInterface } from '../../client_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 const SLOT_WIDTH = 25;
