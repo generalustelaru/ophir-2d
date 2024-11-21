@@ -1,9 +1,9 @@
 import Konva from 'konva';
 import { GameSetupDetails } from '../../shared_types';
 import { Service } from "./Service";
-import { LocationGroup } from '../canvas_mega_groups/LocationGroup';
-import { MapGroup } from '../canvas_mega_groups/MapGroup';
-import { PlayerGroup } from '../canvas_mega_groups/PlayerGroup';
+import { LocationGroup } from '../mega_groups/LocationGroup';
+import { MapGroup } from '../mega_groups/MapGroup';
+import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import clientState from '../state';
 
 export class CanvasService extends Service {

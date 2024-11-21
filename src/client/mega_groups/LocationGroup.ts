@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
-import { MarketCard, ExchangePlacard, TempleCard } from "../canvas_groups/CanvasGroups";
+import { MarketCard, ExchangePlacard, TempleCard } from "../groups/CanvasGroups";
 import clientState from '../state';
 import { HexId, SettlementId } from "../../shared_types";
 
