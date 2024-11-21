@@ -2,7 +2,7 @@ import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
 import clientConstants from "../client_constants";
 import { Contract } from "../../shared_types";
-import { UpgradeBox, ContractCard } from "./CanvasGroups";
+import { UpgradeButton, ContractCard } from "./CanvasGroups";
 
 const { COLOR } = clientConstants;
 
@@ -10,7 +10,7 @@ export class TempleCard implements DynamicGroupInterface<TempleUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private upgradeBox: UpgradeBox;
+    private upgradeButton: UpgradeButton;
     private contractCard: ContractCard;
 
     constructor(
@@ -33,7 +33,7 @@ export class TempleCard implements DynamicGroupInterface<TempleUpdate> {
             cornerRadius: 15,
         });
 
-        this.upgradeBox = new UpgradeBox(
+        this.upgradeButton = new UpgradeButton(
             stage,
             {
                 width: 80,
@@ -61,7 +61,7 @@ export class TempleCard implements DynamicGroupInterface<TempleUpdate> {
         this.group.add(
             this.background,
             this.contractCard.getElement(),
-            this.upgradeBox.getElement(),
+            this.upgradeButton.getElement(),
         );
     }
 
@@ -74,7 +74,7 @@ export class TempleCard implements DynamicGroupInterface<TempleUpdate> {
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
         );
-        this.upgradeBox.updateElement(isUpgradeAvailable);
+        this.upgradeButton.updateElement(isUpgradeAvailable);
     }
 
     public getElement(): Konva.Group {

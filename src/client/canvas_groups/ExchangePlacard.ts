@@ -5,7 +5,7 @@ import { HexId } from '../../shared_types';
 
 const { COLOR } = clientConstants;
 
-export class ExchangeCard implements DynamicGroupInterface<HexId> {
+export class ExchangePlacard implements DynamicGroupInterface<HexId> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

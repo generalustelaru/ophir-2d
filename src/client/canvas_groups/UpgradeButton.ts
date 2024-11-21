@@ -6,7 +6,7 @@ import { CoinDial } from "./CoinDial";
 
 const { COLOR } = clientConstants;
 
-export class UpgradeBox extends ActionGroup implements DynamicGroupInterface<boolean> {
+export class UpgradeButton extends ActionGroup implements DynamicGroupInterface<boolean> {
 
     private background: Konva.Rect;
     private plusSign: Konva.Text;

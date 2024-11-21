@@ -3,7 +3,7 @@ import { DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { ContractCard } from "./CanvasGroups";
 import { Contract } from "../../shared_types";
 
-export class FutureContractDisplay implements DynamicGroupInterface<Contract>
+export class MarketDeck implements DynamicGroupInterface<Contract>
 {
     private group: Konva.Group;
     private contractCard: ContractCard;

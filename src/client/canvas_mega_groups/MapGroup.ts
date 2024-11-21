@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { MapHex, BarrierToken, Ship, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
+import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../canvas_groups/CanvasGroups';
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
@@ -14,8 +14,8 @@ export class MapGroup implements MegaGroupInterface {
     private endTurnButton: EndTurnButton | null = null;
     private actionDial: ActionDial | null = null;
     private favorButton: FavorButton | null = null;
-    private mapHexes: Array<MapHex> = [];
-    private opponentShips: Array<Ship> = [];
+    private mapHexes: Array<MapHexagon> = [];
+    private opponentShips: Array<ShipToken> = [];
     private localShip: PlayerShip | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
@@ -66,7 +66,7 @@ export class MapGroup implements MegaGroupInterface {
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
-            const mapHex = new MapHex(
+            const mapHex = new MapHexagon(
                 this.stage,
                 centerPoint,
                 hexItem.id,
@@ -91,7 +91,7 @@ export class MapGroup implements MegaGroupInterface {
 
             if (player.id && player.id !== clientState.localPlayerId) {
                 const shipPosition = player.location.position;
-                const ship = new Ship(
+                const ship = new ShipToken(
                     shipPosition.x,
                     shipPosition.y,
                     COLOR[player.id],

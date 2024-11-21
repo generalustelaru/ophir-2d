@@ -2,7 +2,7 @@ import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from "../client_types";
 import clientConstants from "../client_constants";
 import { MarketFluctuations, MarketKey, MarketOffer } from "../../shared_types";
-import { FutureContractDisplay, OpenContractDisplay } from "./CanvasGroups";
+import { MarketDeck, MarketCardSlot } from "./CanvasGroups";
 
 const { COLOR, SETTLEMENT_DATA } = clientConstants;
 
@@ -10,10 +10,10 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private futureDisplay: FutureContractDisplay;
-    private slot_1: OpenContractDisplay;
-    private slot_2: OpenContractDisplay;
-    private slot_3: OpenContractDisplay;
+    private marketDeck: MarketDeck;
+    private slot_1: MarketCardSlot;
+    private slot_2: MarketCardSlot;
+    private slot_3: MarketCardSlot;
 
     constructor(
         stage: Konva.Stage,
@@ -39,7 +39,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
         const totalHeight = this.group.height();
         const contractCardWidth = this.group.width() / 4;
 
-        this.futureDisplay = new FutureContractDisplay(
+        this.marketDeck = new MarketDeck(
             stage,
             {
                 width: contractCardWidth,
@@ -50,7 +50,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
             market.future,
         );
 
-        this.slot_1 = new OpenContractDisplay(
+        this.slot_1 = new MarketCardSlot(
             stage,
             {
                 width: contractCardWidth,
@@ -63,7 +63,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
             marketFluctuations.slot_1,
         );
 
-        this.slot_2 = new OpenContractDisplay(
+        this.slot_2 = new MarketCardSlot(
             stage,
             {
                 width: contractCardWidth,
@@ -76,7 +76,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
             marketFluctuations.slot_2,
         );
 
-        this.slot_3 = new OpenContractDisplay(
+        this.slot_3 = new MarketCardSlot(
             stage,
             {
                 width: contractCardWidth,
@@ -98,7 +98,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
 
         this.group.add(
             this.background,
-            this.futureDisplay.getElement(),
+            this.marketDeck.getElement(),
             this.slot_1.getElement(),
             this.slot_2.getElement(),
             this.slot_3.getElement(),
@@ -107,7 +107,7 @@ export class MarketCard implements DynamicGroupInterface<MarketUpdate> {
     }
 
     public updateElement(data: MarketUpdate): void {
-        this.futureDisplay.updateElement(data.contracts.future);
+        this.marketDeck.updateElement(data.contracts.future);
 
         const localPlayer = data.localPlayer;
 
