@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../client_types";
 import { Contract } from "../../shared_types";
-import { CoinDial, GoodsOrderDisplay } from "./CanvasGroups";
+import { CoinDial, GoodsAssortment } from "./CanvasGroups";
 import clientConstants from "../client_constants";
 import { ActionGroup } from "./ActionGroup";
 
@@ -9,7 +9,7 @@ const { COLOR } = clientConstants;
 export class ContractCard extends ActionGroup implements DynamicGroupInterface<ContractCardUpdate> {
 
     private coinDial: CoinDial;
-    private goodsDisplay: GoodsOrderDisplay;
+    private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
     private fluctuation: number | null = null;
     constructor(
@@ -39,7 +39,7 @@ export class ContractCard extends ActionGroup implements DynamicGroupInterface<C
             contract.reward.coins + (fluctuation ?? 0)
         );
 
-        this.goodsDisplay = new GoodsOrderDisplay(
+        this.goodsAssortment = new GoodsAssortment(
             {
                 width: this.background.width(),
                 height: this.background.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
@@ -52,13 +52,13 @@ export class ContractCard extends ActionGroup implements DynamicGroupInterface<C
         this.group.add(...[
             this.background,
             this.coinDial.getElement(),
-            this.goodsDisplay.getElement(),
+            this.goodsAssortment.getElement(),
         ]);
     }
 
     public updateElement(data: ContractCardUpdate): void {
         this.coinDial.updateElement(data.contract.reward.coins + (this.fluctuation ?? 0));
-        this.goodsDisplay.updateElement(data.contract.request);
+        this.goodsAssortment.updateElement(data.contract.request);
         this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
         this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);

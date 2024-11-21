@@ -5,7 +5,7 @@ import clientConstants from '../client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
-export class GoodsOrderDisplay implements DynamicGroupInterface<Array<GoodId>>
+export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
 {
     private group: Konva.Group;
     constructor(

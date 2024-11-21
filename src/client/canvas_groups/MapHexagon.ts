@@ -8,7 +8,7 @@ import { InfluenceDial, LocationToken } from './CanvasGroups';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
-export class MapHex implements DynamicGroupInterface<Player> {
+export class MapHexagon implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;

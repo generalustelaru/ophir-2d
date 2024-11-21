@@ -7,7 +7,7 @@ import clientConstants from '../client_constants';
 
 const { COLOR } = clientConstants;
 
-export class PlayerCard implements DynamicGroupInterface<Player> {
+export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

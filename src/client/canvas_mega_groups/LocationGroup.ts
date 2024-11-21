@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
-import { MarketCard, ExchangeCard, TempleCard } from "../canvas_groups/CanvasGroups";
+import { MarketCard, ExchangePlacard, TempleCard } from "../canvas_groups/CanvasGroups";
 import clientState from '../state';
 import { HexId, SettlementId } from "../../shared_types";
 
@@ -15,7 +15,7 @@ export class LocationGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private marketCard: MarketCard | null = null;
-    private exchangeCard: ExchangeCard | null = null;
+    private exchangePlacard: ExchangePlacard | null = null;
     private templeCard: TempleCard | null = null;
     private locations: Locations | null = null;
 
@@ -53,7 +53,7 @@ export class LocationGroup implements MegaGroupInterface {
             }
         );
 
-        this.exchangeCard = new ExchangeCard(
+        this.exchangePlacard = new ExchangePlacard(
             this.locations.exchange,
             {
                 width: this.group.width(),
@@ -73,13 +73,13 @@ export class LocationGroup implements MegaGroupInterface {
                 width: this.group.width(),
                 height: heightSegment * 2,
                 x: 0,
-                y: this.marketCard.getElement().height() + this.exchangeCard.getElement().height(),
+                y: this.marketCard.getElement().height() + this.exchangePlacard.getElement().height(),
             }
         );
 
         this.group.add(
             this.marketCard.getElement(),
-            this.exchangeCard.getElement(),
+            this.exchangePlacard.getElement(),
             this.templeCard.getElement(),
         );
     }
@@ -104,7 +104,7 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         this.marketCard?.updateElement(marketUpdate);
-        this.exchangeCard?.updateElement(activePlayer.location.hexId);
+        this.exchangePlacard?.updateElement(activePlayer.location.hexId);
         this.templeCard?.updateElement(templeUpdate);
     }
 

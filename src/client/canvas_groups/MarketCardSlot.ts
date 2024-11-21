@@ -6,7 +6,7 @@ import clientConstants from "../client_constants";
 
 const { ICON_DATA } = clientConstants;
 
-export class OpenContractDisplay implements DynamicGroupInterface<ContractCardUpdate> {
+export class MarketCardSlot implements DynamicGroupInterface<ContractCardUpdate> {
     private group: Konva.Group;
     private contractCard: ContractCard;
 

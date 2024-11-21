@@ -3,7 +3,7 @@ import { Coordinates, HexId, PlayerId, SharedState, DiceSix } from '../../shared
 import { ActionEventPayload } from '../client_types';
 import clientState from '../state';
 import clientConstants from '../client_constants';
-import { MapHex } from './CanvasGroups';
+import { MapHexagon } from './CanvasGroups';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
@@ -14,7 +14,7 @@ export class PlayerShip {
     private group: Konva.Group;
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
-    private mapHexes: Array<MapHex> = [];
+    private mapHexes: Array<MapHexagon> = [];
 
     public switchControl(isActivePlayer: boolean) {
         this.group.draggable(isActivePlayer);
@@ -36,7 +36,7 @@ export class PlayerShip {
         offsetY: number,
         fill: string,
         isActivePlayer: boolean,
-        mapHexes: Array<MapHex>
+        mapHexes: Array<MapHexagon>
     ) {
         this.mapHexes = mapHexes;
         const playerId = clientState.localPlayerId;
