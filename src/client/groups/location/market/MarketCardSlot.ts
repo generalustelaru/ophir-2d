@@ -1,8 +1,8 @@
 import Konva from "konva";
-import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { MarketCard } from "../GroupList";
-import { TradeOffer, Fluctuation, MarketKey } from "../../../shared_types";
-import clientConstants from "../../client_constants";
+import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../../client_types";
+import { MarketCard } from "../../GroupList";
+import { TradeOffer, Fluctuation, MarketKey } from "../../../../shared_types";
+import clientConstants from "../../../client_constants";
 
 const { ICON_DATA } = clientConstants;
 

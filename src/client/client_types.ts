@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, Contract, MarketOffer, Player } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, TradeOffer, MarketOffer, Player } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -58,8 +58,8 @@ export type ColorProfile = {
     tertiary: Color | null,
 }
 
-export type ContractCardUpdate = {
-    contract: Contract,
+export type MarketCardUpdate = {
+    contract: TradeOffer,
     isFeasible: boolean,
 }
 
@@ -69,7 +69,7 @@ export type MarketUpdate = {
 }
 
 export type TempleUpdate = {
-    contract: Contract,
+    contract: TradeOffer,
     localPlayer: Player | null,
 }
 

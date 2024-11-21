@@ -1,5 +1,5 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, Contract, MarketOffer, MarketKey } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, TradeOffer, MarketOffer, MarketKey } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -172,7 +172,7 @@ export class GameSetupService extends Service {
         return pool.splice(pick, 1)[0] as MarketKey;
     }
 
-    private extractInitialContracts(contracts: Array<Contract>): {contractDeck: Array<Contract>, marketOffer: MarketOffer} {
+    private extractInitialContracts(contracts: Array<TradeOffer>): {contractDeck: Array<TradeOffer>, marketOffer: MarketOffer} {
         const keys = ['future', 'slot_1', 'slot_2', 'slot_3'];
         const marketOffer = {} as any;
 
