@@ -3,14 +3,14 @@ import { GameSetupDetails } from '../../shared_types';
 import { Service } from "./Service";
 import { LocationGroup } from '../canvas_mega_groups/LocationGroup';
 import { MapGroup } from '../canvas_mega_groups/MapGroup';
-import { PlayerCardGroup } from '../canvas_mega_groups/PlayerCardGroup';
+import { PlayerGroup } from '../canvas_mega_groups/PlayerGroup';
 import clientState from '../state';
 
 export class CanvasService extends Service {
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
-    private playerCardGroup: PlayerCardGroup;
+    private playerGroup: PlayerGroup;
 
     public constructor() {
         super();
@@ -47,7 +47,7 @@ export class CanvasService extends Service {
             },
         ); // mapGroup covers half the canvas (2 segments), sitting in the middle
 
-        this.playerCardGroup = new PlayerCardGroup(
+        this.playerGroup = new PlayerGroup(
             this.stage,
             {
                 height: this.stage.height(),
@@ -64,7 +64,7 @@ export class CanvasService extends Service {
 
     public drawElements(): void {
         this.locationGroup.drawElements();
-        this.playerCardGroup.drawElements();
+        this.playerGroup.drawElements();
         this.mapGroup.drawElements();
 
         if (!clientState.localPlayerId) {
@@ -75,6 +75,6 @@ export class CanvasService extends Service {
     public updateElements(): void {
         this.locationGroup.updateElements();
         this.mapGroup.updateElements();
-        this.playerCardGroup.updateElements();
+        this.playerGroup.updateElements();
     }
 }
