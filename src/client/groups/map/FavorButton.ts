@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { ActionEventPayload, DynamicGroupInterface, GroupLayoutData } from '../client_types';
-import { ActionGroup } from './ActionGroup';
-import { Player } from '../../shared_types';
-import { FavorIcon } from './FavorIcon';
-import clientConstants from '../client_constants';
+import { ActionEventPayload, DynamicGroupInterface, GroupLayoutData } from '../../client_types';
+import { ActionGroup } from '../ActionGroup';
+import { Player } from '../../../shared_types';
+import { FavorIcon } from '../FavorIcon';
+import clientConstants from '../../client_constants';
 
 const { COLOR_PROFILES, ICON_DATA } = clientConstants;
 

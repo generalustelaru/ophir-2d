@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Player, PlayerId } from '../../shared_types';
-import { DynamicGroupInterface } from '../client_types';
-import clientConstants from '../client_constants';
+import { Player, PlayerId } from '../../../shared_types';
+import { DynamicGroupInterface } from '../../client_types';
+import clientConstants from '../../client_constants';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 

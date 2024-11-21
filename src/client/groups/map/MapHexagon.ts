@@ -1,10 +1,10 @@
 
 import Konva from 'konva';
-import { Coordinates, HexId, DiceSix, Player } from '../../shared_types';
-import { Color, DynamicGroupInterface, IslandData, SettlementData } from '../client_types';
+import { Coordinates, HexId, DiceSix, Player } from '../../../shared_types';
+import { Color, DynamicGroupInterface, IslandData, SettlementData } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
-import clientConstants from '../client_constants';
-import { InfluenceDial, LocationToken } from './CanvasGroups';
+import clientConstants from '../../client_constants';
+import { InfluenceDial, LocationToken } from '../CanvasGroups';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
