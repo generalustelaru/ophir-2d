@@ -2,11 +2,11 @@ import Konva from 'konva';
 import constants from '../../client_constants';
 import { Player } from '../../../shared_types';
 import { ActionEventPayload, DynamicGroupInterface } from '../../client_types';
-import { ActionGroup } from '../ActionGroup';
+import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
 // TODO: rename to EndTurnButton
-export class EndTurnButton extends ActionGroup implements DynamicGroupInterface<Player> {
+export class EndTurnButton extends ActionButton implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 
     constructor(

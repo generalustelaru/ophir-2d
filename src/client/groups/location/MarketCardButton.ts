@@ -3,10 +3,10 @@ import { ActionEventPayload, ContractCardUpdate, DynamicGroupInterface, GroupLay
 import { Contract } from "../../../shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "../../client_constants";
-import { ActionGroup } from "../ActionGroup";
+import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
-export class ContractCard extends ActionGroup implements DynamicGroupInterface<ContractCardUpdate> {
+export class MarketCardButton extends ActionButton implements DynamicGroupInterface<ContractCardUpdate> {
 
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;

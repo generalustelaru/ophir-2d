@@ -1,12 +1,12 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { ContractCard } from "../GroupList";
+import { MarketCardButton } from "../GroupList";
 import { Contract } from "../../../shared_types";
 
 export class MarketDeck implements DynamicGroupInterface<Contract>
 {
     private group: Konva.Group;
-    private contractCard: ContractCard;
+    private contractCard: MarketCardButton;
 
     constructor(
         stage: Konva.Stage,
@@ -22,7 +22,7 @@ export class MarketDeck implements DynamicGroupInterface<Contract>
 
         const segmentHeight = this.group.height() / 6;
 
-        this.contractCard = new ContractCard(
+        this.contractCard = new MarketCardButton(
             stage,
             {
                 width: this.group.width(),

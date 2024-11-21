@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ContractCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { ContractCard } from "../GroupList";
+import { MarketCardButton } from "../GroupList";
 import { Contract, Fluctuation, MarketKey } from "../../../shared_types";
 import clientConstants from "../../client_constants";
 
@@ -8,7 +8,7 @@ const { ICON_DATA } = clientConstants;
 
 export class MarketCardSlot implements DynamicGroupInterface<ContractCardUpdate> {
     private group: Konva.Group;
-    private contractCard: ContractCard;
+    private contractCard: MarketCardButton;
 
     constructor(
         stage: Konva.Stage,
@@ -25,7 +25,7 @@ export class MarketCardSlot implements DynamicGroupInterface<ContractCardUpdate>
         });
 
         const segmentHeight = this.group.height() / 6;
-        this.contractCard = new ContractCard(
+        this.contractCard = new MarketCardButton(
             stage,
             {
                 width: this.group.width(),
