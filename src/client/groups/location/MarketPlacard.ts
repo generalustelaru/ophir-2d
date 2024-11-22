@@ -37,12 +37,12 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         });
 
         const totalHeight = this.group.height();
-        const contractCardWidth = this.group.width() / 4;
+        const cardWidth = this.group.width() / 4;
 
         this.marketDeck = new MarketDeck(
             stage,
             {
-                width: contractCardWidth,
+                width: cardWidth,
                 height: totalHeight,
                 x: 0,
                 y: 0,
@@ -54,9 +54,9 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         this.slot_1 = new MarketCardSlot(
             stage,
             {
-                width: contractCardWidth,
+                width: cardWidth,
                 height: totalHeight,
-                x: contractCardWidth,
+                x: cardWidth,
                 y: 0,
             },
             'slot_1',
@@ -67,9 +67,9 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         this.slot_2 = new MarketCardSlot(
             stage,
             {
-                width: contractCardWidth,
+                width: cardWidth,
                 height: totalHeight,
-                x: contractCardWidth * 2,
+                x: cardWidth * 2,
                 y: 0,
             },
             'slot_2',
@@ -80,9 +80,9 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         this.slot_3 = new MarketCardSlot(
             stage,
             {
-                width: contractCardWidth,
+                width: cardWidth,
                 height: totalHeight,
-                x: contractCardWidth * 3,
+                x: cardWidth * 3,
                 y: 0,
             },
             'slot_3',
@@ -93,7 +93,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         const templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: LOCATION_TOKEN_DATA.temple.fill,
-            x: this[templeTradeSlot].getElement().x() + contractCardWidth / 2 - 12,
+            x: this[templeTradeSlot].getElement().x() + cardWidth / 2 - 12,
             y: 5,
         });
 
@@ -108,7 +108,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
     }
 
     public updateElement(data: MarketUpdate): void {
-        this.marketDeck.updateElement(data.contracts);
+        this.marketDeck.updateElement(data.marketOffer);
 
         const localPlayer = data.localPlayer;
 
@@ -122,7 +122,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         cardSlots.forEach(slot => {
             const isFeasible = localPLayerMaySell && localPlayer.feasibleTrades.includes(slot)
             this[slot].updateElement({
-                contract: data.contracts[slot],
+                trade: data.marketOffer[slot],
                 isFeasible,
             });
         });

@@ -1,9 +1,9 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, TradeRequest } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, Trade } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
-const { MARKET_CONTRACTS_B } = serverConstants;
+const { TRADE_DECK_B } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -200,21 +200,21 @@ export class GameSession {
             return false;
         }
 
-        const contract = this.sharedState.market[marketKey];
+        const trade = this.sharedState.marketOffer[marketKey];
         switch (tradeAction) {
             case 'sell_goods':
                 const modifier = this.sharedState.setup.marketFluctuations[marketKey];
-                player.coins += contract.reward.coins + modifier;
+                player.coins += trade.reward.coins + modifier;
                 break;
             case 'donate_goods':
-                const accumulatedFavor = player.favor + contract.reward.favorAndVp;
+                const accumulatedFavor = player.favor + trade.reward.favorAndVp;
                 player.favor = accumulatedFavor > 6 ? 6 : accumulatedFavor;
         }
 
         const playerCargo = player.cargo;
 
-        for (let i = 0; i < contract.request.length; i++) {
-            const goodToUnload = contract.request[i] as GoodId;
+        for (let i = 0; i < trade.request.length; i++) {
+            const goodToUnload = trade.request[i] as GoodId;
             const cargoSlot = playerCargo.indexOf(goodToUnload);
 
             if (cargoSlot === -1) {
@@ -230,9 +230,9 @@ export class GameSession {
         player.locationActions = this.removeAction(player.locationActions, tradeAction);
         player.moveActions = 0;
 
-        const isNewContract = this.shiftMarket();
+        const isNewTrade = this.shiftMarket();
 
-        if (!isNewContract) {
+        if (!isNewTrade) {
             return false;
         }
 
@@ -433,7 +433,7 @@ export class GameSession {
     }
 
     private pickFeasibleTrades(playerCargo: CargoManifest) {
-        const market = this.tools.getCopy(this.sharedState.market);
+        const market = this.tools.getCopy(this.sharedState.marketOffer);
         const cargo = this.tools.getCopy(playerCargo);
         const nonGoods: Array<ManifestItem> = ['empty', 'gold_a', 'gold_b', 'silver_a', 'silver_b'];
 
@@ -466,38 +466,38 @@ export class GameSession {
     }
 
     private shiftMarket(): boolean {
-        const market = this.sharedState.market;
+        const market = this.sharedState.marketOffer;
 
-        market.slot_1 = market.future;
-        market.slot_2 = market.slot_1;
         market.slot_3 = market.slot_2;
+        market.slot_2 = market.slot_1;
+        market.slot_1 = market.future;
 
-        const marketDeck = this.getCards();
-        const pick = Math.floor(Math.random() * marketDeck.length);
-        const newContract = marketDeck.splice(pick, 1).shift();
+        const tradeDeck = this.getCards();
+        const pick = Math.floor(Math.random() * tradeDeck.length);
+        const newTrade = tradeDeck.splice(pick, 1).shift(); //TODO: dow need to shift?
 
-        if (!newContract) {
-            console.error('No contract drawn!');
+        if (!newTrade) {
+            console.error('No card could be drawn!');
 
             return false;
         }
 
-        market.future = newContract;
+        market.future = newTrade;
 
         return true;
     }
 
-    private getCards(): Array<TradeRequest> {
+    private getCards(): Array<Trade> {
         if (
-            this.privateState.marketDeck.length === 0
-            && this.sharedState.market.deckId === 'A'
+            this.privateState.tradeDeck.length === 0
+            && this.sharedState.marketOffer.deckId === 'A'
         ) {
-                this.privateState.marketDeck = this.tools.getCopy(MARKET_CONTRACTS_B);
-                this.sharedState.market.deckId = 'B';
+                this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
+                this.sharedState.marketOffer.deckId = 'B';
 
                 console.log('Deck B loaded');
         }
 
-        return this.privateState.marketDeck;
+        return this.privateState.tradeDeck;
     }
 }

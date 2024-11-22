@@ -1,11 +1,11 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, TradeRequest, MarketOffer, MarketKey, Location } from '../../shared_types';
+import { SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES,TRADE_DECK_A } = serverConstants;
 
 export class GameSetupService extends Service {
 
@@ -16,14 +16,14 @@ export class GameSetupService extends Service {
 
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(sharedState.setup.barriers),
-            marketDeck: this.tools.getCopy(serverConstants.MARKET_CONTRACTS_A),
+            tradeDeck: this.tools.getCopy(TRADE_DECK_A),
         }
 
         sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
 
-        const { contractDeck, marketOffer } = this.extractInitialContracts(this.tools.getCopy(privateState.marketDeck));
-        privateState.marketDeck = contractDeck;
-        sharedState.market = marketOffer;
+        const { tradeDeck, marketOffer } = this.prepareDeckAndGetOffer(this.tools.getCopy(privateState.tradeDeck));
+        privateState.tradeDeck = tradeDeck;
+        sharedState.marketOffer = marketOffer;
 
         const bundle: StateBundle = {
             sharedState: sharedState,
@@ -34,10 +34,7 @@ export class GameSetupService extends Service {
     };
 
     private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
-        const playerIds = players.reduce((acc: Array<PlayerId>, player: Player) => {
-            acc.push(player.id);
-            return acc;
-        }, []);
+        const playerIds = players.map(player => player.id);
 
         let tokenCount = playerIds.length;
 
@@ -169,15 +166,23 @@ export class GameSetupService extends Service {
         return pool.splice(pick, 1)[0] as MarketKey;
     }
 
-    private extractInitialContracts(contracts: Array<TradeRequest>): {contractDeck: Array<TradeRequest>, marketOffer: MarketOffer} {
-        const keys = ['future', 'slot_1', 'slot_2', 'slot_3'];
-        const marketOffer = {deck: 'A'} as any;
+    private prepareDeckAndGetOffer(trades: Array<Trade>): {tradeDeck: Array<Trade>, marketOffer: MarketOffer} {
+        let tradeDeck = this.tools.getCopy(trades);
 
-        keys.forEach(key => {
-            const pick = Math.floor(Math.random() * contracts.length);
-            marketOffer[key] = contracts.splice(pick, 1).shift();
-        });
+        // Remove 5 random cards from the deck
+        for (let i = 0; i < 5; i++) {
+            const pick = Math.floor(Math.random() * tradeDeck.length);
+            tradeDeck.splice(pick, 1);
+        }
 
-        return { contractDeck: contracts, marketOffer: marketOffer as MarketOffer };
+        const marketOffer = {
+            deckId: 'A',
+            future: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(), //TODO: do we need to shift?
+            slot_1: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(),
+            slot_2: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(),
+            slot_3: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(),
+        } as MarketOffer;
+
+        return { tradeDeck, marketOffer };
     }
 }

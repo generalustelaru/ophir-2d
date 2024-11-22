@@ -63,6 +63,5 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
 
     public updateElement(value: number): void {
         this.amount.text(value.toString());
-        this.amount.x(value > 9 ? this.coinCenter - 12 : this.coinCenter - 5);
     }
 }

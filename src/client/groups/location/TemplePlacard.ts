@@ -74,7 +74,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         const localPlayer = data.localPlayer;
 
         this.templeCard.updateElement({
-            contract: data.contract,
+            trade: data.trade,
             isFeasible: (
                 !!localPlayer?.feasibleTrades.includes(this.templeTradeSlot)
                 && !!localPlayer.locationActions?.includes('donate_goods')

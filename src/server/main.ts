@@ -13,19 +13,19 @@ const wsPort = 8080;
 const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
 const privateState: PrivateState = {
     moveRules: [],
-    marketDeck: [],
+    tradeDeck: [],
 }
 
-const sharedState: NewState|SharedState = {
+const newState: NewState | SharedState = {
     gameStatus: 'empty',
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
     players: [],
-    market: null,
+    marketOffer: null,
     setup: null,
 }
 
-let singleSession: GameSession|null = null;
+let singleSession: GameSession | null = null;
 
 const app = express();
 app.use(express.static('public'));
@@ -78,11 +78,11 @@ socketServer.on('connection', function connection(client) {
         );
 
         if (action === 'inquire') {
-            send(client, sharedState);
+            send(client, newState);
             return;
         }
 
-        if(!playerId) {
+        if (!playerId) {
             send(client, { error: 'Player ID is missing' });
 
             return;
@@ -91,7 +91,7 @@ socketServer.on('connection', function connection(client) {
         if (action === 'enroll') {
 
             if (processPlayer(playerId)) {
-                sendAll(sharedState);
+                sendAll(newState);
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
             }
@@ -103,7 +103,7 @@ socketServer.on('connection', function connection(client) {
             const setupDetails = details as GameSetupDetails;
 
             if (processGameStart(setupDetails)) {
-                sendAll(sharedState);
+                sendAll(newState);
             } else {
                 sendAll({ error: 'Game start failed' });
             }
@@ -119,16 +119,16 @@ socketServer.on('connection', function connection(client) {
 function processGameStart(details: GameSetupDetails): boolean {
 
     try {
-        const gameState = sharedState as SharedState;
-        gameState.gameStatus = 'started';
-        gameState.availableSlots = [];
+        const sharedState = newState as SharedState;
+        sharedState.gameStatus = 'started';
+        sharedState.availableSlots = [];
 
-        const bundle: StateBundle = setupService.produceGameData(gameState, details.setupCoordinates);
+        const bundle: StateBundle = setupService.produceGameData(sharedState, details.setupCoordinates);
 
         singleSession = new GameSession(bundle);
 
-        gameState.players = bundle.sharedState.players;
-        gameState.setup = bundle.sharedState.setup;
+        sharedState.players = bundle.sharedState.players;
+        sharedState.setup = bundle.sharedState.setup;
         privateState.moveRules = bundle.privateState.moveRules;
     } catch (error) {
         console.error('Game start failed:', error);
@@ -142,7 +142,7 @@ function processGameStart(details: GameSetupDetails): boolean {
 function processPlayer(playerId: PlayerId): boolean {
     const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
-    if (incompatibleStatuses.includes(sharedState.gameStatus)) {
+    if (incompatibleStatuses.includes(newState.gameStatus)) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
@@ -154,22 +154,22 @@ function processPlayer(playerId: PlayerId): boolean {
         return false;
     }
 
-    sharedState.availableSlots = sharedState.availableSlots.filter(slot => slot !== playerId);
+    newState.availableSlots = newState.availableSlots.filter(slot => slot !== playerId);
 
     const newPlayer = tools.getCopy(DEFAULT_PLAYER_STATE);
     newPlayer.id = playerId;
-    sharedState.players.push(newPlayer);
+    newState.players.push(newPlayer);
 
     console.log(`${playerId} enrolled`);
 
-    if (sharedState.sessionOwner === null) {
-        sharedState.gameStatus = 'created';
-        sharedState.sessionOwner = playerId;
+    if (newState.sessionOwner === null) {
+        newState.gameStatus = 'created';
+        newState.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
 
-    if (sharedState.availableSlots.length === 0) {
-        sharedState.gameStatus = 'full';
+    if (newState.availableSlots.length === 0) {
+        newState.gameStatus = 'full';
         console.log(`Session is full`);
     }
 
