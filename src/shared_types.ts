@@ -16,9 +16,10 @@ export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ManifestItem>;
-export type TradeOffer = { request: Array<GoodId>, reward: PayAndReward };
-export type PayAndReward = { coins: number, favorAndVp: number }
+export type TradeRequest = { request: Array<GoodId>, reward: Reward };
+export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
+export type MarketDeckId = "A" | "B";
 
 export type Player = {
     id: PlayerId,
@@ -43,10 +44,11 @@ export type Player = {
 }
 
 export type MarketOffer = {
-    future: TradeOffer,
-    slot_1: TradeOffer,
-    slot_2: TradeOffer,
-    slot_3: TradeOffer,
+    deckId: MarketDeckId,
+    future: TradeRequest,
+    slot_1: TradeRequest,
+    slot_2: TradeRequest,
+    slot_3: TradeRequest,
 }
 
 export type MarketFluctuations = {

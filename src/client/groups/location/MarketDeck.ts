@@ -1,17 +1,19 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { MarketCard } from "../GroupList";
-import { TradeOffer } from "../../../shared_types";
+import { MarketDeckId, MarketOffer, TradeRequest } from "../../../shared_types";
 
-export class MarketDeck implements DynamicGroupInterface<TradeOffer>
+export class MarketDeck implements DynamicGroupInterface<MarketOffer>
 {
     private group: Konva.Group;
-    private contractCard: MarketCard;
+    private marketCard: MarketCard;
+    private deckInUse: Konva.Text;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        futureContract: TradeOffer,
+        futureContract: TradeRequest,
+        deckId: MarketDeckId,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -22,7 +24,7 @@ export class MarketDeck implements DynamicGroupInterface<TradeOffer>
 
         const segmentHeight = this.group.height() / 6;
 
-        this.contractCard = new MarketCard(
+        this.marketCard = new MarketCard(
             stage,
             {
                 width: this.group.width(),
@@ -35,19 +37,29 @@ export class MarketDeck implements DynamicGroupInterface<TradeOffer>
         );
 
         const deck = new Konva.Rect({
-            width: this.contractCard.getElement().width() - 6,
+            width: this.marketCard.getElement().width() - 6,
             height: 50,
-            x: this.contractCard.getElement().x() + 3,
-            y: this.contractCard.getElement().y() + this.contractCard.getElement().height() - 30,
+            x: this.marketCard.getElement().x() + 3,
+            y: this.marketCard.getElement().y() + this.marketCard.getElement().height() - 30,
             fill: 'gray',
             stroke: 'gray',
             strokeWidth: 2,
             cornerRadius: 15,
         })
 
+        this.deckInUse = new Konva.Text({
+            x: deck.x() + 5,
+            y: deck.y() + 0,
+            text: deckId,
+            fontSize: 20,
+            fontFamily: 'Calibri',
+            fill: 'white',
+        });
+
         this.group.add(
             deck,
-            this.contractCard.getElement()
+            this.marketCard.getElement(),
+            this.deckInUse,
         );
     }
 
@@ -55,7 +67,8 @@ export class MarketDeck implements DynamicGroupInterface<TradeOffer>
         return this.group;
     }
 
-    public updateElement(contract: TradeOffer): void {
-        this.contractCard.updateElement({contract: contract, isFeasible: false});
+    public updateElement(offer: MarketOffer): void {
+        this.marketCard.updateElement({contract: offer.future, isFeasible: false});
+        this.deckInUse.text(offer.deckId);
     }
 }

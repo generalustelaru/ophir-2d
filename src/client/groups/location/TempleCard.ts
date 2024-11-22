@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { TradeOffer } from "../../../shared_types";
+import { TradeRequest } from "../../../shared_types";
 import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -15,7 +15,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
         stage: Konva.Stage,
         layout: GroupLayoutData,
         actionPayload: ActionEventPayload | null,
-        contract: TradeOffer,
+        contract: TradeRequest,
     ) {
         super(stage, layout, actionPayload);
 

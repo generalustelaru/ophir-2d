@@ -1,5 +1,5 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, TradeOffer, MarketOffer, MarketKey, Location } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, TradeRequest, MarketOffer, MarketKey, Location } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -16,13 +16,13 @@ export class GameSetupService extends Service {
 
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(sharedState.setup.barriers),
-            marketContracts: this.tools.getCopy(serverConstants.MARKET_CONTRACTS_A),
+            marketDeck: this.tools.getCopy(serverConstants.MARKET_CONTRACTS_A),
         }
 
         sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
 
-        const { contractDeck, marketOffer } = this.extractInitialContracts(this.tools.getCopy(privateState.marketContracts));
-        privateState.marketContracts = contractDeck;
+        const { contractDeck, marketOffer } = this.extractInitialContracts(this.tools.getCopy(privateState.marketDeck));
+        privateState.marketDeck = contractDeck;
         sharedState.market = marketOffer;
 
         const bundle: StateBundle = {
@@ -57,7 +57,7 @@ export class GameSetupService extends Service {
     private determineBoardPieces(): GameSetup {
         const setup = {
             barriers: this.determineBarriers(),
-            mapPairings: this.determineSettlements(),
+            mapPairings: this.determineLocations(),
             marketFluctuations: this.determineFluctuations(),
             templeTradeSlot: this.determineTempleTradeSlot(),
         }
@@ -77,7 +77,7 @@ export class GameSetupService extends Service {
         return [b1, b2];
     }
 
-    private determineSettlements(): Record<HexId, Location> {
+    private determineLocations(): Record<HexId, Location> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
         const locationPairing: Record<HexId, null|Location> = {
             center: null,
@@ -169,9 +169,9 @@ export class GameSetupService extends Service {
         return pool.splice(pick, 1)[0] as MarketKey;
     }
 
-    private extractInitialContracts(contracts: Array<TradeOffer>): {contractDeck: Array<TradeOffer>, marketOffer: MarketOffer} {
+    private extractInitialContracts(contracts: Array<TradeRequest>): {contractDeck: Array<TradeRequest>, marketOffer: MarketOffer} {
         const keys = ['future', 'slot_1', 'slot_2', 'slot_3'];
-        const marketOffer = {} as any;
+        const marketOffer = {deck: 'A'} as any;
 
         keys.forEach(key => {
             const pick = Math.floor(Math.random() * contracts.length);
