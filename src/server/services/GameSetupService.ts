@@ -1,5 +1,5 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, TradeOffer, MarketOffer, MarketKey, ActionPairing } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, TradeOffer, MarketOffer, MarketKey, Location } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -9,20 +9,19 @@ const { BARRIER_CHECKS, DEFAULT_MOVE_RULES } = serverConstants;
 
 export class GameSetupService extends Service {
 
+    private tools: ToolService = ToolService.getInstance();
     public produceGameData(sharedState: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
         sharedState.players = this.assignTurnOrderAndPosition(sharedState.players, setupCoordinates);
         sharedState.setup = this.determineBoardPieces();
 
-        const tools: ToolService = ToolService.getInstance();
-
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(sharedState.setup.barriers),
-            marketContracts: tools.getCopy(serverConstants.MARKET_CONTRACTS_A),
+            marketContracts: this.tools.getCopy(serverConstants.MARKET_CONTRACTS_A),
         }
 
         sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
 
-        const { contractDeck, marketOffer } = this.extractInitialContracts(tools.getCopy(privateState.marketContracts));
+        const { contractDeck, marketOffer } = this.extractInitialContracts(this.tools.getCopy(privateState.marketContracts));
         privateState.marketContracts = contractDeck;
         sharedState.market = marketOffer;
 
@@ -48,7 +47,7 @@ export class GameSetupService extends Service {
             const player = players.find(player => player.id === playerId) as Player;
             player.turnOrder = tokenCount;
             player.isActive = tokenCount === 1;
-            player.location.position = setupCoordinates.pop() as Coordinates;
+            player.hexagon.position = setupCoordinates.pop() as Coordinates;
             tokenCount -= 1;
         }
 
@@ -58,7 +57,7 @@ export class GameSetupService extends Service {
     private determineBoardPieces(): GameSetup {
         const setup = {
             barriers: this.determineBarriers(),
-            locationPairings: this.determineSettlements(),
+            mapPairings: this.determineSettlements(),
             marketFluctuations: this.determineFluctuations(),
             templeTradeSlot: this.determineTempleTradeSlot(),
         }
@@ -78,12 +77,9 @@ export class GameSetupService extends Service {
         return [b1, b2];
     }
 
-    private determineSettlements(): Record<HexId, ActionPairing> {
-        const settlementIds: Array<SettlementId> = [
-            "temple", "market", "exchange",
-            "quary", "forest", "mines", "farms",
-        ];
-        const locationPairing: Record<HexId, null|ActionPairing> = {
+    private determineSettlements(): Record<HexId, Location> {
+        const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
+        const locationPairing: Record<HexId, null|Location> = {
             center: null,
             topRight: null,
             right: null,
@@ -92,16 +88,15 @@ export class GameSetupService extends Service {
             left: null,
             topLeft: null,
         }
-        const actionPairings = serverConstants.SETTLEMENT_ACTIONS;
 
-        for (const id in locationPairing) {
-            const hexId = id as HexId;
-            const pick = Math.floor(Math.random() * settlementIds.length);
-            const settlementId = settlementIds.splice(pick, 1)[0]
-            locationPairing[hexId] = actionPairings[settlementId];
+        for (const key in locationPairing) {
+            const hexId = key as HexId;
+            const pick = Math.floor(Math.random() * locations.length);
+
+            locationPairing[hexId] = locations.splice(pick, 1)[0];
         }
 
-        return locationPairing as Record<HexId, ActionPairing>;
+        return locationPairing as Record<HexId, Location>;
     }
 
     private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {
@@ -123,7 +118,7 @@ export class GameSetupService extends Service {
         const initialPlacement = moveRules[0];
 
         players.forEach(player => {
-            player.location.hexId = initialPlacement.from;
+            player.hexagon.hexId = initialPlacement.from;
             player.allowedMoves = initialPlacement.allowed;
         });
 

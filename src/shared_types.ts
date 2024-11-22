@@ -6,11 +6,11 @@ export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGr
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver_a" | "silver_b" | "gold_a" | "gold_b"; // metals cover two cargo spaces
-export type SettlementId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
+export type LocationId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
 export type Action =
-    | SettlementAction | FreeAction
+    | LocationAction | FreeAction
     | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";
-export type SettlementAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good";
+export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good";
 export type FreeAction = "reposition" | "drop_item"
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";
@@ -24,21 +24,21 @@ export type Player = {
     id: PlayerId,
     turnOrder: number,
     isActive: boolean,
-    location: {
+    hexagon: {
         hexId: HexId,
         position: Coordinates,
     },
     favor: number,
-    hasSpentFavor: boolean,
+    privilegedSailing: boolean,
     influence: DiceSix,
     moveActions: number,
     isAnchored: boolean,
-    locationActions: Array<SettlementAction> | null,
+    locationActions: Array<LocationAction> | null,
     // locationFreeActions: Array<FreeAction>, TODO: Implement for location-sepcific actions that can be repeated on a turn (sell specialist good, donate metals, buying metals)
     allowedMoves: Array<HexId>,
     hasCargo: boolean,
     cargo: CargoManifest,
-    feasibleContracts: Array<MarketKey>
+    feasibleTrades: Array<MarketKey>
     coins: number,
 }
 
@@ -77,14 +77,14 @@ export type NewState = {
     setup: null,
 }
 
-export type ActionPairing = {
-    id: SettlementId,
-    actions: Array<SettlementAction>,
+export type Location = {
+    id: LocationId,
+    actions: Array<LocationAction>,
 }
 
 export type GameSetup = {
     barriers: Array<BarrierId>,
-    locationPairings: Record<HexId, ActionPairing>,
+    mapPairings: Record<HexId, Location>,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketKey,
 }

@@ -5,7 +5,7 @@ import { ActionEventPayload, DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
-// TODO: rename to EndTurnButton
+
 export class EndTurnButton extends ActionButton implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 

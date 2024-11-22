@@ -91,20 +91,20 @@ export class PlayerShip {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
                 mapHex.setToHitValue(false);
-                mapHex.setFill(player.location.hexId === mapHex.getId() && player.locationActions
-                    ? COLOR.locationHex
+                mapHex.setFill(player.hexagon.hexId === mapHex.getId() && player.locationActions
+                    ? COLOR.activeHex
                     : COLOR.defaultHex
                 );
             }
 
             switch (true) {
-                case targetHex.getId() === player.location.hexId:
-                    targetHex.setFill(player.locationActions ? COLOR.locationHex : COLOR.defaultHex);
+                case targetHex.getId() === player.hexagon.hexId:
+                    targetHex.setFill(player.locationActions ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
-                    targetHex.setToHitValue(player.hasSpentFavor ? false : this.calculateToSailValue(targetHex.getId()));
+                    targetHex.setToHitValue(player.privilegedSailing ? false : this.calculateToSailValue(targetHex.getId()));
                     break;
                 default:
                     targetHex.setRestricted(true);
@@ -124,7 +124,7 @@ export class PlayerShip {
 
             const player = clientState.received.players.find(player => player.id === playerId);
             const position = stage.getPointerPosition();
-            const departureHex = this.mapHexes.find(hex => hex.getId() === player?.location.hexId);
+            const departureHex = this.mapHexes.find(hex => hex.getId() === player?.hexagon.hexId);
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
             if (!targetHex || !departureHex) {
@@ -133,7 +133,7 @@ export class PlayerShip {
 
             switch (true) {
                 case targetHex && this.isDestinationValid:
-                    targetHex.setFill(COLOR.locationHex);
+                    targetHex.setFill(COLOR.activeHex);
                     this.broadcastAction({
                         action: 'move',
                         details: {
@@ -149,12 +149,12 @@ export class PlayerShip {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
                     });
-                    departureHex.setFill(player?.locationActions ? COLOR.locationHex : COLOR.defaultHex);
+                    departureHex.setFill(player?.locationActions ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
-                    departureHex.setFill(player?.locationActions ? COLOR.locationHex: COLOR.defaultHex);
+                    departureHex.setFill(player?.locationActions ? COLOR.activeHex: COLOR.defaultHex);
             }
         });
         this.group.add(this.ship);
@@ -180,7 +180,7 @@ export class PlayerShip {
     }
     private calculateToSailValue(targetHexId: HexId): DiceSix | false {
         const influencePool = clientState.received.players
-            .map(player => { return player.location.hexId === targetHexId ? player.influence : 0 });
+            .map(player => { return player.hexagon.hexId === targetHexId ? player.influence : 0 });
         const highestInfluence = Math.max(...influencePool) as DiceSix;
 
         return highestInfluence > 0 ? highestInfluence : false;
