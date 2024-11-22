@@ -11,6 +11,18 @@ else
 endif
 	make run
 
+client:
+	npx tsc --noEmit
+	npm run build_client
+ifeq ($(OS),Windows_NT)
+	powershell -command "cp src/client/index.html public/index.html"
+	powershell -command "cp src/client/style.css public/style.css"
+else
+	cp src/client/index.html public/index.html
+	cp src/client/style.css public/style.css
+endif
+	make run
+
 run:
 	node public/server.cjs
 

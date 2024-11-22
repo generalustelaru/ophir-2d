@@ -21,6 +21,7 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
             height: layout.height,
             width: layout.width,
         });
+
         this.outerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_outer.shape,
             fill: ICON_DATA.favor_stamp_outer.fill,

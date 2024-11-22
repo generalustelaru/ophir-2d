@@ -22,10 +22,11 @@ import { FavorButton } from './map/FavorButton';
 import { FavorIcon } from './FavorIcon';
 import { UpgradeButton } from './location/UpgradeButton';
 import { TempleCard } from './location/TempleCard';
+import { TempleRewardDial } from './location/TempleRewardDial';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHexagon, ActionDial, PlayerShip,
     ShipToken, PlayerPlacard, FavorDial, CargoDial, MarketPlacard, CoinDial, ExchangePlacard,
-    TemplePlacard, MarketDeck, MarketCard, MarketCardSlot,
+    TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleCard
 };
