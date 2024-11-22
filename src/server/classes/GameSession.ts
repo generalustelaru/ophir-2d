@@ -1,17 +1,19 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
 import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails } from "../../shared_types";
 import serverConstants from "../server_constants";
-
+import { ToolService } from '../services/ToolService';
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
 
     private privateState: PrivateState;
     private sharedState: SharedState;
+    private tools: ToolService;
 
     constructor(bundle: StateBundle) {
         this.privateState = bundle.privateState;
         this.sharedState = bundle.sharedState;
+        this.tools = ToolService.getInstance();
 
         this.setTurnStartCondition(this.findActivePlayer());
     }
@@ -54,7 +56,7 @@ export class GameSession {
             return false;
         }
 
-        const departure = player.location.hexId;
+        const departure = player.hexagon.hexId;
         const destination = details.hexId;
         const remainingMoves = player.moveActions;
         const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
@@ -71,7 +73,7 @@ export class GameSession {
             : this.processInfluenceRoll(player, registry);
 
         if (sailSuccess) {
-            player.location = { hexId: destination, position: details.position };
+            player.hexagon = { hexId: destination, position: details.position };
             player.allowedMoves = (
                 this.privateState.moveRules
                 .find(rule => rule.from === destination)?.allowed
@@ -97,7 +99,7 @@ export class GameSession {
             return false;
         }
 
-        player.location.position = details.repositioning;
+        player.hexagon.position = details.repositioning;
 
         return true;
     }
@@ -144,7 +146,7 @@ export class GameSession {
             return false;
         }
 
-        const localGood = this.getMatchingGood(player.location.hexId);
+        const localGood = this.getMatchingGood(player.hexagon.hexId);
         const actions = player.locationActions;
 
         if (
@@ -259,7 +261,7 @@ export class GameSession {
         const players = this.sharedState.players;
 
         players.forEach(player => {
-            if (player.location.hexId === destinationHex) {
+            if (player.hexagon.hexId === destinationHex) {
                 registry.push({ id: player.id, influence: player.influence });
             }
         });
@@ -350,7 +352,7 @@ export class GameSession {
         player.locationActions = null;
 
         const rules = this.privateState.moveRules.find(
-            rule => rule.from === player.location.hexId
+            rule => rule.from === player.hexagon.hexId
         ) as ProcessedMoveRule;
 
         player.allowedMoves = rules.allowed as Array<HexId>;
@@ -373,7 +375,7 @@ export class GameSession {
     }
 
     private getMatchingGood(hexId: HexId): GoodId | false {
-        const settlement = this.sharedState.setup.locationPairings[hexId].id;
+        const settlement = this.sharedState.setup.mapPairings[hexId].id;
 
         switch (settlement) { // TODO: convert this into a constant as well
             case 'farms': return 'cloth';
@@ -385,9 +387,9 @@ export class GameSession {
     }
 
     private getlocationActionsFromLocation(playerState: Player, hexId: HexId | null = null): Array<SettlementAction> | null {
-        const settlementId = this.sharedState.setup.locationPairings[hexId || playerState.location.hexId];
-        const defaultActions = serverConstants.SETTLEMENT_ACTIONS[settlementId.id].actions;
-
+        const settlementId = this.sharedState.setup.mapPairings[hexId || playerState.hexagon.hexId];
+        const defaultActions = this.tools.getCopy(serverConstants.SETTLEMENT_ACTIONS[settlementId.id].actions);
+        console.debug(`Settlement actions at ${hexId}: ${defaultActions}`);
         return defaultActions;
 
         // TODO: as this method has lost its purpose, it should be modified into a filter for actions
