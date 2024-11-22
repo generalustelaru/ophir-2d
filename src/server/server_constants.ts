@@ -82,6 +82,15 @@ const serverConstants: ServerConstants = {
         'playerRed',
         'playerGreen',
     ],
+    SETTLEMENT_ACTIONS: {
+        temple: {id: 'temple', actions: ['upgrade_hold', 'donate_goods']},
+        market: {id: 'market', actions: ['sell_goods']},
+        exchange: {id: 'exchange', actions: ['buy_metals']},
+        quary: {id: 'quary', actions: ['pickup_good']},
+        forest: {id: 'forest', actions: ['pickup_good']},
+        mines: {id: 'mines', actions: ['pickup_good']},
+        farms: {id: 'farms', actions: ['pickup_good']},
+    },
 
     DEFAULT_PLAYER_STATE: {
         id: 'playerPurple',

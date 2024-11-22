@@ -1,5 +1,5 @@
 
-import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, TradeOffer, MarketOffer, MarketKey } from '../../shared_types';
+import { PlayerId, SharedState, GameSetup, BarrierId, HexId, SettlementId, Coordinates, Player, MarketFluctuations, TradeOffer, MarketOffer, MarketKey, ActionPairing } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -58,7 +58,7 @@ export class GameSetupService extends Service {
     private determineBoardPieces(): GameSetup {
         const setup = {
             barriers: this.determineBarriers(),
-            settlements: this.determineSettlements(),
+            locationPairings: this.determineSettlements(),
             marketFluctuations: this.determineFluctuations(),
             templeTradeSlot: this.determineTempleTradeSlot(),
         }
@@ -78,12 +78,12 @@ export class GameSetupService extends Service {
         return [b1, b2];
     }
 
-    private determineSettlements(): Record<HexId, SettlementId> {
+    private determineSettlements(): Record<HexId, ActionPairing> {
         const settlementIds: Array<SettlementId> = [
             "temple", "market", "exchange",
             "quary", "forest", "mines", "farms",
         ];
-        const pairing: Record<HexId, null|SettlementId> = {
+        const locationPairing: Record<HexId, null|ActionPairing> = {
             center: null,
             topRight: null,
             right: null,
@@ -92,14 +92,16 @@ export class GameSetupService extends Service {
             left: null,
             topLeft: null,
         }
+        const actionPairings = serverConstants.SETTLEMENT_ACTIONS;
 
-        for (const id in pairing) {
+        for (const id in locationPairing) {
             const hexId = id as HexId;
             const pick = Math.floor(Math.random() * settlementIds.length);
-            pairing[hexId] = settlementIds.splice(pick, 1)[0];
+            const settlementId = settlementIds.splice(pick, 1)[0]
+            locationPairing[hexId] = actionPairings[settlementId];
         }
 
-        return pairing as Record<HexId, SettlementId>;
+        return locationPairing as Record<HexId, ActionPairing>;
     }
 
     private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {

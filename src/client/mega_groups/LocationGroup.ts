@@ -2,7 +2,7 @@ import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
 import { MarketPlacard, ExchangePlacard, TemplePlacard } from "../groups/GroupList";
 import clientState from '../state';
-import { HexId, SettlementId } from "../../shared_types";
+import { ActionPairing, HexId } from "../../shared_types";
 
 type Locations = {
     market: HexId;
@@ -37,7 +37,8 @@ export class LocationGroup implements MegaGroupInterface {
             throw new Error('State is missing setup data.');
         }
 
-        this.locations = this.matchLocations(setup.settlements);
+        this.locations = this.matchLocations(setup.locationPairings);
+
         const heightSegment = this.group.height() / 5;
 
         this.marketPlacard = new MarketPlacard(
@@ -106,15 +107,15 @@ export class LocationGroup implements MegaGroupInterface {
         this.templePlacard?.updateElement(templeUpdate);
     }
 
-    private matchLocations(settlements: Record<HexId, SettlementId>|null): Locations {
+    private matchLocations(locationPairings: Record<HexId, ActionPairing>|null): Locations {
 
-        if (!settlements) {
+        if (!locationPairings) {
             throw new Error('No settlements found in setup.');
         }
 
         const locations = Object.fromEntries(
-            Object.entries(settlements)
-                .map(([key, value]) => [value, key])
+            Object.entries(locationPairings)
+                .map(([hexId, actionPairing]) => [actionPairing.id, hexId])
         );
 
         const match = {
