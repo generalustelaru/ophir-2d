@@ -48,6 +48,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
                 y: 0,
             },
             market.future,
+            market.deckId,
         );
 
         this.slot_1 = new MarketCardSlot(
@@ -107,7 +108,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
     }
 
     public updateElement(data: MarketUpdate): void {
-        this.marketDeck.updateElement(data.contracts.future);
+        this.marketDeck.updateElement(data.contracts);
 
         const localPlayer = data.localPlayer;
 

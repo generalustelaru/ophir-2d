@@ -1,6 +1,9 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, TradeRequest } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
+import serverConstants from "../server_constants";
+
+const { MARKET_CONTRACTS_B } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -465,16 +468,16 @@ export class GameSession {
     private shiftMarket(): boolean {
         const market = this.sharedState.market;
 
-        market.slot_3 = market.slot_2;
-        market.slot_2 = market.slot_1;
         market.slot_1 = market.future;
+        market.slot_2 = market.slot_1;
+        market.slot_3 = market.slot_2;
 
-        const contractDeck = this.privateState.marketContracts;
-        const pick = Math.floor(Math.random() * contractDeck.length);
-        const newContract = contractDeck.splice(pick, 1).shift();
+        const marketDeck = this.getCards();
+        const pick = Math.floor(Math.random() * marketDeck.length);
+        const newContract = marketDeck.splice(pick, 1).shift();
 
         if (!newContract) {
-            console.error('No contract drawn');
+            console.error('No contract drawn!');
 
             return false;
         }
@@ -482,5 +485,19 @@ export class GameSession {
         market.future = newContract;
 
         return true;
+    }
+
+    private getCards(): Array<TradeRequest> {
+        if (
+            this.privateState.marketDeck.length === 0
+            && this.sharedState.market.deckId === 'A'
+        ) {
+                this.privateState.marketDeck = this.tools.getCopy(MARKET_CONTRACTS_B);
+                this.sharedState.market.deckId = 'B';
+
+                console.log('Deck B loaded');
+        }
+
+        return this.privateState.marketDeck;
     }
 }
