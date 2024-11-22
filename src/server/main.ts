@@ -14,6 +14,7 @@ const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
 const privateState: PrivateState = {
     moveRules: [],
     tradeDeck: [],
+    playerVPs: [],
 }
 
 const newState: NewState | SharedState = {

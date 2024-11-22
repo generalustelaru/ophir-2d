@@ -201,6 +201,7 @@ export class GameSession {
         }
 
         const trade = this.sharedState.marketOffer[marketKey];
+
         switch (tradeAction) {
             case 'sell_goods':
                 const modifier = this.sharedState.setup.marketFluctuations[marketKey];
@@ -209,6 +210,14 @@ export class GameSession {
             case 'donate_goods':
                 const accumulatedFavor = player.favor + trade.reward.favorAndVp;
                 player.favor = accumulatedFavor > 6 ? 6 : accumulatedFavor;
+                this.privateState.playerVPs.find(
+                    item => item.id === player.id
+                )!.vp += trade.reward.favorAndVp;
+                console.log(this.privateState.playerVPs);
+                break;
+            default:
+                console.error(`Unknown trade action: ${tradeAction}`);
+                return false;
         }
 
         const playerCargo = player.cargo;
