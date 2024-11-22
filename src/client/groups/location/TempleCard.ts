@@ -1,14 +1,14 @@
 import Konva from "konva";
 import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { TradeOffer } from "../../../shared_types";
-import { CoinDial, GoodsAssortment } from "../GroupList";
+import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
 export class TempleCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
 
-    private coinDial: CoinDial;
+    private dial: TempleRewardDial;
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
     constructor(
@@ -30,7 +30,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
             strokeWidth: 2,
         });
 
-        this.coinDial = new CoinDial(
+        this.dial = new TempleRewardDial(
             { x: 38, y: 35 },
             contract.reward.favorAndVp
         );
@@ -38,22 +38,22 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
         this.goodsAssortment = new GoodsAssortment(
             {
                 width: this.background.width(),
-                height: this.background.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
+                height: this.background.height() - this.dial.getElement().height() - this.dial.getElement().y() - 20,
                 x: this.background.x(),
-                y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
+                y: this.dial.getElement().y() + this.dial.getElement().height() + 10,
             },
             contract.request
         );
 
         this.group.add(...[
             this.background,
-            this.coinDial.getElement(),
+            this.dial.getElement(),
             this.goodsAssortment.getElement(),
         ]);
     }
 
     public updateElement(data: MarketCardUpdate): void {
-        this.coinDial.updateElement(data.contract.reward.favorAndVp);
+        this.dial.updateElement(data.contract.reward.favorAndVp);
         this.goodsAssortment.updateElement(data.contract.request);
         this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
         this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);

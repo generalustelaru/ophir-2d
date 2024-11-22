@@ -210,8 +210,8 @@ export class GameSession {
 
         const playerCargo = player.cargo;
 
-        for (const key in contract.request) {
-            const goodToUnload = key as GoodId;
+        for (let i = 0; i < contract.request.length; i++) {
+            const goodToUnload = contract.request[i] as GoodId;
             const cargoSlot = playerCargo.indexOf(goodToUnload);
 
             if (cargoSlot === -1) {
