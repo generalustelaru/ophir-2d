@@ -73,7 +73,7 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                SETTLEMENT_DATA[serverState.setup.settlements[hexItem.id]],
+                SETTLEMENT_DATA[serverState.setup.locationPairings[hexItem.id].id],
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);

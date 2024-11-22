@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, TradeOffer} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, TradeOffer, SettlementId, ActionPairing} from '../shared_types';
 
 export type WsSignal = 'connection'|'message'|'close';
 
@@ -35,6 +35,7 @@ export type BarrierCheck = {
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
+    SETTLEMENT_ACTIONS: Record<SettlementId, ActionPairing>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,

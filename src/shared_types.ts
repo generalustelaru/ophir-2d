@@ -77,9 +77,14 @@ export type NewState = {
     setup: null,
 }
 
+export type ActionPairing = {
+    id: SettlementId,
+    actions: Array<SettlementAction>,
+}
+
 export type GameSetup = {
     barriers: Array<BarrierId>,
-    settlements: Record<HexId, SettlementId>,
+    locationPairings: Record<HexId, ActionPairing>,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketKey,
 }

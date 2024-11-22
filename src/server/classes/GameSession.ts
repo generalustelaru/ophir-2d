@@ -1,5 +1,6 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, SettlementId } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails } from "../../shared_types";
+import serverConstants from "../server_constants";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -372,9 +373,9 @@ export class GameSession {
     }
 
     private getMatchingGood(hexId: HexId): GoodId | false {
-        const settlement = this.sharedState.setup.settlements[hexId];
+        const settlement = this.sharedState.setup.locationPairings[hexId].id;
 
-        switch (settlement) {
+        switch (settlement) { // TODO: convert this into a constant as well
             case 'farms': return 'cloth';
             case 'mines': return 'gem';
             case 'forest': return 'wood';
@@ -384,18 +385,23 @@ export class GameSession {
     }
 
     private getlocationActionsFromLocation(playerState: Player, hexId: HexId | null = null): Array<SettlementAction> | null {
-        const settlementId = this.sharedState.setup.settlements[hexId || playerState.location.hexId];
-        const pickupSettlement: Array<SettlementId> = ['farms', 'mines', 'forest', 'quary'];
+        const settlementId = this.sharedState.setup.locationPairings[hexId || playerState.location.hexId];
+        const defaultActions = serverConstants.SETTLEMENT_ACTIONS[settlementId.id].actions;
 
-        switch (true) {
-            case pickupSettlement.includes(settlementId): return ['pickup_good'];
-            case 'market' == settlementId: return ['sell_goods'];
-            case 'exchange' == settlementId: return ['buy_metals'];
-            case 'temple' == settlementId: return ['upgrade_hold', 'donate_goods'];
-            default:
-                console.error(`Unknown settlement at ${hexId}`);
-                return null;
-        }
+        return defaultActions;
+
+        // TODO: as this method has lost its purpose, it should be modified into a filter for actions
+        // const pickupSettlement: Array<SettlementId> = ['farms', 'mines', 'forest', 'quary'];
+
+        // switch (true) {
+        //     case pickupSettlement.includes(settlementId): return ['pickup_good'];
+        //     case 'market' == settlementId: return ['sell_goods'];
+        //     case 'exchange' == settlementId: return ['buy_metals'];
+        //     case 'temple' == settlementId: return ['upgrade_hold', 'donate_goods'];
+        //     default:
+        //         console.error(`Unknown settlement at ${hexId}`);
+        //         return null;
+        // }
     }
 
     private canItemBeLoaded(player: Player, desired: SettlementAction): boolean {
