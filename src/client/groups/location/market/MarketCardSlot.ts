@@ -33,7 +33,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
                 x: 0,
                 y: segmentHeight,
             },
-            { action: 'sell_goods', details: { contract: marketKey } },
+            { action: 'sell_goods', details: { slot: marketKey } },
             contract,
             fluctuation
         );
