@@ -38,6 +38,7 @@ export class ActionButton {
                         'action',
                         { detail: this.payload }
                 ));
+                this.stage.container().style.cursor = 'default';
             }
         });
     }

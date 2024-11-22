@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { Coordinates, HexId, DiceSix, Player } from '../../../shared_types';
-import { Color, DynamicGroupInterface, IslandData, SettlementData } from '../../client_types';
+import { Color, DynamicGroupInterface, IslandData, LocationIconData } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
 import { InfluenceDial, LocationToken } from '../GroupList';
@@ -13,7 +13,7 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
     private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;
     private island: Konva.Path;
-    private settlement: LocationToken;
+    private location: LocationToken;
     private restrictedIcon: Konva.Path;
     private influenceDial: InfluenceDial;
 
@@ -24,7 +24,7 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
         offsetX:number,
         offsetY:number,
         island: IslandData,
-        settlement: SettlementData,
+        iconData: LocationIconData,
         fill: Color
     ) {
 
@@ -57,8 +57,8 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
         });
         this.group.add(this.island);
 
-        this.settlement = new LocationToken(stage, settlement);
-        this.group.add(this.settlement.getElement());
+        this.location = new LocationToken(stage, iconData);
+        this.group.add(this.location.getElement());
 
         this.restrictedIcon = new Konva.Path({
             x: -75,
@@ -83,16 +83,17 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
     }
 
     updateElement(localPlayer: Player): void {
-        const hereAndNow = (
-            localPlayer.location.hexId === this.getId()
+        const canAct = (
+            localPlayer.hexagon.hexId === this.getId()
             && localPlayer.isActive
             && !!localPlayer.locationActions
+            && localPlayer.isAnchored
         );
 
-        this.setFill(hereAndNow ? COLOR.locationHex : COLOR.defaultHex);
+        this.setFill(canAct ? COLOR.activeHex : COLOR.defaultHex);
 
-        this.settlement.updateElement((
-            hereAndNow
+        this.location.updateElement((
+            canAct
             && !!localPlayer.locationActions?.includes('pickup_good')
             && localPlayer.cargo.includes('empty')
         ));

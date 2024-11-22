@@ -3,7 +3,7 @@ import Konva from 'konva';
 import clientConstants from '../client_constants';
 import { ColorProfile, DynamicGroupInterface, GroupLayoutData } from '../client_types';
 
-const { ICON_DATA, COLOR, SETTLEMENT_DATA } = clientConstants;
+const { ICON_DATA, COLOR, LOCATION_TOKEN_DATA } = clientConstants;
 
 export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
     private group: Konva.Group;
@@ -38,10 +38,8 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
         });
 
         this.templeIcon = new Konva.Path({
-            data: SETTLEMENT_DATA.temple.shape,
+            data: LOCATION_TOKEN_DATA.temple.shape,
             fill: COLOR.stampEdge,
-            // stroke: COLOR.stampEdge,
-            // strokeWidth: 2,
             scale: { x: 1, y: .7 },
             x: 13,
             y: 14,

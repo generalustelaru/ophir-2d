@@ -1,6 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails } from "../../shared_types";
-import serverConstants from "../server_constants";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -68,7 +67,7 @@ export class GameSession {
         player.moveActions = remainingMoves - 1;
 
         const registry = this.getPortRegistry(destination);
-        const sailSuccess = !registry || player.hasSpentFavor
+        const sailSuccess = !registry || player.privilegedSailing
             ? true
             : this.processInfluenceRoll(player, registry);
 
@@ -80,7 +79,7 @@ export class GameSession {
                 .filter(move => move !== departure) as Array<HexId>
             );
             player.isAnchored = true;
-            player.locationActions = this.getlocationActionsFromLocation(player, destination);
+            player.locationActions = this.getLocationActions(player, destination);
         }
 
         if (player.moveActions === 0 && !sailSuccess) {
@@ -96,6 +95,7 @@ export class GameSession {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
 
         if (!player) {
+            console.error(`No such player found: ${message.playerId}`);
             return false;
         }
 
@@ -107,11 +107,10 @@ export class GameSession {
     private processFavorSpending(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
-        if (player?.isActive && player.favor > 0 && player.hasSpentFavor === false) {
+        if (player?.isActive && player.favor > 0 && player.privilegedSailing === false) {
             player.favor -= 1;
-            player.hasSpentFavor = true;
+            player.privilegedSailing = true;
             player.isAnchored = true;
-            player.locationActions = this.getlocationActionsFromLocation(player);
 
             return true;
         }
@@ -133,7 +132,7 @@ export class GameSession {
 
         const hasCargo = manifest.find(item => item !== 'empty') ? true : false;
 
-        player.feasibleContracts = hasCargo ? this.getFeasableContracts(manifest) : [];
+        player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(manifest) : [];
         player.hasCargo = hasCargo;
 
         return true;
@@ -143,36 +142,42 @@ export class GameSession {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
         if (!player) {
+            console.error(`No such player found: ${playerId}`);
+            return false;
+        }
+
+        if (!player.locationActions) {
+            console.error(`No actions found for ${playerId}`);
+            return false;
+        }
+
+        if (!player.locationActions.includes('pickup_good')) {
+            console.error(`'pickup_good' not found for ${playerId}`);
+            return false;
+        }
+
+        if (!this.hasCargoRoom(player, 'pickup_good')) {
+            console.error(`Cannot load goods for ${playerId}`);
             return false;
         }
 
         const localGood = this.getMatchingGood(player.hexagon.hexId);
-        const actions = player.locationActions;
-
-        if (
-            !actions
-            || !localGood
-            || !actions.includes('pickup_good')
-            || !this.canItemBeLoaded(player, 'pickup_good')
-        ) {
-            return false;
-        }
 
         for (let i = 0; i < player.cargo.length; i++) {
             const item = player.cargo[i];
 
             if (item === 'empty') {
-                player.hasCargo = true;
                 player.cargo[i] = localGood;
-                player.feasibleContracts = this.getFeasableContracts(player.cargo);
-                player.moveActions = 0;
-                player.locationActions = this.removeAction(actions, 'pickup_good');
-
-                return true;
+                break;
             }
         }
 
-        return false;
+        player.hasCargo = true;
+        player.moveActions = 0;
+        player.locationActions = this.removeAction(player.locationActions, 'pickup_good');
+        player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
+
+        return true;
     }
 
     private processGoodsSale(message: WebsocketClientMessage): boolean {
@@ -182,7 +187,7 @@ export class GameSession {
 
         if (
             !player?.locationActions?.includes('sell_goods')
-            || !player.feasibleContracts.includes(marketKey)
+            || !player.feasibleTrades.includes(marketKey)
         ) {
             return false;
         }
@@ -218,7 +223,7 @@ export class GameSession {
         const players = this.sharedState.players;
 
         players.forEach(player => {
-            player.feasibleContracts = this.getFeasableContracts(player.cargo);
+            player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
         });
 
         return true;
@@ -311,7 +316,7 @@ export class GameSession {
 
         activePlayer.isActive = false;
         activePlayer.locationActions = null;
-        activePlayer.hasSpentFavor = false;
+        activePlayer.privilegedSailing = false;
 
         const nextToken = activePlayer.turnOrder === players.length
             ? 1
@@ -347,9 +352,9 @@ export class GameSession {
         }
 
         player.isAnchored = false;
-        player.hasSpentFavor = false;
+        player.privilegedSailing = false;
         player.moveActions = 2;
-        player.locationActions = null;
+        player.locationActions = this.getLocationActions(player);
 
         const rules = this.privateState.moveRules.find(
             rule => rule.from === player.hexagon.hexId
@@ -358,7 +363,7 @@ export class GameSession {
         player.allowedMoves = rules.allowed as Array<HexId>;
     }
 
-    private removeAction(actions: Array<SettlementAction>, toRemove: SettlementAction): Array<SettlementAction> | null {
+    private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Array<LocationAction> | null {
         const index = actions.indexOf(toRemove);
 
         if (index === -1) {
@@ -374,60 +379,53 @@ export class GameSession {
         return actions;
     }
 
-    private getMatchingGood(hexId: HexId): GoodId | false {
-        const settlement = this.sharedState.setup.mapPairings[hexId].id;
+    private getMatchingGood(hexId: HexId): GoodId | 'empty' {
+        const locationId = this.sharedState.setup.mapPairings[hexId].id;
 
-        switch (settlement) { // TODO: convert this into a constant as well
+        switch (locationId) { // TODO: convert this into a constant as well
             case 'farms': return 'cloth';
             case 'mines': return 'gem';
             case 'forest': return 'wood';
             case 'quary': return 'stone';
-            default: return false;
+            default: {
+                console.error(`No goods found at ${hexId}`);
+                return 'empty'
+            };
         }
     }
 
-    private getlocationActionsFromLocation(playerState: Player, hexId: HexId | null = null): Array<SettlementAction> | null {
-        const settlementId = this.sharedState.setup.mapPairings[hexId || playerState.hexagon.hexId];
-        const defaultActions = this.tools.getCopy(serverConstants.SETTLEMENT_ACTIONS[settlementId.id].actions);
-        console.debug(`Settlement actions at ${hexId}: ${defaultActions}`);
-        return defaultActions;
+    private getLocationActions(player: Player, hexId: HexId | null = null): Array<LocationAction> | null {
+        const location = this.tools.getCopy((
+            this.sharedState.setup.mapPairings[hexId || player.hexagon.hexId]
+        ));
 
-        // TODO: as this method has lost its purpose, it should be modified into a filter for actions
-        // const pickupSettlement: Array<SettlementId> = ['farms', 'mines', 'forest', 'quary'];
-
-        // switch (true) {
-        //     case pickupSettlement.includes(settlementId): return ['pickup_good'];
-        //     case 'market' == settlementId: return ['sell_goods'];
-        //     case 'exchange' == settlementId: return ['buy_metals'];
-        //     case 'temple' == settlementId: return ['upgrade_hold', 'donate_goods'];
-        //     default:
-        //         console.error(`Unknown settlement at ${hexId}`);
-        //         return null;
-        // }
+        return location.actions;
     }
 
-    private canItemBeLoaded(player: Player, desired: SettlementAction): boolean {
-        if (desired !== 'buy_metals' && desired !== 'pickup_good') {
-            console.error(`Incompatible settlement action: ${desired}`);
+    private hasCargoRoom(player: Player, action: LocationAction): boolean {
+        if (action !== 'buy_metals' && action !== 'pickup_good') {
+            console.error(`Incompatible settlement action: ${action}`);
 
             return false;
         }
 
         const cargo = player.cargo;
         const emptySlots = cargo.filter(item => item === 'empty').length;
-        const cargoReq = desired === 'pickup_good' ? 1 : 2;
+        const cargoReq = action === 'pickup_good' ? 1 : 2;
 
         return emptySlots >= cargoReq;
     }
 
-    private getFeasableContracts(cargo: CargoManifest) {
-        const contracts = this.sharedState.market;
-        const feasable: Array<MarketKey> = [];
+    private pickFeasibleTrades(playerCargo: CargoManifest) {
+        const market = this.tools.getCopy(this.sharedState.market);
+        const cargo = this.tools.getCopy(playerCargo);
         const nonGoods: Array<ManifestItem> = ['empty', 'gold_a', 'gold_b', 'silver_a', 'silver_b'];
+
         const slots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
+        const feasable: Array<MarketKey> = [];
 
         slots.forEach(key => {
-            const request = [...contracts[key].request];
+            const unfilledGoods = market[key].request;
 
             for (let i = 0; i < cargo.length; i++) {
 
@@ -436,14 +434,14 @@ export class GameSession {
                 }
 
                 const carriedGood = cargo[i] as GoodId;
-                const match = request.indexOf(carriedGood);
+                const match = unfilledGoods.indexOf(carriedGood);
 
                 if (match !== -1) {
-                    request.splice(match, 1);
+                    unfilledGoods.splice(match, 1);
                 }
             }
 
-            if (request.length === 0) {
+            if (unfilledGoods.length === 0) {
                 feasable.push(key);
             }
         });

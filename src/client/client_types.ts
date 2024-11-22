@@ -1,9 +1,9 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, SettlementId, ManifestItem, NewState, TradeOffer, MarketOffer, Player } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ManifestItem, NewState, TradeOffer, MarketOffer, Player } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
-export type SettlementData = { id: SettlementId, shape: string, fill: Color };
+export type LocationIconData = { id: LocationId, shape: string, fill: Color };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
@@ -22,7 +22,7 @@ export type ClientConstants = {
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<HexId, IslandData>,
-    SETTLEMENT_DATA: Record<SettlementId, SettlementData>,
+    LOCATION_TOKEN_DATA: Record<LocationId, LocationIconData>,
     SHIP_DATA: {
         setupDrifts: Array<Coordinates>,
         shape: string

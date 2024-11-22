@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { SettlementData, DynamicGroupInterface } from '../../client_types';
+import { LocationIconData, DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
 
 export class LocationToken extends ActionButton implements DynamicGroupInterface<boolean> {
@@ -7,10 +7,10 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
 
     constructor(
         stage: Konva.Stage,
-        settlement: SettlementData
+        iconData: LocationIconData
     ) {
-        const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(settlement.id);
-        const isExchage = settlement.id === 'exchange';
+        const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(iconData.id);
+        const isExchage = iconData.id === 'exchange';
         const makeLarger = isExchage || isPickup;
         const scale = makeLarger ? 3 : 2;
         const drift = makeLarger ? -39 : -26;
@@ -20,8 +20,8 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         this.icon = new Konva.Path({
             x: drift,
             y: drift,
-            data: settlement.shape,
-            fill: settlement.fill,
+            data: iconData.shape,
+            fill: iconData.fill,
             stroke: 'white',
             strokeWidth: makeLarger ? .75 : 1,
             scale: {x: scale, y: scale},

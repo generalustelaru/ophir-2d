@@ -7,6 +7,9 @@ import sharedConstants from "../shared_constants";
 import { SharedState } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
+//@ts-ignore
+let stateDebug: SharedState|null = null;
+
 // Initializations
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
 const canvasService: CanvasService = CanvasService.getInstance([]);
@@ -59,6 +62,11 @@ window.addEventListener(
     } else {
         uiService.updateLobbyControls();
     }
+    sessionStorage.setItem('state', JSON.stringify(sharedState));
+    sessionStorage.setItem('0', JSON.stringify(clientState.received.players[0]));
+    sessionStorage.setItem('1', JSON.stringify(clientState.received.players[1]));
+    sessionStorage.setItem('2', JSON.stringify(clientState.received.players[2]));
+    sessionStorage.setItem('3', JSON.stringify(clientState.received.players[3]));
 });
 
 window.addEventListener(

@@ -5,7 +5,7 @@ import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButt
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, SETTLEMENT_DATA, SHIP_DATA } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA } = clientConstants;
 
 export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
@@ -73,7 +73,7 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                SETTLEMENT_DATA[serverState.setup.locationPairings[hexItem.id].id],
+                LOCATION_TOKEN_DATA[serverState.setup.mapPairings[hexItem.id].id],
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
@@ -90,7 +90,7 @@ export class MapGroup implements MegaGroupInterface {
         players.forEach(player => {
 
             if (player.id && player.id !== clientState.localPlayerId) {
-                const shipPosition = player.location.position;
+                const shipPosition = player.hexagon.position;
                 const ship = new ShipToken(
                     shipPosition.x,
                     shipPosition.y,
@@ -108,7 +108,7 @@ export class MapGroup implements MegaGroupInterface {
         }
 
         //MARK: player ship
-        const shipPosition = localPlayer?.location.position;
+        const shipPosition = localPlayer?.hexagon.position;
 
         if (!shipPosition) {
             throw new Error('Missing player data!');
@@ -164,7 +164,7 @@ export class MapGroup implements MegaGroupInterface {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
             localShip.switchHighlight(localPlayer.isActive);
-            localShip.updateElement(localPlayer.location.position);
+            localShip.updateElement(localPlayer.hexagon.position);
         }
     }
 
