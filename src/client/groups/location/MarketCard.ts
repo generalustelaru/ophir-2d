@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { TradeRequest } from "../../../shared_types";
+import { Trade } from "../../../shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -16,7 +16,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         stage: Konva.Stage,
         layout: GroupLayoutData,
         actionPayload: ActionEventPayload | null,
-        contract: TradeRequest,
+        trade: Trade,
         fluctuation: number | null = null,
     ) {
         super(stage, layout, actionPayload);
@@ -36,7 +36,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
 
         this.coinDial = new CoinDial(
             { x: 38, y: 35 },
-            contract.reward.coins + (fluctuation ?? 0)
+            trade.reward.coins + (fluctuation ?? 0)
         );
 
         this.goodsAssortment = new GoodsAssortment(
@@ -46,7 +46,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
                 x: this.background.x(),
                 y: this.coinDial.getElement().y() + this.coinDial.getElement().height() + 10,
             },
-            contract.request
+            trade.request
         );
 
         this.group.add(...[
@@ -57,8 +57,8 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
     }
 
     public updateElement(data: MarketCardUpdate): void {
-        this.coinDial.updateElement(data.contract.reward.coins + (this.fluctuation ?? 0));
-        this.goodsAssortment.updateElement(data.contract.request);
+        this.coinDial.updateElement(data.trade.reward.coins + (this.fluctuation ?? 0));
+        this.goodsAssortment.updateElement(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
         this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);

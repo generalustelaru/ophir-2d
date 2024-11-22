@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { TradeRequest } from "../../../shared_types";
+import { Trade } from "../../../shared_types";
 import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -15,7 +15,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
         stage: Konva.Stage,
         layout: GroupLayoutData,
         actionPayload: ActionEventPayload | null,
-        contract: TradeRequest,
+        trade: Trade,
     ) {
         super(stage, layout, actionPayload);
 
@@ -32,7 +32,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
 
         this.dial = new TempleRewardDial(
             { x: 38, y: 35 },
-            contract.reward.favorAndVp
+            trade.reward.favorAndVp
         );
 
         this.goodsAssortment = new GoodsAssortment(
@@ -42,7 +42,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
                 x: this.background.x(),
                 y: this.dial.getElement().y() + this.dial.getElement().height() + 10,
             },
-            contract.request
+            trade.request
         );
 
         this.group.add(...[
@@ -53,8 +53,8 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
     }
 
     public updateElement(data: MarketCardUpdate): void {
-        this.dial.updateElement(data.contract.reward.favorAndVp);
-        this.goodsAssortment.updateElement(data.contract.request);
+        this.dial.updateElement(data.trade.reward.favorAndVp);
+        this.goodsAssortment.updateElement(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
         this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);

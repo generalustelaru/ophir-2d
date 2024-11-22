@@ -1,20 +1,20 @@
 import Konva from "konva";
 import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { MarketCard } from "../GroupList";
-import { TradeRequest, Fluctuation, MarketKey } from "../../../shared_types";
+import { Trade, Fluctuation, MarketKey } from "../../../shared_types";
 import clientConstants from "../../client_constants";
 
 const { ICON_DATA } = clientConstants;
 
 export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
     private group: Konva.Group;
-    private contractCard: MarketCard;
+    private marketCard: MarketCard;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         marketKey: MarketKey,
-        contract: TradeRequest,
+        trade: Trade,
         fluctuation: Fluctuation,
     ) {
         this.group = new Konva.Group({
@@ -25,7 +25,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         });
 
         const segmentHeight = this.group.height() / 6;
-        this.contractCard = new MarketCard(
+        this.marketCard = new MarketCard(
             stage,
             {
                 width: this.group.width(),
@@ -34,14 +34,14 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
                 y: segmentHeight,
             },
             { action: 'sell_goods', details: { slot: marketKey } },
-            contract,
+            trade,
             fluctuation
         );
 
         const fluctuationSymbol = this.getFluctuationSymbol(fluctuation);
 
         this.group.add(
-            this.contractCard.getElement(),
+            this.marketCard.getElement(),
             fluctuationSymbol
         );
     }
@@ -51,7 +51,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
     }
 
     public updateElement(data: MarketCardUpdate): void {
-        this.contractCard.updateElement(data);
+        this.marketCard.updateElement(data);
     }
 
     private getFluctuationSymbol(fluctuation: Fluctuation): Konva.Path {

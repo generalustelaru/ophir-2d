@@ -16,7 +16,7 @@ export type GameStatus = "empty" | "created" | "full" | "started";
 export type ManifestItem = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ManifestItem>;
-export type TradeRequest = { request: Array<GoodId>, reward: Reward };
+export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
@@ -45,10 +45,10 @@ export type Player = {
 
 export type MarketOffer = {
     deckId: MarketDeckId,
-    future: TradeRequest,
-    slot_1: TradeRequest,
-    slot_2: TradeRequest,
-    slot_3: TradeRequest,
+    future: Trade,
+    slot_1: Trade,
+    slot_2: Trade,
+    slot_3: Trade,
 }
 
 export type MarketFluctuations = {
@@ -65,7 +65,7 @@ export type SharedState = {
     sessionOwner: PlayerId,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
-    market: MarketOffer,
+    marketOffer: MarketOffer,
     setup: GameSetup,
     // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }
@@ -75,7 +75,7 @@ export type NewState = {
     sessionOwner: PlayerId | null,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
-    market: null,
+    marketOffer: null,
     setup: null,
 }
 
