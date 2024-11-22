@@ -1,11 +1,11 @@
 
 import { SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location } from '../../shared_types';
-import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
+import { PlayerVP, PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES,TRADE_DECK_A } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A } = serverConstants;
 
 export class GameSetupService extends Service {
 
@@ -17,6 +17,7 @@ export class GameSetupService extends Service {
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(sharedState.setup.barriers),
             tradeDeck: this.tools.getCopy(TRADE_DECK_A),
+            playerVPs: sharedState.players.map(p => ({id: p.id, vp: 0})) as Array<PlayerVP>,
         }
 
         sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
@@ -76,7 +77,7 @@ export class GameSetupService extends Service {
 
     private determineLocations(): Record<HexId, Location> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
-        const locationPairing: Record<HexId, null|Location> = {
+        const locationPairing: Record<HexId, null | Location> = {
             center: null,
             topRight: null,
             right: null,
@@ -166,7 +167,7 @@ export class GameSetupService extends Service {
         return pool.splice(pick, 1)[0] as MarketKey;
     }
 
-    private prepareDeckAndGetOffer(trades: Array<Trade>): {tradeDeck: Array<Trade>, marketOffer: MarketOffer} {
+    private prepareDeckAndGetOffer(trades: Array<Trade>): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         let tradeDeck = this.tools.getCopy(trades);
 
         // Remove 5 random cards from the deck

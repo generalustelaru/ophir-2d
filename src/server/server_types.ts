@@ -14,12 +14,18 @@ export type ProcessedMoveRule = {
     allowed: Array<HexId>;
 }
 
+export type PlayerVP = {
+    id: PlayerId;
+    vp: number;
+}
+
 /**
  * @description Not to be shared with clients
 */
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
     tradeDeck: Array<Trade>,
+    playerVPs: Array<PlayerVP>,
 }
 
 export type StateBundle = {
