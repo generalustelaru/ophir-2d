@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, ContractFulfillmentDetails, SettlementId } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, SettlementAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, SettlementId } from "../../shared_types";
 
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
@@ -174,8 +174,8 @@ export class GameSession {
 
     private processGoodsSale(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
-        const details = message.details as ContractFulfillmentDetails;
-        const marketKey = details.contract;
+        const details = message.details as MarketSaleDetails;
+        const marketKey = details.slot;
 
         if (
             !player?.locationActions?.includes('sell_goods')
@@ -364,7 +364,11 @@ export class GameSession {
 
         actions.splice(index, 1);
 
-        return actions || null;
+        if (actions.length === 0) {
+            return null;
+        }
+
+        return actions;
     }
 
     private getMatchingGood(hexId: HexId): GoodId | false {
@@ -387,7 +391,7 @@ export class GameSession {
             case pickupSettlement.includes(settlementId): return ['pickup_good'];
             case 'market' == settlementId: return ['sell_goods'];
             case 'exchange' == settlementId: return ['buy_metals'];
-            case 'temple' == settlementId: return ['upgrade_hold'];
+            case 'temple' == settlementId: return ['upgrade_hold', 'donate_goods'];
             default:
                 console.error(`Unknown settlement at ${hexId}`);
                 return null;

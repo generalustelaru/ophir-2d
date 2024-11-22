@@ -101,12 +101,12 @@ export type DropItemDetails = {
     item: ManifestItem,
 }
 
-export type ContractFulfillmentDetails = {
-    contract: MarketKey,
+export type MarketSaleDetails = {
+    slot: MarketKey,
 }
 
 export type ActionDetails =
-    | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | ContractFulfillmentDetails | null;
+    | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | MarketSaleDetails | null;
 
 export type Coordinates = { x: number, y: number };
 

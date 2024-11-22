@@ -63,12 +63,10 @@ export class LocationGroup implements MegaGroupInterface {
             }
         );
 
-        const templeContractSlot = clientState.received.setup.templeTradeSlot;
-        const contract  = clientState.received.market[templeContractSlot];
-
         this.templePlacard = new TemplePlacard(
             this.stage,
-            contract,
+            clientState.received.setup.templeTradeSlot,
+            clientState.received.market,
             {
                 width: this.group.width(),
                 height: heightSegment * 2,

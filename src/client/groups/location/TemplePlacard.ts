@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
-import { TradeOffer } from "../../../shared_types";
+import { MarketKey, MarketOffer } from "../../../shared_types";
 import { UpgradeButton, TempleCard } from "../GroupList";
 
 const { COLOR } = clientConstants;
@@ -13,9 +13,12 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private upgradeButton: UpgradeButton;
     private templeCard: TempleCard;
 
+    private templeTradeSlot: MarketKey;
+
     constructor(
         stage: Konva.Stage,
-        contract: TradeOffer,
+        marketSlot: MarketKey,
+        market: MarketOffer,
         layout: GroupLayoutData,
     ) {
 
@@ -43,6 +46,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             }
         );
 
+        const card = market[marketSlot];
         const cardWidth = this.group.width() / 4;
         const cardHeight = this.group.height() / 6 * 4;
 
@@ -54,27 +58,34 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
                 x: this.group.width() - cardWidth - 10,
                 y: 10,
             },
-            null,
-            contract,
+            { action: 'donate_goods', details: { slot: marketSlot } },
+            card,
         );
+        this.templeTradeSlot = marketSlot;
 
-        this.group.add(
+        this.group.add(...[
             this.background,
             this.templeCard.getElement(),
             this.upgradeButton.getElement(),
-        );
+        ]);
     }
 
     public updateElement(data: TempleUpdate): void {
         const localPlayer = data.localPlayer;
 
-        this.templeCard.updateElement({ contract: data.contract, isFeasible: false });
-        const isUpgradeAvailable = (
+        this.templeCard.updateElement({
+            contract: data.contract,
+            isFeasible: (
+                !!localPlayer?.feasibleContracts.includes(this.templeTradeSlot)
+                && !!localPlayer.locationActions?.includes('donate_goods')
+            )
+        });
+
+        this.upgradeButton.updateElement((
             !!localPlayer?.locationActions?.includes('upgrade_hold')
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
-        );
-        this.upgradeButton.updateElement(isUpgradeAvailable);
+        ));
     }
 
     public getElement(): Konva.Group {
