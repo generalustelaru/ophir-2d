@@ -34,7 +34,9 @@ export class GameSession {
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
             case 'sell_goods':
-                return this.processGoodsSale(message) ? this.sharedState : { error: `Could not process contract sale on ${id}` };
+                return this.processTrade(message) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
+            case 'donate_goods':
+                return  this.processTrade(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
             case 'upgrade_hold':
@@ -180,38 +182,49 @@ export class GameSession {
         return true;
     }
 
-    private processGoodsSale(message: WebsocketClientMessage): boolean {
+    private processTrade(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const tradeAction = message.action as LocationAction;
         const details = message.details as MarketSaleDetails;
         const marketKey = details.slot;
 
         if (
-            !player?.locationActions?.includes('sell_goods')
+            !player?.locationActions?.includes(tradeAction)
             || !player.feasibleTrades.includes(marketKey)
         ) {
+            console.error(`Trade action ${tradeAction} not feasible for ${player?.id}`);
+
             return false;
         }
 
         const contract = this.sharedState.market[marketKey];
-        const modifier = this.sharedState.setup.marketFluctuations[marketKey];
-        player.coins += contract.reward.coins + modifier;
+        switch (tradeAction) {
+            case 'sell_goods':
+                const modifier = this.sharedState.setup.marketFluctuations[marketKey];
+                player.coins += contract.reward.coins + modifier;
+                break;
+            case 'donate_goods':
+                const accumulatedFavor = player.favor + contract.reward.favorAndVp;
+                player.favor = accumulatedFavor > 6 ? 6 : accumulatedFavor;
+        }
 
-        const soldGoods = contract.request;
         const playerCargo = player.cargo;
 
-        for (let i = 0; i < soldGoods.length; i++) {
-            const goodToUnload = soldGoods[i];
+        for (const key in contract.request) {
+            const goodToUnload = key as GoodId;
             const cargoSlot = playerCargo.indexOf(goodToUnload);
 
             if (cargoSlot === -1) {
+                console.error(`No such good found in cargo: ${goodToUnload}`);
+
                 return false;
             }
 
             playerCargo[cargoSlot] = 'empty';
-        }
+        };
 
         player.hasCargo = playerCargo.find(item => item !== 'empty') ? true : false;
-        player.locationActions = this.removeAction(player.locationActions, 'sell_goods');
+        player.locationActions = this.removeAction(player.locationActions, tradeAction);
         player.moveActions = 0;
 
         const isNewContract = this.shiftMarket();
