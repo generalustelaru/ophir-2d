@@ -1,5 +1,5 @@
 
-import { SharedState, GameSetup, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location } from '../../shared_types';
 import { PlayerVP, PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -12,7 +12,12 @@ export class GameSetupService extends Service {
     private tools: ToolService = ToolService.getInstance();
     public produceGameData(sharedState: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
         sharedState.players = this.assignTurnOrderAndPosition(sharedState.players, setupCoordinates);
-        sharedState.setup = this.determineBoardPieces();
+        sharedState.setup = {
+            barriers: this.determineBarriers(),
+            mapPairings: this.determineLocations(),
+            marketFluctuations: this.determineFluctuations(),
+            templeTradeSlot: this.determineTempleTradeSlot(),
+        }
 
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(sharedState.setup.barriers),
@@ -52,23 +57,12 @@ export class GameSetupService extends Service {
         return players.sort((a, b) => a.turnOrder - b.turnOrder);
     }
 
-    private determineBoardPieces(): GameSetup {
-        const setup = {
-            barriers: this.determineBarriers(),
-            mapPairings: this.determineLocations(),
-            marketFluctuations: this.determineFluctuations(),
-            templeTradeSlot: this.determineTempleTradeSlot(),
-        }
-
-        return setup;
-    }
-
     private determineBarriers(): Array<BarrierId> {
 
         const b1 = Math.ceil(Math.random() * 12) as BarrierId;
         let b2 = b1;
 
-        while (!this.isArrangementLegal(b1, b2)) {
+        while (BARRIER_CHECKS[b1].incompatible.find(id => id === b2)) {
             b2 = Math.ceil(Math.random() * 12) as BarrierId;
         }
 
@@ -95,21 +89,6 @@ export class GameSetupService extends Service {
         }
 
         return locationPairing as Record<HexId, Location>;
-    }
-
-    private isArrangementLegal(b1: BarrierId, b2: BarrierId): boolean {
-
-        if (b1 === b2) {
-            return false;
-        }
-
-        const check = BARRIER_CHECKS[b1];
-
-        if (check.incompatible.find(id => id === b2)) {
-            return false;
-        }
-
-        return true;
     }
 
     private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
