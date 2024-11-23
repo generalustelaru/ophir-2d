@@ -114,6 +114,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
 
         const localPLayerMaySell = !!(
             localPlayer?.isActive
+            && localPlayer?.isAnchored
             && localPlayer?.locationActions?.includes('sell_goods')
         )
 
