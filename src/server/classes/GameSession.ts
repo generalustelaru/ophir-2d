@@ -100,7 +100,7 @@ export class GameSession {
         return true;
     }
 
-    processRepositioning(message: WebsocketClientMessage): boolean {
+    private processRepositioning(message: WebsocketClientMessage): boolean {
         const details = message.details as RepositioningDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerId);
 
