@@ -36,6 +36,7 @@ const clientConstants: ClientConstants = {
         templeDarkBlue: '#134e7d',
         arrowUp: '#225500',
         arrowDown: '#501616',
+        coinSilver: '#C0C0C0',
         upgradeBoxSilver:'#999999',
         darkerSilver: '#666666',
         vpGold: '#e5d280',
