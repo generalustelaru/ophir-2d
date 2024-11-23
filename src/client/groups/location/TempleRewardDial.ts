@@ -22,6 +22,7 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
         const favorIcon = new FavorIcon({ x: -25, y: -25, width: 0, height: 0 });
 
         const semiDisc = new Konva.Wedge({
+            y: -1,
             radius: 26,
             angle: 180,
             fill: COLOR.vpGold,
