@@ -6,7 +6,8 @@ export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGr
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver_a" | "silver_b" | "gold_a" | "gold_b"; // metals cover two cargo spaces
-export type LocationId = "temple" | "market" | "exchange" | "quary" | "forest" | "mines" | "farms";
+export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
+export type LocationId = "temple" | "market" | "exchange" | PickupLocationId;
 export type Action =
     | LocationAction | FreeAction
     | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";
