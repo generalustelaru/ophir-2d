@@ -83,6 +83,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         this.upgradeButton.updateElement((
             !!localPlayer?.locationActions?.includes('upgrade_hold')
+            && localPlayer.isAnchored
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
         ));
