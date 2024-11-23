@@ -41,7 +41,7 @@ export class GameSetupService extends Service {
 
         while (tokenCount > 0) {
             const pick = Math.floor(Math.random() * playerIds.length);
-            const playerId = playerIds.splice(pick, 1)[0];
+            const playerId = playerIds.splice(pick, 1).shift();
             const player = players.find(player => player.id === playerId) as Player;
             player.turnOrder = tokenCount;
             player.isActive = tokenCount === 1;
@@ -132,7 +132,7 @@ export class GameSetupService extends Service {
 
                 if (moveRule.blockedBy.find(id => id === barrierId)) {
                     const neighborHex = BARRIER_CHECKS[barrierId].between
-                        .filter(hexId => hexId !== moveRule.from)[0];
+                        .filter(hexId => hexId !== moveRule.from).shift();
 
                     moveRule.allowed = moveRule.allowed
                         .filter(hexId => hexId !== neighborHex);
@@ -155,7 +155,7 @@ export class GameSetupService extends Service {
 
         for (const key of keys) {
             const pick = Math.floor(Math.random() * pool.length);
-            result[key] = pool.splice(pick, 1)[0];
+            result[key] = pool.splice(pick, 1).shift();
         }
 
         return result as MarketFluctuations;
@@ -164,24 +164,30 @@ export class GameSetupService extends Service {
     private determineTempleTradeSlot(): MarketKey {
         const pool = ['slot_1', 'slot_2', 'slot_3'];
         const pick = Math.floor(Math.random() * pool.length);
-        return pool.splice(pick, 1)[0] as MarketKey;
+
+        return pool.splice(pick, 1).shift() as MarketKey;
     }
 
     private prepareDeckAndGetOffer(trades: Array<Trade>): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         let tradeDeck = this.tools.getCopy(trades);
 
+        const drawRandomCard = (deck: Array<Trade>) => {
+            const pick = Math.floor(Math.random() * deck.length);
+
+            return deck.splice(pick, 1).shift();
+        }
+
         // Remove 5 random cards from the deck
         for (let i = 0; i < 5; i++) {
-            const pick = Math.floor(Math.random() * tradeDeck.length);
-            tradeDeck.splice(pick, 1);
+            drawRandomCard(tradeDeck);
         }
 
         const marketOffer = {
             deckId: 'A',
-            future: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(), //TODO: do we need to shift?
-            slot_1: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(),
-            slot_2: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(),
-            slot_3: tradeDeck.splice(Math.floor(Math.random() * tradeDeck.length), 1).shift(),
+            future: drawRandomCard(tradeDeck),
+            slot_1: drawRandomCard(tradeDeck),
+            slot_2: drawRandomCard(tradeDeck),
+            slot_3: drawRandomCard(tradeDeck),
         } as MarketOffer;
 
         return { tradeDeck, marketOffer };

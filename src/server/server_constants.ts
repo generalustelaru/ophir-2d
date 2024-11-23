@@ -98,7 +98,7 @@ const serverConstants: ServerConstants = {
         turnOrder: 0,
         isActive: false,
         hexagon: {hexId: "center", position: {x: 0, y: 0}},
-        favor: 6,
+        favor: 2,
         privilegedSailing: false,
         influence: 1,
         allowedMoves: [],
