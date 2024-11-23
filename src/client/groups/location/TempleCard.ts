@@ -31,7 +31,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
         });
 
         this.dial = new TempleRewardDial(
-            { x: 38, y: 35 },
+            { x: 38, y: 92 },
             trade.reward.favorAndVp
         );
 
@@ -40,7 +40,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
                 width: this.background.width(),
                 height: this.background.height() - this.dial.getElement().height() - this.dial.getElement().y() - 20,
                 x: this.background.x(),
-                y: this.dial.getElement().y() + this.dial.getElement().height() + 10,
+                y: 15,
             },
             trade.request
         );
