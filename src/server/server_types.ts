@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Trade, Location, GoodId, PickupLocationId} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Trade, Location, GoodId, PickupLocationId, TempleLevel} from '../shared_types';
 
 export type WsSignal = 'connection'|'message'|'close';
 
@@ -49,4 +49,5 @@ export type ServerConstants = {
     DEFAULT_PLAYER_STATE: Player,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
+    TEMPLE_LEVELS: Array<TempleLevel>,
 }

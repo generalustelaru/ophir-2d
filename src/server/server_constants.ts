@@ -117,6 +117,15 @@ const serverConstants: ServerConstants = {
         feasibleTrades: [],
         coins: 0,
     },
+
+    TEMPLE_LEVELS: [
+        { id: 0, goldCost: 2, silverCost: 1, skipOnPlayerCount: 4 },
+        { id: 1, goldCost: 3, silverCost: 1, skipOnPlayerCount: null },
+        { id: 2, goldCost: 4, silverCost: 2, skipOnPlayerCount: null },
+        { id: 3, goldCost: 5, silverCost: 2, skipOnPlayerCount: null },
+        { id: 4, goldCost: 6, silverCost: 3, skipOnPlayerCount: null },
+        { id: 5, goldCost: 7, silverCost: 4, skipOnPlayerCount: 2 },
+    ],
 }
 
 export default serverConstants;

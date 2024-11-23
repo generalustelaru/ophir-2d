@@ -21,7 +21,12 @@ export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
-
+export type TempleLevel = {
+    id: number,
+    goldCost: number,
+    silverCost: number,
+    skipOnPlayerCount: number | null,
+}
 export type Player = {
     id: PlayerId,
     turnOrder: number,
@@ -67,6 +72,7 @@ export type SharedState = {
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
     marketOffer: MarketOffer,
+    templeLevel: TempleLevel,
     setup: GameSetup,
     // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }
