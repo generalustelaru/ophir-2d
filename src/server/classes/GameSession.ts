@@ -483,7 +483,7 @@ export class GameSession {
 
         const tradeDeck = this.getCards();
         const pick = Math.floor(Math.random() * tradeDeck.length);
-        const newTrade = tradeDeck.splice(pick, 1).shift(); //TODO: dow need to shift?
+        const newTrade = tradeDeck.splice(pick, 1).shift();
 
         if (!newTrade) {
             console.error('No card could be drawn!');

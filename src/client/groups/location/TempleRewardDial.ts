@@ -4,7 +4,7 @@ import { Coordinates } from '../../../shared_types';
 import { FavorIcon } from '../FavorIcon';
 import clientConstants from '../../client_constants';
 
-const { ICON_DATA } = clientConstants;
+const { ICON_DATA, COLOR } = clientConstants;
 
 export class TempleRewardDial implements DynamicGroupInterface<number> {
     private group: Konva.Group;
@@ -21,12 +21,11 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
 
         const favorIcon = new FavorIcon({ x: -25, y: -25, width: 0, height: 0 });
 
-        const semiDisc = new Konva.Path({
-            data: ICON_DATA.golden_semidisc.shape,
-            fill: ICON_DATA.golden_semidisc.fill,
-            x: -27,
-            y: -27,
-            scale: { x: 2, y: 2 },
+        const semiDisc = new Konva.Wedge({
+            radius: 26,
+            angle: 180,
+            fill: COLOR.vpGold,
+            rotation: 90,
         });
 
         const semiWreath = new Konva.Path({
