@@ -3,7 +3,7 @@ import clientConstants from '../client_constants';
 import { DynamicGroupInterface } from '../client_types';
 import { Coordinates } from '../../shared_types';
 
-const { COLOR } = clientConstants;
+const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
 export class CoinDial implements DynamicGroupInterface<number> {
     private group: Konva.Group;
     private amount: Konva.Text;
@@ -21,7 +21,22 @@ export class CoinDial implements DynamicGroupInterface<number> {
             radius: 20,
             border: 1,
             borderFill: 'black',
-            fill: COLOR.boneWhite,
+            fill: COLOR.coinSilver,
+        });
+
+        const coinBevel = new Konva.Circle({
+            radius: 16,
+            stroke: COLOR.upgradeBoxSilver,
+            strokeWidth: 1,
+        });
+
+        const templeIcon = new Konva.Path({
+            data: LOCATION_TOKEN_DATA.temple.shape,
+            stroke: COLOR.upgradeBoxSilver,
+            strokeWidth: 1,
+            scale: { x: 1, y: .7 },
+            x: -13,
+            y: -10,
         });
 
         const coinSide = new Konva.Circle({
@@ -36,11 +51,12 @@ export class CoinDial implements DynamicGroupInterface<number> {
             y: this.coinCenter - 10,
             text: amount.toString(),
             fontSize: 20,
-            fill: 'black',
-            fontFamily: 'Arial',
+            fill: COLOR.upgradeBoxSilver,
+            stroke: COLOR.boneWhite,
+            fontFamily: 'Calibri',
         });
 
-        this.group.add(coinSide, coinTop, this.amount);
+        this.group.add(coinSide, coinTop, coinBevel, templeIcon, this.amount);
     }
 
     public getElement(): Konva.Group {
@@ -49,6 +65,6 @@ export class CoinDial implements DynamicGroupInterface<number> {
 
     public updateElement(value: number): void {
         this.amount.text(value.toString());
-        this.amount.x(value > 9 ? this.coinCenter - 12 : this.coinCenter - 5);
+        this.amount.x(value > 9 ? this.coinCenter - 10 : this.coinCenter - 5);
     }
 }
