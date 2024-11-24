@@ -28,7 +28,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
             height: this.group.height() - 6,
             x: 3,
             y: 3,
-            fill: COLOR.wood,
+            fill: COLOR.marketDarkOrange,
             cornerRadius: 15,
             stroke: COLOR.boneWhite,
             strokeWidth: 2,
@@ -59,7 +59,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
     public updateElement(data: MarketCardUpdate): void {
         this.coinDial.updateElement(data.trade.reward.coins + (this.fluctuation ?? 0));
         this.goodsAssortment.updateElement(data.trade.request);
-        this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.wood);
+        this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.marketDarkOrange);
         this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);
     }
