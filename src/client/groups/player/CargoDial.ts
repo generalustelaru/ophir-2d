@@ -64,6 +64,7 @@ export class CargoDial implements DynamicGroupInterface<CargoManifest> {
 
         for (let i = 0; i < cargo.length; i++) {
             const item = cargo[i];
+
             if (item) {
                 const slot = this.cargoDrawData[i];
                 this.addItem(item, slot);
