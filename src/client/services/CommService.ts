@@ -54,7 +54,11 @@ export class CommunicationService extends Service {
         };
 
         console.debug('->', message);
-
-        this.socket.send(JSON.stringify(message));
+        try {
+            this.socket.send(JSON.stringify(message));
+        } catch (error) {
+            console.error(error);
+            this.broadcastEvent('error');
+        }
     }
 }
