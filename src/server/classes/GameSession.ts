@@ -454,7 +454,7 @@ export class GameSession {
     private pickFeasibleTrades(playerCargo: CargoManifest) {
         const market = this.tools.getCopy(this.sharedState.marketOffer);
         const cargo = this.tools.getCopy(playerCargo);
-        const nonGoods: Array<ManifestItem> = ['empty', 'gold_a', 'gold_b', 'silver_a', 'silver_b'];
+        const nonGoods: Array<ManifestItem> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
         const slots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
         const feasable: Array<MarketKey> = [];
