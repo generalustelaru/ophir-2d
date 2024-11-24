@@ -60,8 +60,8 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
 
         const goodData = CARGO_ITEM_DATA[goods[0]];
         const goodShape = new Konva.Path({
-            x: this.group.width()/2 - 19,
-            y: this.group.height()/2 - 10,
+            x: this.group.width() / 2 - 9,
+            y: this.group.height() / 2 - 9,
             data: goodData.shape,
             fill: goodData.fill,
             stroke: 'white',
@@ -83,8 +83,8 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         });
 
         const doubleLayout: Array<Coordinates> = [
-            {x: this.group.width()/2 - 19, y: this.group.height()/2 - 20},
-            {x: this.group.width()/2 - 19, y: this.group.height()/2 + 10},
+            {x: this.group.width()/2 - 9, y: this.group.height()/2 - 21},
+            {x: this.group.width()/2 - 9, y: this.group.height()/2 + 6},
         ]
 
         goods.forEach((good, index) => {
@@ -115,9 +115,9 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         });
 
         const tripleLayout: Array<Coordinates> = [
-            {x: this.group.width()/2 - 35, y: this.group.height()/2 - 20},
-            {x: this.group.width()/2 - 5, y: this.group.height()/2 - 20},
-            {x: this.group.width()/2 - 19, y: this.group.height()/2 + 10},
+            {x: this.group.width()/2 - 24, y: this.group.height()/2 - 21},
+            {x: this.group.width()/2 + 6, y: this.group.height()/2 - 21},
+            {x: this.group.width()/2 - 9, y: this.group.height()/2 + 6},
         ]
 
         goods.forEach((good, index) => {
