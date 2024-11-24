@@ -1,4 +1,5 @@
 
+import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import serverConstants from './server_constants';
@@ -115,6 +116,13 @@ socketServer.on('connection', function connection(client) {
         const session = singleSession as GameSession;
         sendAll(session.processAction(parsedMessage));
     });
+});
+
+process.on('SIGINT', () => {
+    sendAll({error: 'The server is shutting down :('});
+    socketServer.close();
+    console.log('Shutting down...');
+    process.exit(0);
 });
 
 function processGameStart(details: GameSetupDetails): boolean {
