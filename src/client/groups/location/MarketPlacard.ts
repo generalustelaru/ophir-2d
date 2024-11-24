@@ -36,8 +36,9 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             cornerRadius: 10,
         });
 
+        const leftmargin = 10;
         const totalHeight = this.group.height();
-        const cardWidth = this.group.width() / 4;
+        const cardWidth = this.group.width() / 4 - leftmargin;
 
         this.marketDeck = new MarketDeck(
             stage,
@@ -56,7 +57,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             {
                 width: cardWidth,
                 height: totalHeight,
-                x: cardWidth,
+                x: cardWidth + leftmargin,
                 y: 0,
             },
             'slot_1',
@@ -69,7 +70,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             {
                 width: cardWidth,
                 height: totalHeight,
-                x: cardWidth * 2,
+                x: cardWidth * 2 + leftmargin * 2,
                 y: 0,
             },
             'slot_2',
@@ -82,7 +83,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             {
                 width: cardWidth,
                 height: totalHeight,
-                x: cardWidth * 3,
+                x: cardWidth * 3 + leftmargin * 3,
                 y: 0,
             },
             'slot_3',
@@ -95,6 +96,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             fill: LOCATION_TOKEN_DATA.temple.fill,
             x: this[templeTradeSlot].getElement().x() + cardWidth / 2 - 12,
             y: 5,
+            scale: { x: 2, y: 2 },
         });
 
         this.group.add(

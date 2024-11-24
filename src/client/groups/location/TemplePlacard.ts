@@ -12,7 +12,6 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private background: Konva.Rect;
     private upgradeButton: UpgradeButton;
     private templeCard: TempleCard;
-
     private templeTradeSlot: MarketKey;
 
     constructor(
@@ -47,15 +46,16 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         );
 
         const card = market[marketSlot];
+        const margin = 10;
         const cardWidth = this.group.width() / 4;
         const cardHeight = this.group.height() / 6 * 4;
 
         this.templeCard = new TempleCard(
             stage,
             {
-                width: cardWidth,
+                width: cardWidth - margin,
                 height: cardHeight,
-                x: this.group.width() - cardWidth - 10,
+                x: this.group.width() - cardWidth - margin + 3,
                 y: 10,
             },
             { action: 'donate_goods', details: { slot: marketSlot } },

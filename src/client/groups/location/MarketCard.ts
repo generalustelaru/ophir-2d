@@ -24,27 +24,31 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         this.fluctuation = fluctuation;
 
         this.background = new Konva.Rect({
-            width: this.group.width() - 6,
-            height: this.group.height() - 6,
-            x: 3,
-            y: 3,
+            width: this.group.width(),
+            height: this.group.height(),
             fill: COLOR.marketDarkOrange,
             cornerRadius: 15,
             stroke: COLOR.boneWhite,
             strokeWidth: 2,
         });
 
+        const bottomMargins = 10;
+
         this.coinDial = new CoinDial(
-            { x: 38, y: 90 },
+            {
+                x: this.background.width() / 2,
+                y: - 28
+            },
             trade.reward.coins + (fluctuation ?? 0)
         );
+        this.coinDial.getElement().y(this.background.height() - this.coinDial.getDiameter() / 2 - bottomMargins);
 
         this.goodsAssortment = new GoodsAssortment(
             {
                 width: this.background.width(),
-                height: this.background.height() - this.coinDial.getElement().height() - this.coinDial.getElement().y() - 20,
-                x: this.background.x(),
-                y: 15,
+                height: this.background.width(),
+                x: 0,
+                y: 0,
             },
             trade.request
         );

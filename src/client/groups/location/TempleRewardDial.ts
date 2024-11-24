@@ -57,6 +57,10 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
         ]);
     }
 
+    public getDiameter(): number {
+        return this.group.width();
+    }
+
     public getElement(): Konva.Group {
         return this.group;
     }
