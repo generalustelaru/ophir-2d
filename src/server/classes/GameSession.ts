@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, Trade, PickupLocationId, LocationId } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, Trade, LocationId, PickupLocationId } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -24,7 +24,7 @@ export class GameSession {
 
         this.setTurnStartCondition(activePlayer);
     }
-
+    // MARK: ACTION SWITCH
     public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerId;
 
@@ -56,7 +56,7 @@ export class GameSession {
         }
     }
 
-    // Player action processing methods
+    // MARK: MOVE
     private processMove(message: WebsocketClientMessage): boolean {
         const details = message.details as MovementDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerId);
@@ -99,7 +99,7 @@ export class GameSession {
 
         return true;
     }
-
+    // MARK: REPOSITIONING
     private processRepositioning(message: WebsocketClientMessage): boolean {
         const details = message.details as RepositioningDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerId);
@@ -113,7 +113,7 @@ export class GameSession {
 
         return true;
     }
-
+    // MARK: FAVOR
     private processFavorSpending(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
@@ -127,7 +127,7 @@ export class GameSession {
 
         return false;
     }
-
+    // MARK: DROP ITEM
     private processItemDrop(message: WebsocketClientMessage): boolean {
         const details = message.details as DropItemDetails
 
@@ -147,7 +147,7 @@ export class GameSession {
 
         return true;
     }
-
+    // MARK: PICKUP GOOD
     private processGoodPickup(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
@@ -197,7 +197,7 @@ export class GameSession {
 
         return true;
     }
-
+    // MARK: TRADE (SELL, DONATE)
     private processTrade(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
         const tradeAction = message.action as LocationAction;
@@ -296,7 +296,7 @@ export class GameSession {
 
         return true;
     }
-
+    // MARK: END TURN
     private processEndTurn(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
@@ -308,7 +308,7 @@ export class GameSession {
 
         return false;
     }
-
+    // MARK: UPGRADE HOLD
     private processUpgrade(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
@@ -328,7 +328,7 @@ export class GameSession {
         return false;
     }
 
-    // Helper methods
+    // MARK: Helper methods
     private getPortRegistry(destinationHex: HexId): Array<RegistryItem> | false {
         const registry: Array<RegistryItem> = [];
         const players = this.sharedState.players;
