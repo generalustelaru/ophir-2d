@@ -113,7 +113,7 @@ const serverConstants: ServerConstants = {
         locationActions: null,
         moveActions: 2,
         hasCargo: false,
-        cargo: ['empty', 'empty'],
+        cargo: ['gem', 'silver', 'silver_extra', 'stone'],
         feasibleTrades: [],
         coins: 0,
     },

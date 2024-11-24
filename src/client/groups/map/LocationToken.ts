@@ -10,20 +10,22 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         iconData: LocationIconData
     ) {
         const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(iconData.id);
-        const isExchage = iconData.id === 'exchange';
-        const makeLarger = isExchage || isPickup;
-        const scale = makeLarger ? 3 : 2;
-        const drift = makeLarger ? -39 : -26;
+        const scale = 3;
+        const drift = -20;
 
-        super(stage, {width: 100, height: 100, x: 0, y: 0}, isPickup ? { action: 'pickup_good', details: null } : null);
+        super(
+            stage,
+            {width: 100, height: 100, x: 0, y: 0},
+            isPickup ? { action: 'pickup_good', details: null } : null
+        );
 
         this.icon = new Konva.Path({
-            x: drift,
+            x: drift - (iconData.id === 'exchange' ? 20 : 0),
             y: drift,
             data: iconData.shape,
             fill: iconData.fill,
             stroke: 'white',
-            strokeWidth: makeLarger ? .75 : 1,
+            strokeWidth: .75,
             scale: {x: scale, y: scale},
         });
         this.group.add(this.icon);

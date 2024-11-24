@@ -22,12 +22,11 @@ export class CargoDial implements DynamicGroupInterface<CargoManifest> {
             x: 10,
             y: 5,
         });
-        const pathBackDrift = -14;
         this.cargoDrawData = [
-            { x: pathBackDrift, element: null },
-            { x: pathBackDrift + SLOT_WIDTH, element: null },
-            { x: pathBackDrift + SLOT_WIDTH * 2, element: null },
-            { x: pathBackDrift + SLOT_WIDTH * 3, element: null },
+            { x: 0, element: null },
+            { x: SLOT_WIDTH, element: null },
+            { x: SLOT_WIDTH * 2, element: null },
+            { x: SLOT_WIDTH * 3, element: null },
         ];
         const backgroundMapping: Record<PlayerId, Color> = {
             playerRed: COLOR.holdDarkRed,
@@ -53,6 +52,7 @@ export class CargoDial implements DynamicGroupInterface<CargoManifest> {
             background,
             this.cargoDisplay
         ]);
+        this.updateElement(cargo);
     }
 
     public updateElement(cargo: CargoManifest): void {
@@ -76,7 +76,7 @@ export class CargoDial implements DynamicGroupInterface<CargoManifest> {
         const itemData = CARGO_ITEM_DATA[itemId];
         const itemIcon = new Konva.Path({
             x: cargoSlot.x,
-            y: - 12,
+            y: 4,
             data: itemData.shape,
             fill: itemData.fill,
             stroke: 'white',
