@@ -18,14 +18,8 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
             x: layout.x,
             y: layout.y,
         });
-        const testRect = new Konva.Rect({
-            width: layout.width,
-            height: layout.height,
-            stroke: 'black',
-            strokeWidth: 1,
-        });
 
-        this.group.add(testRect, this.getGoodsGroup(goods));
+        this.group.add( this.getGoodsGroup(goods));
     }
 
     public getElement(): Konva.Group {

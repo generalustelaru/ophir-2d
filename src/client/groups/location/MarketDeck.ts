@@ -36,10 +36,10 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
             futureTrade,
         );
 
-        const deck = new Konva.Rect({
-            width: this.marketCard.getElement().width() - 6,
+        const deckEffect = new Konva.Rect({
+            width: this.marketCard.getElement().width(),
             height: 50,
-            x: this.marketCard.getElement().x() + 3,
+            x: this.marketCard.getElement().x(),
             y: this.marketCard.getElement().y() + this.marketCard.getElement().height() - 30,
             fill: 'gray',
             stroke: 'gray',
@@ -48,8 +48,8 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
         })
 
         this.deckInUse = new Konva.Text({
-            x: deck.x() + 5,
-            y: deck.y() + 0,
+            x: deckEffect.x() + 5,
+            y: deckEffect.y() + 0,
             text: deckId,
             fontSize: 20,
             fontFamily: 'Calibri',
@@ -57,7 +57,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
         });
 
         this.group.add(
-            deck,
+            deckEffect,
             this.marketCard.getElement(),
             this.deckInUse,
         );
