@@ -4,12 +4,11 @@ import clientConstants from '../../client_constants';
 import { HexId } from '../../../shared_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
-
+const SCALE = 2.75;
 export class ExchangePlacard implements DynamicGroupInterface<HexId> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-
     private exchangeLocation: HexId
 
     constructor(
@@ -32,28 +31,48 @@ export class ExchangePlacard implements DynamicGroupInterface<HexId> {
             cornerRadius: 15,
         });
 
-        const goldIcon = new Konva.Path({
+        const goldIcon1 = new Konva.Path({
             data: CARGO_ITEM_DATA.gold.shape,
             fill: CARGO_ITEM_DATA.gold.fill,
             x: 10,
             y: 10,
-            scaleX: 3,
-            scaleY: 3,
+            scaleX: SCALE,
+            scaleY: SCALE,
+        });
+        const width = goldIcon1.getClientRect().width;
+        console.log('metalWidth',width);
+        const goldIcon2 = new Konva.Path({
+            data: CARGO_ITEM_DATA.gold.shape,
+            fill: CARGO_ITEM_DATA.gold.fill,
+            x: 10 + width,
+            y: 10,
+            scaleX: SCALE,
+            scaleY: SCALE,
         });
 
-        const silverIcon = new Konva.Path({
+        const silverIcon1 = new Konva.Path({
             data: CARGO_ITEM_DATA.silver.shape,
             fill: CARGO_ITEM_DATA.silver.fill,
-            x: 80,
+            x: 10 + width * 2,
             y: 10,
-            scaleX: 3,
-            scaleY: 3,
+            scaleX: SCALE,
+            scaleY: SCALE,
+        });
+        const silverIcon2 = new Konva.Path({
+            data: CARGO_ITEM_DATA.silver.shape,
+            fill: CARGO_ITEM_DATA.silver.fill,
+            x: 10 + width * 3,
+            y: 10,
+            scaleX: SCALE,
+            scaleY: SCALE,
         });
 
         this.group.add(...[
             this.background,
-            goldIcon,
-            silverIcon,
+            goldIcon1,
+            goldIcon2,
+            silverIcon1,
+            silverIcon2,
         ]);
     }
 
