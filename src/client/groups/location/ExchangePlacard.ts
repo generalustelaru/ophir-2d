@@ -109,22 +109,48 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
     }
 
     public updateElement(update: ExchangeUpdate): void {
-        if (update.localPlayer?.hexagon.hexId === this.exchangeLocation) {
-            this.background.fill(COLOR.exchangeGold);
-        } else {
-            this.background.fill(COLOR.exchangeDarkGold);
-        }
 
-        const playerAmounts = update.localPlayer && {
-            coins: update.localPlayer.coins,
-            favor: update.localPlayer.favor,
-        }
+        const playerCanAct = (
+            update.localPlayer?.hexagon.hexId === this.exchangeLocation
+            && update.localPlayer.isActive
+            && update.localPlayer.isAnchored
+        );
+
+        const playerAmounts = playerCanAct ? {
+            coins: update.localPlayer!.coins,
+            favor: update.localPlayer!.favor,
+        } : null;
+
         this.goldForFavorCard.updateElement({
             playerAmounts,
             exchange: {
                 currency: 'favor',
                 amount: 5,
                 metal: 'gold',
+            }
+        });
+        this.silverForFavorCard.updateElement({
+            playerAmounts,
+            exchange: {
+                currency: 'favor',
+                amount: 3,
+                metal: 'silver',
+            }
+        });
+        this.goldForCoinsCard.updateElement({
+            playerAmounts,
+            exchange: {
+                currency: 'coins',
+                amount: update.templeLevel.goldCost,
+                metal: 'gold',
+            }
+        });
+        this.silverForCoinsCard.updateElement({
+            playerAmounts,
+            exchange: {
+                currency: 'coins',
+                amount: update.templeLevel.silverCost,
+                metal: 'silver',
             }
         });
     }

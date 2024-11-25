@@ -22,7 +22,13 @@ export class ExchangeCard extends ActionButton implements DynamicGroupInterface<
             y: position.y,
         }
 
-        super(stage, groupLayout, null);
+        super(
+            stage,
+            groupLayout,
+            {
+                action: 'buy_metals',
+                details: { metal: update.exchange.metal, currency: update.exchange.currency }
+            });
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -58,6 +64,11 @@ export class ExchangeCard extends ActionButton implements DynamicGroupInterface<
     }
     public updateElement(data: ExchangeCardUpdate): void {
         this.currencyDial.updateElement(data.exchange.amount);
-        console.log('ExchangeCard.updateElement', data);
+        const isFeasible = (data.playerAmounts
+            ? data.exchange.amount <= data.playerAmounts[data.exchange.currency]
+            : false
+        );
+        this.setEnabled(isFeasible);
+        this.background.fill(isFeasible ? COLOR.exchangeGold : COLOR.exchangeDarkGold);
     }
 }
