@@ -32,8 +32,6 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
             strokeWidth: 2,
         });
 
-        // const bottomMargins = 10;
-
         this.coinDial = new CoinDial(
             {
                 x: this.background.width() / 2,
