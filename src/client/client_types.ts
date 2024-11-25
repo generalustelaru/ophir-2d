@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ManifestItem, NewState, Trade, MarketOffer, Player, MetalId, TempleLevel } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ManifestItem, NewState, Trade, MarketOffer, Player, MetalId, TempleLevel, Currency } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -76,7 +76,7 @@ export type ExchangeUpdate = {
 
 export type ExchangeCardUpdate = {
     playerAmounts: { coins: number, favor: number } | null,
-    exchange: {currency: 'favor' | 'coins', amount: number, metal: MetalId},
+    exchange: {currency: Currency, amount: number, metal: MetalId},
 }
 
 export type TempleUpdate = {

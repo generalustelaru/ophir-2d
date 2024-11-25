@@ -106,7 +106,7 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         this.marketPlacard?.updateElement(marketUpdate);
-        this.exchangePlacard?.updateElement({ localPlayer: activePlayer, templeLevel: sharedState.templeLevel });
+        this.exchangePlacard?.updateElement({ localPlayer: localPlayer ?? null, templeLevel: sharedState.templeLevel });
         this.templePlacard?.updateElement(templeUpdate);
     }
 

@@ -6,6 +6,7 @@ export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGr
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver" | "silver_extra" | "gold" | "gold_extra"; // metals cover two cargo spaces
+export type Currency = "coins" | "favor";
 export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
 export type LocationId = "temple" | "market" | "exchange" | PickupLocationId;
 export type Action =
@@ -119,8 +120,14 @@ export type MarketSaleDetails = {
     slot: MarketKey,
 }
 
+export type MetalPurchaseDetails = {
+    metal: MetalId,
+    currency: Currency,
+}
+
 export type ActionDetails =
-    | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | MarketSaleDetails | null;
+    | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | MarketSaleDetails
+    | MetalPurchaseDetails | null;
 
 export type Coordinates = { x: number, y: number };
 
