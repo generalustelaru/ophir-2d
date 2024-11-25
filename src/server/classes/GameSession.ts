@@ -153,23 +153,14 @@ export class GameSession {
     private processGoodPickup(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
-        if (!player) {
-            console.error(`No such player found: ${playerId}`);
-            return false;
-        }
+        if (
+            false === !!player
+            || false === !!player.locationActions
+            || false === player.locationActions.includes('pickup_good')
+            || false === this.hasCargoRoom(player, 'pickup_good')
+        ) {
+            console.error(`Cannot load goods for ${playerId}`, player);
 
-        if (!player.locationActions) {
-            console.error(`No actions found for ${playerId}`);
-            return false;
-        }
-
-        if (!player.locationActions.includes('pickup_good')) {
-            console.error(`'pickup_good' not found for ${playerId}`);
-            return false;
-        }
-
-        if (!this.hasCargoRoom(player, 'pickup_good')) {
-            console.error(`Cannot load goods for ${playerId}`);
             return false;
         }
 
@@ -181,17 +172,9 @@ export class GameSession {
             return false;
         }
 
-        const localGood =  serverConstants.LOCATION_GOODS[locationId as PickupLocationId];
+        const localGood = serverConstants.LOCATION_GOODS[locationId as PickupLocationId];
 
-        for (let i = 0; i < player.cargo.length; i++) {
-            const item = player.cargo[i];
-
-            if (item === 'empty') {
-                player.cargo[i] = localGood;
-                break;
-            }
-        }
-
+        player.cargo = this.loadItem(player.cargo, localGood);
         player.hasCargo = true;
         player.moveActions = 0;
         player.locationActions = this.removeAction(player.locationActions, 'pickup_good');
@@ -298,18 +281,17 @@ export class GameSession {
 
         return true;
     }
-    // MARK: METAL TRADE
+    // MARK: METAL PURCHASE
     private processMetalTrade(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
         const details = message.details as MetalPurchaseDetails;
 
-        const playerCanAct = !!(
-            player?.locationActions?.includes('buy_metals')
-            && player.isAnchored
-            && this.hasCargoRoom(player, 'buy_metals')
-        );
-
-        if (!player || !playerCanAct) {
+        if (
+            false === !!player
+            || false === !!player.locationActions?.includes('buy_metals')
+            || false === player.isAnchored
+            || false === this.hasCargoRoom(player, 'buy_metals')
+        ) {
             console.error(`Player ${player?.id} cannot buy metals`);
             return false;
         }
@@ -331,26 +313,29 @@ export class GameSession {
             return false;
         }
 
-        const difference = playerAmount - metalCost[details.currency];
+        const remainder = playerAmount - metalCost[details.currency];
 
-        if (difference < 0) {
+        if (remainder < 0) {
             console.error(`Player ${player.id} cannot afford metal purchase`);
+
             return false;
         }
 
         switch (details.currency) {
             case 'coins':
-                player.coins = difference;
+                player.coins = remainder;
                 break;
             case 'favor':
-                player.favor = difference;
+                player.favor = remainder;
                 break;
             default:
                 console.error(`Unknown currency: ${details.currency}`);
                 return false;
         }
 
-        // TODO: Implement loading the metal into the player's cargo
+        player.cargo = this.loadItem(player.cargo, details.metal);
+        player.hasCargo = true;
+        player.moveActions = 0;
 
         return true;
     }
@@ -539,5 +524,20 @@ export class GameSession {
         });
 
         return feasable;
+    }
+
+    private loadItem(cargo: CargoManifest, item: ManifestItem): CargoManifest {
+        const filled = cargo.filter(item => item !== 'empty') as Array<ManifestItem>;
+        const empty = cargo.filter(item => item === 'empty') as Array<ManifestItem>;
+        const orderedCargo = filled.concat(empty);
+
+        const firstEmpty = orderedCargo.indexOf('empty');
+        orderedCargo[firstEmpty] = item;
+
+        if (item === 'gold' || item === 'silver') {
+            orderedCargo[firstEmpty + 1] = item + '_extra' as ManifestItem;
+        }
+
+        return orderedCargo;
     }
 }
