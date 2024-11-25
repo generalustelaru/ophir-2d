@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, ExchangeUpdate, GroupLayoutData } from '../../client_types';
 import clientConstants from '../../client_constants';
-import { HexId } from '../../../shared_types';
+import { CargoManifest, HexId } from '../../../shared_types';
 import { ExchangeCard } from './ExchangeCard';
 
 const { COLOR } = clientConstants;
@@ -114,6 +114,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             update.localPlayer?.hexagon.hexId === this.exchangeLocation
             && update.localPlayer.isActive
             && update.localPlayer.isAnchored
+            && this.hasCargoRoom(update.localPlayer.cargo)
         );
 
         const playerAmounts = playerCanAct ? {
@@ -157,5 +158,11 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
 
     public getElement(): Konva.Group {
         return this.group;
+    }
+
+    private hasCargoRoom(cargo: CargoManifest): boolean {
+        const emptySlots = cargo.filter(item => item === 'empty').length;
+
+        return emptySlots >= 2;
     }
 }
