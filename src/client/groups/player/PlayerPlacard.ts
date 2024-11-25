@@ -42,8 +42,8 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.cargoDial = new CargoDial(player.id, player.cargo);
 
         this.favorDial = new FavorDial(
+            { x: 10, y: 42 },
             player.favor,
-            { width: 100, height: 100, x: 10, y: 42 },
         );
 
         this.coinDial = new CoinDial(

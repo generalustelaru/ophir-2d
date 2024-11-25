@@ -1,7 +1,8 @@
 import Konva from 'konva';
 import clientConstants from '../../client_constants';
-import { DynamicGroupInterface, GroupLayoutData } from '../../client_types';
+import { DynamicGroupInterface } from '../../client_types';
 import { FavorIcon } from '../GroupList';
+import { Coordinates } from '../../../shared_types';
 
 const { COLOR } = clientConstants;
 export class FavorDial implements DynamicGroupInterface<number> {
@@ -9,12 +10,12 @@ export class FavorDial implements DynamicGroupInterface<number> {
     private favorCount: Konva.Text;
 
     constructor(
-        favor: number,
-        layout: GroupLayoutData,
+        position: Coordinates,
+        amount: number,
     ) {
         this.group = new Konva.Group({
-            x: layout.x,
-            y: layout.y,
+            x: position.x,
+            y: position.y,
         });
 
         const favorIcon = new FavorIcon({x: 0, y: 0, width: 0, height: 0});
@@ -24,7 +25,7 @@ export class FavorDial implements DynamicGroupInterface<number> {
         this.favorCount = new Konva.Text({
             x: stampCenter - 7,
             y: stampCenter - 12,
-            text: favor.toString(),
+            text: amount.toString(),
             fontSize: 20,
             fill: COLOR.boneWhite,
             fontFamily: 'Arial',
@@ -37,7 +38,7 @@ export class FavorDial implements DynamicGroupInterface<number> {
         return this.group;
     }
 
-    public updateElement(favor: number): void {
-        this.favorCount?.text(favor.toString());
+    public updateElement(amount: number): void {
+        this.favorCount?.text(amount.toString());
     }
 }
