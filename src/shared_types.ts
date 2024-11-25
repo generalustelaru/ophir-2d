@@ -24,10 +24,16 @@ export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
 export type TempleLevel = {
     id: number,
-    goldCost: number,
-    silverCost: number,
+    goldCost: MetalCost,
+    silverCost: MetalCost,
     skipOnPlayerCount: number | null,
 }
+
+export type MetalCost = {
+    coins: number,
+    favor: number,
+}
+
 export type Player = {
     id: PlayerId,
     turnOrder: number,
