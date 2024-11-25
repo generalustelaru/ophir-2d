@@ -156,6 +156,7 @@ export class GameSession {
         if (
             false === !!player
             || false === !!player.locationActions
+            || false === player.isAnchored
             || false === player.locationActions.includes('pickup_good')
             || false === this.hasCargoRoom(player, 'pickup_good')
         ) {

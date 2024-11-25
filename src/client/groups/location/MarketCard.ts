@@ -35,7 +35,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         this.coinDial = new CoinDial(
             {
                 x: this.background.width() / 2,
-                y: this.background.height() / 2 + 30,
+                y: this.background.height() / 2 + 20,
             },
             trade.reward.coins + (fluctuation ?? 0)
         );
