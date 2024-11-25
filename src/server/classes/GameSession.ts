@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, Trade, LocationId, PickupLocationId } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -42,9 +42,11 @@ export class GameSession {
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
             case 'sell_goods':
-                return this.processTrade(message) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
+                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
             case 'donate_goods':
-                return this.processTrade(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
+                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
+            case 'buy_metals':
+                return this.processMetalTrade(message) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
             case 'upgrade_hold':
@@ -197,8 +199,8 @@ export class GameSession {
 
         return true;
     }
-    // MARK: TRADE (SELL, DONATE)
-    private processTrade(message: WebsocketClientMessage): boolean {
+    // MARK: GOODS TRADE
+    private processGoodsTrade(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerId);
         const tradeAction = message.action as LocationAction;
         const details = message.details as MarketSaleDetails;
@@ -293,6 +295,62 @@ export class GameSession {
         players.forEach(player => {
             player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
         });
+
+        return true;
+    }
+    // MARK: METAL TRADE
+    private processMetalTrade(message: WebsocketClientMessage): boolean {
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const details = message.details as MetalPurchaseDetails;
+
+        const playerCanAct = !!(
+            player?.locationActions?.includes('buy_metals')
+            && player.isAnchored
+            && this.hasCargoRoom(player, 'buy_metals')
+        );
+
+        if (!player || !playerCanAct) {
+            console.error(`Player ${player?.id} cannot buy metals`);
+            return false;
+        }
+
+        const templeLevel = this.sharedState.templeLevel;
+        const metalCost = (() =>{ switch (details.metal) {
+            case 'gold': return templeLevel.goldCost;
+            case 'silver': return templeLevel.silverCost;
+            default: return null;
+        }})();
+        const playerAmount = (() => { switch (details.currency) {
+            case 'coins': return player.coins;
+            case 'favor': return player.favor;
+            default: return null;
+        }})();
+
+        if (!metalCost || !playerAmount) {
+            console.error(`No such cost or player amount found: ${metalCost}, ${player}`);
+            return false;
+        }
+
+        const difference = playerAmount - metalCost[details.currency];
+
+        if (difference < 0) {
+            console.error(`Player ${player.id} cannot afford metal purchase`);
+            return false;
+        }
+
+        switch (details.currency) {
+            case 'coins':
+                player.coins = difference;
+                break;
+            case 'favor':
+                player.favor = difference;
+                break;
+            default:
+                console.error(`Unknown currency: ${details.currency}`);
+                return false;
+        }
+
+        // TODO: Implement loading the metal into the player's cargo
 
         return true;
     }
@@ -436,7 +494,6 @@ export class GameSession {
         return location.actions;
     }
 
-    // TODO: remember to use this for picking up metals
     private hasCargoRoom(player: Player, action: LocationAction): boolean {
         if (action !== 'buy_metals' && action !== 'pickup_good') {
             console.error(`Incompatible settlement action: ${action}`);

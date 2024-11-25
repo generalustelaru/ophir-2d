@@ -2,13 +2,6 @@ import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
 import { MarketPlacard, ExchangePlacard, TemplePlacard } from "../groups/GroupList";
 import clientState from '../state';
-import { Location, HexId } from "../../shared_types";
-
-type Locations = {
-    market: HexId;
-    exchange: HexId;
-    temple: HexId;
-};
 
 export class LocationGroup implements MegaGroupInterface {
 
@@ -17,7 +10,6 @@ export class LocationGroup implements MegaGroupInterface {
     private marketPlacard: MarketPlacard | null = null;
     private exchangePlacard: ExchangePlacard | null = null;
     private templePlacard: TemplePlacard | null = null;
-    private locations: Locations | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -38,8 +30,6 @@ export class LocationGroup implements MegaGroupInterface {
             throw new Error('State is missing setup data.');
         }
 
-        this.locations = this.matchLocations(setup.mapPairings);
-
         const heightSegment = this.group.height() / 5;
 
         this.marketPlacard = new MarketPlacard(
@@ -57,7 +47,6 @@ export class LocationGroup implements MegaGroupInterface {
 
         this.exchangePlacard = new ExchangePlacard(
             this.stage,
-            this.locations.exchange,
             {
                 width: this.group.width(),
                 height: heightSegment,
@@ -108,25 +97,5 @@ export class LocationGroup implements MegaGroupInterface {
         this.marketPlacard?.updateElement(marketUpdate);
         this.exchangePlacard?.updateElement({ localPlayer: localPlayer ?? null, templeLevel: sharedState.templeLevel });
         this.templePlacard?.updateElement(templeUpdate);
-    }
-
-    private matchLocations(locationPairings: Record<HexId, Location>|null): Locations {
-
-        if (!locationPairings) {
-            throw new Error('No settlements found in setup.');
-        }
-
-        const locations = Object.fromEntries(
-            Object.entries(locationPairings)
-                .map(([hexId, actionPairing]) => [actionPairing.id, hexId])
-        );
-
-        const match = {
-            market: locations.market,
-            exchange: locations.exchange,
-            temple: locations.temple,
-        } as Locations;
-
-        return match;
     }
 }

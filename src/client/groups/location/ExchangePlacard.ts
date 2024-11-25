@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, ExchangeUpdate, GroupLayoutData } from '../../client_types';
 import clientConstants from '../../client_constants';
-import { CargoManifest, HexId } from '../../../shared_types';
+import { CargoManifest } from '../../../shared_types';
 import { ExchangeCard } from './ExchangeCard';
 
 const { COLOR } = clientConstants;
@@ -10,7 +10,6 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private exchangeLocation: HexId;
     private goldForFavorCard: ExchangeCard;
     private silverForFavorCard: ExchangeCard;
     private goldForCoinsCard: ExchangeCard;
@@ -18,12 +17,9 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
 
     constructor(
         stage: Konva.Stage,
-        location: HexId,
         layout: GroupLayoutData,
         update: ExchangeUpdate,
     ) {
-        this.exchangeLocation = location;
-
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -54,7 +50,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
                 playerAmounts,
                 exchange: {
                     currency: 'favor',
-                    amount: 5,
+                    amount: update.templeLevel.goldCost.favor,
                     metal: 'gold',
                 }
             }
@@ -67,7 +63,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
                 playerAmounts,
                 exchange: {
                     currency: 'favor',
-                    amount: 3,
+                    amount: update.templeLevel.silverCost.favor,
                     metal: 'silver',
                 }
             }
@@ -80,7 +76,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
                 playerAmounts,
                 exchange: {
                     currency: 'coins',
-                    amount: update.templeLevel.goldCost,
+                    amount: update.templeLevel.goldCost.coins,
                     metal: 'gold',
                 }
             }
@@ -93,7 +89,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
                 playerAmounts,
                 exchange: {
                     currency: 'coins',
-                    amount: update.templeLevel.silverCost,
+                    amount: update.templeLevel.silverCost.coins,
                     metal: 'silver',
                 }
             }
@@ -111,8 +107,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
     public updateElement(update: ExchangeUpdate): void {
 
         const playerCanAct = (
-            update.localPlayer?.hexagon.hexId === this.exchangeLocation
-            && update.localPlayer.isActive
+            update.localPlayer?.locationActions?.includes('buy_metals')
             && update.localPlayer.isAnchored
             && this.hasCargoRoom(update.localPlayer.cargo)
         );
@@ -126,7 +121,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             playerAmounts,
             exchange: {
                 currency: 'favor',
-                amount: 5,
+                amount: update.templeLevel.goldCost.favor,
                 metal: 'gold',
             }
         });
@@ -134,7 +129,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             playerAmounts,
             exchange: {
                 currency: 'favor',
-                amount: 3,
+                amount: update.templeLevel.silverCost.favor,
                 metal: 'silver',
             }
         });
@@ -142,7 +137,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             playerAmounts,
             exchange: {
                 currency: 'coins',
-                amount: update.templeLevel.goldCost,
+                amount: update.templeLevel.goldCost.coins,
                 metal: 'gold',
             }
         });
@@ -150,7 +145,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             playerAmounts,
             exchange: {
                 currency: 'coins',
-                amount: update.templeLevel.silverCost,
+                amount: update.templeLevel.silverCost.coins,
                 metal: 'silver',
             }
         });

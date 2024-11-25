@@ -104,7 +104,7 @@ const serverConstants: ServerConstants = {
         id: 'playerPurple',
         turnOrder: 0,
         isActive: false,
-        hexagon: {hexId: "center", position: {x: 0, y: 0}},
+        hexagon: { hexId: "center", position: {x: 0, y: 0} },
         favor: 2,
         privilegedSailing: false,
         influence: 1,
@@ -119,12 +119,12 @@ const serverConstants: ServerConstants = {
     },
 
     TEMPLE_LEVELS: [
-        { id: 0, goldCost: 2, silverCost: 1, skipOnPlayerCount: 4 },
-        { id: 1, goldCost: 3, silverCost: 1, skipOnPlayerCount: null },
-        { id: 2, goldCost: 4, silverCost: 2, skipOnPlayerCount: null },
-        { id: 3, goldCost: 5, silverCost: 2, skipOnPlayerCount: null },
-        { id: 4, goldCost: 6, silverCost: 3, skipOnPlayerCount: null },
-        { id: 5, goldCost: 7, silverCost: 4, skipOnPlayerCount: 2 },
+        { id: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCount: 4 },
+        { id: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCount: null },
+        { id: 2, goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCount: null },
+        { id: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCount: null },
+        { id: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCount: null },
+        { id: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCount: 2 },
     ],
 }
 
