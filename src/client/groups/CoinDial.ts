@@ -33,10 +33,10 @@ export class CoinDial implements DynamicGroupInterface<number> {
         const templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
             stroke: COLOR.upgradeBoxSilver,
-            strokeWidth: 1,
-            scale: { x: 1, y: .7 },
-            x: -13,
-            y: -10,
+            strokeWidth: .5,
+            scale: { x: 2.1, y: 1.4 },
+            x: -12,
+            y: -9,
         });
 
         const coinSide = new Konva.Circle({

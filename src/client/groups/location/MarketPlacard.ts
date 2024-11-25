@@ -34,6 +34,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             height: this.group.height(),
             fill: COLOR.marketDarkOrange,
             cornerRadius: 10,
+            visible: false,
         });
 
         const leftmargin = 10;

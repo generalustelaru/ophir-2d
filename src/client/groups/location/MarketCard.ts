@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { Trade } from "../../../shared_types";
+import { Fluctuation, Trade } from "../../../shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -11,13 +11,13 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
-    private fluctuation: number | null = null;
+    private fluctuation: Fluctuation | null = null;
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         actionPayload: ActionEventPayload | null,
         trade: Trade,
-        fluctuation: number | null = null,
+        fluctuation: Fluctuation | null = null,
     ) {
         super(stage, layout, actionPayload);
 
@@ -32,16 +32,15 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
             strokeWidth: 2,
         });
 
-        const bottomMargins = 10;
+        // const bottomMargins = 10;
 
         this.coinDial = new CoinDial(
             {
                 x: this.background.width() / 2,
-                y: - 28
+                y: this.background.height() / 2 + 30,
             },
             trade.reward.coins + (fluctuation ?? 0)
         );
-        this.coinDial.getElement().y(this.background.height() - this.coinDial.getDiameter() / 2 - bottomMargins);
 
         this.goodsAssortment = new GoodsAssortment(
             {

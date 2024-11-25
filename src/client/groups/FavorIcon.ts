@@ -41,7 +41,7 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
         this.templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: COLOR.stampEdge,
-            scale: { x: 1, y: .7 },
+            scale: { x: 2.3, y: 1.5 },
             x: 13,
             y: 14,
         });
