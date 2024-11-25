@@ -32,6 +32,7 @@ export class LocationGroup implements MegaGroupInterface {
 
     public drawElements(): void {
         const setup = clientState.received.setup;
+        const localPlayer = clientState.received.players.find(player => player.id === clientState.localPlayerId) || null;
 
         if (!setup) {
             throw new Error('State is missing setup data.');
@@ -55,13 +56,15 @@ export class LocationGroup implements MegaGroupInterface {
         );
 
         this.exchangePlacard = new ExchangePlacard(
+            this.stage,
             this.locations.exchange,
             {
                 width: this.group.width(),
                 height: heightSegment,
                 x: 0,
                 y: this.marketPlacard.getElement().height(),
-            }
+            },
+            { localPlayer: localPlayer, templeLevel: clientState.received.templeLevel }
         );
 
         this.templePlacard = new TemplePlacard(
@@ -103,7 +106,7 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         this.marketPlacard?.updateElement(marketUpdate);
-        this.exchangePlacard?.updateElement(activePlayer.hexagon.hexId);
+        this.exchangePlacard?.updateElement({ localPlayer: activePlayer, templeLevel: sharedState.templeLevel });
         this.templePlacard?.updateElement(templeUpdate);
     }
 

@@ -1,11 +1,11 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location, TempleLevel } from '../../shared_types';
 import { PlayerVP, PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TEMPLE_LEVELS } = serverConstants;
 
 export class GameSetupService extends Service {
 
@@ -30,6 +30,7 @@ export class GameSetupService extends Service {
         const { tradeDeck, marketOffer } = this.prepareDeckAndGetOffer(this.tools.getCopy(privateState.tradeDeck));
         privateState.tradeDeck = tradeDeck;
         sharedState.marketOffer = marketOffer;
+        sharedState.templeLevel = this.selectInitialTempleLevel(sharedState.players.length);
 
         const bundle: StateBundle = {
             sharedState: sharedState,
@@ -170,5 +171,17 @@ export class GameSetupService extends Service {
         } as MarketOffer;
 
         return { tradeDeck, marketOffer };
+    }
+
+    private selectInitialTempleLevel(playerCount: number): TempleLevel {
+        const levels = this.tools.getCopy(TEMPLE_LEVELS);
+
+        for (const level of levels) {
+            if (level.skipOnPlayerCount !== playerCount) {
+                return level;
+            }
+        }
+
+        return levels[0];
     }
 }

@@ -27,7 +27,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
             stroke: COLOR.boneWhite,
             strokeWidth: 2,
         });
-        console.dir(layout);
+        console.log('templeCard layout', {...layout});
 
         this.rewardDial = new TempleRewardDial(
             { x: 0, y: 0 },

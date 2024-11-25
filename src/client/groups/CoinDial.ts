@@ -52,7 +52,7 @@ export class CoinDial implements DynamicGroupInterface<number> {
             text: amount.toString(),
             fontSize: 20,
             fill: COLOR.upgradeBoxSilver,
-            stroke: COLOR.boneWhite,
+            stroke: COLOR.darkerSilver,
             fontFamily: 'Calibri',
         });
 
