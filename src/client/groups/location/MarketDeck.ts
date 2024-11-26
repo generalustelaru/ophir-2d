@@ -44,7 +44,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
 
         this.deckInUse = new Konva.Text({
             x: deckEffect.x() + 5,
-            y: deckEffect.y() + 0,
+            y: deckEffect.y() + deckEffect.height() + 2,
             text: deckId,
             fontSize: 20,
             fontFamily: 'Calibri',
