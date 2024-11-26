@@ -1,41 +1,41 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { MarketCard } from "../GroupList";
-import { MarketDeckId, MarketOffer, Trade } from "../../../shared_types";
+import { MarketDeckId, MarketOffer } from "../../../shared_types";
 
 export class MarketDeck implements DynamicGroupInterface<MarketOffer>
 {
     private group: Konva.Group;
     private marketCard: MarketCard;
     private deckInUse: Konva.Text;
+    private cardY: number;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        futureTrade: Trade,
+        offer: MarketOffer,
         deckId: MarketDeckId,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
             x: layout.x,
-            y: layout.y - 20,
+            y: layout.y,
         });
 
-        const segmentHeight = this.group.height() / 6;
-
+        this.cardY = this.group.height() / 6;
         this.marketCard = new MarketCard(
             stage,
-            { x: 0, y: segmentHeight },
+            { x: 0, y: this.cardY - offer.deckSize },
             null,
-            futureTrade,
+            offer.future,
         );
 
         const deckEffect = new Konva.Rect({
             width: this.marketCard.getElement().width(),
-            height: 50,
+            height: this.marketCard.getElement().height(),
             x: this.marketCard.getElement().x(),
-            y: this.marketCard.getElement().y() + this.marketCard.getElement().height() - 30,
+            y: this.cardY,
             fill: 'gray',
             stroke: 'gray',
             strokeWidth: 2,
@@ -65,5 +65,6 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
     public updateElement(offer: MarketOffer): void {
         this.marketCard.updateElement({trade: offer.future, isFeasible: false});
         this.deckInUse.text(offer.deckId);
+        this.marketCard.getElement().y(this.cardY - offer.deckSize);
     }
 }

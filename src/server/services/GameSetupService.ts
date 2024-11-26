@@ -163,6 +163,7 @@ export class GameSetupService extends Service {
         }
 
         const marketOffer = {
+            deckSize: 35,
             deckId: 'A',
             future: drawRandomCard(tradeDeck),
             slot_1: drawRandomCard(tradeDeck),

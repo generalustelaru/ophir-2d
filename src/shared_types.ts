@@ -57,6 +57,7 @@ export type Player = {
 }
 
 export type MarketOffer = {
+    deckSize: number,
     deckId: MarketDeckId,
     future: Trade,
     slot_1: Trade,

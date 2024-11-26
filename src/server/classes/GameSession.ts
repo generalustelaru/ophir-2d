@@ -247,6 +247,7 @@ export class GameSession {
         const isNewTrade = ((): boolean => {
             const market = this.sharedState.marketOffer;
 
+            market.deckSize -= 1;
             market.slot_3 = market.slot_2;
             market.slot_2 = market.slot_1;
             market.slot_1 = market.future;
