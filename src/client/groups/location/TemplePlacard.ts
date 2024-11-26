@@ -78,6 +78,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             isFeasible: (
                 !!localPlayer?.feasibleTrades.includes(this.templeTradeSlot)
                 && !!localPlayer.locationActions?.includes('donate_goods')
+                && localPlayer.isAnchored
             )
         });
 
