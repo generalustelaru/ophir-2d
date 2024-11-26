@@ -36,17 +36,17 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
             y: -24,
             scale: { x: 2, y: 2 },
         });
-
+        console.log(amount);
         this.coinCenter = this.group.getClientRect().width / 2;
         this.amount = new Konva.Text({
             x: this.coinCenter - 9,
-            y: this.coinCenter - 15,
+            y: this.coinCenter - 20,
             text: amount.toString(),
-            fontSize: 30,
-            fill: 'white',
+            fontSize: 40,
+            fill: COLOR.boneWhite,
             stroke: 'black',
-            strokeWidth: 1,
-            fontFamily: 'Arial',
+            strokeWidth: 2,
+            fontFamily: 'Calibri',
         });
 
         this.group.add(...[
