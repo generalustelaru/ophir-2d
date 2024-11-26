@@ -49,7 +49,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
                 x: 0,
                 y: 0,
             },
-            market.future,
+            market,
             market.deckId,
         );
 

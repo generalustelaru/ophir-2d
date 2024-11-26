@@ -33,12 +33,14 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
             fluctuation
         );
 
-        const fluctuationSymbol = this.getFluctuationSymbol(fluctuation);
 
         this.group.add(
             this.marketCard.getElement(),
-            fluctuationSymbol
         );
+
+        if (!!fluctuation) {
+            this.group.add(this.getFluctuationSymbol(fluctuation));
+        }
     }
 
     public getElement(): Konva.Group {
@@ -65,9 +67,11 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         return new Konva.Path({
             data: data().shape,
             fill: data().fill,
-            scale: { x: 3, y: 3 },
-            x: this.group.width() / 2 - 12,
-            y: this.group.height() - this.group.height() / 6 - 10,
+            stroke: 'black',
+            strokeWidth: 1,
+            scale: { x: 2, y: 2 },
+            x: this.group.width() / 2 - 20,
+            y: this.group.height() - this.group.height() / 6 - 30,
         });
     }
 }
