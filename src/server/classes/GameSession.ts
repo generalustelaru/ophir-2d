@@ -1,5 +1,5 @@
 import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ManifestItem, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -134,18 +134,23 @@ export class GameSession {
         const details = message.details as DropItemDetails
 
         const player = this.sharedState.players.find(player => player.id === message.playerId);
-        const manifest = player?.cargo;
 
-        if (!manifest || !manifest.includes(details.item)) {
+        if (!player?.cargo || !player.cargo.includes(details.item)) {
             return false;
         }
 
-        manifest.splice(manifest.indexOf(details.item), 1, 'empty');
+        const manifest = this.unloadItem(player.cargo, details.item);
+
+        if (manifest.length === 0) {
+            console.error(`Could not unload item ${details.item} from ${player.id}`);
+            return false;
+        }
 
         const hasCargo = manifest.find(item => item !== 'empty') ? true : false;
 
-        player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(manifest) : [];
+        player.cargo = manifest;
         player.hasCargo = hasCargo;
+        player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(manifest) : [];
 
         return true;
     }
@@ -217,22 +222,23 @@ export class GameSession {
                 return false;
         }
 
-        const playerCargo = player.cargo;
+        const playerCargo = (() => {
+            let playerCargo = this.tools.getCopy(player.cargo);
 
-        for (let i = 0; i < trade.request.length; i++) {
-            const goodToUnload = trade.request[i] as GoodId;
-            const cargoSlot = playerCargo.indexOf(goodToUnload);
+            for (const goodId of trade.request) {
+                playerCargo = this.unloadItem(playerCargo, goodId);
+            };
 
-            if (cargoSlot === -1) {
-                console.error(`No such good found in cargo: ${goodToUnload}`);
+            return playerCargo;
+        })();
 
-                return false;
-            }
+        if (playerCargo.length === 0) {
+            console.error(`Could not match cargo item to trade request: ${playerCargo}`);
+            return false;
+        }
 
-            playerCargo[cargoSlot] = 'empty';
-        };
-
-        player.hasCargo = playerCargo.find(item => item !== 'empty') ? true : false;
+        player.cargo = playerCargo;
+        player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
         player.locationActions = this.removeAction(player.locationActions, tradeAction);
         player.moveActions = 0;
 
@@ -497,7 +503,7 @@ export class GameSession {
     private pickFeasibleTrades(playerCargo: CargoManifest) {
         const market = this.tools.getCopy(this.sharedState.marketOffer);
         const cargo = this.tools.getCopy(playerCargo);
-        const nonGoods: Array<ManifestItem> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
+        const nonGoods: Array<ItemId> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
         const slots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
         const feasable: Array<MarketKey> = [];
@@ -527,18 +533,34 @@ export class GameSession {
         return feasable;
     }
 
-    private loadItem(cargo: CargoManifest, item: ManifestItem): CargoManifest {
-        const filled = cargo.filter(item => item !== 'empty') as Array<ManifestItem>;
-        const empty = cargo.filter(item => item === 'empty') as Array<ManifestItem>;
+    private loadItem(cargo: CargoManifest, item: ItemId): CargoManifest {
+        const filled = cargo.filter(item => item !== 'empty') as Array<ItemId>;
+        const empty = cargo.filter(item => item === 'empty') as Array<ItemId>;
         const orderedCargo = filled.concat(empty);
 
         const firstEmpty = orderedCargo.indexOf('empty');
         orderedCargo[firstEmpty] = item;
 
         if (item === 'gold' || item === 'silver') {
-            orderedCargo[firstEmpty + 1] = item + '_extra' as ManifestItem;
+            orderedCargo[firstEmpty + 1] = item + '_extra' as ItemId;
         }
 
         return orderedCargo;
+    }
+
+    private unloadItem(cargo: CargoManifest, item: ItemId): CargoManifest {
+        const manifest = this.tools.getCopy(cargo);
+        const manifestIndex = manifest.indexOf(item);
+
+        if (manifestIndex === -1) {
+            return [];
+        }
+        manifest.splice(manifestIndex, 1, 'empty');
+
+        if (['gold', 'silver'].includes(item)) {
+            manifest.splice(manifestIndex + 1, 1, 'empty');
+        }
+
+        return manifest;
     }
 }

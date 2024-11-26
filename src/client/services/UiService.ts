@@ -1,4 +1,4 @@
-import { ManifestItem, PlayerId, NewState, SharedState } from '../../shared_types';
+import { PlayerId, NewState } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
 import { Service } from './Service';
 import clientState from '../state';
@@ -8,7 +8,6 @@ import { CanvasService } from "./CanvasService";
 export class UserInterfaceService extends Service {
 
     createButton; joinButton; startButton; playerColorSelect;
-    dropItemSelect;
 
     constructor() {
         super();
@@ -27,57 +26,6 @@ export class UserInterfaceService extends Service {
             },
 
             disable: () => this.playerColorSelect.element.disabled = true,
-        }
-
-        this.dropItemSelect = {
-            element: document.getElementById('dropItemSelect') as HTMLSelectElement,
-            enable: () => {
-                const element = this.dropItemSelect.element;
-
-                element.addEventListener('change', this.requestItemDrop);
-
-                while (element.firstChild) {
-                    element.removeChild(element.firstChild);
-                }
-
-                const titleOption = document.createElement('option');
-                titleOption.value = '';
-                titleOption.text = '--Drop Item--';
-                titleOption.selected = true;
-                element.appendChild(titleOption);
-                const serverState = clientState.received as SharedState;
-                const manifest = serverState.players.find(player => player.id === clientState.localPlayerId)?.cargo;
-
-                if (!manifest) {
-                    throw new Error('Player not found');
-                }
-
-                for (let i = 0; i < manifest.length; i++) {
-
-                    if (manifest[i] === 'empty') {
-                        continue;
-                    }
-
-                    const itemOption = document.createElement('option');
-                    itemOption.value = manifest[i];
-                    itemOption.text = manifest[i];
-                    element.appendChild(itemOption);
-                }
-
-                element.disabled = false;
-
-            },
-
-            disable: () => {
-                const element = this.dropItemSelect.element;
-                const titleOption = document.createElement('option');
-                titleOption.value = '';
-                titleOption.text = '--Drop Item--';
-                titleOption.selected = true;
-                element.appendChild(titleOption);
-                element.removeEventListener('change', this.requestItemDrop);
-                element.disabled = true;
-            },
         }
     }
 
@@ -110,13 +58,6 @@ export class UserInterfaceService extends Service {
         return this.setInfo('This color has just been taken :(');
     }
 
-    private requestItemDrop = (): void => {
-        const item = this.dropItemSelect.element.value as ManifestItem;
-        const payload: ActionEventPayload = { action: 'drop_item', details: { item } };
-
-        return this.broadcastEvent('action', payload);
-    }
-
     public setInfo(text: string): void {
         const info = document.getElementById('info') as HTMLDivElement;
         info.innerHTML = text;
@@ -133,22 +74,8 @@ export class UserInterfaceService extends Service {
         this.playerColorSelect.disable();
     }
 
-    private disableGameControls(): void {
-        this.dropItemSelect.disable();
-    }
-
     public updateGameControls(): void {
         this.disableLobbyControls();
-        this.disableGameControls();
-        const serverState = clientState.received as SharedState;
-        const player = serverState.players.find(player => player.id === clientState.localPlayerId);
-
-        if (player?.isActive) {
-
-            if (player.hasCargo) {
-                this.dropItemSelect.enable();
-            }
-        }
     }
 
     public updateLobbyControls(): void {

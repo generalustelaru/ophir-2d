@@ -15,9 +15,9 @@ export type Action =
 export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good";
 export type FreeAction = "reposition" | "drop_item"
 export type GameStatus = "empty" | "created" | "full" | "started";
-export type ManifestItem = GoodId | MetalId | "empty";
+export type ItemId = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
-export type CargoManifest = Array<ManifestItem>;
+export type CargoManifest = Array<ItemId>;
 export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
@@ -119,7 +119,7 @@ export type GameSetupDetails = {
 }
 
 export type DropItemDetails = {
-    item: ManifestItem,
+    item: ItemId,
 }
 
 export type MarketSaleDetails = {

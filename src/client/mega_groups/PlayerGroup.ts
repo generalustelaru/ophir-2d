@@ -4,6 +4,7 @@ import { PlayerPlacard } from '../groups/GroupList';
 import clientState from '../state';
 
 export class PlayerGroup implements MegaGroupInterface {
+    private stage: Konva.Stage;
     private group: Konva.Group;
     private playerPlacards: Array<PlayerPlacard> = [];
 
@@ -15,6 +16,7 @@ export class PlayerGroup implements MegaGroupInterface {
             y: layout.y,
         });
         stage.getLayers()[0].add(this.group);
+        this.stage = stage;
     }
 
     // MARK: DRAW
@@ -23,6 +25,7 @@ export class PlayerGroup implements MegaGroupInterface {
 
         clientState.received.players.forEach(player => {
             const placard = new PlayerPlacard(
+                this.stage,
                 player,
                 clientState.localPlayerId,
                 verticalOffsets.shift() as number
