@@ -2,7 +2,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
 import { Player, PlayerId } from '../../../shared_types';
-import { FavorDial, CargoDial, CoinDial, InfluenceDial} from '../GroupList';
+import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import clientConstants from '../../client_constants';
 
 const { COLOR } = clientConstants;
@@ -11,7 +11,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private cargoDial: CargoDial;
+    private cargoBand: CargoBand;
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
@@ -39,7 +39,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             strokeWidth: player.isActive ? 3 : 0,
         });
 
-        this.cargoDial = new CargoDial(player.id, player.cargo);
+        this.cargoBand = new CargoBand(player.id, player.cargo);
 
         this.favorDial = new FavorDial(
             { x: 10, y: 42 },
@@ -58,7 +58,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
         this.group.add(
             this.background,
-            this.cargoDial.getElement(),
+            this.cargoBand.getElement(),
             this.favorDial.getElement(),
             this.coinDial.getElement(),
             this.influenceDial.getElement(),
@@ -67,7 +67,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
     public updateElement(player: Player): void {
         this.background.strokeWidth(player.isActive ? 3 : 0);
-        this.cargoDial.updateElement(player.cargo);
+        this.cargoBand.updateElement(player.cargo);
         this.favorDial.updateElement(player.favor);
         this.coinDial.updateElement(player.coins);
         this.influenceDial.updateElement(player.influence);

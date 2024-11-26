@@ -10,7 +10,7 @@ type CargoSlot = {
     x: number,
     element: Konva.Path | null,
 }
-export class CargoDial implements DynamicGroupInterface<CargoManifest> {
+export class CargoBand implements DynamicGroupInterface<CargoManifest> {
     private group: Konva.Group;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
