@@ -15,16 +15,14 @@ export class ExchangeCard extends ActionButton implements DynamicGroupInterface<
         position: Coordinates,
         update: ExchangeCardUpdate
     ) {
-        const groupLayout = {
-            width: 66,
-            height: 96,
-            x: position.x,
-            y: position.y,
-        }
-
         super(
             stage,
-            groupLayout,
+            {
+                width: 66,
+                height: 96,
+                x: position.x,
+                y: position.y,
+            },
             {
                 action: 'buy_metals',
                 details: { metal: update.exchange.metal, currency: update.exchange.currency }

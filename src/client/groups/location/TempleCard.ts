@@ -1,6 +1,6 @@
 import Konva from "konva";
-import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { Trade } from "../../../shared_types";
+import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface } from "../../client_types";
+import { Coordinates, Trade } from "../../../shared_types";
 import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -13,11 +13,20 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
     private background: Konva.Rect;
     constructor(
         stage: Konva.Stage,
-        layout: GroupLayoutData,
+        position: Coordinates,
         actionPayload: ActionEventPayload | null,
         trade: Trade,
     ) {
-        super(stage, layout, actionPayload);
+        super(
+            stage,
+            {
+                width: 66,
+                height: 128,
+                x: position.x,
+                y: position.y,
+            },
+            actionPayload
+        );
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -27,7 +36,6 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
             stroke: COLOR.boneWhite,
             strokeWidth: 2,
         });
-        console.log('templeCard layout', {...layout});
 
         this.rewardDial = new TempleRewardDial(
             { x: 0, y: 0 },

@@ -27,12 +27,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         const segmentHeight = this.group.height() / 6;
         this.marketCard = new MarketCard(
             stage,
-            {
-                width: this.group.width(),
-                height: segmentHeight * 4,
-                x: 0,
-                y: segmentHeight,
-            },
+            { x: 0, y: segmentHeight },
             { action: 'sell_goods', details: { slot: marketKey } },
             trade,
             fluctuation
