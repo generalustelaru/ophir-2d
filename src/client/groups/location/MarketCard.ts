@@ -1,6 +1,6 @@
 import Konva from "konva";
-import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { Fluctuation, Trade } from "../../../shared_types";
+import { ActionEventPayload, MarketCardUpdate, DynamicGroupInterface } from "../../client_types";
+import { Coordinates, Fluctuation, Trade } from "../../../shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -14,12 +14,21 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
     private fluctuation: Fluctuation | null = null;
     constructor(
         stage: Konva.Stage,
-        layout: GroupLayoutData,
+        position: Coordinates,
         actionPayload: ActionEventPayload | null,
         trade: Trade,
         fluctuation: Fluctuation | null = null,
     ) {
-        super(stage, layout, actionPayload);
+        super(
+            stage,
+            {
+                width: 66,
+                height: 128,
+                x: position.x,
+                y: position.y,
+            },
+            actionPayload
+        );
 
         this.fluctuation = fluctuation;
 

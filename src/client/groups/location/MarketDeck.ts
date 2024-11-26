@@ -26,12 +26,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
 
         this.marketCard = new MarketCard(
             stage,
-            {
-                width: this.group.width(),
-                height: segmentHeight * 4,
-                x: 0,
-                y: segmentHeight,
-            },
+            { x: 0, y: segmentHeight },
             null,
             futureTrade,
         );

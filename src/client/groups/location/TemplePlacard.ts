@@ -47,17 +47,10 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         const card = market[marketSlot];
         const margin = 10;
-        const cardWidth = this.group.width() / 4;
-        const cardHeight = this.group.height() / 6 * 4;
 
         this.templeCard = new TempleCard(
             stage,
-            {
-                width: cardWidth - margin,
-                height: cardHeight,
-                x: this.group.width() - cardWidth - margin + 3,
-                y: 10,
-            },
+            { x: this.group.width() - this.group.width() / 4 - margin + 3, y: 10 },
             { action: 'donate_goods', details: { slot: marketSlot } },
             card,
         );
