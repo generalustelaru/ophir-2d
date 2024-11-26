@@ -197,7 +197,8 @@ export class GameSession {
 
         if (
             !player?.locationActions?.includes(tradeAction)
-            || !player.feasibleTrades.includes(marketKey)
+            || false === player.feasibleTrades.includes(marketKey)
+            || false === player.isAnchored
         ) {
             console.error(`Trade action ${tradeAction} not feasible for ${player?.id}`);
 
