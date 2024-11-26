@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ManifestItem, NewState, Trade, MarketOffer, Player, MetalId, TempleLevel, Currency } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, TempleLevel, Currency } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -27,7 +27,7 @@ export type ClientConstants = {
         setupDrifts: Array<Coordinates>,
         shape: string
     },
-    CARGO_ITEM_DATA: Record<ManifestItem, PathData>,
+    CARGO_ITEM_DATA: Record<ItemId, PathData>,
     ICON_DATA: Record<string, PathData>,
 }
 

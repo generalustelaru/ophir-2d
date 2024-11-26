@@ -1,27 +1,24 @@
 import Konva from "konva";
 import { ActionButton } from "../ActionButton";
-import { Coordinates, ManifestItem } from "../../../shared_types";
+import { Coordinates, ItemId } from "../../../shared_types";
 import clientConstants from "../../client_constants";
-type CargoTokenUpdate = {
-    itemId: ManifestItem
-}
+
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
 export class CargoToken extends ActionButton {
     private path: Konva.Path;
-    constructor(stage: Konva.Stage, position: Coordinates, update: CargoTokenUpdate) {
+
+    constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemId) {
         super(
             stage,
             { width: 0, height: 0, x: position.x, y: position.y },
-            null,
+            {action: 'drop_item', details: {item: itemId} },
         );
 
-        const tokenData = CARGO_ITEM_DATA[update.itemId];
+        const tokenData = CARGO_ITEM_DATA[itemId];
 
         this.path = new Konva.Path({
-            x: position.x,
-            y: position.y,
             data: tokenData.shape,
             fill: tokenData.fill,
             stroke: 'white',
@@ -33,5 +30,15 @@ export class CargoToken extends ActionButton {
         this.group.height(this.path.height());
 
         this.group.add(this.path);
+        this.setEnabled(true);
+    }
+
+    public getElement(): Konva.Group {
+        return this.group;
+    }
+
+    public selfDestruct(): null {
+        this.group.destroy();
+        return null;
     }
 }

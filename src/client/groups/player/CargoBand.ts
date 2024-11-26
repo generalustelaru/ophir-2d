@@ -1,21 +1,24 @@
 import Konva from 'konva';
 import clientConstants from '../../client_constants';
-import { CargoManifest, ManifestItem, PlayerId } from '../../../shared_types';
+import { CargoManifest, ItemId, PlayerId } from '../../../shared_types';
 import { Color, DynamicGroupInterface } from '../../client_types';
+import { CargoToken } from './CargoToken';
 
-const { COLOR, CARGO_ITEM_DATA } = clientConstants;
+const { COLOR } = clientConstants;
 const SLOT_WIDTH = 25;
 
 type CargoSlot = {
     x: number,
-    element: Konva.Path | null,
+    element: CargoToken | null,
 }
 export class CargoBand implements DynamicGroupInterface<CargoManifest> {
     private group: Konva.Group;
+    private stage: Konva.Stage;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
 
-    constructor(playerId: PlayerId, cargo: CargoManifest) {
+    constructor(stage: Konva.Stage, playerId: PlayerId, cargo: CargoManifest) {
+        this.stage = stage;
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
             height: 30,
@@ -59,7 +62,7 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
         this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
 
         for (const slot of this.cargoDrawData) {
-            slot.element?.destroy();
+            slot.element = slot.element?.selfDestruct() || null;
         }
 
         for (let i = 0; i < cargo.length; i++) {
@@ -72,19 +75,15 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
         }
     };
 
-    private addItem(itemId: ManifestItem, cargoSlot: CargoSlot): void {
-        const itemData = CARGO_ITEM_DATA[itemId];
-        const token = new Konva.Path({
-            x: cargoSlot.x,
-            y: 4,
-            data: itemData.shape,
-            fill: itemData.fill,
-            stroke: 'white',
-            strokeWidth: 1,
-            scale: { x: 2, y: 2 },
-        });
+    private addItem(itemId: ItemId, cargoSlot: CargoSlot): void {
+        const token = new CargoToken(
+            this.stage,
+            { x: cargoSlot.x, y: 4 },
+            itemId,
+        );
+
         cargoSlot.element = token;
-        this.group.add(token);
+        this.group.add(token.getElement());
     }
 
     public getElement() {

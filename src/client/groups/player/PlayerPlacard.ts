@@ -9,6 +9,7 @@ const { COLOR } = clientConstants;
 
 export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
+    private stage: Konva.Stage;
     private group: Konva.Group;
     private background: Konva.Rect;
     private cargoBand: CargoBand;
@@ -18,10 +19,12 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private id: PlayerId;
 
     constructor(
+        stage: Konva.Stage,
         player: Player,
         localPlayerId: PlayerId | null,
         yOffset: number,
     ) {
+        this.stage = stage;
         this.id = player.id;
         this.group = new Konva.Group({
             width: 200,
@@ -39,7 +42,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             strokeWidth: player.isActive ? 3 : 0,
         });
 
-        this.cargoBand = new CargoBand(player.id, player.cargo);
+        this.cargoBand = new CargoBand(this.stage, player.id, player.cargo);
 
         this.favorDial = new FavorDial(
             { x: 10, y: 42 },
