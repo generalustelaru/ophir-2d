@@ -74,7 +74,7 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
 
     private addItem(itemId: ManifestItem, cargoSlot: CargoSlot): void {
         const itemData = CARGO_ITEM_DATA[itemId];
-        const itemIcon = new Konva.Path({
+        const token = new Konva.Path({
             x: cargoSlot.x,
             y: 4,
             data: itemData.shape,
@@ -83,8 +83,8 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
             strokeWidth: 1,
             scale: { x: 2, y: 2 },
         });
-        cargoSlot.element = itemIcon;
-        this.group.add(itemIcon);
+        cargoSlot.element = token;
+        this.group.add(token);
     }
 
     public getElement() {
