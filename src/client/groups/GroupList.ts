@@ -7,7 +7,7 @@ import { ActionDial } from './map/ActionDial';
 import { PlayerShip } from './map/PlayerShip';
 import { ShipToken } from './map/ShipToken';
 import { PlayerPlacard } from './player/PlayerPlacard';
-import { FavorDial } from './player/FavorDial';
+import { FavorDial } from './FavorDial';
 import { CargoBand } from './player/CargoBand';
 import { MarketPlacard } from './location/MarketPlacard';
 import { CoinDial } from "./CoinDial";
