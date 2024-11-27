@@ -18,12 +18,7 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
     ) {
         super(
             stage,
-            {
-                width: 66,
-                height: 96,
-                x: position.x,
-                y: position.y,
-            },
+            { width: 66, height: 96, x: position.x, y: position.y },
             {
                 action: 'buy_metals',
                 details: { metal: update.treasury.metal, currency: update.treasury.currency }
