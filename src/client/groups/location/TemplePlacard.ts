@@ -84,26 +84,38 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
     public updateElement(data: TempleUpdate): void {
         const localPlayer = data.localPlayer;
+        const playerCanAct = (
+            !!localPlayer
+            && localPlayer.isAnchored
+        );
 
         this.marketCard.updateElement({
             trade: data.trade,
             isFeasible: (
-                !!localPlayer?.feasibleTrades.includes(this.templeTradeSlot)
+                playerCanAct
+                && !!localPlayer.feasibleTrades.includes(this.templeTradeSlot)
                 && !!localPlayer.locationActions?.includes('donate_goods')
-                && localPlayer.isAnchored
             )
         });
 
         this.upgradeButton.updateElement((
-            !!localPlayer?.locationActions?.includes('upgrade_hold')
-            && localPlayer.isAnchored
+            playerCanAct
+            && !!localPlayer.locationActions?.includes('upgrade_hold')
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
         ));
 
-        // TODO: implement donation checks
-        this.goldDonationCard.updateElement(true);
-        this.silverDonationCard.updateElement(true);
+        const playerCanDonate = playerCanAct && !!localPlayer.locationActions?.includes('donate_goods');
+
+        this.goldDonationCard.updateElement((
+            playerCanDonate
+            && !!localPlayer.cargo.find(item => item === 'gold')
+        ));
+
+        this.silverDonationCard.updateElement((
+            playerCanDonate
+            && !!localPlayer.cargo.find(item => item === 'silver')
+        ));
     }
 
     public getElement(): Konva.Group {
