@@ -1,3 +1,13 @@
+# Installation
+Have `docker` and `docker-compose` installed
+
+Run
+
+```bash
+make up
+```
+
+
 Web-based implementation of **Ophir** (Terra Nova Games)
 
 Work in progress.

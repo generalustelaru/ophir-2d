@@ -1,0 +1,20 @@
+networks:
+  default:
+    name: awesome-game-network
+
+volumes:
+  game-volume:
+
+services:
+  game:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev-setup
+    ports:
+      - 3456:3000
+    container_name: game
+    image: game:dev
+    volumes:
+      - ./src:/src
+      - game-volume:/app/node_modules
