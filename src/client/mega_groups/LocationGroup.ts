@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
-import { MarketPlacard, ExchangePlacard, TemplePlacard } from "../groups/GroupList";
+import { MarketPlacard, TreasuryPlacard, TemplePlacard } from "../groups/GroupList";
 import clientState from '../state';
 
 export class LocationGroup implements MegaGroupInterface {
@@ -8,7 +8,7 @@ export class LocationGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private marketPlacard: MarketPlacard | null = null;
-    private exchangePlacard: ExchangePlacard | null = null;
+    private treasuryPlacard: TreasuryPlacard | null = null;
     private templePlacard: TemplePlacard | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
@@ -45,7 +45,7 @@ export class LocationGroup implements MegaGroupInterface {
             }
         );
 
-        this.exchangePlacard = new ExchangePlacard(
+        this.treasuryPlacard = new TreasuryPlacard(
             this.stage,
             {
                 width: this.group.width(),
@@ -64,13 +64,13 @@ export class LocationGroup implements MegaGroupInterface {
                 width: this.group.width(),
                 height: heightSegment * 2,
                 x: 0,
-                y: this.marketPlacard.getElement().height() + this.exchangePlacard.getElement().height(),
+                y: this.marketPlacard.getElement().height() + this.treasuryPlacard.getElement().height(),
             }
         );
 
         this.group.add(
             this.marketPlacard.getElement(),
-            this.exchangePlacard.getElement(),
+            this.treasuryPlacard.getElement(),
             this.templePlacard.getElement(),
         );
     }
@@ -95,7 +95,7 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         this.marketPlacard?.updateElement(marketUpdate);
-        this.exchangePlacard?.updateElement({ localPlayer: localPlayer ?? null, templeLevel: sharedState.templeLevel });
+        this.treasuryPlacard?.updateElement({ localPlayer: localPlayer ?? null, templeLevel: sharedState.templeLevel });
         this.templePlacard?.updateElement(templeUpdate);
     }
 }

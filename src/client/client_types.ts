@@ -70,14 +70,14 @@ export type MarketUpdate = {
     marketOffer: MarketOffer,
 }
 
-export type ExchangeUpdate = {
+export type TreasuryUpdate = {
     localPlayer: Player | null,
     templeLevel: TempleLevel,
 }
 
-export type ExchangeCardUpdate = {
+export type TreasuryCardUpdate = {
     playerAmounts: { coins: number, favor: number } | null,
-    exchange: {currency: Currency, amount: number, metal: MetalId},
+    treasury: { currency: Currency, amount: number, metal: MetalId },
 }
 
 export type TempleUpdate = {

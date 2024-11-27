@@ -65,7 +65,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
         this.rewardDial.updateElement(data.trade.reward.favorAndVp);
         this.goodsAssortment.updateElement(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
-        this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
+        this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);
     }
 
