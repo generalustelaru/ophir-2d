@@ -1,5 +1,4 @@
 
-//TODO: Research and implement namespaces for type files
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
