@@ -37,7 +37,9 @@ const clientConstants: ClientConstants = {
         coinSilver: '#C0C0C0',
         upgradeBoxSilver: '#999999',
         darkerSilver: '#666666',
-        vpGold: '#e5d280',
+        vpGold: '#E5D280',
+        vpCardPurple: '#A70FFA',
+        vpCardLightPurple: '#E37AF5',
     },
     COLOR_PROFILES: {
         favorStampReady: { primary: '#aa0000', secondary: '#850c03', tertiary: null },

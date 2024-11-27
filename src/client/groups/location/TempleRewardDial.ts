@@ -9,7 +9,6 @@ const { ICON_DATA, COLOR } = clientConstants;
 export class TempleRewardDial implements DynamicGroupInterface<number> {
     private group: Konva.Group;
     private amount: Konva.Text;
-    private coinCenter: number;
     constructor(
         position: Coordinates,
         amount: number,
@@ -36,11 +35,11 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
             y: -24,
             scale: { x: 2, y: 2 },
         });
-        console.log(amount);
-        this.coinCenter = this.group.getClientRect().width / 2;
+
+        const coinCenter = this.group.getClientRect().width / 2;
         this.amount = new Konva.Text({
-            x: this.coinCenter - 9,
-            y: this.coinCenter - 20,
+            x: coinCenter - 9,
+            y: coinCenter - 20,
             text: amount.toString(),
             fontSize: 40,
             fill: COLOR.boneWhite,

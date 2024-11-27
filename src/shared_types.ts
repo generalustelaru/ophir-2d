@@ -11,7 +11,7 @@ export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
 export type Action =
     | LocationAction | FreeAction
     | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";
-export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good";
+export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good" | "donate_metals";
 export type FreeAction = "reposition" | "drop_item"
 export type GameStatus = "empty" | "created" | "full" | "started";
 export type ItemId = GoodId | MetalId | "empty";
@@ -131,9 +131,13 @@ export type MetalPurchaseDetails = {
     currency: Currency,
 }
 
+export type MetalDonationDetails = {
+    metal: MetalId,
+}
+
 export type ActionDetails =
     | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | MarketSaleDetails
-    | MetalPurchaseDetails | null;
+    | MetalPurchaseDetails | MetalDonationDetails | null;
 
 export type Coordinates = { x: number, y: number };
 
