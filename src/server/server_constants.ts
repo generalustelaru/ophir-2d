@@ -125,6 +125,7 @@ const serverConstants: ServerConstants = {
         { id: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCount: null },
         { id: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCount: null },
         { id: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCount: 2 },
+        { id: 6, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCount: null },
     ],
 }
 

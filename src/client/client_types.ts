@@ -23,6 +23,7 @@ export type ClientConstants = {
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<HexId, IslandData>,
     LOCATION_TOKEN_DATA: Record<LocationId, LocationIconData>,
+    TEMPLE_CONSTRUCTION_DATA: Array<LocationIconData>
     SHIP_DATA: {
         setupDrifts: Array<Coordinates>,
         shape: string

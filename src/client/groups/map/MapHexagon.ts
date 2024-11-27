@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { Coordinates, HexId, DiceSix, Player } from '../../../shared_types';
+import { Coordinates, HexId, DiceSix, Player, LocationId } from '../../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, LocationIconData } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
@@ -8,7 +8,12 @@ import { InfluenceDial, LocationToken } from '../GroupList';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
-export class MapHexagon implements DynamicGroupInterface<Player> {
+type HexUpdate = {
+    player: Player|null,
+    templeIcon: LocationIconData | null,
+}
+
+export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
 
     private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;
@@ -82,9 +87,10 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
         this.group.add(this.influenceDial.getElement());
     }
 
-    updateElement(localPlayer: Player): void {
+    updateElement(update: HexUpdate): void {
+        const localPlayer = update.player;
         const canAct = (
-            localPlayer.hexagon.hexId === this.getId()
+            localPlayer?.hexagon.hexId === this.getId()
             && localPlayer.isActive
             && !!localPlayer.locationActions
             && localPlayer.isAnchored
@@ -92,11 +98,14 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
 
         this.setFill(canAct ? COLOR.activeHex : COLOR.defaultHex);
 
-        this.location.updateElement((
-            canAct
-            && !!localPlayer.locationActions?.includes('pickup_good')
-            && localPlayer.cargo.includes('empty')
-        ));
+        this.location.updateElement({
+            mayPickup: (
+                canAct
+                && !!localPlayer.locationActions?.includes('pickup_good')
+                && localPlayer.cargo.includes('empty')
+            ),
+            templeIcon: update.templeIcon,
+        });
     }
 
     public getElement(): Konva.Group {
@@ -104,6 +113,10 @@ export class MapHexagon implements DynamicGroupInterface<Player> {
     }
     public getId(): HexId {
         return this.group.attrs.id as HexId;
+    }
+
+    public getTokenId(): LocationId {
+        return this.location.getId();
     }
     public setFill(color: Color): void {
         this.hexagon.fill(color);
