@@ -3,7 +3,7 @@ import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, L
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
-const { TRADE_DECK_B } = serverConstants;
+const { TRADE_DECK_B, TEMPLE_LEVELS } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -348,6 +348,11 @@ export class GameSession {
 
         return true;
     }
+    // MARK: DONATE METALS
+    // TODO: Implement donate_metals
+    /**
+     * this.sharedState.templeLevel = TEMPLE_LEVELS[this.sharedState.templeLevel.id + 1]; 
+     */
     // MARK: END TURN
     private processEndTurn(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);

@@ -5,7 +5,7 @@ import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButt
 import clientState from '../state';
 import clientConstants from '../client_constants';
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA } = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA} = clientConstants;
 
 export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
@@ -66,6 +66,7 @@ export class MapGroup implements MegaGroupInterface {
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
+            const pairing = serverState.setup.mapPairings[hexItem.id];
             const mapHex = new MapHexagon(
                 this.stage,
                 centerPoint,
@@ -73,7 +74,9 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                LOCATION_TOKEN_DATA[serverState.setup.mapPairings[hexItem.id].id],
+                pairing.id === 'temple'
+                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeLevel.id]
+                    : LOCATION_TOKEN_DATA[pairing.id],
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
@@ -133,16 +136,21 @@ export class MapGroup implements MegaGroupInterface {
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === clientState.localPlayerId);
 
+        //MARK: dials & hexes
         if (localPlayer) {
-            //MARK: dials & hexes
             this.movesDial?.updateElement(localPlayer);
             this.endTurnButton?.updateElement(localPlayer);
             this.actionDial?.updateElement(localPlayer);
             this.favorButton?.updateElement(localPlayer);
+        }
 
-            for (const mapHex of this.mapHexes) {
-                mapHex.updateElement(localPlayer);
-            }
+        for (const mapHex of this.mapHexes) {
+            mapHex.updateElement({
+                player: localPlayer || null,
+                templeIcon: mapHex.getTokenId() === 'temple'
+                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeLevel.id]
+                    : null,
+            });
         }
 
         // MARK: ships
