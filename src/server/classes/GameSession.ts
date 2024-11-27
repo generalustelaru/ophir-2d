@@ -3,7 +3,7 @@ import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, L
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
-const { TRADE_DECK_B } = serverConstants;
+const { TRADE_DECK_B, TEMPLE_LEVELS } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -47,6 +47,8 @@ export class GameSession {
                 return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
             case 'buy_metals':
                 return this.processMetalTrade(message) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
+            case 'donate_metals':
+                return this.processMetalDonation(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
             case 'upgrade_hold':
@@ -349,10 +351,30 @@ export class GameSession {
         return true;
     }
     // MARK: DONATE METALS
-    // TODO: Implement donate_metals
-    /**
-     * this.sharedState.templeLevel = TEMPLE_LEVELS[this.sharedState.templeLevel.id + 1]; 
-     */
+    private processMetalDonation(message: WebsocketClientMessage): boolean {
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const details = message.details as MetalPurchaseDetails;
+
+        if (
+            false === !!player
+            || false === !!player.locationActions?.includes('donate_metals')
+            || false === player.isAnchored
+            || false === player.cargo.includes(details.metal)
+        ) {
+            console.error(`Player ${player?.id} cannot donate ${details.metal}`);
+            return false;
+        }
+
+        const reward = details.metal === 'gold' ? 10 : 5
+        this.privateState.playerVPs.find(p => p.id === player.id)!.vp += reward;
+        console.info(this.privateState.playerVPs);
+
+        player.cargo = this.unloadItem(player.cargo, details.metal);
+        player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
+        this.sharedState.templeLevel = TEMPLE_LEVELS[this.sharedState.templeLevel.id + 1];
+
+        return true;
+    }
     // MARK: END TURN
     private processEndTurn(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
