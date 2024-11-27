@@ -1,24 +1,24 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, ExchangeUpdate, GroupLayoutData } from '../../client_types';
+import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '../../client_types';
 import clientConstants from '../../client_constants';
 import { CargoManifest } from '../../../shared_types';
-import { ExchangeCard } from './ExchangeCard';
+import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
 
-export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
+export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
-    private goldForFavorCard: ExchangeCard;
-    private silverForFavorCard: ExchangeCard;
-    private goldForCoinsCard: ExchangeCard;
-    private silverForCoinsCard: ExchangeCard;
+    private goldForFavorCard: TreasuryCard;
+    private silverForFavorCard: TreasuryCard;
+    private goldForCoinsCard: TreasuryCard;
+    private silverForCoinsCard: TreasuryCard;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        update: ExchangeUpdate,
+        update: TreasuryUpdate,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -30,7 +30,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.exchangeDarkGold,
+            fill: COLOR.treasuryDarkGold,
             cornerRadius: 15,
             visible: false,
         });
@@ -43,12 +43,12 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
         const leftmargin = 10;
         const cardWidth = 66;
 
-        this.goldForFavorCard = new ExchangeCard(
+        this.goldForFavorCard = new TreasuryCard(
             stage,
             { x: 0, y: 0 },
             {
                 playerAmounts,
-                exchange: {
+                treasury: {
                     currency: 'favor',
                     amount: update.templeLevel.goldCost.favor,
                     metal: 'gold',
@@ -56,12 +56,12 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             }
         );
 
-        this.silverForFavorCard = new ExchangeCard(
+        this.silverForFavorCard = new TreasuryCard(
             stage,
             { x: cardWidth + leftmargin, y: 0 },
             {
                 playerAmounts,
-                exchange: {
+                treasury: {
                     currency: 'favor',
                     amount: update.templeLevel.silverCost.favor,
                     metal: 'silver',
@@ -69,12 +69,12 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             }
         );
 
-        this.goldForCoinsCard = new ExchangeCard(
+        this.goldForCoinsCard = new TreasuryCard(
             stage,
             { x: cardWidth * 2 + leftmargin * 2, y: 0 },
             {
                 playerAmounts,
-                exchange: {
+                treasury: {
                     currency: 'coins',
                     amount: update.templeLevel.goldCost.coins,
                     metal: 'gold',
@@ -82,12 +82,12 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
             }
         );
 
-        this.silverForCoinsCard = new ExchangeCard(
+        this.silverForCoinsCard = new TreasuryCard(
             stage,
             { x: cardWidth * 3 + leftmargin * 3, y: 0 },
             {
                 playerAmounts,
-                exchange: {
+                treasury: {
                     currency: 'coins',
                     amount: update.templeLevel.silverCost.coins,
                     metal: 'silver',
@@ -104,7 +104,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
         ]);
     }
 
-    public updateElement(update: ExchangeUpdate): void {
+    public updateElement(update: TreasuryUpdate): void {
 
         const playerCanAct = (
             update.localPlayer?.locationActions?.includes('buy_metals')
@@ -119,7 +119,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
 
         this.goldForFavorCard.updateElement({
             playerAmounts,
-            exchange: {
+            treasury: {
                 currency: 'favor',
                 amount: update.templeLevel.goldCost.favor,
                 metal: 'gold',
@@ -127,7 +127,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
         });
         this.silverForFavorCard.updateElement({
             playerAmounts,
-            exchange: {
+            treasury: {
                 currency: 'favor',
                 amount: update.templeLevel.silverCost.favor,
                 metal: 'silver',
@@ -135,7 +135,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
         });
         this.goldForCoinsCard.updateElement({
             playerAmounts,
-            exchange: {
+            treasury: {
                 currency: 'coins',
                 amount: update.templeLevel.goldCost.coins,
                 metal: 'gold',
@@ -143,7 +143,7 @@ export class ExchangePlacard implements DynamicGroupInterface<ExchangeUpdate> {
         });
         this.silverForCoinsCard.updateElement({
             playerAmounts,
-            exchange: {
+            treasury: {
                 currency: 'coins',
                 amount: update.templeLevel.silverCost.coins,
                 metal: 'silver',

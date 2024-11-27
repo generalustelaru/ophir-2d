@@ -37,7 +37,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         const horizontalDrift = ((): number => {
             switch (iconData.id) {
                 case 'temple': return -36;
-                case 'exchange': return -36;
+                case 'treasury': return -36;
                 default: return -18;
             }
         })();

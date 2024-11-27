@@ -7,7 +7,7 @@ export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver" | "silver_extra" | "gold" | "gold_extra"; // metals cover two cargo spaces
 export type Currency = "coins" | "favor";
 export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
-export type LocationId = "temple" | "market" | "exchange" | PickupLocationId;
+export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
 export type Action =
     | LocationAction | FreeAction
     | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";

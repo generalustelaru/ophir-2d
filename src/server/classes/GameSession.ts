@@ -171,7 +171,7 @@ export class GameSession {
         }
 
         const locationId = this.sharedState.setup.mapPairings[player.hexagon.hexId].id;
-        const nonPickupLocations: Array<LocationId> = ['temple', 'market', 'exchange'];
+        const nonPickupLocations: Array<LocationId> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationId)) {
             console.error(`Cannot pick up goods from ${locationId}`);
