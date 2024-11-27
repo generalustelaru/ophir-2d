@@ -3,7 +3,7 @@ import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, L
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
-const { TRADE_DECK_B, TEMPLE_LEVELS } = serverConstants;
+const { TRADE_DECK_B } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
