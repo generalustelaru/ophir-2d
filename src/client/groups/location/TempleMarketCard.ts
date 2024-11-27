@@ -6,7 +6,7 @@ import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
-export class TempleCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
+export class TempleMarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
 
     private rewardDial: TempleRewardDial;
     private goodsAssortment: GoodsAssortment;

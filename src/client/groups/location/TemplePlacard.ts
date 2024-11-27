@@ -2,7 +2,7 @@ import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
 import { MarketKey, MarketOffer } from "../../../shared_types";
-import { UpgradeButton, TempleCard } from "../GroupList";
+import { UpgradeButton, TempleMarketCard } from "../GroupList";
 
 const { COLOR } = clientConstants;
 
@@ -11,7 +11,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private upgradeButton: UpgradeButton;
-    private templeCard: TempleCard;
+    private marketCard: TempleMarketCard;
     private templeTradeSlot: MarketKey;
 
     constructor(
@@ -48,7 +48,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         const card = market[marketSlot];
         const margin = 10;
 
-        this.templeCard = new TempleCard(
+        this.marketCard = new TempleMarketCard(
             stage,
             { x: this.group.width() - this.group.width() / 4 - margin + 3, y: 10 },
             { action: 'donate_goods', details: { slot: marketSlot } },
@@ -58,7 +58,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         this.group.add(...[
             this.background,
-            this.templeCard.getElement(),
+            this.marketCard.getElement(),
             this.upgradeButton.getElement(),
         ]);
     }
@@ -66,7 +66,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     public updateElement(data: TempleUpdate): void {
         const localPlayer = data.localPlayer;
 
-        this.templeCard.updateElement({
+        this.marketCard.updateElement({
             trade: data.trade,
             isFeasible: (
                 !!localPlayer?.feasibleTrades.includes(this.templeTradeSlot)

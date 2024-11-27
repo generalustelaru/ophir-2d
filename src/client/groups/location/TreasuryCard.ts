@@ -6,6 +6,7 @@ import clientConstants from "../../client_constants";
 import { Coordinates } from "../../../shared_types";
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
+
 export class TreasuryCard extends ActionButton implements DynamicGroupInterface<TreasuryCardUpdate> {
     private background: Konva.Rect;
     private currencyDial: CoinDial | FavorDial;
