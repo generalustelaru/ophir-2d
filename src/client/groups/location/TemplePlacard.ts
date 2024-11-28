@@ -24,12 +24,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         layout: GroupLayoutData,
     ) {
 
-        this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            x: layout.x,
-            y: layout.y,
-        });
+        this.group = new Konva.Group(layout);
 
         this.background = new Konva.Rect({
             width: this.group.width(),
