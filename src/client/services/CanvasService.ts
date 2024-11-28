@@ -70,6 +70,8 @@ export class CanvasService extends Service {
         if (!clientState.localPlayerId) {
             this.broadcastEvent('info', { text: 'You are a spectator' });
         }
+
+        this.updateElements();
     }
 
     public updateElements(): void {
