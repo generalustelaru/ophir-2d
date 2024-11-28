@@ -29,6 +29,7 @@ html, body {
 button, select {
     font-size: large;
     height: 40px;
+    user-select: none;
 }
 
 #info {
