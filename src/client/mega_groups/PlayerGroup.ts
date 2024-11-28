@@ -24,13 +24,15 @@ export class PlayerGroup implements MegaGroupInterface {
     public drawElements(): void {
         const verticalOffsets = [20, 140, 260, 380];
 
-        const playersByLocalPlayer = (() => {
-            const players = [...clientState.received.players];
-            while(players[0].id !== clientState.localPlayerId) {
-                players.push(players.shift() as Player);
-            }
-            return players;
-        })();
+        const playersByLocalPlayer = clientState.localPlayerId
+            ? (() => {
+                const players = [...clientState.received.players];
+                while (players[0].id !== clientState.localPlayerId) {
+                    players.push(players.shift() as Player);
+                }
+                return players;
+            })()
+            : clientState.received.players;
 
         playersByLocalPlayer.forEach(player => {
             const placard = new PlayerPlacard(
