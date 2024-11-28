@@ -1,3 +1,4 @@
+import { PlayerVP } from "./server/server_types";
 
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
@@ -70,6 +71,12 @@ export type MarketFluctuations = {
     slot_3: Fluctuation,
 }
 
+export type TempleStatus = {
+    level: TempleLevel,
+    levelCompletion: number,
+    donations: Array<MetalId>,
+}
+
 /**
  * @description Shared between players and server in a session
  */
@@ -79,7 +86,7 @@ export type SharedState = {
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
     marketOffer: MarketOffer,
-    templeLevel: TempleLevel,
+    templeStatus: TempleStatus,
     setup: GameSetup,
     // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }

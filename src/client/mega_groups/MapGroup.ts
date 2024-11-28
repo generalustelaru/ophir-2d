@@ -75,7 +75,7 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
                 pairing.id === 'temple'
-                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeLevel.id]
+                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeStatus.level.id]
                     : LOCATION_TOKEN_DATA[pairing.id],
                 COLOR.defaultHex,
             );
@@ -148,7 +148,7 @@ export class MapGroup implements MegaGroupInterface {
             mapHex.updateElement({
                 player: localPlayer || null,
                 templeIcon: mapHex.getTokenId() === 'temple'
-                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeLevel.id]
+                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeStatus.level.id]
                     : null,
             });
         }
