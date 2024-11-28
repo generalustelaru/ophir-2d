@@ -63,10 +63,15 @@ window.addEventListener(
         uiService.updateLobbyControls();
     }
     sessionStorage.setItem('state', JSON.stringify(sharedState));
-    sessionStorage.setItem('0', JSON.stringify(clientState.received.players[0]));
-    sessionStorage.setItem('1', JSON.stringify(clientState.received.players[1]));
-    sessionStorage.setItem('2', JSON.stringify(clientState.received.players[2]));
-    sessionStorage.setItem('3', JSON.stringify(clientState.received.players[3]));
+
+    ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
+        sessionStorage.removeItem(playerId);
+    });
+
+    for (const player of clientState.received.players) {
+        sessionStorage.setItem(player.id, JSON.stringify(player));
+    }
+
 });
 
 window.addEventListener(
