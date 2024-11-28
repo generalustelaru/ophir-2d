@@ -1,6 +1,6 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location, TempleLevel } from '../../shared_types';
-import { PlayerVP, PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location, TempleLevel, TempleStatus, NewState } from '../../shared_types';
+import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
@@ -10,34 +10,47 @@ const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TEMPLE_LEVELS } = serv
 export class GameSetupService extends Service {
 
     private tools: ToolService = ToolService.getInstance();
-    public produceGameData(sharedState: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
-        sharedState.players = this.assignTurnOrderAndPosition(sharedState.players, setupCoordinates);
-        sharedState.setup = {
-            barriers: this.determineBarriers(),
-            mapPairings: this.determineLocations(),
-            marketFluctuations: this.determineFluctuations(),
-            templeTradeSlot: this.determineTempleTradeSlot(),
+
+    public produceGameData(newState: NewState, setupCoordinates: Array<Coordinates>): StateBundle {
+        const players = this.tools.getCopy(newState.players);
+
+        if (newState.sessionOwner === null) {
+            throw new Error('Cannot start game while the session owner is null');
         }
+
+        if (players.length < 2) {
+            throw new Error('Not enough players to start a game');
+        }
+
+        const barriers = this.determineBarriers();
+        const marketData = this.prepareDeckAndGetOffer((TRADE_DECK_A));
 
         const privateState: PrivateState = {
-            moveRules: this.produceMoveRules(sharedState.setup.barriers),
-            tradeDeck: this.tools.getCopy(TRADE_DECK_A),
-            playerVPs: sharedState.players.map(p => ({id: p.id, vp: 0})) as Array<PlayerVP>,
+            moveRules: this.produceMoveRules(barriers),
+            tradeDeck: marketData.tradeDeck,
+            playerVPs: players.map(p => ({id: p.id, vp: 0})),
         }
 
-        sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
-
-        const { tradeDeck, marketOffer } = this.prepareDeckAndGetOffer(this.tools.getCopy(privateState.tradeDeck));
-        privateState.tradeDeck = tradeDeck;
-        sharedState.marketOffer = marketOffer;
-        sharedState.templeLevel = this.selectInitialTempleLevel(sharedState.players.length);
-
-        const bundle: StateBundle = {
-            sharedState: sharedState,
-            privateState: privateState,
+        const sharedState: SharedState = {
+            gameStatus: 'started',
+            gameResults: null,
+            sessionOwner: newState.sessionOwner,
+            availableSlots: [],
+            players: this.assignTurnOneRules(
+                this.assignTurnOrderAndPosition(players, setupCoordinates),
+                privateState.moveRules
+            ),
+            marketOffer: marketData.marketOffer,
+            templeStatus: this.createTempleStatus(players.length),
+            setup: {
+                barriers: barriers,
+                mapPairings: this.determineLocations(),
+                marketFluctuations: this.determineFluctuations(),
+                templeTradeSlot: this.determineTempleTradeSlot(),
+            },
         }
 
-        return bundle;
+        return { sharedState, privateState };
     };
 
     private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
@@ -174,15 +187,19 @@ export class GameSetupService extends Service {
         return { tradeDeck, marketOffer };
     }
 
-    private selectInitialTempleLevel(playerCount: number): TempleLevel {
+    private createTempleStatus(playerCount: number): TempleStatus {
         const levels = this.tools.getCopy(TEMPLE_LEVELS);
 
-        for (const level of levels) {
-            if (level.skipOnPlayerCount !== playerCount) {
-                return level;
-            }
+        return {
+            level: ((): TempleLevel => {
+                for (const level of levels) {
+                    if (level.skipOnPlayerCount !== playerCount)
+                        return level;
+                }
+                return levels[0];
+            })(),
+            levelCompletion: 0,
+            donations: [],
         }
-
-        return levels[0];
     }
 }

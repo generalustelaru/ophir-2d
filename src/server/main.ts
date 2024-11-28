@@ -3,8 +3,8 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import serverConstants from './server_constants';
-import { SharedState, PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
-import { PrivateState, WssMessage, StateBundle } from './server_types';
+import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
+import { WssMessage, StateBundle } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
@@ -12,14 +12,10 @@ const httpPort = 3000;
 const wsPort = 8080;
 
 const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
-const privateState: PrivateState = {
-    moveRules: [],
-    tradeDeck: [],
-    playerVPs: [],
-}
 
-const newState: NewState | SharedState = {
+const newState: NewState = {
     gameStatus: 'empty',
+    gameResults: null,
     sessionOwner: null,
     availableSlots: PLAYER_IDS,
     players: [],
@@ -80,7 +76,8 @@ socketServer.on('connection', function connection(client) {
         );
 
         if (action === 'inquire') {
-            send(client, newState);
+            send(client, singleSession?.getState() || newState);
+
             return;
         }
 
@@ -103,18 +100,25 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'start') {
             const setupDetails = details as GameSetupDetails;
+            const sessionCreated = processGameStart(setupDetails);
 
-            if (processGameStart(setupDetails)) {
-                sendAll(newState);
+            if (sessionCreated && singleSession) {
+                console.log('Game started');
+                sendAll(singleSession.getState());
             } else {
                 sendAll({ error: 'Game start failed' });
             }
 
             return;
         }
-        // in-game player actions are handled in instantiable class
-        const session = singleSession as GameSession;
-        sendAll(session.processAction(parsedMessage));
+
+        if (singleSession) {
+            sendAll(singleSession.processAction(parsedMessage));
+
+            return;
+        }
+
+        send(client, { error: 'Request cannot be handled' });
     });
 });
 
@@ -128,17 +132,8 @@ process.on('SIGINT', () => {
 function processGameStart(details: GameSetupDetails): boolean {
 
     try {
-        const sharedState = newState as SharedState;
-        sharedState.gameStatus = 'started';
-        sharedState.availableSlots = [];
-
-        const bundle: StateBundle = setupService.produceGameData(sharedState, details.setupCoordinates);
-
+        const bundle: StateBundle = setupService.produceGameData(newState, details.setupCoordinates);
         singleSession = new GameSession(bundle);
-
-        sharedState.players = bundle.sharedState.players;
-        sharedState.setup = bundle.sharedState.setup;
-        privateState.moveRules = bundle.privateState.moveRules;
     } catch (error) {
         console.error('Game start failed:', error);
 
