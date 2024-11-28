@@ -4,13 +4,16 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import sharedConstants from "../shared_constants";
-import { SharedState } from "../shared_types";
+import { PlayerId, SharedState } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
 //@ts-ignore
 let stateDebug: SharedState|null = null;
 
 // Initializations
+// TODO: Remove the key when the game is over
+clientState.localPlayerId = localStorage.getItem('playerId') as PlayerId | null;
+
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
 const canvasService: CanvasService = CanvasService.getInstance([]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
@@ -63,6 +66,7 @@ window.addEventListener(
         uiService.updateLobbyControls();
     }
     sessionStorage.setItem('state', JSON.stringify(sharedState));
+    sessionStorage.setItem('clientState', JSON.stringify({localPlayerId: clientState.localPlayerId, isBoardDrawn: clientState.isBoardDrawn}));
 
     ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
         sessionStorage.removeItem(playerId);
