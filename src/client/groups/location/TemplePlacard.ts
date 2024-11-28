@@ -109,15 +109,17 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             && localPlayer.cargo.length < 4
         ));
 
-        const playerCanDonate = playerCanAct && !!localPlayer.locationActions?.includes('donate_goods');
+        const playerCanDonateMetals = (
+            playerCanAct && !!localPlayer.locationActions?.includes('donate_metals')
+        );
 
         this.goldDonationCard.updateElement((
-            playerCanDonate
+            playerCanDonateMetals
             && !!localPlayer.cargo.find(item => item === 'gold')
         ));
 
         this.silverDonationCard.updateElement((
-            playerCanDonate
+            playerCanDonateMetals
             && !!localPlayer.cargo.find(item => item === 'silver')
         ));
 
