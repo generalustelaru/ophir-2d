@@ -91,6 +91,7 @@ export class LocationGroup implements MegaGroupInterface {
         }
         const templeUpdate: TempleUpdate = {
             localPlayer: localPlayer ?? null,
+            templeStatus: sharedState.templeStatus,
             trade: sharedState.marketOffer[sharedState.setup.templeTradeSlot],
         }
 
