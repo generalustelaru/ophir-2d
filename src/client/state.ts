@@ -6,6 +6,7 @@ const clientState: ClientState = {
     isBoardDrawn: false,
     received: {
         gameStatus: 'empty',
+        gameResults: null,
         sessionOwner: null,
         availableSlots: [],
         players: [],

@@ -24,6 +24,11 @@ export class GameSession {
 
         this.setTurnStartCondition(activePlayer);
     }
+
+    public getState(): SharedState {
+        return this.sharedState;
+    }
+
     // MARK: ACTION SWITCH
     public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerId;
@@ -270,8 +275,6 @@ export class GameSession {
             const newTrade = tradeDeck.splice(pick, 1).shift();
 
             if (!newTrade) {
-                console.error('No card could be drawn!');
-
                 return false;
             }
 
@@ -281,6 +284,8 @@ export class GameSession {
         })();
 
         if (!isNewTrade) {
+            console.info('Game over!');
+
             return false;
         }
 
@@ -307,10 +312,10 @@ export class GameSession {
             return false;
         }
 
-        const templeLevel = this.sharedState.templeLevel;
+        const templeStatus = this.sharedState.templeStatus;
         const metalCost = (() =>{ switch (details.metal) {
-            case 'gold': return templeLevel.goldCost;
-            case 'silver': return templeLevel.silverCost;
+            case 'gold': return templeStatus.level.goldCost;
+            case 'silver': return templeStatus.level.silverCost;
             default: return null;
         }})();
         const playerAmount = (() => { switch (details.currency) {
@@ -371,7 +376,23 @@ export class GameSession {
 
         player.cargo = this.unloadItem(player.cargo, details.metal);
         player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
-        this.sharedState.templeLevel = TEMPLE_LEVELS[this.sharedState.templeLevel.id + 1];
+        player.moveActions = 0;
+
+        const newStatus = this.tools.getCopy(this.sharedState.templeStatus);
+        newStatus.levelCompletion += 1;
+        newStatus.donations.push(details.metal);
+
+        if (newStatus.levelCompletion === 3) {
+            newStatus.level = TEMPLE_LEVELS[newStatus.level.id + 1];
+            if (newStatus.level.id === 6) {
+                console.info('Game over!');
+
+                return false;
+            }
+            newStatus.levelCompletion = 0;
+        }
+
+        this.sharedState.templeStatus = newStatus;
 
         return true;
     }
