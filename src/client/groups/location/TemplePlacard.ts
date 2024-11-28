@@ -3,6 +3,7 @@ import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../clie
 import clientConstants from "../../client_constants";
 import { MarketKey, MarketOffer } from "../../../shared_types";
 import { UpgradeButton, TempleMarketCard, TempleDonationCard } from "../GroupList";
+// import { MetalDonationsDial } from "./MetalDonationsDial";
 
 
 const { COLOR } = clientConstants;
@@ -16,6 +17,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private templeTradeSlot: MarketKey;
     private goldDonationCard: TempleDonationCard;
     private silverDonationCard: TempleDonationCard;
+    // private donationsDial: MetalDonationsDial;
 
     constructor(
         stage: Konva.Stage,
@@ -68,12 +70,17 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             false,
         );
 
+        // this.donationsDial = new MetalDonationsDial(
+        //     { x: 10, y: 50 },
+        // );
+
         this.group.add(...[
             this.background,
             this.marketCard.getElement(),
             this.upgradeButton.getElement(),
             this.goldDonationCard.getElement(),
             this.silverDonationCard.getElement(),
+            // this.donationsDial.getElement(),
         ]);
     }
 
@@ -111,6 +118,8 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             playerCanDonate
             && !!localPlayer.cargo.find(item => item === 'silver')
         ));
+
+        // this.donationsDial.updateElement(data.templeStatus);
     }
 
     public getElement(): Konva.Group {
