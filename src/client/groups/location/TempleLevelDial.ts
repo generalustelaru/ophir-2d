@@ -1,30 +1,37 @@
 import Konva from "konva";
 import { Coordinates, MetalId } from "../../../shared_types";
 import { StaticGroupInterface } from "../../client_types";
-// import clientConstants from "../../client_constants";
+import clientConstants from "../../client_constants";
 
-// const { CARGO_ITEM_DATA } = clientConstants;
-
+const { CARGO_ITEM_DATA } = clientConstants;
+const UNIT = 27;
 export class TempleLevelDial implements StaticGroupInterface {
     private group: Konva.Group;
 
-    constructor(donations: Array<MetalId>, position: Coordinates) {
+    constructor(
+        position: Coordinates,
+        donations: Array<MetalId>,
+    ) {
         this.group = new Konva.Group({
             x: position.x,
             y: position.y,
-            width: 25,
-            height: 100,
+            width: UNIT,
+            height: UNIT * 3,
         });
 
-        const background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
-            fill: 'red',
-            cornerRadius: 15,
-        });
-        console.log('donations', donations);
+        for (let i = 0; i < donations.length; i++) {
+            const metal = new Konva.Path({
+                width: UNIT,
+                height: UNIT,
+                data: CARGO_ITEM_DATA[donations[i]].shape,
+                fill: CARGO_ITEM_DATA[donations[i]].fill,
+                x: 2,
+                y: (this.group.height() - UNIT) - i * UNIT,
+                scaleY: 2.75,
+            });
 
-        this.group.add(background);
+            this.group.add(metal);
+        }
     }
 
     getElement(): Konva.Group {

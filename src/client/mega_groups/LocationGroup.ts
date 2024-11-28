@@ -65,7 +65,8 @@ export class LocationGroup implements MegaGroupInterface {
                 height: heightSegment * 2,
                 x: 0,
                 y: this.marketPlacard.getElement().height() + this.treasuryPlacard.getElement().height(),
-            }
+            },
+            clientState.received.players.length,
         );
 
         this.group.add(
