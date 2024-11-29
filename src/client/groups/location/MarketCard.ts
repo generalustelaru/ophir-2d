@@ -23,7 +23,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
             stage,
             {
                 width: 66,
-                height: 128,
+                height: 108,
                 x: position.x,
                 y: position.y,
             },
@@ -44,7 +44,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         this.coinDial = new CoinDial(
             {
                 x: this.background.width() / 2,
-                y: this.background.height() / 2 + 20,
+                y: this.background.height() / 2 + 27,
             },
             trade.reward.coins + (fluctuation ?? 0)
         );
@@ -54,7 +54,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
                 width: this.background.width(),
                 height: this.background.width(),
                 x: 0,
-                y: 0,
+                y: -3,
             },
             trade.request
         );
