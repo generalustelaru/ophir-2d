@@ -15,7 +15,7 @@ const LEVEL_DIAL_DRIFTS = [
     {id: 5, x: UNIT * 5},
     {id: 6, x: UNIT * 6},
 ];
-export class MetalDonationsDial implements DynamicGroupInterface<TempleStatus> {
+export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
 
     private group: Konva.Group;
     private levelDials: Array<TempleLevelDial> = [];
