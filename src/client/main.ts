@@ -15,14 +15,20 @@ let stateDebug: SharedState|null = null;
 clientState.localPlayerId = localStorage.getItem('playerId') as PlayerId | null;
 
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
-const canvasService: CanvasService = CanvasService.getInstance([]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
+const canvasService: CanvasService = CanvasService.getInstance([]);
 
 //Send player action to server
 window.addEventListener(
     'action' as any,
     (event) => {
         const payload: ActionEventPayload = event.detail;
+
+        if (payload.action === 'reset') {
+            canvasService.clearElements();
+            clientState.isBoardDrawn = false;
+        }
+
         commService.sendMessage(
             payload.action,
             payload.details
@@ -58,13 +64,15 @@ window.addEventListener(
             canvasService.updateElements();
         } else {
             uiService.setInfo('The game has started');
+
             canvasService.drawElements();
             clientState.isBoardDrawn = true;
         }
+
         uiService.updateGameControls();
-    } else {
-        uiService.updateLobbyControls();
     }
+
+    uiService.updateLobbyControls();
 
     // Debugging
     sessionStorage.setItem('state', JSON.stringify(sharedState));

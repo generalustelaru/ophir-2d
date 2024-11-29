@@ -11,7 +11,7 @@ export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
 export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
 export type Action =
     | LocationAction | FreeAction
-    | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";
+    | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn" | "reset";
 export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good" | "donate_metals";
 export type FreeAction = "reposition" | "drop_item"
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended";

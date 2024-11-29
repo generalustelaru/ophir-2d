@@ -24,10 +24,14 @@ app.listen(httpPort, () => {
     console.info(`Server running at http://localhost:${httpPort}`);
 });
 
-const socketClients: Array<any> = [];
-const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
+
+let lobbyState: NewState = tools.getCopy(serverConstants.NEW_STATE);
+let singleSession: GameSession | null = null;
+
+const socketClients: Array<any> = [];
+const socketServer = new WebSocketServer({ port: wsPort });
 
 const sendAll = (message: WssMessage) => {
     socketClients.forEach(client => {
@@ -62,7 +66,7 @@ socketServer.on('connection', function connection(client) {
         );
 
         if (action === 'inquire') {
-            send(client, singleSession?.getState() || newState);
+            send(client, singleSession?.getState() || lobbyState);
 
             return;
         }
@@ -76,7 +80,7 @@ socketServer.on('connection', function connection(client) {
         if (action === 'enroll') {
 
             if (processPlayer(playerId)) {
-                sendAll(newState);
+                sendAll(lobbyState);
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
             }
@@ -94,6 +98,14 @@ socketServer.on('connection', function connection(client) {
             } else {
                 sendAll({ error: 'Game start failed' });
             }
+
+            return;
+        }
+
+        if (action === 'reset') {
+            singleSession = null;
+            lobbyState = tools.getCopy(serverConstants.NEW_STATE);
+            sendAll(lobbyState);
 
             return;
         }
@@ -118,7 +130,7 @@ process.on('SIGINT', () => {
 function processGameStart(details: GameSetupDetails): boolean {
 
     try {
-        const bundle: StateBundle = setupService.produceGameData(newState, details.setupCoordinates);
+        const bundle: StateBundle = setupService.produceGameData(lobbyState, details.setupCoordinates);
         singleSession = new GameSession(bundle);
     } catch (error) {
         console.error('Game start failed:', error);
@@ -132,34 +144,34 @@ function processGameStart(details: GameSetupDetails): boolean {
 function processPlayer(playerId: PlayerId): boolean {
     const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
-    if (incompatibleStatuses.includes(newState.gameStatus)) {
+    if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
     }
 
-    if (false == PLAYER_IDS.includes(playerId)) {
+    if (false == serverConstants.PLAYER_IDS.includes(playerId)) {
         console.log(`${playerId} is not a valid player`);
 
         return false;
     }
 
-    newState.availableSlots = newState.availableSlots.filter(slot => slot !== playerId);
+    lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerId);
 
-    const newPlayer = tools.getCopy(DEFAULT_PLAYER_STATE);
+    const newPlayer = tools.getCopy(serverConstants.DEFAULT_PLAYER_STATE);
     newPlayer.id = playerId;
-    newState.players.push(newPlayer);
+    lobbyState.players.push(newPlayer);
 
     console.log(`${playerId} enrolled`);
 
-    if (newState.sessionOwner === null) {
-        newState.gameStatus = 'created';
-        newState.sessionOwner = playerId;
+    if (lobbyState.sessionOwner === null) {
+        lobbyState.gameStatus = 'created';
+        lobbyState.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
 
-    if (newState.availableSlots.length === 0) {
-        newState.gameStatus = 'full';
+    if (lobbyState.availableSlots.length === 0) {
+        lobbyState.gameStatus = 'full';
         console.log(`Session is full`);
     }
 

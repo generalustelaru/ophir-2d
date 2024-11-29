@@ -7,13 +7,18 @@ import { CanvasService } from "./CanvasService";
 
 export class UserInterfaceService extends Service {
 
-    createButton; joinButton; startButton; playerColorSelect;
+    createButton: Button;
+    joinButton: Button;
+    startButton: Button;
+    resetButton: Button;
+    playerColorSelect;
 
     constructor() {
         super();
         this.createButton = new Button('createButton', this.processEnroll);
         this.joinButton = new Button('joinButton', this.processEnroll);
         this.startButton = new Button('startButton', this.processStart);
+        this.resetButton = new Button('resetButton', this.processReset);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
@@ -36,6 +41,12 @@ export class UserInterfaceService extends Service {
             action: 'start',
             details: canvasService.getSetupCoordinates(),
         };
+
+        return this.broadcastEvent('action', payload);
+    }
+
+    private processReset = (): void => {
+        const payload: ActionEventPayload = { action: 'reset', details: null };
 
         return this.broadcastEvent('action', payload);
     }
@@ -72,10 +83,12 @@ export class UserInterfaceService extends Service {
         this.joinButton.disable();
         this.startButton.disable();
         this.playerColorSelect.disable();
+        this.resetButton.disable();
     }
 
     public updateGameControls(): void {
         this.disableLobbyControls();
+        this.resetButton.enable();
     }
 
     public updateLobbyControls(): void {
@@ -85,6 +98,11 @@ export class UserInterfaceService extends Service {
             case 'empty': this.enableCreate(); break;
             case 'created': this.enableJoinOrStart(); break;
             case 'full': this.enableStartForOwner(); break;
+            case 'started': this.enableResetForOwner(); break;
+            case 'ended': {
+                this.setInfo('The game has ended');
+                this.alertGameResults();
+            } break;
         }
     }
 
@@ -124,5 +142,34 @@ export class UserInterfaceService extends Service {
         }
 
         return this.setInfo('The game might start at any time.');
+    }
+
+    private enableResetForOwner(): void {
+
+        if (clientState.localPlayerId === clientState.received.sessionOwner) {
+            this.resetButton.enable();
+        }
+
+        return this.setInfo('The game can be reset');
+    }
+
+    private alertGameResults(): void {
+        localStorage.removeItem('playerId');
+        const results = clientState.received.gameResults;
+        const winner = results?.reduce((acc, player) => player.vp > acc.vp ? player : acc, { id: '', vp: 0 });
+
+        if (!winner || !results) {
+            alert('The game has ended');
+        } else {
+            let message = 'The game has ended\n\n';
+
+            for (const player of results) {
+                message = message.concat(`${player.id} : ${player.vp} VP\n`);
+            }
+
+            message = message.concat(`\nThe winner is ${winner.id} with ${winner.vp} victory points`);
+
+            alert(message);
+        }
     }
 }

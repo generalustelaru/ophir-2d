@@ -47,6 +47,7 @@ export type ServerConstants = {
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
     DEFAULT_PLAYER_STATE: Player,
+    NEW_STATE: NewState,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
     TEMPLE_LEVELS: Array<TempleLevel>,

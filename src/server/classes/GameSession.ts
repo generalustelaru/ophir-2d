@@ -23,6 +23,8 @@ export class GameSession {
         }
 
         this.setTurnStartCondition(activePlayer);
+
+        console.info('Game session created');
     }
 
     public getState(): SharedState {
@@ -285,8 +287,8 @@ export class GameSession {
 
         if (!isNewTrade) {
             console.info('Game over!');
-
-            return false;
+            this.sharedState.gameStatus = 'ended';
+            this.sharedState.gameResults = this.privateState.playerVPs;
         }
 
         const players = this.sharedState.players;
@@ -382,12 +384,14 @@ export class GameSession {
         newStatus.levelCompletion += 1;
         newStatus.donations.push(details.metal);
 
-        if (newStatus.levelCompletion === 3) {
+        // if (newStatus.levelCompletion === 3) {
+        if (true) {
             newStatus.level = TEMPLE_LEVELS[newStatus.level.id + 1];
-            if (newStatus.level.id === 6) {
+            // if (newStatus.level.id === 6) {
+            if (true) {
                 console.info('Game over!');
-
-                return false;
+                this.sharedState.gameStatus = 'ended';
+                this.sharedState.gameResults = this.privateState.playerVPs;
             }
             newStatus.levelCompletion = 0;
         }
