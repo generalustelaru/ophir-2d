@@ -118,8 +118,9 @@ export class GameSetupService extends Service {
     // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
         const rules: Array<ProcessedMoveRule> = [];
+        const defaultMoveRules = this.tools.getCopy(DEFAULT_MOVE_RULES);
 
-        DEFAULT_MOVE_RULES.forEach(moveRule => {
+        defaultMoveRules.forEach(moveRule => {
 
             barrierIds.forEach(barrierId => {
 
