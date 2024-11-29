@@ -11,20 +11,6 @@ import { GameSession } from './classes/GameSession';
 const httpPort = 3000;
 const wsPort = 8080;
 
-const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
-
-const newState: NewState = {
-    gameStatus: 'empty',
-    gameResults: null,
-    sessionOwner: null,
-    availableSlots: PLAYER_IDS,
-    players: [],
-    marketOffer: null,
-    setup: null,
-}
-
-let singleSession: GameSession | null = null;
-
 const app = express();
 app.use(express.static('public'));
 app.use(express.static(__dirname));
