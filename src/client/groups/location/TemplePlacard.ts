@@ -40,17 +40,19 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             {
                 width: 80,
                 height: 30 + 10,
-                x: layout.width - 90,
+                x: layout.width - 85,
                 y: layout.height - 51,
             }
         );
 
         const card = market[marketSlot];
         const margin = 10;
+        const donationCardDrift = 26;
+        const donationCardWidth = 66;
 
         this.marketCard = new TempleMarketCard(
             stage,
-            { x: this.group.width() - this.group.width() / 4 - margin + 3, y: 10 },
+            { x: this.group.width() - 62 - margin, y: 10 },
             { action: 'donate_goods', details: { slot: marketSlot } },
             card,
         );
@@ -58,14 +60,14 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
 
         this.goldDonationCard = new TempleDonationCard(
             stage,
-            { x: margin + 21, y: 10 },
+            { x: margin + donationCardDrift, y: 10 },
             'gold',
             false,
         );
 
         this.silverDonationCard = new TempleDonationCard(
             stage,
-            { x: margin + 21 + 76, y: 10 },
+            { x: margin * 2 + donationCardDrift + donationCardWidth, y: 10 },
             'silver',
             false,
         );

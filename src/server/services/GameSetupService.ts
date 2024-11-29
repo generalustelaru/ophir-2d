@@ -17,7 +17,7 @@ export class GameSetupService extends Service {
         if (newState.sessionOwner === null) {
             throw new Error('Cannot start game while the session owner is null');
         }
-
+        // TODO: Re-enable this check when the game is ready to be played
         // if (players.length < 2) {
         //     throw new Error('Not enough players to start a game');
         // }
@@ -52,7 +52,7 @@ export class GameSetupService extends Service {
 
         return { sharedState, privateState };
     };
-
+    // MARK: Player Setup
     private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
         const playerIds = players.map(player => player.id);
 
@@ -82,7 +82,7 @@ export class GameSetupService extends Service {
 
         return [b1, b2];
     }
-
+    // MARK: Map Locations
     private determineLocations(): Record<HexId, Location> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
         const locationPairing: Record<HexId, null | Location> = {
@@ -115,7 +115,7 @@ export class GameSetupService extends Service {
 
         return players;
     }
-
+    // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
         const rules: Array<ProcessedMoveRule> = [];
 
@@ -160,7 +160,7 @@ export class GameSetupService extends Service {
 
         return pool.splice(pick, 1).shift() as MarketKey;
     }
-
+    // MARK: Market Offer
     private prepareDeckAndGetOffer(trades: Array<Trade>): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         let tradeDeck = this.tools.getCopy(trades);
 
@@ -186,7 +186,7 @@ export class GameSetupService extends Service {
 
         return { tradeDeck, marketOffer };
     }
-
+    // MARK: Temple Status
     private createTempleStatus(playerCount: number): TempleStatus {
         const levels = this.tools.getCopy(TEMPLE_LEVELS);
 
