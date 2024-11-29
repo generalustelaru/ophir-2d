@@ -30,7 +30,7 @@ export class LocationGroup implements MegaGroupInterface {
             throw new Error('State is missing setup data.');
         }
 
-        const heightSegment = this.group.height() / 5;
+        const heightSegment = this.group.height() / 9;
 
         this.marketPlacard = new MarketPlacard(
             this.stage,
@@ -39,7 +39,7 @@ export class LocationGroup implements MegaGroupInterface {
             clientState.received.marketOffer,
             {
                 width: this.group.width(),
-                height: heightSegment * 2,
+                height: heightSegment * 3,
                 x: 0,
                 y: 0,
             }
@@ -49,7 +49,7 @@ export class LocationGroup implements MegaGroupInterface {
             this.stage,
             {
                 width: this.group.width(),
-                height: heightSegment,
+                height: heightSegment * 2,
                 x: 0,
                 y: this.marketPlacard.getElement().height(),
             },
@@ -62,7 +62,7 @@ export class LocationGroup implements MegaGroupInterface {
             clientState.received.marketOffer,
             {
                 width: this.group.width(),
-                height: heightSegment * 2,
+                height: heightSegment * 4,
                 x: 0,
                 y: this.marketPlacard.getElement().height() + this.treasuryPlacard.getElement().height(),
             },
