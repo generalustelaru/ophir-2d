@@ -34,7 +34,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             height: this.group.height(),
             fill: COLOR.marketDarkOrange,
             cornerRadius: 10,
-            // visible: false,
+            visible: false,
         });
 
         const leftmargin = 10;
@@ -96,7 +96,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: LOCATION_TOKEN_DATA.temple.fill,
             x: this[templeTradeSlot].getElement().x() + cardWidth / 2 - 12,
-            y: 5,
+            y: 0,
             scale: { x: 2, y: 2 },
         });
 
