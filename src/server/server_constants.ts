@@ -118,6 +118,21 @@ const serverConstants: ServerConstants = {
         coins: 0,
     },
 
+    NEW_STATE: {
+        gameStatus: 'empty',
+        gameResults: null,
+        sessionOwner: null,
+        availableSlots: [
+            'playerPurple',
+            'playerYellow',
+            'playerRed',
+            'playerGreen',
+        ],
+        players: [],
+        marketOffer: null,
+        setup: null,
+    },
+
     TEMPLE_LEVELS: [
         { id: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCount: 4 },
         { id: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCount: null },
