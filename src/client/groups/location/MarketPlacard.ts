@@ -39,7 +39,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
 
         const leftmargin = 10;
         const totalHeight = this.group.height();
-        const cardWidth = this.group.width() / 4 - leftmargin;
+        const cardWidth = 66;
 
         this.marketDeck = new MarketDeck(
             stage,
