@@ -49,7 +49,6 @@ export class UserInterfaceService extends Service {
         }
 
         if (lobbyState.availableSlots.includes(selectedId)) {
-            localStorage.setItem('playerId', selectedId);
             clientState.localPlayerId = selectedId;
             const payload: ActionEventPayload = { action: 'enroll', details: null };
 

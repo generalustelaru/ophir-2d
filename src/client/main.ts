@@ -65,6 +65,8 @@ window.addEventListener(
     } else {
         uiService.updateLobbyControls();
     }
+
+    // Debugging
     sessionStorage.setItem('state', JSON.stringify(sharedState));
     sessionStorage.setItem('clientState', JSON.stringify({localPlayerId: clientState.localPlayerId, isBoardDrawn: clientState.isBoardDrawn}));
 
@@ -75,7 +77,6 @@ window.addEventListener(
     for (const player of clientState.received.players) {
         sessionStorage.setItem(player.id, JSON.stringify(player));
     }
-
 });
 
 window.addEventListener(
