@@ -24,6 +24,9 @@ app.listen(httpPort, () => {
     console.info(`Server running at http://localhost:${httpPort}`);
 });
 
+const newState: NewState = serverConstants.DEFAULT_NEW_STATE;
+let singleSession: GameSession | null = null;
+
 const socketClients: Array<any> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
@@ -138,7 +141,7 @@ function processPlayer(playerId: PlayerId): boolean {
         return false;
     }
 
-    if (false == PLAYER_IDS.includes(playerId)) {
+    if (false == serverConstants.PLAYER_IDS.includes(playerId)) {
         console.log(`${playerId} is not a valid player`);
 
         return false;
@@ -146,7 +149,7 @@ function processPlayer(playerId: PlayerId): boolean {
 
     newState.availableSlots = newState.availableSlots.filter(slot => slot !== playerId);
 
-    const newPlayer = tools.getCopy(DEFAULT_PLAYER_STATE);
+    const newPlayer = tools.getCopy(serverConstants.DEFAULT_PLAYER_STATE);
     newPlayer.id = playerId;
     newState.players.push(newPlayer);
 
