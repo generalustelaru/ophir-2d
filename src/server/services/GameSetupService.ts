@@ -1,11 +1,11 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location, TempleLevel, TempleStatus, NewState } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, LocationData, MetalPrices, NewState } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TEMPLE_LEVELS } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, METAL_PRICES } = serverConstants;
 
 export class GameSetupService extends Service {
 
@@ -28,6 +28,7 @@ export class GameSetupService extends Service {
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
+            templeLevels: this.filterTempleLevels(players.length),
             playerVPs: players.map(p => ({id: p.id, vp: 0})),
         }
 
@@ -41,7 +42,13 @@ export class GameSetupService extends Service {
                 privateState.moveRules
             ),
             marketOffer: marketData.marketOffer,
-            templeStatus: this.createTempleStatus(players.length),
+            templeStatus: {
+                prices: privateState.templeLevels[0],
+                maxLevel: privateState.templeLevels.length,
+                levelCompletion: 0,
+                currentLevel: 0,
+                donations: [],
+            },
             setup: {
                 barriers: barriers,
                 mapPairings: this.determineLocations(),
@@ -83,9 +90,9 @@ export class GameSetupService extends Service {
         return [b1, b2];
     }
     // MARK: Map Locations
-    private determineLocations(): Record<HexId, Location> {
+    private determineLocations(): Record<HexId, LocationData> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
-        const locationPairing: Record<HexId, null | Location> = {
+        const locationPairing: Record<HexId, null | LocationData> = {
             center: null,
             topRight: null,
             right: null,
@@ -102,7 +109,7 @@ export class GameSetupService extends Service {
             locationPairing[hexId] = locations.splice(pick, 1)[0];
         }
 
-        return locationPairing as Record<HexId, Location>;
+        return locationPairing as Record<HexId, LocationData>;
     }
 
     private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
@@ -187,20 +194,13 @@ export class GameSetupService extends Service {
 
         return { tradeDeck, marketOffer };
     }
-    // MARK: Temple Status
-    private createTempleStatus(playerCount: number): TempleStatus {
-        const levels = this.tools.getCopy(TEMPLE_LEVELS);
+    // MARK: Temple Levels
+    private filterTempleLevels(playerCount: number): Array<MetalPrices> {
+        const levels = this.tools.getCopy(METAL_PRICES);
+        const sessionLevels = levels.filter(
+            level => !level.skipOnPlayerCounts.includes(playerCount)
+        );
 
-        return {
-            level: ((): TempleLevel => {
-                for (const level of levels) {
-                    if (level.skipOnPlayerCount !== playerCount)
-                        return level;
-                }
-                return levels[0];
-            })(),
-            levelCompletion: 0,
-            donations: [],
-        }
+        return sessionLevels;
     }
 }

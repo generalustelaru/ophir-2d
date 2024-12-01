@@ -23,7 +23,7 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: isEnabled ? COLOR.vpCardLightPurple : COLOR.vpCardPurple,
+            fill: isEnabled ? COLOR.templeBlue : COLOR.templeDarkBlue,
             stroke: isEnabled ? COLOR.treasuryGold : COLOR.boneWhite,
             strokeWidth: 2,
             cornerRadius: 15,
@@ -91,6 +91,6 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
 
     public updateElement(canDonate: boolean): void {
         this.setEnabled(canDonate);
-        this.background.fill(canDonate ? COLOR.vpCardLightPurple : COLOR.vpCardPurple);
+        this.background.fill(canDonate ? COLOR.templeBlue : COLOR.templeDarkBlue);
     }
 }

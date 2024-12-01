@@ -22,13 +22,13 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
 
     constructor(
         position: Coordinates,
-        playerCount: number,
+        maxLevel: number,
     ) {
 
         this.group = new Konva.Group({
             x: position.x,
             y: position.y,
-            width: UNIT * 7,
+            width: UNIT * 6,
             height: UNIT * 3,
         });
 
@@ -41,7 +41,7 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
         });
 
         const storageDisplay = new Konva.Rect({
-            width: UNIT * ([2, 4].includes(playerCount) ? 6 : 7),
+            width: UNIT * maxLevel,
             height: UNIT * 3,
             fill: 'black',
             stroke: COLOR.stampEdge,
