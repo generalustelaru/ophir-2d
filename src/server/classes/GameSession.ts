@@ -285,17 +285,17 @@ export class GameSession {
             return true;
         })();
 
-        if (!isNewTrade) {
+        if (isNewTrade) {
+            const players = this.sharedState.players;
+
+            players.forEach(player => {
+                player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
+            });
+        } else {
             console.info('Game over!');
             this.sharedState.gameStatus = 'ended';
             this.sharedState.gameResults = this.privateState.playerVPs;
         }
-
-        const players = this.sharedState.players;
-
-        players.forEach(player => {
-            player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-        });
 
         return true;
     }
@@ -388,18 +388,14 @@ export class GameSession {
             newStatus.currentLevel += 1;
             const newPrices = this.privateState.metalPrices.shift();
 
-            if (!newPrices) {
+            if (newPrices) {
+                newStatus.prices = newPrices;
+                newStatus.levelCompletion = 0;
+            } else {
                 console.info('Game over!');
                 this.sharedState.gameStatus = 'ended';
                 this.sharedState.gameResults = this.privateState.playerVPs;
-
-                return false;
             }
-
-            newStatus.prices = newPrices;
-
-
-            newStatus.levelCompletion = 0;
         }
 
         this.sharedState.templeStatus = newStatus;
