@@ -29,7 +29,7 @@ const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
-let lobbyState: NewState = tools.getCopy(serverConstants.NEW_STATE);
+let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
 let singleSession: GameSession | null = null;
 
 const sendAll = (message: WssMessage) => {
@@ -103,7 +103,7 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'reset') {
             singleSession = null;
-            lobbyState = tools.getCopy(serverConstants.NEW_STATE);
+            lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
             sendAll(lobbyState);
 
             return;
