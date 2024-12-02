@@ -1,8 +1,8 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Trade, LocationData, GoodId, PickupLocationId, MetalPrices} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, ResetState, Trade, LocationData, GoodId, PickupLocationId, MetalPrices} from '../shared_types';
 
 export type WsSignal = 'connection'|'message'|'close';
 
-export type WssMessage = SharedState|NewState|{ error: string};
+export type WssMessage = SharedState|NewState|ResetState|{ error: string};
 
 export type DefaultMoveRule = {
     from: HexId;
@@ -46,6 +46,7 @@ export type ServerConstants = {
     LOCATION_GOODS: Record<PickupLocationId, GoodId>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
     DEFAULT_NEW_STATE: NewState,
+    RESET_STATE: ResetState,
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
     DEFAULT_PLAYER_STATE: Player,

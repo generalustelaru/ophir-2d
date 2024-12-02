@@ -8,7 +8,7 @@ import { PlayerId, SharedState } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
 //@ts-ignore
-let stateDebug: SharedState|null = null;
+let stateDebug: SharedState | null = null;
 
 // Initializations
 // TODO: Remove the key when the game is over
@@ -23,11 +23,6 @@ window.addEventListener(
     'action' as any,
     (event) => {
         const payload: ActionEventPayload = event.detail;
-
-        if (payload.action === 'reset') {
-            canvasService.clearElements();
-            clientState.isBoardDrawn = false;
-        }
 
         commService.sendMessage(
             payload.action,
@@ -56,30 +51,36 @@ window.addEventListener(
 window.addEventListener(
     'update',
     () => {
-    const sharedState = clientState.received as SharedState;
+        const sharedState = clientState.received as SharedState;
 
-    if (clientState.isBoardDrawn) {
-        canvasService.updateElements();
-    } else if (sharedState.gameStatus === 'started'){
-        clientState.isBoardDrawn = true;
-        canvasService.drawElements();
-    }
+        if (sharedState.gameStatus === 'reset') {
+            alert('The game has been reset');
+            window.location.reload();
+        }
 
-    uiService.updateGameControls();
-    uiService.updateLobbyControls();
+        if (clientState.isBoardDrawn) {
+            canvasService.updateElements();
+        } else if (sharedState.gameStatus === 'started') {
+            uiService.setInfo('You are playing.');
+            clientState.isBoardDrawn = true;
+            canvasService.drawElements();
+        }
 
-    // Debugging
-    sessionStorage.setItem('state', JSON.stringify(sharedState));
-    sessionStorage.setItem('clientState', JSON.stringify({localPlayerId: clientState.localPlayerId, isBoardDrawn: clientState.isBoardDrawn}));
+        uiService.updateGameControls();
+        uiService.updateLobbyControls();
 
-    ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
-        sessionStorage.removeItem(playerId);
+        // Debugging
+        sessionStorage.setItem('state', JSON.stringify(sharedState));
+        sessionStorage.setItem('clientState', JSON.stringify({ localPlayerId: clientState.localPlayerId, isBoardDrawn: clientState.isBoardDrawn }));
+
+        ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
+            sessionStorage.removeItem(playerId);
+        });
+
+        for (const player of clientState.received.players) {
+            sessionStorage.setItem(player.id, JSON.stringify(player));
+        }
     });
-
-    for (const player of clientState.received.players) {
-        sessionStorage.setItem(player.id, JSON.stringify(player));
-    }
-});
 
 window.addEventListener(
     'info' as any,

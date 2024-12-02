@@ -14,7 +14,7 @@ export type Action =
     | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn" | "reset";
 export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good" | "donate_metals";
 export type FreeAction = "reposition" | "drop_item"
-export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
+export type GameStatus = "empty" | "created" | "full" | "started" | "ended" | "reset";
 export type ItemId = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ItemId>;
@@ -103,6 +103,10 @@ export type NewState = {
     marketOffer: null,
     templeStatus: null,
     setup: null,
+}
+
+export type ResetState = {
+    gameStatus: "reset",
 }
 
 export type LocationData = {
