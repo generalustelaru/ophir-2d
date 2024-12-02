@@ -25,7 +25,7 @@ export type PlayerVP = {
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
     tradeDeck: Array<Trade>,
-    templeLevels: Array<MetalPrices>,
+    metalPrices: Array<MetalPrices>,
     playerVPs: Array<PlayerVP>,
 }
 
