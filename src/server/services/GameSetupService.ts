@@ -28,7 +28,7 @@ export class GameSetupService extends Service {
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
-            templeLevels: this.filterTempleLevels(players.length),
+            metalPrices: this.filterMetalPrices(players.length),
             playerVPs: players.map(p => ({id: p.id, vp: 0})),
         }
 
@@ -43,8 +43,8 @@ export class GameSetupService extends Service {
             ),
             marketOffer: marketData.marketOffer,
             templeStatus: {
-                prices: privateState.templeLevels[0],
-                maxLevel: privateState.templeLevels.length,
+                maxLevel: privateState.metalPrices.length,
+                prices: privateState.metalPrices.pop() as MetalPrices,
                 levelCompletion: 0,
                 currentLevel: 0,
                 donations: [],
@@ -195,7 +195,7 @@ export class GameSetupService extends Service {
         return { tradeDeck, marketOffer };
     }
     // MARK: Temple Levels
-    private filterTempleLevels(playerCount: number): Array<MetalPrices> {
+    private filterMetalPrices(playerCount: number): Array<MetalPrices> {
         const levels = this.tools.getCopy(METAL_PRICES);
         const sessionLevels = levels.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)

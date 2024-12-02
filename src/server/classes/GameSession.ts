@@ -3,7 +3,7 @@ import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, L
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
-const { TRADE_DECK_B, METAL_PRICES: TEMPLE_LEVELS } = serverConstants;
+const { TRADE_DECK_B } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -384,13 +384,16 @@ export class GameSession {
 
         if (newStatus.levelCompletion === 3) {
             newStatus.currentLevel += 1;
-            newStatus.prices = TEMPLE_LEVELS[newStatus.prices.id + 1];
+            const newPrices = this.privateState.metalPrices.pop();
 
-            if (newStatus.prices.id === 6) {
+            if (!newPrices) {
                 console.info('Game over!');
 
                 return false;
             }
+
+            newStatus.prices = newPrices;
+
 
             newStatus.levelCompletion = 0;
         }
