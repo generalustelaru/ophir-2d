@@ -101,6 +101,7 @@ export class UserInterfaceService extends Service {
             case 'started': this.enableResetForOwner(); break;
             case 'ended': {
                 this.setInfo('The game has ended');
+                this.enableResetForOwner();
                 this.alertGameResults();
             } break;
         }
@@ -149,8 +150,6 @@ export class UserInterfaceService extends Service {
         if (clientState.localPlayerId === clientState.received.sessionOwner) {
             this.resetButton.enable();
         }
-
-        return this.setInfo('The game can be reset');
     }
 
     private alertGameResults(): void {

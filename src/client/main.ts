@@ -58,20 +58,14 @@ window.addEventListener(
     () => {
     const sharedState = clientState.received as SharedState;
 
-    if (sharedState.gameStatus === 'started') {
-
-        if (clientState.isBoardDrawn) {
-            canvasService.updateElements();
-        } else {
-            uiService.setInfo('The game has started');
-
-            canvasService.drawElements();
-            clientState.isBoardDrawn = true;
-        }
-
-        uiService.updateGameControls();
+    if (clientState.isBoardDrawn) {
+        canvasService.updateElements();
+    } else if (sharedState.gameStatus === 'started'){
+        clientState.isBoardDrawn = true;
+        canvasService.drawElements();
     }
 
+    uiService.updateGameControls();
     uiService.updateLobbyControls();
 
     // Debugging
