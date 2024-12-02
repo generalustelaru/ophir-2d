@@ -22,7 +22,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         marketSlot: MarketKey,
         market: MarketOffer,
         layout: GroupLayoutData,
-        playerCount: number,
+        maxLevel: number,
     ) {
 
         this.group = new Konva.Group(layout);
@@ -73,8 +73,8 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         );
 
         this.donationsBand = new MetalDonationsBand(
-            { x: 10, y: 120 },
-            playerCount,
+            { x: 26, y: 120 },
+            maxLevel,
         );
 
         this.group.add(...[

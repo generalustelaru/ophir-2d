@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Trade, Location, GoodId, PickupLocationId, TempleLevel} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, Trade, LocationData, GoodId, PickupLocationId, MetalPrices} from '../shared_types';
 
 export type WsSignal = 'connection'|'message'|'close';
 
@@ -25,6 +25,7 @@ export type PlayerVP = {
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
     tradeDeck: Array<Trade>,
+    metalPrices: Array<MetalPrices>,
     playerVPs: Array<PlayerVP>,
 }
 
@@ -41,14 +42,15 @@ export type BarrierCheck = {
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
-    LOCATION_ACTIONS: Array<Location>,
+    LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<PickupLocationId, GoodId>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
+    DEFAULT_NEW_STATE: NewState,
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerId>,
     DEFAULT_PLAYER_STATE: Player,
     NEW_STATE: NewState,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
-    TEMPLE_LEVELS: Array<TempleLevel>,
+    METAL_PRICES: Array<MetalPrices>,
 }

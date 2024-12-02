@@ -22,11 +22,11 @@ export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
-export type TempleLevel = {
+export type MetalPrices = {
     id: number,
     goldCost: MetalCost,
     silverCost: MetalCost,
-    skipOnPlayerCount: number | null,
+    skipOnPlayerCounts: Array<number>,
 }
 
 export type MetalCost = {
@@ -72,7 +72,9 @@ export type MarketFluctuations = {
 }
 
 export type TempleStatus = {
-    level: TempleLevel,
+    prices: MetalPrices,
+    currentLevel: number,
+    maxLevel: number,
     levelCompletion: number,
     donations: Array<MetalId>,
 }
@@ -99,17 +101,18 @@ export type NewState = {
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
     marketOffer: null,
+    templeStatus: null,
     setup: null,
 }
 
-export type Location = {
+export type LocationData = {
     id: LocationId,
     actions: Array<LocationAction>,
 }
 
 export type GameSetup = {
     barriers: Array<BarrierId>,
-    mapPairings: Record<HexId, Location>,
+    mapPairings: Record<HexId, LocationData>,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketKey,
 }
