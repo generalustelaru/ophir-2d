@@ -18,17 +18,18 @@ const LEVEL_DIAL_DRIFTS = [
 export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
 
     private group: Konva.Group;
+    private cargoDisplayGroup: Konva.Group;
     private levelDials: Array<TempleLevelDial> = [];
 
     constructor(
         position: Coordinates,
-        playerCount: number,
+        maxLevel: number,
     ) {
 
         this.group = new Konva.Group({
             x: position.x,
             y: position.y,
-            width: UNIT * 7,
+            width: UNIT * 6,
             height: UNIT * 3,
         });
 
@@ -40,16 +41,25 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
             cornerRadius: 5,
         });
 
-        const storageDisplay = new Konva.Rect({
-            width: UNIT * ([2, 4].includes(playerCount) ? 6 : 7),
+        const displayWidth = UNIT * maxLevel
+        this.cargoDisplayGroup = new Konva.Group({
+            x: this.group.width() - displayWidth,
+            width: UNIT * maxLevel,
             height: UNIT * 3,
+        });
+
+        const storageDisplay = new Konva.Rect({
+            width: this.cargoDisplayGroup.width(),
+            height: this.cargoDisplayGroup.height(),
             fill: 'black',
             stroke: COLOR.stampEdge,
             cornerRadius: 5,
             strokeWidth: 1,
         });
 
-        this.group.add(background, storageDisplay);
+        this.cargoDisplayGroup.add(storageDisplay);
+
+        this.group.add(background, this.cargoDisplayGroup);
     }
 
     getElement(): Konva.Group {
@@ -68,7 +78,7 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
                 { x: LEVEL_DIAL_DRIFTS[i].x, y: 0 },
                 status.donations.slice(i * 3, i * 3 + 3),
             );
-            this.group.add(dial.getElement());
+            this.cargoDisplayGroup.add(dial.getElement());
             this.levelDials.push(dial);
         }
     }

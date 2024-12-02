@@ -14,9 +14,10 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
 
     constructor(
         stage: Konva.Stage,
+        locationId: LocationId,
         iconData: LocationIconData
     ) {
-        const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(iconData.id);
+        const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(locationId);
         const scale = 3;
 
         super(
@@ -25,17 +26,17 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
             isPickup ? { action: 'pickup_good', details: null } : null
         );
 
-        this.id = iconData.id;
+        this.id = locationId;
 
         const verticalDrift = ((): number => {
-            switch (iconData.id) {
+            switch (locationId) {
                 case 'temple': return -36;
                 default: return -18;
             }
         })();
 
         const horizontalDrift = ((): number => {
-            switch (iconData.id) {
+            switch (locationId) {
                 case 'temple': return -36;
                 case 'treasury': return -36;
                 default: return -18;

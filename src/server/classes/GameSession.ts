@@ -3,7 +3,7 @@ import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, L
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
-const { TRADE_DECK_B, TEMPLE_LEVELS } = serverConstants;
+const { TRADE_DECK_B } = serverConstants;
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -316,8 +316,8 @@ export class GameSession {
 
         const templeStatus = this.sharedState.templeStatus;
         const metalCost = (() =>{ switch (details.metal) {
-            case 'gold': return templeStatus.level.goldCost;
-            case 'silver': return templeStatus.level.silverCost;
+            case 'gold': return templeStatus.prices.goldCost;
+            case 'silver': return templeStatus.prices.silverCost;
             default: return null;
         }})();
         const playerAmount = (() => { switch (details.currency) {
@@ -384,15 +384,21 @@ export class GameSession {
         newStatus.levelCompletion += 1;
         newStatus.donations.push(details.metal);
 
-        // if (newStatus.levelCompletion === 3) {
-        if (true) {
-            newStatus.level = TEMPLE_LEVELS[newStatus.level.id + 1];
-            // if (newStatus.level.id === 6) {
-            if (true) {
+        if (newStatus.levelCompletion === 3) {
+            newStatus.currentLevel += 1;
+            const newPrices = this.privateState.metalPrices.pop();
+
+            if (!newPrices) {
                 console.info('Game over!');
                 this.sharedState.gameStatus = 'ended';
                 this.sharedState.gameResults = this.privateState.playerVPs;
+
+                return false;
             }
+
+            newStatus.prices = newPrices;
+
+
             newStatus.levelCompletion = 0;
         }
 

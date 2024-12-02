@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
-import { MegaGroupInterface, GroupLayoutData } from '../client_types';
+import { Coordinates, GameSetupDetails, LocationId, PlayerId, SharedState } from '../../shared_types';
+import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import clientState from '../state';
 import clientConstants from '../client_constants';
@@ -66,7 +66,7 @@ export class MapGroup implements MegaGroupInterface {
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
-            const pairing = serverState.setup.mapPairings[hexItem.id];
+            const locationData = serverState.setup.mapPairings[hexItem.id];
             const mapHex = new MapHexagon(
                 this.stage,
                 centerPoint,
@@ -74,9 +74,8 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                pairing.id === 'temple'
-                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeStatus.level.id]
-                    : LOCATION_TOKEN_DATA[pairing.id],
+                locationData.id,
+                this.getIconData(locationData.id),
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
@@ -147,9 +146,7 @@ export class MapGroup implements MegaGroupInterface {
         for (const mapHex of this.mapHexes) {
             mapHex.updateElement({
                 player: localPlayer || null,
-                templeIcon: mapHex.getTokenId() === 'temple'
-                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeStatus.level.id]
-                    : null,
+                templeIcon: this.getIconData(mapHex.getTokenId())
             });
         }
 
@@ -187,5 +184,29 @@ export class MapGroup implements MegaGroupInterface {
         });
 
         return { setupCoordinates: startingPositions };
+    }
+
+    private getIconData(locationId: LocationId): LocationIconData {
+
+        if (locationId != 'temple')
+            return LOCATION_TOKEN_DATA[locationId];
+
+        const skipCount = (() => {
+            const playerCount = clientState.received.players.length;
+            switch (playerCount) {
+                case 2: return 2;
+                case 3: return 1;
+                default: return 0;
+            }
+        })();
+        const currentLevel = clientState.received.templeStatus?.currentLevel || 0;
+        const templeData = TEMPLE_CONSTRUCTION_DATA.find(
+            item => item.shapeId == currentLevel + skipCount
+        );
+
+        if (templeData)
+            return templeData.icon;
+
+        return LOCATION_TOKEN_DATA[locationId];
     }
 }

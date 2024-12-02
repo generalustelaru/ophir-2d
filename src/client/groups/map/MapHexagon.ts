@@ -29,6 +29,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         offsetX:number,
         offsetY:number,
         island: IslandData,
+        locationId: LocationId,
         iconData: LocationIconData,
         fill: Color
     ) {
@@ -62,7 +63,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         });
         this.group.add(this.island);
 
-        this.location = new LocationToken(stage, iconData);
+        this.location = new LocationToken(stage, locationId, iconData);
         this.group.add(this.location.getElement());
 
         this.restrictedIcon = new Konva.Path({

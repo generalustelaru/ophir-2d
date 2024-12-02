@@ -11,6 +11,7 @@ const clientState: ClientState = {
         availableSlots: [],
         players: [],
         marketOffer: null,
+        templeStatus: null,
         setup: null,
     },
 }

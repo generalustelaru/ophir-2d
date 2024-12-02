@@ -24,14 +24,13 @@ app.listen(httpPort, () => {
     console.info(`Server running at http://localhost:${httpPort}`);
 });
 
+const socketClients: Array<any> = [];
+const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
 let lobbyState: NewState = tools.getCopy(serverConstants.NEW_STATE);
 let singleSession: GameSession | null = null;
-
-const socketClients: Array<any> = [];
-const socketServer = new WebSocketServer({ port: wsPort });
 
 const sendAll = (message: WssMessage) => {
     socketClients.forEach(client => {
