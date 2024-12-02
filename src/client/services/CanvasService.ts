@@ -79,8 +79,4 @@ export class CanvasService extends Service {
         this.mapGroup.updateElements();
         this.playerGroup.updateElements();
     }
-
-    public clearElements(): void {
-        this.stage.clear();
-    }
 }

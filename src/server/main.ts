@@ -102,9 +102,11 @@ socketServer.on('connection', function connection(client) {
         }
 
         if (action === 'reset') {
+            console.log('Session is resetting!');
             singleSession = null;
             lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
-            sendAll(lobbyState);
+
+            sendAll(serverConstants.RESET_STATE);
 
             return;
         }
