@@ -44,7 +44,7 @@ export class GameSetupService extends Service {
             marketOffer: marketData.marketOffer,
             templeStatus: {
                 maxLevel: privateState.metalPrices.length,
-                prices: privateState.metalPrices.pop() as MetalPrices,
+                prices: privateState.metalPrices.shift() as MetalPrices,
                 levelCompletion: 0,
                 currentLevel: 0,
                 donations: [],
@@ -196,11 +196,13 @@ export class GameSetupService extends Service {
     }
     // MARK: Temple Levels
     private filterMetalPrices(playerCount: number): Array<MetalPrices> {
-        const levels = this.tools.getCopy(METAL_PRICES);
-        const sessionLevels = levels.filter(
+        const defaultPriceList = this.tools.getCopy(METAL_PRICES);
+        const metalprices = defaultPriceList.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)
         );
 
-        return sessionLevels;
+        console.log('Metal prices:', metalprices);
+
+        return metalprices;
     }
 }

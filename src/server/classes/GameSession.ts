@@ -51,7 +51,7 @@ export class GameSession {
             case 'sell_goods':
                 return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
             case 'donate_goods':
-                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
+                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process trade on ${id}` };
             case 'buy_metals':
                 return this.processMetalTrade(message) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
             case 'donate_metals':
@@ -386,7 +386,7 @@ export class GameSession {
 
         if (newStatus.levelCompletion === 3) {
             newStatus.currentLevel += 1;
-            const newPrices = this.privateState.metalPrices.pop();
+            const newPrices = this.privateState.metalPrices.shift();
 
             if (!newPrices) {
                 console.info('Game over!');
