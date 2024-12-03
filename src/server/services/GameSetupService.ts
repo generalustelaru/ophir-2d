@@ -29,7 +29,7 @@ export class GameSetupService extends Service {
             moveRules: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
             metalPrices: this.filterMetalPrices(players.length),
-            playerVPs: players.map(p => ({id: p.id, vp: 0})),
+            gameStats: players.map(p => ({id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0})),
         }
 
         const sharedState: SharedState = {
