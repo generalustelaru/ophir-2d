@@ -53,7 +53,9 @@ window.addEventListener(
         const sharedState = clientState.received as SharedState;
 
         if (sharedState.gameStatus === 'reset') {
+            localStorage.removeItem('playerId');
             alert('The game has been reset');
+
             window.location.reload();
         }
 
