@@ -79,6 +79,12 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'enroll') {
 
+            if (!playerHasUniqueName(playerName)) {
+                send(client, { error: 'This name is already taken' });
+
+                return;
+            }
+
             if (processPlayer(playerId, playerName)) {
                 sendAll(lobbyState);
             } else {
@@ -141,6 +147,14 @@ function processGameStart(details: GameSetupDetails): boolean {
     }
 
     return true;
+}
+
+function playerHasUniqueName(playerName: string|null): boolean {
+    if (!playerName) {
+        return true;
+    }
+
+    return !lobbyState.players.some(player => player.name === playerName);
 }
 
 function processPlayer(playerId: PlayerId, playerName: string|null): boolean {

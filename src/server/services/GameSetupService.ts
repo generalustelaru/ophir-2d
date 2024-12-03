@@ -17,10 +17,10 @@ export class GameSetupService extends Service {
         if (newState.sessionOwner === null) {
             throw new Error('Cannot start game while the session owner is null');
         }
-        // TODO: Re-enable this check when the game is ready to be played
-        // if (players.length < 2) {
-        //     throw new Error('Not enough players to start a game');
-        // }
+    
+        if (players.length < 2) {
+            throw new Error('Not enough players to start a game');
+        }
 
         const barriers = this.determineBarriers();
         const marketData = this.prepareDeckAndGetOffer((TRADE_DECK_A));

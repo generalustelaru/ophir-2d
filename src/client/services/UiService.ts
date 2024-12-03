@@ -43,6 +43,11 @@ export class UserInterfaceService extends Service {
     }
 
     private processStart = (): void => {
+
+        if (clientState.received.players.length < 2) {
+            return alert('You need at least 2 players to start the game');
+        }
+
         this.startButton.disable();
         const canvasService: CanvasService = CanvasService.getInstance([]);
         const payload: ActionEventPayload = {
