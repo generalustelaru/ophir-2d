@@ -40,7 +40,6 @@ export interface MegaGroupInterface {
 }
 
 export interface DynamicGroupInterface<S> {
-    // new(state: S, ...constructorArgs: any[]): void, TODO: define the constructor args to include the update data; modify the constructors and instantiations.
     getElement(): Konva.Group,
     updateElement(state: S): void,
 }

@@ -36,6 +36,7 @@ export type MetalCost = {
 
 export type Player = {
     id: PlayerId,
+    name: string | null,
     turnOrder: number,
     isActive: boolean,
     hexagon: {
@@ -48,7 +49,6 @@ export type Player = {
     moveActions: number,
     isAnchored: boolean,
     locationActions: Array<LocationAction> | null,
-    // locationFreeActions: Array<FreeAction>, TODO: Implement for location-sepcific actions that can be repeated on a turn (sell specialist good, donate metals, buying metals)
     allowedMoves: Array<HexId>,
     hasCargo: boolean,
     cargo: CargoManifest,
@@ -159,6 +159,7 @@ export type Coordinates = { x: number, y: number };
 
 export type WebsocketClientMessage = {
     playerId: PlayerId | null,
+    playerName: string | null,
     action: Action,
     details: ActionDetails,
 }

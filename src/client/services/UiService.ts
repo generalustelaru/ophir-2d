@@ -71,7 +71,7 @@ export class UserInterfaceService extends Service {
 
         if (lobbyState.availableSlots.includes(selectedId)) {
             clientState.localPlayerId = selectedId;
-            const payload: ActionEventPayload = { action: 'enroll', details: { playerName: clientState.localPlayerName }};
+            const payload: ActionEventPayload = { action: 'enroll', details: null };
 
             return this.broadcastEvent('action', payload);
         }
