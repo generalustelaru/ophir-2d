@@ -8,7 +8,7 @@ export class Service {
         // Initialize with dependencies if needed
     }
 
-    public broadcastEvent(
+    protected broadcastEvent(
         eventType: EventTitle,
         detail: EventPayload = null
     ): void {
