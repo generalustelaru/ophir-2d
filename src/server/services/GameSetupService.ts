@@ -201,8 +201,6 @@ export class GameSetupService extends Service {
             level => !level.skipOnPlayerCounts.includes(playerCount)
         );
 
-        console.log('Metal prices:', metalprices);
-
         return metalprices;
     }
 }
