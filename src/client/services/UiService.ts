@@ -4,6 +4,7 @@ import { Service } from './Service';
 import clientState from '../state';
 import { Button } from '../html_behaviors/button';
 import { CanvasService } from "./CanvasService";
+import { PlayerCountables } from '../../server/server_types';
 
 export class UserInterfaceService extends Service {
 
@@ -155,20 +156,68 @@ export class UserInterfaceService extends Service {
     private alertGameResults(): void {
         localStorage.removeItem('playerId');
         const results = clientState.received.gameResults;
-        const winner = results?.reduce((acc, player) => player.vp > acc.vp ? player : acc, { id: '', vp: 0 });
+        let message = 'The game has ended\n\n';
 
-        if (!winner || !results) {
-            alert('The game has ended');
-        } else {
-            let message = 'The game has ended\n\n';
-
-            for (const player of results) {
-                message = message.concat(`${player.id} : ${player.vp} VP\n`);
-            }
-
-            message = message.concat(`\nThe winner is ${winner.id} with ${winner.vp} victory points`);
-
-            alert(message);
+        if (!results){
+            return alert(message);
         }
+
+        const getLeaders = (tiedPlayers: Array<PlayerCountables>, criteria: string) : Array<PlayerCountables> => {
+            const key = criteria as keyof typeof tiedPlayers[0];
+            const topValue = tiedPlayers.reduce((acc, player) => {
+                const value = player[key] as number;
+
+                return value > acc ? value : acc
+            }, 0);
+
+            return tiedPlayers.filter(player => player[key] === topValue);
+        }
+        const addWinner = (winnerAsArray: Array<PlayerCountables>, criteria: string, message: string) : string => {
+            const winner = winnerAsArray[0];
+            const key = criteria as keyof typeof winner;
+
+            return message.concat(`\nThe winner is ${winner.id} with ${winner[key]} ${criteria}\n`);
+        }
+        const addTiedPlayers = (players: Array<PlayerCountables>, criteria: string, message: string) : string => {
+            const key = criteria as keyof typeof players[0];
+
+            return message.concat(
+                `\n${criteria}-tied players:\n\n${players.map(
+                    player => `${player.id} : ${player[key]} ${criteria}\n`
+                ).join('')}`
+            );
+        }
+
+        for (const player of results) {
+            message = message.concat(`${player.id} : ${player.vp} VP\n`);
+        }
+
+        const vpWinners = getLeaders(results, 'vp');
+
+        if (vpWinners.length == 1){
+            return alert(addWinner(vpWinners, 'vp', message));
+        }
+
+        message = addTiedPlayers(vpWinners, 'favor', message);
+        const favorWinners = getLeaders(vpWinners, 'favor');
+
+        if (favorWinners.length == 1){
+            return alert(addWinner(favorWinners, 'favor', message));
+        }
+
+        message = addTiedPlayers(favorWinners, 'coins', message);
+        const coinWinners = getLeaders(favorWinners, 'coins');
+
+        if (coinWinners.length == 1) {
+            return alert(addWinner(coinWinners, 'coins', message));
+        }
+
+        message = message.concat(`\nShared victory:\n`);
+
+        for (const player of coinWinners) {
+            message = message.concat(`${player.id} : ${player.vp} VP + ${player.coins} coins\n`);
+        }
+
+        alert(message);
     }
 }

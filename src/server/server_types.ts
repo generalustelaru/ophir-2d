@@ -14,9 +14,13 @@ export type ProcessedMoveRule = {
     allowed: Array<HexId>;
 }
 
-export type PlayerVP = {
+export type PlayerCountables = {
     id: PlayerId;
     vp: number;
+    gold: number;
+    silver: number;
+    favor: number;
+    coins: number;
 }
 
 /**
@@ -26,7 +30,7 @@ export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
     tradeDeck: Array<Trade>,
     metalPrices: Array<MetalPrices>,
-    playerVPs: Array<PlayerVP>,
+    gameStats: Array<PlayerCountables>,
 }
 
 export type StateBundle = {

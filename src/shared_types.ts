@@ -1,4 +1,4 @@
-import { PlayerVP } from "./server/server_types";
+import { PlayerCountables } from "./server/server_types";
 
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
@@ -84,7 +84,7 @@ export type TempleStatus = {
  */
 export type SharedState = {
     gameStatus: GameStatus,
-    gameResults: null | Array<PlayerVP>,
+    gameResults: null | Array<PlayerCountables>,
     sessionOwner: PlayerId,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,

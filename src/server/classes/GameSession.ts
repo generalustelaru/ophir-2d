@@ -1,4 +1,4 @@
-import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
+import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
 import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -224,8 +224,8 @@ export class GameSession {
             case 'donate_goods':
                 const reward = trade.reward.favorAndVp;
                 player.favor = Math.min(6, player.favor + reward);
-                this.privateState.playerVPs.find(p => p.id === player.id)!.vp += reward;
-                console.info(this.privateState.playerVPs);
+                this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
+                console.info(this.privateState.gameStats);
                 break;
             default:
                 console.error(`Unknown trade action: ${tradeAction}`);
@@ -294,7 +294,7 @@ export class GameSession {
         } else {
             console.info('Game over!');
             this.sharedState.gameStatus = 'ended';
-            this.sharedState.gameResults = this.privateState.playerVPs;
+            this.sharedState.gameResults = this.compileGameResults();
         }
 
         return true;
@@ -373,8 +373,8 @@ export class GameSession {
         }
 
         const reward = details.metal === 'gold' ? 10 : 5
-        this.privateState.playerVPs.find(p => p.id === player.id)!.vp += reward;
-        console.info(this.privateState.playerVPs);
+        this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
+        console.info(this.privateState.gameStats);
 
         player.cargo = this.unloadItem(player.cargo, details.metal);
         player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
@@ -394,7 +394,7 @@ export class GameSession {
             } else {
                 console.info('Game over!');
                 this.sharedState.gameStatus = 'ended';
-                this.sharedState.gameResults = this.privateState.playerVPs;
+                this.sharedState.gameResults = this.compileGameResults();
             }
         }
 
@@ -618,5 +618,34 @@ export class GameSession {
         }
 
         return manifest;
+    }
+
+    private compileGameResults(): Array<PlayerCountables> {
+        const players = this.sharedState.players;
+        const gameStats = this.privateState.gameStats;
+
+        gameStats.forEach(player => {
+            const playerState = players.find(p => p.id === player.id);
+
+            if (!playerState) {
+                console.error(`No player found for ${player.id}`);
+                return;
+            }
+
+            player.gold = ((): number => {
+                return playerState.cargo.filter(item => item === 'gold').length;
+            })();
+
+            player.silver = ((): number => {
+                return playerState.cargo.filter(item => item === 'silver').length;
+            })();
+
+            player.vp += (player.gold * 5) + (player.silver * 3);
+
+            player.favor = playerState.favor;
+            player.coins = playerState.coins;
+        });
+
+        return gameStats;
     }
 }
