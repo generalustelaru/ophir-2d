@@ -3,16 +3,18 @@ import { ActionEventPayload } from '../client_types';
 import { Service } from './Service';
 import clientState from '../state';
 import { Button } from '../html_behaviors/button';
+import { TextInput } from '../html_behaviors/TextInput';
 import { CanvasService } from "./CanvasService";
 import { PlayerCountables } from '../../server/server_types';
 
 export class UserInterfaceService extends Service {
 
-    createButton: Button;
-    joinButton: Button;
-    startButton: Button;
-    resetButton: Button;
-    playerColorSelect;
+    private createButton: Button;
+    private joinButton: Button;
+    private startButton: Button;
+    private resetButton: Button;
+    private playerNameInput;
+    private playerColorSelect;
 
     constructor() {
         super();
@@ -20,6 +22,7 @@ export class UserInterfaceService extends Service {
         this.joinButton = new Button('joinButton', this.processEnroll);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
+        this.playerNameInput = new TextInput('playerNameInput', this.updatePlayerName);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
@@ -33,6 +36,10 @@ export class UserInterfaceService extends Service {
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
+    }
+
+    private updatePlayerName = (): void => {
+        clientState.localPlayerName = this.playerNameInput.element.value;
     }
 
     private processStart = (): void => {
@@ -60,9 +67,11 @@ export class UserInterfaceService extends Service {
             return this.setInfo('Please select a color');
         }
 
+        localStorage.setItem('playerId', selectedId);
+
         if (lobbyState.availableSlots.includes(selectedId)) {
             clientState.localPlayerId = selectedId;
-            const payload: ActionEventPayload = { action: 'enroll', details: null };
+            const payload: ActionEventPayload = { action: 'enroll', details: { playerName: clientState.localPlayerName }};
 
             return this.broadcastEvent('action', payload);
         }
@@ -85,6 +94,7 @@ export class UserInterfaceService extends Service {
         this.startButton.disable();
         this.playerColorSelect.disable();
         this.resetButton.disable();
+        this.playerNameInput.disable();
     }
 
     public updateGameControls(): void {
@@ -111,7 +121,7 @@ export class UserInterfaceService extends Service {
     private enableJoinOrStart(): void {
 
         if (!clientState.localPlayerId) {
-            this.enableElements(this.joinButton, this.playerColorSelect);
+            this.enableElements(this.joinButton, this.playerColorSelect, this.playerNameInput);
 
             return this.setInfo('A game is waiting for you');
         }
@@ -126,7 +136,7 @@ export class UserInterfaceService extends Service {
     }
 
     private enableCreate(): void {
-        this.enableElements(this.createButton, this.playerColorSelect);
+        this.enableElements(this.createButton, this.playerColorSelect, this.playerNameInput);
 
         return this.setInfo('You may create the game');
     }

@@ -3,6 +3,7 @@ import { ClientState } from './client_types';
 
 const clientState: ClientState = {
     localPlayerId: null,
+    localPlayerName: null,
     isBoardDrawn: false,
     received: {
         gameStatus: 'empty',
