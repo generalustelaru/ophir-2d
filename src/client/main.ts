@@ -69,8 +69,8 @@ window.addEventListener(
         uiService.updateLobbyControls();
 
         // Debugging
-        sessionStorage.setItem('state', JSON.stringify(sharedState));
-        sessionStorage.setItem('clientState', JSON.stringify({ localPlayerId: clientState.localPlayerId, isBoardDrawn: clientState.isBoardDrawn }));
+        sessionStorage.setItem('received', JSON.stringify(sharedState));
+        sessionStorage.setItem('client', JSON.stringify(clientState));
 
         ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
             sessionStorage.removeItem(playerId);
