@@ -49,6 +49,7 @@ export class CommunicationService extends Service {
 
         const message: WebsocketClientMessage = {
             playerId: clientState.localPlayerId,
+            playerName: clientState.localPlayerName,
             action,
             details
         };
