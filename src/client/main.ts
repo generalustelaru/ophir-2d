@@ -11,7 +11,6 @@ const { CONNECTION } = sharedConstants;
 let stateDebug: SharedState | null = null;
 
 // Initializations
-// TODO: Remove the key when the game is over
 clientState.localPlayerId = localStorage.getItem('playerId') as PlayerId | null;
 
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
