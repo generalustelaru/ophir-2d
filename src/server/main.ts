@@ -49,12 +49,13 @@ socketServer.on('connection', function connection(client) {
     client.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
-        const { playerId, action, details } = parsedMessage;
+        const { playerId, playerName, action, details } = parsedMessage;
+        const name = playerName || playerId || '';
         const colorized = {
-            playerPurple: '\x1b[95mplayerPurple\x1b[0m',
-            playerYellow: '\x1b[93mplayerYellow\x1b[0m',
-            playerRed: '\x1b[91mplayerRed\x1b[0m',
-            playerGreen: '\x1b[92mplayerGreen\x1b[0m',
+            playerPurple: `\x1b[95m${name}\x1b[0m`,
+            playerYellow: `\x1b[93m${name}\x1b[0m`,
+            playerRed: `\x1b[91m${name}\x1b[0m`,
+            playerGreen: `\x1b[92m${name}\x1b[0m`,
         }
         const clientName = playerId ? colorized[playerId] : 'anon';
         console.info(
@@ -78,7 +79,7 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'enroll') {
 
-            if (processPlayer(playerId)) {
+            if (processPlayer(playerId, playerName)) {
                 sendAll(lobbyState);
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
@@ -142,7 +143,7 @@ function processGameStart(details: GameSetupDetails): boolean {
     return true;
 }
 
-function processPlayer(playerId: PlayerId): boolean {
+function processPlayer(playerId: PlayerId, playerName: string|null): boolean {
     const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
     if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
@@ -161,6 +162,7 @@ function processPlayer(playerId: PlayerId): boolean {
 
     const newPlayer = tools.getCopy(serverConstants.DEFAULT_PLAYER_STATE);
     newPlayer.id = playerId;
+    newPlayer.name = playerName || playerId
     lobbyState.players.push(newPlayer);
 
     console.log(`${playerId} enrolled`);
