@@ -11,6 +11,7 @@ export type EventTitle = "connected" | "action" | "update" | "error" | "info" | 
 
 export type ClientState = {
     localPlayerId: PlayerId | null,
+    localPlayerName: string | null,
     isBoardDrawn: boolean,
     received: SharedState | NewState,
 }

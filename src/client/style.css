@@ -32,6 +32,12 @@ button, select {
     user-select: none;
 }
 
+input {
+    font-size: large;
+    height: 34px;
+    width: 100px;
+}
+
 #info {
     color: aliceblue;
 }
