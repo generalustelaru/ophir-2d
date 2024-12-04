@@ -1,4 +1,4 @@
-import { PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
+import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
 import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -23,7 +23,14 @@ export class GameSession {
         }
 
         this.setTurnStartCondition(activePlayer);
+
+        console.info('Game session created');
     }
+
+    public getState(): SharedState {
+        return this.sharedState;
+    }
+
     // MARK: ACTION SWITCH
     public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerId;
@@ -44,9 +51,11 @@ export class GameSession {
             case 'sell_goods':
                 return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
             case 'donate_goods':
-                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
+                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process trade on ${id}` };
             case 'buy_metals':
                 return this.processMetalTrade(message) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
+            case 'donate_metals':
+                return this.processMetalDonation(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
             case 'upgrade_hold':
@@ -171,7 +180,7 @@ export class GameSession {
         }
 
         const locationId = this.sharedState.setup.mapPairings[player.hexagon.hexId].id;
-        const nonPickupLocations: Array<LocationId> = ['temple', 'market', 'exchange'];
+        const nonPickupLocations: Array<LocationId> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationId)) {
             console.error(`Cannot pick up goods from ${locationId}`);
@@ -215,8 +224,8 @@ export class GameSession {
             case 'donate_goods':
                 const reward = trade.reward.favorAndVp;
                 player.favor = Math.min(6, player.favor + reward);
-                this.privateState.playerVPs.find(p => p.id === player.id)!.vp += reward;
-                console.info(this.privateState.playerVPs);
+                this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
+                console.info(this.privateState.gameStats);
                 break;
             default:
                 console.error(`Unknown trade action: ${tradeAction}`);
@@ -268,8 +277,6 @@ export class GameSession {
             const newTrade = tradeDeck.splice(pick, 1).shift();
 
             if (!newTrade) {
-                console.error('No card could be drawn!');
-
                 return false;
             }
 
@@ -278,15 +285,17 @@ export class GameSession {
             return true;
         })();
 
-        if (!isNewTrade) {
-            return false;
+        if (isNewTrade) {
+            const players = this.sharedState.players;
+
+            players.forEach(player => {
+                player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
+            });
+        } else {
+            console.info('Game over!');
+            this.sharedState.gameStatus = 'ended';
+            this.sharedState.gameResults = this.compileGameResults();
         }
-
-        const players = this.sharedState.players;
-
-        players.forEach(player => {
-            player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-        });
 
         return true;
     }
@@ -305,10 +314,10 @@ export class GameSession {
             return false;
         }
 
-        const templeLevel = this.sharedState.templeLevel;
+        const templeStatus = this.sharedState.templeStatus;
         const metalCost = (() =>{ switch (details.metal) {
-            case 'gold': return templeLevel.goldCost;
-            case 'silver': return templeLevel.silverCost;
+            case 'gold': return templeStatus.prices.goldCost;
+            case 'silver': return templeStatus.prices.silverCost;
             default: return null;
         }})();
         const playerAmount = (() => { switch (details.currency) {
@@ -349,10 +358,50 @@ export class GameSession {
         return true;
     }
     // MARK: DONATE METALS
-    // TODO: Implement donate_metals
-    /**
-     * this.sharedState.templeLevel = TEMPLE_LEVELS[this.sharedState.templeLevel.id + 1]; 
-     */
+    private processMetalDonation(message: WebsocketClientMessage): boolean {
+        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const details = message.details as MetalPurchaseDetails;
+
+        if (
+            false === !!player
+            || false === !!player.locationActions?.includes('donate_metals')
+            || false === player.isAnchored
+            || false === player.cargo.includes(details.metal)
+        ) {
+            console.error(`Player ${player?.id} cannot donate ${details.metal}`);
+            return false;
+        }
+
+        const reward = details.metal === 'gold' ? 10 : 5
+        this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
+        console.info(this.privateState.gameStats);
+
+        player.cargo = this.unloadItem(player.cargo, details.metal);
+        player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
+        player.moveActions = 0;
+
+        const newStatus = this.tools.getCopy(this.sharedState.templeStatus);
+        newStatus.levelCompletion += 1;
+        newStatus.donations.push(details.metal);
+
+        if (newStatus.levelCompletion === 3) {
+            newStatus.currentLevel += 1;
+            const newPrices = this.privateState.metalPrices.shift();
+
+            if (newPrices) {
+                newStatus.prices = newPrices;
+                newStatus.levelCompletion = 0;
+            } else {
+                console.info('Game over!');
+                this.sharedState.gameStatus = 'ended';
+                this.sharedState.gameResults = this.compileGameResults();
+            }
+        }
+
+        this.sharedState.templeStatus = newStatus;
+
+        return true;
+    }
     // MARK: END TURN
     private processEndTurn(playerId: PlayerId): boolean {
         const player = this.sharedState.players.find(player => player.id === playerId);
@@ -569,5 +618,34 @@ export class GameSession {
         }
 
         return manifest;
+    }
+
+    private compileGameResults(): Array<PlayerCountables> {
+        const players = this.sharedState.players;
+        const gameStats = this.privateState.gameStats;
+
+        gameStats.forEach(player => {
+            const playerState = players.find(p => p.id === player.id);
+
+            if (!playerState) {
+                console.error(`No player found for ${player.id}`);
+                return;
+            }
+
+            player.gold = ((): number => {
+                return playerState.cargo.filter(item => item === 'gold').length;
+            })();
+
+            player.silver = ((): number => {
+                return playerState.cargo.filter(item => item === 'silver').length;
+            })();
+
+            player.vp += (player.gold * 5) + (player.silver * 3);
+
+            player.favor = playerState.favor;
+            player.coins = playerState.coins;
+        });
+
+        return gameStats;
     }
 }

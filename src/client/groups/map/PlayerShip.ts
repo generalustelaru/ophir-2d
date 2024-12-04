@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, HexId, PlayerId, SharedState, DiceSix } from '../../../shared_types';
 import { ActionEventPayload } from '../../client_types';
-import clientState from '../../state';
+import state from '../../state';
 import clientConstants from '../../client_constants';
 import { MapHexagon } from '../GroupList';
 
@@ -39,7 +39,7 @@ export class PlayerShip {
         mapHexes: Array<MapHexagon>
     ) {
         this.mapHexes = mapHexes;
-        const playerId = clientState.localPlayerId;
+        const playerId = state.local.playerId;
 
         if (!playerId) {
             throw new Error('Player ID is missing!');
@@ -78,7 +78,7 @@ export class PlayerShip {
         // MARK: - Dragging (move)
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
-            const serverState = clientState.received as SharedState
+            const serverState = state.received as SharedState
             const player = serverState.players.find(player => player.id === playerId);
             const position = stage.getPointerPosition();
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
@@ -122,7 +122,7 @@ export class PlayerShip {
                 mapHex.setFill(COLOR.defaultHex);
             }
 
-            const player = clientState.received.players.find(player => player.id === playerId);
+            const player = state.received.players.find(player => player.id === playerId);
             const position = stage.getPointerPosition();
             const departureHex = this.mapHexes.find(hex => hex.getId() === player?.hexagon.hexId);
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
@@ -179,7 +179,7 @@ export class PlayerShip {
         ));
     }
     private calculateToSailValue(targetHexId: HexId): DiceSix | false {
-        const influencePool = clientState.received.players
+        const influencePool = state.received.players
             .map(player => { return player.hexagon.hexId === targetHexId ? player.influence : 0 });
         const highestInfluence = Math.max(...influencePool) as DiceSix;
 

@@ -1,45 +1,66 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, Location, TempleLevel } from '../../shared_types';
-import { PlayerVP, PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, LocationData, MetalPrices, NewState } from '../../shared_types';
+import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TEMPLE_LEVELS } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, METAL_PRICES } = serverConstants;
 
 export class GameSetupService extends Service {
 
     private tools: ToolService = ToolService.getInstance();
-    public produceGameData(sharedState: SharedState, setupCoordinates: Array<Coordinates>): StateBundle {
-        sharedState.players = this.assignTurnOrderAndPosition(sharedState.players, setupCoordinates);
-        sharedState.setup = {
-            barriers: this.determineBarriers(),
-            mapPairings: this.determineLocations(),
-            marketFluctuations: this.determineFluctuations(),
-            templeTradeSlot: this.determineTempleTradeSlot(),
+
+    public produceGameData(newState: NewState, setupCoordinates: Array<Coordinates>): StateBundle {
+        const players = this.tools.getCopy(newState.players);
+
+        if (newState.sessionOwner === null) {
+            throw new Error('Cannot start game while the session owner is null');
         }
+    
+        if (players.length < 2) {
+            throw new Error('Not enough players to start a game');
+        }
+
+        const barriers = this.determineBarriers();
+        const marketData = this.prepareDeckAndGetOffer((TRADE_DECK_A));
 
         const privateState: PrivateState = {
-            moveRules: this.produceMoveRules(sharedState.setup.barriers),
-            tradeDeck: this.tools.getCopy(TRADE_DECK_A),
-            playerVPs: sharedState.players.map(p => ({id: p.id, vp: 0})) as Array<PlayerVP>,
+            moveRules: this.produceMoveRules(barriers),
+            tradeDeck: marketData.tradeDeck,
+            metalPrices: this.filterMetalPrices(players.length),
+            gameStats: players.map(p => ({id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0})),
         }
 
-        sharedState.players = this.assignTurnOneRules(sharedState.players, privateState.moveRules);
-
-        const { tradeDeck, marketOffer } = this.prepareDeckAndGetOffer(this.tools.getCopy(privateState.tradeDeck));
-        privateState.tradeDeck = tradeDeck;
-        sharedState.marketOffer = marketOffer;
-        sharedState.templeLevel = this.selectInitialTempleLevel(sharedState.players.length);
-
-        const bundle: StateBundle = {
-            sharedState: sharedState,
-            privateState: privateState,
+        const sharedState: SharedState = {
+            gameStatus: 'started',
+            gameResults: null,
+            sessionOwner: newState.sessionOwner,
+            sessionChat: ['Welcome to the archipelago!'],
+            availableSlots: [],
+            players: this.assignTurnOneRules(
+                this.assignTurnOrderAndPosition(players, setupCoordinates),
+                privateState.moveRules
+            ),
+            marketOffer: marketData.marketOffer,
+            templeStatus: {
+                maxLevel: privateState.metalPrices.length,
+                prices: privateState.metalPrices.shift() as MetalPrices,
+                levelCompletion: 0,
+                currentLevel: 0,
+                donations: [],
+            },
+            setup: {
+                barriers: barriers,
+                mapPairings: this.determineLocations(),
+                marketFluctuations: this.determineFluctuations(),
+                templeTradeSlot: this.determineTempleTradeSlot(),
+            },
         }
 
-        return bundle;
+        return { sharedState, privateState };
     };
-
+    // MARK: Player Setup
     private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
         const playerIds = players.map(player => player.id);
 
@@ -69,10 +90,10 @@ export class GameSetupService extends Service {
 
         return [b1, b2];
     }
-
-    private determineLocations(): Record<HexId, Location> {
+    // MARK: Map Locations
+    private determineLocations(): Record<HexId, LocationData> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
-        const locationPairing: Record<HexId, null | Location> = {
+        const locationPairing: Record<HexId, null | LocationData> = {
             center: null,
             topRight: null,
             right: null,
@@ -89,7 +110,7 @@ export class GameSetupService extends Service {
             locationPairing[hexId] = locations.splice(pick, 1)[0];
         }
 
-        return locationPairing as Record<HexId, Location>;
+        return locationPairing as Record<HexId, LocationData>;
     }
 
     private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
@@ -102,11 +123,12 @@ export class GameSetupService extends Service {
 
         return players;
     }
-
+    // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
         const rules: Array<ProcessedMoveRule> = [];
+        const defaultMoveRules = this.tools.getCopy(DEFAULT_MOVE_RULES);
 
-        DEFAULT_MOVE_RULES.forEach(moveRule => {
+        defaultMoveRules.forEach(moveRule => {
 
             barrierIds.forEach(barrierId => {
 
@@ -147,7 +169,7 @@ export class GameSetupService extends Service {
 
         return pool.splice(pick, 1).shift() as MarketKey;
     }
-
+    // MARK: Market Offer
     private prepareDeckAndGetOffer(trades: Array<Trade>): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         let tradeDeck = this.tools.getCopy(trades);
 
@@ -173,16 +195,13 @@ export class GameSetupService extends Service {
 
         return { tradeDeck, marketOffer };
     }
+    // MARK: Temple Levels
+    private filterMetalPrices(playerCount: number): Array<MetalPrices> {
+        const defaultPriceList = this.tools.getCopy(METAL_PRICES);
+        const metalprices = defaultPriceList.filter(
+            level => !level.skipOnPlayerCounts.includes(playerCount)
+        );
 
-    private selectInitialTempleLevel(playerCount: number): TempleLevel {
-        const levels = this.tools.getCopy(TEMPLE_LEVELS);
-
-        for (const level of levels) {
-            if (level.skipOnPlayerCount !== playerCount) {
-                return level;
-            }
-        }
-
-        return levels[0];
+        return metalprices;
     }
 }

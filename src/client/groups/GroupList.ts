@@ -11,7 +11,7 @@ import { FavorDial } from './FavorDial';
 import { CargoBand } from './player/CargoBand';
 import { MarketPlacard } from './location/MarketPlacard';
 import { CoinDial } from "./CoinDial";
-import { ExchangePlacard } from "./location/ExchangePlacard";
+import { TreasuryPlacard } from "./location/TreasuryPlacard";
 import { TemplePlacard } from './location/TemplePlacard';
 import { MarketDeck } from './location/MarketDeck';
 import { MarketCard } from './location/MarketCard';
@@ -21,12 +21,14 @@ import { MovesDial } from './map/MovesDial';
 import { FavorButton } from './map/FavorButton';
 import { FavorIcon } from './FavorIcon';
 import { UpgradeButton } from './location/UpgradeButton';
-import { TempleCard } from './location/TempleCard';
+import { TempleMarketCard } from './location/TempleMarketCard';
 import { TempleRewardDial } from './location/TempleRewardDial';
+import { TempleDonationCard } from './location/TempleDonationCard';
+import { MetalDonationsBand } from './location/MetalDonationsBand';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHexagon, ActionDial, PlayerShip,
-    ShipToken, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, ExchangePlacard,
-    TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial,
-    GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleCard
+    ShipToken, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
+    TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, TempleDonationCard,
+    GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
 };

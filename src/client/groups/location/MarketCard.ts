@@ -4,6 +4,7 @@ import { Coordinates, Fluctuation, Trade } from "../../../shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
+import { MiniTempleRewardDial } from "./MiniTempleRewardDial";
 
 const { COLOR } = clientConstants;
 export class MarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
@@ -12,6 +13,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
     private fluctuation: Fluctuation | null = null;
+    private miniRewardDial: MiniTempleRewardDial
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
@@ -23,7 +25,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
             stage,
             {
                 width: 66,
-                height: 128,
+                height: 108,
                 x: position.x,
                 y: position.y,
             },
@@ -44,7 +46,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         this.coinDial = new CoinDial(
             {
                 x: this.background.width() / 2,
-                y: this.background.height() / 2 + 20,
+                y: this.background.height() / 2 + 27,
             },
             trade.reward.coins + (fluctuation ?? 0)
         );
@@ -54,23 +56,30 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
                 width: this.background.width(),
                 height: this.background.width(),
                 x: 0,
-                y: 0,
+                y: -3,
             },
             trade.request
         );
+
+        this.miniRewardDial = new MiniTempleRewardDial(
+            { x: this.group.width() - 13, y: this.group.height() - 13 },
+            trade.reward.favorAndVp,
+        )
 
         this.group.add(...[
             this.background,
             this.coinDial.getElement(),
             this.goodsAssortment.getElement(),
+            this.miniRewardDial.getElement(),
         ]);
     }
 
     public updateElement(data: MarketCardUpdate): void {
         this.coinDial.updateElement(data.trade.reward.coins + (this.fluctuation ?? 0));
+        this.miniRewardDial.updateElement(data.trade.reward.favorAndVp);
         this.goodsAssortment.updateElement(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.marketDarkOrange);
-        this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
+        this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);
     }
 

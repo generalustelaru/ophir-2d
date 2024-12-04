@@ -6,7 +6,7 @@ import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
-export class TempleCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
+export class TempleMarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
 
     private rewardDial: TempleRewardDial;
     private goodsAssortment: GoodsAssortment;
@@ -65,7 +65,7 @@ export class TempleCard extends ActionButton implements DynamicGroupInterface<Ma
         this.rewardDial.updateElement(data.trade.reward.favorAndVp);
         this.goodsAssortment.updateElement(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
-        this.background.stroke(data.isFeasible ? COLOR.exchangeGold : COLOR.boneWhite);
+        this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);
     }
 

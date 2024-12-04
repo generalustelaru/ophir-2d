@@ -1,16 +1,20 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, TempleLevel, Currency } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
 export type HexOffset = { id: HexId, x: number, y: number };
-export type LocationIconData = { id: LocationId, shape: string, fill: Color };
+export type LocationIconData = { shape: string, fill: Color };
+export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
-
-export type ClientState = {
-    localPlayerId: PlayerId | null,
+export type LocalState = {
+    playerId: PlayerId | null,
+    playerName: string | null,
     isBoardDrawn: boolean,
+}
+export type ClientState = {
+    local: LocalState,
     received: SharedState | NewState,
 }
 
@@ -18,12 +22,13 @@ export type ClientConstants = {
     CONNECTION: {
         wsAddress: string
     },
+    DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<HexId, IslandData>,
     LOCATION_TOKEN_DATA: Record<LocationId, LocationIconData>,
-    TEMPLE_CONSTRUCTION_DATA: Array<LocationIconData>
+    TEMPLE_CONSTRUCTION_DATA: Array<TempleIconData>
     SHIP_DATA: {
         setupDrifts: Array<Coordinates>,
         shape: string
@@ -38,7 +43,6 @@ export interface MegaGroupInterface {
 }
 
 export interface DynamicGroupInterface<S> {
-    // new(state: S, ...constructorArgs: any[]): void, TODO: define the constructor args to include the update data; modify the constructors and instantiations.
     getElement(): Konva.Group,
     updateElement(state: S): void,
 }
@@ -70,18 +74,19 @@ export type MarketUpdate = {
     marketOffer: MarketOffer,
 }
 
-export type ExchangeUpdate = {
+export type TreasuryUpdate = {
     localPlayer: Player | null,
-    templeLevel: TempleLevel,
+    metalPrices: MetalPrices,
 }
 
-export type ExchangeCardUpdate = {
+export type TreasuryCardUpdate = {
     playerAmounts: { coins: number, favor: number } | null,
-    exchange: {currency: Currency, amount: number, metal: MetalId},
+    treasury: { currency: Currency, amount: number, metal: MetalId },
 }
 
 export type TempleUpdate = {
     trade: Trade,
+    templeStatus: TempleStatus,
     localPlayer: Player | null,
 }
 

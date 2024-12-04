@@ -70,8 +70,8 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
             stroke: 'black',
             strokeWidth: 1,
             scale: { x: 2, y: 2 },
-            x: this.group.width() / 2 - 20,
-            y: this.group.height() - this.group.height() / 6 - 30,
+            x: 5,
+            y: this.group.height() - 48,
         });
     }
 }

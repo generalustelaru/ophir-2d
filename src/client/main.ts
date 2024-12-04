@@ -1,25 +1,30 @@
-import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
-import clientState from "./state";
+import { InfoEventPayload, ActionEventPayload, ErrorEventPayload, LocalState } from "./client_types";
+import state from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import sharedConstants from "../shared_constants";
+import clientConstants from "./client_constants";
 import { SharedState } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
 //@ts-ignore
-let stateDebug: SharedState|null = null;
+let stateDebug: SharedState | null = null;
 
 // Initializations
+const savedState = sessionStorage.getItem('localState');
+state.local = savedState ? JSON.parse(savedState) : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
+
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
-const canvasService: CanvasService = CanvasService.getInstance([]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
+const canvasService: CanvasService = CanvasService.getInstance([]);
 
 //Send player action to server
 window.addEventListener(
     'action' as any,
     (event) => {
         const payload: ActionEventPayload = event.detail;
+
         commService.sendMessage(
             payload.action,
             payload.details
@@ -47,27 +52,38 @@ window.addEventListener(
 window.addEventListener(
     'update',
     () => {
-    const sharedState = clientState.received as SharedState;
+        const sharedState = state.received as SharedState;
 
-    if (sharedState.gameStatus === 'started') {
+        if (sharedState.gameStatus === 'reset') {
+            sessionStorage.removeItem('localState');
+            alert('The game has been reset');
 
-        if (clientState.isBoardDrawn) {
-            canvasService.updateElements();
-        } else {
-            uiService.setInfo('The game has started');
-            canvasService.drawElements();
-            clientState.isBoardDrawn = true;
+            window.location.reload();
         }
+
+        if (state.local.isBoardDrawn) {
+            canvasService.updateElements();
+        } else if (sharedState.gameStatus === 'started') {
+            uiService.setInfo('You are playing.');
+            state.local.isBoardDrawn = true;
+            canvasService.drawElements();
+        }
+
         uiService.updateGameControls();
-    } else {
         uiService.updateLobbyControls();
-    }
-    sessionStorage.setItem('state', JSON.stringify(sharedState));
-    sessionStorage.setItem('0', JSON.stringify(clientState.received.players[0]));
-    sessionStorage.setItem('1', JSON.stringify(clientState.received.players[1]));
-    sessionStorage.setItem('2', JSON.stringify(clientState.received.players[2]));
-    sessionStorage.setItem('3', JSON.stringify(clientState.received.players[3]));
-});
+
+        // Debugging
+        localStorage.setItem('received', JSON.stringify(sharedState));
+        localStorage.setItem('client', JSON.stringify(state));
+
+        ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
+            localStorage.removeItem(playerId);
+        });
+
+        for (const player of state.received.players) {
+            localStorage.setItem(player.id, JSON.stringify(player));
+        }
+    });
 
 window.addEventListener(
     'info' as any,

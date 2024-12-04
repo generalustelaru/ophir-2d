@@ -84,9 +84,9 @@ const serverConstants: ServerConstants = {
     ],
 
     LOCATION_ACTIONS: [
-        {id: 'temple', actions: ['upgrade_hold', 'donate_goods']}, // TODO: Implement donate_metals
+        {id: 'temple', actions: ['upgrade_hold', 'donate_goods', 'donate_metals']},
         {id: 'market', actions: ['sell_goods']},
-        {id: 'exchange', actions: ['buy_metals']},
+        {id: 'treasury', actions: ['buy_metals']},
         {id: 'quary', actions: ['pickup_good']},
         {id: 'forest', actions: ['pickup_good']},
         {id: 'mines', actions: ['pickup_good']},
@@ -102,6 +102,7 @@ const serverConstants: ServerConstants = {
 
     DEFAULT_PLAYER_STATE: {
         id: 'playerPurple',
+        name: null,
         turnOrder: 0,
         isActive: false,
         hexagon: { hexId: "center", position: {x: 0, y: 0} },
@@ -118,14 +119,34 @@ const serverConstants: ServerConstants = {
         coins: 0,
     },
 
-    TEMPLE_LEVELS: [
-        { id: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCount: 4 },
-        { id: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCount: null },
-        { id: 2, goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCount: null },
-        { id: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCount: null },
-        { id: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCount: null },
-        { id: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCount: 2 },
-        { id: 6, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCount: null },
+    DEFAULT_NEW_STATE: {
+        gameStatus: 'empty',
+        gameResults: null,
+        sessionOwner: null,
+        sessionChat: [],
+        availableSlots: [
+            'playerPurple',
+            'playerYellow',
+            'playerRed',
+            'playerGreen',
+        ],
+        players: [],
+        marketOffer: null,
+        templeStatus: null,
+        setup: null,
+    },
+
+    RESET_STATE: {
+        gameStatus: 'reset',
+    },
+
+    METAL_PRICES: [
+        { id: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: [2, 3] },
+        { id: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: []},
+        { id: 2, goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: []},
+        { id: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: []},
+        { id: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCounts: []},
+        { id: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCounts: [2] },
     ],
 }
 

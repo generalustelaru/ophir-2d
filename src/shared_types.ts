@@ -1,3 +1,4 @@
+import { PlayerCountables } from "./server/server_types";
 
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
@@ -7,13 +8,13 @@ export type GoodId = "gem" | "wood" | "stone" | "cloth";
 export type MetalId = "silver" | "silver_extra" | "gold" | "gold_extra"; // metals cover two cargo spaces
 export type Currency = "coins" | "favor";
 export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
-export type LocationId = "temple" | "market" | "exchange" | PickupLocationId;
+export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
 export type Action =
     | LocationAction | FreeAction
-    | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn";
-export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good";
+    | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn" | "reset";
+export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good" | "donate_metals";
 export type FreeAction = "reposition" | "drop_item"
-export type GameStatus = "empty" | "created" | "full" | "started";
+export type GameStatus = "empty" | "created" | "full" | "started" | "ended" | "reset";
 export type ItemId = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ItemId>;
@@ -21,11 +22,11 @@ export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
-export type TempleLevel = {
+export type MetalPrices = {
     id: number,
     goldCost: MetalCost,
     silverCost: MetalCost,
-    skipOnPlayerCount: number | null,
+    skipOnPlayerCounts: Array<number>,
 }
 
 export type MetalCost = {
@@ -35,6 +36,7 @@ export type MetalCost = {
 
 export type Player = {
     id: PlayerId,
+    name: string | null,
     turnOrder: number,
     isActive: boolean,
     hexagon: {
@@ -47,7 +49,6 @@ export type Player = {
     moveActions: number,
     isAnchored: boolean,
     locationActions: Array<LocationAction> | null,
-    // locationFreeActions: Array<FreeAction>, TODO: Implement for location-sepcific actions that can be repeated on a turn (sell specialist good, donate metals, buying metals)
     allowedMoves: Array<HexId>,
     hasCargo: boolean,
     cargo: CargoManifest,
@@ -70,37 +71,54 @@ export type MarketFluctuations = {
     slot_3: Fluctuation,
 }
 
+export type TempleStatus = {
+    prices: MetalPrices,
+    currentLevel: number,
+    maxLevel: number,
+    levelCompletion: number,
+    donations: Array<MetalId>,
+}
+
 /**
  * @description Shared between players and server in a session
  */
 export type SharedState = {
     gameStatus: GameStatus,
+    gameResults: null | Array<PlayerCountables>,
     sessionOwner: PlayerId,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
     marketOffer: MarketOffer,
-    templeLevel: TempleLevel,
+    templeStatus: TempleStatus,
     setup: GameSetup,
+    sessionChat: Array<string>,
     // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }
 
 export type NewState = {
     gameStatus: GameStatus,
+    gameResults: null,
     sessionOwner: PlayerId | null,
     availableSlots: Array<PlayerId>,
     players: Array<Player>,
     marketOffer: null,
+    templeStatus: null,
     setup: null,
+    sessionChat: Array<string>,
 }
 
-export type Location = {
+export type ResetState = {
+    gameStatus: "reset",
+}
+
+export type LocationData = {
     id: LocationId,
     actions: Array<LocationAction>,
 }
 
 export type GameSetup = {
     barriers: Array<BarrierId>,
-    mapPairings: Record<HexId, Location>,
+    mapPairings: Record<HexId, LocationData>,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketKey,
 }
@@ -131,14 +149,19 @@ export type MetalPurchaseDetails = {
     currency: Currency,
 }
 
+export type MetalDonationDetails = {
+    metal: MetalId,
+}
+
 export type ActionDetails =
     | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | MarketSaleDetails
-    | MetalPurchaseDetails | null;
+    | MetalPurchaseDetails | MetalDonationDetails | null;
 
 export type Coordinates = { x: number, y: number };
 
 export type WebsocketClientMessage = {
     playerId: PlayerId | null,
+    playerName: string | null,
     action: Action,
     details: ActionDetails,
 }

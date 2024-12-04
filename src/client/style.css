@@ -29,6 +29,13 @@ html, body {
 button, select {
     font-size: large;
     height: 40px;
+    user-select: none;
+}
+
+input {
+    font-size: large;
+    height: 34px;
+    width: 100px;
 }
 
 #info {

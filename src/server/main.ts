@@ -3,31 +3,13 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import serverConstants from './server_constants';
-import { SharedState, PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
-import { PrivateState, WssMessage, StateBundle } from './server_types';
+import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
+import { WssMessage, StateBundle } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
 const httpPort = 3000;
 const wsPort = 8080;
-
-const { PLAYER_IDS, DEFAULT_PLAYER_STATE } = serverConstants;
-const privateState: PrivateState = {
-    moveRules: [],
-    tradeDeck: [],
-    playerVPs: [],
-}
-
-const newState: NewState | SharedState = {
-    gameStatus: 'empty',
-    sessionOwner: null,
-    availableSlots: PLAYER_IDS,
-    players: [],
-    marketOffer: null,
-    setup: null,
-}
-
-let singleSession: GameSession | null = null;
 
 const app = express();
 app.use(express.static('public'));
@@ -47,6 +29,9 @@ const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
+let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+let singleSession: GameSession | null = null;
+
 const sendAll = (message: WssMessage) => {
     socketClients.forEach(client => {
         client.send(JSON.stringify(message));
@@ -64,12 +49,13 @@ socketServer.on('connection', function connection(client) {
     client.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
-        const { playerId, action, details } = parsedMessage;
+        const { playerId, playerName, action, details } = parsedMessage;
+        const name = playerName || playerId || '';
         const colorized = {
-            playerPurple: '\x1b[95mplayerPurple\x1b[0m',
-            playerYellow: '\x1b[93mplayerYellow\x1b[0m',
-            playerRed: '\x1b[91mplayerRed\x1b[0m',
-            playerGreen: '\x1b[92mplayerGreen\x1b[0m',
+            playerPurple: `\x1b[95m${name}\x1b[0m`,
+            playerYellow: `\x1b[93m${name}\x1b[0m`,
+            playerRed: `\x1b[91m${name}\x1b[0m`,
+            playerGreen: `\x1b[92m${name}\x1b[0m`,
         }
         const clientName = playerId ? colorized[playerId] : 'anon';
         console.info(
@@ -80,7 +66,8 @@ socketServer.on('connection', function connection(client) {
         );
 
         if (action === 'inquire') {
-            send(client, newState);
+            send(client, singleSession?.getState() || lobbyState);
+
             return;
         }
 
@@ -92,8 +79,14 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'enroll') {
 
-            if (processPlayer(playerId)) {
-                sendAll(newState);
+            if (!playerHasUniqueName(playerName)) {
+                send(client, { error: 'This name is already taken' });
+
+                return;
+            }
+
+            if (processPlayer(playerId, playerName)) {
+                sendAll(lobbyState);
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
             }
@@ -103,18 +96,35 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'start') {
             const setupDetails = details as GameSetupDetails;
+            const sessionCreated = processGameStart(setupDetails);
 
-            if (processGameStart(setupDetails)) {
-                sendAll(newState);
+            if (sessionCreated && singleSession) {
+                console.log('Game started');
+                sendAll(singleSession.getState());
             } else {
                 sendAll({ error: 'Game start failed' });
             }
 
             return;
         }
-        // in-game player actions are handled in instantiable class
-        const session = singleSession as GameSession;
-        sendAll(session.processAction(parsedMessage));
+
+        if (action === 'reset') {
+            console.log('Session is resetting!');
+            singleSession = null;
+            lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+
+            sendAll(serverConstants.RESET_STATE);
+
+            return;
+        }
+
+        if (singleSession) {
+            sendAll(singleSession.processAction(parsedMessage));
+
+            return;
+        }
+
+        send(client, { error: 'Request cannot be handled' });
     });
 });
 
@@ -128,17 +138,8 @@ process.on('SIGINT', () => {
 function processGameStart(details: GameSetupDetails): boolean {
 
     try {
-        const sharedState = newState as SharedState;
-        sharedState.gameStatus = 'started';
-        sharedState.availableSlots = [];
-
-        const bundle: StateBundle = setupService.produceGameData(sharedState, details.setupCoordinates);
-
+        const bundle: StateBundle = setupService.produceGameData(lobbyState, details.setupCoordinates);
         singleSession = new GameSession(bundle);
-
-        sharedState.players = bundle.sharedState.players;
-        sharedState.setup = bundle.sharedState.setup;
-        privateState.moveRules = bundle.privateState.moveRules;
     } catch (error) {
         console.error('Game start failed:', error);
 
@@ -148,37 +149,46 @@ function processGameStart(details: GameSetupDetails): boolean {
     return true;
 }
 
-function processPlayer(playerId: PlayerId): boolean {
+function playerHasUniqueName(playerName: string|null): boolean {
+    if (!playerName) {
+        return true;
+    }
+
+    return !lobbyState.players.some(player => player.name === playerName);
+}
+
+function processPlayer(playerId: PlayerId, playerName: string|null): boolean {
     const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
-    if (incompatibleStatuses.includes(newState.gameStatus)) {
+    if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
         console.log(`${playerId} cannot enroll`);
 
         return false;
     }
 
-    if (false == PLAYER_IDS.includes(playerId)) {
+    if (false == serverConstants.PLAYER_IDS.includes(playerId)) {
         console.log(`${playerId} is not a valid player`);
 
         return false;
     }
 
-    newState.availableSlots = newState.availableSlots.filter(slot => slot !== playerId);
+    lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerId);
 
-    const newPlayer = tools.getCopy(DEFAULT_PLAYER_STATE);
+    const newPlayer = tools.getCopy(serverConstants.DEFAULT_PLAYER_STATE);
     newPlayer.id = playerId;
-    newState.players.push(newPlayer);
+    newPlayer.name = playerName || playerId
+    lobbyState.players.push(newPlayer);
 
     console.log(`${playerId} enrolled`);
 
-    if (newState.sessionOwner === null) {
-        newState.gameStatus = 'created';
-        newState.sessionOwner = playerId;
+    if (lobbyState.sessionOwner === null) {
+        lobbyState.gameStatus = 'created';
+        lobbyState.sessionOwner = playerId;
         console.log(`${playerId} is the session owner`);
     }
 
-    if (newState.availableSlots.length === 0) {
-        newState.gameStatus = 'full';
+    if (lobbyState.availableSlots.length === 0) {
+        lobbyState.gameStatus = 'full';
         console.log(`Session is full`);
     }
 

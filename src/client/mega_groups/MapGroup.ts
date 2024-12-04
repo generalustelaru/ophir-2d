@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails, PlayerId, SharedState } from '../../shared_types';
-import { MegaGroupInterface, GroupLayoutData } from '../client_types';
+import { Coordinates, GameSetupDetails, LocationId, PlayerId, SharedState } from '../../shared_types';
+import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
-import clientState from '../state';
+import state from '../state';
 import clientConstants from '../client_constants';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA} = clientConstants;
@@ -34,9 +34,9 @@ export class MapGroup implements MegaGroupInterface {
     // MARK: DRAW
     public drawElements(): void {
         const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
-        const serverState = clientState.received as SharedState;
+        const serverState = state.received as SharedState;
         const players = serverState.players;
-        const localPlayer = players.find(player => player.id === clientState.localPlayerId);
+        const localPlayer = players.find(player => player.id === state.local.playerId);
         const isActivePlayer = localPlayer?.isActive || false;
         //MARK: dials
         this.movesDial = new MovesDial(isActivePlayer);
@@ -66,7 +66,7 @@ export class MapGroup implements MegaGroupInterface {
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
-            const pairing = serverState.setup.mapPairings[hexItem.id];
+            const locationData = serverState.setup.mapPairings[hexItem.id];
             const mapHex = new MapHexagon(
                 this.stage,
                 centerPoint,
@@ -74,9 +74,8 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                pairing.id === 'temple'
-                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeLevel.id]
-                    : LOCATION_TOKEN_DATA[pairing.id],
+                locationData.id,
+                this.getIconData(locationData.id),
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
@@ -92,7 +91,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: ships
         players.forEach(player => {
 
-            if (player.id && player.id !== clientState.localPlayerId) {
+            if (player.id && player.id !== state.local.playerId) {
                 const shipPosition = player.hexagon.position;
                 const ship = new ShipToken(
                     shipPosition.x,
@@ -106,7 +105,7 @@ export class MapGroup implements MegaGroupInterface {
             }
         });
 
-        if (!clientState.localPlayerId) {
+        if (!state.local.playerId) {
             return;
         }
 
@@ -121,7 +120,7 @@ export class MapGroup implements MegaGroupInterface {
             this.stage,
             shipPosition.x,
             shipPosition.y,
-            COLOR[clientState.localPlayerId],
+            COLOR[state.local.playerId],
             localPlayer.isActive,
             this.mapHexes,
         );
@@ -132,9 +131,9 @@ export class MapGroup implements MegaGroupInterface {
 
     // MARK: UPDATE
     public updateElements(): void {
-        const serverState = clientState.received as SharedState;
+        const serverState = state.received as SharedState;
         const players = serverState.players;
-        const localPlayer = players.find(player => player.id === clientState.localPlayerId);
+        const localPlayer = players.find(player => player.id === state.local.playerId);
 
         //MARK: dials & hexes
         if (localPlayer) {
@@ -147,9 +146,7 @@ export class MapGroup implements MegaGroupInterface {
         for (const mapHex of this.mapHexes) {
             mapHex.updateElement({
                 player: localPlayer || null,
-                templeIcon: mapHex.getTokenId() === 'temple'
-                    ? TEMPLE_CONSTRUCTION_DATA[serverState.templeLevel.id]
-                    : null,
+                templeIcon: this.getIconData(mapHex.getTokenId())
             });
         }
 
@@ -187,5 +184,29 @@ export class MapGroup implements MegaGroupInterface {
         });
 
         return { setupCoordinates: startingPositions };
+    }
+
+    private getIconData(locationId: LocationId): LocationIconData {
+
+        if (locationId != 'temple')
+            return LOCATION_TOKEN_DATA[locationId];
+
+        const skipCount = (() => {
+            const playerCount = state.received.players.length;
+            switch (playerCount) {
+                case 2: return 2;
+                case 3: return 1;
+                default: return 0;
+            }
+        })();
+        const currentLevel = state.received.templeStatus?.currentLevel || 0;
+        const templeData = TEMPLE_CONSTRUCTION_DATA.find(
+            item => item.shapeId == currentLevel + skipCount
+        );
+
+        if (templeData)
+            return templeData.icon;
+
+        return LOCATION_TOKEN_DATA[locationId];
     }
 }
