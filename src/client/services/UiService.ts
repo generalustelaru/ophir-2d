@@ -15,6 +15,8 @@ export class UserInterfaceService extends Service {
     private resetButton: Button;
     private playerNameInput;
     private playerColorSelect;
+    private chatInput: TextInput;
+    private chatSendButton: Button;
 
     constructor() {
         super();
@@ -40,6 +42,8 @@ export class UserInterfaceService extends Service {
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
+        this.chatInput = new TextInput('chatInput', () => {});
+        this.chatSendButton = new Button('chatSendButton', () => {});
 
         this.playerNameInput.setValue(state.local.playerName);
         this.playerColorSelect.setValue(state.local.playerId);
@@ -108,15 +112,16 @@ export class UserInterfaceService extends Service {
         this.playerColorSelect.disable();
         this.resetButton.disable();
         this.playerNameInput.disable();
+        this.chatInput.disable();
+        this.chatSendButton.disable();
     }
 
-    public updateGameControls(): void {
+    public updateControls(): void {
         this.disableLobbyControls();
-        this.resetButton.enable();
-    }
 
-    public updateLobbyControls(): void {
-        this.disableLobbyControls();
+        if(state.local.playerId){
+            this.enableElements(this.chatInput, this.chatSendButton);
+        }
 
         switch (state.received.gameStatus) {
             case 'empty': this.enableCreate(); break;
