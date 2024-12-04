@@ -4,7 +4,7 @@ import { Service } from "./Service";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
-import clientState from '../state';
+import state from '../state';
 
 export class CanvasService extends Service {
     private stage: Konva.Stage;
@@ -67,7 +67,7 @@ export class CanvasService extends Service {
         this.playerGroup.drawElements();
         this.mapGroup.drawElements();
 
-        if (!clientState.localPlayerId) {
+        if (!state.local.playerId) {
             this.broadcastEvent('info', { text: 'You are a spectator' });
         }
 

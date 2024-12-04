@@ -8,11 +8,13 @@ export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
-
-export type ClientState = {
-    localPlayerId: PlayerId | null,
-    localPlayerName: string | null,
+export type LocalState = {
+    playerId: PlayerId | null,
+    playerName: string | null,
     isBoardDrawn: boolean,
+}
+export type ClientState = {
+    local: LocalState,
     received: SharedState | NewState,
 }
 

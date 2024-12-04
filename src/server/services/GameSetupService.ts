@@ -36,6 +36,7 @@ export class GameSetupService extends Service {
             gameStatus: 'started',
             gameResults: null,
             sessionOwner: newState.sessionOwner,
+            sessionChat: ['Welcome to the archipelago!'],
             availableSlots: [],
             players: this.assignTurnOneRules(
                 this.assignTurnOrderAndPosition(players, setupCoordinates),

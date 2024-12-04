@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerPlacard } from '../groups/GroupList';
-import clientState from '../state';
+import state from '../state';
 import { Player } from '../../shared_types';
 
 export class PlayerGroup implements MegaGroupInterface {
@@ -24,21 +24,21 @@ export class PlayerGroup implements MegaGroupInterface {
     public drawElements(): void {
         const verticalOffsets = [20, 140, 260, 380];
 
-        const playersByLocalPlayer = clientState.localPlayerId
+        const playersByLocalPlayer = state.local.playerId
             ? (() => {
-                const players = [...clientState.received.players];
-                while (players[0].id !== clientState.localPlayerId) {
+                const players = [...state.received.players];
+                while (players[0].id !== state.local.playerId) {
                     players.push(players.shift() as Player);
                 }
                 return players;
             })()
-            : clientState.received.players;
+            : state.received.players;
 
         playersByLocalPlayer.forEach(player => {
             const placard = new PlayerPlacard(
                 this.stage,
                 player,
-                clientState.localPlayerId,
+                state.local.playerId,
                 verticalOffsets.shift() as number
             );
             this.group.add(placard.getElement());
@@ -50,7 +50,7 @@ export class PlayerGroup implements MegaGroupInterface {
     public updateElements(): void {
 
         this.playerPlacards.forEach(placard => {
-            const player = clientState.received.players.find(player => player.id === placard.getId());
+            const player = state.received.players.find(player => player.id === placard.getId());
             if (player) {
                 placard.updateElement(player);
             } else {

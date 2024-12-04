@@ -1,14 +1,17 @@
 
 import { ClientState } from './client_types';
 
-const clientState: ClientState = {
-    localPlayerId: null,
-    localPlayerName: null,
-    isBoardDrawn: false,
+const state: ClientState = {
+    local: {
+        playerId: null,
+        playerName: null,
+        isBoardDrawn: false,
+    },
     received: {
         gameStatus: 'empty',
         gameResults: null,
         sessionOwner: null,
+        sessionChat: [],
         availableSlots: [],
         players: [],
         marketOffer: null,
@@ -17,4 +20,4 @@ const clientState: ClientState = {
     },
 }
 
-export default clientState;
+export default state;

@@ -1,7 +1,7 @@
 import { PlayerId, NewState } from '../../shared_types';
 import { ActionEventPayload } from '../client_types';
 import { Service } from './Service';
-import clientState from '../state';
+import state from '../state';
 import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
 import { CanvasService } from "./CanvasService";
@@ -27,7 +27,7 @@ export class UserInterfaceService extends Service {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
                 this.playerColorSelect.element.disabled = false;
-                const players = clientState.received.players
+                const players = state.received.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
                     const player = players.find(player => player.id === option.value);
                     option.disabled = !!player;
@@ -39,12 +39,12 @@ export class UserInterfaceService extends Service {
     }
 
     private updatePlayerName = (): void => {
-        clientState.localPlayerName = this.playerNameInput.element.value;
+        state.local.playerName = this.playerNameInput.element.value;
     }
 
     private processStart = (): void => {
 
-        if (clientState.received.players.length < 2) {
+        if (state.received.players.length < 2) {
             return alert('You need at least 2 players to start the game');
         }
 
@@ -65,7 +65,7 @@ export class UserInterfaceService extends Service {
     }
 
     private processEnroll = (): void => {
-        const lobbyState = clientState.received as NewState;
+        const lobbyState = state.received as NewState;
         const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
@@ -75,7 +75,7 @@ export class UserInterfaceService extends Service {
         sessionStorage.setItem('playerId', selectedId);
 
         if (lobbyState.availableSlots.includes(selectedId)) {
-            clientState.localPlayerId = selectedId;
+            state.local.playerId = selectedId;
             const payload: ActionEventPayload = { action: 'enroll', details: null };
 
             return this.broadcastEvent('action', payload);
@@ -110,7 +110,7 @@ export class UserInterfaceService extends Service {
     public updateLobbyControls(): void {
         this.disableLobbyControls();
 
-        switch (clientState.received.gameStatus) {
+        switch (state.received.gameStatus) {
             case 'empty': this.enableCreate(); break;
             case 'created': this.enableJoinOrStart(); break;
             case 'full': this.enableStartForOwner(); break;
@@ -125,13 +125,13 @@ export class UserInterfaceService extends Service {
 
     private enableJoinOrStart(): void {
 
-        if (!clientState.localPlayerId) {
+        if (!state.local.playerId) {
             this.enableElements(this.joinButton, this.playerColorSelect, this.playerNameInput);
 
             return this.setInfo('A game is waiting for you');
         }
 
-        if (clientState.received.sessionOwner === clientState.localPlayerId) {
+        if (state.received.sessionOwner === state.local.playerId) {
             this.enableElements(this.startButton, this.resetButton)
 
             return this.setInfo('Waiting for more players to join...');
@@ -148,11 +148,11 @@ export class UserInterfaceService extends Service {
 
     private enableStartForOwner(): void {
 
-        if (!clientState.localPlayerId) {
+        if (!state.local.playerId) {
             return this.setInfo('The game is full, sorry :(');
         }
 
-        if (clientState.localPlayerId === clientState.received.sessionOwner) {
+        if (state.local.playerId === state.received.sessionOwner) {
             this.startButton.enable();
 
             return this.setInfo('You may start whenever you want');
@@ -163,14 +163,14 @@ export class UserInterfaceService extends Service {
 
     private enableResetForOwner(): void {
 
-        if (clientState.localPlayerId === clientState.received.sessionOwner) {
+        if (state.local.playerId === state.received.sessionOwner) {
             this.resetButton.enable();
         }
     }
 
     private alertGameResults(): void {
         sessionStorage.removeItem('playerId');
-        const results = clientState.received.gameResults;
+        const results = state.received.gameResults;
         let message = 'The game has ended\n\n';
 
         if (!results){
