@@ -1,11 +1,11 @@
-import { InfoEventPayload, ActionEventPayload, ErrorEventPayload, LocalState } from "./client_types";
+import { InfoEventPayload, ErrorEventPayload, LocalState } from "./client_types";
 import state from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import sharedConstants from "../shared_constants";
 import clientConstants from "./client_constants";
-import { SharedState } from "../shared_types";
+import { SharedState, WsPayload } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
 //@ts-ignore
@@ -23,12 +23,9 @@ const canvasService: CanvasService = CanvasService.getInstance([]);
 window.addEventListener(
     'action' as any,
     (event) => {
-        const payload: ActionEventPayload = event.detail;
+        const payload: WsPayload = event.detail;
 
-        commService.sendMessage(
-            payload.action,
-            payload.details
-        )
+        commService.sendMessage(payload);
     },
 );
 
@@ -45,7 +42,7 @@ window.addEventListener(
 // Get server data on connection
 window.addEventListener(
     'connected',
-    () => commService.sendMessage('inquire'),
+    () => commService.sendMessage({ action: 'inquire', details: null }),
 );
 
 // Update client on server state update

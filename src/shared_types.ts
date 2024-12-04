@@ -9,11 +9,7 @@ export type MetalId = "silver" | "silver_extra" | "gold" | "gold_extra"; // meta
 export type Currency = "coins" | "favor";
 export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
 export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
-export type Action =
-    | LocationAction | FreeAction
-    | "inquire" | "enroll" | "start" | "move" | "spend_favor" | "end_turn" | "reset";
 export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good" | "donate_metals";
-export type FreeAction = "reposition" | "drop_item"
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended" | "reset";
 export type ItemId = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
@@ -153,17 +149,28 @@ export type MetalDonationDetails = {
     metal: MetalId,
 }
 
-export type ActionDetails =
-    | GameSetupDetails | MovementDetails | DropItemDetails | RepositioningDetails | MarketSaleDetails
-    | MetalPurchaseDetails | MetalDonationDetails | null;
-
 export type Coordinates = { x: number, y: number };
+export interface RequestInterface<A, D> {
+    action: A,
+    details: D,
+}
+
+export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold';
+export type LaconicRequest = RequestInterface<LaconicAction, null>;
+export type GameSetupRequest = RequestInterface<'start', GameSetupDetails>;
+export type MovementRequest = RequestInterface<'move', MovementDetails>;
+export type DropItemRequest = RequestInterface<'drop_item', DropItemDetails>;
+export type RepositioningRequest = RequestInterface<'reposition', RepositioningDetails>;
+export type MarketSaleRequest = RequestInterface<'sell_goods', MarketSaleDetails>;
+export type MetalPurchaseRequest = RequestInterface<'buy_metals', MetalPurchaseDetails>;
+export type GoodsDonationRequest = RequestInterface<'donate_goods', MarketSaleDetails>;
+export type MetalDonationRequest = RequestInterface<'donate_metals', MetalDonationDetails>;
+export type WsPayload = LaconicRequest | GameSetupRequest | MovementRequest | DropItemRequest | RepositioningRequest | MarketSaleRequest | MetalPurchaseRequest | MetalDonationRequest | GoodsDonationRequest;
 
 export type WebsocketClientMessage = {
     playerId: PlayerId | null,
     playerName: string | null,
-    action: Action,
-    details: ActionDetails,
+    payload: WsPayload,
 }
 
 export type SharedConstants = {

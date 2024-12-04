@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import constants from '../../client_constants';
-import { Player } from '../../../shared_types';
-import { ActionEventPayload, DynamicGroupInterface } from '../../client_types';
+import { Player, WsPayload } from '../../../shared_types';
+import { DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
@@ -12,7 +12,7 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
     constructor(
         stage: Konva.Stage,
         parent: Konva.Group,
-        actionPayload: ActionEventPayload,
+        actionPayload: WsPayload,
         isActivePlayer: boolean
     ) {
 

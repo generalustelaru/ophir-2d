@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, Action, ActionDetails, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus } from '../shared_types';
+import { HexId, PlayerId, SharedState, Coordinates, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus, WsPayload } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -90,7 +90,7 @@ export type TempleUpdate = {
     localPlayer: Player | null,
 }
 
-export type EventPayload = InfoEventPayload | ActionEventPayload | ErrorEventPayload | SetupEventPayload | null;
+export type EventPayload = InfoEventPayload | WsPayload | ErrorEventPayload | SetupEventPayload | null;
 
 export type InfoEventPayload = {
     text: string,
@@ -98,11 +98,6 @@ export type InfoEventPayload = {
 
 export type ErrorEventPayload = {
     error: string,
-}
-
-export type ActionEventPayload = {
-    action: Action,
-    details: ActionDetails,
 }
 
 export type SetupEventPayload = {
