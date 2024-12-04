@@ -69,10 +69,10 @@ export class UserInterfaceService extends Service {
         const selectedId = this.playerColorSelect.element.value as PlayerId;
 
         if (!selectedId) {
-            return this.setInfo('Please select a color');
+            return alert('Select your player color first.');
         }
 
-        localStorage.setItem('playerId', selectedId);
+        sessionStorage.setItem('playerId', selectedId);
 
         if (lobbyState.availableSlots.includes(selectedId)) {
             clientState.localPlayerId = selectedId;
@@ -132,12 +132,12 @@ export class UserInterfaceService extends Service {
         }
 
         if (clientState.received.sessionOwner === clientState.localPlayerId) {
-            this.startButton.enable();
+            this.enableElements(this.startButton, this.resetButton)
 
-            return this.setInfo('You may wait for more player or start');
+            return this.setInfo('Waiting for more players to join...');
         }
 
-        return this.setInfo('Waiting for players to join...');
+        return this.setInfo('Waiting for owner to start...');
     }
 
     private enableCreate(): void {
@@ -169,7 +169,7 @@ export class UserInterfaceService extends Service {
     }
 
     private alertGameResults(): void {
-        localStorage.removeItem('playerId');
+        sessionStorage.removeItem('playerId');
         const results = clientState.received.gameResults;
         let message = 'The game has ended\n\n';
 
