@@ -1,5 +1,5 @@
 import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
-import clientState from "./state";
+import state from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
@@ -11,7 +11,7 @@ const { CONNECTION } = sharedConstants;
 let stateDebug: SharedState | null = null;
 
 // Initializations
-clientState.localPlayerId = sessionStorage.getItem('playerId') as PlayerId | null;
+state.local.playerId = sessionStorage.getItem('playerId') as PlayerId | null;
 
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
@@ -50,7 +50,7 @@ window.addEventListener(
 window.addEventListener(
     'update',
     () => {
-        const sharedState = clientState.received as SharedState;
+        const sharedState = state.received as SharedState;
 
         if (sharedState.gameStatus === 'reset') {
             sessionStorage.removeItem('playerId');
@@ -59,11 +59,11 @@ window.addEventListener(
             window.location.reload();
         }
 
-        if (clientState.isBoardDrawn) {
+        if (state.local.isBoardDrawn) {
             canvasService.updateElements();
         } else if (sharedState.gameStatus === 'started') {
             uiService.setInfo('You are playing.');
-            clientState.isBoardDrawn = true;
+            state.local.isBoardDrawn = true;
             canvasService.drawElements();
         }
 
@@ -72,13 +72,13 @@ window.addEventListener(
 
         // Debugging
         sessionStorage.setItem('received', JSON.stringify(sharedState));
-        sessionStorage.setItem('client', JSON.stringify(clientState));
+        sessionStorage.setItem('client', JSON.stringify(state));
 
         ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
             sessionStorage.removeItem(playerId);
         });
 
-        for (const player of clientState.received.players) {
+        for (const player of state.received.players) {
             sessionStorage.setItem(player.id, JSON.stringify(player));
         }
     });

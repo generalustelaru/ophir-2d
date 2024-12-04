@@ -123,6 +123,7 @@ const serverConstants: ServerConstants = {
         gameStatus: 'empty',
         gameResults: null,
         sessionOwner: null,
+        sessionChat: [],
         availableSlots: [
             'playerPurple',
             'playerYellow',

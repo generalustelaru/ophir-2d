@@ -91,6 +91,7 @@ export type SharedState = {
     marketOffer: MarketOffer,
     templeStatus: TempleStatus,
     setup: GameSetup,
+    sessionChat: Array<string>,
     // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }
 
@@ -103,6 +104,7 @@ export type NewState = {
     marketOffer: null,
     templeStatus: null,
     setup: null,
+    sessionChat: Array<string>,
 }
 
 export type ResetState = {

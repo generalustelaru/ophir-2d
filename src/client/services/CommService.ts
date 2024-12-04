@@ -1,6 +1,6 @@
 import { WebsocketClientMessage, Action, ActionDetails } from '../../shared_types';
 import { Service } from './Service';
-import clientState from '../state';
+import state from '../state';
 
 export class CommunicationService extends Service {
 
@@ -32,7 +32,7 @@ export class CommunicationService extends Service {
 
             console.debug('<-', data);
 
-            clientState.received = data;
+            state.received = data;
 
             this.broadcastEvent('update');
         }
@@ -48,8 +48,8 @@ export class CommunicationService extends Service {
         }
 
         const message: WebsocketClientMessage = {
-            playerId: clientState.localPlayerId,
-            playerName: clientState.localPlayerName,
+            playerId: state.local.playerId,
+            playerName: state.local.playerName,
             action,
             details
         };

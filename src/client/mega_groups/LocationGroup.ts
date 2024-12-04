@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
 import { MarketPlacard, TreasuryPlacard, TemplePlacard } from "../groups/GroupList";
-import clientState from '../state';
+import state from '../state';
 
 export class LocationGroup implements MegaGroupInterface {
 
@@ -23,8 +23,8 @@ export class LocationGroup implements MegaGroupInterface {
     }
 
     public drawElements(): void {
-        const setup = clientState.received.setup;
-        const localPlayer = clientState.received.players.find(player => player.id === clientState.localPlayerId) || null;
+        const setup = state.received.setup;
+        const localPlayer = state.received.players.find(player => player.id === state.local.playerId) || null;
 
         if (!setup) {
             throw new Error('State is missing setup data.');
@@ -34,9 +34,9 @@ export class LocationGroup implements MegaGroupInterface {
 
         this.marketPlacard = new MarketPlacard(
             this.stage,
-            clientState.received.setup.marketFluctuations,
-            clientState.received.setup.templeTradeSlot,
-            clientState.received.marketOffer,
+            state.received.setup.marketFluctuations,
+            state.received.setup.templeTradeSlot,
+            state.received.marketOffer,
             {
                 width: this.group.width(),
                 height: heightSegment * 3,
@@ -53,20 +53,20 @@ export class LocationGroup implements MegaGroupInterface {
                 x: 0,
                 y: this.marketPlacard.getElement().height(),
             },
-            { localPlayer: localPlayer, metalPrices: clientState.received.templeStatus.prices }
+            { localPlayer: localPlayer, metalPrices: state.received.templeStatus.prices }
         );
 
         this.templePlacard = new TemplePlacard(
             this.stage,
-            clientState.received.setup.templeTradeSlot,
-            clientState.received.marketOffer,
+            state.received.setup.templeTradeSlot,
+            state.received.marketOffer,
             {
                 width: this.group.width(),
                 height: heightSegment * 4,
                 x: 0,
                 y: this.marketPlacard.getElement().height() + this.treasuryPlacard.getElement().height(),
             },
-            clientState.received.templeStatus.maxLevel
+            state.received.templeStatus.maxLevel
         );
 
         this.group.add(
@@ -78,14 +78,14 @@ export class LocationGroup implements MegaGroupInterface {
 
     public updateElements(): void {
 
-        const sharedState = clientState.received;
+        const sharedState = state.received;
         const activePlayer = sharedState.players.find(player => player.isActive);
         const marketOffer = sharedState.marketOffer
         if (!activePlayer || !marketOffer) {
             throw new Error(`Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`);
         }
 
-        const localPlayer = sharedState.players.find(player => player.id === clientState.localPlayerId);
+        const localPlayer = sharedState.players.find(player => player.id === state.local.playerId);
         const marketUpdate = {
             localPlayer: localPlayer ?? null,
             marketOffer: marketOffer,
