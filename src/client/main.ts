@@ -71,15 +71,15 @@ window.addEventListener(
         uiService.updateLobbyControls();
 
         // Debugging
-        sessionStorage.setItem('received', JSON.stringify(sharedState));
-        sessionStorage.setItem('client', JSON.stringify(state));
+        localStorage.setItem('received', JSON.stringify(sharedState));
+        localStorage.setItem('client', JSON.stringify(state));
 
         ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
-            sessionStorage.removeItem(playerId);
+            localStorage.removeItem(playerId);
         });
 
         for (const player of state.received.players) {
-            sessionStorage.setItem(player.id, JSON.stringify(player));
+            localStorage.setItem(player.id, JSON.stringify(player));
         }
     });
 
