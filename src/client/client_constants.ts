@@ -5,6 +5,11 @@ const clientConstants: ClientConstants = {
     CONNECTION: {
         wsAddress: 'ws://localhost:8080',
     },
+    DEFAULT_LOCAL_STATE: {
+        playerId: null,
+        playerName: null,
+        isBoardDrawn: false,
+    },
     COLOR: {
         barrierDefault: '#003C43',
         barrierNavigator: '#FFFDD7',

@@ -22,4 +22,8 @@ export class TextInput implements HTMLHandlerInterface {
         this.element.disabled = true;
         this.element.removeEventListener('input', this.callback);
     }
+
+    setValue = (value: string | null) => {
+        this.element.value = value ?? '';
+    }
 }

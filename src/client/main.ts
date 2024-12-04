@@ -1,17 +1,19 @@
-import { InfoEventPayload, ActionEventPayload, ErrorEventPayload } from "./client_types";
+import { InfoEventPayload, ActionEventPayload, ErrorEventPayload, LocalState } from "./client_types";
 import state from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import sharedConstants from "../shared_constants";
-import { PlayerId, SharedState } from "../shared_types";
+import clientConstants from "./client_constants";
+import { SharedState } from "../shared_types";
 const { CONNECTION } = sharedConstants;
 
 //@ts-ignore
 let stateDebug: SharedState | null = null;
 
 // Initializations
-state.local.playerId = sessionStorage.getItem('playerId') as PlayerId | null;
+const savedState = sessionStorage.getItem('localState');
+state.local = savedState ? JSON.parse(savedState) : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
 
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
@@ -53,7 +55,7 @@ window.addEventListener(
         const sharedState = state.received as SharedState;
 
         if (sharedState.gameStatus === 'reset') {
-            sessionStorage.removeItem('playerId');
+            sessionStorage.removeItem('localState');
             alert('The game has been reset');
 
             window.location.reload();
