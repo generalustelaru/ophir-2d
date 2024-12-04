@@ -11,7 +11,7 @@ const { CONNECTION } = sharedConstants;
 let stateDebug: SharedState | null = null;
 
 // Initializations
-clientState.localPlayerId = localStorage.getItem('playerId') as PlayerId | null;
+clientState.localPlayerId = sessionStorage.getItem('playerId') as PlayerId | null;
 
 const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
@@ -53,7 +53,7 @@ window.addEventListener(
         const sharedState = clientState.received as SharedState;
 
         if (sharedState.gameStatus === 'reset') {
-            localStorage.removeItem('playerId');
+            sessionStorage.removeItem('playerId');
             alert('The game has been reset');
 
             window.location.reload();
