@@ -22,6 +22,7 @@ export type ClientConstants = {
     CONNECTION: {
         wsAddress: string
     },
+    DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,

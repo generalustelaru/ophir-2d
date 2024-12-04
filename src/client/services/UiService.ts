@@ -23,6 +23,7 @@ export class UserInterfaceService extends Service {
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
         this.playerNameInput = new TextInput('playerNameInput', this.updatePlayerName);
+        this.playerNameInput.setValue(state.local.playerName);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
@@ -34,12 +35,20 @@ export class UserInterfaceService extends Service {
                 });
             },
 
+            setValue: (color: PlayerId | null) => {
+                if (color)
+                    this.playerColorSelect.element.value = color;
+            },
+
             disable: () => this.playerColorSelect.element.disabled = true,
         }
+
+        this.playerColorSelect.setValue(state.local.playerId);
     }
 
     private updatePlayerName = (): void => {
         state.local.playerName = this.playerNameInput.element.value;
+        sessionStorage.setItem('localState', JSON.stringify(state.local));
     }
 
     private processStart = (): void => {
@@ -72,10 +81,10 @@ export class UserInterfaceService extends Service {
             return alert('Select your player color first.');
         }
 
-        sessionStorage.setItem('playerId', selectedId);
 
         if (lobbyState.availableSlots.includes(selectedId)) {
             state.local.playerId = selectedId;
+            sessionStorage.setItem('localState', JSON.stringify(state.local));
             const payload: ActionEventPayload = { action: 'enroll', details: null };
 
             return this.broadcastEvent('action', payload);
