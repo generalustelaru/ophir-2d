@@ -38,10 +38,32 @@ input {
     width: 100px;
 }
 
-#info {
-    color: aliceblue;
+#chatRoom {
+    width: 1200px;
+    max-height: 500px;
+    background-color: rgb(22, 9, 9);
+    color: rgb(223, 126, 126);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 5px;
+    & #chatMessages {
+        overflow-y: auto;
+        height: 100px;
+    }
+    & #inputLine {
+        display: flex;
+        justify-content: space-between;
+        align-items: left;
+        & input {
+            width: 100%;
+        }
+        & button {
+            width: 100px;
+        }
+    }
 }
 
-.test {
-    background-color: red;
+#info {
+    color: aliceblue;
 }
