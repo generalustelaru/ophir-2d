@@ -9,7 +9,6 @@ client:
 	npx tsc --noEmit
 	npm run build_client
 	make ui
-	make run
 
 ui:
 ifeq ($(OS),Windows_NT)

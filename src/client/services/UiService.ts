@@ -23,7 +23,6 @@ export class UserInterfaceService extends Service {
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
         this.playerNameInput = new TextInput('playerNameInput', this.updatePlayerName);
-        this.playerNameInput.setValue(state.local.playerName);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
@@ -36,13 +35,13 @@ export class UserInterfaceService extends Service {
             },
 
             setValue: (color: PlayerId | null) => {
-                if (color)
-                    this.playerColorSelect.element.value = color;
+                if (color) this.playerColorSelect.element.value = color;
             },
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
 
+        this.playerNameInput.setValue(state.local.playerName);
         this.playerColorSelect.setValue(state.local.playerId);
     }
 
