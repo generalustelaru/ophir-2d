@@ -69,8 +69,7 @@ window.addEventListener(
             canvasService.drawElements();
         }
 
-        uiService.updateGameControls();
-        uiService.updateLobbyControls();
+        uiService.updateControls();
 
         // Debugging
         localStorage.setItem('received', JSON.stringify(sharedState));
