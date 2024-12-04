@@ -49,7 +49,8 @@ socketServer.on('connection', function connection(client) {
     client.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
-        const { playerId, playerName, action, details } = parsedMessage;
+        const { playerId, playerName, payload } = parsedMessage;
+        const {action, details} = payload;
         const name = playerName || playerId || '';
         const colorized = {
             playerPurple: `\x1b[95m${name}\x1b[0m`,

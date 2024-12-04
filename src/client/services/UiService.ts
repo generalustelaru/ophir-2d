@@ -1,5 +1,5 @@
-import { PlayerId, NewState } from '../../shared_types';
-import { ActionEventPayload } from '../client_types';
+import { PlayerId, NewState, GameSetupRequest } from '../../shared_types';
+import { WsPayload } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
 import { Button } from '../html_behaviors/button';
@@ -62,7 +62,7 @@ export class UserInterfaceService extends Service {
 
         this.startButton.disable();
         const canvasService: CanvasService = CanvasService.getInstance([]);
-        const payload: ActionEventPayload = {
+        const payload: GameSetupRequest = {
             action: 'start',
             details: canvasService.getSetupCoordinates(),
         };
@@ -71,7 +71,7 @@ export class UserInterfaceService extends Service {
     }
 
     private processReset = (): void => {
-        const payload: ActionEventPayload = { action: 'reset', details: null };
+        const payload: WsPayload = { action: 'reset', details: null };
 
         return this.broadcastEvent('action', payload);
     }
@@ -88,7 +88,7 @@ export class UserInterfaceService extends Service {
         if (lobbyState.availableSlots.includes(selectedId)) {
             state.local.playerId = selectedId;
             sessionStorage.setItem('localState', JSON.stringify(state.local));
-            const payload: ActionEventPayload = { action: 'enroll', details: null };
+            const payload: WsPayload = { action: 'enroll', details: null };
 
             return this.broadcastEvent('action', payload);
         }

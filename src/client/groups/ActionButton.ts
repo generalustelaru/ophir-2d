@@ -1,12 +1,13 @@
 import Konva from 'konva';
-import { ActionEventPayload, GroupLayoutData } from '../client_types';
+import { GroupLayoutData } from '../client_types';
+import { WsPayload } from '../../shared_types';
 export class ActionButton {
     protected group: Konva.Group;
     private stage: Konva.Stage;
-    private payload: ActionEventPayload | null;
+    private payload: WsPayload | null;
     private isActive: boolean = false;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, actionPayload: ActionEventPayload | null) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, actionPayload: WsPayload | null) {
         this.stage = stage;
         this.payload = actionPayload;
         const layer = stage.getLayers()[0];
@@ -43,7 +44,7 @@ export class ActionButton {
         });
     }
 
-    public updateActionPayload(payload: ActionEventPayload): void {
+    public updateActionPayload(payload: WsPayload): void {
         this.payload = payload;
     }
 
