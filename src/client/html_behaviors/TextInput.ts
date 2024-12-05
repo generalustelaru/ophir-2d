@@ -26,4 +26,11 @@ export class TextInput implements HTMLHandlerInterface {
     setValue = (value: string | null) => {
         this.element.value = value ?? '';
     }
+
+    flushValue = () => {
+        const value = this.element.value;
+        this.element.value = '';
+
+        return value;
+    }
 }

@@ -1,4 +1,4 @@
-import { PlayerId, NewState, GameSetupRequest } from '../../shared_types';
+import { PlayerId, NewState, GameSetupRequest, ChatRequest } from '../../shared_types';
 import { WsPayload } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
@@ -43,7 +43,7 @@ export class UserInterfaceService extends Service {
             disable: () => this.playerColorSelect.element.disabled = true,
         }
         this.chatInput = new TextInput('chatInput', () => {});
-        this.chatSendButton = new Button('chatSendButton', () => {});
+        this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
 
         this.playerNameInput.setValue(state.local.playerName);
         this.playerColorSelect.setValue(state.local.playerId);
@@ -52,6 +52,15 @@ export class UserInterfaceService extends Service {
     private updatePlayerName = (): void => {
         state.local.playerName = this.playerNameInput.element.value;
         sessionStorage.setItem('localState', JSON.stringify(state.local));
+    }
+
+    private sendChatMessage = (): void => {
+        const payload: ChatRequest = {
+            action: 'chat',
+            details: { message: this.chatInput.flushValue() }
+        };
+
+        return this.broadcastEvent('action', payload);
     }
 
     private processStart = (): void => {

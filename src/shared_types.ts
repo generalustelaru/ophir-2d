@@ -119,6 +119,10 @@ export type GameSetup = {
     templeTradeSlot: MarketKey,
 }
 
+export type ChatDetails = {
+    message: string,
+}
+
 export type MovementDetails = {
     hexId: HexId,
     position: Coordinates,
@@ -157,6 +161,7 @@ export interface RequestInterface<A, D> {
 
 export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold';
 export type LaconicRequest = RequestInterface<LaconicAction, null>;
+export type ChatRequest = RequestInterface<'chat', ChatDetails>;
 export type GameSetupRequest = RequestInterface<'start', GameSetupDetails>;
 export type MovementRequest = RequestInterface<'move', MovementDetails>;
 export type DropItemRequest = RequestInterface<'drop_item', DropItemDetails>;
@@ -165,7 +170,10 @@ export type MarketSaleRequest = RequestInterface<'sell_goods', MarketSaleDetails
 export type MetalPurchaseRequest = RequestInterface<'buy_metals', MetalPurchaseDetails>;
 export type GoodsDonationRequest = RequestInterface<'donate_goods', MarketSaleDetails>;
 export type MetalDonationRequest = RequestInterface<'donate_metals', MetalDonationDetails>;
-export type WsPayload = LaconicRequest | GameSetupRequest | MovementRequest | DropItemRequest | RepositioningRequest | MarketSaleRequest | MetalPurchaseRequest | MetalDonationRequest | GoodsDonationRequest;
+export type WsPayload =
+    | LaconicRequest | GameSetupRequest | MovementRequest | DropItemRequest
+    | RepositioningRequest | MarketSaleRequest | MetalPurchaseRequest | MetalDonationRequest
+    | GoodsDonationRequest | ChatRequest;
 
 export type WebsocketClientMessage = {
     playerId: PlayerId | null,
