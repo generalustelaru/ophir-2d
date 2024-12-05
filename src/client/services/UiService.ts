@@ -105,7 +105,7 @@ export class UserInterfaceService extends Service {
         handlers.forEach(handler => handler.enable());
     }
 
-    private disableLobbyControls(): void {
+    public disableControls(): void {
         this.createButton.disable();
         this.joinButton.disable();
         this.startButton.disable();
@@ -117,7 +117,7 @@ export class UserInterfaceService extends Service {
     }
 
     public updateControls(): void {
-        this.disableLobbyControls();
+        this.disableControls();
 
         if(state.local.playerId){
             this.enableElements(this.chatInput, this.chatSendButton);

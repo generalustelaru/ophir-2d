@@ -35,6 +35,7 @@ window.addEventListener(
     (event) => {
         const payload: ErrorEventPayload = event.detail;
         console.error(payload.error);
+        uiService.disableControls();
         alert(payload.error);
     },
 );
