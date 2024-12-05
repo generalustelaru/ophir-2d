@@ -1,4 +1,4 @@
-import { PlayerId, NewState, GameSetupRequest, ChatRequest } from '../../shared_types';
+import { PlayerId, NewState, GameSetupRequest, ChatRequest, ChatEntry } from '../../shared_types';
 import { WsPayload } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
@@ -6,6 +6,7 @@ import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
 import { CanvasService } from "./CanvasService";
 import { PlayerCountables } from '../../server/server_types';
+import clientConstants from '../client_constants';
 
 export class UserInterfaceService extends Service {
 
@@ -15,6 +16,7 @@ export class UserInterfaceService extends Service {
     private resetButton: Button;
     private playerNameInput;
     private playerColorSelect;
+    private chatMessages: HTMLDivElement;
     private chatInput: TextInput;
     private chatSendButton: Button;
 
@@ -42,6 +44,7 @@ export class UserInterfaceService extends Service {
 
             disable: () => this.playerColorSelect.element.disabled = true,
         }
+        this.chatMessages = document.getElementById('chatMessages') as HTMLDivElement;
         this.chatInput = new TextInput('chatInput', () => {});
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
 
@@ -127,6 +130,7 @@ export class UserInterfaceService extends Service {
 
     public updateControls(): void {
         this.disableControls();
+        this.updateChat(state.received.sessionChat);
 
         if(state.local.playerId){
             this.enableElements(this.chatInput, this.chatSendButton);
@@ -256,5 +260,15 @@ export class UserInterfaceService extends Service {
         }
 
         alert(message);
+    }
+
+    private updateChat(chat: Array<ChatEntry>): void {
+        this.chatMessages.innerHTML = chat.map(entry => {
+            const name = entry.name ? `${entry.name}: ` : '';
+            const message = entry.message;
+            const color = entry.id ? clientConstants.COLOR[entry.id] : 'white';
+            return `<span style="color:${color}; font-weight: bold">${name}</span>${message}</br>`;
+        }).join('');
+        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 }
