@@ -17,7 +17,7 @@ export class GameSetupService extends Service {
         if (newState.sessionOwner === null) {
             throw new Error('Cannot start game while the session owner is null');
         }
-    
+
         if (players.length < 2) {
             throw new Error('Not enough players to start a game');
         }
@@ -31,12 +31,12 @@ export class GameSetupService extends Service {
             metalPrices: this.filterMetalPrices(players.length),
             gameStats: players.map(p => ({id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0})),
         }
-
+        newState.sessionChat.push({id: null, name: 'Gamebot', message: 'Welcome to the archipelago!'})
         const sharedState: SharedState = {
             gameStatus: 'started',
             gameResults: null,
             sessionOwner: newState.sessionOwner,
-            sessionChat: ['Welcome to the archipelago!'],
+            sessionChat: newState.sessionChat,
             availableSlots: [],
             players: this.assignTurnOneRules(
                 this.assignTurnOrderAndPosition(players, setupCoordinates),

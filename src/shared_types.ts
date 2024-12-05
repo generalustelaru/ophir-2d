@@ -18,6 +18,7 @@ export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
+export type ChatEntry = {id: PlayerId|null, name: string|null, message: string};
 export type MetalPrices = {
     id: number,
     goldCost: MetalCost,
@@ -87,7 +88,7 @@ export type SharedState = {
     marketOffer: MarketOffer,
     templeStatus: TempleStatus,
     setup: GameSetup,
-    sessionChat: Array<string>,
+    sessionChat: Array<ChatEntry>,
     // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
 }
 
@@ -100,7 +101,7 @@ export type NewState = {
     marketOffer: null,
     templeStatus: null,
     setup: null,
-    sessionChat: Array<string>,
+    sessionChat: Array<ChatEntry>,
 }
 
 export type ResetState = {
