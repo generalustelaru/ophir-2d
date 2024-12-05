@@ -1,5 +1,5 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -40,6 +40,8 @@ export class GameSession {
         }
 
         switch (message.payload.action) {
+            case 'chat':
+                return this.processChat(message) ? this.sharedState : { error: `Could not process chat message on ${id}` };
             case 'spend_favor':
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Could not process favor spending on ${id}` };
             case 'move':
@@ -65,6 +67,19 @@ export class GameSession {
             default:
                 return { error: `Unknown action on ${id}` };
         }
+    }
+
+    // MARK: CHAT
+    private processChat(message: WebsocketClientMessage): boolean {
+        const chatMessage = message.payload.details as ChatDetails;
+
+        if (!chatMessage?.message) {
+            return false;
+        }
+        const chatEntry = { id: message.playerId, name: message.playerName, message: chatMessage.message };
+        this.sharedState.sessionChat.push(chatEntry);
+
+        return true;
     }
 
     // MARK: MOVE

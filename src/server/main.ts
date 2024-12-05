@@ -3,7 +3,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus } from '../shared_types';
+import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails } from '../shared_types';
 import { WssMessage, StateBundle } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
@@ -91,6 +91,14 @@ socketServer.on('connection', function connection(client) {
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
             }
+
+            return;
+        }
+
+        if (action === 'chat' && !singleSession) {
+            const chatMessage = details as ChatDetails;
+            lobbyState.sessionChat.push({ id: playerId, name: playerName || playerId, message: chatMessage.message });
+            sendAll(lobbyState);
 
             return;
         }
