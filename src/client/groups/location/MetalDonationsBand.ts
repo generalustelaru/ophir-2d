@@ -67,7 +67,6 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
     }
 
     updateElement(status: TempleStatus): void {
-        console.log('dial update', status);
         this.levelDials.forEach(dial => dial.getElement().destroy());
         this.levelDials = [];
         const donationsCount = status.donations.length;

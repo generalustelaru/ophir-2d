@@ -4,6 +4,7 @@ import { Service } from './Service';
 import state from '../state';
 import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
+import { ChatInput } from '../html_behaviors/ChatInput';
 import { CanvasService } from "./CanvasService";
 import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
@@ -17,7 +18,7 @@ export class UserInterfaceService extends Service {
     private playerNameInput;
     private playerColorSelect;
     private chatMessages: HTMLDivElement;
-    private chatInput: TextInput;
+    private chatInput: ChatInput;
     private chatSendButton: Button;
 
     constructor() {
@@ -45,7 +46,7 @@ export class UserInterfaceService extends Service {
             disable: () => this.playerColorSelect.element.disabled = true,
         }
         this.chatMessages = document.getElementById('chatMessages') as HTMLDivElement;
-        this.chatInput = new TextInput('chatInput', () => {});
+        this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
 
         this.playerNameInput.setValue(state.local.playerName);
@@ -58,12 +59,24 @@ export class UserInterfaceService extends Service {
     }
 
     private sendChatMessage = (): void => {
+        const message = this.chatInput.flushValue();
+
+        if (!message) return;
+
         const payload: ChatRequest = {
             action: 'chat',
-            details: { message: this.chatInput.flushValue() }
+            details: { message: message },
         };
 
         return this.broadcastEvent('action', payload);
+    }
+
+    private handleKeyInput  = (toSubmit: boolean): void => {
+        toSubmit && this.sendChatMessage();
+
+        setTimeout(() => {
+            this.chatInput.element.focus();
+        }, 5);
     }
 
     private processStart = (): void => {

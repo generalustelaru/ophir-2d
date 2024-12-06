@@ -1,9 +1,10 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails } from "../../shared_types";
+import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
 const { TRADE_DECK_B } = serverConstants;
+const SERVER_NAME = 'GameBot';
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -74,12 +75,19 @@ export class GameSession {
         const chatMessage = message.payload.details as ChatDetails;
 
         if (!chatMessage?.message) {
+            console.error('No chat message found', chatMessage);
+
             return false;
         }
         const chatEntry = { id: message.playerId, name: message.playerName, message: chatMessage.message };
         this.sharedState.sessionChat.push(chatEntry);
 
         return true;
+    }
+
+    private addServerMessage(message: string): void {
+        const chatEntry: ChatEntry = { id: null, name: SERVER_NAME, message };
+        this.sharedState.sessionChat.push(chatEntry);
     }
 
     // MARK: MOVE
@@ -93,6 +101,7 @@ export class GameSession {
 
         const departure = player.hexagon.hexId;
         const destination = details.hexId;
+        const locationName = this.sharedState.setup.mapPairings[destination].id;
         const remainingMoves = player.moveActions;
         const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
 
@@ -116,11 +125,14 @@ export class GameSession {
             );
             player.isAnchored = true;
             player.locationActions = this.getLocationActions(player, destination);
+        } else {
+            this.addServerMessage(`${player.name} was blocked from sailing towards the ${locationName}`);
         }
 
         if (player.moveActions === 0 && !sailSuccess) {
             player.isAnchored = true;
             player.locationActions = null;
+            this.addServerMessage(`${player.name} also ran out of moves and cannot act further`);
         }
 
         return true;
@@ -147,6 +159,7 @@ export class GameSession {
             player.favor -= 1;
             player.privilegedSailing = true;
             player.isAnchored = true;
+            this.addServerMessage(`${player.name} spent favor to remain anchored or sail without influence roll`);
 
             return true;
         }
@@ -175,6 +188,8 @@ export class GameSession {
         player.cargo = manifest;
         player.hasCargo = hasCargo;
         player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(manifest) : [];
+
+        this.addServerMessage(`${player.name} just threw ${details.item} overboard`);
 
         return true;
     }
@@ -210,6 +225,8 @@ export class GameSession {
         player.locationActions = this.removeAction(player.locationActions, 'pickup_good');
         player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
 
+        this.addServerMessage(`${player.name} picked up ${localGood} from the ${locationId}`);
+
         return true;
     }
     // MARK: GOODS TRADE
@@ -235,11 +252,13 @@ export class GameSession {
             case 'sell_goods':
                 const modifier = this.sharedState.setup.marketFluctuations[marketKey];
                 player.coins += trade.reward.coins + modifier;
+                this.addServerMessage(`${player.name} sold goods for ${trade.reward.coins + modifier} coins`);
                 break;
             case 'donate_goods':
                 const reward = trade.reward.favorAndVp;
                 player.favor = Math.min(6, player.favor + reward);
                 this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
+                this.addServerMessage(`${player.name} donated goods for ${reward} favor and ${reward} VP`);
                 console.info(this.privateState.gameStats);
                 break;
             default:
@@ -282,6 +301,7 @@ export class GameSession {
                     this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
                     this.sharedState.marketOffer.deckId = 'B';
 
+                    this.addServerMessage('Market deck B is now in play');
                     console.info('Deck B loaded');
                 }
 
@@ -308,6 +328,7 @@ export class GameSession {
             });
         } else {
             console.info('Game over!');
+            this.addServerMessage('Market deck is empty! Game has ended.');
             this.sharedState.gameStatus = 'ended';
             this.sharedState.gameResults = this.compileGameResults();
         }
@@ -357,9 +378,11 @@ export class GameSession {
         switch (details.currency) {
             case 'coins':
                 player.coins = remainder;
+                this.addServerMessage(`${player.name} bought ${details.metal} for ${metalCost.coins} coins`);
                 break;
             case 'favor':
                 player.favor = remainder;
+                this.addServerMessage(`${player.name} bought ${details.metal} for ${metalCost.favor} favor`);
                 break;
             default:
                 console.error(`Unknown currency: ${details.currency}`);
@@ -389,6 +412,7 @@ export class GameSession {
 
         const reward = details.metal === 'gold' ? 10 : 5
         this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
+        this.addServerMessage(`${player.name} donated ${details.metal} for ${reward} VP`);
         console.info(this.privateState.gameStats);
 
         player.cargo = this.unloadItem(player.cargo, details.metal);
@@ -402,14 +426,17 @@ export class GameSession {
         if (newStatus.levelCompletion === 3) {
             newStatus.currentLevel += 1;
             const newPrices = this.privateState.metalPrices.shift();
-
+            this.addServerMessage('Temple level has been upgraded');
             if (newPrices) {
                 newStatus.prices = newPrices;
                 newStatus.levelCompletion = 0;
+                this.addServerMessage('Metal prices have increased');
             } else {
+                this.addServerMessage('The temple construction is complete! Game has ended.');
                 console.info('Game over!');
                 this.sharedState.gameStatus = 'ended';
                 this.sharedState.gameResults = this.compileGameResults();
+                this.addServerMessage(JSON.stringify(this.sharedState.gameResults));
             }
         }
 
@@ -422,7 +449,8 @@ export class GameSession {
         const player = this.sharedState.players.find(player => player.id === playerId);
 
         if (player?.isActive && player.isAnchored) {
-            this.passActiveStatus();
+            const activePlayer = this.passActiveStatus();
+            this.addServerMessage(`${activePlayer.name} is now active!`);
 
             return true;
         }
@@ -442,6 +470,8 @@ export class GameSession {
             player.cargo.push('empty');
             player.locationActions = this.removeAction(player.locationActions, 'upgrade_hold');
             player.moveActions = 0;
+
+            this.addServerMessage(`${player.name} upgraded their hold`);
 
             return true;
         }
@@ -481,6 +511,7 @@ export class GameSession {
         });
 
         if (canMove) {
+            this.addServerMessage(`${activePlayer.name} rolled a ${activePlayer.influence} and sailed successfully!`);
             return true;
         }
 
@@ -495,7 +526,7 @@ export class GameSession {
         return false;
     }
 
-    private passActiveStatus(): void {
+    private passActiveStatus(): Player {
         const players = this.sharedState.players;
         const activePlayer = players.find(player => player.isActive);
 
@@ -516,7 +547,11 @@ export class GameSession {
         if (nextActivePlayer) {
             nextActivePlayer.isActive = true;
             this.setTurnStartCondition(nextActivePlayer);
+
+            return nextActivePlayer;
         }
+
+        return activePlayer;
     }
 
     private setTurnStartCondition(player: Player): void {

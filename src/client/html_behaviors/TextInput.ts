@@ -6,31 +6,24 @@ interface HTMLHandlerInterface {
 export class TextInput implements HTMLHandlerInterface {
 
     element: HTMLInputElement;
-    callback: () => void;
+    inputCallback: () => void;
 
-    constructor(id: string, callback: () => void) {
+    constructor(id: string, input: () => void) {
         this.element = document.getElementById(id) as HTMLInputElement;
-        this.callback = callback.bind(this);
+        this.inputCallback = input.bind(this);
     }
 
     enable = () => {
         this.element.disabled = false;
-        this.element.addEventListener('input', this.callback);
+        this.element.addEventListener('input', this.inputCallback);
     }
 
     disable = () => {
         this.element.disabled = true;
-        this.element.removeEventListener('input', this.callback);
+        this.element.removeEventListener('input', this.inputCallback);
     }
 
     setValue = (value: string | null) => {
         this.element.value = value ?? '';
-    }
-
-    flushValue = () => {
-        const value = this.element.value;
-        this.element.value = '';
-
-        return value;
     }
 }

@@ -1,9 +1,9 @@
-
+''
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails } from '../shared_types';
+import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry } from '../shared_types';
 import { WssMessage, StateBundle } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
@@ -87,6 +87,7 @@ socketServer.on('connection', function connection(client) {
             }
 
             if (processPlayer(playerId, playerName)) {
+                addServerMessage(`${playerName} has joined the game`);
                 sendAll(lobbyState);
             } else {
                 sendAll({ error: `Enrollment failed on ${playerId}` });
@@ -202,4 +203,9 @@ function processPlayer(playerId: PlayerId, playerName: string|null): boolean {
     }
 
     return true;
+}
+
+function addServerMessage(message: string): void {
+    const chatEntry: ChatEntry = { id: null, name: serverConstants.SERVER_NAME, message };
+    lobbyState.sessionChat.push(chatEntry);
 }
