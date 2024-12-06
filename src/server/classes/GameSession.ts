@@ -5,6 +5,8 @@ import serverConstants from "../server_constants";
 
 const { TRADE_DECK_B } = serverConstants;
 const SERVER_NAME = 'GameBot';
+const MAX_FAVOR = 6;
+
 type RegistryItem = { id: PlayerId, influence: DiceSix };
 
 export class GameSession {
@@ -256,7 +258,7 @@ export class GameSession {
                 break;
             case 'donate_goods':
                 const reward = trade.reward.favorAndVp;
-                player.favor = Math.min(6, player.favor + reward);
+                player.favor = Math.min(MAX_FAVOR, player.favor + reward);
                 this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
                 this.addServerMessage(`${player.name} donated goods for ${reward} favor and ${reward} VP`);
                 console.info(this.privateState.gameStats);
