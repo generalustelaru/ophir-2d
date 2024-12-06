@@ -46,6 +46,7 @@ export type BarrierCheck = {
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
+    SERVER_NAME: string,
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<PickupLocationId, GoodId>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
