@@ -225,7 +225,7 @@ export class GameSession {
         player.locationActions = this.removeAction(player.locationActions, 'pickup_good');
         player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
 
-        this.addServerMessage(`${player.name} picked up ${localGood} from the ${locationId}`);
+        this.addServerMessage(`${player.name} picked up ${localGood}`);
 
         return true;
     }
