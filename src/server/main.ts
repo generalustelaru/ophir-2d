@@ -8,7 +8,14 @@ import { WssMessage, StateBundle } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
-const httpPort = 3000;
+const httpAddress = process.env.HTTP_SERVER_ADDRESS || 'localhost';
+const httpPort = process.env.HTTP_SERVER_PORT;
+
+if (!httpPort) {
+    console.error('No port provided');
+    process.exit(1);
+}
+
 const wsPort = 8080;
 
 const app = express();
@@ -21,7 +28,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.listen(httpPort, () => {
-    console.info(`Server running at http://localhost:${httpPort}`);
+    console.info(`Server running at http://${httpAddress}:${httpPort}`);
 });
 
 const socketClients: Array<any> = [];

@@ -3,19 +3,23 @@ import state from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
-import sharedConstants from "../shared_constants";
 import clientConstants from "./client_constants";
 import { SharedState, WsPayload } from "../shared_types";
-const { CONNECTION } = sharedConstants;
 
 //@ts-ignore
 let stateDebug: SharedState | null = null;
 
 // Initializations
+const wsAddress = process.env.WS_ADDRESS;
+
+if (!wsAddress) {
+    throw new Error('No websocket address provided');
+}
+
 const savedState = sessionStorage.getItem('localState');
 state.local = savedState ? JSON.parse(savedState) : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
 
-const commService: CommunicationService = CommunicationService.getInstance([CONNECTION.wsAddress]);
+const commService: CommunicationService = CommunicationService.getInstance([wsAddress]);
 const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
 const canvasService: CanvasService = CanvasService.getInstance([]);
 

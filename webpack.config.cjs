@@ -1,13 +1,18 @@
 
 const path = require('path');
 const TerserPlugin = require('terser-webpack-plugin');
+const dotenv = require('dotenv-webpack');
 
 module.exports = (env, argv) => {
     const isServer = env.isServer === 'true';
     const label = isServer ? 'server' : 'client';
 
     console.info(`Bundling ${label} code...`);
+
     return {
+        plugins: [
+            new dotenv(),
+        ],
         entry: {
             [label]: `./src/${label}/main.ts`,
         },
