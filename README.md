@@ -7,8 +7,8 @@ Work in progress.
 
 Try it out:
 
-1. Install/Update [https://nodejs.org/en/download/package-manager](Node).
-2. (optional) Install [https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions](Chocolatey).
+1. Install/Update [Node](https://nodejs.org/en/download/package-manager).
+2. (optional) Install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions).
 3. (optional) Run `choco install make`.
 4. Download the codebase.
 5. Go to the project folder and run `npm install` to download dependencies.
