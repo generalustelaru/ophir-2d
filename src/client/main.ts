@@ -10,12 +10,13 @@ import { SharedState, WsPayload } from "../shared_types";
 let stateDebug: SharedState | null = null;
 
 // Initializations
-const wsAddress = process.env.WS_ADDRESS;
+const serverAddress = process.env.SERVER_ADDRESS;
+const wsPort = process.env.WS_PORT;
 
-if (!wsAddress) {
+if (!wsPort) {
     throw new Error('No websocket address provided');
 }
-
+const wsAddress = `ws://${serverAddress}:${wsPort}`;
 const savedState = sessionStorage.getItem('localState');
 state.local = savedState ? JSON.parse(savedState) : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
 
