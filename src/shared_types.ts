@@ -181,9 +181,3 @@ export type WebsocketClientMessage = {
     playerName: string | null,
     payload: WsPayload,
 }
-
-export type SharedConstants = {
-    CONNECTION: {
-        wsAddress: string
-    },
-};

@@ -2,9 +2,6 @@
 import { ClientConstants } from './client_types';
 
 const clientConstants: ClientConstants = {
-    CONNECTION: {
-        wsAddress: 'ws://localhost:8080',
-    },
     DEFAULT_LOCAL_STATE: {
         playerId: null,
         playerName: null,
