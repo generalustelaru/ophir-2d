@@ -121,6 +121,7 @@ const serverConstants: ServerConstants = {
     },
 
     DEFAULT_NEW_STATE: {
+        gameId: null,
         gameStatus: 'empty',
         gameResults: null,
         sessionOwner: null,
