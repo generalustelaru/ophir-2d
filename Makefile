@@ -1,8 +1,8 @@
 build:
 	npx tsc --noEmit
+	make ui
 	npm run build_client
 	npm run build_server
-	make ui
 	make run
 
 client:
@@ -12,8 +12,10 @@ client:
 
 ui:
 ifeq ($(OS),Windows_NT)
+	powershell -command "rm -r public/*"
 	powershell -command "cp -r src/client/layout/* public/"
 else
+	rm -r public/*
 	cp -r src/client/layout/* public/
 endif
 
