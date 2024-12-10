@@ -103,6 +103,8 @@ const serverConstants: ServerConstants = {
 
     DEFAULT_PLAYER_STATE: {
         id: 'playerPurple',
+        timeStamp: 0,
+        isIdle: false,
         name: null,
         turnOrder: 0,
         isActive: false,

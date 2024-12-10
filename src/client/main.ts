@@ -69,6 +69,7 @@ window.addEventListener(
             uiService.setInfo('You are playing.');
             state.local.isBoardDrawn = true;
             canvasService.drawElements();
+            commService.startUpdateChecks();
         }
 
         uiService.updateControls();
