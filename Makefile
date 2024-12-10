@@ -1,14 +1,19 @@
 build:
-	npx tsc --noEmit
+	make check
 	make ui
 	npm run build_client
 	npm run build_server
 	make run
 
+server:
+	make check
+	npm run build_server
+	make run
+
 client:
-	npx tsc --noEmit
+	make check
 	npm run build_client
-	make ui
+	make run
 
 ui:
 ifeq ($(OS),Windows_NT)
