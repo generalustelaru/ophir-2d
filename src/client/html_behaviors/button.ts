@@ -1,8 +1,5 @@
+import { HTMLHandlerInterface } from "../client_types";
 
-interface HTMLHandlerInterface {
-    enable(): void,
-    disable(): void,
-}
 export class Button implements HTMLHandlerInterface {
 
     element: HTMLButtonElement;

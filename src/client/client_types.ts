@@ -34,6 +34,11 @@ export type ClientConstants = {
     ICON_DATA: Record<string, PathData>,
 }
 
+export interface HTMLHandlerInterface {
+    enable(): void,
+    disable(): void,
+}
+
 export interface MegaGroupInterface {
     drawElements(): void,
     updateElements(): void,

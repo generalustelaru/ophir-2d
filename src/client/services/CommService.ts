@@ -61,4 +61,11 @@ export class CommunicationService extends Service {
             this.broadcastEvent('error');
         }
     }
+
+    public startUpdateChecks() {
+
+        setInterval(() => {
+            this.sendMessage({ action: 'inquire', details: null });
+        }, 5000);
+    }
 }

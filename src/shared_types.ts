@@ -33,6 +33,8 @@ export type MetalCost = {
 
 export type Player = {
     id: PlayerId,
+    timeStamp: number,
+    isIdle: boolean,
     name: string | null,
     turnOrder: number,
     isActive: boolean,

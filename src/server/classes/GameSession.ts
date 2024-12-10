@@ -28,6 +28,8 @@ export class GameSession {
         this.setTurnStartCondition(activePlayer);
 
         console.info('Game session created');
+
+        this.startIdleChecks();
     }
 
     public getState(): SharedState {
@@ -41,6 +43,8 @@ export class GameSession {
         if (!id) {
             return { error: 'No player ID provided' };
         }
+
+        this.updateTimestamp(id);
 
         switch (message.payload.action) {
             case 'chat':
@@ -699,5 +703,37 @@ export class GameSession {
         });
 
         return gameStats;
+    }
+
+    private updateTimestamp(activePlayerId: PlayerId): void {
+        const activePlayer = this.sharedState.players.find(player => player.id === activePlayerId);
+
+        if (!activePlayer) {
+            console.error(`Could not find active player: ${activePlayerId}`);
+            return;
+        }
+
+        activePlayer.isIdle = false;
+        activePlayer.timeStamp = Date.now();
+    }
+
+    private startIdleChecks(): void {
+        setInterval(() => {
+            const activePlayer = this.sharedState.players.find(player => player.isActive);
+
+            if (!activePlayer) {
+                console.error('No active player found');
+                return;
+            }
+
+            const timeNow = Date.now();
+
+            if (timeNow - activePlayer.timeStamp > 60000 && !activePlayer.isIdle) {
+                activePlayer.isIdle = true;
+                this.addServerMessage(`${activePlayer.name} is idle`);
+                // this.processEndTurn(activePlayer.id);
+            }
+
+        }, 60000);
     }
 }

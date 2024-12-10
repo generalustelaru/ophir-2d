@@ -130,6 +130,10 @@ export class UserInterfaceService extends Service {
         handlers.forEach(handler => handler.enable());
     }
 
+    private disableElements(...handlers: Array<{ disable(): void }>): void {
+        handlers.forEach(handler => handler.disable());
+    }
+
     public disableControls(): void {
         this.createButton.disable();
         this.joinButton.disable();
@@ -142,7 +146,6 @@ export class UserInterfaceService extends Service {
     }
 
     public updateControls(): void {
-        this.disableControls();
         this.updateChat(state.received.sessionChat);
 
         if(state.local.playerId){
@@ -150,25 +153,24 @@ export class UserInterfaceService extends Service {
         }
 
         switch (state.received.gameStatus) {
-            case 'empty': this.enableCreate(); break;
-            case 'created': this.enableJoinOrStart(); break;
-            case 'full': this.enableStartForOwner(); break;
-            case 'started': this.enableResetForOwner(); break;
-            case 'ended': {
-                this.setInfo('The game has ended');
-                this.enableResetForOwner();
-                this.alertGameResults();
-            } break;
+            case 'empty': this.handleEmptyState(); break;
+            case 'created': this.handleCreatedState(); break;
+            case 'full': this.handleFullState(); break;
+            case 'started': this.handleStartedState(); break;
+            case 'ended': this.handleEndedState(); break;
         }
     }
 
-    private enableJoinOrStart(): void {
+    private handleCreatedState(): void {
 
         if (!state.local.playerId) {
+            this.disableElements(this.startButton, this.resetButton, this.chatInput, this.chatSendButton);
             this.enableElements(this.joinButton, this.playerColorSelect, this.playerNameInput);
 
             return this.setInfo('A game is waiting for you');
         }
+
+        this.enableElements(this.chatInput, this.chatSendButton);
 
         if (state.received.sessionOwner === state.local.playerId) {
             this.enableElements(this.startButton, this.resetButton)
@@ -179,17 +181,24 @@ export class UserInterfaceService extends Service {
         return this.setInfo('Waiting for owner to start...');
     }
 
-    private enableCreate(): void {
+    private handleEmptyState(): void {
+        this.disableElements(this.joinButton, this.startButton, this.resetButton, this.chatInput, this.chatSendButton);
         this.enableElements(this.createButton, this.playerColorSelect, this.playerNameInput);
 
         return this.setInfo('You may create the game');
     }
 
-    private enableStartForOwner(): void {
+    private handleFullState(): void {
+
+        this.disableElements(this.createButton, this.joinButton, this.resetButton, this.playerColorSelect, this.playerNameInput);
 
         if (!state.local.playerId) {
+            this.startButton.disable();
+
             return this.setInfo('The game is full, sorry :(');
         }
+
+        this.enableElements(this.chatInput, this.chatSendButton);
 
         if (state.local.playerId === state.received.sessionOwner) {
             this.startButton.enable();
@@ -200,11 +209,21 @@ export class UserInterfaceService extends Service {
         return this.setInfo('The game might start at any time.');
     }
 
-    private enableResetForOwner(): void {
+    private handleStartedState(): void {
+
+        this.disableElements(this.createButton, this.joinButton, this.startButton, this.playerColorSelect, this.playerNameInput, this.resetButton);
+        this.enableElements(this.chatInput, this.chatSendButton);
 
         if (state.local.playerId === state.received.sessionOwner) {
             this.resetButton.enable();
         }
+    }
+
+    private handleEndedState(): void {
+        this.setInfo('The game has ended');
+        setTimeout(() => {
+            this.alertGameResults();
+        }, 1000);
     }
 
     private alertGameResults(): void {
