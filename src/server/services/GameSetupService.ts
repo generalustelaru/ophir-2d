@@ -14,6 +14,10 @@ export class GameSetupService extends Service {
     public produceGameData(newState: NewState, setupCoordinates: Array<Coordinates>): StateBundle {
         const players = this.tools.getCopy(newState.players);
 
+        if (newState.gameId  === null) {
+            throw new Error('Cannot start game without a game ID');
+        }
+
         if (newState.sessionOwner === null) {
             throw new Error('Cannot start game while the session owner is null');
         }
@@ -33,6 +37,7 @@ export class GameSetupService extends Service {
         }
         newState.sessionChat.push({id: null, name: 'Gamebot', message: 'Welcome to the archipelago!'})
         const sharedState: SharedState = {
+            gameId: newState.gameId,
             gameStatus: 'started',
             gameResults: null,
             sessionOwner: newState.sessionOwner,

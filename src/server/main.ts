@@ -1,13 +1,14 @@
 ''
 import process from 'process';
 import express, { Request, Response } from 'express';
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
 import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry } from '../shared_types';
-import { WssMessage, StateBundle } from './server_types';
+import { WssMessage, StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
+import { randomUUID } from 'crypto';
 
 const httpAddress = process.env.SERVER_ADDRESS;
 const httpPort = process.env.HTTP_PORT;
@@ -31,27 +32,29 @@ app.listen(httpPort, () => {
     console.info(`Server running at http://${httpAddress}:${httpPort}`);
 });
 
-const socketClients: Array<any> = [];
+const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
+const sessionId = randomUUID();
 let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+lobbyState.gameId = sessionId;
 let singleSession: GameSession | null = null;
 
-const sendAll = (message: WssMessage) => {
+function sendAll (message: WssMessage): void {
     socketClients.forEach(client => {
-        client.send(JSON.stringify(message));
+        client.socket.send(JSON.stringify(message));
     });
 }
 
-const send = (client: any, message: WssMessage) => {
+function send (client: WebSocket, message: WssMessage): void {
     client.send(JSON.stringify(message));
 }
 
 socketServer.on('connection', function connection(client) {
 
-    socketClients.push(client);
+    socketClients.push({ gameID: sessionId, socket: client });
 
     client.on('message', function incoming(message: string) {
 
