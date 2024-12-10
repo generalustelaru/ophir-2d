@@ -12,7 +12,7 @@ import { randomUUID } from 'crypto';
 
 const httpAddress = process.env.SERVER_ADDRESS;
 const httpPort = process.env.HTTP_PORT;
-const wsPort = parseInt(process.env.WS_PORT ?? '0');
+const wsPort = process.env.WS_PORT && parseInt(process.env.WS_PORT);
 
 if (!httpAddress || !httpPort || !wsPort) {
     console.error('Missing environment variables');
@@ -29,7 +29,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.listen(httpPort, () => {
-    console.info(`Server running at http://${httpAddress}:${httpPort}`);
+    console.info(`Server running at ${httpAddress}:${httpPort}`);
 });
 
 const socketClients: Array<WsClient> = [];
