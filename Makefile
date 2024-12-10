@@ -12,11 +12,9 @@ client:
 
 ui:
 ifeq ($(OS),Windows_NT)
-	powershell -command "cp src/client/index.html public/index.html"
-	powershell -command "cp src/client/style.css public/style.css"
+	powershell -command "cp -r src/client/layout/* public/"
 else
-	cp src/client/index.html public/index.html
-	cp src/client/style.css public/style.css
+	cp -r src/client/layout/* public/
 endif
 
 run:
