@@ -80,6 +80,7 @@ export type TempleStatus = {
  * @description Shared between players and server in a session
  */
 export type SharedState = {
+    gameId: string,
     gameStatus: GameStatus,
     gameResults: null | Array<PlayerCountables>,
     sessionOwner: PlayerId,
@@ -93,6 +94,7 @@ export type SharedState = {
 }
 
 export type NewState = {
+    gameId: string | null,
     gameStatus: GameStatus,
     gameResults: null,
     sessionOwner: PlayerId | null,

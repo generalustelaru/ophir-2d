@@ -1,4 +1,9 @@
 import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, ResetState, Trade, LocationData, GoodId, PickupLocationId, MetalPrices} from '../shared_types';
+import { WebSocket } from 'ws';
+export type WsClient = {
+    gameID: string,
+    socket: WebSocket
+}
 
 export type WsSignal = 'connection'|'message'|'close';
 

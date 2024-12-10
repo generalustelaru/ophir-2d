@@ -8,6 +8,7 @@ const state: ClientState = {
         isBoardDrawn: false,
     },
     received: {
+        gameId: null,
         gameStatus: 'empty',
         gameResults: null,
         sessionOwner: null,
