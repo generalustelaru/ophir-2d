@@ -1,7 +1,8 @@
-import { SharedState, BarrierId, HexId, PlayerId, Player, NewState, ResetState, Trade, LocationData, GoodId, PickupLocationId, MetalPrices} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, ResetState, Trade, LocationData, GoodId, PickupLocationId, MetalPrices} from '../shared_types';
 import { WebSocket } from 'ws';
 export type WsClient = {
-    gameID: string,
+    clientID: string,
+    gameID: string | null,
     socket: WebSocket
 }
 
@@ -20,7 +21,7 @@ export type ProcessedMoveRule = {
 }
 
 export type PlayerCountables = {
-    id: PlayerId;
+    id: PlayerColor;
     vp: number;
     gold: number;
     silver: number;
@@ -58,7 +59,7 @@ export type ServerConstants = {
     DEFAULT_NEW_STATE: NewState,
     RESET_STATE: ResetState,
     BARRIER_CHECKS: BarrierChecks,
-    PLAYER_IDS: Array<PlayerId>,
+    PLAYER_IDS: Array<PlayerColor>,
     DEFAULT_PLAYER_STATE: Player,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,

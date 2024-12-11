@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails, LocationId, PlayerId, SharedState } from '../../shared_types';
+import { Coordinates, GameSetupDetails, LocationId, PlayerColor, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import state from '../state';
@@ -36,7 +36,7 @@ export class MapGroup implements MegaGroupInterface {
         const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
         const serverState = state.received as SharedState;
         const players = serverState.players;
-        const localPlayer = players.find(player => player.id === state.local.playerId);
+        const localPlayer = players.find(player => player.id === state.local.playerColor);
         const isActivePlayer = localPlayer?.isActive || false;
         //MARK: dials
         this.movesDial = new MovesDial(isActivePlayer);
@@ -91,7 +91,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: ships
         players.forEach(player => {
 
-            if (player.id && player.id !== state.local.playerId) {
+            if (player.id && player.id !== state.local.playerColor) {
                 const shipPosition = player.hexagon.position;
                 const ship = new ShipToken(
                     shipPosition.x,
@@ -105,7 +105,7 @@ export class MapGroup implements MegaGroupInterface {
             }
         });
 
-        if (!state.local.playerId) {
+        if (!state.local.playerColor) {
             return;
         }
 
@@ -120,7 +120,7 @@ export class MapGroup implements MegaGroupInterface {
             this.stage,
             shipPosition.x,
             shipPosition.y,
-            COLOR[state.local.playerId],
+            COLOR[state.local.playerColor],
             localPlayer.isActive,
             this.mapHexes,
         );
@@ -133,7 +133,7 @@ export class MapGroup implements MegaGroupInterface {
     public updateElements(): void {
         const serverState = state.received as SharedState;
         const players = serverState.players;
-        const localPlayer = players.find(player => player.id === state.local.playerId);
+        const localPlayer = players.find(player => player.id === state.local.playerColor);
 
         //MARK: dials & hexes
         if (localPlayer) {
@@ -152,7 +152,7 @@ export class MapGroup implements MegaGroupInterface {
 
         // MARK: ships
         this.opponentShips.forEach(ship => {
-            const opponentId: PlayerId = ship.getId();
+            const opponentId: PlayerColor = ship.getId();
             const player = players.find(player => player.id === opponentId);
 
             if (player) {

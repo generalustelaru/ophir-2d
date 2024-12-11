@@ -3,7 +3,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerId, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry } from '../shared_types';
+import { PlayerColor, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry } from '../shared_types';
 import { WssMessage, StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
@@ -37,9 +37,9 @@ const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
-const sessionId = randomUUID();
+// const sessionId = randomUUID();
 let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
-lobbyState.gameId = sessionId;
+// lobbyState.gameId = sessionId;
 let singleSession: GameSession | null = null;
 
 function sendAll (message: WssMessage): void {
@@ -53,22 +53,23 @@ function send (client: WebSocket, message: WssMessage): void {
 }
 
 socketServer.on('connection', function connection(client) {
-
-    socketClients.push({ gameID: sessionId, socket: client });
+    const clientID = randomUUID();
+    client.send(JSON.stringify({ id: clientID }));
+    socketClients.push({ clientID, gameID: null, socket: client });
 
     client.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
-        const { playerId, playerName, payload } = parsedMessage;
+        const { playerColor, playerName, payload } = parsedMessage;
         const {action, details} = payload;
-        const name = playerName || playerId || '';
+        const name = playerName || playerColor || '';
         const colorized = {
-            playerPurple: `\x1b[95m${name}\x1b[0m`,
-            playerYellow: `\x1b[93m${name}\x1b[0m`,
-            playerRed: `\x1b[91m${name}\x1b[0m`,
-            playerGreen: `\x1b[92m${name}\x1b[0m`,
+            Purple: `\x1b[95m${name}\x1b[0m`,
+            Yellow: `\x1b[93m${name}\x1b[0m`,
+            Red: `\x1b[91m${name}\x1b[0m`,
+            Green: `\x1b[92m${name}\x1b[0m`,
         }
-        const clientName = playerId ? colorized[playerId] : 'anon';
+        const clientName = playerColor ? colorized[playerColor] : 'anon';
         console.info(
             '%s -> %s%s',
             clientName,
@@ -76,13 +77,13 @@ socketServer.on('connection', function connection(client) {
             details ? `: ${JSON.stringify(details)}` : ': { ¯\\_(ツ)_/¯ }',
         );
 
-        if (action === 'inquire') {
+        if (action === 'inquire' || action === 'get_status') {
             send(client, singleSession?.getState() || lobbyState);
 
             return;
         }
 
-        if (!playerId) {
+        if (!playerColor) {
             send(client, { error: 'Player ID is missing' });
 
             return;
@@ -96,11 +97,12 @@ socketServer.on('connection', function connection(client) {
                 return;
             }
 
-            if (processPlayer(playerId, playerName)) {
-                addServerMessage(`${playerName} has joined the game`);
+            if (processPlayer(playerColor, playerName)) {
+                addServerMessage(`${playerName ?? playerColor} has joined the game`);
+                lobbyState.gameId = randomUUID();
                 sendAll(lobbyState);
             } else {
-                sendAll({ error: `Enrollment failed on ${playerId}` });
+                sendAll({ error: `Enrollment failed on ${playerColor}` });
             }
 
             return;
@@ -108,7 +110,7 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'chat' && !singleSession) {
             const chatMessage = details as ChatDetails;
-            lobbyState.sessionChat.push({ id: playerId, name: playerName || playerId, message: chatMessage.message });
+            lobbyState.sessionChat.push({ id: playerColor, name: playerName ?? playerColor, message: chatMessage.message });
             sendAll(lobbyState);
 
             return;
@@ -130,7 +132,7 @@ socketServer.on('connection', function connection(client) {
 
         if (action === 'reset') {
             console.log('Session is resetting!');
-            singleSession = null;
+            singleSession = singleSession?.wipeSession() ?? null;
             lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
 
             sendAll(serverConstants.RESET_STATE);
@@ -177,34 +179,34 @@ function playerHasUniqueName(playerName: string|null): boolean {
     return !lobbyState.players.some(player => player.name === playerName);
 }
 
-function processPlayer(playerId: PlayerId, playerName: string|null): boolean {
+function processPlayer(playerColor: PlayerColor, playerName: string|null): boolean {
     const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
     if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
-        console.log(`${playerId} cannot enroll`);
+        console.log(`${playerColor} cannot enroll`);
 
         return false;
     }
 
-    if (false == serverConstants.PLAYER_IDS.includes(playerId)) {
-        console.log(`${playerId} is not a valid player`);
+    if (false == serverConstants.PLAYER_IDS.includes(playerColor)) {
+        console.log(`${playerColor} is not a valid player`);
 
         return false;
     }
 
-    lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerId);
+    lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerColor);
 
     const newPlayer = tools.getCopy(serverConstants.DEFAULT_PLAYER_STATE);
-    newPlayer.id = playerId;
-    newPlayer.name = playerName || playerId
+    newPlayer.id = playerColor;
+    newPlayer.name = playerName || playerColor
     lobbyState.players.push(newPlayer);
 
-    console.log(`${playerId} enrolled`);
+    console.log(`${playerColor} enrolled`);
 
     if (lobbyState.sessionOwner === null) {
         lobbyState.gameStatus = 'created';
-        lobbyState.sessionOwner = playerId;
-        console.log(`${playerId} is the session owner`);
+        lobbyState.sessionOwner = playerColor;
+        console.log(`${playerColor} is the session owner`);
     }
 
     if (lobbyState.availableSlots.length === 0) {

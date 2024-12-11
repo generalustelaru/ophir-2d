@@ -26,8 +26,8 @@ const canvasService: CanvasService = CanvasService.getInstance([]);
 
 //Send player action to server
 window.addEventListener(
-    'action' as any,
-    (event) => {
+    'action',
+    (event: CustomEventInit) => {
         const payload: WsPayload = event.detail;
 
         commService.sendMessage(payload);
@@ -36,8 +36,8 @@ window.addEventListener(
 
 //Display errors
 window.addEventListener(
-    'error' as any,
-    (event) => {
+    'error',
+    (event: CustomEventInit) => {
         const payload: ErrorEventPayload = event.detail;
         console.error(payload.error);
         alert(payload.error);
@@ -50,11 +50,24 @@ window.addEventListener(
     () => commService.sendMessage({ action: 'inquire', details: null }),
 );
 
+window.addEventListener(
+    'identification',
+    (event: CustomEventInit) => {
+        const payload = event.detail;
+        state.local.clientId = payload.clientID;
+        sessionStorage.setItem('localState', JSON.stringify(state.local));
+    });
+
 // Update client on server state update
 window.addEventListener(
     'update',
     () => {
         const sharedState = state.received as SharedState;
+
+        if (sharedState.gameStatus === 'created') {
+            state.local.gameId = sharedState.gameId;
+            sessionStorage.setItem('localState', JSON.stringify(state.local));
+        }
 
         if (sharedState.gameStatus === 'reset') {
             sessionStorage.removeItem('localState');
@@ -69,17 +82,18 @@ window.addEventListener(
             uiService.setInfo('You are playing.');
             state.local.isBoardDrawn = true;
             canvasService.drawElements();
-            commService.startUpdateChecks();
+            commService.beginStatusChecks();
         }
 
         uiService.updateControls();
 
         // Debugging
+        localStorage.setItem('gameStatus', sharedState.gameStatus);
         localStorage.setItem('received', JSON.stringify(sharedState));
         localStorage.setItem('client', JSON.stringify(state));
 
-        ['playerRed', 'playerGreen', 'playerPurple', 'playerYellow'].forEach((playerId) => {
-            localStorage.removeItem(playerId);
+        ['Red', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
+            localStorage.removeItem(playerColor);
         });
 
         for (const player of state.received.players) {
@@ -88,8 +102,8 @@ window.addEventListener(
     });
 
 window.addEventListener(
-    'info' as any,
-    (event) => {
+    'info',
+    (event: CustomEventInit) => {
         const payload: InfoEventPayload = event.detail;
         uiService.setInfo(payload.text)
     }

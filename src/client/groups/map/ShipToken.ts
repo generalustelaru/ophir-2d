@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Player, PlayerId } from '../../../shared_types';
+import { Player, PlayerColor } from '../../../shared_types';
 import { DynamicGroupInterface } from '../../client_types';
 import clientConstants from '../../client_constants';
 
@@ -15,7 +15,7 @@ export class ShipToken implements DynamicGroupInterface<Player> {
         offsetY: number,
         fill: string,
         isActivePlayer: boolean,
-        id: PlayerId,
+        id: PlayerColor,
     ) {
         this.group = new Konva.Group({
             x: offsetX,
@@ -42,8 +42,8 @@ export class ShipToken implements DynamicGroupInterface<Player> {
         return this.group
     }
 
-    public getId(): PlayerId {
-        return this.group.attrs.id as PlayerId
+    public getId(): PlayerColor {
+        return this.group.attrs.id as PlayerColor
     }
 
     public updateElement(player: Player): void {

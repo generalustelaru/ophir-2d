@@ -2,7 +2,7 @@ import { PlayerCountables } from "./server/server_types";
 
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
-export type PlayerId = "playerPurple" | "playerYellow" | "playerRed" | "playerGreen";
+export type PlayerColor = "Purple" | "Yellow" | "Red" | "Green";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type GoodId = "gems" | "wood" | "stone" | "cloth";
 export type MetalId = "silver" | "silver_extra" | "gold" | "gold_extra"; // metals cover two cargo spaces
@@ -18,7 +18,7 @@ export type Trade = { request: Array<GoodId>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckId = "A" | "B";
-export type ChatEntry = {id: PlayerId|null, name: string|null, message: string};
+export type ChatEntry = {id: PlayerColor|null, name: string|null, message: string};
 export type MetalPrices = {
     id: number,
     goldCost: MetalCost,
@@ -32,7 +32,7 @@ export type MetalCost = {
 }
 
 export type Player = {
-    id: PlayerId,
+    id: PlayerColor,
     timeStamp: number,
     isIdle: boolean,
     name: string | null,
@@ -82,11 +82,12 @@ export type TempleStatus = {
  * @description Shared between players and server in a session
  */
 export type SharedState = {
+    isStatusResponse: boolean,
     gameId: string,
     gameStatus: GameStatus,
     gameResults: null | Array<PlayerCountables>,
-    sessionOwner: PlayerId,
-    availableSlots: Array<PlayerId>,
+    sessionOwner: PlayerColor,
+    availableSlots: Array<PlayerColor>,
     players: Array<Player>,
     marketOffer: MarketOffer,
     templeStatus: TempleStatus,
@@ -96,11 +97,12 @@ export type SharedState = {
 }
 
 export type NewState = {
+    isStatusResponse: boolean,
     gameId: string | null,
     gameStatus: GameStatus,
     gameResults: null,
-    sessionOwner: PlayerId | null,
-    availableSlots: Array<PlayerId>,
+    sessionOwner: PlayerColor | null,
+    availableSlots: Array<PlayerColor>,
     players: Array<Player>,
     marketOffer: null,
     templeStatus: null,
@@ -164,7 +166,7 @@ export interface RequestInterface<A, D> {
     details: D,
 }
 
-export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold';
+export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';
 export type LaconicRequest = RequestInterface<LaconicAction, null>;
 export type ChatRequest = RequestInterface<'chat', ChatDetails>;
 export type GameSetupRequest = RequestInterface<'start', GameSetupDetails>;
@@ -181,7 +183,9 @@ export type WsPayload =
     | GoodsDonationRequest | ChatRequest;
 
 export type WebsocketClientMessage = {
-    playerId: PlayerId | null,
+    gameId: string | null,
+    clientId: string | null,
+    playerColor: PlayerColor | null,
     playerName: string | null,
     payload: WsPayload,
 }

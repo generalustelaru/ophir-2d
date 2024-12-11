@@ -1,4 +1,4 @@
-import { HexId, PlayerId, SharedState, Coordinates, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus, WsPayload } from '../shared_types';
+import { HexId, PlayerColor, SharedState, Coordinates, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus, WsPayload } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -7,9 +7,11 @@ export type LocationIconData = { shape: string, fill: Color };
 export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
-export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup";
+export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup" | "identification";
 export type LocalState = {
-    playerId: PlayerId | null,
+    gameId: string | null,
+    clientId: string | null,
+    playerColor: PlayerColor | null,
     playerName: string | null,
     isBoardDrawn: boolean,
 }
@@ -92,7 +94,7 @@ export type TempleUpdate = {
     localPlayer: Player | null,
 }
 
-export type EventPayload = InfoEventPayload | WsPayload | ErrorEventPayload | SetupEventPayload | null;
+export type EventPayload = InfoEventPayload | WsPayload | ErrorEventPayload | SetupEventPayload | IdentificationEventPayload | null;
 
 export type InfoEventPayload = {
     text: string,
@@ -104,4 +106,8 @@ export type ErrorEventPayload = {
 
 export type SetupEventPayload = {
     playerPositions: Array<Coordinates>,
+}
+
+export type IdentificationEventPayload = {
+    clientID: string,
 }

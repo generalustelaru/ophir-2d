@@ -3,7 +3,9 @@ import { ClientConstants } from './client_types';
 
 const clientConstants: ClientConstants = {
     DEFAULT_LOCAL_STATE: {
-        playerId: null,
+        gameId: null,
+        clientId: null,
+        playerColor: null,
         playerName: null,
         isBoardDrawn: false,
     },
@@ -12,10 +14,10 @@ const clientConstants: ClientConstants = {
         barrierNavigator: '#FFFDD7',
         activeShipBorder: '#FFFFFF',
         shipBorder: '#000000',
-        playerPurple: '#A55A9A',
-        playerYellow: '#FFC94A',
-        playerRed: '#FF204E',
-        playerGreen: '#87A922',
+        Purple: '#A55A9A',
+        Yellow: '#FFC94A',
+        Red: '#FF204E',
+        Green: '#87A922',
         illegal: '#A94438',
         validHex: '#A3FFD6',
         defaultHex: '#3887BE',
