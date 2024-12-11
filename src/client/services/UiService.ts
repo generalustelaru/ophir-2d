@@ -20,6 +20,7 @@ export class UserInterfaceService extends Service {
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
     private chatSendButton: Button;
+    private kickPlayerButton: Button;
 
     constructor() {
         super();
@@ -27,6 +28,7 @@ export class UserInterfaceService extends Service {
         this.joinButton = new Button('joinButton', this.processEnroll);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
+        this.kickPlayerButton = new Button('kickPlayerButton', ()=>{});
         this.playerNameInput = new TextInput('playerNameInput', this.updatePlayerName);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
@@ -139,6 +141,7 @@ export class UserInterfaceService extends Service {
         this.joinButton.disable();
         this.startButton.disable();
         this.resetButton.disable();
+        this.kickPlayerButton.disable();
         this.chatSendButton.disable();
     }
 
@@ -211,6 +214,11 @@ export class UserInterfaceService extends Service {
 
         if (state.local.playerColor === state.received.sessionOwner) {
             this.resetButton.enable();
+            const activePlayer = state.received.players.find(p => p.isActive);
+
+            if (activePlayer?.isIdle) {
+                this.kickPlayerButton.enable();
+            }
         }
     }
 
