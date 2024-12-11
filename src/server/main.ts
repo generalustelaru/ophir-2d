@@ -3,7 +3,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry } from '../shared_types';
+import { PlayerColor, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails } from '../shared_types';
 import { WssMessage, StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
@@ -52,12 +52,12 @@ function send (client: WebSocket, message: WssMessage): void {
     client.send(JSON.stringify(message));
 }
 
-socketServer.on('connection', function connection(client) {
+socketServer.on('connection', function connection(socket) {
     const clientID = randomUUID();
-    client.send(JSON.stringify({ id: clientID }));
-    socketClients.push({ clientID, gameID: null, socket: client });
+    socket.send(JSON.stringify({ id: clientID }));
+    socketClients.push({ clientID, gameID: null, socket: socket });
 
-    client.on('message', function incoming(message: string) {
+    socket.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
         const { playerColor, playerName, payload } = parsedMessage;
@@ -77,14 +77,27 @@ socketServer.on('connection', function connection(client) {
             details ? `: ${JSON.stringify(details)}` : ': { ¯\\_(ツ)_/¯ }',
         );
 
+        if (action === 'rebind_id') {
+            const { referenceId, myId } = details as RebindClientDetails;
+            const socketClient = socketClients.find(c => c.clientID === referenceId);
+
+            if (socketClient) {
+                socketClient.clientID = myId;
+
+                return
+            };
+
+            send(socket, { error: 'Client not found' });
+        }
+
         if (action === 'inquire' || action === 'get_status') {
-            send(client, singleSession?.getState() || lobbyState);
+            send(socket, singleSession?.getState() || lobbyState);
 
             return;
         }
 
         if (!playerColor) {
-            send(client, { error: 'Player ID is missing' });
+            send(socket, { error: 'Player ID is missing' });
 
             return;
         }
@@ -92,7 +105,7 @@ socketServer.on('connection', function connection(client) {
         if (action === 'enroll') {
 
             if (!playerHasUniqueName(playerName)) {
-                send(client, { error: 'This name is already taken' });
+                send(socket, { error: 'This name is already taken' });
 
                 return;
             }
@@ -146,7 +159,7 @@ socketServer.on('connection', function connection(client) {
             return;
         }
 
-        send(client, { error: 'Request cannot be handled' });
+        send(socket, { error: 'Request cannot be handled' });
     });
 });
 
