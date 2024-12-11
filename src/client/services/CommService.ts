@@ -24,8 +24,12 @@ export class CommunicationService extends Service {
             const data = JSON.parse(event.data);
 
             if (data.id) {
-                console.log(`My ID is ${data.id}`);
-                this.broadcastEvent('identification', { clientID: data.id });
+                if (state.local.clientId === null) {
+                    console.log(`My new ID is ${data.id}`);
+                    this.broadcastEvent('identification', { clientID: data.id });
+                } else {
+                    this.sendMessage({ action: 'rebind_id', details: {referenceId: data.id, myId: state.local.clientId} });
+                }
             }
 
             if (data.error) {
