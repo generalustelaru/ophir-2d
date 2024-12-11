@@ -1,4 +1,4 @@
-import { WebsocketClientMessage, WsPayload } from '../../shared_types';
+import { LaconicRequest, WebsocketClientMessage, WsPayload } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
 
@@ -22,6 +22,11 @@ export class CommunicationService extends Service {
         }
         this.socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
+
+            if (data.id) {
+                console.log(`My ID is ${data.id}`);
+                this.broadcastEvent('identification', { clientID: data.id });
+            }
 
             if (data.error) {
                 console.error('<-', data.error);
@@ -48,7 +53,9 @@ export class CommunicationService extends Service {
         }
 
         const message: WebsocketClientMessage = {
-            playerId: state.local.playerId,
+            gameId: state.local.gameId,
+            clientId: state.local.clientId,
+            playerColor: state.local.playerColor,
             playerName: state.local.playerName,
             payload
         };
@@ -62,10 +69,10 @@ export class CommunicationService extends Service {
         }
     }
 
-    public startUpdateChecks() {
-
+    public beginStatusChecks() {
+        const request: LaconicRequest = { action: 'get_status', details: null };
         setInterval(() => {
-            this.sendMessage({ action: 'inquire', details: null });
+            this.sendMessage(request);
         }, 5000);
     }
 }

@@ -1,4 +1,4 @@
-import { PlayerId, NewState, GameSetupRequest, ChatRequest, ChatEntry } from '../../shared_types';
+import { PlayerColor, NewState, GameSetupRequest, ChatRequest, ChatEntry } from '../../shared_types';
 import { WsPayload } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
@@ -39,7 +39,7 @@ export class UserInterfaceService extends Service {
                 });
             },
 
-            setValue: (color: PlayerId | null) => {
+            setValue: (color: PlayerColor | null) => {
                 if (color) this.playerColorSelect.element.value = color;
             },
 
@@ -50,7 +50,7 @@ export class UserInterfaceService extends Service {
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
 
         this.playerNameInput.setValue(state.local.playerName);
-        this.playerColorSelect.setValue(state.local.playerId);
+        this.playerColorSelect.setValue(state.local.playerColor);
     }
 
     private updatePlayerName = (): void => {
@@ -103,7 +103,7 @@ export class UserInterfaceService extends Service {
 
     private processEnroll = (): void => {
         const lobbyState = state.received as NewState;
-        const selectedId = this.playerColorSelect.element.value as PlayerId;
+        const selectedId = this.playerColorSelect.element.value as PlayerColor;
 
         if (!selectedId) {
             return alert('Select your player color first.');
@@ -111,7 +111,7 @@ export class UserInterfaceService extends Service {
 
 
         if (lobbyState.availableSlots.includes(selectedId)) {
-            state.local.playerId = selectedId;
+            state.local.playerColor = selectedId;
             sessionStorage.setItem('localState', JSON.stringify(state.local));
             const payload: WsPayload = { action: 'enroll', details: null };
 
@@ -134,21 +134,19 @@ export class UserInterfaceService extends Service {
         handlers.forEach(handler => handler.disable());
     }
 
-    public disableControls(): void {
+    private disableButtons(): void {
         this.createButton.disable();
         this.joinButton.disable();
         this.startButton.disable();
-        this.playerColorSelect.disable();
         this.resetButton.disable();
-        this.playerNameInput.disable();
-        this.chatInput.disable();
         this.chatSendButton.disable();
     }
 
     public updateControls(): void {
         this.updateChat(state.received.sessionChat);
+        this.disableButtons();
 
-        if(state.local.playerId){
+        if(state.local.playerColor){
             this.enableElements(this.chatInput, this.chatSendButton);
         }
 
@@ -163,17 +161,19 @@ export class UserInterfaceService extends Service {
 
     private handleCreatedState(): void {
 
-        if (!state.local.playerId) {
-            this.disableElements(this.startButton, this.resetButton, this.chatInput, this.chatSendButton);
+        // guest/anon/spectator
+        if (!state.local.playerColor) {
             this.enableElements(this.joinButton, this.playerColorSelect, this.playerNameInput);
 
             return this.setInfo('A game is waiting for you');
         }
 
-        this.enableElements(this.chatInput, this.chatSendButton);
+        // enrolled player
+        this.disableElements(this.playerNameInput, this.playerColorSelect)
 
-        if (state.received.sessionOwner === state.local.playerId) {
-            this.enableElements(this.startButton, this.resetButton)
+        // session owner
+        if (state.received.sessionOwner === state.local.playerColor) {
+            this.enableElements(this.startButton, this.resetButton);
 
             return this.setInfo('Waiting for more players to join...');
         }
@@ -182,7 +182,6 @@ export class UserInterfaceService extends Service {
     }
 
     private handleEmptyState(): void {
-        this.disableElements(this.joinButton, this.startButton, this.resetButton, this.chatInput, this.chatSendButton);
         this.enableElements(this.createButton, this.playerColorSelect, this.playerNameInput);
 
         return this.setInfo('You may create the game');
@@ -190,18 +189,15 @@ export class UserInterfaceService extends Service {
 
     private handleFullState(): void {
 
-        this.disableElements(this.createButton, this.joinButton, this.resetButton, this.playerColorSelect, this.playerNameInput);
+        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
-        if (!state.local.playerId) {
-            this.startButton.disable();
+        if (!state.local.playerColor) {
 
             return this.setInfo('The game is full, sorry :(');
         }
 
-        this.enableElements(this.chatInput, this.chatSendButton);
-
-        if (state.local.playerId === state.received.sessionOwner) {
-            this.startButton.enable();
+        if (state.local.playerColor === state.received.sessionOwner) {
+            this.enableElements(this.startButton, this.resetButton);
 
             return this.setInfo('You may start whenever you want');
         }
@@ -211,10 +207,9 @@ export class UserInterfaceService extends Service {
 
     private handleStartedState(): void {
 
-        this.disableElements(this.createButton, this.joinButton, this.startButton, this.playerColorSelect, this.playerNameInput, this.resetButton);
-        this.enableElements(this.chatInput, this.chatSendButton);
+        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
-        if (state.local.playerId === state.received.sessionOwner) {
+        if (state.local.playerColor === state.received.sessionOwner) {
             this.resetButton.enable();
         }
     }
@@ -227,7 +222,7 @@ export class UserInterfaceService extends Service {
     }
 
     private alertGameResults(): void {
-        sessionStorage.removeItem('playerId');
+        sessionStorage.removeItem('playerColor');
         const results = state.received.gameResults;
         let message = 'The game has ended\n\n';
 

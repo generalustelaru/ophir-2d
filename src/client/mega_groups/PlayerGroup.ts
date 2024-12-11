@@ -24,10 +24,10 @@ export class PlayerGroup implements MegaGroupInterface {
     public drawElements(): void {
         const verticalOffsets = [20, 140, 260, 380];
 
-        const playersByLocalPlayer = state.local.playerId
+        const playersByLocalPlayer = state.local.playerColor
             ? (() => {
                 const players = [...state.received.players];
-                while (players[0].id !== state.local.playerId) {
+                while (players[0].id !== state.local.playerColor) {
                     players.push(players.shift() as Player);
                 }
                 return players;
@@ -38,7 +38,7 @@ export class PlayerGroup implements MegaGroupInterface {
             const placard = new PlayerPlacard(
                 this.stage,
                 player,
-                state.local.playerId,
+                state.local.playerColor,
                 verticalOffsets.shift() as number
             );
             this.group.add(placard.getElement());

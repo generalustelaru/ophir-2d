@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, HexId, PlayerId, SharedState, DiceSix, WsPayload } from '../../../shared_types';
+import { Coordinates, HexId, PlayerColor, SharedState, DiceSix, WsPayload } from '../../../shared_types';
 import state from '../../state';
 import clientConstants from '../../client_constants';
 import { MapHexagon } from '../GroupList';
@@ -38,17 +38,17 @@ export class PlayerShip {
         mapHexes: Array<MapHexagon>
     ) {
         this.mapHexes = mapHexes;
-        const playerId = state.local.playerId;
+        const playerColor = state.local.playerColor;
 
-        if (!playerId) {
-            throw new Error('Player ID is missing!');
+        if (!playerColor) {
+            throw new Error('Cannot create PlayerShip w/o Player ID!');
         }
 
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
             draggable: true,
-            id: playerId,
+            id: playerColor,
         });
 
         this.ship = new Konva.Path({
@@ -78,7 +78,7 @@ export class PlayerShip {
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
             const serverState = state.received as SharedState
-            const player = serverState.players.find(player => player.id === playerId);
+            const player = serverState.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
@@ -121,7 +121,7 @@ export class PlayerShip {
                 mapHex.setFill(COLOR.defaultHex);
             }
 
-            const player = state.received.players.find(player => player.id === playerId);
+            const player = state.received.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
             const departureHex = this.mapHexes.find(hex => hex.getId() === player?.hexagon.hexId);
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
@@ -159,8 +159,8 @@ export class PlayerShip {
         this.group.add(this.ship);
     }
 
-    public getId(): PlayerId {
-        return this.group.attrs.id() as PlayerId;
+    public getId(): PlayerColor {
+        return this.group.attrs.id() as PlayerColor;
     }
 
     public destroy(): void {

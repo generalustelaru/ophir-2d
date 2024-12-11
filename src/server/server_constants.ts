@@ -78,10 +78,10 @@ const serverConstants: ServerConstants = {
     },
 
     PLAYER_IDS: [
-        'playerPurple',
-        'playerYellow',
-        'playerRed',
-        'playerGreen',
+        'Purple',
+        'Yellow',
+        'Red',
+        'Green',
     ],
 
     LOCATION_ACTIONS: [
@@ -102,7 +102,7 @@ const serverConstants: ServerConstants = {
     },
 
     DEFAULT_PLAYER_STATE: {
-        id: 'playerPurple',
+        id: 'Purple',
         timeStamp: 0,
         isIdle: false,
         name: null,
@@ -123,16 +123,17 @@ const serverConstants: ServerConstants = {
     },
 
     DEFAULT_NEW_STATE: {
+        isStatusResponse: false,
         gameId: null,
         gameStatus: 'empty',
         gameResults: null,
         sessionOwner: null,
         sessionChat: [],
         availableSlots: [
-            'playerPurple',
-            'playerYellow',
-            'playerRed',
-            'playerGreen',
+            'Purple',
+            'Yellow',
+            'Red',
+            'Green',
         ],
         players: [],
         marketOffer: null,

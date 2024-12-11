@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
-import { Player, PlayerId } from '../../../shared_types';
+import { Player, PlayerColor } from '../../../shared_types';
 import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import clientConstants from '../../client_constants';
 
@@ -16,12 +16,12 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
-    private id: PlayerId;
+    private id: PlayerColor;
 
     constructor(
         stage: Konva.Stage,
         player: Player,
-        localPlayerId: PlayerId | null,
+        localPlayerId: PlayerColor | null,
         yOffset: number,
     ) {
         this.stage = stage;
@@ -76,7 +76,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.influenceDial.updateElement(player.influence);
     }
 
-    public getId(): PlayerId {
+    public getId(): PlayerColor {
         return this.id;
     }
 

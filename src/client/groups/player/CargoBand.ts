@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import clientConstants from '../../client_constants';
-import { CargoManifest, ItemId, PlayerId } from '../../../shared_types';
+import { CargoManifest, ItemId, PlayerColor } from '../../../shared_types';
 import { Color, DynamicGroupInterface } from '../../client_types';
 import { CargoToken } from './CargoToken';
 
@@ -17,7 +17,7 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
 
-    constructor(stage: Konva.Stage, playerId: PlayerId, cargo: CargoManifest) {
+    constructor(stage: Konva.Stage, playerColor: PlayerColor, cargo: CargoManifest) {
         this.stage = stage;
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
@@ -31,16 +31,16 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
             { x: SLOT_WIDTH * 2, element: null },
             { x: SLOT_WIDTH * 3, element: null },
         ];
-        const backgroundMapping: Record<PlayerId, Color> = {
-            playerRed: COLOR.holdDarkRed,
-            playerPurple: COLOR.holdDarkPurple,
-            playerGreen: COLOR.holdDarkGreen,
-            playerYellow: COLOR.holdDarkYellow,
+        const backgroundMapping: Record<PlayerColor, Color> = {
+            Red: COLOR.holdDarkRed,
+            Purple: COLOR.holdDarkPurple,
+            Green: COLOR.holdDarkGreen,
+            Yellow: COLOR.holdDarkYellow,
         }
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: backgroundMapping[playerId],
+            fill: backgroundMapping[playerColor],
             stroke: COLOR.stampEdge,
             cornerRadius: 5,
             strokeWidth: 1,

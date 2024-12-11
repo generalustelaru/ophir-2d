@@ -1,5 +1,5 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerId, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry } from "../../shared_types";
+import { HexId, PlayerColor, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -7,15 +7,17 @@ const { TRADE_DECK_B } = serverConstants;
 const SERVER_NAME = 'GameBot';
 const MAX_FAVOR = 6;
 
-type RegistryItem = { id: PlayerId, influence: DiceSix };
+type RegistryItem = { id: PlayerColor, influence: DiceSix };
 
 export class GameSession {
 
     private privateState: PrivateState;
     private sharedState: SharedState;
     private tools: ToolService;
+    private idleCheckInterval: NodeJS.Timeout | null = null;
 
     constructor(bundle: StateBundle) {
+        (global as any).myInstance = this;
         this.privateState = bundle.privateState;
         this.sharedState = bundle.sharedState;
         this.tools = ToolService.getInstance();
@@ -38,7 +40,7 @@ export class GameSession {
 
     // MARK: ACTION SWITCH
     public processAction(message: WebsocketClientMessage): WssMessage {
-        const id = message.playerId;
+        const id = message.playerColor;
 
         if (!id) {
             return { error: 'No player ID provided' };
@@ -47,6 +49,8 @@ export class GameSession {
         this.updateTimestamp(id);
 
         switch (message.payload.action) {
+            case 'get_status':
+                return this.processStatusRequest() ? this.sharedState : { error: `Could not process status request on ${id}` };
             case 'chat':
                 return this.processChat(message) ? this.sharedState : { error: `Could not process chat message on ${id}` };
             case 'spend_favor':
@@ -76,8 +80,14 @@ export class GameSession {
         }
     }
 
+    private processStatusRequest(): boolean {
+        this.sharedState.isStatusResponse = true;
+
+        return true;
+    }
     // MARK: CHAT
     private processChat(message: WebsocketClientMessage): boolean {
+        this.sharedState.isStatusResponse = true;
         const chatMessage = message.payload.details as ChatDetails;
 
         if (!chatMessage?.message) {
@@ -85,7 +95,7 @@ export class GameSession {
 
             return false;
         }
-        const chatEntry = { id: message.playerId, name: message.playerName, message: chatMessage.message };
+        const chatEntry = { id: message.playerColor, name: message.playerName ?? message.playerColor, message: chatMessage.message };
         this.sharedState.sessionChat.push(chatEntry);
 
         return true;
@@ -98,8 +108,10 @@ export class GameSession {
 
     // MARK: MOVE
     private processMove(message: WebsocketClientMessage): boolean {
+
+        this.sharedState.isStatusResponse = false;
         const details = message.payload.details as MovementDetails;
-        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
         if (!player) {
             return false;
@@ -145,11 +157,13 @@ export class GameSession {
     }
     // MARK: REPOSITIONING
     private processRepositioning(message: WebsocketClientMessage): boolean {
+
+        this.sharedState.isStatusResponse = false;
         const details = message.payload.details as RepositioningDetails;
-        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
         if (!player) {
-            console.error(`No such player found: ${message.playerId}`);
+            console.error(`No such player found: ${message.playerColor}`);
             return false;
         }
 
@@ -158,8 +172,10 @@ export class GameSession {
         return true;
     }
     // MARK: FAVOR
-    private processFavorSpending(playerId: PlayerId): boolean {
-        const player = this.sharedState.players.find(player => player.id === playerId);
+    private processFavorSpending(playerColor: PlayerColor): boolean {
+
+        this.sharedState.isStatusResponse = false;
+        const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (player?.isActive && player.favor > 0 && player.privilegedSailing === false) {
             player.favor -= 1;
@@ -174,9 +190,11 @@ export class GameSession {
     }
     // MARK: DROP ITEM
     private processItemDrop(message: WebsocketClientMessage): boolean {
+
+        this.sharedState.isStatusResponse = false;
         const details = message.payload.details as DropItemDetails
 
-        const player = this.sharedState.players.find(player => player.id === message.playerId);
+        const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
         if (!player?.cargo || !player.cargo.includes(details.item)) {
             return false;
@@ -200,8 +218,10 @@ export class GameSession {
         return true;
     }
     // MARK: PICKUP GOOD
-    private processGoodPickup(playerId: PlayerId): boolean {
-        const player = this.sharedState.players.find(player => player.id === playerId);
+    private processGoodPickup(playerColor: PlayerColor): boolean {
+
+        this.sharedState.isStatusResponse = false;
+        const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (
             false === !!player
@@ -210,7 +230,7 @@ export class GameSession {
             || false === player.locationActions.includes('pickup_good')
             || false === this.hasCargoRoom(player, 'pickup_good')
         ) {
-            console.error(`Cannot load goods for ${playerId}`, player);
+            console.error(`Cannot load goods for ${playerColor}`, player);
 
             return false;
         }
@@ -237,7 +257,9 @@ export class GameSession {
     }
     // MARK: GOODS TRADE
     private processGoodsTrade(message: WebsocketClientMessage): boolean {
-        const player = this.sharedState.players.find(player => player.id === message.playerId);
+
+        this.sharedState.isStatusResponse = false;
+        const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const tradeAction = message.payload.action as LocationAction;
         const details = message.payload.details as MarketSaleDetails;
         const marketKey = details.slot;
@@ -343,7 +365,9 @@ export class GameSession {
     }
     // MARK: METAL PURCHASE
     private processMetalTrade(message: WebsocketClientMessage): boolean {
-        const player = this.sharedState.players.find(player => player.id === message.playerId);
+
+        this.sharedState.isStatusResponse = false;
+        const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const details = message.payload.details as MetalPurchaseDetails;
 
         if (
@@ -403,7 +427,9 @@ export class GameSession {
     }
     // MARK: DONATE METALS
     private processMetalDonation(message: WebsocketClientMessage): boolean {
-        const player = this.sharedState.players.find(player => player.id === message.playerId);
+
+        this.sharedState.isStatusResponse = false;
+        const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const details = message.payload.details as MetalPurchaseDetails;
 
         if (
@@ -451,8 +477,10 @@ export class GameSession {
         return true;
     }
     // MARK: END TURN
-    private processEndTurn(playerId: PlayerId): boolean {
-        const player = this.sharedState.players.find(player => player.id === playerId);
+    private processEndTurn(playerColor: PlayerColor): boolean {
+
+        this.sharedState.isStatusResponse = false;
+        const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (player?.isActive && player.isAnchored) {
             const activePlayer = this.passActiveStatus();
@@ -464,8 +492,8 @@ export class GameSession {
         return false;
     }
     // MARK: UPGRADE HOLD
-    private processUpgrade(playerId: PlayerId): boolean {
-        const player = this.sharedState.players.find(player => player.id === playerId);
+    private processUpgrade(playerColor: PlayerColor): boolean {
+        const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (
             player?.locationActions?.includes('upgrade_hold')
@@ -705,7 +733,7 @@ export class GameSession {
         return gameStats;
     }
 
-    private updateTimestamp(activePlayerId: PlayerId): void {
+    private updateTimestamp(activePlayerId: PlayerColor): void {
         const activePlayer = this.sharedState.players.find(player => player.id === activePlayerId);
 
         if (!activePlayer) {
@@ -718,7 +746,7 @@ export class GameSession {
     }
 
     private startIdleChecks(): void {
-        setInterval(() => {
+        this.idleCheckInterval = setInterval(() => {
             const activePlayer = this.sharedState.players.find(player => player.isActive);
 
             if (!activePlayer) {
@@ -735,5 +763,12 @@ export class GameSession {
             }
 
         }, 60000);
+    }
+
+    public wipeSession(): null {
+        this.idleCheckInterval && clearInterval(this.idleCheckInterval);
+        delete (global as any).myInstance;
+
+        return null
     }
 }

@@ -37,6 +37,7 @@ export class GameSetupService extends Service {
         }
         newState.sessionChat.push({id: null, name: 'Gamebot', message: 'Welcome to the archipelago!'})
         const sharedState: SharedState = {
+            isStatusResponse: false,
             gameId: newState.gameId,
             gameStatus: 'started',
             gameResults: null,
@@ -67,14 +68,14 @@ export class GameSetupService extends Service {
     };
     // MARK: Player Setup
     private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
-        const playerIds = players.map(player => player.id);
+        const playerColors = players.map(player => player.id);
 
-        let tokenCount = playerIds.length;
+        let tokenCount = playerColors.length;
 
         while (tokenCount > 0) {
-            const pick = Math.floor(Math.random() * playerIds.length);
-            const playerId = playerIds.splice(pick, 1).shift();
-            const player = players.find(player => player.id === playerId) as Player;
+            const pick = Math.floor(Math.random() * playerColors.length);
+            const playerColor = playerColors.splice(pick, 1).shift();
+            const player = players.find(player => player.id === playerColor) as Player;
             player.turnOrder = tokenCount;
             player.isActive = tokenCount === 1;
             player.hexagon.position = setupCoordinates.pop() as Coordinates;
