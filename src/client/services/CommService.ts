@@ -56,13 +56,8 @@ export class CommunicationService extends Service {
             return;
         }
 
-        const message: WebsocketClientMessage = {
-            gameId: state.local.gameId,
-            clientId: state.local.clientId,
-            playerColor: state.local.playerColor,
-            playerName: state.local.playerName,
-            payload
-        };
+        const { gameId, clientId, playerColor, playerName } = state.local;
+        const message: WebsocketClientMessage = { gameId, clientId, playerColor, playerName, payload };
 
         console.debug('->', message);
         try {
