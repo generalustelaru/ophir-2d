@@ -90,14 +90,8 @@ socketServer.on('connection', function connection(socket) {
             send(socket, { error: 'Client not found' });
         }
 
-        if (action === 'inquire' || action === 'get_status') {
+        if (action === 'inquire') {
             send(socket, singleSession?.getState() || lobbyState);
-
-            return;
-        }
-
-        if (!playerColor) {
-            send(socket, { error: 'Player ID is missing' });
 
             return;
         }
@@ -192,11 +186,17 @@ function playerHasUniqueName(playerName: string|null): boolean {
     return !lobbyState.players.some(player => player.name === playerName);
 }
 
-function processPlayer(playerColor: PlayerColor, playerName: string|null): boolean {
+function processPlayer(playerColor: PlayerColor | null, playerName: string | null): boolean {
     const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
 
     if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
         console.log(`${playerColor} cannot enroll`);
+
+        return false;
+    }
+
+    if (!playerColor) {
+        console.log('Player color is missing');
 
         return false;
     }

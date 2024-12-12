@@ -75,7 +75,6 @@ export class CanvasService extends Service {
     }
 
     public updateElements(): void {
-
         if (state.received.isStatusResponse) {
             return;
         }

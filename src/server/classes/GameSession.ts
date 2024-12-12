@@ -41,6 +41,11 @@ export class GameSession {
     // MARK: ACTION SWITCH
     public processAction(message: WebsocketClientMessage): WssMessage {
         const id = message.playerColor;
+        const action = message.payload.action;
+
+        if (action === 'get_status'){
+            return this.processStatusRequest() ? this.sharedState : { error: 'Could not process status request' };
+        }
 
         if (!id) {
             return { error: 'No player ID provided' };
@@ -48,9 +53,7 @@ export class GameSession {
 
         this.updateTimestamp(id);
 
-        switch (message.payload.action) {
-            case 'get_status':
-                return this.processStatusRequest() ? this.sharedState : { error: `Could not process status request on ${id}` };
+        switch (action) {
             case 'chat':
                 return this.processChat(message) ? this.sharedState : { error: `Could not process chat message on ${id}` };
             case 'spend_favor':
