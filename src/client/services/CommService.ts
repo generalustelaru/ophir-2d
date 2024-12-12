@@ -25,7 +25,6 @@ export class CommunicationService extends Service {
 
             if (data.id) {
                 if (state.local.clientId === null) {
-                    console.log(`My new ID is ${data.id}`);
                     this.broadcastEvent('identification', { clientID: data.id });
                 } else {
                     this.sendMessage({
@@ -33,6 +32,8 @@ export class CommunicationService extends Service {
                         details: { referenceId: data.id, myId: state.local.clientId }
                     });
                 }
+
+                return;
             }
 
             if (data.error) {
