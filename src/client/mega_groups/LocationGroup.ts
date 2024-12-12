@@ -103,4 +103,11 @@ export class LocationGroup implements MegaGroupInterface {
         });
         this.templePlacard?.update(templeUpdate);
     }
+
+    public disable(): void {
+        this.marketPlacard?.disable();
+        this.treasuryPlacard?.disable();
+        this.templePlacard?.disable();
+    }
+
 }

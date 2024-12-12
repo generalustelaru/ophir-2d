@@ -55,6 +55,11 @@ export class UserInterfaceService extends Service {
         this.playerColorSelect.setValue(state.local.playerColor);
     }
 
+    public disable(): void {
+        this.disableButtons();
+        this.disableElements(this.chatInput, this.chatSendButton, this.playerColorSelect, this.playerNameInput);
+    }
+
     private updatePlayerName = (): void => {
         state.local.playerName = this.playerNameInput.element.value;
         sessionStorage.setItem('localState', JSON.stringify(state.local));
@@ -223,7 +228,13 @@ export class UserInterfaceService extends Service {
     }
 
     private handleEndedState(): void {
+        if (state.received.isStatusResponse) {
+            return;
+        }
+
         this.setInfo('The game has ended');
+        this.kickPlayerButton.disable();
+
         setTimeout(() => {
             this.alertGameResults();
         }, 1000);

@@ -131,4 +131,11 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     public getElement(): Konva.Group {
         return this.group;
     }
+
+    public disable(): void {
+        this.marketCard.disableAction();
+        this.upgradeButton.disableAction();
+        this.goldDonationCard.disableAction();
+        this.silverDonationCard.disableAction();
+    }
 }

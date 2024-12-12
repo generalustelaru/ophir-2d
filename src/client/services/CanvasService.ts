@@ -83,4 +83,10 @@ export class CanvasService extends Service {
         this.mapGroup.update();
         this.playerGroup.update();
     }
+
+    public disable(): void {
+        this.locationGroup.disable();
+        this.mapGroup.disable();
+        this.playerGroup.disable();
+    }
 }

@@ -58,4 +58,8 @@ export class PlayerGroup implements MegaGroupInterface {
             }
         });
     }
+
+    public disable(): void {
+        this.playerPlacards.forEach(placard => placard.disable());
+    }
 }

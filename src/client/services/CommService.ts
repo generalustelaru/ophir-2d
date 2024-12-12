@@ -16,6 +16,12 @@ export class CommunicationService extends Service {
             console.info('Connected to the server');
             this.broadcastEvent('connected');
         }
+
+        this.socket.onclose = () => {
+            console.info('The connection was closed');
+            this.broadcastEvent('close', null);
+        }
+
         this.socket.onerror = (error) => {
             console.error(error);
             this.broadcastEvent('error', { error: 'The connection encountered an error' });

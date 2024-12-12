@@ -74,4 +74,8 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
             y: this.group.height() - 48,
         });
     }
+
+    public disable(): void {
+        this.marketCard.disableAction();
+    }
 }
