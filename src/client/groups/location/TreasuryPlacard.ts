@@ -160,4 +160,11 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
 
         return emptySlots >= 2;
     }
+
+    public disable(): void {
+        this.goldForFavorCard.disableAction();
+        this.silverForFavorCard.disableAction();
+        this.goldForCoinsCard.disableAction();
+        this.silverForCoinsCard.disableAction();
+    }
 }

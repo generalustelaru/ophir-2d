@@ -51,6 +51,17 @@ window.addEventListener(
 );
 
 window.addEventListener(
+    'close',
+    () => {
+        sessionStorage.removeItem('localState');
+        alert('The connection was closed');
+        uiService.setInfo('Connection closed');
+        uiService.disable();
+        canvasService.disable();
+    },
+)
+
+window.addEventListener(
     'identification',
     (event: CustomEventInit) => {
         const payload = event.detail;
@@ -74,6 +85,11 @@ window.addEventListener(
             alert('The game has been reset');
 
             window.location.reload();
+        }
+
+        if (sharedState.gameStatus === 'ended') {
+            // The uiService handles its own cleanup
+            canvasService.disable();
         }
 
         if (state.local.isBoardDrawn) {

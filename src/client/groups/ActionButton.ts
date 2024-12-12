@@ -51,4 +51,8 @@ export class ActionButton {
     protected setEnabled(isEnabled: boolean): void {
         this.isActive = isEnabled;
     }
+
+    public disableAction(): void {
+        this.setEnabled(false);
+    }
 }

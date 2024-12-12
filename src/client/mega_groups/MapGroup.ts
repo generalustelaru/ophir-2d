@@ -173,6 +173,12 @@ export class MapGroup implements MegaGroupInterface {
         }
     }
 
+    public disable(): void {
+        this.localShip?.switchControl(false);
+        this.endTurnButton?.disableAction();
+        this.favorButton?.disableAction();
+    }
+
     public calculateShipPositions(): GameSetupDetails {
         const startingPositions: Array<Coordinates> = [];
 

@@ -135,4 +135,10 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
     public getElement(): Konva.Group {
         return this.group;
     }
+
+    public disable(): void {
+        this.slot_1.disable();
+        this.slot_2.disable();
+        this.slot_3.disable();
+    }
 }

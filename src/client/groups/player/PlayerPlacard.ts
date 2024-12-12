@@ -83,4 +83,8 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     public getElement() {
         return this.group;
     }
+
+    public disable() {
+        this.cargoBand.disable();
+    }
 }

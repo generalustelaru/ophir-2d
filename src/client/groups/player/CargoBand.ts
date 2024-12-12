@@ -89,4 +89,10 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
     public getElement() {
         return this.group;
     }
+
+    public disable() {
+        this.cargoDrawData.forEach(slot => {
+            slot.element?.disableAction();
+        });
+    }
 }

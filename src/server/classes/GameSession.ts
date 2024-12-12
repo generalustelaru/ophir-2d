@@ -44,7 +44,7 @@ export class GameSession {
         const action = message.payload.action;
 
         if (action === 'get_status'){
-            return this.processStatusRequest() ? this.sharedState : { error: 'Could not process status request' };
+            return this.processStatusRequest();
         }
 
         if (!id) {
@@ -83,14 +83,15 @@ export class GameSession {
         }
     }
 
-    private processStatusRequest(): boolean {
-        this.sharedState.isStatusResponse = true;
+    private processStatusRequest(): SharedState {
+        const statusUpdate = this.tools.getCopy(this.sharedState);
+        statusUpdate.isStatusResponse = true;
 
-        return true;
+        return statusUpdate;
     }
+
     // MARK: CHAT
     private processChat(message: WebsocketClientMessage): boolean {
-        this.sharedState.isStatusResponse = true;
         const chatMessage = message.payload.details as ChatDetails;
 
         if (!chatMessage?.message) {
@@ -111,8 +112,6 @@ export class GameSession {
 
     // MARK: MOVE
     private processMove(message: WebsocketClientMessage): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const details = message.payload.details as MovementDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
@@ -160,8 +159,6 @@ export class GameSession {
     }
     // MARK: REPOSITIONING
     private processRepositioning(message: WebsocketClientMessage): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const details = message.payload.details as RepositioningDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
@@ -176,8 +173,6 @@ export class GameSession {
     }
     // MARK: FAVOR
     private processFavorSpending(playerColor: PlayerColor): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (player?.isActive && player.favor > 0 && player.privilegedSailing === false) {
@@ -193,8 +188,6 @@ export class GameSession {
     }
     // MARK: DROP ITEM
     private processItemDrop(message: WebsocketClientMessage): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const details = message.payload.details as DropItemDetails
 
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
@@ -222,8 +215,6 @@ export class GameSession {
     }
     // MARK: PICKUP GOOD
     private processGoodPickup(playerColor: PlayerColor): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (
@@ -260,8 +251,6 @@ export class GameSession {
     }
     // MARK: GOODS TRADE
     private processGoodsTrade(message: WebsocketClientMessage): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const tradeAction = message.payload.action as LocationAction;
         const details = message.payload.details as MarketSaleDetails;
@@ -368,8 +357,6 @@ export class GameSession {
     }
     // MARK: METAL PURCHASE
     private processMetalTrade(message: WebsocketClientMessage): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const details = message.payload.details as MetalPurchaseDetails;
 
@@ -430,8 +417,6 @@ export class GameSession {
     }
     // MARK: DONATE METALS
     private processMetalDonation(message: WebsocketClientMessage): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const details = message.payload.details as MetalPurchaseDetails;
 
@@ -481,8 +466,6 @@ export class GameSession {
     }
     // MARK: END TURN
     private processEndTurn(playerColor: PlayerColor): boolean {
-
-        this.sharedState.isStatusResponse = false;
         const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (player?.isActive && player.isAnchored) {
