@@ -110,8 +110,8 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         );
     }
 
-    public updateElement(data: MarketUpdate): void {
-        this.marketDeck.updateElement(data.marketOffer);
+    public update(data: MarketUpdate): void {
+        this.marketDeck.update(data.marketOffer);
 
         const localPlayer = data.localPlayer;
 
@@ -125,7 +125,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
 
         cardSlots.forEach(slot => {
             const isFeasible = localPLayerMaySell && localPlayer.feasibleTrades.includes(slot)
-            this[slot].updateElement({
+            this[slot].update({
                 trade: data.marketOffer[slot],
                 isFeasible,
             });

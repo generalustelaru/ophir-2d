@@ -26,7 +26,7 @@ export class ActionDial implements DynamicGroupInterface<Player> {
         return this.group;
     }
 
-    public updateElement(player: Player): void {
+    public update(player: Player): void {
 
         const pendingAction = player.isActive && (player.locationActions || player.moveActions === 2);
 

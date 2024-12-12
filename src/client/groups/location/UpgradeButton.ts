@@ -55,7 +55,7 @@ export class UpgradeButton extends ActionButton implements DynamicGroupInterface
         );
     }
 
-    public updateElement(canUpgrade: boolean): void {
+    public update(canUpgrade: boolean): void {
         this.setEnabled(canUpgrade);
         this.background.fill(canUpgrade ? COLOR.boneWhite : COLOR.upgradeBoxSilver);
     }

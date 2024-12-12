@@ -7,10 +7,10 @@ export type LocationIconData = { shape: string, fill: Color };
 export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
-export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup" | "identification";
+export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup" | "identification" | "close";
 export type LocalState = {
     gameId: string | null,
-    clientId: string | null,
+    myId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
     isBoardDrawn: boolean,
@@ -43,12 +43,12 @@ export interface HTMLHandlerInterface {
 
 export interface MegaGroupInterface {
     drawElements(): void,
-    updateElements(): void,
+    update(): void,
 }
 
 export interface DynamicGroupInterface<S> {
     getElement(): Konva.Group,
-    updateElement(state: S): void,
+    update(state: S): void,
 }
 
 export interface StaticGroupInterface {
@@ -109,5 +109,5 @@ export type SetupEventPayload = {
 }
 
 export type IdentificationEventPayload = {
-    clientID: string,
+    clientId: string,
 }

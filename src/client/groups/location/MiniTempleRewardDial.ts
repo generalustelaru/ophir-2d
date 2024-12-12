@@ -56,7 +56,7 @@ export class MiniTempleRewardDial implements DynamicGroupInterface<number> {
         return this.group;
     }
 
-    public updateElement(state: number): void {
+    public update(state: number): void {
         this.amount.text(state.toString());
     }
 }

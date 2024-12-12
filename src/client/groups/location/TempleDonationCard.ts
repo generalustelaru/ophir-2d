@@ -89,7 +89,7 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
         return this.group;
     }
 
-    public updateElement(canDonate: boolean): void {
+    public update(canDonate: boolean): void {
         this.setEnabled(canDonate);
         this.background.fill(canDonate ? COLOR.templeBlue : COLOR.templeDarkBlue);
     }

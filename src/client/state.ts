@@ -4,7 +4,7 @@ import { ClientState } from './client_types';
 const state: ClientState = {
     local: {
         gameId: null,
-        clientId: null,
+        myId: null,
         playerColor: null,
         playerName: null,
         isBoardDrawn: false,

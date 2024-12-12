@@ -47,8 +47,8 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         return this.group;
     }
 
-    public updateElement(data: MarketCardUpdate): void {
-        this.marketCard.updateElement(data);
+    public update(data: MarketCardUpdate): void {
+        this.marketCard.update(data);
     }
 
     private getFluctuationSymbol(fluctuation: Fluctuation): Konva.Path {

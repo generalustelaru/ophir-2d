@@ -58,7 +58,7 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
         return this.verticalAxis;
     }
 
-    public updateElement(colorProfile: ColorProfile): void {
+    public update(colorProfile: ColorProfile): void {
         this.templeIcon.fill(colorProfile.secondary);
         this.innerStamp.fill(colorProfile.primary);
         this.outerStamp.fill(colorProfile.primary);

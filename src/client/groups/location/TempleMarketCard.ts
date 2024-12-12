@@ -61,9 +61,9 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
         ]);
     }
 
-    public updateElement(data: MarketCardUpdate): void {
-        this.rewardDial.updateElement(data.trade.reward.favorAndVp);
-        this.goodsAssortment.updateElement(data.trade.request);
+    public update(data: MarketCardUpdate): void {
+        this.rewardDial.update(data.trade.reward.favorAndVp);
+        this.goodsAssortment.update(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);

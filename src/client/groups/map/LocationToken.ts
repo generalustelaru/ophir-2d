@@ -63,7 +63,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         return this.id;
     }
 
-    public updateElement(update: LocationTokenUpdate): void {
+    public update(update: LocationTokenUpdate): void {
         this.setEnabled(update.mayPickup);
 
         if (update.templeIcon) {

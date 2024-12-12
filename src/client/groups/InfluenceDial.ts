@@ -55,7 +55,7 @@ export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
         this.group.hide();
     }
 
-    public updateElement(value: DiceSix|false): void {
+    public update(value: DiceSix|false): void {
 
         if (value === false) {
             this.group.hide();

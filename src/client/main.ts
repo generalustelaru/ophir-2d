@@ -54,14 +54,14 @@ window.addEventListener(
     'identification',
     (event: CustomEventInit) => {
         const payload = event.detail;
-        state.local.clientId = payload.clientID;
+        state.local.myId = payload.clientId;
         sessionStorage.setItem('localState', JSON.stringify(state.local));
     });
 
 // Update client on server state update
 window.addEventListener(
     'update',
-    () => {
+    () => { // TODO: Refactor this into a switch statement
         const sharedState = state.received as SharedState;
 
         if (sharedState.gameStatus === 'created') {
@@ -77,7 +77,7 @@ window.addEventListener(
         }
 
         if (state.local.isBoardDrawn) {
-            canvasService.updateElements();
+            canvasService.update();
         } else if (sharedState.gameStatus === 'started') {
             uiService.setInfo('You are playing.');
             state.local.isBoardDrawn = true;
