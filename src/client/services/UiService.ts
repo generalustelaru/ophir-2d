@@ -233,6 +233,7 @@ export class UserInterfaceService extends Service {
         }
 
         this.setInfo('The game has ended');
+        this.resetButton.enable();
         this.kickPlayerButton.disable();
 
         setTimeout(() => {

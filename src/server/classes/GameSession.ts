@@ -447,16 +447,17 @@ export class GameSession {
             newStatus.currentLevel += 1;
             const newPrices = this.privateState.metalPrices.shift();
             this.addServerMessage('Temple level has been upgraded');
-            if (newPrices) {
+            if (newPrices && newStatus.currentLevel < newStatus.maxLevel) {
                 newStatus.prices = newPrices;
                 newStatus.levelCompletion = 0;
                 this.addServerMessage('Metal prices have increased');
             } else {
-                this.addServerMessage('The temple construction is complete! Game has ended.');
-                console.info('Game over!');
+                player.locationActions = null;
                 this.sharedState.gameStatus = 'ended';
                 this.sharedState.gameResults = this.compileGameResults();
+                this.addServerMessage('The temple construction is complete! Game has ended.');
                 this.addServerMessage(JSON.stringify(this.sharedState.gameResults));
+                console.info('Game over!');
             }
         }
 
