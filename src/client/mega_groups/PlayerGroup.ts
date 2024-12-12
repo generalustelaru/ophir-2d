@@ -47,12 +47,12 @@ export class PlayerGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public updateElements(): void {
+    public update(): void {
 
         this.playerPlacards.forEach(placard => {
             const player = state.received.players.find(player => player.id === placard.getId());
             if (player) {
-                placard.updateElement(player);
+                placard.update(player);
             } else {
                 placard.getElement().destroy();
             }

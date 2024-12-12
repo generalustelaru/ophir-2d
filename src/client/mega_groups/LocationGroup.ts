@@ -76,7 +76,7 @@ export class LocationGroup implements MegaGroupInterface {
         );
     }
 
-    public updateElements(): void {
+    public update(): void {
 
         const sharedState = state.received;
         const activePlayer = sharedState.players.find(player => player.isActive);
@@ -96,11 +96,11 @@ export class LocationGroup implements MegaGroupInterface {
             trade: sharedState.marketOffer[sharedState.setup.templeTradeSlot],
         }
 
-        this.marketPlacard?.updateElement(marketUpdate);
-        this.treasuryPlacard?.updateElement({
+        this.marketPlacard?.update(marketUpdate);
+        this.treasuryPlacard?.update({
             localPlayer: localPlayer ?? null,
             metalPrices: sharedState.templeStatus.prices
         });
-        this.templePlacard?.updateElement(templeUpdate);
+        this.templePlacard?.update(templeUpdate);
     }
 }

@@ -62,8 +62,8 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
         return this.group;
     }
 
-    public updateElement(offer: MarketOffer): void {
-        this.marketCard.updateElement({trade: offer.future, isFeasible: false});
+    public update(offer: MarketOffer): void {
+        this.marketCard.update({trade: offer.future, isFeasible: false});
         this.deckInUse.text(offer.deckId);
         this.marketCard.getElement().y(this.cardY - offer.deckSize);
     }

@@ -23,7 +23,7 @@ export class PlayerShip {
         return this.group
     };
 
-    public updateElement(coordinates: Coordinates) {
+    public update(coordinates: Coordinates) {
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };

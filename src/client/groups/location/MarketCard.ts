@@ -74,10 +74,10 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         ]);
     }
 
-    public updateElement(data: MarketCardUpdate): void {
-        this.coinDial.updateElement(data.trade.reward.coins + (this.fluctuation ?? 0));
-        this.miniRewardDial.updateElement(data.trade.reward.favorAndVp);
-        this.goodsAssortment.updateElement(data.trade.request);
+    public update(data: MarketCardUpdate): void {
+        this.coinDial.update(data.trade.reward.coins + (this.fluctuation ?? 0));
+        this.miniRewardDial.update(data.trade.reward.favorAndVp);
+        this.goodsAssortment.update(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.marketDarkOrange);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);

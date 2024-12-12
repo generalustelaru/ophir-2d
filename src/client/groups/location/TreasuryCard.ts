@@ -56,8 +56,8 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
     public getElement(): Konva.Group {
         return this.group;
     }
-    public updateElement(data: TreasuryCardUpdate): void {
-        this.currencyDial.updateElement(data.treasury.amount);
+    public update(data: TreasuryCardUpdate): void {
+        this.currencyDial.update(data.treasury.amount);
         const isFeasible = (data.playerAmounts
             ? data.treasury.amount <= data.playerAmounts[data.treasury.currency]
             : false

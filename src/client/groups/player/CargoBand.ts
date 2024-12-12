@@ -55,10 +55,10 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
             background,
             this.cargoDisplay
         ]);
-        this.updateElement(cargo);
+        this.update(cargo);
     }
 
-    public updateElement(cargo: CargoManifest): void {
+    public update(cargo: CargoManifest): void {
         this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
 
         for (const slot of this.cargoDrawData) {

@@ -24,12 +24,12 @@ export class CommunicationService extends Service {
             const data = JSON.parse(event.data);
 
             if (data.id) {
-                if (state.local.clientId === null) {
-                    this.broadcastEvent('identification', { clientID: data.id });
+                if (state.local.myId === null) {
+                    this.broadcastEvent('identification', { clientId: data.id });
                 } else {
                     this.sendMessage({
                         action: 'rebind_id',
-                        details: { referenceId: data.id, myId: state.local.clientId }
+                        details: { referenceId: data.id, myId: state.local.myId }
                     });
                 }
 
@@ -60,7 +60,7 @@ export class CommunicationService extends Service {
             return;
         }
 
-        const { gameId, clientId, playerColor, playerName } = state.local;
+        const { gameId, myId: clientId, playerColor, playerName } = state.local;
         const message: WebsocketClientMessage = { gameId, clientId, playerColor, playerName, payload };
 
         console.debug('->', message);

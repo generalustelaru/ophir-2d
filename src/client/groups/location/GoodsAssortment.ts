@@ -26,7 +26,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         return this.group;
     }
 
-    public updateElement(goods: Array<GoodId>): void {
+    public update(goods: Array<GoodId>): void {
         this.group.destroyChildren();
         this.group.add(this.getGoodsGroup(goods));
     }

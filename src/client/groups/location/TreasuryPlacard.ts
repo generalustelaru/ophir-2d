@@ -104,7 +104,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
         ]);
     }
 
-    public updateElement(update: TreasuryUpdate): void {
+    public update(update: TreasuryUpdate): void {
 
         const playerCanAct = (
             update.localPlayer?.locationActions?.includes('buy_metals')
@@ -117,7 +117,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
             favor: update.localPlayer!.favor,
         } : null;
 
-        this.goldForFavorCard.updateElement({
+        this.goldForFavorCard.update({
             playerAmounts,
             treasury: {
                 currency: 'favor',
@@ -125,7 +125,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 metal: 'gold',
             }
         });
-        this.silverForFavorCard.updateElement({
+        this.silverForFavorCard.update({
             playerAmounts,
             treasury: {
                 currency: 'favor',
@@ -133,7 +133,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 metal: 'silver',
             }
         });
-        this.goldForCoinsCard.updateElement({
+        this.goldForCoinsCard.update({
             playerAmounts,
             treasury: {
                 currency: 'coins',
@@ -141,7 +141,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 metal: 'gold',
             }
         });
-        this.silverForCoinsCard.updateElement({
+        this.silverForCoinsCard.update({
             playerAmounts,
             treasury: {
                 currency: 'coins',

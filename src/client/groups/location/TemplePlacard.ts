@@ -87,14 +87,15 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         ]);
     }
 
-    public updateElement(data: TempleUpdate): void {
+    public update(data: TempleUpdate): void {
         const localPlayer = data.localPlayer;
         const playerCanAct = (
             !!localPlayer
             && localPlayer.isAnchored
+            && !!localPlayer.locationActions
         );
 
-        this.marketCard.updateElement({
+        this.marketCard.update({
             trade: data.trade,
             isFeasible: (
                 playerCanAct
@@ -103,7 +104,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             )
         });
 
-        this.upgradeButton.updateElement((
+        this.upgradeButton.update((
             playerCanAct
             && !!localPlayer.locationActions?.includes('upgrade_hold')
             && localPlayer.coins >= 2
@@ -114,17 +115,17 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             playerCanAct && !!localPlayer.locationActions?.includes('donate_metals')
         );
 
-        this.goldDonationCard.updateElement((
+        this.goldDonationCard.update((
             playerCanDonateMetals
             && !!localPlayer.cargo.find(item => item === 'gold')
         ));
 
-        this.silverDonationCard.updateElement((
+        this.silverDonationCard.update((
             playerCanDonateMetals
             && !!localPlayer.cargo.find(item => item === 'silver')
         ));
 
-        this.donationsBand.updateElement(data.templeStatus);
+        this.donationsBand.update(data.templeStatus);
     }
 
     public getElement(): Konva.Group {

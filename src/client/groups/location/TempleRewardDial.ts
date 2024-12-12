@@ -64,7 +64,7 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
         return this.group;
     }
 
-    public updateElement(value: number): void {
+    public update(value: number): void {
         this.amount.text(value.toString());
     }
 }

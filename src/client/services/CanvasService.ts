@@ -71,16 +71,16 @@ export class CanvasService extends Service {
             this.broadcastEvent('info', { text: 'You are a spectator' });
         }
 
-        this.updateElements();
+        this.update();
     }
 
-    public updateElements(): void {
+    public update(): void {
         if (state.received.isStatusResponse) {
             return;
         }
 
-        this.locationGroup.updateElements();
-        this.mapGroup.updateElements();
-        this.playerGroup.updateElements();
+        this.locationGroup.update();
+        this.mapGroup.update();
+        this.playerGroup.update();
     }
 }

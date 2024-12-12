@@ -38,7 +38,7 @@ export class FavorDial implements DynamicGroupInterface<number> {
         return this.group;
     }
 
-    public updateElement(amount: number): void {
+    public update(amount: number): void {
         this.favorCount?.text(amount.toString());
     }
 }

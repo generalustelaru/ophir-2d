@@ -29,18 +29,18 @@ export class FavorButton extends ActionButton implements DynamicGroupInterface<P
 
         this.group.add(this.favorIcon.getElement(), this.checkmark);
 
-        this.updateElement(player);
+        this.update(player);
     }
 
     public getElement(): Konva.Group {
         return this.group;
     }
 
-    public updateElement(player: Player | null): void {
+    public update(player: Player | null): void {
         switch (true) {
             case (player?.isActive && player.privilegedSailing):
                 this.setEnabled(false);
-                this.favorIcon.updateElement(COLOR_PROFILES.favorStampActive);
+                this.favorIcon.update(COLOR_PROFILES.favorStampActive);
                 this.checkmark.visible(true);
 
                 break;
@@ -48,13 +48,13 @@ export class FavorButton extends ActionButton implements DynamicGroupInterface<P
             case (player?.isActive && player.favor > 0 && player.moveActions > 0):
                 this.setEnabled(true);
                 this.checkmark.visible(false);
-                this.favorIcon.updateElement(COLOR_PROFILES.favorStampReady);
+                this.favorIcon.update(COLOR_PROFILES.favorStampReady);
 
                 break;
 
             default:
                 this.setEnabled(false);
-                this.favorIcon.updateElement(COLOR_PROFILES.favorStampDisabled);
+                this.favorIcon.update(COLOR_PROFILES.favorStampDisabled);
                 this.checkmark.visible(false);
 
                 break;

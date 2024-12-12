@@ -130,21 +130,21 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public updateElements(): void {
+    public update(): void {
         const serverState = state.received as SharedState;
         const players = serverState.players;
         const localPlayer = players.find(player => player.id === state.local.playerColor);
 
         //MARK: dials & hexes
         if (localPlayer) {
-            this.movesDial?.updateElement(localPlayer);
-            this.endTurnButton?.updateElement(localPlayer);
-            this.actionDial?.updateElement(localPlayer);
-            this.favorButton?.updateElement(localPlayer);
+            this.movesDial?.update(localPlayer);
+            this.endTurnButton?.update(localPlayer);
+            this.actionDial?.update(localPlayer);
+            this.favorButton?.update(localPlayer);
         }
 
         for (const mapHex of this.mapHexes) {
-            mapHex.updateElement({
+            mapHex.update({
                 player: localPlayer || null,
                 templeIcon: this.getIconData(mapHex.getTokenId())
             });
@@ -156,7 +156,7 @@ export class MapGroup implements MegaGroupInterface {
             const player = players.find(player => player.id === opponentId);
 
             if (player) {
-                ship.updateElement(player);
+                ship.update(player);
             } else {
                 ship.destroy();
                 // TODO: remove ship element from layer
@@ -169,7 +169,7 @@ export class MapGroup implements MegaGroupInterface {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
             localShip.switchHighlight(localPlayer.isActive);
-            localShip.updateElement(localPlayer.hexagon.position);
+            localShip.update(localPlayer.hexagon.position);
         }
     }
 

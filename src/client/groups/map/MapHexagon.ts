@@ -88,7 +88,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         this.group.add(this.influenceDial.getElement());
     }
 
-    updateElement(update: HexUpdate): void {
+    update(update: HexUpdate): void {
         const localPlayer = update.player;
         const canAct = (
             localPlayer?.hexagon.hexId === this.getId()
@@ -99,7 +99,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
 
         this.setFill(canAct ? COLOR.activeHex : COLOR.defaultHex);
 
-        this.location.updateElement({
+        this.location.update({
             mayPickup: (
                 canAct
                 && !!localPlayer.locationActions?.includes('pickup_good')
@@ -128,7 +128,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
     }
 
     public setToHitValue(value: DiceSix|false): void {
-        this.influenceDial.updateElement(value);
+        this.influenceDial.update(value);
     }
 
     public isIntersecting(vector: Vector2d|null): boolean {

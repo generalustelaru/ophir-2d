@@ -42,7 +42,7 @@ export class MovesDial implements DynamicGroupInterface<Player> {
         return this.group;
     }
 
-    public updateElement(player: Player): void {
+    public update(player: Player): void {
         const waveColor = ICON_DATA.ocean_wave.fill;
         if (player.isActive) {
             this.upperWave.fill(player.moveActions > 1 ? waveColor : COLOR.disabled);

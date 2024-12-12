@@ -67,7 +67,7 @@ export class CoinDial implements DynamicGroupInterface<number> {
         return this.group.getClientRect().width;
     }
 
-    public updateElement(value: number): void {
+    public update(value: number): void {
         this.amount.text(value.toString());
         this.amount.x(value > 9 ? this.coinCenter - 10 : this.coinCenter - 5);
     }
