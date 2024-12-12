@@ -28,7 +28,10 @@ export class CommunicationService extends Service {
                     console.log(`My new ID is ${data.id}`);
                     this.broadcastEvent('identification', { clientID: data.id });
                 } else {
-                    this.sendMessage({ action: 'rebind_id', details: {referenceId: data.id, myId: state.local.clientId} });
+                    this.sendMessage({
+                        action: 'rebind_id',
+                        details: { referenceId: data.id, myId: state.local.clientId }
+                    });
                 }
             }
 
