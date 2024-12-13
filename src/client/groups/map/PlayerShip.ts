@@ -126,8 +126,8 @@ export class PlayerShip {
             const departureHex = this.mapHexes.find(hex => hex.getId() === player?.hexagon.hexId);
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
-            if (!targetHex || !departureHex) {
-                throw new Error('Missing state data compute repositioning/moving!');
+            if (!departureHex) {
+                throw new Error('Missing departure hex data to compute repositioning/moving!');
             }
 
             switch (true) {
