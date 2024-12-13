@@ -1,3 +1,9 @@
+update:
+	git pull
+	npm install
+	npm update
+	make build
+
 build:
 	make check
 	make ui

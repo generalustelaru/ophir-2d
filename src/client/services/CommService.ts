@@ -2,6 +2,7 @@ import { ClientIdResponse, ErrorResponse, LaconicRequest, SharedState, Websocket
 import { Service } from './Service';
 import state from '../state';
 
+type WssResponse = ClientIdResponse | ErrorResponse | SharedState;
 export class CommunicationService extends Service {
 
     socket: WebSocket;
@@ -37,9 +38,9 @@ export class CommunicationService extends Service {
             });
         }
         this.socket.onmessage = (event) => {
-            const data: SharedState | ClientIdResponse | ErrorResponse = JSON.parse(event.data);
+            const data: WssResponse = JSON.parse(event.data);
 
-            if ('id' in data) {
+            if (this.isClientIdResponse(data)) {
                 if (state.local.myId === null) {
                     this.broadcastEvent({
                         type: 'identification',
@@ -55,7 +56,7 @@ export class CommunicationService extends Service {
                 return;
             }
 
-            if ('error' in data) {
+            if (this.isErrorResponse(data)) {
                 console.error('<-', data.error);
                 this.broadcastEvent({ type:'error', detail:{ message: data.error } });
 
@@ -64,9 +65,14 @@ export class CommunicationService extends Service {
 
             console.debug('<-', data);
 
-            state.received = data;
+            if (this.isSharedSession(data)) {
+                state.received = data;
+                this.broadcastEvent({ type: 'update', detail: null });
 
-            this.broadcastEvent({ type: 'update', detail: null });
+                return;
+            }
+
+            this.broadcastEvent({ type: 'error', detail: { message: 'Server Error' } });
         }
     }
 
@@ -94,5 +100,17 @@ export class CommunicationService extends Service {
         setInterval(() => {
             this.sendMessage(request);
         }, 5000);
+    }
+
+    private isSharedSession(data: WssResponse): data is SharedState {
+        return 'players' in data;
+    }
+
+    private isClientIdResponse(data: WssResponse): data is ClientIdResponse {
+        return 'id' in data;
+    }
+
+    private isErrorResponse(data: WssResponse): data is ErrorResponse {
+        return 'error' in data;
     }
 }
