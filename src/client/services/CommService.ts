@@ -17,9 +17,16 @@ export class CommunicationService extends Service {
             this.broadcastEvent('connected');
         }
 
-        this.socket.onclose = () => {
-            console.info('The connection was closed');
-            this.broadcastEvent('close', null);
+        this.socket.onclose = (event) => {
+            if (event.wasClean) {
+                console.info('Connection terminated');
+                this.broadcastEvent('close', null);
+            }
+            else {
+                console.info('Connection timeout');
+                this.broadcastEvent('timeout', null);
+            }
+            this.socket.close();
         }
 
         this.socket.onerror = (error) => {
