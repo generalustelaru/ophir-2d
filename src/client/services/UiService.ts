@@ -68,7 +68,7 @@ export class UserInterfaceService extends Service {
     private sendChatMessage = (): void => {
         const message = this.chatInput.flushValue();
 
-        if (!message || message.matchAll(/\s/)) return;
+        if (!message || false === !!message.match(/[^\s]/)) return;
 
         return this.broadcastEvent({
             type: 'action',
