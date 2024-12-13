@@ -51,6 +51,16 @@ window.addEventListener(
 );
 
 window.addEventListener(
+    'timeout',
+    () => {
+        alert('Please refresh the page');
+        uiService.setInfo('Connection timeout');
+        uiService.disable();
+        canvasService.disable();
+    },
+);
+
+window.addEventListener(
     'close',
     () => {
         sessionStorage.removeItem('localState');
@@ -59,7 +69,7 @@ window.addEventListener(
         uiService.disable();
         canvasService.disable();
     },
-)
+);
 
 window.addEventListener(
     'identification',
