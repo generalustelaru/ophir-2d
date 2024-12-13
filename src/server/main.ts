@@ -28,6 +28,23 @@ app.get('/', (req: Request, res: Response) => {
     res.sendFile(__dirname + 'public/index.html');
 });
 
+app.get('/shutdown', (req: Request, res: Response) => {
+    if (req.query.auth !== process.env.SHUTDOWN_AUTH) {
+        console.error('Unauthorized shutdown attempt');
+        res.status(401).send('Unauthorized');
+
+        return;
+    }
+
+    console.log('Server is shutting down...');
+    socketClients.forEach(client => client.socket.close(1000));
+    res.send('Shutting down...');
+    setTimeout(() => {
+        socketServer.close();
+        process.exit(0);
+    }, 3000);
+});
+
 app.listen(httpPort, () => {
     console.info(`Server running at ${httpAddress}:${httpPort}`);
 });
