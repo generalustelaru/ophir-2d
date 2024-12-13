@@ -1,4 +1,4 @@
-import { EventPayload, EventTitle } from "../client_types";
+import { ClientEvent } from "../client_types";
 
 export class Service {
     static instance: Service|null = null;
@@ -9,10 +9,11 @@ export class Service {
     }
 
     protected broadcastEvent(
-        eventType: EventTitle,
-        detail: EventPayload = null
+        event: ClientEvent
     ): void {
-        window.dispatchEvent(new CustomEvent(eventType, { detail: detail }));
+        const { type, detail } = event;
+        const eventInitDict = { detail };
+        window.dispatchEvent(new CustomEvent(type, eventInitDict));
     }
 
     public static getInstance<T,I>(deps: Array<T>): I {

@@ -1,4 +1,4 @@
-import { LaconicRequest, WebsocketClientMessage, WsPayload } from '../../shared_types';
+import { ClientIdResponse, ErrorResponse, LaconicRequest, SharedState, WebsocketClientMessage, WsPayload } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
 
@@ -13,45 +13,51 @@ export class CommunicationService extends Service {
 
     public createConnection() {
         this.socket.onopen = () => {
-            console.info('Connected to the server');
-            this.broadcastEvent('connected');
+            console.info('Connection established');
+            this.broadcastEvent({ type: 'connected', detail: null });
         }
 
         this.socket.onclose = (event) => {
             if (event.wasClean) {
                 console.info('Connection terminated');
-                this.broadcastEvent('close', null);
+                this.broadcastEvent({type: 'close', detail: null });
             }
             else {
                 console.info('Connection timeout');
-                this.broadcastEvent('timeout', null);
+                this.broadcastEvent({ type: 'timeout', detail: null });
             }
             this.socket.close();
         }
 
         this.socket.onerror = (error) => {
             console.error(error);
-            this.broadcastEvent('error', { error: 'The connection encountered an error' });
+            this.broadcastEvent({
+                type: 'error',
+                detail: { message: 'The connection encountered an error' }
+            });
         }
         this.socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
+            const data: SharedState | ClientIdResponse | ErrorResponse = JSON.parse(event.data);
 
-            if (data.id) {
+            if ('id' in data) {
                 if (state.local.myId === null) {
-                    this.broadcastEvent('identification', { clientId: data.id });
+                    this.broadcastEvent({
+                        type: 'identification',
+                        detail: { clientId: data.id }
+                    });
                 } else {
                     this.sendMessage({
                         action: 'rebind_id',
-                        details: { referenceId: data.id, myId: state.local.myId }
+                        payload: { referenceId: data.id, myId: state.local.myId }
                     });
                 }
 
                 return;
             }
 
-            if (data.error) {
+            if ('error' in data) {
                 console.error('<-', data.error);
-                this.broadcastEvent('error', { error: data.error });
+                this.broadcastEvent({ type:'error', detail:{ message: data.error } });
 
                 return;
             }
@@ -60,15 +66,17 @@ export class CommunicationService extends Service {
 
             state.received = data;
 
-            this.broadcastEvent('update');
+            this.broadcastEvent({ type: 'update', detail: null });
         }
     }
 
     public sendMessage(payload: WsPayload) {
 
         if (!this.socket.readyState) {
-            console.error('The connection is not open');
-            this.broadcastEvent('error');
+            this.broadcastEvent({
+                type: 'error',
+                detail: { message: 'The connection is not open' }
+            });
 
             return;
         }
@@ -77,16 +85,12 @@ export class CommunicationService extends Service {
         const message: WebsocketClientMessage = { gameId, clientId, playerColor, playerName, payload };
 
         console.debug('->', message);
-        try {
-            this.socket.send(JSON.stringify(message));
-        } catch (error) {
-            console.error(error);
-            this.broadcastEvent('error');
-        }
+
+        this.socket.send(JSON.stringify(message));
     }
 
     public beginStatusChecks() {
-        const request: LaconicRequest = { action: 'get_status', details: null };
+        const request: LaconicRequest = { action: 'get_status', payload: null };
         setInterval(() => {
             this.sendMessage(request);
         }, 5000);

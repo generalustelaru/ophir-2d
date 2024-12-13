@@ -23,7 +23,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         super(
             stage,
             { width: 100, height: 100, x: 0, y: 0 },
-            isPickup ? { action: 'pickup_good', details: null } : null
+            isPickup ? { action: 'pickup_good', payload: null } : null
         );
 
         this.id = locationId;

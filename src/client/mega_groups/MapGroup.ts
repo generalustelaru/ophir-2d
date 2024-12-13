@@ -44,13 +44,13 @@ export class MapGroup implements MegaGroupInterface {
         this.endTurnButton = new EndTurnButton(
             this.stage,
             this.group,
-            { action: 'end_turn', details: null },
+            { action: 'end_turn', payload: null },
             isActivePlayer,
         );
 
         this.favorButton = new FavorButton(
             this.stage,
-            { action: 'spend_favor', details: null },
+            { action: 'spend_favor', payload: null },
             localPlayer || null,
             { width: 50, height: 50, x: 500, y: 70 },
         );

@@ -68,7 +68,10 @@ export class CanvasService extends Service {
         this.mapGroup.drawElements();
 
         if (!state.local.playerColor) {
-            this.broadcastEvent('info', { text: 'You are a spectator' });
+            this.broadcastEvent({
+                type: 'info',
+                detail: { text: 'You are a spectator' }
+            });
         }
 
         this.update();

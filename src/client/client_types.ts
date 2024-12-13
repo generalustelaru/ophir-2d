@@ -7,7 +7,7 @@ export type LocationIconData = { shape: string, fill: Color };
 export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
-export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup" | "identification" | "close" | "timeout";
+
 export type LocalState = {
     gameId: string | null,
     myId: string | null,
@@ -15,6 +15,7 @@ export type LocalState = {
     playerName: string | null,
     isBoardDrawn: boolean,
 }
+
 export type ClientState = {
     local: LocalState,
     received: SharedState | NewState,
@@ -94,20 +95,37 @@ export type TempleUpdate = {
     localPlayer: Player | null,
 }
 
-export type EventPayload = InfoEventPayload | WsPayload | ErrorEventPayload | SetupEventPayload | IdentificationEventPayload | null;
+export interface ClientEventInterface<T, D> {
+    type: T,
+    detail: D,
+}
 
-export type InfoEventPayload = {
+export type ConnectedEvent = ClientEventInterface<"connected", null>;
+export type ActionEvent = ClientEventInterface<"action", WsPayload>;
+export type UpdateEvent = ClientEventInterface<"update", null>;
+export type ErrorEvent = ClientEventInterface<"error", ErrorDetail>;
+export type InfoEvent = ClientEventInterface<"info", InfoDetail>;
+export type SetupEvent = ClientEventInterface<"setup", SetupDetail>;
+export type IdentificationEvent = ClientEventInterface<"identification", IdentificationDetail>;
+export type CloseEvent = ClientEventInterface<"close", null>;
+export type TimeoutEvent = ClientEventInterface<"timeout", null>;
+
+export type ClientEvent =
+    | ConnectedEvent | ActionEvent | UpdateEvent | ErrorEvent | InfoEvent
+    | SetupEvent | IdentificationEvent | CloseEvent | TimeoutEvent;
+
+export type InfoDetail = {
     text: string,
 }
 
-export type ErrorEventPayload = {
-    error: string,
+export type ErrorDetail = {
+    message: string,
 }
 
-export type SetupEventPayload = {
+export type SetupDetail = {
     playerPositions: Array<Coordinates>,
 }
 
-export type IdentificationEventPayload = {
+export type IdentificationDetail = {
     clientId: string,
 }

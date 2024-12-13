@@ -28,7 +28,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         this.marketCard = new MarketCard(
             stage,
             { x: 0, y: segmentHeight },
-            { action: 'sell_goods', details: { slot: marketKey } },
+            { action: 'sell_goods', payload: { slot: marketKey } },
             trade,
             fluctuation
         );

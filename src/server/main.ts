@@ -3,7 +3,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails } from '../shared_types';
+import { PlayerColor, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse } from '../shared_types';
 import { WssMessage, StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
@@ -71,14 +71,15 @@ function send (client: WebSocket, message: WssMessage): void {
 
 socketServer.on('connection', function connection(socket) {
     const clientID = randomUUID();
-    socket.send(JSON.stringify({ id: clientID }));
+    const response: ClientIdResponse = { id: clientID };
+    socket.send(JSON.stringify(response));
     socketClients.push({ clientID, gameID: null, socket: socket });
 
     socket.on('message', function incoming(message: string) {
 
         const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
         const { playerColor, playerName, payload } = parsedMessage;
-        const {action, details} = payload;
+        const {action, payload: details} = payload;
         const name = playerName || playerColor || '';
         const colorized = {
             Purple: `\x1b[95m${name}\x1b[0m`,
