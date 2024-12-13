@@ -7,7 +7,7 @@ export type LocationIconData = { shape: string, fill: Color };
 export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
-export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup" | "identification" | "close";
+export type EventTitle = "connected" | "action" | "update" | "error" | "info" | "setup" | "identification" | "close" | "timeout";
 export type LocalState = {
     gameId: string | null,
     myId: string | null,
