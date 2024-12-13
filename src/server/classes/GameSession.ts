@@ -581,6 +581,7 @@ export class GameSession {
         player.privilegedSailing = false;
         player.moveActions = 2;
         player.locationActions = this.getLocationActions(player);
+        player.timeStamp = Date.now();
 
         const rules = this.privateState.moveRules.find(
             rule => rule.from === player.hexagon.hexId
