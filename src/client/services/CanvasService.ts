@@ -37,6 +37,16 @@ export class CanvasService extends Service {
             },
         ); // locationGroup covers 1 segment, sitting on the left
 
+        this.playerGroup = new PlayerGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth,
+                x: segmentWidth * 3,
+                y: 0,
+            },
+        ); // playerGroup covers 1 segment, sitting on the right
+
         this.mapGroup = new MapGroup(
             this.stage,
             {
@@ -46,16 +56,6 @@ export class CanvasService extends Service {
                 y: 0,
             },
         ); // mapGroup covers half the canvas (2 segments), sitting in the middle
-
-        this.playerGroup = new PlayerGroup(
-            this.stage,
-            {
-                height: this.stage.height(),
-                width: segmentWidth,
-                x: segmentWidth * 3,
-                y: 0,
-            },
-        );
     }
 
     public getSetupCoordinates(): GameSetupDetails {
