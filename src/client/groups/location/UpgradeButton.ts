@@ -15,7 +15,7 @@ export class UpgradeButton extends ActionButton implements DynamicGroupInterface
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        super(stage, layout, { action: 'upgrade_hold', details: null });
+        super(stage, layout, { action: 'upgrade_hold', payload: null });
 
         this.background = new Konva.Rect({
             width: layout.width,

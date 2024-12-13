@@ -78,6 +78,13 @@ export type TempleStatus = {
     donations: Array<MetalId>,
 }
 
+export type ClientIdResponse = {
+    id: string,
+}
+
+export type ErrorResponse = {
+    error: string,
+}
 /**
  * @description Shared between players and server in a session
  */
@@ -168,7 +175,7 @@ export type RebindClientDetails = {
 export type Coordinates = { x: number, y: number };
 export interface RequestInterface<A, D> {
     action: A,
-    details: D,
+    payload: D, // TODO: rename to payload
 }
 
 export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';

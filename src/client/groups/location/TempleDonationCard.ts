@@ -17,7 +17,7 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
         super(
             stage,
             { x: position.x, y: position.y, width: 66, height: 96 },
-            { action: 'donate_metals', details: { metal: metalType } },
+            { action: 'donate_metals', payload: { metal: metalType } },
         );
 
         this.background = new Konva.Rect({

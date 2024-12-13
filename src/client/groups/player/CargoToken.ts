@@ -13,7 +13,7 @@ export class CargoToken extends ActionButton {
         super(
             stage,
             { width: 0, height: 0, x: position.x, y: position.y },
-            {action: 'drop_item', details: {item: itemId} },
+            {action: 'drop_item', payload: {item: itemId} },
         );
 
         const tokenData = CARGO_ITEM_DATA[itemId];

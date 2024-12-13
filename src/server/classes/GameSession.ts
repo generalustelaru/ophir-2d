@@ -92,7 +92,7 @@ export class GameSession {
 
     // MARK: CHAT
     private processChat(message: WebsocketClientMessage): boolean {
-        const chatMessage = message.payload.details as ChatDetails;
+        const chatMessage = message.payload.payload as ChatDetails;
 
         if (!chatMessage?.message) {
             console.error('No chat message found', chatMessage);
@@ -112,7 +112,7 @@ export class GameSession {
 
     // MARK: MOVE
     private processMove(message: WebsocketClientMessage): boolean {
-        const details = message.payload.details as MovementDetails;
+        const details = message.payload.payload as MovementDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
         if (!player) {
@@ -159,7 +159,7 @@ export class GameSession {
     }
     // MARK: REPOSITIONING
     private processRepositioning(message: WebsocketClientMessage): boolean {
-        const details = message.payload.details as RepositioningDetails;
+        const details = message.payload.payload as RepositioningDetails;
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
         if (!player) {
@@ -188,7 +188,7 @@ export class GameSession {
     }
     // MARK: DROP ITEM
     private processItemDrop(message: WebsocketClientMessage): boolean {
-        const details = message.payload.details as DropItemDetails
+        const details = message.payload.payload as DropItemDetails
 
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
 
@@ -253,7 +253,7 @@ export class GameSession {
     private processGoodsTrade(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
         const tradeAction = message.payload.action as LocationAction;
-        const details = message.payload.details as MarketSaleDetails;
+        const details = message.payload.payload as MarketSaleDetails;
         const marketKey = details.slot;
 
         if (
@@ -358,7 +358,7 @@ export class GameSession {
     // MARK: METAL PURCHASE
     private processMetalTrade(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
-        const details = message.payload.details as MetalPurchaseDetails;
+        const details = message.payload.payload as MetalPurchaseDetails;
 
         if (
             false === !!player
@@ -418,7 +418,7 @@ export class GameSession {
     // MARK: DONATE METALS
     private processMetalDonation(message: WebsocketClientMessage): boolean {
         const player = this.sharedState.players.find(player => player.id === message.playerColor);
-        const details = message.payload.details as MetalPurchaseDetails;
+        const details = message.payload.payload as MetalPurchaseDetails;
 
         if (
             false === !!player

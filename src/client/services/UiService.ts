@@ -1,5 +1,5 @@
-import { PlayerColor, NewState, GameSetupRequest, ChatRequest, ChatEntry } from '../../shared_types';
-import { WsPayload } from '../../shared_types';
+import { PlayerColor, NewState, ChatEntry } from '../../shared_types';
+
 import { Service } from './Service';
 import state from '../state';
 import { Button } from '../html_behaviors/button';
@@ -68,14 +68,15 @@ export class UserInterfaceService extends Service {
     private sendChatMessage = (): void => {
         const message = this.chatInput.flushValue();
 
-        if (!message) return;
+        if (!message || message.matchAll(/\s/)) return;
 
-        const payload: ChatRequest = {
-            action: 'chat',
-            details: { message: message },
-        };
-
-        return this.broadcastEvent('action', payload);
+        return this.broadcastEvent({
+            type: 'action',
+            detail: {
+                action: 'chat',
+                payload: { message: message },
+            },
+        });
     }
 
     private handleKeyInput  = (toSubmit: boolean): void => {
@@ -94,18 +95,22 @@ export class UserInterfaceService extends Service {
 
         this.startButton.disable();
         const canvasService: CanvasService = CanvasService.getInstance([]);
-        const payload: GameSetupRequest = {
-            action: 'start',
-            details: canvasService.getSetupCoordinates(),
-        };
 
-        return this.broadcastEvent('action', payload);
+        return this.broadcastEvent({
+            type: 'action',
+            detail: {
+                action: 'start',
+                payload: canvasService.getSetupCoordinates(),
+            }
+        });
     }
 
     private processReset = (): void => {
-        const payload: WsPayload = { action: 'reset', details: null };
 
-        return this.broadcastEvent('action', payload);
+        return this.broadcastEvent({
+            type: 'action',
+            detail: { action: 'reset', payload: null }
+        });
     }
 
     private processEnroll = (): void => {
@@ -120,9 +125,11 @@ export class UserInterfaceService extends Service {
         if (lobbyState.availableSlots.includes(selectedId)) {
             state.local.playerColor = selectedId;
             sessionStorage.setItem('localState', JSON.stringify(state.local));
-            const payload: WsPayload = { action: 'enroll', details: null };
 
-            return this.broadcastEvent('action', payload);
+            return this.broadcastEvent({
+                type: 'action',
+                detail: { action: 'enroll', payload: null }
+            });
         }
 
         return this.setInfo('This color has just been taken :(');

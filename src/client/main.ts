@@ -1,4 +1,4 @@
-import { InfoEventPayload, ErrorEventPayload, LocalState } from "./client_types";
+import { InfoDetail, ErrorDetail, LocalState } from "./client_types";
 import state from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
@@ -38,16 +38,18 @@ window.addEventListener(
 window.addEventListener(
     'error',
     (event: CustomEventInit) => {
-        const payload: ErrorEventPayload = event.detail;
-        console.error(payload.error);
-        alert(payload.error);
+        const detail: ErrorDetail = event.detail;
+        console.error(detail.message ?? 'An error occurred');
+        alert(detail.message ?? 'An error occurred');
     },
 );
 
 // Get server data on connection
 window.addEventListener(
     'connected',
-    () => commService.sendMessage({ action: 'inquire', details: null }),
+    () => {
+        commService.sendMessage({ action: 'inquire', payload: null })
+    },
 );
 
 window.addEventListener(
@@ -130,7 +132,7 @@ window.addEventListener(
 window.addEventListener(
     'info',
     (event: CustomEventInit) => {
-        const payload: InfoEventPayload = event.detail;
+        const payload: InfoDetail = event.detail;
         uiService.setInfo(payload.text)
     }
 );

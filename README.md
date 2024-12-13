@@ -16,5 +16,5 @@ Try it out:
 6. Create a `.env` file based on `.env.example`.
 7. Run `make build` to bundle the code and start the server.
 
-8. To shutdown the server, make a `/shutdown` GET request and include the environment SHUTDOWN_AUTH value as `auth`. (ex.: /shutdown?auth=123456).
+8. To shutdown the server, make a GET request to `/shutdown` containing the environment `SHUTDOWN_AUTH` value as `auth` (ex.: "/shutdown?auth=123456").
 9. To start the server again run `make run`.

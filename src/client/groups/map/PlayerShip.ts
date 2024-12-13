@@ -135,7 +135,7 @@ export class PlayerShip {
                     targetHex.setFill(COLOR.activeHex);
                     this.broadcastAction({
                         action: 'move',
-                        details: {
+                        payload: {
                             hexId: targetHex.getId(),
                             position: { x: this.group.x(), y: this.group.y() }
                         }
@@ -144,7 +144,7 @@ export class PlayerShip {
                 case departureHex === targetHex:
                     this.broadcastAction({
                         action: 'reposition',
-                        details: {
+                        payload: {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
                     });
