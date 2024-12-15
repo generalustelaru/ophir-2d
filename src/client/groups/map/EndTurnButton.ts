@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import constants from '../../client_constants';
-import { Player, WsPayload } from '../../../shared_types';
+import { Player, ClientMessage } from '../../../shared_types';
 import { DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
 
@@ -12,7 +12,7 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
     constructor(
         stage: Konva.Stage,
         parent: Konva.Group,
-        actionPayload: WsPayload,
+        message: ClientMessage,
         isActivePlayer: boolean
     ) {
 
@@ -23,7 +23,7 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
             y: parent.height() - 130,
         }
 
-        super(stage, layout, actionPayload);
+        super(stage, layout, message);
 
         const hoverZone = new Konva.Rect({
             width: this.group.width(),

@@ -173,32 +173,32 @@ export type RebindClientDetails = {
 }
 
 export type Coordinates = { x: number, y: number };
-export interface RequestInterface<A, D> {
+export interface MessageInterface<A, D> {
     action: A,
     payload: D, // TODO: rename to payload
 }
 
 export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';
-export type LaconicRequest = RequestInterface<LaconicAction, null>;
-export type ChatRequest = RequestInterface<'chat', ChatDetails>;
-export type GameSetupRequest = RequestInterface<'start', GameSetupDetails>;
-export type MovementRequest = RequestInterface<'move', MovementDetails>;
-export type DropItemRequest = RequestInterface<'drop_item', DropItemDetails>;
-export type RepositioningRequest = RequestInterface<'reposition', RepositioningDetails>;
-export type MarketSaleRequest = RequestInterface<'sell_goods', MarketSaleDetails>;
-export type MetalPurchaseRequest = RequestInterface<'buy_metals', MetalPurchaseDetails>;
-export type GoodsDonationRequest = RequestInterface<'donate_goods', MarketSaleDetails>;
-export type MetalDonationRequest = RequestInterface<'donate_metals', MetalDonationDetails>;
-export type RebindClientRequest = RequestInterface<'rebind_id', RebindClientDetails>;
-export type WsPayload = // TODO: rename to WsRequest
-    | LaconicRequest | GameSetupRequest | MovementRequest | DropItemRequest
-    | RepositioningRequest | MarketSaleRequest | MetalPurchaseRequest | MetalDonationRequest
-    | GoodsDonationRequest | ChatRequest | RebindClientRequest;
+export type LaconicMessage = MessageInterface<LaconicAction, null>;
+export type ChatMessage = MessageInterface<'chat', ChatDetails>;
+export type StartMessage = MessageInterface<'start', GameSetupDetails>;
+export type MoveMessage = MessageInterface<'move', MovementDetails>;
+export type DropItemMessage = MessageInterface<'drop_item', DropItemDetails>;
+export type RepositionMessage = MessageInterface<'reposition', RepositioningDetails>;
+export type SellGoodsMessage = MessageInterface<'sell_goods', MarketSaleDetails>;
+export type BuyMetalsMessage = MessageInterface<'buy_metals', MetalPurchaseDetails>;
+export type DonateGoodsMessage = MessageInterface<'donate_goods', MarketSaleDetails>;
+export type DonateMetalMessage = MessageInterface<'donate_metals', MetalDonationDetails>;
+export type RebindIdMessage = MessageInterface<'rebind_id', RebindClientDetails>;
+export type ClientMessage =
+    | LaconicMessage | StartMessage | MoveMessage | DropItemMessage
+    | RepositionMessage | SellGoodsMessage | BuyMetalsMessage | DonateMetalMessage
+    | DonateGoodsMessage | ChatMessage | RebindIdMessage;
 
-export type WebsocketClientMessage = {
+export type ClientRequest = {
     gameId: string | null,
     clientId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
-    payload: WsPayload,
+    message: ClientMessage,
 }

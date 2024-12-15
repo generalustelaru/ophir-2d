@@ -1,15 +1,15 @@
 import Konva from 'konva';
 import { GroupLayoutData } from '../client_types';
-import { WsPayload } from '../../shared_types';
+import { ClientMessage } from '../../shared_types';
 export class ActionButton {
     protected group: Konva.Group;
     private stage: Konva.Stage;
-    private payload: WsPayload | null;
+    private message: ClientMessage | null;
     private isActive: boolean = false;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, actionPayload: WsPayload | null) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, actionMessage: ClientMessage | null) {
         this.stage = stage;
-        this.payload = actionPayload;
+        this.message = actionMessage;
         const layer = stage.getLayers()[0];
 
         this.group = new Konva.Group({
@@ -20,7 +20,7 @@ export class ActionButton {
         });
         layer.add(this.group);
 
-        if (!actionPayload) {
+        if (!actionMessage) {
             return;
         }
 
@@ -37,15 +37,15 @@ export class ActionButton {
             if (this.isActive) {
                 window.dispatchEvent(new CustomEvent(
                         'action',
-                        { detail: this.payload }
+                        { detail: this.message }
                 ));
                 this.stage.container().style.cursor = 'default';
             }
         });
     }
 
-    public updateActionPayload(payload: WsPayload): void {
-        this.payload = payload;
+    public updateActionPayload(payload: ClientMessage): void {
+        this.message = payload;
     }
 
     protected setEnabled(isEnabled: boolean): void {
