@@ -105,14 +105,14 @@ export type ActionEvent = ClientEventInterface<"action", WsPayload>;
 export type UpdateEvent = ClientEventInterface<"update", null>;
 export type ErrorEvent = ClientEventInterface<"error", ErrorDetail>;
 export type InfoEvent = ClientEventInterface<"info", InfoDetail>;
-export type SetupEvent = ClientEventInterface<"setup", SetupDetail>;
+export type StartEvent = ClientEventInterface<"start", null>;
 export type IdentificationEvent = ClientEventInterface<"identification", IdentificationDetail>;
 export type CloseEvent = ClientEventInterface<"close", null>;
 export type TimeoutEvent = ClientEventInterface<"timeout", null>;
 
 export type ClientEvent =
     | ConnectedEvent | ActionEvent | UpdateEvent | ErrorEvent | InfoEvent
-    | SetupEvent | IdentificationEvent | CloseEvent | TimeoutEvent;
+    | StartEvent | IdentificationEvent | CloseEvent | TimeoutEvent;
 
 export type InfoDetail = {
     text: string,

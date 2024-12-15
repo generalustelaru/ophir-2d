@@ -34,6 +34,18 @@ window.addEventListener(
     },
 );
 
+//Send start message to server
+window.addEventListener(
+    'start',
+    () => {
+        const payload: WsPayload = {
+            action: 'start',
+            payload: canvasService.getSetupCoordinates()
+        }
+        commService.sendMessage(payload);
+    },
+);
+
 //Display errors
 window.addEventListener(
     'error',

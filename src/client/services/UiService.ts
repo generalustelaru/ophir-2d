@@ -5,7 +5,6 @@ import state from '../state';
 import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
 import { ChatInput } from '../html_behaviors/ChatInput';
-import { CanvasService } from "./CanvasService";
 import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
 
@@ -89,20 +88,12 @@ export class UserInterfaceService extends Service {
 
     private processStart = (): void => {
 
-        if (state.received.players.length < 2) {
+        if (state.received.players.length < 2) { // TODO: keep button disabled instead
             return alert('You need at least 2 players to start the game');
         }
-
         this.startButton.disable();
-        const canvasService: CanvasService = CanvasService.getInstance([]);
 
-        return this.broadcastEvent({
-            type: 'action',
-            detail: {
-                action: 'start',
-                payload: canvasService.getSetupCoordinates(),
-            }
-        });
+        return this.broadcastEvent({ type: 'start', detail: null });
     }
 
     private processReset = (): void => {
