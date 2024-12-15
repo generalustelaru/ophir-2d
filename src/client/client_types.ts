@@ -1,4 +1,4 @@
-import { HexId, PlayerColor, SharedState, Coordinates, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus, WsPayload } from '../shared_types';
+import { HexId, PlayerColor, SharedState, Coordinates, LocationId, ItemId, NewState, Trade, MarketOffer, Player, MetalId, MetalPrices, Currency, TempleStatus, ClientMessage } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
@@ -100,19 +100,14 @@ export interface ClientEventInterface<T, D> {
     detail: D,
 }
 
-export type ConnectedEvent = ClientEventInterface<"connected", null>;
-export type ActionEvent = ClientEventInterface<"action", WsPayload>;
-export type UpdateEvent = ClientEventInterface<"update", null>;
+export type LaconicType = "connected" | "update" | "start" | "close" | "timeout";
+export type LaconicEvent = ClientEventInterface<LaconicType, null>;
+export type ActionEvent = ClientEventInterface<"action", ClientMessage>;
 export type ErrorEvent = ClientEventInterface<"error", ErrorDetail>;
 export type InfoEvent = ClientEventInterface<"info", InfoDetail>;
-export type StartEvent = ClientEventInterface<"start", null>;
 export type IdentificationEvent = ClientEventInterface<"identification", IdentificationDetail>;
-export type CloseEvent = ClientEventInterface<"close", null>;
-export type TimeoutEvent = ClientEventInterface<"timeout", null>;
 
-export type ClientEvent =
-    | ConnectedEvent | ActionEvent | UpdateEvent | ErrorEvent | InfoEvent
-    | StartEvent | IdentificationEvent | CloseEvent | TimeoutEvent;
+export type ClientEvent = LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent;
 
 export type InfoDetail = {
     text: string,

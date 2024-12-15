@@ -3,7 +3,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, WebsocketClientMessage, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse } from '../shared_types';
+import { PlayerColor, ClientRequest, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse } from '../shared_types';
 import { WssMessage, StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
@@ -77,8 +77,8 @@ socketServer.on('connection', function connection(socket) {
 
     socket.on('message', function incoming(message: string) {
 
-        const parsedMessage = JSON.parse(message) as WebsocketClientMessage;
-        const { playerColor, playerName, payload } = parsedMessage;
+        const parsedRequest = JSON.parse(message) as ClientRequest;
+        const { playerColor, playerName, message: payload } = parsedRequest;
         const {action, payload: details} = payload;
         const name = playerName || playerColor || '';
         const colorized = {
@@ -166,7 +166,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (singleSession) {
-            sendAll(singleSession.processAction(parsedMessage));
+            sendAll(singleSession.processAction(parsedRequest));
 
             return;
         }

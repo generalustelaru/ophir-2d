@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { Player, WsPayload } from '../../../shared_types';
+import { Player, ClientMessage } from '../../../shared_types';
 import { FavorIcon } from '../FavorIcon';
 import clientConstants from '../../client_constants';
 
@@ -13,11 +13,11 @@ export class FavorButton extends ActionButton implements DynamicGroupInterface<P
     private checkmark: Konva.Path;
     constructor(
         stage: Konva.Stage,
-        actionPayload: WsPayload | null,
+        message: ClientMessage | null,
         player: Player | null,
         layout: GroupLayoutData,
     ) {
-        super(stage, layout, actionPayload);
+        super(stage, layout, message);
 
         this.favorIcon = new FavorIcon({ x: 0, y: 0, width: layout.width, height: layout.height });
 

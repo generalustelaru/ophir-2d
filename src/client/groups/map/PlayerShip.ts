@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, HexId, PlayerColor, SharedState, DiceSix, WsPayload } from '../../../shared_types';
+import { Coordinates, HexId, PlayerColor, SharedState, DiceSix, ClientMessage } from '../../../shared_types';
 import state from '../../state';
 import clientConstants from '../../client_constants';
 import { MapHexagon } from '../GroupList';
@@ -171,7 +171,7 @@ export class PlayerShip {
         this.ship.stroke(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
     }
 
-    private broadcastAction(detail: WsPayload): void {
+    private broadcastAction(detail: ClientMessage): void {
         window.dispatchEvent(new CustomEvent(
             'action',
             { detail: detail }

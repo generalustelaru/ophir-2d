@@ -1,4 +1,4 @@
-import { ClientIdResponse, ErrorResponse, LaconicRequest, SharedState, WebsocketClientMessage, WsPayload } from '../../shared_types';
+import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
 
@@ -76,7 +76,7 @@ export class CommunicationService extends Service {
         }
     }
 
-    public sendMessage(payload: WsPayload) {
+    public sendMessage(payload: ClientMessage) {
 
         if (!this.socket.readyState) {
             this.broadcastEvent({
@@ -88,7 +88,7 @@ export class CommunicationService extends Service {
         }
 
         const { gameId, myId: clientId, playerColor, playerName } = state.local;
-        const message: WebsocketClientMessage = { gameId, clientId, playerColor, playerName, payload };
+        const message: ClientRequest = { gameId, clientId, playerColor, playerName, message: payload };
 
         console.debug('->', message);
 
@@ -96,14 +96,14 @@ export class CommunicationService extends Service {
     }
 
     public beginStatusChecks() {
-        const request: LaconicRequest = { action: 'get_status', payload: null };
-        setInterval(() => {
-            this.sendMessage(request);
+        const message: ClientMessage = { action: 'get_status', payload: null };
+        setInterval(() => { // TODO: See if the interval needs to be cleared
+            this.sendMessage(message);
         }, 5000);
     }
-
+    // TODO: Look for a more thorough solution for type-guarding
     private isSharedSession(data: WssResponse): data is SharedState {
-        return 'players' in data;
+        return 'gameId' in data;
     }
 
     private isClientIdResponse(data: WssResponse): data is ClientIdResponse {

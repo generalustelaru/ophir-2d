@@ -1,5 +1,5 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerColor, Player, SharedState, WebsocketClientMessage, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry } from "../../shared_types";
+import { HexId, PlayerColor, Player, SharedState, ClientRequest, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -39,9 +39,9 @@ export class GameSession {
     }
 
     // MARK: ACTION SWITCH
-    public processAction(message: WebsocketClientMessage): WssMessage {
-        const id = message.playerColor;
-        const action = message.payload.action;
+    public processAction(request: ClientRequest): WssMessage {
+        const id = request.playerColor;
+        const action = request.message.action;
 
         if (action === 'get_status'){
             return this.processStatusRequest();
@@ -55,29 +55,29 @@ export class GameSession {
 
         switch (action) {
             case 'chat':
-                return this.processChat(message) ? this.sharedState : { error: `Could not process chat message on ${id}` };
+                return this.processChat(request) ? this.sharedState : { error: `Could not process chat message on ${id}` };
             case 'spend_favor':
                 return this.processFavorSpending(id) ? this.sharedState : { error: `Could not process favor spending on ${id}` };
             case 'move':
-                return this.processMove(message) ? this.sharedState : { error: `Could not process move on ${id}` };
+                return this.processMove(request) ? this.sharedState : { error: `Could not process move on ${id}` };
             case 'reposition':
-                return this.processRepositioning(message) ? this.sharedState : { error: `Could process repositioning on ${id}` };
+                return this.processRepositioning(request) ? this.sharedState : { error: `Could process repositioning on ${id}` };
             case 'pickup_good':
                 return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
             case 'sell_goods':
-                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
+                return this.processGoodsTrade(request) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
             case 'donate_goods':
-                return this.processGoodsTrade(message) ? this.sharedState : { error: `Could not process trade on ${id}` };
+                return this.processGoodsTrade(request) ? this.sharedState : { error: `Could not process trade on ${id}` };
             case 'buy_metals':
-                return this.processMetalTrade(message) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
+                return this.processMetalTrade(request) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
             case 'donate_metals':
-                return this.processMetalDonation(message) ? this.sharedState : { error: `Could not process donation on ${id}` };
+                return this.processMetalDonation(request) ? this.sharedState : { error: `Could not process donation on ${id}` };
             case 'end_turn':
                 return this.processEndTurn(id) ? this.sharedState : { error: `Could not process turn end on ${id}` };
             case 'upgrade_hold':
                 return this.processUpgrade(id) ? this.sharedState : { error: `Could not process upgrade on ${id}` };
             case 'drop_item':
-                return this.processItemDrop(message) ? this.sharedState : { error: `Could not process item drop on ${id}` };
+                return this.processItemDrop(request) ? this.sharedState : { error: `Could not process item drop on ${id}` };
             default:
                 return { error: `Unknown action on ${id}` };
         }
@@ -91,15 +91,15 @@ export class GameSession {
     }
 
     // MARK: CHAT
-    private processChat(message: WebsocketClientMessage): boolean {
-        const chatMessage = message.payload.payload as ChatDetails;
+    private processChat(request: ClientRequest): boolean {
+        const chatMessage = request.message.payload as ChatDetails;
 
         if (!chatMessage?.message) {
             console.error('No chat message found', chatMessage);
 
             return false;
         }
-        const chatEntry = { id: message.playerColor, name: message.playerName ?? message.playerColor, message: chatMessage.message };
+        const chatEntry = { id: request.playerColor, name: request.playerName ?? request.playerColor, message: chatMessage.message };
         this.sharedState.sessionChat.push(chatEntry);
 
         return true;
@@ -111,9 +111,9 @@ export class GameSession {
     }
 
     // MARK: MOVE
-    private processMove(message: WebsocketClientMessage): boolean {
-        const details = message.payload.payload as MovementDetails;
-        const player = this.sharedState.players.find(player => player.id === message.playerColor);
+    private processMove(request: ClientRequest): boolean {
+        const details = request.message.payload as MovementDetails;
+        const player = this.sharedState.players.find(player => player.id === request.playerColor);
 
         if (!player) {
             return false;
@@ -158,12 +158,12 @@ export class GameSession {
         return true;
     }
     // MARK: REPOSITIONING
-    private processRepositioning(message: WebsocketClientMessage): boolean {
-        const details = message.payload.payload as RepositioningDetails;
-        const player = this.sharedState.players.find(player => player.id === message.playerColor);
+    private processRepositioning(request: ClientRequest): boolean {
+        const details = request.message.payload as RepositioningDetails;
+        const player = this.sharedState.players.find(player => player.id === request.playerColor);
 
         if (!player) {
-            console.error(`No such player found: ${message.playerColor}`);
+            console.error(`No such player found: ${request.playerColor}`);
             return false;
         }
 
@@ -187,10 +187,10 @@ export class GameSession {
         return false;
     }
     // MARK: DROP ITEM
-    private processItemDrop(message: WebsocketClientMessage): boolean {
-        const details = message.payload.payload as DropItemDetails
+    private processItemDrop(request: ClientRequest): boolean {
+        const details = request.message.payload as DropItemDetails
 
-        const player = this.sharedState.players.find(player => player.id === message.playerColor);
+        const player = this.sharedState.players.find(player => player.id === request.playerColor);
 
         if (!player?.cargo || !player.cargo.includes(details.item)) {
             return false;
@@ -250,10 +250,10 @@ export class GameSession {
         return true;
     }
     // MARK: GOODS TRADE
-    private processGoodsTrade(message: WebsocketClientMessage): boolean {
-        const player = this.sharedState.players.find(player => player.id === message.playerColor);
-        const tradeAction = message.payload.action as LocationAction;
-        const details = message.payload.payload as MarketSaleDetails;
+    private processGoodsTrade(request: ClientRequest): boolean {
+        const player = this.sharedState.players.find(player => player.id === request.playerColor);
+        const tradeAction = request.message.action as LocationAction;
+        const details = request.message.payload as MarketSaleDetails;
         const marketKey = details.slot;
 
         if (
@@ -356,9 +356,9 @@ export class GameSession {
         return true;
     }
     // MARK: METAL PURCHASE
-    private processMetalTrade(message: WebsocketClientMessage): boolean {
-        const player = this.sharedState.players.find(player => player.id === message.playerColor);
-        const details = message.payload.payload as MetalPurchaseDetails;
+    private processMetalTrade(request: ClientRequest): boolean {
+        const player = this.sharedState.players.find(player => player.id === request.playerColor);
+        const details = request.message.payload as MetalPurchaseDetails;
 
         if (
             false === !!player
@@ -416,9 +416,9 @@ export class GameSession {
         return true;
     }
     // MARK: DONATE METALS
-    private processMetalDonation(message: WebsocketClientMessage): boolean {
-        const player = this.sharedState.players.find(player => player.id === message.playerColor);
-        const details = message.payload.payload as MetalPurchaseDetails;
+    private processMetalDonation(request: ClientRequest): boolean {
+        const player = this.sharedState.players.find(player => player.id === request.playerColor);
+        const details = request.message.payload as MetalPurchaseDetails;
 
         if (
             false === !!player

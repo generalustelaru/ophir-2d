@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { MarketCardUpdate, DynamicGroupInterface } from "../../client_types";
-import { Coordinates, Trade, WsPayload } from "../../../shared_types";
+import { Coordinates, Trade, ClientMessage } from "../../../shared_types";
 import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
@@ -14,7 +14,7 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        actionPayload: WsPayload | null,
+        message: ClientMessage | null,
         trade: Trade,
     ) {
         super(
@@ -25,7 +25,7 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
                 x: position.x,
                 y: position.y,
             },
-            actionPayload
+            message
         );
 
         this.background = new Konva.Rect({

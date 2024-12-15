@@ -4,7 +4,7 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { SharedState, WsPayload } from "../shared_types";
+import { SharedState, ClientMessage } from "../shared_types";
 
 //@ts-ignore
 let stateDebug: SharedState | null = null;
@@ -28,9 +28,9 @@ const canvasService: CanvasService = CanvasService.getInstance([]);
 window.addEventListener(
     'action',
     (event: CustomEventInit) => {
-        const payload: WsPayload = event.detail;
+        const message = event.detail as ClientMessage;
 
-        commService.sendMessage(payload);
+        commService.sendMessage(message);
     },
 );
 
@@ -38,11 +38,11 @@ window.addEventListener(
 window.addEventListener(
     'start',
     () => {
-        const payload: WsPayload = {
+        const message: ClientMessage = {
             action: 'start',
             payload: canvasService.getSetupCoordinates()
         }
-        commService.sendMessage(payload);
+        commService.sendMessage(message);
     },
 );
 
