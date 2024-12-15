@@ -190,7 +190,7 @@ export type MetalPurchaseRequest = RequestInterface<'buy_metals', MetalPurchaseD
 export type GoodsDonationRequest = RequestInterface<'donate_goods', MarketSaleDetails>;
 export type MetalDonationRequest = RequestInterface<'donate_metals', MetalDonationDetails>;
 export type RebindClientRequest = RequestInterface<'rebind_id', RebindClientDetails>;
-export type WsPayload =
+export type WsPayload = // TODO: rename to WsRequest
     | LaconicRequest | GameSetupRequest | MovementRequest | DropItemRequest
     | RepositioningRequest | MarketSaleRequest | MetalPurchaseRequest | MetalDonationRequest
     | GoodsDonationRequest | ChatRequest | RebindClientRequest;
