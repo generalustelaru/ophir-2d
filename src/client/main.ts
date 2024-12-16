@@ -4,7 +4,7 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { SharedState, ClientMessage } from "../shared_types";
+import { SharedState, ClientMessage, ResetResponse } from "../shared_types";
 
 //@ts-ignore
 let stateDebug: SharedState | null = null;
@@ -51,8 +51,8 @@ window.addEventListener(
     'error',
     (event: CustomEventInit) => {
         const detail: ErrorDetail = event.detail;
-        console.error(detail.message ?? 'An error occurred');
-        alert(detail.message ?? 'An error occurred');
+        console.error(detail.message || 'An error occurred');
+        alert(detail.message || 'An error occurred');
     },
 );
 
@@ -93,22 +93,24 @@ window.addEventListener(
         sessionStorage.setItem('localState', JSON.stringify(state.local));
     });
 
+window.addEventListener(
+    'reset',
+    (event: CustomEventInit) => {
+        const payload: ResetResponse = event.detail;
+        sessionStorage.removeItem('localState');
+        alert(`The game has been reset by ${payload.resetFrom}`);
+        window.location.reload();
+    });
+
 // Update client on server state update
 window.addEventListener(
     'update',
-    () => { // TODO: Refactor this into a switch statement
+    () => {
         const sharedState = state.received as SharedState;
 
         if (sharedState.gameStatus === 'created') {
             state.local.gameId = sharedState.gameId;
             sessionStorage.setItem('localState', JSON.stringify(state.local));
-        }
-
-        if (sharedState.gameStatus === 'reset') {
-            sessionStorage.removeItem('localState');
-            alert('The game has been reset');
-
-            window.location.reload();
         }
 
         if (sharedState.gameStatus === 'ended') {

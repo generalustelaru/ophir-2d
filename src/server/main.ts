@@ -3,8 +3,8 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, ClientRequest, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse } from '../shared_types';
-import { WssMessage, StateBundle, WsClient } from './server_types';
+import { PlayerColor, ClientRequest, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse, ServerMessage, ResetResponse } from '../shared_types';
+import { StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
@@ -59,13 +59,13 @@ let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
 // lobbyState.gameId = sessionId;
 let singleSession: GameSession | null = null;
 
-function sendAll (message: WssMessage): void {
+function sendAll (message: ServerMessage): void {
     socketClients.forEach(client => {
         client.socket.send(JSON.stringify(message));
     });
 }
 
-function send (client: WebSocket, message: WssMessage): void {
+function send (client: WebSocket, message: ServerMessage): void {
     client.send(JSON.stringify(message));
 }
 
@@ -159,8 +159,9 @@ socketServer.on('connection', function connection(socket) {
             console.log('Session is resetting!');
             singleSession = singleSession?.wipeSession() ?? null;
             lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+            const resetResponse: ResetResponse = { resetFrom:  playerName ?? playerColor ?? 'anon' };
 
-            sendAll(serverConstants.RESET_STATE);
+            sendAll(resetResponse);
 
             return;
         }
