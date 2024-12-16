@@ -38,17 +38,18 @@ export class CommunicationService extends Service {
         }
         this.socket.onmessage = (event) => {
             const data: ServerMessage = JSON.parse(event.data);
+            console.debug('<-', data);
 
             if (this.isClientIdResponse(data)) {
                 if (state.local.myId === null) {
                     this.broadcastEvent({
                         type: 'identification',
-                        detail: { clientId: data.id }
+                        detail: { clientId: data.clientId }
                     });
                 } else {
                     this.sendMessage({
                         action: 'rebind_id',
-                        payload: { referenceId: data.id, myId: state.local.myId }
+                        payload: { referenceId: data.clientId, myId: state.local.myId }
                     });
                 }
 
@@ -68,8 +69,6 @@ export class CommunicationService extends Service {
                 return;
             }
 
-            console.debug('<-', data);
-
             if (this.isSharedState(data)) {
                 state.received = data;
                 this.broadcastEvent({ type: 'update', detail: null });
@@ -77,7 +76,7 @@ export class CommunicationService extends Service {
                 return;
             }
 
-            this.broadcastEvent({ type: 'error', detail: { message: 'Server Error' } });
+            this.broadcastEvent({ type: 'error', detail: { message: 'Could not determine message type.' } });
         }
     }
 
@@ -112,7 +111,7 @@ export class CommunicationService extends Service {
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
-        return 'id' in data;
+        return 'clientId' in data;
     }
 
     private isErrorResponse(data: ServerMessage): data is ErrorResponse {

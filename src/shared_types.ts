@@ -79,7 +79,7 @@ export type TempleStatus = {
 }
 
 export type ClientIdResponse = {
-    id: string,
+    clientId: string,
 }
 
 export type ErrorResponse = {
@@ -177,7 +177,7 @@ export type RebindClientDetails = {
 export type Coordinates = { x: number, y: number };
 export interface MessageInterface<A, D> {
     action: A,
-    payload: D, // TODO: rename to payload
+    payload: D,
 }
 
 export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';

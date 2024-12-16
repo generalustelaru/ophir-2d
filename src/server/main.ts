@@ -38,9 +38,10 @@ app.get('/shutdown', (req: Request, res: Response) => {
 
     console.log('Server is shutting down...');
     socketClients.forEach(client => client.socket.close(1000));
-    res.send('Shutting down...');
     setTimeout(() => {
         socketServer.close();
+        console.log('Server off.');
+        res.send('Server off.');
         process.exit(0);
     }, 3000);
 });
@@ -54,9 +55,7 @@ const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
-// const sessionId = randomUUID();
 let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
-// lobbyState.gameId = sessionId;
 let singleSession: GameSession | null = null;
 
 function sendAll (message: ServerMessage): void {
@@ -70,10 +69,10 @@ function send (client: WebSocket, message: ServerMessage): void {
 }
 
 socketServer.on('connection', function connection(socket) {
-    const clientID = randomUUID();
-    const response: ClientIdResponse = { id: clientID };
+    const clientId = randomUUID();
+    const response: ClientIdResponse = { clientId };
     socket.send(JSON.stringify(response));
-    socketClients.push({ clientID, gameID: null, socket: socket });
+    socketClients.push({ clientID: clientId, gameID: null, socket: socket });
 
     socket.on('message', function incoming(message: string) {
 
