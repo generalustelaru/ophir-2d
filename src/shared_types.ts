@@ -10,7 +10,7 @@ export type Currency = "coins" | "favor";
 export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
 export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
 export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "pickup_good" | "donate_metals";
-export type GameStatus = "empty" | "created" | "full" | "started" | "ended" | "reset";
+export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
 export type ItemId = GoodId | MetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ItemId>;
@@ -117,9 +117,11 @@ export type NewState = {
     sessionChat: Array<ChatEntry>,
 }
 
-export type ResetState = {
-    gameStatus: "reset",
+export type ResetResponse = {
+    resetFrom: string | PlayerColor,
 }
+
+export type ServerMessage = ClientIdResponse | SharedState | NewState | ResetResponse | ErrorResponse;
 
 export type LocationData = {
     id: LocationId,

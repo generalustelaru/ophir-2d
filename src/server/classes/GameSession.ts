@@ -1,5 +1,9 @@
-import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle, WssMessage } from "../server_types";
-import { HexId, PlayerColor, Player, SharedState, ClientRequest, GoodId, LocationAction, MovementDetails, DropItemDetails, DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId, PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry } from "../../shared_types";
+import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
+import {
+    HexId, PlayerColor, Player, SharedState, ClientRequest, GoodId, LocationAction, MovementDetails, DropItemDetails,
+    DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId,
+    PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage
+} from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 
@@ -39,7 +43,7 @@ export class GameSession {
     }
 
     // MARK: ACTION SWITCH
-    public processAction(request: ClientRequest): WssMessage {
+    public processAction(request: ClientRequest): ServerMessage {
         const id = request.playerColor;
         const action = request.message.action;
 

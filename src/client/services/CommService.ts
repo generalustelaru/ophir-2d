@@ -1,8 +1,7 @@
-import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage } from '../../shared_types';
+import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage, ServerMessage, ResetResponse } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
 
-type WssResponse = ClientIdResponse | ErrorResponse | SharedState;
 export class CommunicationService extends Service {
 
     socket: WebSocket;
@@ -38,7 +37,7 @@ export class CommunicationService extends Service {
             });
         }
         this.socket.onmessage = (event) => {
-            const data: WssResponse = JSON.parse(event.data);
+            const data: ServerMessage = JSON.parse(event.data);
 
             if (this.isClientIdResponse(data)) {
                 if (state.local.myId === null) {
@@ -63,9 +62,15 @@ export class CommunicationService extends Service {
                 return;
             }
 
+            if (this.isResetOrder(data)) {
+                this.broadcastEvent({ type: 'reset', detail: data });
+
+                return;
+            }
+
             console.debug('<-', data);
 
-            if (this.isSharedSession(data)) {
+            if (this.isSharedState(data)) {
                 state.received = data;
                 this.broadcastEvent({ type: 'update', detail: null });
 
@@ -102,15 +107,19 @@ export class CommunicationService extends Service {
         }, 5000);
     }
     // TODO: Look for a more thorough solution for type-guarding
-    private isSharedSession(data: WssResponse): data is SharedState {
-        return 'gameId' in data;
+    private isSharedState(data: ServerMessage): data is SharedState {
+        return 'gameStatus' in data;
     }
 
-    private isClientIdResponse(data: WssResponse): data is ClientIdResponse {
+    private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
         return 'id' in data;
     }
 
-    private isErrorResponse(data: WssResponse): data is ErrorResponse {
+    private isErrorResponse(data: ServerMessage): data is ErrorResponse {
         return 'error' in data;
+    }
+
+    private isResetOrder(data: ServerMessage): data is ResetResponse {
+        return 'resetFrom' in data;
     }
 }
