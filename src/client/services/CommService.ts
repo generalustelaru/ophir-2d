@@ -5,6 +5,7 @@ import state from '../state';
 export class CommunicationService extends Service {
 
     socket: WebSocket;
+    statusInterval: NodeJS.Timeout | null = null;
 
     constructor(url: string) {
         super();
@@ -101,9 +102,13 @@ export class CommunicationService extends Service {
 
     public beginStatusChecks() {
         const message: ClientMessage = { action: 'get_status', payload: null };
-        setInterval(() => { // TODO: See if the interval needs to be cleared
+        this.statusInterval = setInterval(() => {
             this.sendMessage(message);
         }, 5000);
+    }
+
+    public endStatusChecks() {
+        if (this.statusInterval) clearInterval(this.statusInterval);
     }
     // TODO: Look for a more thorough solution for type-guarding
     private isSharedState(data: ServerMessage): data is SharedState {
