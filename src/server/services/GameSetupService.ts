@@ -1,5 +1,5 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, LocationData, MetalPrices, NewState } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, LocationData, MetalPrices, NewState, Fluctuation } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -14,7 +14,7 @@ export class GameSetupService extends Service {
     public produceGameData(newState: NewState, setupCoordinates: Array<Coordinates>): StateBundle {
         const players = this.tools.getCopy(newState.players);
 
-        if (newState.gameId  === null) {
+        if (newState.gameId === null) {
             throw new Error('Cannot start game without a game ID');
         }
 
@@ -27,7 +27,7 @@ export class GameSetupService extends Service {
         }
 
         const barriers = this.determineBarriers();
-        const marketData = this.prepareDeckAndGetOffer((TRADE_DECK_A));
+        const marketData = this.prepareDeckAndGetOffer();
 
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(barriers),
@@ -35,7 +35,9 @@ export class GameSetupService extends Service {
             metalPrices: this.filterMetalPrices(players.length),
             gameStats: players.map(p => ({id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0})),
         }
-        newState.sessionChat.push({id: null, name: 'Gamebot', message: 'Welcome to the archipelago!'})
+
+        newState.sessionChat.push({id: null, name: 'Gamebot', message: 'Game started!'});
+
         const sharedState: SharedState = {
             isStatusResponse: false,
             gameId: newState.gameId,
@@ -59,7 +61,7 @@ export class GameSetupService extends Service {
             setup: {
                 barriers: barriers,
                 mapPairings: this.determineLocations(),
-                marketFluctuations: this.determineFluctuations(),
+                marketFluctuations: this.getMarketFluctuations(),
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
         }
@@ -87,11 +89,15 @@ export class GameSetupService extends Service {
 
     private determineBarriers(): Array<BarrierId> {
 
-        const b1 = Math.ceil(Math.random() * 12) as BarrierId;
+        function newId(): BarrierId {
+            return Math.ceil(Math.random() * 12) as BarrierId;
+        }
+
+        const b1 = newId();
         let b2 = b1;
 
         while (BARRIER_CHECKS[b1].incompatible.find(id => id === b2)) {
-            b2 = Math.ceil(Math.random() * 12) as BarrierId;
+            b2 = newId();
         }
 
         return [b1, b2];
@@ -99,24 +105,26 @@ export class GameSetupService extends Service {
     // MARK: Map Locations
     private determineLocations(): Record<HexId, LocationData> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
-        const locationPairing: Record<HexId, null | LocationData> = {
-            center: null,
-            topRight: null,
-            right: null,
-            bottomRight: null,
-            bottomLeft: null,
-            left: null,
-            topLeft: null,
+
+        if (locations.length !== 7) {
+            throw new Error(`Invalid number of locations! Expected 7, got {${locations.length}}`);
         }
 
-        for (const key in locationPairing) {
-            const hexId = key as HexId;
+        function locationData(): LocationData {
             const pick = Math.floor(Math.random() * locations.length);
 
-            locationPairing[hexId] = locations.splice(pick, 1)[0];
+            return locations.splice(pick, 1).shift() as LocationData;
         }
 
-        return locationPairing as Record<HexId, LocationData>;
+        return {
+            center: locationData(),
+            topRight: locationData(),
+            right: locationData(),
+            bottomRight: locationData(),
+            bottomLeft: locationData(),
+            left: locationData(),
+            topLeft: locationData(),
+        }
     }
 
     private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
@@ -131,10 +139,8 @@ export class GameSetupService extends Service {
     }
     // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
-        const rules: Array<ProcessedMoveRule> = [];
-        const defaultMoveRules = this.tools.getCopy(DEFAULT_MOVE_RULES);
 
-        defaultMoveRules.forEach(moveRule => {
+        return DEFAULT_MOVE_RULES.map(moveRule => {
 
             barrierIds.forEach(barrierId => {
 
@@ -147,67 +153,64 @@ export class GameSetupService extends Service {
                 }
             });
 
-            rules.push({
-                from: moveRule.from,
-                allowed: moveRule.allowed,
-            });
+            return moveRule;
         });
-
-        return rules;
     }
 
-    private determineFluctuations(): MarketFluctuations {
-        const pool = [-1, 0, 1];
-        const keys = ['slot_1', 'slot_2', 'slot_3'];
-        const result: any = {};
+    private getMarketFluctuations(): MarketFluctuations {
+        const pool: Array<Fluctuation> = [-1, 0, 1];
 
-        for (const key of keys) {
+        function selectRandomFluctuation(pool: Array<number>): Fluctuation {
             const pick = Math.floor(Math.random() * pool.length);
-            result[key] = pool.splice(pick, 1).shift();
+
+            return pool.splice(pick, 1).shift() as Fluctuation;
         }
 
-        return result as MarketFluctuations;
+        return {
+            slot_1: selectRandomFluctuation(pool),
+            slot_2: selectRandomFluctuation(pool),
+            slot_3: selectRandomFluctuation(pool),
+        };
     }
 
     private determineTempleTradeSlot(): MarketKey {
-        const pool = ['slot_1', 'slot_2', 'slot_3'];
-        const pick = Math.floor(Math.random() * pool.length);
 
-        return pool.splice(pick, 1).shift() as MarketKey;
+        return (['slot_1', 'slot_2', 'slot_3']
+            .splice(Math.floor(Math.random() * 3), 1)
+            .shift() as MarketKey
+        );
     }
     // MARK: Market Offer
-    private prepareDeckAndGetOffer(trades: Array<Trade>): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
-        let tradeDeck = this.tools.getCopy(trades);
+    private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
+        const tradeDeck = this.tools.getCopy(TRADE_DECK_A);
 
-        const drawRandomCard = (deck: Array<Trade>) => {
-            const pick = Math.floor(Math.random() * deck.length);
+        function drawRandomCard(): Trade{
+            const pick = Math.floor(Math.random() * tradeDeck.length);
 
-            return deck.splice(pick, 1).shift();
+            return tradeDeck.splice(pick, 1).shift() as Trade;
         }
 
         // Remove 5 random cards from the deck
         for (let i = 0; i < 5; i++) {
-            drawRandomCard(tradeDeck);
+            drawRandomCard();
         }
 
-        const marketOffer = {
+        const marketOffer: MarketOffer = {
             deckSize: 35,
             deckId: 'A',
-            future: drawRandomCard(tradeDeck),
-            slot_1: drawRandomCard(tradeDeck),
-            slot_2: drawRandomCard(tradeDeck),
-            slot_3: drawRandomCard(tradeDeck),
-        } as MarketOffer;
+            future: drawRandomCard(),
+            slot_1: drawRandomCard(),
+            slot_2: drawRandomCard(),
+            slot_3: drawRandomCard(),
+        };
 
         return { tradeDeck, marketOffer };
     }
     // MARK: Temple Levels
     private filterMetalPrices(playerCount: number): Array<MetalPrices> {
-        const defaultPriceList = this.tools.getCopy(METAL_PRICES);
-        const metalprices = defaultPriceList.filter(
+
+        return METAL_PRICES.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)
         );
-
-        return metalprices;
     }
 }
