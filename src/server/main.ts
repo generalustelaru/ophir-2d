@@ -3,8 +3,8 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, ClientRequest, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse } from '../shared_types';
-import { WssMessage, StateBundle, WsClient } from './server_types';
+import { PlayerColor, ClientRequest, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse, ServerMessage, ResetResponse } from '../shared_types';
+import { StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
@@ -38,9 +38,10 @@ app.get('/shutdown', (req: Request, res: Response) => {
 
     console.log('Server is shutting down...');
     socketClients.forEach(client => client.socket.close(1000));
-    res.send('Shutting down...');
     setTimeout(() => {
         socketServer.close();
+        console.log('Server off.');
+        res.send('Server off.');
         process.exit(0);
     }, 3000);
 });
@@ -54,26 +55,24 @@ const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
 const tools: ToolService = ToolService.getInstance();
 
-// const sessionId = randomUUID();
 let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
-// lobbyState.gameId = sessionId;
 let singleSession: GameSession | null = null;
 
-function sendAll (message: WssMessage): void {
+function sendAll (message: ServerMessage): void {
     socketClients.forEach(client => {
         client.socket.send(JSON.stringify(message));
     });
 }
 
-function send (client: WebSocket, message: WssMessage): void {
+function send (client: WebSocket, message: ServerMessage): void {
     client.send(JSON.stringify(message));
 }
 
 socketServer.on('connection', function connection(socket) {
-    const clientID = randomUUID();
-    const response: ClientIdResponse = { id: clientID };
+    const clientId = randomUUID();
+    const response: ClientIdResponse = { clientId };
     socket.send(JSON.stringify(response));
-    socketClients.push({ clientID, gameID: null, socket: socket });
+    socketClients.push({ clientID: clientId, gameID: null, socket: socket });
 
     socket.on('message', function incoming(message: string) {
 
@@ -159,8 +158,9 @@ socketServer.on('connection', function connection(socket) {
             console.log('Session is resetting!');
             singleSession = singleSession?.wipeSession() ?? null;
             lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+            const resetResponse: ResetResponse = { resetFrom:  playerName ?? playerColor ?? 'anon' };
 
-            sendAll(serverConstants.RESET_STATE);
+            sendAll(resetResponse);
 
             return;
         }

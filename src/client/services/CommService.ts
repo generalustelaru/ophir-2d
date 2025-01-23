@@ -1,11 +1,11 @@
-import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage } from '../../shared_types';
+import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage, ServerMessage, ResetResponse } from '../../shared_types';
 import { Service } from './Service';
 import state from '../state';
 
-type WssResponse = ClientIdResponse | ErrorResponse | SharedState;
 export class CommunicationService extends Service {
 
     socket: WebSocket;
+    statusInterval: NodeJS.Timeout | null = null;
 
     constructor(url: string) {
         super();
@@ -38,18 +38,19 @@ export class CommunicationService extends Service {
             });
         }
         this.socket.onmessage = (event) => {
-            const data: WssResponse = JSON.parse(event.data);
+            const data: ServerMessage = JSON.parse(event.data);
+            console.debug('<-', data);
 
             if (this.isClientIdResponse(data)) {
                 if (state.local.myId === null) {
                     this.broadcastEvent({
                         type: 'identification',
-                        detail: { clientId: data.id }
+                        detail: { clientId: data.clientId }
                     });
                 } else {
                     this.sendMessage({
                         action: 'rebind_id',
-                        payload: { referenceId: data.id, myId: state.local.myId }
+                        payload: { referenceId: data.clientId, myId: state.local.myId }
                     });
                 }
 
@@ -63,16 +64,20 @@ export class CommunicationService extends Service {
                 return;
             }
 
-            console.debug('<-', data);
+            if (this.isResetOrder(data)) {
+                this.broadcastEvent({ type: 'reset', detail: data });
 
-            if (this.isSharedSession(data)) {
+                return;
+            }
+
+            if (this.isSharedState(data)) {
                 state.received = data;
                 this.broadcastEvent({ type: 'update', detail: null });
 
                 return;
             }
 
-            this.broadcastEvent({ type: 'error', detail: { message: 'Server Error' } });
+            this.broadcastEvent({ type: 'error', detail: { message: 'Could not determine message type.' } });
         }
     }
 
@@ -97,20 +102,28 @@ export class CommunicationService extends Service {
 
     public beginStatusChecks() {
         const message: ClientMessage = { action: 'get_status', payload: null };
-        setInterval(() => { // TODO: See if the interval needs to be cleared
+        this.statusInterval = setInterval(() => {
             this.sendMessage(message);
         }, 5000);
     }
+
+    public endStatusChecks() {
+        if (this.statusInterval) clearInterval(this.statusInterval);
+    }
     // TODO: Look for a more thorough solution for type-guarding
-    private isSharedSession(data: WssResponse): data is SharedState {
-        return 'gameId' in data;
+    private isSharedState(data: ServerMessage): data is SharedState {
+        return 'gameStatus' in data;
     }
 
-    private isClientIdResponse(data: WssResponse): data is ClientIdResponse {
-        return 'id' in data;
+    private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
+        return 'clientId' in data;
     }
 
-    private isErrorResponse(data: WssResponse): data is ErrorResponse {
+    private isErrorResponse(data: ServerMessage): data is ErrorResponse {
         return 'error' in data;
+    }
+
+    private isResetOrder(data: ServerMessage): data is ResetResponse {
+        return 'resetFrom' in data;
     }
 }

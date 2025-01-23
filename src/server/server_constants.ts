@@ -141,10 +141,6 @@ const serverConstants: ServerConstants = {
         setup: null,
     },
 
-    RESET_STATE: {
-        gameStatus: 'reset',
-    },
-
     METAL_PRICES: [
         { id: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: [2, 3] },
         { id: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: []},
