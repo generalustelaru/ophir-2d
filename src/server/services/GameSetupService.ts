@@ -5,7 +5,7 @@ import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, METAL_PRICES } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, METAL_PRICES } = serverConstants;
 
 export class GameSetupService extends Service {
 
@@ -33,10 +33,10 @@ export class GameSetupService extends Service {
             moveRules: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
             metalPrices: this.filterMetalPrices(players.length),
-            gameStats: players.map(p => ({id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0})),
+            gameStats: players.map(p => ({ id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         }
 
-        newState.sessionChat.push({id: null, name: 'Gamebot', message: 'Game started!'});
+        newState.sessionChat.push({ id: null, name: 'Gamebot', message: 'Game started!' });
 
         const sharedState: SharedState = {
             isStatusResponse: false,
@@ -77,10 +77,12 @@ export class GameSetupService extends Service {
         while (tokenCount > 0) {
             const pick = Math.floor(Math.random() * playerColors.length);
             const playerColor = playerColors.splice(pick, 1).shift();
+
             const player = players.find(player => player.id === playerColor) as Player;
             player.turnOrder = tokenCount;
             player.isActive = tokenCount === 1;
             player.hexagon.position = setupCoordinates.pop() as Coordinates;
+
             tokenCount -= 1;
         }
 
@@ -89,16 +91,23 @@ export class GameSetupService extends Service {
 
     private determineBarriers(): Array<BarrierId> {
 
-        function newId(): BarrierId {
+        function newBarrierId(): BarrierId {
             return Math.ceil(Math.random() * 12) as BarrierId;
         }
 
-        const b1 = newId();
-        let b2 = b1;
+        const b1 = newBarrierId();
 
-        while (BARRIER_CHECKS[b1].incompatible.find(id => id === b2)) {
-            b2 = newId();
-        }
+        const b2 = ((): BarrierId =>{
+            const checks = this.tools.getCopy(BARRIER_CHECKS[b1].incompatible)
+            let barrier = newBarrierId();
+
+            while (checks.find(incompatible => incompatible === barrier)) {
+                checks.splice(checks.indexOf(barrier), 1);
+                barrier = newBarrierId();
+            }
+
+            return barrier;
+        })();
 
         return [b1, b2];
     }
@@ -128,14 +137,14 @@ export class GameSetupService extends Service {
     }
 
     private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
-        const initialPlacement = moveRules[0];
+        const initialPlacement = this.tools.getCopy(moveRules[0]);
 
-        players.forEach(player => {
+        return players.map(player =>{
             player.hexagon.hexId = initialPlacement.from;
             player.allowedMoves = initialPlacement.allowed;
-        });
 
-        return players;
+            return player;
+        });
     }
     // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
@@ -184,7 +193,7 @@ export class GameSetupService extends Service {
     private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         const tradeDeck = this.tools.getCopy(TRADE_DECK_A);
 
-        function drawRandomCard(): Trade{
+        function drawRandomCard(): Trade {
             const pick = Math.floor(Math.random() * tradeDeck.length);
 
             return tradeDeck.splice(pick, 1).shift() as Trade;
@@ -196,12 +205,12 @@ export class GameSetupService extends Service {
         }
 
         const marketOffer: MarketOffer = {
-            deckSize: 35,
             deckId: 'A',
             future: drawRandomCard(),
             slot_1: drawRandomCard(),
             slot_2: drawRandomCard(),
             slot_3: drawRandomCard(),
+            deckSize: tradeDeck.length + TRADE_DECK_B.length, // 35,
         };
 
         return { tradeDeck, marketOffer };

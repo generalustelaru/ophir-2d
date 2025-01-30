@@ -9,6 +9,7 @@ import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
 import { randomUUID } from 'crypto';
+import readline from 'readline';
 
 const httpAddress = process.env.SERVER_ADDRESS;
 const httpPort = process.env.HTTP_PORT;
@@ -47,8 +48,34 @@ app.get('/shutdown', (req: Request, res: Response) => {
 });
 
 app.listen(httpPort, () => {
-    console.info(`Server running at ${httpAddress}:${httpPort}`);
+    console.info(`Server running at http://${httpAddress}:${httpPort}`);
 });
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+function promptForServerShutdown(): void {
+    rl.question('\n', (input) => {
+
+        if (input == 'shutdown') {
+            console.log('Shutting down...');
+            rl.close();
+
+            socketClients.forEach(client => client.socket.close(1000));
+            setTimeout(() => {
+                socketServer.close();
+                console.log('Server off.');
+                process.exit(0);
+            }, 3000);
+        } else {
+            promptForServerShutdown();
+        }
+    });
+}
+
+promptForServerShutdown();
 
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
@@ -87,12 +114,15 @@ socketServer.on('connection', function connection(socket) {
             Green: `\x1b[92m${name}\x1b[0m`,
         }
         const clientName = playerColor ? colorized[playerColor] : 'anon';
-        console.info(
-            '%s -> %s%s',
-            clientName,
-            action ?? '?',
-            details ? `: ${JSON.stringify(details)}` : ': { ¯\\_(ツ)_/¯ }',
-        );
+
+        if (action !== 'get_status') {
+            console.info(
+                '%s -> %s%s',
+                clientName,
+                action ?? '?',
+                details ? `: ${JSON.stringify(details)}` : ': { ¯\\_(ツ)_/¯ }',
+            );
+        }
 
         if (action === 'rebind_id') {
             const { referenceId, myId } = details as RebindClientDetails;

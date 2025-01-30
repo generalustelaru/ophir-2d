@@ -179,7 +179,12 @@ export class UserInterfaceService extends Service {
 
         // session owner
         if (state.received.sessionOwner === state.local.playerColor) {
-            this.enableElements(this.startButton, this.resetButton);
+
+            if (state.received.players.length > 1) {
+                this.enableElements(this.startButton, this.resetButton);
+
+                return this.setInfo('You may start whenever you want');
+            }
 
             return this.setInfo('Waiting for more players to join...');
         }
