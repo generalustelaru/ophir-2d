@@ -33,13 +33,13 @@ Spin up a server:
  - Run `make build`* to bundle the code and start the server.
 
 *To build and run without `make`:
-    a. Run `npm run build_server`.
-    b. Run `npm run build_client`.
-    c. Copy `index.html` and `style.css` from "src/client/layout/" into the newly created "public" folder.
-    d. Run `node public/server.cjs`.
+    a) Run `npm run build_server`.
+    b) Run `npm run build_client`.
+    c) Copy `index.html` and `style.css` from "src/client/layout/" into the newly created "public" folder.
+    d) Run `node public/server.cjs`.
 
 To shut down the server gracefully, input `shutdown` in the running server's command line.
-You can also shut it down remotely by making a regular http request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<SHUTDOWN_AUTH>". Use the values in your.env file.
+You can also shut it down remotely by making a regular http request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<SHUTDOWN_AUTH>". Use the values in your .env file.
 
 To start the server again run `make run` or `node public/server.cjs`.
 
