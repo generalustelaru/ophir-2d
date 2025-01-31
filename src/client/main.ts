@@ -13,8 +13,8 @@ let stateDebug: SharedState | null = null;
 const serverAddress = process.env.SERVER_ADDRESS;
 const wsPort = process.env.WS_PORT;
 
-if (!wsPort) {
-    throw new Error('No websocket address provided');
+if (!wsPort || !serverAddress) {
+    throw new Error('Server address and port must be provided in the environment');
 }
 
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
