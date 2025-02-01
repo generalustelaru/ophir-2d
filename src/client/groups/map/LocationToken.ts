@@ -17,13 +17,13 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         locationId: LocationId,
         iconData: LocationIconData
     ) {
-        const isPickup = ['mines', 'quary', 'forest', 'farms'].includes(locationId);
+        const isGoodsLocation = ['mines', 'quary', 'forest', 'farms'].includes(locationId);
         const scale = 3;
 
         super(
             stage,
             { width: 100, height: 100, x: 0, y: 0 },
-            isPickup ? { action: 'pickup_good', payload: null } : null
+            isGoodsLocation ? { action: 'load_good', payload: null } : null
         );
 
         this.id = locationId;

@@ -30,17 +30,17 @@ On your turn, as long as you have moves left, you may click once on the Favor Ic
 ### Goods Locations
 
 Four of the seven zones contain Goods (Gems, Wood, Stone, or Cloth). Location icons depict the Goods themselves.
-   (A)- Click on the zone's Good Icon to pick up 1 Good of that type. A Good takes up 1 space in your Cargo.
+   - Load Good: Click on the zone's Good Icon to pick up 1 Good of that type. The Good is placed in your Cargo.
 
 ### The Market
 
 The Market (orange house icon location) consists of 3 available Market Cards which shift right after each Market Trade (The Market Placard is displayed in the top left). The deck of Market Cards has the "A" cards sitting on top of the "B" cards. "B" cards contain generally better deals. The leftmost Market Card sits on top of the deck and is not accessbile.
 
-A Market Card features an assortment of Goods that Players can exchange for Coins. When a Player performs a Market Trade Action, the Goods are discarded, the Player receives the Coin amount (pictured in the Coin swatch on the Player Card). Finally the first Market Card from the right is discarded, and the rest glide to fill the empty slot, including the leftmost card, which reveals the next card in the deck.
+A Market Card features an assortment of Goods that Players can exchange for Coins. When a Player performs a Market Trade Action, the Goods are discarded, the Player receives the Coin amount (pictured in the Coin swatch on the Player Card). Finally all Market Cards will shift rightwards. The first Market Card from the right is discarded, and a new Market Card appears on top of the deck.
 
-The number on the bottom right of the Market Card shows it's potential value in VP and Favor (more on that later). If the Market Card shows an arrow in its bottom left corner, it means that its Coin value has been modified. The upwards green arrow means +1 and the downwards red arrow -1 respectively. These two modifiers are assigned randomly to market slots at game start and only affect Market Cards which are placed on them. Hence, the fluctuation of the Coin reward is constant as Market Cards shift to the right.
+The number on the bottom right of a Market Card shows its potential value in VP and Favor (as a Temple donation). If the Market Card shows an arrow in its bottom left corner, it means that its Coin value has been modified. The upwards green arrow means +1 and the downwards red arrow -1 respectively. These two modifiers are assigned randomly to market slots at game start and only affect Market Cards which are placed on them. Hence, the fluctuation of the Coin reward is constant as Market Cards shift to the right.
 
-   (A)- Click on an available Market Card to perform a Market Trade Action and exchange the required Goods in your Cargo for the amount of Coins pictured. Note that the  Market Card you picked will drift rightwards and might remain in offer at a different rate. You can only perform the Market Trade Action once per turn.
+   - Sell Goods: Once per turn, you may click on an available Market Card to deliver the required Goods from your Cargo for the amount of Coins pictured. Note that the Market Card you picked will drift rightwards and might remain in offer but at a different value.
 
 The game can also end if the market deck runs out, meaning players have focused on trading goods instead of delivering precious metals.
 
@@ -48,7 +48,7 @@ The game can also end if the market deck runs out, meaning players have focused 
 
 The Exchange (gold ingot icon location) is the only source of precious metals (Gold and Silver). The Exchange Placard sits on the left, between the Market and Temple Placards. Here you may perform Exchange Actions to trade Coins or Favor for Gold or Silver. The indicated Coin prices will increase progressively as the Temple levels are added -- Gold increases roughly twice as fast as Silver.
 
-   (A)- Click on an Exchange Card to trade coins or favor for Gold or Silver. You may load two metals if you have the space.  Metal takes up 2 Cargo spaces Note that you can free up Cargo space by throwing unwanted items overboard.
+   - Buy Metals: Click on an Exchange Card to trade coins or favor for Gold or Silver. You may load two metals if you have the space.  Metal takes up 2 Cargo spaces. Note that you can free up Cargo space by throwing unwanted items overboard.
 
 #### Favor and Metals
 The Favor cost of Gold (5) and Silver (3) might look steep. However, as opposed to Coin costs, Favor costs remain constant.
@@ -56,11 +56,9 @@ The Favor cost of Gold (5) and Silver (3) might look steep. However, as opposed 
 ### The Temple
 
 The Temple (blue construction icon) a source of VP and Favor. On the Temple Placard (bottom left) you may perform several Actions:
- - Upgrade Cargo:
-    Once per turn, you may click on the Upgrade Button (bottom right on the Temple Placard) to increase your Cargo capacity by 1 space.
- - Donate Metal:
-    Donation Cards are fixed and award 10 VP for Gold and 5 VP for Silver. If you're carrying 2 Metals, you may donate both.
- - Donate Goods:
-    The blue Market Card is mirroring a regular Market Card on the Market Placard. The small blue Temple Icon on the upper edge of the Market Placard indicates the slot that's always mirrored on the Temple Placard. CLick it to exchange your goods for VP and Favor in the depicted amount.
+
+ - Upgrade Cargo: Once per turn, you may click on the Upgrade Button (bottom right on the Temple Placard) to increase your Cargo capacity by 1 space.
+ - Donate Metal: Donation Cards are fixed and award 10 VP for Gold and 5 VP for Silver. If you're carrying 2 Metals, you may donate both.
+ - Donate Goods: Once per turn you may donate Goods to the temple to get Favor and VP in equal amounts. This donation does not contribute to the construction. The blue Market Card is mirroring a regular Market Card on the Market Placard. The small blue Temple Icon on the upper edge of the Market Placard indicates the slot that's always mirrored on the Temple Placard. Donating Goods will also shift the Market Cards
 
 Donating goods to the temple provides Favor, a resource you can spend to navigate without risk (no influence checks), prolong your stay in the same zone (ignore movement), or to purchase precious metals (pay fixed favor cost instead of devaluing coins). The temple market accepts a single trade (goods to donate) but mirrors a specific slot in the market and shifts accordingly.

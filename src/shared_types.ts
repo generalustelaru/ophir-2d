@@ -180,7 +180,7 @@ export interface MessageInterface<A, D> {
     payload: D,
 }
 
-export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'pickup_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';
+export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';
 export type LaconicMessage = MessageInterface<LaconicAction, null>;
 export type ChatMessage = MessageInterface<'chat', ChatDetails>;
 export type StartMessage = MessageInterface<'start', GameSetupDetails>;
