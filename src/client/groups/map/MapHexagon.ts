@@ -102,7 +102,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         this.location.update({
             mayPickup: (
                 canAct
-                && !!localPlayer.locationActions?.includes('pickup_good')
+                && !!localPlayer.locationActions?.includes('load_good')
                 && localPlayer.cargo.includes('empty')
             ),
             templeIcon: update.templeIcon,

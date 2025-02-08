@@ -47,7 +47,7 @@ export class GameSession {
         const id = request.playerColor;
         const action = request.message.action;
 
-        if (action === 'get_status'){
+        if (action === 'get_status') {
             return this.processStatusRequest();
         }
 
@@ -66,8 +66,8 @@ export class GameSession {
                 return this.processMove(request) ? this.sharedState : { error: `Could not process move on ${id}` };
             case 'reposition':
                 return this.processRepositioning(request) ? this.sharedState : { error: `Could process repositioning on ${id}` };
-            case 'pickup_good':
-                return this.processGoodPickup(id) ? this.sharedState : { error: `Could not process pickup on ${id}` };
+            case 'load_good':
+                return this.processLoadGood(id) ? this.sharedState : { error: `Could not process load on ${id}` };
             case 'sell_goods':
                 return this.processGoodsTrade(request) ? this.sharedState : { error: `Could not process sale sale on ${id}` };
             case 'donate_goods':
@@ -217,16 +217,16 @@ export class GameSession {
 
         return true;
     }
-    // MARK: PICKUP GOOD
-    private processGoodPickup(playerColor: PlayerColor): boolean {
+    // MARK: LOAD GOOD
+    private processLoadGood(playerColor: PlayerColor): boolean {
         const player = this.sharedState.players.find(player => player.id === playerColor);
 
         if (
             false === !!player
             || false === !!player.locationActions
             || false === player.isAnchored
-            || false === player.locationActions.includes('pickup_good')
-            || false === this.hasCargoRoom(player, 'pickup_good')
+            || false === player.locationActions.includes('load_good')
+            || false === this.hasCargoRoom(player, 'load_good')
         ) {
             console.error(`Cannot load goods for ${playerColor}`, player);
 
@@ -246,7 +246,7 @@ export class GameSession {
         player.cargo = this.loadItem(player.cargo, localGood);
         player.hasCargo = true;
         player.moveActions = 0;
-        player.locationActions = this.removeAction(player.locationActions, 'pickup_good');
+        player.locationActions = this.removeAction(player.locationActions, 'load_good');
         player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
 
         this.addServerMessage(`${player.name} picked up ${localGood}`);
@@ -311,47 +311,36 @@ export class GameSession {
         player.moveActions = 0;
 
         // Update market offer
-        const isNewTrade = ((): boolean => {
-            const market = this.sharedState.marketOffer;
+        const market = this.sharedState.marketOffer;
 
-            market.deckSize -= 1;
-            market.slot_3 = market.slot_2;
-            market.slot_2 = market.slot_1;
-            market.slot_1 = market.future;
+        market.deckSize -= 1;
+        market.slot_3 = market.slot_2;
+        market.slot_2 = market.slot_1;
+        market.slot_1 = market.future;
 
-            // Load trade deck B if needed and not already loaded
-            const tradeDeck = ((): Array<Trade> => {
-                if (this.privateState.tradeDeck.length === 0 && this.sharedState.marketOffer.deckId === 'A') {
-                    this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
-                    this.sharedState.marketOffer.deckId = 'B';
+        const tradeDeck = ((): Array<Trade> => {
 
-                    this.addServerMessage('Market deck B is now in play');
-                    console.info('Deck B loaded');
-                }
-
-                return this.privateState.tradeDeck;
-            })();
-
-            const pick = Math.floor(Math.random() * tradeDeck.length);
-            const newTrade = tradeDeck.splice(pick, 1).shift();
-
-            if (!newTrade) {
-                return false;
+            // Load trade deck B if required
+            if (this.privateState.tradeDeck.length === 0 && this.sharedState.marketOffer.deckId === 'A') {
+                this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
+                this.sharedState.marketOffer.deckId = 'B';
+                this.addServerMessage('Market deck B is now in play');
             }
 
-            market.future = newTrade;
-
-            return true;
+            return this.privateState.tradeDeck;
         })();
 
-        if (isNewTrade) {
+        const pick = Math.floor(Math.random() * tradeDeck.length);
+        const newTrade = tradeDeck.splice(pick, 1).shift() || null;
+
+        if (newTrade) {
+            market.future = newTrade;
             const players = this.sharedState.players;
 
             players.forEach(player => {
                 player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
             });
         } else {
-            console.info('Game over!');
             this.addServerMessage('Market deck is empty! Game has ended.');
             this.sharedState.gameStatus = 'ended';
             this.sharedState.gameResults = this.compileGameResults();
@@ -375,16 +364,20 @@ export class GameSession {
         }
 
         const templeStatus = this.sharedState.templeStatus;
-        const metalCost = (() =>{ switch (details.metal) {
-            case 'gold': return templeStatus.prices.goldCost;
-            case 'silver': return templeStatus.prices.silverCost;
-            default: return null;
-        }})();
-        const playerAmount = (() => { switch (details.currency) {
-            case 'coins': return player.coins;
-            case 'favor': return player.favor;
-            default: return null;
-        }})();
+        const metalCost = (() => {
+            switch (details.metal) {
+                case 'gold': return templeStatus.prices.goldCost;
+                case 'silver': return templeStatus.prices.silverCost;
+                default: return null;
+            }
+        })();
+        const playerAmount = (() => {
+            switch (details.currency) {
+                case 'coins': return player.coins;
+                case 'favor': return player.favor;
+                default: return null;
+            }
+        })();
 
         if (!metalCost || !playerAmount) {
             console.error(`No such cost or player amount found: ${metalCost}, ${player}`);
@@ -619,7 +612,7 @@ export class GameSession {
     }
 
     private hasCargoRoom(player: Player, action: LocationAction): boolean {
-        if (action !== 'buy_metals' && action !== 'pickup_good') {
+        if (action !== 'buy_metals' && action !== 'load_good') {
             console.error(`Incompatible settlement action: ${action}`);
 
             return false;
@@ -627,7 +620,7 @@ export class GameSession {
 
         const cargo = player.cargo;
         const emptySlots = cargo.filter(item => item === 'empty').length;
-        const cargoReq = action === 'pickup_good' ? 1 : 2;
+        const cargoReq = action === 'load_good' ? 1 : 2;
 
         return emptySlots >= cargoReq;
     }
