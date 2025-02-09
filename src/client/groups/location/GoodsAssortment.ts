@@ -1,16 +1,16 @@
 import Konva from 'konva';
-import { Coordinates, GoodId } from '../../../shared_types';
+import { Coordinates, GoodName } from '../../../shared_types';
 import { DynamicGroupInterface, GroupLayoutData} from '../../client_types';
 import clientConstants from '../../client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
-export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
+export class GoodsAssortment implements DynamicGroupInterface<Array<GoodName>>
 {
     private group: Konva.Group;
     constructor(
         layout: GroupLayoutData,
-        goods: Array<GoodId>,
+        goods: Array<GoodName>,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -26,12 +26,12 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         return this.group;
     }
 
-    public update(goods: Array<GoodId>): void {
+    public update(goods: Array<GoodName>): void {
         this.group.destroyChildren();
         this.group.add(this.getGoodsGroup(goods));
     }
 
-    private getGoodsGroup(goods: Array<GoodId>): Konva.Group {
+    private getGoodsGroup(goods: Array<GoodName>): Konva.Group {
         const count = goods.length;
 
         switch (count) {
@@ -46,7 +46,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         }
     }
 
-    private getSingleGoodGroup(goods: Array<GoodId>): Konva.Group {
+    private getSingleGoodGroup(goods: Array<GoodName>): Konva.Group {
         const group = new Konva.Group({
             width: this.group.width(),
             height: this.group.height(),
@@ -70,7 +70,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         return group;
     }
 
-    private getDoubleGoodGroup(goods: Array<GoodId>): Konva.Group {
+    private getDoubleGoodGroup(goods: Array<GoodName>): Konva.Group {
         const group = new Konva.Group({
             width: this.group.width(),
             height: this.group.height(),
@@ -102,7 +102,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<GoodId>>
         return group;
     }
 
-    private getTripleGoodGroup(goods: Array<GoodId>): Konva.Group {
+    private getTripleGoodGroup(goods: Array<GoodName>): Konva.Group {
         const group = new Konva.Group({
             width: this.group.width(),
             height: this.group.height(),

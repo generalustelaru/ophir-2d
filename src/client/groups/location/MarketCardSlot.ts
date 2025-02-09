@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { MarketCard } from "../GroupList";
-import { Trade, Fluctuation, MarketKey } from "../../../shared_types";
+import { Trade, Fluctuation, MarketSlotKey } from "../../../shared_types";
 import clientConstants from "../../client_constants";
 
 const { ICON_DATA } = clientConstants;
@@ -13,7 +13,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        marketKey: MarketKey,
+        marketKey: MarketSlotKey,
         trade: Trade,
         fluctuation: Fluctuation,
     ) {

@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ActionButton } from "../ActionButton";
-import { Coordinates, ItemId } from "../../../shared_types";
+import { Coordinates, ItemName } from "../../../shared_types";
 import clientConstants from "../../client_constants";
 
 
@@ -9,7 +9,7 @@ const { CARGO_ITEM_DATA } = clientConstants;
 export class CargoToken extends ActionButton {
     private path: Konva.Path;
 
-    constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemId) {
+    constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemName) {
         super(
             stage,
             { width: 0, height: 0, x: position.x, y: position.y },

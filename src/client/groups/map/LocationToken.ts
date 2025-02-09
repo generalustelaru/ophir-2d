@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { LocationIconData, DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { LocationId } from '../../../shared_types';
+import { LocationName } from '../../../shared_types';
 
 type LocationTokenUpdate = {
     mayPickup: boolean
@@ -10,11 +10,11 @@ type LocationTokenUpdate = {
 
 export class LocationToken extends ActionButton implements DynamicGroupInterface<LocationTokenUpdate> {
     icon: Konva.Path;
-    id: LocationId;
+    id: LocationName;
 
     constructor(
         stage: Konva.Stage,
-        locationId: LocationId,
+        locationId: LocationName,
         iconData: LocationIconData
     ) {
         const isGoodsLocation = ['mines', 'quary', 'forest', 'farms'].includes(locationId);
@@ -59,7 +59,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         return this.group;
     }
 
-    public getId(): LocationId {
+    public getId(): LocationName {
         return this.id;
     }
 
