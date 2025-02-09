@@ -2,7 +2,7 @@ import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "
 import {
     HexId, PlayerColor, Player, SharedState, ClientRequest, GoodId, LocationAction, MovementDetails, DropItemDetails,
     DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId,
-    PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage
+    PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage, CargoMetalId, MetalId,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -73,7 +73,7 @@ export class GameSession {
             case 'donate_goods':
                 return this.processGoodsTrade(request) ? this.sharedState : { error: `Could not process trade on ${id}` };
             case 'buy_metals':
-                return this.processMetalTrade(request) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
+                return this.processMetalPurchase(request) ? this.sharedState : { error: `Could not process metal purchase on ${id}` };
             case 'donate_metals':
                 return this.processMetalDonation(request) ? this.sharedState : { error: `Could not process donation on ${id}` };
             case 'end_turn':
@@ -200,18 +200,18 @@ export class GameSession {
             return false;
         }
 
-        const manifest = this.unloadItem(player.cargo, details.item);
+        const newCargo = this.unloadItem(player.cargo, details.item);
 
-        if (manifest.length === 0) {
+        if (!newCargo) {
             console.error(`Could not unload item ${details.item} from ${player.id}`);
             return false;
         }
 
-        const hasCargo = manifest.find(item => item !== 'empty') ? true : false;
+        const hasCargo = !!newCargo.find(item => item !== 'empty');
 
-        player.cargo = manifest;
+        player.cargo = newCargo;
         player.hasCargo = hasCargo;
-        player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(manifest) : [];
+        player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(newCargo) : [];
 
         this.addServerMessage(`${player.name} just threw ${details.item} overboard`);
 
@@ -243,7 +243,12 @@ export class GameSession {
 
         const localGood = serverConstants.LOCATION_GOODS[locationId as PickupLocationId];
 
-        player.cargo = this.loadItem(player.cargo, localGood);
+        const newCargo = this.loadItem(player.cargo, localGood);
+
+        if (!newCargo)
+            return false;
+
+        player.cargo = newCargo;
         player.hasCargo = true;
         player.moveActions = 0;
         player.locationActions = this.removeAction(player.locationActions, 'load_good');
@@ -290,22 +295,27 @@ export class GameSession {
                 return false;
         }
 
-        const playerCargo = (() => {
-            let playerCargo = this.tools.getCopy(player.cargo);
+        const newCargo = (() => {
+            let cargo = this.tools.getCopy(player.cargo);
 
             for (const goodId of trade.request) {
-                playerCargo = this.unloadItem(playerCargo, goodId);
-            };
+                const result =  this.unloadItem(cargo, goodId);
 
-            return playerCargo;
+                if (!result)
+                    return null;
+
+                cargo = result;
+            }
+
+            return cargo;
         })();
 
-        if (playerCargo.length === 0) {
-            console.error(`Could not match cargo item to trade request: ${playerCargo}`);
+        if (!newCargo) {
+            console.error(`Could not match cargo item to trade request: ${player.cargo}`);
             return false;
         }
 
-        player.cargo = playerCargo;
+        player.cargo = newCargo;
         player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
         player.locationActions = this.removeAction(player.locationActions, tradeAction);
         player.moveActions = 0;
@@ -349,7 +359,7 @@ export class GameSession {
         return true;
     }
     // MARK: METAL PURCHASE
-    private processMetalTrade(request: ClientRequest): boolean {
+    private processMetalPurchase(request: ClientRequest): boolean {
         const player = this.sharedState.players.find(player => player.id === request.playerColor);
         const details = request.message.payload as MetalPurchaseDetails;
 
@@ -406,7 +416,12 @@ export class GameSession {
                 return false;
         }
 
-        player.cargo = this.loadItem(player.cargo, details.metal);
+        const newCargo = this.loadItem(player.cargo, details.metal);
+
+        if (!newCargo)
+            return false;
+
+        player.cargo = newCargo;
         player.hasCargo = true;
         player.moveActions = 0;
 
@@ -432,7 +447,12 @@ export class GameSession {
         this.addServerMessage(`${player.name} donated ${details.metal} for ${reward} VP`);
         console.info(this.privateState.gameStats);
 
-        player.cargo = this.unloadItem(player.cargo, details.metal);
+        const newCargo = this.unloadItem(player.cargo, details.metal);
+
+        if (!newCargo)
+            return false;
+
+        player.cargo = newCargo;
         player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
         player.moveActions = 0;
 
@@ -444,6 +464,7 @@ export class GameSession {
             newStatus.currentLevel += 1;
             const newPrices = this.privateState.metalPrices.shift();
             this.addServerMessage('Temple level has been upgraded');
+
             if (newPrices && newStatus.currentLevel < newStatus.maxLevel) {
                 newStatus.prices = newPrices;
                 newStatus.levelCompletion = 0;
@@ -454,7 +475,6 @@ export class GameSession {
                 this.sharedState.gameResults = this.compileGameResults();
                 this.addServerMessage('The temple construction is complete! Game has ended.');
                 this.addServerMessage(JSON.stringify(this.sharedState.gameResults));
-                console.info('Game over!');
             }
         }
 
@@ -631,7 +651,7 @@ export class GameSession {
         const nonGoods: Array<ItemId> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
         const slots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
-        const feasable: Array<MarketKey> = [];
+        const feasible: Array<MarketKey> = [];
 
         slots.forEach(key => {
             const unfilledGoods = market[key].request;
@@ -651,14 +671,14 @@ export class GameSession {
             }
 
             if (unfilledGoods.length === 0) {
-                feasable.push(key);
+                feasible.push(key);
             }
         });
 
-        return feasable;
+        return feasible;
     }
 
-    private loadItem(cargo: CargoManifest, item: ItemId): CargoManifest {
+    private loadItem(cargo: CargoManifest, item: ItemId): CargoManifest | null {
         const filled = cargo.filter(item => item !== 'empty') as Array<ItemId>;
         const empty = cargo.filter(item => item === 'empty') as Array<ItemId>;
         const orderedCargo = filled.concat(empty);
@@ -666,27 +686,49 @@ export class GameSession {
         const firstEmpty = orderedCargo.indexOf('empty');
         orderedCargo[firstEmpty] = item;
 
-        if (item === 'gold' || item === 'silver') {
-            orderedCargo[firstEmpty + 1] = item + '_extra' as ItemId;
+        const controlGroup: Array<ItemId> = ['gold', 'silver'];
+
+        if (controlGroup.includes(item)) {
+            orderedCargo[firstEmpty + 1] = `${item}_extra` as CargoMetalId;
+
+            if (this.sharedState.itemSupplies.metals[item as MetalId] < 1) {
+                console.error(`No ${item} available for loading`);
+                return null;
+        }
+            this.sharedState.itemSupplies.metals[item as MetalId] -= 1;
+        } else {
+
+            if (this.sharedState.itemSupplies.goods[item as GoodId] < 1) {
+                console.error(`No ${item} available for loading`);
+                return null;
+}
+            this.sharedState.itemSupplies.goods[item as GoodId] -= 1;
         }
 
         return orderedCargo;
     }
 
-    private unloadItem(cargo: CargoManifest, item: ItemId): CargoManifest {
-        const manifest = this.tools.getCopy(cargo);
-        const manifestIndex = manifest.indexOf(item);
+    private unloadItem(cargo: CargoManifest, item: ItemId): CargoManifest | null {
+        const newCargo = this.tools.getCopy(cargo);
+        const itemIndex = newCargo.indexOf(item);
 
-        if (manifestIndex === -1) {
-            return [];
-        }
-        manifest.splice(manifestIndex, 1, 'empty');
-
-        if (['gold', 'silver'].includes(item)) {
-            manifest.splice(manifestIndex + 1, 1, 'empty');
+        if (itemIndex === -1) {
+            console.error(`Could not find item ${item} in cargo`);
+            return null;
         }
 
-        return manifest;
+        newCargo.splice(itemIndex, 1, 'empty');
+
+        const controlGroup: Array<ItemId> = ['gold', 'silver'];
+
+        if (controlGroup.includes(item)) {
+            newCargo.splice(itemIndex + 1, 1, 'empty');
+            this.sharedState.itemSupplies.metals[item as MetalId] += 1;
+        } else {
+            this.sharedState.itemSupplies.goods[item as GoodId] += 1;
+        }
+
+        return newCargo;
     }
 
     private compileGameResults(): Array<PlayerCountables> {

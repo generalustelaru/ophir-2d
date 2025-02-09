@@ -51,6 +51,7 @@ export class GameSetupService extends Service {
                 privateState.moveRules
             ),
             marketOffer: marketData.marketOffer,
+            itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
             templeStatus: {
                 maxLevel: privateState.metalPrices.length,
                 prices: privateState.metalPrices.shift() as MetalPrices,
