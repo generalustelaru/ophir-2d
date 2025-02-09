@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import clientConstants from '../../client_constants';
-import { CargoManifest, ItemId, PlayerColor } from '../../../shared_types';
+import { CargoInventory, ItemName, PlayerColor } from '../../../shared_types';
 import { Color, DynamicGroupInterface } from '../../client_types';
 import { CargoToken } from './CargoToken';
 
@@ -11,13 +11,13 @@ type CargoSlot = {
     x: number,
     element: CargoToken | null,
 }
-export class CargoBand implements DynamicGroupInterface<CargoManifest> {
+export class CargoBand implements DynamicGroupInterface<CargoInventory> {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
 
-    constructor(stage: Konva.Stage, playerColor: PlayerColor, cargo: CargoManifest) {
+    constructor(stage: Konva.Stage, playerColor: PlayerColor, cargo: CargoInventory) {
         this.stage = stage;
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
@@ -58,7 +58,7 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
         this.update(cargo);
     }
 
-    public update(cargo: CargoManifest): void {
+    public update(cargo: CargoInventory): void {
         this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
 
         for (const slot of this.cargoDrawData) {
@@ -75,7 +75,7 @@ export class CargoBand implements DynamicGroupInterface<CargoManifest> {
         }
     };
 
-    private addItem(itemId: ItemId, cargoSlot: CargoSlot): void {
+    private addItem(itemId: ItemName, cargoSlot: CargoSlot): void {
         const token = new CargoToken(
             this.stage,
             { x: cargoSlot.x, y: 4 },

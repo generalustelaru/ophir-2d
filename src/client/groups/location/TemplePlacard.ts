@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
-import { MarketKey, MarketOffer } from "../../../shared_types";
+import { MarketSlotKey, MarketOffer } from "../../../shared_types";
 import { UpgradeButton, TempleMarketCard, TempleDonationCard, MetalDonationsBand } from "../GroupList";
 
 const { COLOR } = clientConstants;
@@ -12,14 +12,14 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     private background: Konva.Rect;
     private upgradeButton: UpgradeButton;
     private marketCard: TempleMarketCard;
-    private templeTradeSlot: MarketKey;
+    private templeTradeSlot: MarketSlotKey;
     private goldDonationCard: TempleDonationCard;
     private silverDonationCard: TempleDonationCard;
     private donationsBand: MetalDonationsBand;
 
     constructor(
         stage: Konva.Stage,
-        marketSlot: MarketKey,
+        marketSlot: MarketSlotKey,
         market: MarketOffer,
         layout: GroupLayoutData,
         maxLevel: number,

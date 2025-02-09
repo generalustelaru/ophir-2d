@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { Coordinates, HexId, DiceSix, Player, LocationId } from '../../../shared_types';
+import { Coordinates, HexId, DiceSix, Player, LocationName } from '../../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, LocationIconData } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
@@ -29,7 +29,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         offsetX:number,
         offsetY:number,
         island: IslandData,
-        locationId: LocationId,
+        locationId: LocationName,
         iconData: LocationIconData,
         fill: Color
     ) {
@@ -116,7 +116,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         return this.group.attrs.id as HexId;
     }
 
-    public getTokenId(): LocationId {
+    public getTokenId(): LocationName {
         return this.location.getId();
     }
     public setFill(color: Color): void {

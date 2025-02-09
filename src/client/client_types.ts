@@ -1,5 +1,5 @@
-import { HexId, PlayerColor, SharedState, Coordinates, LocationId, ItemId, NewState, Trade, MarketOffer, Player,
-    MetalId, MetalPrices, Currency, TempleStatus, ClientMessage, ResetResponse,
+import { HexId, PlayerColor, SharedState, Coordinates, LocationName, ItemName, NewState, Trade, MarketOffer, Player,
+    MetalName, MetalPrices, Currency, TempleStatus, ClientMessage, ResetResponse,
     ClientIdResponse
 } from '../shared_types';
 import Konva from 'konva';
@@ -30,13 +30,13 @@ export type ClientConstants = {
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<HexId, IslandData>,
-    LOCATION_TOKEN_DATA: Record<LocationId, LocationIconData>,
+    LOCATION_TOKEN_DATA: Record<LocationName, LocationIconData>,
     TEMPLE_CONSTRUCTION_DATA: Array<TempleIconData>
     SHIP_DATA: {
         setupDrifts: Array<Coordinates>,
         shape: string
     },
-    CARGO_ITEM_DATA: Record<ItemId, PathData>,
+    CARGO_ITEM_DATA: Record<ItemName, PathData>,
     ICON_DATA: Record<string, PathData>,
 }
 
@@ -89,7 +89,7 @@ export type TreasuryUpdate = {
 
 export type TreasuryCardUpdate = {
     playerAmounts: { coins: number, favor: number } | null,
-    treasury: { currency: Currency, amount: number, metal: MetalId },
+    treasury: { currency: Currency, amount: number, metal: MetalName },
 }
 
 export type TempleUpdate = {

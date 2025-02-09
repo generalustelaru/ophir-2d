@@ -1,8 +1,8 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
-    HexId, PlayerColor, Player, SharedState, ClientRequest, GoodId, LocationAction, MovementDetails, DropItemDetails,
-    DiceSix, RepositioningDetails, CargoManifest, MarketKey, ItemId, MarketSaleDetails, Trade, LocationId,
-    PickupLocationId, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage, CargoMetalId, MetalId,
+    HexId, PlayerColor, Player, SharedState, ClientRequest, GoodName, LocationAction, MovementDetails, DropItemDetails,
+    DiceSix, RepositioningDetails, CargoInventory, MarketSlotKey, ItemName, MarketSaleDetails, Trade, LocationName,
+    GoodLocationName, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage, CargoMetalName, MetalName,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -234,14 +234,14 @@ export class GameSession {
         }
 
         const locationId = this.sharedState.setup.mapPairings[player.hexagon.hexId].id;
-        const nonPickupLocations: Array<LocationId> = ['temple', 'market', 'treasury'];
+        const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationId)) {
             console.error(`Cannot pick up goods from ${locationId}`);
             return false;
         }
 
-        const localGood = serverConstants.LOCATION_GOODS[locationId as PickupLocationId];
+        const localGood = serverConstants.LOCATION_GOODS[locationId as GoodLocationName];
 
         const newCargo = this.loadItem(player.cargo, localGood);
 
@@ -645,13 +645,13 @@ export class GameSession {
         return emptySlots >= cargoReq;
     }
 
-    private pickFeasibleTrades(playerCargo: CargoManifest) {
+    private pickFeasibleTrades(playerCargo: CargoInventory) {
         const market = this.tools.getCopy(this.sharedState.marketOffer);
         const cargo = this.tools.getCopy(playerCargo);
-        const nonGoods: Array<ItemId> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
+        const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
-        const slots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
-        const feasible: Array<MarketKey> = [];
+        const slots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
+        const feasible: Array<MarketSlotKey> = [];
 
         slots.forEach(key => {
             const unfilledGoods = market[key].request;
@@ -662,7 +662,7 @@ export class GameSession {
                     continue;
                 }
 
-                const carriedGood = cargo[i] as GoodId;
+                const carriedGood = cargo[i] as GoodName;
                 const match = unfilledGoods.indexOf(carriedGood);
 
                 if (match !== -1) {
@@ -678,37 +678,37 @@ export class GameSession {
         return feasible;
     }
 
-    private loadItem(cargo: CargoManifest, item: ItemId): CargoManifest | null {
-        const filled = cargo.filter(item => item !== 'empty') as Array<ItemId>;
-        const empty = cargo.filter(item => item === 'empty') as Array<ItemId>;
+    private loadItem(cargo: CargoInventory, item: ItemName): CargoInventory | null {
+        const filled = cargo.filter(item => item !== 'empty') as Array<ItemName>;
+        const empty = cargo.filter(item => item === 'empty') as Array<ItemName>;
         const orderedCargo = filled.concat(empty);
 
         const firstEmpty = orderedCargo.indexOf('empty');
         orderedCargo[firstEmpty] = item;
 
-        const controlGroup: Array<ItemId> = ['gold', 'silver'];
+        const controlGroup: Array<ItemName> = ['gold', 'silver'];
 
         if (controlGroup.includes(item)) {
-            orderedCargo[firstEmpty + 1] = `${item}_extra` as CargoMetalId;
+            orderedCargo[firstEmpty + 1] = `${item}_extra` as CargoMetalName;
 
-            if (this.sharedState.itemSupplies.metals[item as MetalId] < 1) {
+            if (this.sharedState.itemSupplies.metals[item as MetalName] < 1) {
                 console.error(`No ${item} available for loading`);
                 return null;
         }
-            this.sharedState.itemSupplies.metals[item as MetalId] -= 1;
+            this.sharedState.itemSupplies.metals[item as MetalName] -= 1;
         } else {
 
-            if (this.sharedState.itemSupplies.goods[item as GoodId] < 1) {
+            if (this.sharedState.itemSupplies.goods[item as GoodName] < 1) {
                 console.error(`No ${item} available for loading`);
                 return null;
 }
-            this.sharedState.itemSupplies.goods[item as GoodId] -= 1;
+            this.sharedState.itemSupplies.goods[item as GoodName] -= 1;
         }
 
         return orderedCargo;
     }
 
-    private unloadItem(cargo: CargoManifest, item: ItemId): CargoManifest | null {
+    private unloadItem(cargo: CargoInventory, item: ItemName): CargoInventory | null {
         const newCargo = this.tools.getCopy(cargo);
         const itemIndex = newCargo.indexOf(item);
 
@@ -719,13 +719,13 @@ export class GameSession {
 
         newCargo.splice(itemIndex, 1, 'empty');
 
-        const controlGroup: Array<ItemId> = ['gold', 'silver'];
+        const controlGroup: Array<ItemName> = ['gold', 'silver'];
 
         if (controlGroup.includes(item)) {
             newCargo.splice(itemIndex + 1, 1, 'empty');
-            this.sharedState.itemSupplies.metals[item as MetalId] += 1;
+            this.sharedState.itemSupplies.metals[item as MetalName] += 1;
         } else {
-            this.sharedState.itemSupplies.goods[item as GoodId] += 1;
+            this.sharedState.itemSupplies.goods[item as GoodName] += 1;
         }
 
         return newCargo;

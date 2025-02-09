@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
-import { MarketFluctuations, MarketKey, MarketOffer } from "../../../shared_types";
+import { MarketFluctuations, MarketSlotKey, MarketOffer } from "../../../shared_types";
 import { MarketDeck, MarketCardSlot } from "../GroupList";
 
 const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
@@ -18,7 +18,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
     constructor(
         stage: Konva.Stage,
         marketFluctuations: MarketFluctuations,
-        templeTradeSlot: MarketKey,
+        templeTradeSlot: MarketSlotKey,
         market: MarketOffer,
         layout: GroupLayoutData,
     ) {
@@ -121,7 +121,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             && localPlayer?.locationActions?.includes('sell_goods')
         )
 
-        const cardSlots: Array<MarketKey> = ['slot_1', 'slot_2', 'slot_3'];
+        const cardSlots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
 
         cardSlots.forEach(slot => {
             const isFeasible = localPLayerMaySell && localPlayer.feasibleTrades.includes(slot)

@@ -1,5 +1,5 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketKey, LocationData, MetalPrices, NewState, Fluctuation } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData, MetalPrices, NewState, Fluctuation } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
@@ -183,11 +183,11 @@ export class GameSetupService extends Service {
         };
     }
 
-    private determineTempleTradeSlot(): MarketKey {
+    private determineTempleTradeSlot(): MarketSlotKey {
 
         return (['slot_1', 'slot_2', 'slot_3']
             .splice(Math.floor(Math.random() * 3), 1)
-            .shift() as MarketKey
+            .shift() as MarketSlotKey
         );
     }
     // MARK: Market Offer

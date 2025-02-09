@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails, LocationId, PlayerColor, SharedState } from '../../shared_types';
+import { Coordinates, GameSetupDetails, LocationName, PlayerColor, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import state from '../state';
@@ -192,7 +192,7 @@ export class MapGroup implements MegaGroupInterface {
         return { setupCoordinates: startingPositions };
     }
 
-    private getIconData(locationId: LocationId): LocationIconData {
+    private getIconData(locationId: LocationName): LocationIconData {
 
         if (locationId != 'temple')
             return LOCATION_TOKEN_DATA[locationId];
