@@ -5,13 +5,14 @@ export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type PlayerColor = "Purple" | "Yellow" | "Red" | "Green";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type GoodId = "gems" | "wood" | "stone" | "cloth";
-export type MetalId = "silver" | "silver_extra" | "gold" | "gold_extra"; // metals cover two cargo spaces
+export type MetalId = "silver" | "gold";
+export type CargoMetalId = MetalId | "silver_extra" | "gold_extra";
 export type Currency = "coins" | "favor";
 export type PickupLocationId = "quary" | "forest" | "mines" | "farms";
 export type LocationId = "temple" | "market" | "treasury" | PickupLocationId;
 export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "load_good" | "donate_metals";
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
-export type ItemId = GoodId | MetalId | "empty";
+export type ItemId = GoodId | CargoMetalId | "empty";
 export type MarketKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoManifest = Array<ItemId>;
 export type Trade = { request: Array<GoodId>, reward: Reward };
@@ -78,6 +79,11 @@ export type TempleStatus = {
     donations: Array<MetalId>,
 }
 
+export type ItemSupplies = {
+    metals: Record<MetalId, number>,
+    goods: Record<GoodId, number>,
+}
+
 export type ClientIdResponse = {
     clientId: string,
 }
@@ -100,7 +106,7 @@ export type SharedState = {
     templeStatus: TempleStatus,
     setup: GameSetup,
     sessionChat: Array<ChatEntry>,
-    // mapSupplies: MapSupplies, // TODO: Implement map supplies (for limiting goods and metals on the map -- 5 of each)
+    itemSupplies: ItemSupplies,
 }
 
 export type NewState = {
