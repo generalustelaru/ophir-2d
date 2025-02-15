@@ -20,13 +20,11 @@ Try it out
 You can install and run a server on your local network fairly easily.
 
 Spin up a server:
-1. Install [Node](https://nodejs.org/en/download/package-manager).
-(optional) Install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions). Run `choco install make` to make use of Makefile commands.
+1. Install [Node](https://nodejs.org/en/download/package-manager). You may install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) then run `choco install make` to make use of Makefile commands
 
 2. Download the project (codebase) and enter the root folder.
 
-3. Create an `.env` file (just '.env') next to `.env.example` and copy its content into it.
-(optional) Replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). The local network can't access 'localhost'.
+3. Create an `.env` file (just '.env') next to `.env.example` and copy its content into it. You may replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). The local network can't access 'localhost'.
 
 4  Open a terminal (Command Prompt, Powershell, Bash) in the root folder.
  - Run `npm install` to download dependencies.
