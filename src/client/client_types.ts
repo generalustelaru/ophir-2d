@@ -1,6 +1,5 @@
 import { HexId, PlayerColor, SharedState, Coordinates, LocationName, ItemName, NewState, Trade, MarketOffer, Player,
-    MetalName, MetalPrices, Currency, TempleStatus, ClientMessage, ResetResponse,
-    ClientIdResponse
+    MetalName, MetalPrices, Currency, TempleStatus, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
 } from '../shared_types';
 import Konva from 'konva';
 
@@ -96,6 +95,11 @@ export type TempleUpdate = {
     trade: Trade,
     templeStatus: TempleStatus,
     localPlayer: Player | null,
+}
+
+export type CargoBandUpdate = {
+    cargo: CargoInventory,
+    canDrop: boolean,
 }
 
 export interface ClientEventInterface<T, D> {

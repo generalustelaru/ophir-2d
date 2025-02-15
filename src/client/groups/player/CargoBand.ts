@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import clientConstants from '../../client_constants';
-import { CargoInventory, ItemName, PlayerColor } from '../../../shared_types';
-import { Color, DynamicGroupInterface } from '../../client_types';
+import { ItemName, PlayerColor } from '../../../shared_types';
+import { CargoBandUpdate, Color, DynamicGroupInterface } from '../../client_types';
 import { CargoToken } from './CargoToken';
 
 const { COLOR } = clientConstants;
@@ -11,13 +11,13 @@ type CargoSlot = {
     x: number,
     element: CargoToken | null,
 }
-export class CargoBand implements DynamicGroupInterface<CargoInventory> {
+export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
 
-    constructor(stage: Konva.Stage, playerColor: PlayerColor, cargo: CargoInventory) {
+    constructor(stage: Konva.Stage, playerColor: PlayerColor, update: CargoBandUpdate) {
         this.stage = stage;
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
@@ -46,7 +46,7 @@ export class CargoBand implements DynamicGroupInterface<CargoInventory> {
             strokeWidth: 1,
         });
         this.cargoDisplay = new Konva.Rect({
-            width: cargo.length * SLOT_WIDTH,
+            width: update.cargo.length * SLOT_WIDTH,
             height: this.group.height(),
             fill: 'black',
             cornerRadius: 5,
@@ -55,10 +55,11 @@ export class CargoBand implements DynamicGroupInterface<CargoInventory> {
             background,
             this.cargoDisplay
         ]);
-        this.update(cargo);
+        this.update(update);
     }
 
-    public update(cargo: CargoInventory): void {
+    public update(update: CargoBandUpdate): void {
+        const { cargo, canDrop } = update;
         this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
 
         for (const slot of this.cargoDrawData) {
@@ -73,6 +74,8 @@ export class CargoBand implements DynamicGroupInterface<CargoInventory> {
                 this.addItem(item, slot);
             }
         }
+
+        !canDrop && this.disable();
     };
 
     private addItem(itemId: ItemName, cargoSlot: CargoSlot): void {

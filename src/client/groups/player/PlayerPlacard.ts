@@ -17,19 +17,21 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
     private id: PlayerColor;
+    private localPlayerColor: PlayerColor | null;
 
     constructor(
         stage: Konva.Stage,
         player: Player,
-        localPlayerId: PlayerColor | null,
+        localPlayerColor: PlayerColor | null,
         yOffset: number,
     ) {
         this.stage = stage;
         this.id = player.id;
+        this.localPlayerColor = localPlayerColor;
         this.group = new Konva.Group({
             width: 200,
             height: 100,
-            x: localPlayerId === player.id ? 25 : 50,
+            x: localPlayerColor === player.id ? 25 : 50,
             y: yOffset,
         });
 
@@ -42,7 +44,12 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             strokeWidth: player.isActive ? 3 : 0,
         });
 
-        this.cargoBand = new CargoBand(this.stage, player.id, player.cargo);
+        const { id, cargo } = player;
+        this.cargoBand = new CargoBand(
+            this.stage,
+            id,
+            { cargo, canDrop: false },
+        );
 
         this.favorDial = new FavorDial(
             { x: 10, y: 42 },
@@ -69,11 +76,12 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     }
 
     public update(player: Player): void {
-        this.background.strokeWidth(player.isActive ? 3 : 0);
-        this.cargoBand.update(player.cargo);
-        this.favorDial.update(player.favor);
+        const { cargo, favor, isActive, influence, id } = player;
+        this.background.strokeWidth(isActive ? 3 : 0);
+        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === id && isActive });
+        this.favorDial.update(favor);
         this.coinDial.update(player.coins);
-        this.influenceDial.update(player.influence);
+        this.influenceDial.update(influence);
     }
 
     public getId(): PlayerColor {
