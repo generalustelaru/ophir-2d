@@ -19,7 +19,6 @@ server:
 client:
 	make check
 	npm run build_client
-	make run
 
 ui:
 ifeq ($(OS),Windows_NT)
