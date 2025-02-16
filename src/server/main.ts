@@ -164,7 +164,7 @@ socketServer.on('connection', function connection(socket) {
 
         if (action === 'chat' && !singleSession) {
             const chatMessage = details as ChatDetails;
-            lobbyState.sessionChat.push({ id: playerColor, name: playerName ?? playerColor, message: chatMessage.message });
+            lobbyState.sessionChat.push({ id: playerColor, name: playerName ?? playerColor, message: chatMessage.input });
             sendAll(lobbyState);
 
             return;
