@@ -142,7 +142,7 @@ export type GameSetup = {
 }
 
 export type ChatDetails = {
-    message: string,
+    input: string,
 }
 
 export type MovementDetails = {

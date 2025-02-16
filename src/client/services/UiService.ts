@@ -73,7 +73,7 @@ export class UserInterfaceService extends Service {
             type: 'action',
             detail: {
                 action: 'chat',
-                payload: { message: message },
+                payload: { input: message },
             },
         });
     }
