@@ -108,6 +108,9 @@ window.addEventListener('update', () => {
     uiService.updateControls();
 
     // Debugging
+    if (sharedState.isStatusResponse)
+        return;
+
     localStorage.setItem('gameStatus', sharedState.gameStatus);
     localStorage.setItem('received', JSON.stringify(sharedState));
     localStorage.setItem('client', JSON.stringify(state));
