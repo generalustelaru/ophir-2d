@@ -19,6 +19,7 @@ On your turn, you must first move once or twice into adjacent zones and without 
 The two natural barriers are the only elements blocking access. However, opponet ships can also become obstacles. Moving towards a zone where opponents are anchored will require an influence check (roll on a D6) to be succesful.
 
 The roll is performed automatically when you signal intent by releasing your Ship Figure over the destination zone.
+
    - A roll result of at least equal to the highest influence between the ships there will complete the move succesfully.
    - Rolling lower than the highest influence prevents entry and loses you the move (returning your Ship Figure to its original spot).
 
@@ -30,7 +31,8 @@ On your turn, as long as you have moves left, you may click once on the Favor Ic
 ### Goods Locations
 
 Four of the seven zones contain Goods (Gems, Wood, Stone, or Cloth). Location icons depict the Goods themselves.
-   - Load Good: Click on the zone's Good Icon to pick up 1 Good of that type. The Good is placed in your Cargo.
+
+  - Load Good: Click on the zone's Good Icon to pick up 1 Good of that type. The Good is placed in your Cargo.
 
 ### The Market
 
@@ -48,7 +50,7 @@ The game can also end if the market deck runs out, meaning players have focused 
 
 The Exchange (gold ingot icon location) is the only source of precious metals (Gold and Silver). The Exchange Placard sits on the left, between the Market and Temple Placards. Here you may perform Exchange Actions to trade Coins or Favor for Gold or Silver. The indicated Coin prices will increase progressively as the Temple levels are added -- Gold increases roughly twice as fast as Silver.
 
-   - Buy Metals: Click on an Exchange Card to trade coins or favor for Gold or Silver. You may load two metals if you have the space.  Metal takes up 2 Cargo spaces. Note that you can free up Cargo space by throwing unwanted items overboard.
+   - Buy Metals: Click on an Exchange Card to trade Coins or Favor for Gold or Silver. You may load two metals if you have the space.  Metal takes up 2 Cargo spaces. Note that you can free up Cargo space by throwing unwanted items overboard.
 
 #### Favor and Metals
 The Favor cost of Gold (5) and Silver (3) might look steep. However, as opposed to Coin costs, Favor costs remain constant.
@@ -57,8 +59,6 @@ The Favor cost of Gold (5) and Silver (3) might look steep. However, as opposed 
 
 The Temple (blue construction icon) a source of VP and Favor. On the Temple Placard (bottom left) you may perform several Actions:
 
- - Upgrade Cargo: Once per turn, you may click on the Upgrade Button (bottom right on the Temple Placard) to increase your Cargo capacity by 1 space.
- - Donate Metal: Donation Cards are fixed and award 10 VP for Gold and 5 VP for Silver. If you're carrying 2 Metals, you may donate both.
- - Donate Goods: Once per turn you may donate Goods to the temple to get Favor and VP in equal amounts. This donation does not contribute to the construction. The blue Market Card is mirroring a regular Market Card on the Market Placard. The small blue Temple Icon on the upper edge of the Market Placard indicates the slot that's always mirrored on the Temple Placard. Donating Goods will also shift the Market Cards
-
-Donating goods to the temple provides Favor, a resource you can spend to navigate without risk (no influence checks), prolong your stay in the same zone (ignore movement), or to purchase precious metals (pay fixed favor cost instead of devaluing coins). The temple market accepts a single trade (goods to donate) but mirrors a specific slot in the market and shifts accordingly.
+   - Upgrade Cargo: Once per turn, you may click on the Upgrade Button (bottom right on the Temple Placard) to increase your Cargo capacity by 1 space.
+   - Donate Goods: Once per turn you may donate Goods to the temple to get Favor and VP in equal amounts. This donation does not contribute to the construction. The blue Market Card is mirroring a regular Market Card on the Market Placard. The small blue Temple Icon on the upper edge of the Market Placard indicates the slot that's always mirrored on the Temple Placard. Donating Goods will also shift the Market Cards,
+   - Donate Metal: Donation Cards are fixed and award 10 VP for Gold and 5 VP for Silver. If you're carrying 2 Metals, you may donate both. The Temple Donations Swatch keeps track of every delivered metal. The metals stack upwards to 3. When a third metal is donated, the Coin prices of metals at the exchange increase. Gold price increases roughly by 1 Coin every turn. Silver price increases only half as often. When the swatch fills, the game ends.
