@@ -85,8 +85,8 @@ const serverConstants: ServerConstants = {
     ],
 
     LOCATION_ACTIONS: [
-        {id: 'temple', actions: ['upgrade_hold', 'donate_goods', 'donate_metals']},
-        {id: 'market', actions: ['sell_goods']},
+        {id: 'temple', actions: ['upgrade_hold', 'trade_goods', 'donate_metals']},
+        {id: 'market', actions: ['trade_goods']},
         {id: 'treasury', actions: ['buy_metals']},
         {id: 'quary', actions: ['load_good']},
         {id: 'forest', actions: ['load_good']},

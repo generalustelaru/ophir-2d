@@ -10,7 +10,7 @@ export type CargoMetalName = MetalName | "silver_extra" | "gold_extra";
 export type Currency = "coins" | "favor";
 export type GoodLocationName = "quary" | "forest" | "mines" | "farms";
 export type LocationName = "temple" | "market" | "treasury" | GoodLocationName;
-export type LocationAction = "upgrade_hold" | "donate_goods" | "sell_goods" | "buy_metals" | "load_good" | "donate_metals";
+export type LocationAction = "upgrade_hold" | "trade_goods" | "buy_metals" | "load_good" | "donate_metals";
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
 export type ItemName = GoodName | CargoMetalName | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
@@ -162,8 +162,9 @@ export type DropItemDetails = {
     item: ItemName,
 }
 
-export type MarketSaleDetails = {
+export type TradeDetails = {
     slot: MarketSlotKey,
+    location: LocationName
 }
 
 export type MetalPurchaseDetails = {
@@ -186,22 +187,21 @@ export interface MessageInterface<A, D> {
     payload: D,
 }
 
-export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good' | 'donate_goods' | 'upgrade_hold' | 'get_status';
+export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good' | 'upgrade_hold' | 'get_status';
 export type LaconicMessage = MessageInterface<LaconicAction, null>;
 export type ChatMessage = MessageInterface<'chat', ChatDetails>;
 export type StartMessage = MessageInterface<'start', GameSetupDetails>;
 export type MoveMessage = MessageInterface<'move', MovementDetails>;
 export type DropItemMessage = MessageInterface<'drop_item', DropItemDetails>;
 export type RepositionMessage = MessageInterface<'reposition', RepositioningDetails>;
-export type SellGoodsMessage = MessageInterface<'sell_goods', MarketSaleDetails>;
+export type SellGoodsMessage = MessageInterface<'trade_goods', TradeDetails>;
 export type BuyMetalsMessage = MessageInterface<'buy_metals', MetalPurchaseDetails>;
-export type DonateGoodsMessage = MessageInterface<'donate_goods', MarketSaleDetails>;
 export type DonateMetalMessage = MessageInterface<'donate_metals', MetalDonationDetails>;
 export type RebindIdMessage = MessageInterface<'rebind_id', RebindClientDetails>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | DropItemMessage
     | RepositionMessage | SellGoodsMessage | BuyMetalsMessage | DonateMetalMessage
-    | DonateGoodsMessage | ChatMessage | RebindIdMessage;
+    | ChatMessage | RebindIdMessage;
 
 export type ClientRequest = {
     gameId: string | null,
