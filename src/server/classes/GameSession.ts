@@ -1,7 +1,7 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
     HexId, PlayerColor, Player, SharedState, ClientRequest, GoodName, LocationAction, MovementDetails, DropItemDetails,
-    DiceSix, RepositioningDetails, CargoInventory, MarketSlotKey, ItemName, MarketSaleDetails, Trade, LocationName,
+    DiceSix, RepositioningDetails, CargoInventory, MarketSlotKey, ItemName, TradeDetails, Trade, LocationName,
     GoodLocationName, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage, CargoMetalName, MetalName,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
@@ -83,10 +83,8 @@ export class GameSession {
                 return this.processRepositioning(data) ? this.sharedState : { error: `Could process repositioning on ${color}` };
             case 'load_good':
                 return this.processLoadGood(data) ? this.sharedState : { error: `Could not process load on ${color}` };
-            case 'sell_goods':
-                // selling and donating require mostly the same logic
-            case 'donate_goods':
-                return this.processGoodsTrade(data, message.action) ? this.sharedState : { error: `Could not process trade on ${color}` };
+            case 'trade_goods':
+                return this.processGoodsTrade(data) ? this.sharedState : { error: `Could not process trade on ${color}` };
             case 'buy_metals':
                 return this.processMetalPurchase(data) ? this.sharedState : { error: `Could not process metal purchase on ${color}` };
             case 'donate_metals':
@@ -265,31 +263,31 @@ export class GameSession {
         return true;
     }
     // MARK: GOODS TRADE
-    private processGoodsTrade(data: DataDigest, tradeAction: LocationAction): boolean {
+    private processGoodsTrade(data: DataDigest): boolean {
         const player = data.player;
-        const details = data.payload as MarketSaleDetails;
+        const details = data.payload as TradeDetails;
         // const tradeAction = request.message.action as LocationAction;
-        const marketKey = details.slot;
+        const { slot, location } = details;
 
         if (
-            !player?.locationActions?.includes(tradeAction)
-            || false === player.feasibleTrades.includes(marketKey)
+            !player?.locationActions?.includes('trade_goods')
+            || false === player.feasibleTrades.includes(slot)
             || false === player.isAnchored
         ) {
-            console.error(`Trade action ${tradeAction} not feasible for ${player?.id}`);
+            console.error(`Trade action not feasible for ${player?.id}`);
 
             return false;
         }
 
-        const trade = this.sharedState.marketOffer[marketKey];
+        const trade = this.sharedState.marketOffer[slot];
 
-        switch (tradeAction) {
-            case 'sell_goods':
-                const modifier = this.sharedState.setup.marketFluctuations[marketKey];
+        switch (location) {
+            case 'market':
+                const modifier = this.sharedState.setup.marketFluctuations[slot];
                 player.coins += trade.reward.coins + modifier;
                 this.addServerMessage(`${player.name} sold goods for ${trade.reward.coins + modifier} coins`);
                 break;
-            case 'donate_goods':
+            case 'temple':
                 const reward = trade.reward.favorAndVp;
                 player.favor = Math.min(MAX_FAVOR, player.favor + reward);
                 this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
@@ -297,7 +295,7 @@ export class GameSession {
                 console.info(this.privateState.gameStats);
                 break;
             default:
-                console.error(`Unknown trade action: ${tradeAction}`);
+                console.error(`Unknown trade location: ${location}`);
                 return false;
         }
 
@@ -323,7 +321,7 @@ export class GameSession {
 
         player.cargo = newCargo;
         player.hasCargo = player.cargo.find(item => item !== 'empty') ? true : false;
-        player.locationActions = this.removeAction(player.locationActions, tradeAction);
+        player.locationActions = this.removeAction(player.locationActions, 'trade_goods');
         player.moveActions = 0;
 
         // Update market offer
