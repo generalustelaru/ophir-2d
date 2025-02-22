@@ -1,10 +1,9 @@
-import { Service } from './Service';
 
-export class ToolService extends Service {
+export class ToolService {
 
-    public isRecord(obj: object): boolean {
+    public isRecord(value: any): boolean {
 
-        return obj.constructor === Object && Object.keys(obj).length > 0;
+        return value.constructor === Object && Object.keys(value).length > 0;
     }
 
     /**
@@ -16,5 +15,16 @@ export class ToolService extends Service {
     public getCopy<O extends object>(obj: O): O {
 
         return JSON.parse(JSON.stringify(obj));
+    }
+
+    public parse<O extends object>(json: string): O | null {
+        const value = JSON.parse(json);
+
+        if (this.isRecord(value))
+            return value;
+
+        console.error('Invalid request format.', json);
+
+        return null;
     }
 }

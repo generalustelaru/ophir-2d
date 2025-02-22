@@ -3,11 +3,12 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, ClientRequest, NewState, GameSetupDetails, GameStatus, ChatDetails, ChatEntry, RebindClientDetails, ClientIdResponse, ServerMessage, ResetResponse } from '../shared_types';
+import { PlayerColor, ClientRequest, NewState, GameSetupPayload, GameStatus, ChatPayload, ChatEntry, RebindClientPayload, ClientIdResponse, ServerMessage, ResetResponse } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
+import { ValidatorService } from "./services/ValidatorService";
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 
@@ -80,7 +81,8 @@ promptForServerShutdown();
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
 const setupService: GameSetupService = GameSetupService.getInstance();
-const tools: ToolService = ToolService.getInstance();
+const tools = new ToolService();
+const validator = new ValidatorService();
 
 let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
 let singleSession: GameSession | null = null;
@@ -101,11 +103,26 @@ socketServer.on('connection', function connection(socket) {
     socket.send(JSON.stringify(response));
     socketClients.push({ clientID: clientId, gameID: null, socket: socket });
 
-    socket.on('message', function incoming(message: string) {
+    socket.on('message', function incoming(req: string) {
 
-        const parsedRequest = JSON.parse(message) as ClientRequest;
-        const { playerColor, playerName, message: payload } = parsedRequest;
-        const {action, payload: details} = payload;
+        const request = tools.parse(req);
+
+        if (!request) {
+            send(socket, {error: 'Invalid request format.'});
+
+            return;
+        }
+
+        const clientRequest = validator.validateClientRequest(request);
+
+        if (!clientRequest) {
+            send(socket, {error: 'Invalid request data.'});
+
+            return;
+        }
+
+        const { playerColor, playerName, message } = clientRequest;
+        const {action, payload: details} = message;
         const name = playerName || playerColor || '';
         const colorized = {
             Purple: `\x1b[95m${name}\x1b[0m`,
@@ -125,7 +142,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'rebind_id') {
-            const { referenceId, myId } = details as RebindClientDetails;
+            const { referenceId, myId } = details as RebindClientPayload;
             const socketClient = socketClients.find(c => c.clientID === referenceId);
 
             if (socketClient) {
@@ -156,22 +173,33 @@ socketServer.on('connection', function connection(socket) {
                 lobbyState.gameId = randomUUID();
                 sendAll(lobbyState);
             } else {
-                sendAll({ error: `Enrollment failed on ${playerColor}` });
+                send(socket, { error: `Enrollment failed on ${playerColor}` });
             }
 
             return;
         }
 
         if (action === 'chat' && !singleSession) {
-            const chatMessage = details as ChatDetails;
-            lobbyState.sessionChat.push({ id: playerColor, name: playerName ?? playerColor, message: chatMessage.input });
+            const chatMessage = details as ChatPayload;
+
+            console.log('offSession processing')
+            if (!chatMessage) {
+                sendAll({ error: `Could not process chat message on ${playerColor}` })
+                return;
+            }
+
+            lobbyState.sessionChat.push({
+                id: playerColor,
+                name: playerName ?? playerColor,
+                message: chatMessage.input,
+            });
             sendAll(lobbyState);
 
             return;
         }
 
         if (action === 'start') {
-            const setupDetails = details as GameSetupDetails;
+            const setupDetails = details as GameSetupPayload;
             const sessionCreated = processGameStart(setupDetails);
 
             if (sessionCreated && singleSession) {
@@ -196,7 +224,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (singleSession) {
-            sendAll(singleSession.processAction(parsedRequest));
+            sendAll(singleSession.processAction(clientRequest));
 
             return;
         }
@@ -212,7 +240,7 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
-function processGameStart(details: GameSetupDetails): boolean {
+function processGameStart(details: GameSetupPayload): boolean {
 
     try {
         const bundle: StateBundle = setupService.produceGameData(lobbyState, details.setupCoordinates);
