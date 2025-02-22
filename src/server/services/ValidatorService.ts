@@ -1,25 +1,20 @@
 import {
     ClientRequest,
     PlayerColor,
-    // ClientMessage
+    ClientMessage,
+    MessageAction
 } from "../../shared_types";
 import { ToolService } from "./ToolService";
 
 export class ValidatorService {
     private tools: ToolService;
-    private errors: Array<string>;
+    private error: string
 
     constructor(){
         this.tools = new ToolService();
-        this.errors = [];
+        this.error = '';
     }
     public validateClientRequest(request: object): ClientRequest | null {
-
-        if (!request) {
-            console.log('ERROR: Payload is not an object.', {payload: request});
-
-            return null;
-        }
 
         if (
             this.hasString(request, 'clientId', true)
@@ -30,8 +25,8 @@ export class ValidatorService {
         )
             return request as ClientRequest;
 
-        console.log(this.errors);
-        this.errors = [];
+        console.error(this.error);
+        this.setError();
 
         return null;
     }
@@ -47,7 +42,8 @@ export class ValidatorService {
         if (playerColors.includes(prop))
             return true;
 
-        this.errors.push(`Invalid playerColor: ${prop}`);
+        this.setError(`Invalid playerColor: ${prop}`);
+
         return false;
     }
 
@@ -55,14 +51,28 @@ export class ValidatorService {
         const value = parent['message' as keyof object];
 
         if (!this.tools.isRecord(value)) {
-            this.errors.push(`"message" property is missing: ${{...parent}}`)
+            this.setError(`"message" property is missing: ${{...parent}}`)
+
             return false;
         }
 
         const object = value as object;
 
         if (!('action' in object) || !('payload' in object)) {
-            this.errors.push(`"ClientMessage" is missing keys: ${{...object}}`);
+            this.setError(`"ClientMessage" is missing keys: ${{...object}}`);
+            return false;
+        }
+
+        const clientMessage = object as ClientMessage;
+        const actions: Array<MessageAction> = [
+            "inquire", "enroll", "end_turn", "reset", "spend_favor", 'load_good',
+            'upgrade_hold', 'get_status', 'chat', 'start', 'move', 'drop_item',
+            'reposition', 'trade_goods', 'buy_metals', 'donate_metals', 'rebind_id',
+        ];
+
+        if (!actions.includes(clientMessage.action)) {
+            this.setError(`action in ClientMessage is not MessageAction: ${clientMessage.action}`);
+
             return false;
         }
 
@@ -72,7 +82,8 @@ export class ValidatorService {
     private hasString(parent: object, key: string, nullable: boolean = false): boolean {
 
         if (!Boolean(key in parent)) {
-            this.errors.push(`"${key}" property is missing: ${{...parent}}`);
+            this.setError(`"${key}" property is missing: ${{...parent}}`);
+
             return false;
         }
 
@@ -82,10 +93,15 @@ export class ValidatorService {
             return true;
 
         if (typeof parent[_key] !== 'string' || !((parent[_key] as string).length)) {
-            this.errors.push(`"${key}" property is not a valid string: ${{...parent}}`);
+            this.setError(`${key} property is not a valid string: ${parent[_key]}`);
+
             return false;
         }
 
         return true;
+    }
+
+    private setError(text?: string) {
+        this.error = `VALIDATION ERROR; ${text}` || '';
     }
 }
