@@ -21,12 +21,12 @@ export class GameSession {
     private sharedState: SharedState;
     private tools: ToolService;
     private idleCheckInterval: NodeJS.Timeout | null = null;
-    // TODO: Implement classes to validate payloads and update the shared state
+
     constructor(bundle: StateBundle) {
         (global as any).myInstance = this;
         this.privateState = bundle.privateState;
         this.sharedState = bundle.sharedState;
-        this.tools = ToolService.getInstance();
+        this.tools = new ToolService();
         const activePlayer = this.sharedState.players.find(player => player.isActive);
 
         if (!activePlayer) {

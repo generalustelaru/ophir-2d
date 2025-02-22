@@ -155,7 +155,13 @@ export interface MessageInterface<A, P> {
     action: A,
     payload: P,
 }
-export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good' | 'upgrade_hold' | 'get_status';
+export type MessageAction =
+    | "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good' | 'upgrade_hold' | 'get_status'
+    | 'chat' | 'start' | 'move' | 'drop_item' | 'reposition' | 'trade_goods' | 'buy_metals'
+    | 'donate_metals' | 'rebind_id';
+export type LaconicAction =
+    | "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good'
+    | 'upgrade_hold' | 'get_status';
 export type LaconicMessage = MessageInterface<LaconicAction, null>;
 export type ChatMessage = MessageInterface<'chat', ChatPayload>;
 export type StartMessage = MessageInterface<'start', GameSetupPayload>;

@@ -9,7 +9,7 @@ const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, METAL_PR
 
 export class GameSetupService extends Service {
 
-    private tools: ToolService = ToolService.getInstance();
+    private tools: ToolService = new ToolService();
 
     public produceGameData(newState: NewState, setupCoordinates: Array<Coordinates>): StateBundle {
         const players = this.tools.getCopy(newState.players);
