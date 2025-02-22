@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupDetails } from '../../shared_types';
+import { GameSetupPayload } from '../../shared_types';
 import { Service } from "./Service";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -58,7 +58,7 @@ export class CanvasService extends Service {
         ); // mapGroup covers half the canvas (2 segments), sitting in the middle
     }
 
-    public getSetupCoordinates(): GameSetupDetails {
+    public getSetupCoordinates(): GameSetupPayload {
         return this.mapGroup.calculateShipPositions();
     }
 

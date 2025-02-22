@@ -2,6 +2,7 @@ import { PlayerCountables } from "./server/server_types";
 
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
+export type Coordinates = { x: number, y: number };
 export type PlayerColor = "Purple" | "Yellow" | "Red" | "Green";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type GoodName = "gems" | "wood" | "stone" | "cloth";
@@ -140,69 +141,39 @@ export type GameSetup = {
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
 }
+export type ChatPayload = { input: string }
+export type MovementPayload = { hexId: HexId, position: Coordinates }
+export type RepositioningPayload = { repositioning: Coordinates }
+export type GameSetupPayload = { setupCoordinates: Array<Coordinates> }
+export type DropItemPayload = { item: ItemName }
+export type GoodsTradePayload = { slot: MarketSlotKey, location: LocationName }
+export type MetalPurchasePayload = { metal: MetalName, currency: Currency }
+export type MetalDonationPayload = { metal: MetalName }
+export type RebindClientPayload = { referenceId: string, myId: string }
 
-export type ChatDetails = {
-    input: string,
-}
-
-export type MovementDetails = {
-    hexId: HexId,
-    position: Coordinates,
-}
-
-export type RepositioningDetails = {
-    repositioning: Coordinates,
-}
-
-export type GameSetupDetails = {
-    setupCoordinates: Array<Coordinates>,
-}
-
-export type DropItemDetails = {
-    item: ItemName,
-}
-
-export type TradeDetails = {
-    slot: MarketSlotKey,
-    location: LocationName
-}
-
-export type MetalPurchaseDetails = {
-    metal: MetalName,
-    currency: Currency,
-}
-
-export type MetalDonationDetails = {
-    metal: MetalName,
-}
-
-export type RebindClientDetails = {
-    referenceId: string,
-    myId: string
-}
-
-export type Coordinates = { x: number, y: number };
-export interface MessageInterface<A, D> {
+export interface MessageInterface<A, P> {
     action: A,
-    payload: D,
+    payload: P,
 }
-
 export type LaconicAction = "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good' | 'upgrade_hold' | 'get_status';
 export type LaconicMessage = MessageInterface<LaconicAction, null>;
-export type ChatMessage = MessageInterface<'chat', ChatDetails>;
-export type StartMessage = MessageInterface<'start', GameSetupDetails>;
-export type MoveMessage = MessageInterface<'move', MovementDetails>;
-export type DropItemMessage = MessageInterface<'drop_item', DropItemDetails>;
-export type RepositionMessage = MessageInterface<'reposition', RepositioningDetails>;
-export type SellGoodsMessage = MessageInterface<'trade_goods', TradeDetails>;
-export type BuyMetalsMessage = MessageInterface<'buy_metals', MetalPurchaseDetails>;
-export type DonateMetalMessage = MessageInterface<'donate_metals', MetalDonationDetails>;
-export type RebindIdMessage = MessageInterface<'rebind_id', RebindClientDetails>;
+export type ChatMessage = MessageInterface<'chat', ChatPayload>;
+export type StartMessage = MessageInterface<'start', GameSetupPayload>;
+export type MoveMessage = MessageInterface<'move', MovementPayload>;
+export type DropItemMessage = MessageInterface<'drop_item', DropItemPayload>;
+export type RepositionMessage = MessageInterface<'reposition', RepositioningPayload>;
+export type SellGoodsMessage = MessageInterface<'trade_goods', GoodsTradePayload>;
+export type BuyMetalsMessage = MessageInterface<'buy_metals', MetalPurchasePayload>;
+export type DonateMetalMessage = MessageInterface<'donate_metals', MetalDonationPayload>;
+export type RebindIdMessage = MessageInterface<'rebind_id', RebindClientPayload>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | DropItemMessage
     | RepositionMessage | SellGoodsMessage | BuyMetalsMessage | DonateMetalMessage
     | ChatMessage | RebindIdMessage;
-
+export type MessagePayload =
+    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
+    | RepositioningPayload | GoodsTradePayload | MetalPurchasePayload
+    | MetalDonationPayload | RebindClientPayload;
 export type ClientRequest = {
     gameId: string | null,
     clientId: string | null,
