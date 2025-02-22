@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupDetails, LocationName, PlayerColor, SharedState } from '../../shared_types';
+import { Coordinates, GameSetupPayload, LocationName, PlayerColor, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import state from '../state';
@@ -179,7 +179,7 @@ export class MapGroup implements MegaGroupInterface {
         this.favorButton?.disableAction();
     }
 
-    public calculateShipPositions(): GameSetupDetails {
+    public calculateShipPositions(): GameSetupPayload {
         const startingPositions: Array<Coordinates> = [];
 
         SHIP_DATA.setupDrifts.forEach((drift) => {

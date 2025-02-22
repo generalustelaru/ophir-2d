@@ -1,8 +1,9 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
-    HexId, PlayerColor, Player, SharedState, ClientRequest, GoodName, LocationAction, MovementDetails, DropItemDetails,
-    DiceSix, RepositioningDetails, CargoInventory, MarketSlotKey, ItemName, TradeDetails, Trade, LocationName,
-    GoodLocationName, MetalPurchaseDetails, ChatDetails, ChatEntry, ServerMessage, CargoMetalName, MetalName,
+    HexId, PlayerColor, Player, SharedState, ClientRequest, GoodName, LocationAction, MovementPayload, DropItemPayload,
+    DiceSix, RepositioningPayload, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
+    GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetalName, MetalName, ChatPayload,
+    MessagePayload,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -12,7 +13,7 @@ const SERVER_NAME = 'GameBot';
 const MAX_FAVOR = 6;
 
 type RegistryItem = { id: PlayerColor, influence: DiceSix };
-type DataDigest = { player: Player, payload: unknown }
+type DataDigest = { player: Player, payload: MessagePayload }
 
 export class GameSession {
 
@@ -109,15 +110,8 @@ export class GameSession {
 
     // MARK: CHAT
     private processChat(data: DataDigest): boolean {
-
         const { player, payload } = data;
-        const chatDetails = payload as ChatDetails;
-
-        if (!chatDetails.input) {
-            console.error('No chat message found', chatDetails);
-
-            return false;
-        }
+        const chatDetails = payload as ChatPayload;
 
         const chatEntry = { id: player.id, name: player.name ?? player.id, message: chatDetails.input };
         this.sharedState.sessionChat.push(chatEntry);
@@ -132,7 +126,7 @@ export class GameSession {
 
     // MARK: MOVE
     private processMove(data: DataDigest): boolean {
-        const details = data.payload as MovementDetails;
+        const details = data.payload as MovementPayload;
         const player = data.player;
         const departure = player.hexagon.hexId;
         const destination = details.hexId;
@@ -174,7 +168,7 @@ export class GameSession {
     }
     // MARK: REPOSITIONING
     private processRepositioning(data: DataDigest): boolean {
-        const details = data.payload as RepositioningDetails;
+        const details = data.payload as RepositioningPayload;
         const player = data.player;
 
         player.hexagon.position = details.repositioning;
@@ -202,7 +196,7 @@ export class GameSession {
     }
     // MARK: DROP ITEM
     private processItemDrop(data: DataDigest): boolean {
-        const details = data.payload as DropItemDetails
+        const details = data.payload as DropItemPayload
         const player = data.player;
 
         const newCargo = this.unloadItem(player.cargo, details.item);
@@ -265,7 +259,7 @@ export class GameSession {
     // MARK: GOODS TRADE
     private processGoodsTrade(data: DataDigest): boolean {
         const player = data.player;
-        const details = data.payload as TradeDetails;
+        const details = data.payload as GoodsTradePayload;
         // const tradeAction = request.message.action as LocationAction;
         const { slot, location } = details;
 
@@ -365,7 +359,7 @@ export class GameSession {
     // MARK: METAL PURCHASE
     private processMetalPurchase(data: DataDigest): boolean {
         const player = data.player;
-        const details = data.payload as MetalPurchaseDetails;
+        const details = data.payload as MetalPurchasePayload;
 
         if (
             false === !!player.locationActions?.includes('buy_metals')
@@ -433,7 +427,7 @@ export class GameSession {
     // MARK: DONATE METALS
     private processMetalDonation(data: DataDigest): boolean {
         const player = data.player;
-        const details = data.payload as MetalPurchaseDetails;
+        const details = data.payload as MetalPurchasePayload;
 
         if (
             false === !!player.locationActions?.includes('donate_metals')
