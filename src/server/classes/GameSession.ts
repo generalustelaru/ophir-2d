@@ -820,6 +820,6 @@ export class GameSession {
         this.idleCheckInterval && clearInterval(this.idleCheckInterval);
         delete (global as any).myInstance;
 
-        return null
+        return null;
     }
 }
