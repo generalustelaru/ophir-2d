@@ -44,6 +44,10 @@ export class GameSession {
         return this.sharedState;
     }
 
+    public getPrivateState(): PrivateState {
+        return this.privateState;
+    }
+
     // MARK: ACTION SWITCH
     public processAction(request: ClientRequest): ServerMessage {
         const color = request.playerColor;
