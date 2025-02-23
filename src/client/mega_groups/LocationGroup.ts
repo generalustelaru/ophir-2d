@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { MegaGroupInterface, GroupLayoutData, TempleUpdate } from "../client_types";
+import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from "../client_types";
 import { MarketPlacard, TreasuryPlacard, TemplePlacard } from "../groups/GroupList";
 import state from '../state';
 
@@ -86,7 +86,7 @@ export class LocationGroup implements MegaGroupInterface {
         }
 
         const localPlayer = sharedState.players.find(player => player.id === state.local.playerColor);
-        const marketUpdate = {
+        const marketUpdate: MarketUpdate = {
             localPlayer: localPlayer ?? null,
             marketOffer: marketOffer,
         }

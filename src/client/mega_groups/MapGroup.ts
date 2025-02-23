@@ -74,8 +74,8 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.x,
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
-                locationData.id,
-                this.getIconData(locationData.id),
+                locationData.name,
+                this.getIconData(locationData.name),
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
@@ -192,10 +192,10 @@ export class MapGroup implements MegaGroupInterface {
         return { setupCoordinates: startingPositions };
     }
 
-    private getIconData(locationId: LocationName): LocationIconData {
+    private getIconData(locationName: LocationName): LocationIconData {
 
-        if (locationId != 'temple')
-            return LOCATION_TOKEN_DATA[locationId];
+        if (locationName != 'temple')
+            return LOCATION_TOKEN_DATA[locationName];
 
         const skipCount = (() => {
             const playerCount = state.received.players.length;
@@ -213,6 +213,6 @@ export class MapGroup implements MegaGroupInterface {
         if (templeData)
             return templeData.icon;
 
-        return LOCATION_TOKEN_DATA[locationId];
+        return LOCATION_TOKEN_DATA[locationName];
     }
 }

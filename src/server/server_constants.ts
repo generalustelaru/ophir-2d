@@ -85,13 +85,13 @@ const serverConstants: ServerConstants = {
     ],
 
     LOCATION_ACTIONS: [
-        {id: 'temple', actions: ['upgrade_hold', 'trade_goods', 'donate_metals']},
-        {id: 'market', actions: ['trade_goods']},
-        {id: 'treasury', actions: ['buy_metals']},
-        {id: 'quary', actions: ['load_good']},
-        {id: 'forest', actions: ['load_good']},
-        {id: 'mines', actions: ['load_good']},
-        {id: 'farms', actions: ['load_good']},
+        {name: 'temple', actions: ['upgrade_hold', 'trade_goods', 'donate_metals']},
+        {name: 'market', actions: ['trade_goods']},
+        {name: 'treasury', actions: ['buy_metals']},
+        {name: 'quary', actions: ['load_good']},
+        {name: 'forest', actions: ['load_good']},
+        {name: 'mines', actions: ['load_good']},
+        {name: 'farms', actions: ['load_good']},
     ],
 
     LOCATION_GOODS: {
@@ -108,7 +108,7 @@ const serverConstants: ServerConstants = {
         name: null,
         turnOrder: 0,
         isActive: false,
-        hexagon: { hexId: "center", position: {x: 0, y: 0} },
+        hexagon: { hexId: "center", position: {x: 0, y: 0}, location: null },
         favor: 2,
         privilegedSailing: false,
         influence: 1,
