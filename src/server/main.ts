@@ -38,14 +38,8 @@ app.get('/shutdown', (req: Request, res: Response) => {
         return;
     }
 
-    console.log('Server is shutting down...');
-    socketClients.forEach(client => client.socket.close(1000));
-    setTimeout(() => {
-        socketServer.close();
-        console.log('Server off.');
-        res.send('Server off.');
-        process.exit(0);
-    }, 3000);
+    console.warn('Remote server shutdown!');
+    shutDown();
 });
 
 app.listen(httpPort, () => {
@@ -56,27 +50,32 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-
-function promptForServerShutdown(): void {
+function shutDown() {
+    console.log('Shutting down...');
+    rl.close();
+    socketClients.forEach(client => client.socket.close(1000));
+    setTimeout(() => {
+        socketServer.close();
+        console.log('Server off.');
+        process.exit(0);
+    }, 3000);
+}
+function promptForInput(): void {
     rl.question('\n', (input) => {
 
-        if (input == 'shutdown') {
-            console.log('Shutting down...');
-            rl.close();
-
-            socketClients.forEach(client => client.socket.close(1000));
-            setTimeout(() => {
-                socketServer.close();
-                console.log('Server off.');
-                process.exit(0);
-            }, 3000);
-        } else {
-            promptForServerShutdown();
+        switch(input) {
+            case 'shutdown':
+                shutDown();
+            return;
+            case 'debug':
+                console.log(JSON.stringify(singleSession?.getPrivateState()));
+            break;
         }
+
+        promptForInput();
     });
 }
-
-promptForServerShutdown();
+promptForInput();
 
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
