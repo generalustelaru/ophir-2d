@@ -1,7 +1,7 @@
 Web-based implementation of **Ophir** (Terra Nova Games)
+![3 Player game sample](./3-player-sample-screenshot.png)
 
 ## Description
-
 Ophir is a multiplayer pickup & deliver game for 2-4 players which takes place in a 7 island (zones) archipelago.
 
 On a player's turn he/she will move his/her ship from island to island, picking up goods and delivering them to the market for coins or to the temple for victory points (VP). Players spend coins to upgrade their ship cargo capacity and to purchase precious metals -- which are donated at the temple for more VP. The goal is to gather the most VP before the game ends.
