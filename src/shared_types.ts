@@ -42,6 +42,7 @@ export type Player = {
     isActive: boolean,
     hexagon: {
         hexId: HexId,
+        location: LocationName | null,
         position: Coordinates,
     },
     favor: number,
@@ -131,7 +132,7 @@ export type ResetResponse = {
 export type ServerMessage = ClientIdResponse | SharedState | NewState | ResetResponse | ErrorResponse;
 
 export type LocationData = {
-    id: LocationName,
+    name: LocationName,
     actions: Array<LocationAction>,
 }
 

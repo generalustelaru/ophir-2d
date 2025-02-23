@@ -130,7 +130,7 @@ export class GameSession {
         const player = data.player;
         const departure = player.hexagon.hexId;
         const destination = details.hexId;
-        const locationName = this.sharedState.setup.mapPairings[destination].id;
+        const locationName = this.sharedState.setup.mapPairings[destination].name;
         const remainingMoves = player.moveActions;
         const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
 
@@ -146,7 +146,11 @@ export class GameSession {
             : this.processInfluenceRoll(player, registry);
 
         if (sailSuccess) {
-            player.hexagon = { hexId: destination, position: details.position };
+            player.hexagon = {
+                hexId: destination,
+                position: details.position,
+                location: this.getLocationName(destination),
+            };
             player.allowedMoves = (
                 this.privateState.moveRules
                     .find(rule => rule.from === destination)?.allowed
@@ -231,7 +235,7 @@ export class GameSession {
             return false;
         }
 
-        const locationId = this.sharedState.setup.mapPairings[player.hexagon.hexId].id;
+        const locationId = this.sharedState.setup.mapPairings[player.hexagon.hexId].name;
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationId)) {
@@ -260,15 +264,15 @@ export class GameSession {
     private processGoodsTrade(data: DataDigest): boolean {
         const player = data.player;
         const details = data.payload as GoodsTradePayload;
-        // const tradeAction = request.message.action as LocationAction;
         const { slot, location } = details;
 
         if (
-            !player?.locationActions?.includes('trade_goods')
-            || false === player.feasibleTrades.includes(slot)
-            || false === player.isAnchored
+            !player.locationActions?.includes('trade_goods')
+            || player.hexagon.location !== location
+            || !player.feasibleTrades.includes(slot)
+            || !player.isAnchored
         ) {
-            console.error(`Trade action not feasible for ${player?.id}`);
+            console.error(`Conditions for trade not satisfied for ${player.id}`);
 
             return false;
         }
@@ -625,6 +629,14 @@ export class GameSession {
         ));
 
         return location.actions;
+    }
+
+    private getLocationName(hexId: HexId): LocationName {
+        const location = this.tools.getCopy((
+            this.sharedState.setup.mapPairings[hexId]
+        ));
+
+        return location.name;
     }
 
     private hasCargoRoom(player: Player, action: LocationAction): boolean {
