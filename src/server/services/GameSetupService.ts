@@ -150,7 +150,7 @@ export class GameSetupService extends Service {
     // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
 
-        return DEFAULT_MOVE_RULES.map(moveRule => {
+        return this.tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
 
             barrierIds.forEach(barrierId => {
 
@@ -218,8 +218,9 @@ export class GameSetupService extends Service {
     }
     // MARK: Temple Levels
     private filterCostTiers(playerCount: number): Array<MetalCostTier> {
+        const tiers = this.tools.getCopy(COST_TIERS);
 
-        return COST_TIERS.filter(
+        return tiers.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)
         );
     }
