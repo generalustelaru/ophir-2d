@@ -50,7 +50,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'favor',
-                    amount: update.metalPrices.goldCost.favor,
+                    amount: update.tier.goldCost.favor,
                     metal: 'gold',
                 }
             }
@@ -63,7 +63,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'favor',
-                    amount: update.metalPrices.silverCost.favor,
+                    amount: update.tier.silverCost.favor,
                     metal: 'silver',
                 }
             }
@@ -76,7 +76,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'coins',
-                    amount: update.metalPrices.goldCost.coins,
+                    amount: update.tier.goldCost.coins,
                     metal: 'gold',
                 }
             }
@@ -89,7 +89,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'coins',
-                    amount: update.metalPrices.silverCost.coins,
+                    amount: update.tier.silverCost.coins,
                     metal: 'silver',
                 }
             }
@@ -121,7 +121,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
             playerAmounts,
             treasury: {
                 currency: 'favor',
-                amount: update.metalPrices.goldCost.favor,
+                amount: update.tier.goldCost.favor,
                 metal: 'gold',
             }
         });
@@ -129,7 +129,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
             playerAmounts,
             treasury: {
                 currency: 'favor',
-                amount: update.metalPrices.silverCost.favor,
+                amount: update.tier.silverCost.favor,
                 metal: 'silver',
             }
         });
@@ -137,7 +137,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
             playerAmounts,
             treasury: {
                 currency: 'coins',
-                amount: update.metalPrices.goldCost.coins,
+                amount: update.tier.goldCost.coins,
                 metal: 'gold',
             }
         });
@@ -145,7 +145,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
             playerAmounts,
             treasury: {
                 currency: 'coins',
-                amount: update.metalPrices.silverCost.coins,
+                amount: update.tier.silverCost.coins,
                 metal: 'silver',
             }
         });

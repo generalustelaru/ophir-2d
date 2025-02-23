@@ -1,11 +1,11 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData, MetalPrices, NewState, Fluctuation } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData, MetalCostTier, NewState, Fluctuation } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, METAL_PRICES } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
 
 export class GameSetupService extends Service {
 
@@ -32,7 +32,7 @@ export class GameSetupService extends Service {
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
-            metalPrices: this.filterMetalPrices(players.length),
+            costTiers: this.filterCostTiers(players.length),
             gameStats: players.map(p => ({ id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         }
 
@@ -53,8 +53,8 @@ export class GameSetupService extends Service {
             marketOffer: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
             templeStatus: {
-                maxLevel: privateState.metalPrices.length,
-                prices: privateState.metalPrices.shift() as MetalPrices,
+                maxLevel: privateState.costTiers.length,
+                tier: privateState.costTiers.shift() as MetalCostTier,
                 levelCompletion: 0,
                 currentLevel: 0,
                 donations: [],
@@ -217,9 +217,9 @@ export class GameSetupService extends Service {
         return { tradeDeck, marketOffer };
     }
     // MARK: Temple Levels
-    private filterMetalPrices(playerCount: number): Array<MetalPrices> {
+    private filterCostTiers(playerCount: number): Array<MetalCostTier> {
 
-        return METAL_PRICES.filter(
+        return COST_TIERS.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)
         );
     }

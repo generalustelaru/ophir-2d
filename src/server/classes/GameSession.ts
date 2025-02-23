@@ -373,8 +373,8 @@ export class GameSession {
         const templeStatus = this.sharedState.templeStatus;
         const metalCost = (() => {
             switch (details.metal) {
-                case 'gold': return templeStatus.prices.goldCost;
-                case 'silver': return templeStatus.prices.silverCost;
+                case 'gold': return templeStatus.tier.goldCost;
+                case 'silver': return templeStatus.tier.silverCost;
                 default: return null;
             }
         })();
@@ -458,11 +458,11 @@ export class GameSession {
 
         if (newStatus.levelCompletion === 3) {
             newStatus.currentLevel += 1;
-            const newPrices = this.privateState.metalPrices.shift();
+            const newPrices = this.privateState.costTiers.shift();
             this.addServerMessage('Temple level has been upgraded');
 
             if (newPrices && newStatus.currentLevel < newStatus.maxLevel) {
-                newStatus.prices = newPrices;
+                newStatus.tier = newPrices;
                 newStatus.levelCompletion = 0;
                 this.addServerMessage('Metal prices have increased');
             } else {

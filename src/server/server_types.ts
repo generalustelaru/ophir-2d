@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, GoodName, GoodLocationName, MetalPrices} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, GoodName, GoodLocationName, MetalCostTier} from '../shared_types';
 import { WebSocket } from 'ws';
 export type WsClient = {
     clientID: string,
@@ -33,7 +33,7 @@ export type PlayerCountables = {
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
     tradeDeck: Array<Trade>,
-    metalPrices: Array<MetalPrices>,
+    costTiers: Array<MetalCostTier>,
     gameStats: Array<PlayerCountables>,
 }
 
@@ -60,5 +60,5 @@ export type ServerConstants = {
     DEFAULT_PLAYER_STATE: Player,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
-    METAL_PRICES: Array<MetalPrices>,
+    COST_TIERS: Array<MetalCostTier>,
 }

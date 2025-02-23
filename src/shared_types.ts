@@ -21,8 +21,8 @@ export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = "A" | "B";
 export type ChatEntry = {id: PlayerColor|null, name: string|null, message: string};
-export type MetalPrices = {
-    id: number,
+export type MetalCostTier = {
+    templeLevel: number,
     goldCost: MetalCost,
     silverCost: MetalCost,
     skipOnPlayerCounts: Array<number>,
@@ -73,7 +73,7 @@ export type MarketFluctuations = {
 }
 
 export type TempleStatus = {
-    prices: MetalPrices,
+    tier: MetalCostTier,
     currentLevel: number,
     maxLevel: number,
     levelCompletion: number,

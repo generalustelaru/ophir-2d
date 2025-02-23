@@ -141,13 +141,13 @@ const serverConstants: ServerConstants = {
         setup: null,
     },
 
-    METAL_PRICES: [
-        { id: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: [2, 3] },
-        { id: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: []},
-        { id: 2, goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: []},
-        { id: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: []},
-        { id: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCounts: []},
-        { id: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCounts: [2] },
+    COST_TIERS: [
+        { templeLevel: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: [2, 3] },
+        { templeLevel: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: []},
+        { templeLevel: 2, goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: []},
+        { templeLevel: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: []},
+        { templeLevel: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCounts: []},
+        { templeLevel: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCounts: [2] },
     ],
 }
 
