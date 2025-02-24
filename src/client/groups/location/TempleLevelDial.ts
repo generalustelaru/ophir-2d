@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { Coordinates, MetalName } from "../../../shared_types";
+import { Coordinates, Metal } from "../../../shared_types";
 import { StaticGroupInterface } from "../../client_types";
 import clientConstants from "../../client_constants";
 
@@ -10,7 +10,7 @@ export class TempleLevelDial implements StaticGroupInterface {
 
     constructor(
         position: Coordinates,
-        donations: Array<MetalName>,
+        donations: Array<Metal>,
     ) {
         this.group = new Konva.Group({
             x: position.x,

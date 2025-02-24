@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { Coordinates, MetalName } from "../../../shared_types";
+import { Coordinates, Metal } from "../../../shared_types";
 import { DynamicGroupInterface } from "../../client_types";
 import { ActionButton } from "../ActionButton";
 import clientConstants from "../../client_constants";
@@ -11,7 +11,7 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        metalType: MetalName,
+        metalType: Metal,
         isEnabled: boolean,
     ) {
         super(
