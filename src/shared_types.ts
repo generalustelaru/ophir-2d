@@ -5,18 +5,18 @@ export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type Coordinates = { x: number, y: number };
 export type PlayerColor = "Purple" | "Yellow" | "Red" | "Green";
 export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
-export type GoodName = "gems" | "wood" | "stone" | "cloth";
-export type MetalName = "silver" | "gold";
-export type CargoMetalName = MetalName | "silver_extra" | "gold_extra";
+export type TradeGood = "gems" | "wood" | "stone" | "cloth";
+export type Metal = "silver" | "gold";
+export type CargoMetal = Metal | "silver_extra" | "gold_extra";
 export type Currency = "coins" | "favor";
 export type GoodLocationName = "quary" | "forest" | "mines" | "farms";
 export type LocationName = "temple" | "market" | "treasury" | GoodLocationName;
 export type LocationAction = "upgrade_hold" | "trade_goods" | "buy_metals" | "load_good" | "donate_metals";
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
-export type ItemName = GoodName | CargoMetalName | "empty";
+export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
 export type CargoInventory = Array<ItemName>;
-export type Trade = { request: Array<GoodName>, reward: Reward };
+export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = "A" | "B";
@@ -78,12 +78,12 @@ export type TempleStatus = {
     currentLevel: number,
     maxLevel: number,
     levelCompletion: number,
-    donations: Array<MetalName>,
+    donations: Array<Metal>,
 }
 
 export type ItemSupplies = {
-    metals: Record<MetalName, number>,
-    goods: Record<GoodName, number>,
+    metals: Record<Metal, number>,
+    goods: Record<TradeGood, number>,
 }
 
 export type ClientIdResponse = {
@@ -148,8 +148,8 @@ export type RepositioningPayload = { repositioning: Coordinates }
 export type GameSetupPayload = { setupCoordinates: Array<Coordinates> }
 export type DropItemPayload = { item: ItemName }
 export type GoodsTradePayload = { slot: MarketSlotKey, location: LocationName }
-export type MetalPurchasePayload = { metal: MetalName, currency: Currency }
-export type MetalDonationPayload = { metal: MetalName }
+export type MetalPurchasePayload = { metal: Metal, currency: Currency }
+export type MetalDonationPayload = { metal: Metal }
 export type RebindClientPayload = { referenceId: string, myId: string }
 
 export interface MessageInterface<A, P> {

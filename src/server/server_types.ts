@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, GoodName, GoodLocationName, MetalCostTier} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, TradeGood, GoodLocationName, MetalCostTier} from '../shared_types';
 import { WebSocket } from 'ws';
 export type WsClient = {
     clientID: string,
@@ -52,7 +52,7 @@ export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 export type ServerConstants = {
     SERVER_NAME: string,
     LOCATION_ACTIONS: Array<LocationData>,
-    LOCATION_GOODS: Record<GoodLocationName, GoodName>,
+    LOCATION_GOODS: Record<GoodLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
     DEFAULT_NEW_STATE: NewState,
     BARRIER_CHECKS: BarrierChecks,

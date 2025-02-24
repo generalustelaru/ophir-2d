@@ -1,8 +1,8 @@
 import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
-    HexId, PlayerColor, Player, SharedState, ClientRequest, GoodName, LocationAction, MovementPayload, DropItemPayload,
+    HexId, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction, MovementPayload, DropItemPayload,
     DiceSix, RepositioningPayload, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
-    GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetalName, MetalName, ChatPayload,
+    GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal, ChatPayload,
     MessagePayload,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
@@ -225,7 +225,7 @@ export class GameSession {
 
         return true;
     }
-    // MARK: LOAD GOOD
+    // MARK: LOAD TRADE GOOD
     private processLoadGood(data: DataDigest): boolean {
         const player = data.player;
 
@@ -674,7 +674,7 @@ export class GameSession {
                     continue;
                 }
 
-                const carriedGood = cargo[i] as GoodName;
+                const carriedGood = cargo[i] as TradeGood;
                 const match = unfilledGoods.indexOf(carriedGood);
 
                 if (match !== -1) {
@@ -705,7 +705,7 @@ export class GameSession {
 
         if (metalNames.includes(item)) {
 
-            if (this.sharedState.itemSupplies.metals[item as MetalName] < 1) {
+            if (this.sharedState.itemSupplies.metals[item as Metal] < 1) {
                 console.error(`No ${item} available for loading`);
 
                 return null;
@@ -718,13 +718,13 @@ export class GameSession {
             }
 
             orderedCargo[emptyIndex] = item;
-            orderedCargo[emptyIndex + 1] = `${item}_extra` as CargoMetalName;
+            orderedCargo[emptyIndex + 1] = `${item}_extra` as CargoMetal;
 
-            this.sharedState.itemSupplies.metals[item as MetalName] -= 1;
+            this.sharedState.itemSupplies.metals[item as Metal] -= 1;
 
         } else {
 
-            if (this.sharedState.itemSupplies.goods[item as GoodName] < 1) {
+            if (this.sharedState.itemSupplies.goods[item as TradeGood] < 1) {
                 console.error(`No ${item} available for loading`);
 
                 return null;
@@ -732,7 +732,7 @@ export class GameSession {
 
             orderedCargo[emptyIndex] = item;
 
-            this.sharedState.itemSupplies.goods[item as GoodName] -= 1;
+            this.sharedState.itemSupplies.goods[item as TradeGood] -= 1;
         }
 
         return orderedCargo;
@@ -754,9 +754,9 @@ export class GameSession {
 
         if (controlGroup.includes(item)) {
             newCargo.splice(itemIndex + 1, 1, 'empty');
-            this.sharedState.itemSupplies.metals[item as MetalName] += 1;
+            this.sharedState.itemSupplies.metals[item as Metal] += 1;
         } else {
-            this.sharedState.itemSupplies.goods[item as GoodName] += 1;
+            this.sharedState.itemSupplies.goods[item as TradeGood] += 1;
         }
 
         return newCargo;

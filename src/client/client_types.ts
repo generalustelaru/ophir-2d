@@ -1,5 +1,5 @@
 import { HexId, PlayerColor, SharedState, Coordinates, LocationName, ItemName, NewState, Trade, MarketOffer, Player,
-    MetalName, MetalCostTier, Currency, TempleStatus, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
+    Metal, MetalCostTier, Currency, TempleStatus, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
 } from '../shared_types';
 import Konva from 'konva';
 
@@ -88,7 +88,7 @@ export type TreasuryUpdate = {
 
 export type TreasuryCardUpdate = {
     playerAmounts: { coins: number, favor: number } | null,
-    treasury: { currency: Currency, amount: number, metal: MetalName },
+    treasury: { currency: Currency, amount: number, metal: Metal },
 }
 
 export type TempleUpdate = {
