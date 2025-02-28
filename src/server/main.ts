@@ -121,7 +121,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         const { playerColor, playerName, message } = clientRequest;
-        const {action, payload: details} = message;
+        const { action, payload } = message;
         const name = playerName || playerColor || '';
         const colorized = {
             Purple: `\x1b[95m${name}\x1b[0m`,
@@ -136,12 +136,12 @@ socketServer.on('connection', function connection(socket) {
                 '%s -> %s%s',
                 clientName,
                 action ?? '?',
-                details ? `: ${JSON.stringify(details)}` : ': { ¯\\_(ツ)_/¯ }',
+                payload ? `: ${JSON.stringify(payload)}` : ': { ¯\\_(ツ)_/¯ }',
             );
         }
 
         if (action === 'rebind_id') {
-            const { referenceId, myId } = details as RebindClientPayload;
+            const { referenceId, myId } = payload as RebindClientPayload;
             const socketClient = socketClients.find(c => c.clientID === referenceId);
 
             if (socketClient) {
@@ -179,7 +179,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'chat' && !singleSession) {
-            const chatMessage = details as ChatPayload;
+            const chatMessage = payload as ChatPayload;
 
             console.log('offSession processing')
             if (!chatMessage) {
@@ -198,7 +198,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'start') {
-            const setupDetails = details as GameSetupPayload;
+            const setupDetails = payload as GameSetupPayload;
             const sessionCreated = processGameStart(setupDetails);
 
             if (sessionCreated && singleSession) {
