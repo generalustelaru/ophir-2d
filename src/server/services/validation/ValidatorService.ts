@@ -1,6 +1,6 @@
 import {
     ClientRequest,
-} from "../../shared_types";
+} from "../../../shared_types";
 
 export class ValidatorService {
     private error: string
