@@ -12,7 +12,7 @@ export class ToolService {
         return JSON.parse(JSON.stringify(obj));
     }
 
-    public parse<O extends object>(json: string): O | null {
+    public parse(json: string): object | null {
         const value = JSON.parse(json);
 
         if (
@@ -22,7 +22,7 @@ export class ToolService {
                 || (Array.isArray(value) && value.length)
             )
         )
-            return value;
+            return value as object;
 
         console.error('Invalid or empty data.', json);
 
