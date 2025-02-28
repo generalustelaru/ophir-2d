@@ -1,11 +1,6 @@
 
 export class ToolService {
 
-    public isRecord(value: any): boolean {
-
-        return value.constructor === Object && Object.keys(value).length > 0;
-    }
-
     /**
      * Deep copy a data object
      * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.
@@ -20,10 +15,16 @@ export class ToolService {
     public parse<O extends object>(json: string): O | null {
         const value = JSON.parse(json);
 
-        if (this.isRecord(value))
+        if (
+            typeof value !== null
+            && (
+                (typeof value === 'object' && Object.keys(value).length)
+                || (Array.isArray(value) && value.length)
+            )
+        )
             return value;
 
-        console.error('Invalid request format.', json);
+        console.error('Invalid or empty data.', json);
 
         return null;
     }
