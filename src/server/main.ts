@@ -8,7 +8,7 @@ import { StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
-import { ValidatorService } from "./services/ValidatorService";
+import { ValidatorService } from "./services/validation/ValidatorService";
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 
