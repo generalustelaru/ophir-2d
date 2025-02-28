@@ -1,29 +1,25 @@
 import {
     ClientRequest,
-    PlayerColor,
-    ClientMessage,
-    MessageAction
 } from "../../shared_types";
-import { ToolService } from "./ToolService";
 
 export class ValidatorService {
-    private tools: ToolService;
     private error: string
 
     constructor(){
-        this.tools = new ToolService();
         this.error = '';
     }
+
     public validateClientRequest(request: object): ClientRequest | null {
 
         if (
             this.hasString(request, 'clientId', true)
             && this.hasString(request, 'gameId', true)
             && this.hasString(request, 'playerName', true)
-            && this.hasPlayerColor(request)
-            && this.hasClientMessage(request)
-        )
+            && this.hasString(request, 'playerColor', true)
+            && this.hasMessageInterface(request)
+        ) {
             return request as ClientRequest;
+        }
 
         console.error(this.error);
         this.setError();
@@ -31,77 +27,71 @@ export class ValidatorService {
         return null;
     }
 
-    private hasPlayerColor(parent: object) {
+    private setError(text?: string) {
+        this.error = `VALIDATION ERROR; ${text}` || '';
+    }
 
-        if (!this.hasString(parent, 'playerColor', true))
-            return false;
+    private hasMessageInterface(parent: object) {
 
-        const prop = parent[('playerColor' as keyof object)];
-        const playerColors: Array<PlayerColor|null> = ['Purple', 'Yellow', 'Red', 'Green', null];
+        if (this.hasRecord(parent, 'message')) {
+            const message = parent['message' as keyof object] as object;
 
-        if (playerColors.includes(prop))
+            if (
+                this.hasString(message, 'action')
+                && this.hasRecord(message, 'payload', true)
+            )
+
             return true;
-
-        this.setError(`Invalid playerColor: ${prop}`);
+        }
 
         return false;
     }
 
-    private hasClientMessage(parent: object) {
-        const value = parent['message' as keyof object];
-
-        if (!this.tools.isRecord(value)) {
-            this.setError(`"message" property is missing: ${{...parent}}`)
-
-            return false;
-        }
-
-        const object = value as object;
-
-        if (!('action' in object) || !('payload' in object)) {
-            this.setError(`"ClientMessage" is missing keys: ${{...object}}`);
-            return false;
-        }
-
-        const clientMessage = object as ClientMessage;
-        const actions: Array<MessageAction> = [
-            "inquire", "enroll", "end_turn", "reset", "spend_favor", 'load_good',
-            'upgrade_hold', 'get_status', 'chat', 'start', 'move', 'drop_item',
-            'reposition', 'trade_goods', 'buy_metals', 'donate_metals', 'rebind_id',
-        ];
-
-        if (!actions.includes(clientMessage.action)) {
-            this.setError(`action in ClientMessage is not MessageAction: ${clientMessage.action}`);
-
-            return false;
-        }
-
-        return true;
-    }
-
     private hasString(parent: object, key: string, nullable: boolean = false): boolean {
 
-        if (!Boolean(key in parent)) {
-            this.setError(`"${key}" property is missing: ${{...parent}}`);
+        if (this.hasKey(parent, key)) {
+            const prop = parent[key as keyof object] as unknown;
 
-            return false;
+            if (nullable && prop === null)
+                return true;
+
+            if (typeof prop === 'string' && prop.length)
+                return true;
+
+            this.setError(`${key} property is not a valid string: ${prop}`);
         }
 
-        const _key = key as keyof object;
-
-        if (nullable && parent[_key] === null)
-            return true;
-
-        if (typeof parent[_key] !== 'string' || !((parent[_key] as string).length)) {
-            this.setError(`${key} property is not a valid string: ${parent[_key]}`);
-
-            return false;
-        }
-
-        return true;
+        return false;
     }
 
-    private setError(text?: string) {
-        this.error = `VALIDATION ERROR; ${text}` || '';
+    private hasRecord(parent: object, key: string, nullable: boolean = false): boolean {
+
+        if (this.hasKey(parent, key)) {
+            const prop = parent[key as keyof object] as unknown;
+
+            if (nullable && prop === null)
+                return true;
+
+            if (
+                typeof prop === 'object'
+                && prop !== null
+                && Object.keys(prop).length
+            )
+                return true;
+
+            this.setError(`${key} property is not a valid object: ${prop}`);
+        }
+
+        return false;
+    }
+
+    private hasKey(parent: object, key: string) {
+
+        if (parent !== null && key in parent)
+            return true;
+
+        this.setError(`"${key}" property is missing: ${parent}`);
+
+        return false;
     }
 }
