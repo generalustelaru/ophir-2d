@@ -1,10 +1,19 @@
-export type ValidationResponse = {
+export type ValidationResult = {
     passed: boolean,
     error: string
 }
 
+function pass(): ValidationResult {
 
-function hasKey(parent: object, key: string): ValidationResponse {
+    return { passed: true, error: '' }
+}
+
+function fail(error: string): ValidationResult {
+
+    return { passed: false, error }
+}
+
+function hasKey(parent: object, key: string): ValidationResult {
 
     if (parent !== null && key in parent)
         return pass();
@@ -12,59 +21,43 @@ function hasKey(parent: object, key: string): ValidationResponse {
     return fail(`"${key}" property is missing.`);
 }
 
-function pass(): ValidationResponse {
-
-    return {
-        passed: true,
-        error: '',
-    }
-}
-
-function fail(error: string): ValidationResponse {
-
-    return {
-        passed: false,
-        error
-    }
-}
-
 export const lib = {
 
-    hasRecord: (parent: object, key: string, nullable: boolean = false): ValidationResponse => {
+    hasRecord: (parent: object, key: string, nullable: boolean = false): ValidationResult => {
         const keyTest = hasKey(parent, key);
 
         if (keyTest.passed) {
-            const prop = parent[key as keyof object] as unknown;
+            const value = parent[key as keyof object] as unknown;
 
-            if (nullable && prop === null)
+            if (nullable && value === null)
                 return pass();
 
             if (
-                typeof prop === 'object'
-                && prop !== null
-                && Object.keys(prop).length
+                typeof value === 'object'
+                && value !== null
+                && Object.keys(value).length
             )
                 return pass();
 
-            return fail(`${key} property is not a valid object: ${prop}`)
+            return fail(`${key} property is not a valid object: ${value}`)
         }
 
         return fail(keyTest.error)
     },
 
-    hasString: (parent: object, key: string, nullable: boolean = false): ValidationResponse => {
+    hasString: (parent: object, key: string, nullable: boolean = false): ValidationResult => {
         const keyTest = hasKey(parent, key);
 
         if (keyTest.passed) {
-            const prop = parent[key as keyof object] as unknown;
+            const value = parent[key as keyof object] as unknown;
 
-            if (nullable && prop === null)
+            if (nullable && value === null)
                 return pass();
 
-            if (typeof prop === 'string' && prop.length)
+            if (typeof value === 'string' && value.length)
                 return pass();
 
-            return fail(`${key} property is not a valid string: ${prop}`);
+            return fail(`${key} property is not a valid string: ${value}`);
         }
 
         return fail(keyTest.error);
