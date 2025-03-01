@@ -1,13 +1,16 @@
 update:
 	git pull
-	npm install
 	npm update
 
 build:
-	make ui
+	make public
 	npm run build_client
 	npm run build_server
 	make run
+
+install:
+	npm install
+	make build
 
 server:
 	npm run build_server
@@ -16,12 +19,14 @@ server:
 client:
 	npm run build_client
 
-ui:
+public:
 ifeq ($(OS),Windows_NT)
-	powershell -command "rm -r public/*"
+	powershell -command "if (-not (Test-Path 'public')) { New-Item -ItemType Directory -Name 'public' }"
+	powershell -command "if (Get-ChildItem 'public' -ErrorAction SilentlyContinue) { Get-ChildItem 'public' -Recurse | Remove-Item -Force }"
 	powershell -command "cp -r src/client/layout/* public/"
 else
-	rm -r public/*
+	if [ ! -d 'public' ]; then mkdir 'public'; fi
+	if [ -f 'public/*' ]; then rm -r public/*; fi
 	cp -r src/client/layout/* public/
 endif
 
