@@ -1,40 +1,41 @@
 import {
     ClientRequest,
 } from "../../../shared_types";
-import { lib, ValidationResult } from "./library"
+import { lib, ObjectTests } from "./library"
 
 export class ValidatorService {
 
-    public validateClientRequest(request: object): ClientRequest | null {
+    public validateClientRequest(request: object | null): ClientRequest | null {
 
-        const clientMessageResults = ((): Array<ValidationResult> => {
-            const keyTestResult = lib.hasRecord(request, 'message');
-
-            if (keyTestResult.passed) {
-                const message = request['message' as keyof object] as object;
-
-                const propTestResults = [
-                    lib.hasString(message, 'action'),
-                    lib.hasRecord(message, 'payload', true),
-                ]
-
-                return propTestResults;
-            }
-
-            return [keyTestResult];
-        })();
-
-        const results: Array<ValidationResult> = [
-            lib.hasString(request, 'clientId', true),
-            lib.hasString(request, 'gameId', true),
-            lib.hasString(request, 'playerName', true),
-            lib.hasString(request, 'playerColor', true),
-            ...clientMessageResults,
+        const requestTests: ObjectTests = [
+            { key: 'clientId', type: 'string', nullable: true },
+            { key: 'gameId', type: 'string', nullable: true },
+            { key: 'playerName', type: 'string', nullable: true },
+            { key: 'playerColor', type: 'string', nullable: true },
+            { key: 'message', type: 'object', nullable: false },
         ];
 
-        const errors = results
-        .filter(v => (!v.passed && v.error))
-        .map(validation => validation.error);
+        const messageTests: ObjectTests = [
+            { key: 'action', type: 'string', nullable: false },
+            { key: 'payload', type: 'object', nullable: true },
+        ];
+
+        const requestValidationResults = lib.test(
+            { request },
+            'request',
+            requestTests
+        );
+
+        const messageValidationResults = lib.test(
+            request,
+            'message',
+            messageTests
+        );
+
+        const errors = lib.getErrors([
+            ...requestValidationResults,
+            ...messageValidationResults
+        ]);
 
         if (errors.length) {
 
@@ -48,4 +49,3 @@ export class ValidatorService {
         return request as ClientRequest;
     }
 }
-
