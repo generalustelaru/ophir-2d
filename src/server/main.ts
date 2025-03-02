@@ -104,15 +104,9 @@ socketServer.on('connection', function connection(socket) {
 
     socket.on('message', function incoming(req: string) {
 
-        const request = tools.parse(req);
-
-        if (!request) {
-            send(socket, {error: 'Invalid request format.'});
-
-            return;
-        }
-
-        const clientRequest = validator.validateClientRequest(request);
+        const clientRequest = validator.validateClientRequest(
+            tools.parse(req),
+        );
 
         if (!clientRequest) {
             send(socket, {error: 'Invalid request data.'});
