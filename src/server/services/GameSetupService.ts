@@ -98,16 +98,15 @@ export class GameSetupService extends Service {
 
         const b1 = newBarrierId();
 
-        const b2 = ((): BarrierId =>{
-            const checks = this.tools.getCopy(BARRIER_CHECKS[b1].incompatible)
-            let barrier = newBarrierId();
+        const b2 = ((): BarrierId => {
+            const incompatibles = BARRIER_CHECKS[b1].incompatible;
+            let b;
 
-            while (checks.find(incompatible => incompatible === barrier)) {
-                checks.splice(checks.indexOf(barrier), 1);
-                barrier = newBarrierId();
-            }
+            do {
+                b = newBarrierId();
+            } while (incompatibles.includes(b));
 
-            return barrier;
+            return b;
         })();
 
         return [b1, b2];
