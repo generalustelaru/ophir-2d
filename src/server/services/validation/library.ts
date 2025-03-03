@@ -55,7 +55,7 @@ function hasString(parent: object, key: string, nullable: boolean = false): Vali
     return fail(keyTest.error);
 }
 
-function isObject(value: unknown, nullable: boolean = false): ValidationResult {
+function isObject(name: string, value: unknown, nullable: boolean = false): ValidationResult {
 
     if (nullable && value === null)
         return pass();
@@ -67,7 +67,7 @@ function isObject(value: unknown, nullable: boolean = false): ValidationResult {
     )
         return pass();
 
-    return fail(`Value is not a valid object: ${value}`);
+    return fail(`${name} is not a valid object: ${value}`);
 }
 
 function hasObject(parent: object | null, key: string, nullable: boolean = false): ValidationResult {
@@ -75,37 +75,37 @@ function hasObject(parent: object | null, key: string, nullable: boolean = false
 
     if (keyTest.passed) {
         const value = (parent as object)[key as keyof object] as unknown;
-        const objectTest = isObject(value, nullable);
+        const objectTest = isObject(key, value, nullable);
 
         if (objectTest.passed)
             return pass();
 
-        return fail(`${key}: ${objectTest.error}`);
+        return fail(objectTest.error);
     }
 
     return fail(keyTest.error);
 }
 
-function evaluateObject(value: unknown, tests: ObjectTests): Array<string> {
-    const objectResult = hasObject({value}, 'value');
+function evaluateObject(objectType: string, value: unknown, tests: ObjectTests): Array<string> {
+    const objectTest = isObject(objectType, value);
 
-    if (objectResult.passed) {
+    if (objectTest.passed) {
         const object = value as object;
 
-        const propResults =  tests.map(test => {
+        const propTests =  tests.map(test => {
             const { key, type, nullable } = test;
 
             switch (type) {
                 case 'string': return hasString(object, key, nullable);
                 case 'object': return hasObject(object, key, nullable); // basic test, should become recursive evaluation
-                default: return fail(`Unknown type: ${type}`);
+                default: return fail(`${key} is of unknown type: ${type}`);
             }
         });
 
-        return getErrors(propResults);
+        return getErrors(propTests);
     }
 
-    return getErrors([objectResult]);
+    return [objectTest.error];
 }
 
 export const lib = {
