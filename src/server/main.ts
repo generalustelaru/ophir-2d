@@ -3,7 +3,10 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import { PlayerColor, NewState, GameSetupPayload, GameStatus, ChatPayload, ChatEntry, RebindClientPayload, ClientIdResponse, ServerMessage, ResetResponse } from '../shared_types';
+import {
+    PlayerColor, NewState, GameSetupPayload, GameStatus, ChatEntry, RebindClientPayload,
+    ClientIdResponse, ServerMessage, ResetResponse,
+} from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
 import { GameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';

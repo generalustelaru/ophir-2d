@@ -2,8 +2,7 @@ import { DataDigest, PlayerCountables, PrivateState, ProcessedMoveRule, StateBun
 import {
     HexId, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction, MovementPayload, DropItemPayload,
     DiceSix, RepositioningPayload, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
-    GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal, ChatPayload,
-    MessagePayload,
+    GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
