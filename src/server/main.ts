@@ -4,7 +4,7 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
 import {
-    PlayerColor, NewState, GameSetupPayload, GameStatus, ChatEntry, RebindClientPayload,
+    PlayerColor, NewState, GameSetupPayload, GameStatus, ChatEntry,
     ClientIdResponse, ServerMessage, ResetResponse,
 } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
@@ -138,16 +138,28 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'rebind_id') {
-            const { referenceId, myId } = payload as RebindClientPayload;
+            const rebindPayload = validator.validateRebindClientPayload(payload)
+
+            if (!rebindPayload) {
+                send(socket, { error: 'Invalid request format.' });
+
+                return;
+            }
+
+            const { referenceId, myId } = rebindPayload;
+            const abandonedClient = socketClients.find(c => c.clientID === myId);
             const socketClient = socketClients.find(c => c.clientID === referenceId);
 
-            if (socketClient) {
-                socketClient.clientID = myId;
+            if (!abandonedClient || !socketClient) {
+                send(socket, { error: 'Client not found.' });
 
-                return
+                return;
             };
 
-            send(socket, { error: 'Client not found' });
+            abandonedClient.socket.close;
+            socketClient.clientID = myId;
+
+            return;
         }
 
         if (action === 'inquire') {

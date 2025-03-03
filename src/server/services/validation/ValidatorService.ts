@@ -1,14 +1,16 @@
 import {
     ChatPayload,
     ClientRequest,
+    RebindClientPayload,
 } from "../../../shared_types";
 import { lib } from "./library"
 
 export class ValidatorService {
 
-    public validateClientRequest(request: object | null): ClientRequest | null {
+    public validateClientRequest(request: unknown): ClientRequest | null {
 
         const requestErrors = lib.evaluateObject(
+            'ClientRequest',
             request,
             [
                 { key: 'clientId', type: 'string', nullable: true },
@@ -26,6 +28,7 @@ export class ValidatorService {
         }
 
         const messageErrors = lib.evaluateObject(
+            'ClientMessage',
             (request as object)['message' as keyof object],
             [
                 { key: 'action', type: 'string', nullable: false },
@@ -43,18 +46,38 @@ export class ValidatorService {
     }
 
     public validateChatPayload(payload: object|null): ChatPayload | null {
-        const digestErrors = lib.evaluateObject(
+        const errors = lib.evaluateObject(
+            'ChatPayload',
             payload,
             [{ key: 'input', type: 'string', nullable: false }],
         );
 
-        if (digestErrors.length){
-            this.logErrors(digestErrors);
+        if (errors.length){
+            this.logErrors(errors);
 
             return null;
         }
 
         return payload as ChatPayload;
+    }
+
+    public validateRebindClientPayload(payload: object|null): RebindClientPayload | null {
+        const errors = lib.evaluateObject(
+            'RebindClientPayload',
+            payload,
+            [
+                { key: 'referenceId', type: 'string', nullable: false },
+                { key: 'myId', type: 'string', nullable: false },
+            ],
+        );
+
+        if (errors.length){
+            this.logErrors(errors);
+
+            return null;
+        }
+
+        return payload as RebindClientPayload;
     }
 
     private logErrors(errors: Array<string>) {
