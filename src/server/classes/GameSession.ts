@@ -1,4 +1,4 @@
-import { PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
+import { DataDigest, PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
     HexId, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction, MovementPayload, DropItemPayload,
     DiceSix, RepositioningPayload, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
@@ -7,13 +7,13 @@ import {
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
+import { ValidatorService } from "../services/validation/ValidatorService";
 
 const { TRADE_DECK_B } = serverConstants;
 const SERVER_NAME = 'GameBot';
 const MAX_FAVOR = 6;
 
 type RegistryItem = { id: PlayerColor, influence: DiceSix };
-type DataDigest = { player: Player, payload: MessagePayload }
 
 export class GameSession {
 
@@ -21,12 +21,14 @@ export class GameSession {
     private sharedState: SharedState;
     private tools: ToolService;
     private idleCheckInterval: NodeJS.Timeout | null = null;
+    private validator: ValidatorService;
 
     constructor(bundle: StateBundle) {
         (global as any).myInstance = this;
         this.privateState = bundle.privateState;
         this.sharedState = bundle.sharedState;
         this.tools = new ToolService();
+        this.validator = new ValidatorService();
         const activePlayer = this.sharedState.players.find(player => player.isActive);
 
         if (!activePlayer) {
@@ -115,9 +117,12 @@ export class GameSession {
     // MARK: CHAT
     private processChat(data: DataDigest): boolean {
         const { player, payload } = data;
-        const chatDetails = payload as ChatPayload;
+        const chatPayload = this.validator.validateChatPayload(payload);
 
-        const chatEntry = { id: player.id, name: player.name ?? player.id, message: chatDetails.input };
+        if (!chatPayload)
+            return false;
+
+        const chatEntry = { id: player.id, name: player.name ?? player.id, message: chatPayload.input };
         this.sharedState.sessionChat.push(chatEntry);
 
         return true;

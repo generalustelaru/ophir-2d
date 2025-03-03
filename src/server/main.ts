@@ -173,9 +173,8 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'chat' && !singleSession) {
-            const chatMessage = payload as ChatPayload;
+            const chatMessage = validator.validateChatPayload(payload);
 
-            console.log('offSession processing')
             if (!chatMessage) {
                 sendAll({ error: `Could not process chat message on ${playerColor}` })
                 return;
