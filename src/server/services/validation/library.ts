@@ -24,6 +24,7 @@ function fail(error: string): ValidationResult {
 
 function getErrors(results: Array<ValidationResult>): Array<string> {
 
+    
     return results
     .filter(result => !result.passed)
     .map(result => result.error);
@@ -37,19 +38,27 @@ function hasKey(parent: object | null, key: string): ValidationResult {
     return fail(`"${key}" property is missing.`);
 }
 
+function isString(name: string, value: unknown, nullable: boolean = false): ValidationResult {
+
+    if  (
+        (nullable && value === null)
+        || (typeof value === 'string' && value.length)
+    )
+        return pass();
+
+    return fail(`${name} property is not a valid string: ${value}`)
+}
 function hasString(parent: object, key: string, nullable: boolean = false): ValidationResult {
     const keyTest = hasKey(parent, key);
 
     if (keyTest.passed) {
         const value = parent[key as keyof object] as unknown;
+        const stringTest = isString(key, value, nullable);
 
-        if (nullable && value === null)
+        if (stringTest.passed)
             return pass();
 
-        if (typeof value === 'string' && value.length)
-            return pass();
-
-        return fail(`${key} property is not a valid string: ${value}`);
+        return fail(stringTest.error);
     }
 
     return fail(keyTest.error);
