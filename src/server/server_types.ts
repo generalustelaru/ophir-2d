@@ -1,4 +1,4 @@
-import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, TradeGood, GoodLocationName, MetalCostTier} from '../shared_types';
+import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, TradeGood, GoodLocationName, MetalCostTier, MessagePayload} from '../shared_types';
 import { WebSocket } from 'ws';
 export type WsClient = {
     clientID: string,
@@ -40,6 +40,11 @@ export type PrivateState = {
 export type StateBundle = {
     sharedState: SharedState,
     privateState: PrivateState,
+}
+
+export type DataDigest = {
+    player: Player,
+    payload: MessagePayload
 }
 
 export type BarrierCheck = {

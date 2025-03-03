@@ -1,51 +1,66 @@
 import {
+    ChatPayload,
     ClientRequest,
 } from "../../../shared_types";
-import { lib, ObjectTests } from "./library"
+import { lib } from "./library"
 
 export class ValidatorService {
 
     public validateClientRequest(request: object | null): ClientRequest | null {
 
-        const requestTests: ObjectTests = [
-            { key: 'clientId', type: 'string', nullable: true },
-            { key: 'gameId', type: 'string', nullable: true },
-            { key: 'playerName', type: 'string', nullable: true },
-            { key: 'playerColor', type: 'string', nullable: true },
-            { key: 'message', type: 'object', nullable: false },
-        ];
-
-        const messageTests: ObjectTests = [
-            { key: 'action', type: 'string', nullable: false },
-            { key: 'payload', type: 'object', nullable: true },
-        ];
-
-        const requestValidationResults = lib.test(
-            { request },
-            'request',
-            requestTests
-        );
-
-        const messageValidationResults = lib.test(
+        const requestErrors = lib.evaluateObject(
             request,
-            'message',
-            messageTests
+            [
+                { key: 'clientId', type: 'string', nullable: true },
+                { key: 'gameId', type: 'string', nullable: true },
+                { key: 'playerName', type: 'string', nullable: true },
+                { key: 'playerColor', type: 'string', nullable: true },
+                { key: 'message', type: 'object', nullable: false },
+            ]
         );
 
-        const errors = lib.getErrors([
-            ...requestValidationResults,
-            ...messageValidationResults
-        ]);
+        if (requestErrors.length) {
+            this.logErrors(requestErrors);
 
-        if (errors.length) {
+            return null;
+        }
 
-            errors.forEach(error => {
-                console.error(`Validation ERROR: ${error}`);
-            });
+        const messageErrors = lib.evaluateObject(
+            (request as object)['message' as keyof object],
+            [
+                { key: 'action', type: 'string', nullable: false },
+                { key: 'payload', type: 'object', nullable: true },
+            ]
+        );
+
+        if (messageErrors.length) {
+            this.logErrors(messageErrors);
 
             return null;
         }
 
         return request as ClientRequest;
+    }
+
+    public validateChatPayload(payload: object|null): ChatPayload | null {
+        const digestErrors = lib.evaluateObject(
+            payload,
+            [{ key: 'input', type: 'string', nullable: false }],
+        );
+
+        if (digestErrors.length){
+            this.logErrors(digestErrors);
+
+            return null;
+        }
+
+        return payload as ChatPayload;
+    }
+
+    private logErrors(errors: Array<string>) {
+        console.error('Validation Errors:')
+        errors.forEach(error => {
+            console.error(error);
+        });
     }
 }

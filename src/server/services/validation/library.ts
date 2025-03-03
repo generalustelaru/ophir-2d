@@ -1,5 +1,5 @@
 
-type Test = {
+export type Test = {
     key: string,
     type: 'string' | 'object',
     nullable: boolean,
@@ -20,6 +20,13 @@ function pass(): ValidationResult {
 function fail(error: string): ValidationResult {
 
     return { passed: false, error }
+}
+
+function getErrors(results: Array<ValidationResult>): Array<string> {
+
+    return results
+    .filter(result => !result.passed)
+    .map(result => result.error);
 }
 
 function hasKey(parent: object | null, key: string): ValidationResult {
@@ -48,35 +55,44 @@ function hasString(parent: object, key: string, nullable: boolean = false): Vali
     return fail(keyTest.error);
 }
 
+function isObject(value: unknown, nullable: boolean = false): ValidationResult {
+
+    if (nullable && value === null)
+        return pass();
+
+    if (
+        typeof value === 'object'
+        && value !== null
+        && Object.keys(value).length
+    )
+        return pass();
+
+    return fail(`Value is not a valid object: ${value}`);
+}
+
 function hasObject(parent: object | null, key: string, nullable: boolean = false): ValidationResult {
     const keyTest = hasKey(parent, key);
 
     if (keyTest.passed) {
         const value = (parent as object)[key as keyof object] as unknown;
+        const objectTest = isObject(value, nullable);
 
-        if (nullable && value === null)
+        if (objectTest.passed)
             return pass();
 
-        if (
-            typeof value === 'object'
-            && value !== null
-            && Object.keys(value).length
-        )
-            return pass();
-
-        return fail(`${key} property is not a valid object: ${value}`);
+        return fail(`${key}: ${objectTest.error}`);
     }
 
     return fail(keyTest.error);
 }
 
-function evaluateObject(parent: object|null, key: string, tests: ObjectTests, nullable: boolean = false): Array<ValidationResult> {
-    const objectResult = hasObject(parent, key, nullable);
+function evaluateObject(value: unknown, tests: ObjectTests): Array<string> {
+    const objectResult = hasObject({value}, 'value');
 
     if (objectResult.passed) {
-        const object = (parent as object)[key as keyof object] as object;
+        const object = value as object;
 
-        return tests.map(test => {
+        const propResults =  tests.map(test => {
             const { key, type, nullable } = test;
 
             switch (type) {
@@ -85,19 +101,13 @@ function evaluateObject(parent: object|null, key: string, tests: ObjectTests, nu
                 default: return fail(`Unknown type: ${type}`);
             }
         });
+
+        return getErrors(propResults);
     }
 
-    return [objectResult];
+    return getErrors([objectResult]);
 }
 
 export const lib = {
-
-    test: evaluateObject,
-
-    getErrors: (results: Array<ValidationResult>): Array<string> => {
-
-        return results
-        .filter(result => !result.passed)
-        .map(result => result.error);
-    }
+    evaluateObject,
 }
