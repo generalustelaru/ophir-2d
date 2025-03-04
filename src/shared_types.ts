@@ -152,7 +152,7 @@ export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type RebindClientPayload = { referenceId: string, myId: string }
 
-export interface MessageInterface<A, P> {
+type MessageFormat<A, P> = {
     action: A,
     payload: P,
 }
@@ -163,16 +163,16 @@ export type MessageAction =
 export type LaconicAction =
     | "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor" | 'load_good'
     | 'upgrade_hold' | 'get_status';
-export type LaconicMessage = MessageInterface<LaconicAction, null>;
-export type ChatMessage = MessageInterface<'chat', ChatPayload>;
-export type StartMessage = MessageInterface<'start', GameSetupPayload>;
-export type MoveMessage = MessageInterface<'move', MovementPayload>;
-export type DropItemMessage = MessageInterface<'drop_item', DropItemPayload>;
-export type RepositionMessage = MessageInterface<'reposition', RepositioningPayload>;
-export type SellGoodsMessage = MessageInterface<'trade_goods', GoodsTradePayload>;
-export type BuyMetalsMessage = MessageInterface<'buy_metals', MetalPurchasePayload>;
-export type DonateMetalMessage = MessageInterface<'donate_metals', MetalDonationPayload>;
-export type RebindIdMessage = MessageInterface<'rebind_id', RebindClientPayload>;
+export type LaconicMessage = MessageFormat<LaconicAction, null>;
+export type ChatMessage = MessageFormat<'chat', ChatPayload>;
+export type StartMessage = MessageFormat<'start', GameSetupPayload>;
+export type MoveMessage = MessageFormat<'move', MovementPayload>;
+export type DropItemMessage = MessageFormat<'drop_item', DropItemPayload>;
+export type RepositionMessage = MessageFormat<'reposition', RepositioningPayload>;
+export type SellGoodsMessage = MessageFormat<'trade_goods', GoodsTradePayload>;
+export type BuyMetalsMessage = MessageFormat<'buy_metals', MetalPurchasePayload>;
+export type DonateMetalMessage = MessageFormat<'donate_metals', MetalDonationPayload>;
+export type RebindIdMessage = MessageFormat<'rebind_id', RebindClientPayload>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | DropItemMessage
     | RepositionMessage | SellGoodsMessage | BuyMetalsMessage | DonateMetalMessage
