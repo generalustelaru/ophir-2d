@@ -1,7 +1,7 @@
 
 export type Test = {
     key: string,
-    type: 'string' | 'object',
+    type: 'string' | 'object' | 'array' | 'number',
     nullable: boolean,
     // values: Array<string|Test>
 }
@@ -24,7 +24,6 @@ function fail(error: string): ValidationResult {
 
 function getErrors(results: Array<ValidationResult>): Array<string> {
 
-    
     return results
     .filter(result => !result.passed)
     .map(result => result.error);
@@ -64,13 +63,39 @@ function hasString(parent: object, key: string, nullable: boolean = false): Vali
     return fail(keyTest.error);
 }
 
+function isNumber(name: string, value: unknown, nullable: boolean = false): ValidationResult {
+
+    if  (
+        (nullable && value === null)
+        || typeof value === 'number'
+    )
+        return pass();
+
+    return fail(`${name} property is not a valid number: ${value}`)
+}
+function hasNumber(parent: object, key: string, nullable: boolean = false): ValidationResult {
+    const keyTest = hasKey(parent, key);
+
+    if (keyTest.passed) {
+        const value = parent[key as keyof object] as unknown;
+        const numberTest = isNumber(key, value, nullable);
+
+        if (numberTest.passed)
+            return pass();
+
+        return fail(numberTest.error);
+    }
+
+    return fail(keyTest.error);
+}
+
 function isObject(name: string, value: unknown, nullable: boolean = false): ValidationResult {
 
     if (nullable && value === null)
         return pass();
 
     if (
-        typeof value === 'object'
+        (typeof value === 'object' && !Array.isArray(value))
         && value !== null
         && Object.keys(value).length
     )
@@ -78,7 +103,6 @@ function isObject(name: string, value: unknown, nullable: boolean = false): Vali
 
     return fail(`${name} is not a valid object: ${value}`);
 }
-
 function hasObject(parent: object | null, key: string, nullable: boolean = false): ValidationResult {
     const keyTest = hasKey(parent, key);
 
@@ -95,6 +119,36 @@ function hasObject(parent: object | null, key: string, nullable: boolean = false
     return fail(keyTest.error);
 }
 
+function isArray(name: string, value: unknown, nullable: boolean = false): ValidationResult {
+
+    if (nullable && value === null)
+        return pass();
+
+    if (
+        Array.isArray(value)
+        && value !== null
+        && Object.keys(value).length
+    )
+        return pass();
+
+    return fail(`${name} is not a valid array: ${value}`);
+}
+function hasArray(parent: object | null, key: string, nullable: boolean = false): ValidationResult {
+    const keyTest = hasKey(parent, key);
+
+    if (keyTest.passed) {
+        const value = (parent as object)[key as keyof object] as unknown;
+        const arrayTest = isArray(key, value, nullable);
+
+        if (arrayTest.passed)
+            return pass();
+
+        return fail(arrayTest.error);
+    }
+
+    return fail(keyTest.error);
+}
+
 function evaluateObject(objectType: string, value: unknown, tests: ObjectTests): Array<string> {
     const objectTest = isObject(objectType, value);
 
@@ -106,7 +160,9 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
 
             switch (type) {
                 case 'string': return hasString(object, key, nullable);
-                case 'object': return hasObject(object, key, nullable); // basic test, should become recursive evaluation
+                case 'number': return hasNumber(object, key, nullable);
+                case 'object': return hasObject(object, key, nullable);
+                case 'array': return hasArray(object, key, nullable);
                 default: return fail(`${key} is of unknown type: ${type}`);
             }
         });

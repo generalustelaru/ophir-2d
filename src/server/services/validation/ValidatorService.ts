@@ -2,6 +2,7 @@ import {
     ChatPayload,
     ClientRequest,
     RebindClientPayload,
+    GameSetupPayload
 } from "../../../shared_types";
 import { lib } from "./library"
 
@@ -61,7 +62,7 @@ export class ValidatorService {
         return payload as ChatPayload;
     }
 
-    public validateRebindClientPayload(payload: object|null): RebindClientPayload | null {
+    public validateRebindClientPayload(payload: object | null): RebindClientPayload | null {
         const errors = lib.evaluateObject(
             'RebindClientPayload',
             payload,
@@ -78,6 +79,51 @@ export class ValidatorService {
         }
 
         return payload as RebindClientPayload;
+    }
+
+    public validateGameSetupPayload(payload: object | null): GameSetupPayload | null {
+        const gameSetupPayloadErrors = lib.evaluateObject(
+            'GameSetupPayload',
+            payload,
+            [
+                { key: 'setupCoordinates', type: 'array', nullable: false }
+            ],
+        )
+
+        if (gameSetupPayloadErrors.length) {
+            this.logErrors(gameSetupPayloadErrors);
+
+            return null;
+        }
+
+        const gameSetupPayload = payload as GameSetupPayload
+
+        const setupCoordinatesErrors = (() => {
+            const array = gameSetupPayload.setupCoordinates;
+            const errors: Array<string> = [];
+
+            for (let i = 0; i < array.length; i++) {
+                const arrayValue = array[i];
+                errors.concat(lib.evaluateObject(
+                    'Coordinates',
+                    arrayValue,
+                    [
+                        {key: 'x', type: 'number', nullable: false},
+                        {key: 'y', type: 'number', nullable: false},
+                    ]
+                ))
+            }
+
+            return errors;
+        })();
+
+        if (setupCoordinatesErrors.length) {
+            this.logErrors(setupCoordinatesErrors);
+
+            return null;
+        }
+
+        return gameSetupPayload;
     }
 
     private logErrors(errors: Array<string>) {
