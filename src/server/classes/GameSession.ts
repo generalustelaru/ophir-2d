@@ -45,6 +45,10 @@ export class GameSession {
         return this.sharedState;
     }
 
+    public getSessionOwner() {
+        return this.sharedState.sessionOwner;
+    }
+
     public getPrivateState(): PrivateState {
         return this.privateState;
     }

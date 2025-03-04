@@ -206,7 +206,14 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'start') {
-            const setupDetails = payload as GameSetupPayload;
+            const setupDetails = validator.validateGameSetupPayload(payload);
+
+            if (!setupDetails) {
+                sendAll({error: 'Could not process setup request.'})
+
+                return;
+            }
+
             const sessionCreated = processGameStart(setupDetails);
 
             if (sessionCreated && singleSession) {
@@ -220,6 +227,12 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'reset') {
+            if (!singleSession || singleSession.getSessionOwner() !== playerColor) {
+                send(socket, { error: 'Only session owner may reset.'});
+
+                return;
+            }
+
             console.log('Session is resetting!');
             singleSession = singleSession?.wipeSession() ?? null;
             lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
