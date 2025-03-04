@@ -138,10 +138,14 @@ export class GameSession {
 
     // MARK: MOVE
     private processMove(data: DataDigest): boolean {
-        const details = data.payload as MovementPayload;
+        const payload = this.validator.validateMovementPayload(data.payload);
+
+        if (!payload)
+            return false;
+
         const player = data.player;
         const departure = player.hexagon.hexId;
-        const destination = details.hexId;
+        const destination = payload.hexId;
         const locationName = this.sharedState.setup.mapPairings[destination].name;
         const remainingMoves = player.moveActions;
         const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
@@ -160,7 +164,7 @@ export class GameSession {
         if (sailSuccess) {
             player.hexagon = {
                 hexId: destination,
-                position: details.position,
+                position: payload.position,
                 location: this.getLocationName(destination),
             };
             player.allowedMoves = (
@@ -184,17 +188,18 @@ export class GameSession {
     }
     // MARK: REPOSITIONING
     private processRepositioning(data: DataDigest): boolean {
-        const details = data.payload as RepositioningPayload;
-        const player = data.player;
+        const payload = this.validator.validateRepositioningPayload(data.payload);
 
-        player.hexagon.position = details.repositioning;
+        if (!payload)
+            return false;
+
+        data.player.hexagon.position = payload.repositioning;
 
         return true;
     }
     // MARK: FAVOR
     private processFavorSpending(data: DataDigest): boolean {
         const player = data.player;
-
         const { isActive, favor, privilegedSailing } = player;
 
         if (isActive && favor > 0 && privilegedSailing === false) {

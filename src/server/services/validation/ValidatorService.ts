@@ -2,7 +2,10 @@ import {
     ChatPayload,
     ClientRequest,
     RebindClientPayload,
-    GameSetupPayload
+    GameSetupPayload,
+    MovementPayload,
+    Coordinates,
+    RepositioningPayload
 } from "../../../shared_types";
 import { lib } from "./library"
 
@@ -81,6 +84,73 @@ export class ValidatorService {
         return payload as RebindClientPayload;
     }
 
+    public validateMovementPayload(payload: object | null): MovementPayload | null {
+        const payloadErrors = lib.evaluateObject(
+            'MovementPayload',
+            payload,
+            [
+                { key: 'hexId', type: 'string', nullable: false },
+                { key: 'position', type: 'object', nullable: false },
+            ],
+        );
+
+        if (payloadErrors.length) {
+            this.logErrors(payloadErrors);
+
+            return null;
+        }
+
+        const movementPayload = payload as MovementPayload;
+
+        const position = this.validateCoordinates(movementPayload.position);
+
+        if (!position)
+            return null;
+
+        return movementPayload;
+    }
+
+    public validateRepositioningPayload(payload: object | null): RepositioningPayload | null {
+        const payloadErrors = lib.evaluateObject(
+            'RepositioningPayload',
+            payload,
+            [{key: 'repositioning', type: 'object', nullable: false}],
+        );
+
+        if (payloadErrors.length) {
+            this.logErrors(payloadErrors);
+
+            return null;
+        }
+
+        const repositioningPayload = payload as RepositioningPayload;
+
+        if (!this.validateCoordinates(repositioningPayload.repositioning)) {
+            return null;
+        }
+
+        return repositioningPayload;
+    }
+
+    public validateCoordinates(value: unknown): Coordinates | null {
+        const errors = lib.evaluateObject(
+            'Coordinates',
+            value,
+            [
+                {key: 'x', type: 'number', nullable: false},
+                {key: 'y', type: 'number', nullable: false},
+            ],
+        );
+
+        if (errors.length) {
+            this.logErrors(errors);
+
+            return null;
+        }
+
+        return value as Coordinates;
+    }
+
     public validateGameSetupPayload(payload: object | null): GameSetupPayload | null {
         const gameSetupPayloadErrors = lib.evaluateObject(
             'GameSetupPayload',
@@ -98,30 +168,11 @@ export class ValidatorService {
 
         const gameSetupPayload = payload as GameSetupPayload
 
-        const setupCoordinatesErrors = (() => {
-            const array = gameSetupPayload.setupCoordinates;
-            const errors: Array<string> = [];
+        const coordinatesAreValid = gameSetupPayload.setupCoordinates
+        .every(value => !!this.validateCoordinates(value));
 
-            for (let i = 0; i < array.length; i++) {
-                const arrayValue = array[i];
-                errors.concat(lib.evaluateObject(
-                    'Coordinates',
-                    arrayValue,
-                    [
-                        {key: 'x', type: 'number', nullable: false},
-                        {key: 'y', type: 'number', nullable: false},
-                    ]
-                ))
-            }
-
-            return errors;
-        })();
-
-        if (setupCoordinatesErrors.length) {
-            this.logErrors(setupCoordinatesErrors);
-
+        if (!coordinatesAreValid)
             return null;
-        }
 
         return gameSetupPayload;
     }
