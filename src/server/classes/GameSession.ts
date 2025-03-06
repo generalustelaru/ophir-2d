@@ -1,7 +1,7 @@
 import { DataDigest, PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
-    HexId, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction, MovementPayload, DropItemPayload,
-    DiceSix, RepositioningPayload, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
+    HexId, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction,
+    DiceSix, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
     GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
@@ -217,10 +217,13 @@ export class GameSession {
     }
     // MARK: DROP ITEM
     private processItemDrop(data: DataDigest): boolean {
-        const details = data.payload as DropItemPayload
-        const player = data.player;
+        const payload = this.validator.validateDropItemPayload(data.payload);
 
-        const newCargo = this.unloadItem(player.cargo, details.item);
+        if (!payload)
+            return false;
+
+        const player = data.player;
+        const newCargo = this.unloadItem(player.cargo, payload.item);
 
         if (!newCargo) {
             console.error(`Could not drop item for ${player.id}`);
@@ -229,12 +232,11 @@ export class GameSession {
         }
 
         const hasCargo = Boolean(newCargo.find(item => item !== 'empty'));
-
         player.cargo = newCargo;
         player.hasCargo = hasCargo;
         player.feasibleTrades = hasCargo ? this.pickFeasibleTrades(newCargo) : [];
 
-        this.addServerMessage(`${player.name} just threw ${details.item} overboard`);
+        this.addServerMessage(`${player.name} just threw ${payload.item} overboard`);
 
         return true;
     }

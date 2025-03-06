@@ -5,7 +5,8 @@ import {
     GameSetupPayload,
     MovementPayload,
     Coordinates,
-    RepositioningPayload
+    RepositioningPayload,
+    DropItemPayload,
 } from "../../../shared_types";
 import { lib } from "./library"
 
@@ -101,7 +102,6 @@ export class ValidatorService {
         }
 
         const movementPayload = payload as MovementPayload;
-
         const position = this.validateCoordinates(movementPayload.position);
 
         if (!position)
@@ -177,6 +177,23 @@ export class ValidatorService {
         return gameSetupPayload;
     }
 
+    public validateDropItemPayload(payload: object | null): DropItemPayload | null {
+        const dropItemPayloadErrors = lib.evaluateObject(
+            'DropItemPayload',
+            payload,
+            [{key: 'item', type: 'string', nullable: false}],
+        );
+
+        if (dropItemPayloadErrors.length) {
+            this.logErrors(dropItemPayloadErrors);
+
+            return null;
+        }
+
+        return payload as DropItemPayload;
+    }
+
+    // MARK: UTILITY
     private logErrors(errors: Array<string>) {
         console.error('Validation Errors:')
         errors.forEach(error => {
