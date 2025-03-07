@@ -21,6 +21,7 @@ export class GameSession {
     private tools: ToolService;
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private validator: ValidatorService;
+    private errorMessage: string = 'Unknown error';
 
     constructor(bundle: StateBundle) {
         (global as any).myInstance = this;
@@ -84,27 +85,27 @@ export class GameSession {
 
         switch (message.action) {
             case 'chat':
-                return this.processChat(data) ? this.sharedState : { error: `Could not process chat message on ${color}` };
+                return this.processChat(data) ? this.sharedState : { error: this.errorMessage };
             case 'spend_favor':
-                return this.processFavorSpending(data) ? this.sharedState : { error: `Could not process favor spending on ${color}` };
+                return this.processFavorSpending(data) ? this.sharedState : { error: this.errorMessage };
             case 'move':
-                return this.processMove(data) ? this.sharedState : { error: `Could not process move on ${color}` };
+                return this.processMove(data) ? this.sharedState : { error: this.errorMessage };
             case 'reposition':
-                return this.processRepositioning(data) ? this.sharedState : { error: `Could process repositioning on ${color}` };
+                return this.processRepositioning(data) ? this.sharedState : { error: this.errorMessage };
             case 'load_good':
-                return this.processLoadGood(data) ? this.sharedState : { error: `Could not process load on ${color}` };
+                return this.processLoadGood(data) ? this.sharedState : { error: this.errorMessage };
             case 'trade_goods':
-                return this.processGoodsTrade(data) ? this.sharedState : { error: `Could not process trade on ${color}` };
+                return this.processGoodsTrade(data) ? this.sharedState : { error: this.errorMessage };
             case 'buy_metals':
-                return this.processMetalPurchase(data) ? this.sharedState : { error: `Could not process metal purchase on ${color}` };
+                return this.processMetalPurchase(data) ? this.sharedState : { error: this.errorMessage };
             case 'donate_metals':
-                return this.processMetalDonation(data) ? this.sharedState : { error: `Could not process donation on ${color}` };
+                return this.processMetalDonation(data) ? this.sharedState : { error: this.errorMessage };
             case 'end_turn':
-                return this.processEndTurn(data) ? this.sharedState : { error: `Could not process turn end on ${color}` };
+                return this.processEndTurn(data) ? this.sharedState : { error: this.errorMessage };
             case 'upgrade_hold':
-                return this.processUpgrade(data) ? this.sharedState : { error: `Could not process upgrade on ${color}` };
+                return this.processUpgrade(data) ? this.sharedState : { error: this.errorMessage };
             case 'drop_item':
-                return this.processItemDrop(data) ? this.sharedState : { error: `Could not process item drop on ${color}` };
+                return this.processItemDrop(data) ? this.sharedState : { error: this.errorMessage };
             default:
                 return { error: `Unknown action on ${color}` };
         }
@@ -211,7 +212,8 @@ export class GameSession {
             return true;
         }
 
-        console.error('Could not process favor',{isActive, favor, privilegedSailing})
+        this.errorMessage = `Could not process favor for ${player.id}`;
+        console.error(this.errorMessage, {isActive, favor, privilegedSailing});
 
         return false;
     }
@@ -226,7 +228,8 @@ export class GameSession {
         const newCargo = this.unloadItem(player.cargo, payload.item);
 
         if (!newCargo) {
-            console.error(`Could not drop item for ${player.id}`);
+            this.errorMessage = `Could not drop item for ${player.id}`;
+            console.error(this.errorMessage);
 
             return false;
         }
@@ -254,7 +257,8 @@ export class GameSession {
             || !player.locationActions?.includes('load_good')
             || !this.hasCargoRoom(player, 'load_good')
         ) {
-            console.error(`Cannot load goods for ${player.id}`, player);
+            this.errorMessage = `Cannot load goods for ${player.id}`;
+            console.error(this.errorMessage, player);
 
             return false;
         }
@@ -263,7 +267,8 @@ export class GameSession {
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationId)) {
-            console.error(`Cannot pick up goods from ${locationId}`);
+            this.errorMessage = `Cannot pick up goods from ${locationId}`;
+            console.error(this.errorMessage);
 
             return false;
         }
@@ -271,7 +276,8 @@ export class GameSession {
         const localGood = serverConstants.LOCATION_GOODS[locationId as GoodLocationName];
 
         if (localGood !== payload.tradeGood) {
-            console.error(`Cannot load goods for ${player.id}`, {localGood, payload});
+            this.errorMessage = `Cannot load goods for ${player.id}`;
+            console.error(this.errorMessage, {localGood, payload});
 
             return false;
         }
@@ -303,7 +309,8 @@ export class GameSession {
             || !player.feasibleTrades.includes(slot)
             || !player.isAnchored
         ) {
-            console.error(`Conditions for trade not satisfied for ${player.id}`);
+            this.errorMessage = `Conditions for trade not satisfied for ${player.id}`;
+            console.error(this.errorMessage);
 
             return false;
         }
@@ -324,7 +331,8 @@ export class GameSession {
                 console.info(this.privateState.gameStats);
                 break;
             default:
-                console.error(`Unknown trade location: ${location}`);
+                this.errorMessage = `Unknown trade location: ${location}`;
+                console.error(this.errorMessage);
                 return false;
         }
 
@@ -344,7 +352,8 @@ export class GameSession {
         })();
 
         if (!newCargo) {
-            console.error(`Could not match cargo item to trade request: ${player.cargo}`);
+            this.errorMessage = `Could not match cargo item to trade request: ${player.cargo}`;
+            console.error(this.errorMessage);
             return false;
         }
 
@@ -401,7 +410,8 @@ export class GameSession {
             || false === player.isAnchored
             || false === this.hasCargoRoom(player, 'buy_metals')
         ) {
-            console.error(`Player ${player?.id} cannot buy metals`);
+            this.errorMessage = `Player ${player?.id} cannot buy metals`;
+            console.error(this.errorMessage);
             return false;
         }
 
@@ -422,14 +432,16 @@ export class GameSession {
         })();
 
         if (!metalCost || !playerAmount) {
-            console.error(`No such cost or player amount found: ${metalCost}, ${player}`);
+            this.errorMessage = `No such cost or player amount found: ${metalCost}, ${player}`;
+            console.error(this.errorMessage);
             return false;
         }
 
         const remainder = playerAmount - metalCost[details.currency];
 
         if (remainder < 0) {
-            console.error(`Player ${player.id} cannot afford metal purchase`);
+            this.errorMessage = `Player ${player.id} cannot afford metal purchase`;
+            console.error(this.errorMessage);
 
             return false;
         }
@@ -444,7 +456,8 @@ export class GameSession {
                 this.addServerMessage(`${player.name} bought ${details.metal} for ${metalCost.favor} favor`);
                 break;
             default:
-                console.error(`Unknown currency: ${details.currency}`);
+                this.errorMessage = `Unknown currency: ${details.currency}`;
+                console.error(this.errorMessage);
                 return false;
         }
 
@@ -469,7 +482,8 @@ export class GameSession {
             || false === player.isAnchored
             || false === player.cargo.includes(details.metal)
         ) {
-            console.error(`Player ${player?.id} cannot donate ${details.metal}`);
+            this.errorMessage = `Player ${player?.id} cannot donate ${details.metal}`;
+            console.error(this.errorMessage);
             return false;
         }
 
@@ -672,7 +686,8 @@ export class GameSession {
 
     private hasCargoRoom(player: Player, action: LocationAction): boolean {
         if (action !== 'buy_metals' && action !== 'load_good') {
-            console.error(`Incompatible settlement action: ${action}`);
+            this.errorMessage = `Incompatible settlement action: ${action}`;
+            console.error(this.errorMessage);
 
             return false;
         }
@@ -725,7 +740,8 @@ export class GameSession {
         const emptyIndex = orderedCargo.indexOf('empty');
 
         if (emptyIndex === -1) {
-            console.error('Could not find an empty slot to load item',{cargo})
+            this.errorMessage = `Could not find an empty slot to load item`;
+            console.error(this.errorMessage,{cargo})
         }
 
         const metalNames: CargoInventory = ['gold', 'silver'];
@@ -733,13 +749,15 @@ export class GameSession {
         if (metalNames.includes(item)) {
 
             if (this.sharedState.itemSupplies.metals[item as Metal] < 1) {
-                console.error(`No ${item} available for loading`);
+                this.errorMessage = `No ${item} available for loading`;
+                console.error(this.errorMessage);
 
                 return null;
             }
 
             if (orderedCargo[emptyIndex + 1] !== 'empty') {
-                console.error('Not enough empty slots for storing metal')
+                this.errorMessage = `Not enough empty slots for storing metal`;
+                console.error(this.errorMessage)
 
                 return null;
             }
@@ -752,7 +770,8 @@ export class GameSession {
         } else {
 
             if (this.sharedState.itemSupplies.goods[item as TradeGood] < 1) {
-                console.error(`No ${item} available for loading`);
+                this.errorMessage = `No ${item} available for loading`;
+                console.error(this.errorMessage);
 
                 return null;
             }
@@ -770,7 +789,8 @@ export class GameSession {
         const itemIndex = newCargo.indexOf(item);
 
         if (itemIndex === -1) {
-            console.error('Cannot drop item', {cargo,item});
+            this.errorMessage = `Cannot drop item`;
+            console.error(this.errorMessage,{cargo,item});
 
             return null;
         }
@@ -797,7 +817,8 @@ export class GameSession {
             const playerState = players.find(p => p.id === player.id);
 
             if (!playerState) {
-                console.error(`No player found for ${player.id}`);
+                this.errorMessage = `No player found for ${player.id}`;
+                console.error(this.errorMessage);
                 return;
             }
 
@@ -828,7 +849,8 @@ export class GameSession {
             const activePlayer = this.sharedState.players.find(player => player.isActive);
 
             if (!activePlayer) {
-                console.error('No active player found');
+                this.errorMessage = 'No active player found';
+                console.error(this.errorMessage);
                 return;
             }
 

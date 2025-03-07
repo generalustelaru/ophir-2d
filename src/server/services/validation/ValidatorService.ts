@@ -133,25 +133,6 @@ export class ValidatorService {
         return repositioningPayload;
     }
 
-    public validateCoordinates(value: unknown): Coordinates | null {
-        const errors = lib.evaluateObject(
-            'Coordinates',
-            value,
-            [
-                {key: 'x', type: 'number', nullable: false},
-                {key: 'y', type: 'number', nullable: false},
-            ],
-        );
-
-        if (errors.length) {
-            this.logErrors(errors);
-
-            return null;
-        }
-
-        return value as Coordinates;
-    }
-
     public validateGameSetupPayload(payload: object | null): GameSetupPayload | null {
         const gameSetupPayloadErrors = lib.evaluateObject(
             'GameSetupPayload',
@@ -208,6 +189,26 @@ export class ValidatorService {
         }
 
         return payload as DropItemPayload;
+    }
+
+    // MARK: PRIVATE
+    private validateCoordinates(value: unknown): Coordinates | null {
+        const errors = lib.evaluateObject(
+            'Coordinates',
+            value,
+            [
+                {key: 'x', type: 'number', nullable: false},
+                {key: 'y', type: 'number', nullable: false},
+            ],
+        );
+
+        if (errors.length) {
+            this.logErrors(errors);
+
+            return null;
+        }
+
+        return value as Coordinates;
     }
 
     // MARK: UTILITY
