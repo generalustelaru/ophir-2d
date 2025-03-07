@@ -242,6 +242,11 @@ export class GameSession {
     }
     // MARK: LOAD TRADE GOOD
     private processLoadGood(data: DataDigest): boolean {
+        const payload = this.validator.validateLoadGoodPayload(data.payload);
+
+        if (!payload)
+            return false;
+
         const player = data.player;
 
         if (
@@ -259,10 +264,17 @@ export class GameSession {
 
         if (nonPickupLocations.includes(locationId)) {
             console.error(`Cannot pick up goods from ${locationId}`);
+
             return false;
         }
 
         const localGood = serverConstants.LOCATION_GOODS[locationId as GoodLocationName];
+
+        if (localGood !== payload.tradeGood) {
+            console.error(`Cannot load goods for ${player.id}`, {localGood, payload});
+
+            return false;
+        }
 
         const newCargo = this.loadItem(player.cargo, localGood);
 

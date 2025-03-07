@@ -7,6 +7,7 @@ import {
     Coordinates,
     RepositioningPayload,
     DropItemPayload,
+    LoadGoodPayload,
 } from "../../../shared_types";
 import { lib } from "./library"
 
@@ -175,6 +176,22 @@ export class ValidatorService {
             return null;
 
         return gameSetupPayload;
+    }
+
+    public validateLoadGoodPayload(payload : object | null): LoadGoodPayload | null {
+        const loadGoodPayloadErrors = lib.evaluateObject(
+            'LoadGoodPayload',
+            payload,
+            [{key: 'tradeGood', type: 'string', nullable: false}],
+        );
+
+        if (loadGoodPayloadErrors.length) {
+            this.logErrors(loadGoodPayloadErrors);
+
+            return null;
+        }
+
+        return payload as LoadGoodPayload;
     }
 
     public validateDropItemPayload(payload: object | null): DropItemPayload | null {
