@@ -54,7 +54,7 @@ window.addEventListener('connected', () => {
 window.addEventListener('timeout', () => {
     uiService.setInfo('Connection timeout');
     uiService.disable();
-    canvasService.disable();
+    canvasService.update(true);
     alert('Please refresh the page');
 });
 
@@ -62,7 +62,7 @@ window.addEventListener('close', () => {
     commService.endStatusChecks();
     sessionStorage.removeItem('localState');
     uiService.disable();
-    canvasService.disable();
+    canvasService.update(true);
     uiService.setInfo('Connection closed. Try again later.');
     alert('The connection was closed');
 });
@@ -84,15 +84,17 @@ window.addEventListener('reset', (event: CustomEventInit) => {
 window.addEventListener('update', () => {
     const sharedState = state.received as SharedState;
 
+    if (sharedState.gameStatus === 'ended') {
+        commService.endStatusChecks();
+        canvasService.update(true);
+        uiService.updateControls();
+
+        return;
+    }
+
     if (sharedState.gameStatus === 'created') {
         state.local.gameId = sharedState.gameId;
         sessionStorage.setItem('localState', JSON.stringify(state.local));
-    }
-
-    if (sharedState.gameStatus === 'ended') {
-        commService.endStatusChecks();
-        canvasService.disable();
-        // The uiService handles its own cleanup at updateControls
     }
 
     if (state.local.isBoardDrawn) {
