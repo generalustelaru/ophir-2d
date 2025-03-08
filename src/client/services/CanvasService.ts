@@ -77,7 +77,7 @@ export class CanvasService extends Service {
         this.update();
     }
 
-    public update(): void {
+    public update(disable = false): void {
         if (state.received.isStatusResponse) {
             return;
         }
@@ -85,9 +85,11 @@ export class CanvasService extends Service {
         this.locationGroup.update();
         this.mapGroup.update();
         this.playerGroup.update();
+
+        disable && this.disable();
     }
 
-    public disable(): void {
+    private disable(): void {
         this.locationGroup.disable();
         this.mapGroup.disable();
         this.playerGroup.disable();
