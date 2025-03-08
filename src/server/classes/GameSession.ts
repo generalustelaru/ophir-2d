@@ -58,6 +58,13 @@ export class GameSession {
         return this.privateState;
     }
 
+    public wipeSession(): null {
+        this.idleCheckInterval && clearInterval(this.idleCheckInterval);
+        delete (global as any).myInstance;
+
+        return null;
+    }
+
     // MARK: ACTION SWITCH
     public processAction(request: ClientRequest): ServerMessage {
         const { playerColor, message } = request;
@@ -837,13 +844,6 @@ export class GameSession {
         console.error(message, params);
 
         return false;
-    }
-
-    public wipeSession(): null {
-        this.idleCheckInterval && clearInterval(this.idleCheckInterval);
-        delete (global as any).myInstance;
-
-        return null;
     }
 
     private pass<T>(data: T): Probable<T> {

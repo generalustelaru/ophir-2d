@@ -1,13 +1,12 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData, MetalCostTier, NewState, Fluctuation } from '../../shared_types';
+import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData, MetalCostTier, NewState, Fluctuation, PlayerColor } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
-import { Service } from './Service';
 import { ToolService } from '../services/ToolService';
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
 
-export class GameSetupService extends Service {
+class GameSetupService {
 
     private tools: ToolService = new ToolService();
 
@@ -46,10 +45,7 @@ export class GameSetupService extends Service {
             sessionOwner: newState.sessionOwner,
             sessionChat: newState.sessionChat,
             availableSlots: [],
-            players: this.assignTurnOneRules(
-                this.assignTurnOrderAndPosition(players, setupCoordinates),
-                privateState.moveRules
-            ),
+            players: this.assignTurnOneRules(players, privateState.moveRules, setupCoordinates),
             marketOffer: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
             templeStatus: {
@@ -69,27 +65,8 @@ export class GameSetupService extends Service {
 
         return { sharedState, privateState };
     };
-    // MARK: Player Setup
-    private assignTurnOrderAndPosition(players: Array<Player>, setupCoordinates: Array<Coordinates>): Array<Player> {
-        const playerColors = players.map(player => player.id);
 
-        let tokenCount = playerColors.length;
-
-        while (tokenCount > 0) {
-            const pick = Math.floor(Math.random() * playerColors.length);
-            const playerColor = playerColors.splice(pick, 1).shift();
-
-            const player = players.find(player => player.id === playerColor) as Player;
-            player.turnOrder = tokenCount;
-            player.isActive = tokenCount === 1;
-            player.hexagon.position = setupCoordinates.pop() as Coordinates;
-
-            tokenCount -= 1;
-        }
-
-        return players.sort((a, b) => a.turnOrder - b.turnOrder);
-    }
-
+    // MARK: Map
     private determineBarriers(): Array<BarrierId> {
 
         function newBarrierId(): BarrierId {
@@ -111,7 +88,7 @@ export class GameSetupService extends Service {
 
         return [b1, b2];
     }
-    // MARK: Map Locations
+
     private determineLocations(): Record<HexId, LocationData> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
 
@@ -136,17 +113,6 @@ export class GameSetupService extends Service {
         }
     }
 
-    private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>): Array<Player> {
-        const initialPlacement = this.tools.getCopy(moveRules[0]);
-
-        return players.map(player =>{
-            player.hexagon.hexId = initialPlacement.from;
-            player.allowedMoves = initialPlacement.allowed;
-
-            return player;
-        });
-    }
-    // MARK: Move Rules
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
 
         return this.tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
@@ -166,6 +132,39 @@ export class GameSetupService extends Service {
         });
     }
 
+    // MARK: Players
+    private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>, setupCoordinates: Array<Coordinates>): Array<Player> {
+        const sortedPlayers = ((): Array<Player> => {
+            const playerColors = players.map(player => player.id);
+
+            let tokenCount = playerColors.length;
+            let error: string = '';
+
+            while (tokenCount > 0 && !error) {
+                const pick = Math.floor(Math.random() * playerColors.length);
+                const playerColor = playerColors.splice(pick, 1).shift() as PlayerColor;
+                const player = players.find(player => player.id === playerColor) as Player;
+                player.turnOrder = tokenCount;
+                player.isActive = tokenCount === 1;
+                player.hexagon.position = setupCoordinates.pop() as Coordinates;
+
+                tokenCount -= 1;
+            }
+
+            return players.sort((a, b) => a.turnOrder - b.turnOrder);
+        })();
+
+        const initialRules = this.tools.getCopy(moveRules[0]);
+
+        return sortedPlayers.map(player => {
+            player.hexagon.hexId = initialRules.from;
+            player.allowedMoves = initialRules.allowed;
+
+            return player;
+        });
+    }
+
+    // MARK: Market
     private getMarketFluctuations(): MarketFluctuations {
         const pool: Array<Fluctuation> = [-1, 0, 1];
 
@@ -182,14 +181,6 @@ export class GameSetupService extends Service {
         };
     }
 
-    private determineTempleTradeSlot(): MarketSlotKey {
-
-        return (['slot_1', 'slot_2', 'slot_3']
-            .splice(Math.floor(Math.random() * 3), 1)
-            .shift() as MarketSlotKey
-        );
-    }
-    // MARK: Market Offer
     private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         const tradeDeck = this.tools.getCopy(TRADE_DECK_A);
 
@@ -215,7 +206,17 @@ export class GameSetupService extends Service {
 
         return { tradeDeck, marketOffer };
     }
-    // MARK: Temple Levels
+
+    // MARK: Temple
+    private determineTempleTradeSlot(): MarketSlotKey {
+
+        return (['slot_1', 'slot_2', 'slot_3']
+            .splice(Math.floor(Math.random() * 3), 1)
+            .shift() as MarketSlotKey
+        );
+    }
+
+    // MARK: Exchange
     private filterCostTiers(playerCount: number): Array<MetalCostTier> {
         const tiers = this.tools.getCopy(COST_TIERS);
 
@@ -224,3 +225,5 @@ export class GameSetupService extends Service {
         );
     }
 }
+
+export const gameSetupService = new GameSetupService();
