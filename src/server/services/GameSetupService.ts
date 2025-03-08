@@ -4,6 +4,10 @@ import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
 
+const debug_rich = Boolean(process.env.RICH_PLAYERS);
+const debug_end =  Boolean(process.env.SHORT_GAME);
+console.log({debug_rich, debug_end});
+
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
 
 class GameSetupService {
@@ -154,11 +158,17 @@ class GameSetupService {
             return players.sort((a, b) => a.turnOrder - b.turnOrder);
         })();
 
+
         const initialRules = this.tools.getCopy(moveRules[0]);
 
         return sortedPlayers.map(player => {
             player.hexagon.hexId = initialRules.from;
             player.allowedMoves = initialRules.allowed;
+
+            if (debug_rich) {
+                player.coins = 99;
+                player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
+            }
 
             return player;
         });
@@ -219,6 +229,10 @@ class GameSetupService {
     // MARK: Exchange
     private filterCostTiers(playerCount: number): Array<MetalCostTier> {
         const tiers = this.tools.getCopy(COST_TIERS);
+
+        if (debug_end) {
+            return [tiers[0]];
+        }
 
         return tiers.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)

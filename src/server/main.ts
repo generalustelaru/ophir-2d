@@ -8,7 +8,7 @@ import {
     ClientIdResponse, ServerMessage, ResetResponse,
 } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
-import { GameSetupService } from './services/GameSetupService';
+import { gameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
 import { ValidatorService } from "./services/validation/ValidatorService";
@@ -42,6 +42,7 @@ app.get('/shutdown', (req: Request, res: Response) => {
     }
 
     console.warn('Remote server shutdown!');
+    res.status(200).send('OK');
     shutDown();
 });
 
@@ -82,7 +83,7 @@ promptForInput();
 
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: wsPort });
-const setupService: GameSetupService = GameSetupService.getInstance();
+// const setupService: GameSetupService = GameSetupService.getInstance();
 const tools = new ToolService();
 const validator = new ValidatorService();
 
@@ -263,7 +264,7 @@ process.on('SIGINT', () => {
 function processGameStart(details: GameSetupPayload): boolean {
 
     try {
-        const bundle: StateBundle = setupService.produceGameData(lobbyState, details.setupCoordinates);
+        const bundle: StateBundle = gameSetupService.produceGameData(lobbyState, details.setupCoordinates);
         singleSession = new GameSession(bundle);
     } catch (error) {
         console.error('Game start failed:', error);

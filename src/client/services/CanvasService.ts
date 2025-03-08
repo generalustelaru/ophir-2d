@@ -1,16 +1,17 @@
 import Konva from 'konva';
 import { GameSetupPayload } from '../../shared_types';
-import { Service } from "./Service";
+import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import state from '../state';
 
-export class CanvasService extends Service {
+class CanvasClass extends Communicator {
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
     private playerGroup: PlayerGroup;
+    private isDrawn = false;
 
     public constructor() {
         super();
@@ -62,7 +63,7 @@ export class CanvasService extends Service {
         return this.mapGroup.calculateShipPositions();
     }
 
-    public drawElements(): void {
+    private drawElements(): void {
         this.locationGroup.drawElements();
         this.playerGroup.drawElements();
         this.mapGroup.drawElements();
@@ -73,25 +74,28 @@ export class CanvasService extends Service {
                 detail: { text: 'You are a spectator' }
             });
         }
-
-        this.update();
+        this.isDrawn = true;
     }
 
-    public update(disable = false): void {
+    public drawUpdateElements(disable = false): void {
         if (state.received.isStatusResponse) {
             return;
         }
 
+        if(!this.isDrawn)
+            this.drawElements();
+
         this.locationGroup.update();
         this.mapGroup.update();
         this.playerGroup.update();
-
         disable && this.disable();
     }
 
-    private disable(): void {
+    public disable(): void {
         this.locationGroup.disable();
         this.mapGroup.disable();
         this.playerGroup.disable();
     }
 }
+
+export const CanvasService = new CanvasClass();
