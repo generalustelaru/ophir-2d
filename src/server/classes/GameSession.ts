@@ -480,7 +480,7 @@ export class GameSession {
         const newCargo = this.unloadItem(player.cargo, details.metal);
 
         if (!newCargo)
-            return this.err(`COuld not refresh cargo for ${player.id}`);
+            return this.err(`Could not refresh cargo for ${player.id}`);
 
         player.cargo = newCargo;
         player.hasCargo = Boolean(player.cargo.find(item => item !== 'empty'));
