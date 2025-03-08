@@ -1,18 +1,19 @@
 import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage, ServerMessage, ResetResponse } from '../../shared_types';
-import { Service } from './Service';
+import { Communicator } from './Communicator';
 import state from '../state';
 
-export class CommunicationService extends Service {
+class CommunicationClass extends Communicator {
 
-    socket: WebSocket;
-    statusInterval: NodeJS.Timeout | null = null;
+    private socket: WebSocket | null = null;
+    private statusInterval: NodeJS.Timeout | null = null;
 
-    constructor(url: string) {
+    constructor() {
         super();
-        this.socket = new WebSocket(url);
     }
 
-    public createConnection() {
+    public createConnection(url: string) {
+        this.socket = new WebSocket(url);
+
         this.socket.onopen = () => {
             console.info('Connection established');
             this.broadcastEvent({ type: 'connected', detail: null });
@@ -22,12 +23,13 @@ export class CommunicationService extends Service {
             if (event.wasClean) {
                 console.info('Connection terminated');
                 this.broadcastEvent({type: 'close', detail: null });
-            }
-            else {
+            } else {
                 console.info('Connection timeout');
                 this.broadcastEvent({ type: 'timeout', detail: null });
             }
-            this.socket.close();
+
+            this.socket?.close();
+            this.socket = null;
         }
 
         this.socket.onerror = (error) => {
@@ -83,7 +85,7 @@ export class CommunicationService extends Service {
 
     public sendMessage(payload: ClientMessage) {
 
-        if (!this.socket.readyState) {
+        if (!this.socket || !this.socket.readyState) {
             this.broadcastEvent({
                 type: 'error',
                 detail: { message: 'The connection is not open' }
@@ -100,14 +102,17 @@ export class CommunicationService extends Service {
         this.socket.send(JSON.stringify(message));
     }
 
-    public beginStatusChecks() {
-        const message: ClientMessage = { action: 'get_status', payload: null };
+    public setKeepStatusCheck() {
+
+        if (this.statusInterval)
+            return;
+
         this.statusInterval = setInterval(() => {
-            this.sendMessage(message);
+            this.sendMessage({ action: 'get_status', payload: null });
         }, 5000);
     }
 
-    public endStatusChecks() {
+    public clearStatusCheck() {
         if (this.statusInterval) clearInterval(this.statusInterval);
     }
     // TODO: Look for a more thorough solution for type-guarding
@@ -127,3 +132,5 @@ export class CommunicationService extends Service {
         return 'resetFrom' in data;
     }
 }
+
+export const CommunicationService = new CommunicationClass();

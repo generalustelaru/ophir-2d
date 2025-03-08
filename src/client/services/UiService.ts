@@ -1,6 +1,6 @@
 import { PlayerColor, NewState, ChatEntry } from '../../shared_types';
 
-import { Service } from './Service';
+import { Communicator } from './Communicator';
 import state from '../state';
 import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
@@ -8,7 +8,7 @@ import { ChatInput } from '../html_behaviors/ChatInput';
 import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
 
-export class UserInterfaceService extends Service {
+class UserInterfaceClass extends Communicator {
 
     private createButton: Button;
     private joinButton: Button;
@@ -322,3 +322,5 @@ export class UserInterfaceService extends Service {
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 }
+
+export const UserInterfaceService = new UserInterfaceClass();

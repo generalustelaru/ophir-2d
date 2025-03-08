@@ -20,23 +20,19 @@ const wsAddress = `ws://${serverAddress}:${wsPort}`;
 const savedState = sessionStorage.getItem('localState');
 state.local = savedState ? JSON.parse(savedState) : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
 
-const commService: CommunicationService = CommunicationService.getInstance([wsAddress]);
-const uiService: UserInterfaceService = UserInterfaceService.getInstance([]);
-const canvasService: CanvasService = CanvasService.getInstance([]);
-
 //Send player action to server
 window.addEventListener('action', (event: CustomEventInit) => {
     const message = event.detail as ClientMessage;
-    commService.sendMessage(message);
+    CommunicationService.sendMessage(message);
 });
 
 //Send start message to server
 window.addEventListener('start', () => {
     const message: ClientMessage = {
         action: 'start',
-        payload: canvasService.getSetupCoordinates()
+        payload: CanvasService.getSetupCoordinates()
     }
-    commService.sendMessage(message);
+    CommunicationService.sendMessage(message);
 });
 
 //Display errors
@@ -48,22 +44,22 @@ window.addEventListener('error', (event: CustomEventInit) => {
 
 // Get server data on connection
 window.addEventListener('connected', () => {
-    commService.sendMessage({ action: 'inquire', payload: null })
+    CommunicationService.sendMessage({ action: 'inquire', payload: null })
 });
 
 window.addEventListener('timeout', () => {
-    uiService.setInfo('Connection timeout');
-    uiService.disable();
-    canvasService.update(true);
+    UserInterfaceService.setInfo('Connection timeout');
+    UserInterfaceService.disable();
+    CanvasService.disable();
     alert('Please refresh the page');
 });
 
 window.addEventListener('close', () => {
-    commService.endStatusChecks();
+    CommunicationService.clearStatusCheck();
     sessionStorage.removeItem('localState');
-    uiService.disable();
-    canvasService.update(true);
-    uiService.setInfo('Connection closed. Try again later.');
+    UserInterfaceService.disable();
+    CanvasService.disable();
+    UserInterfaceService.setInfo('Connection closed. Try again later.');
     alert('The connection was closed');
 });
 
@@ -84,29 +80,30 @@ window.addEventListener('reset', (event: CustomEventInit) => {
 window.addEventListener('update', () => {
     const sharedState = state.received as SharedState;
 
-    if (sharedState.gameStatus === 'ended') {
-        commService.endStatusChecks();
-        canvasService.update(true);
-        uiService.updateControls();
+    switch(sharedState.gameStatus) {
+        case 'started':
+            CommunicationService.setKeepStatusCheck();
+            CanvasService.drawUpdateElements();
+            UserInterfaceService.setInfo('You are playing.');
+            break;
 
-        return;
+        case 'ended':
+            CommunicationService.clearStatusCheck();
+            CanvasService.drawUpdateElements(true);
+            break;
+
+        case 'created':
+            state.local.gameId = sharedState.gameId;
+            sessionStorage.setItem('localState', JSON.stringify(state.local));
+            break;
+
+        case 'empty':
+        case "full":
+        default:
+            break;
     }
 
-    if (sharedState.gameStatus === 'created') {
-        state.local.gameId = sharedState.gameId;
-        sessionStorage.setItem('localState', JSON.stringify(state.local));
-    }
-
-    if (state.local.isBoardDrawn) {
-        canvasService.update();
-    } else if (sharedState.gameStatus === 'started') {
-        uiService.setInfo('You are playing.');
-        state.local.isBoardDrawn = true;
-        canvasService.drawElements();
-        commService.beginStatusChecks();
-    }
-
-    uiService.updateControls();
+    UserInterfaceService.updateControls();
 
     // Debugging
     if (sharedState.isStatusResponse)
@@ -129,8 +126,8 @@ window.addEventListener(
     'info',
     (event: CustomEventInit) => {
         const payload: InfoDetail = event.detail;
-        uiService.setInfo(payload.text)
+        UserInterfaceService.setInfo(payload.text)
     }
 );
 
-commService.createConnection();
+CommunicationService.createConnection(wsAddress);
