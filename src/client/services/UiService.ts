@@ -36,7 +36,7 @@ class UserInterfaceClass extends Communicator {
                 const players = state.received.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
                     const player = players.find(player => player.id === option.value);
-                    option.disabled = !!player;
+                    option.disabled = !!player || !option.value;
                 });
             },
 
@@ -52,6 +52,10 @@ class UserInterfaceClass extends Communicator {
 
         this.playerNameInput.setValue(state.local.playerName);
         this.playerColorSelect.setValue(state.local.playerColor);
+
+        this.playerColorSelect.element.addEventListener('change', () => {
+            this.playerColorSelect.element.value && this.handleColorSelect();
+        });
     }
 
     public disable(): void {
@@ -78,6 +82,18 @@ class UserInterfaceClass extends Communicator {
         });
     }
 
+    private handleColorSelect = () => {
+        switch(state.received.gameStatus) {
+            case 'empty':
+                this.createButton.enable();
+                break;
+            case 'created':
+                this.joinButton.enable();
+                break;
+            default:
+                break;
+        }
+    }
     private handleKeyInput  = (toSubmit: boolean): void => {
         toSubmit && this.sendChatMessage();
 
@@ -87,10 +103,6 @@ class UserInterfaceClass extends Communicator {
     }
 
     private processStart = (): void => {
-
-        if (state.received.players.length < 2) { // TODO: keep button disabled instead
-            return alert('You need at least 2 players to start the game');
-        }
         this.startButton.disable();
 
         return this.broadcastEvent({ type: 'start', detail: null });
@@ -169,7 +181,8 @@ class UserInterfaceClass extends Communicator {
 
         // guest/anon/spectator
         if (!state.local.playerColor) {
-            this.enableElements(this.joinButton, this.playerColorSelect, this.playerNameInput);
+            this.enableElements(this.playerColorSelect, this.playerNameInput);
+            this.playerColorSelect.element.value && this.joinButton.enable();
 
             return this.setInfo('A game is waiting for you');
         }
@@ -193,7 +206,8 @@ class UserInterfaceClass extends Communicator {
     }
 
     private handleEmptyState(): void {
-        this.enableElements(this.createButton, this.playerColorSelect, this.playerNameInput);
+        this.enableElements(this.playerColorSelect, this.playerNameInput);
+        this.playerColorSelect.element.value && this.createButton.enable();
 
         return this.setInfo('You may create the game');
     }
