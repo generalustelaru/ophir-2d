@@ -3,6 +3,7 @@ import {
     HexId, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction,
     DiceSix, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
     GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal,
+    ErrorResponse,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -13,8 +14,7 @@ const SERVER_NAME = 'GameBot';
 const MAX_FAVOR = 6;
 
 type RegistryItem = { id: PlayerColor, influence: DiceSix };
-type ErrString = `Error: ${string}`;
-type Probable<T> = { err: true, data: ErrString } | { err: false, data: T };
+type Probable<T> = { err: true, data: string } | { err: false, data: T };
 
 export class GameSession {
 
@@ -23,7 +23,6 @@ export class GameSession {
     private tools: ToolService;
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private validator: ValidatorService;
-    private errorMessage: ErrString = 'Error: Unknown error';
 
     constructor(bundle: StateBundle) {
         (global as any).myInstance = this;
@@ -74,53 +73,45 @@ export class GameSession {
             return this.processStatusRequest();
         }
 
-        if (!playerColor) {
-            const errorMessage = 'No player ID provided';
-            console.error(errorMessage);
-
-            return { error: errorMessage }
-        }
+        if (!playerColor)
+            return this.errorResponse('No player ID provided');
 
         const player = this.sharedState.players.find(
             player => player.id === playerColor
         );
 
-        if (!player) {
-            const errorMessage = `Player does not exist: ${playerColor}`;
-            console.error(errorMessage);
-
-            return { error: errorMessage }
-        }
+        if (!player)
+            return this.errorResponse(`Player does not exist: ${playerColor}`);
 
         this.updateTimestamp(player);
 
         const digest: DataDigest = { player, payload }
 
-        switch (message.action) {
+        switch (action) {
             case 'chat':
-                return this.processChat(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processChat(digest);
             case 'spend_favor':
-                return this.processFavorSpending(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processFavorSpending(digest);
             case 'move':
-                return this.processMove(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processMove(digest);
             case 'reposition':
-                return this.processRepositioning(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processRepositioning(digest);
             case 'load_good':
-                return this.processLoadGood(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processLoadGood(digest);
             case 'trade_goods':
-                return this.processGoodsTrade(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processGoodsTrade(digest);
             case 'buy_metals':
-                return this.processMetalPurchase(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processMetalPurchase(digest);
             case 'donate_metals':
-                return this.processMetalDonation(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processMetalDonation(digest);
             case 'end_turn':
-                return this.processEndTurn(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processEndTurn(digest);
             case 'upgrade_hold':
-                return this.processUpgrade(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processUpgrade(digest);
             case 'drop_item':
-                return this.processItemDrop(digest) ? this.sharedState : { error: this.errorMessage };
+                return this.processItemDrop(digest);
             default:
-                return { error: `Unknown action on ${playerColor}` };
+                return this.errorResponse(`Unknown action: ${action}`);
         }
     }
 
@@ -132,17 +123,17 @@ export class GameSession {
     }
 
     // MARK: CHAT
-    private processChat(data: DataDigest): boolean {
+    private processChat(data: DataDigest): SharedState | ErrorResponse {
         const { player, payload } = data;
         const chatPayload = this.validator.validateChatPayload(payload);
 
         if (!chatPayload)
-            return this.validationError()
+            return this.validationErrorResponse()
 
-        const chatEntry = { id: player.id, name: player.name ?? player.id, message: chatPayload.input };
+        const chatEntry = { id: player.id, name: player.name, message: chatPayload.input };
         this.sharedState.sessionChat.push(chatEntry);
 
-        return true;
+        return this.stateResponse();
     }
 
     private addServerMessage(message: string): void {
@@ -151,11 +142,11 @@ export class GameSession {
     }
 
     // MARK: MOVE
-    private processMove(data: DataDigest): boolean {
+    private processMove(data: DataDigest): SharedState | ErrorResponse {
         const payload = this.validator.validateMovementPayload(data.payload);
 
         if (!payload)
-            return this.validationError();
+            return this.validationErrorResponse();
 
         const player = data.player;
         const departure = player.hexagon.hexId;
@@ -165,7 +156,7 @@ export class GameSession {
         const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
 
         if (!hexMoveRule.allowed.includes(destination) || remainingMoves === 0) {
-            return this.Error(this.errMsg('Movement not allwed.'), { destination, remainingMoves });
+            return this.errorResponse('Movement not alowed.', { destination, remainingMoves });
         }
 
         player.moveActions = remainingMoves - 1;
@@ -173,7 +164,7 @@ export class GameSession {
         const registry = this.getPortRegistry(destination);
         const sailSuccess = !registry || player.privilegedSailing
             ? true
-            : this.processInfluenceRoll(player, registry);
+            : this.checkInfluence(player, registry);
 
         if (sailSuccess) {
             player.hexagon = {
@@ -198,21 +189,21 @@ export class GameSession {
             this.addServerMessage(`${player.name} also ran out of moves and cannot act further`);
         }
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: REPOSITIONING
-    private processRepositioning(data: DataDigest): boolean {
+    private processRepositioning(data: DataDigest): SharedState | ErrorResponse {
         const payload = this.validator.validateRepositioningPayload(data.payload);
 
         if (!payload)
-            return this.validationError();
+            return this.validationErrorResponse();
 
         data.player.hexagon.position = payload.repositioning;
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: FAVOR
-    private processFavorSpending(data: DataDigest): boolean {
+    private processFavorSpending(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
         const { isActive, favor, privilegedSailing } = player;
 
@@ -222,26 +213,26 @@ export class GameSession {
             player.isAnchored = true;
             this.addServerMessage(`${player.name} spent favor to remain anchored or sail without influence roll`);
 
-            return true;
+            return this.stateResponse();
         }
 
-        return this.Error(
-            this.errMsg(`Could not process favor for ${player.id}`),
+        return this.errorResponse(
+            `Could not process favor for ${player.id}`,
             {isActive, favor, privilegedSailing}
         );
     }
     // MARK: DROP ITEM
-    private processItemDrop(data: DataDigest): boolean {
+    private processItemDrop(data: DataDigest): SharedState | ErrorResponse {
         const payload = this.validator.validateDropItemPayload(data.payload);
 
         if (!payload)
-            return this.validationError();
+            return this.validationErrorResponse();
 
         const player = data.player;
         const newCargo = this.unloadItem(player.cargo, payload.item);
 
         if (!newCargo) {
-            return this.Error(this.errMsg(`Could not drop item for ${player.id}`));
+            return this.errorResponse(`Could not drop item for ${player.id}`);
 
         }
 
@@ -252,14 +243,14 @@ export class GameSession {
 
         this.addServerMessage(`${player.name} just threw ${payload.item} overboard`);
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: LOAD TRADE GOOD
-    private processLoadGood(data: DataDigest): boolean {
+    private processLoadGood(data: DataDigest): SharedState | ErrorResponse {
         const payload = this.validator.validateLoadGoodPayload(data.payload);
 
         if (!payload)
-            return this.validationError();
+            return this.validationErrorResponse();
 
         const player = data.player;
 
@@ -268,21 +259,21 @@ export class GameSession {
             || !player.locationActions?.includes('load_good')
             || !this.hasCargoRoom(player.cargo, 1)
         ) {
-            return this.Error(this.errMsg(`Cannot load goods for ${player.id}`), player);
+            return this.errorResponse(`Cannot load goods for ${player.id}`, player);
         }
 
         const locationId = this.sharedState.setup.mapPairings[player.hexagon.hexId].name;
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationId)) {
-            return this.Error(this.errMsg(`Cannot pick up goods from ${locationId}`));
+            return this.errorResponse(`Cannot pick up goods from ${locationId}`);
         }
 
         const localGood = serverConstants.LOCATION_GOODS[locationId as GoodLocationName];
 
         if (localGood !== payload.tradeGood) {
-            return this.Error(
-                this.errMsg(`Cannot load goods for ${player.id}`),
+            return this.errorResponse(
+                `Cannot load goods for ${player.id}`,
                 {localGood, payload},
             );
         }
@@ -290,7 +281,7 @@ export class GameSession {
         const res = this.loadItem(player.cargo, localGood);
 
         if (res.err)
-            return this.Error(res.data);
+            return this.errorResponse(res.data);
 
         player.cargo = res.data;
         player.hasCargo = true;
@@ -300,10 +291,10 @@ export class GameSession {
 
         this.addServerMessage(`${player.name} picked up ${localGood}`);
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: GOODS TRADE
-    private processGoodsTrade(data: DataDigest): boolean {
+    private processGoodsTrade(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
         const details = data.payload as GoodsTradePayload;
         const { slot, location } = details;
@@ -314,7 +305,7 @@ export class GameSession {
             || !player.feasibleTrades.includes(slot)
             || !player.isAnchored
         ) {
-            return this.Error(this.errMsg(`Conditions for trade not satisfied for ${player.id}`));
+            return this.errorResponse(`Conditions for trade not satisfied for ${player.id}`);
         }
 
         const trade = this.sharedState.marketOffer[slot];
@@ -333,7 +324,7 @@ export class GameSession {
                 console.info(this.privateState.gameStats);
                 break;
             default:
-                return this.Error(this.errMsg(`Unknown trade location: ${location}`));
+                return this.errorResponse(`Unknown trade location: ${location}`);
         }
 
         const newCargo = (() => {
@@ -352,7 +343,7 @@ export class GameSession {
         })();
 
         if (!newCargo) {
-            return this.Error(this.errMsg(`Could not match cargo item to trade request: ${player.cargo}`));
+            return this.errorResponse(`Could not match cargo item to trade request: ${player.cargo}`);
         }
 
         player.cargo = newCargo;
@@ -394,17 +385,17 @@ export class GameSession {
             const result = this.compileGameResults();
 
             if (result.err)
-                return this.Error(result.data);
+                return this.errorResponse(result.data);
 
             this.sharedState.gameResults = result.data;
             this.sharedState.gameStatus = 'ended';
             this.addServerMessage('Market deck is empty! Game has ended.');
         }
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: METAL PURCHASE
-    private processMetalPurchase(data: DataDigest): boolean {
+    private processMetalPurchase(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
         const details = data.payload as MetalPurchasePayload;
 
@@ -413,7 +404,7 @@ export class GameSession {
             || false === player.isAnchored
             || false === this.hasCargoRoom(player.cargo, 2)
         ) {
-            return this.Error(this.errMsg(`Player ${player?.id} cannot buy metals`));
+            return this.errorResponse(`Player ${player?.id} cannot buy metals`);
         }
 
         const templeStatus = this.sharedState.templeStatus;
@@ -433,13 +424,13 @@ export class GameSession {
         })();
 
         if (!metalCost || !playerAmount) {
-            return this.Error(this.errMsg(`No such cost or player amount found: ${metalCost}, ${player}`));
+            return this.errorResponse(`No such cost or player amount found: ${metalCost}, ${player}`);
         }
 
         const remainder = playerAmount - metalCost[details.currency];
 
         if (remainder < 0) {
-            return this.Error(this.errMsg(`Player ${player.id} cannot afford metal purchase`));
+            return this.errorResponse(`Player ${player.id} cannot afford metal purchase`);
         }
 
         switch (details.currency) {
@@ -452,22 +443,22 @@ export class GameSession {
                 this.addServerMessage(`${player.name} bought ${details.metal} for ${metalCost.favor} favor`);
                 break;
             default:
-                return this.Error(this.errMsg(`Unknown currency: ${details.currency}`));
+                return this.errorResponse(`Unknown currency: ${details.currency}`);
         }
 
         const result = this.loadItem(player.cargo, details.metal);
 
         if (result.err)
-            return this.Error(result.data);
+            return this.errorResponse(result.data);
 
         player.cargo = result.data;
         player.hasCargo = true;
         player.moveActions = 0;
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: DONATE METALS
-    private processMetalDonation(data: DataDigest): boolean {
+    private processMetalDonation(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
         const details = data.payload as MetalPurchasePayload;
 
@@ -476,7 +467,7 @@ export class GameSession {
             || false === player.isAnchored
             || false === player.cargo.includes(details.metal)
         ) {
-            return this.Error(this.errMsg(`Player ${player?.id} cannot donate ${details.metal}`));
+            return this.errorResponse(`Player ${player?.id} cannot donate ${details.metal}`);
         }
 
         const reward = details.metal === 'gold' ? 10 : 5
@@ -487,7 +478,7 @@ export class GameSession {
         const newCargo = this.unloadItem(player.cargo, details.metal);
 
         if (!newCargo)
-            return this.Error(this.errMsg(`Could not refresh cargo for ${player.id}`));
+            return this.errorResponse(`Could not refresh cargo for ${player.id}`);
 
         player.cargo = newCargo;
         player.hasCargo = Boolean(player.cargo.find(item => item !== 'empty'));
@@ -510,7 +501,7 @@ export class GameSession {
                 const result = this.compileGameResults();
 
                 if (result.err)
-                    return this.Error(result.data);
+                    return this.errorResponse(result.data);
 
                 this.sharedState.gameResults = result.data;
                 player.locationActions = null;
@@ -522,16 +513,16 @@ export class GameSession {
 
         this.sharedState.templeStatus = newStatus;
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: END TURN
-    private processEndTurn(data: DataDigest): boolean {
+    private processEndTurn(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
         const { isActive, isAnchored } = player;
 
         if (!isActive || !isAnchored) {
-            return this.Error(
-                this.errMsg(`Cannot process turn for ${player.id}`),
+            return this.errorResponse(
+                `Cannot process turn for ${player.id}`,
                 { isActive, isAnchored }
             );
         }
@@ -539,15 +530,15 @@ export class GameSession {
         const res = this.passActiveStatus();
 
         if (res.err)
-            return this.Error(res.data);
+            return this.errorResponse(res.data);
 
         const activePlayer = res.data;
         this.addServerMessage(`${activePlayer.name} is now active!`);
 
-        return true;
+        return this.stateResponse();
     }
     // MARK: UPGRADE HOLD
-    private processUpgrade(data: DataDigest): boolean {
+    private processUpgrade(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
         const { coins, cargo, locationActions } = player;
         if (
@@ -562,11 +553,11 @@ export class GameSession {
 
             this.addServerMessage(`${player.name} upgraded their hold`);
 
-            return true;
+            return this.stateResponse();
         }
 
-        return this.Error(
-            this.errMsg(`Could not resolve upgrade`),
+        return this.errorResponse(
+            `Could not resolve upgrade`,
             { coins, cargo, locationActions },
         );
     }
@@ -589,7 +580,7 @@ export class GameSession {
         return registry;
     }
 
-    private processInfluenceRoll(activePlayer: Player, registry: Array<RegistryItem>): boolean {
+    private checkInfluence(activePlayer: Player, registry: Array<RegistryItem>): boolean {
         let canMove = true;
 
         activePlayer.influence = Math.ceil(Math.random() * 6) as DiceSix;
@@ -826,8 +817,7 @@ export class GameSession {
             const activePlayer = this.sharedState.players.find(player => player.isActive);
 
             if (!activePlayer) {
-                this.errorMessage = this.errMsg('No active player found');
-                console.error(this.errorMessage);
+                this.errorResponse('No active player found in idle check!')
                 return;
             }
 
@@ -842,26 +832,25 @@ export class GameSession {
         }, 60000);
     }
 
-    private validationError(){
-        return this.Error(this.errMsg('Malformed request.'));
+    private validationErrorResponse(){
+        return this.errorResponse('Malformed request.');
     }
 
-    private Error(message: ErrString, params?: object): false {
-        this.errorMessage = message;
-        console.error(message, params);
-
-        return false;
+    private stateResponse(): SharedState {
+        return this.sharedState;
     }
+    private errorResponse(message: string, params?: object): ErrorResponse {
+        const error = `ERROR: ${message}`;
+        console.error(error, params);
 
-    private errMsg(string: string): ErrString {
-        return `Error: ${string}`;
+        return { error };
     }
 
     private pass<T>(data: T): Probable<T> {
         return { err: false, data }
     }
 
-    private fail(data: string): Probable<any> {
-        return { err: true, data: this.errMsg(data) }
+    private fail(message: string): Probable<any> {
+        return { err: true, data: message }
     }
 }
