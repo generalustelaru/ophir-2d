@@ -51,14 +51,14 @@ export class ValidatorService {
         return request as ClientRequest;
     }
 
-    public validateChatPayload(payload: object|null): ChatPayload | null {
+    public validateChatPayload(payload: object | null): ChatPayload | null {
         const errors = lib.evaluateObject(
             'ChatPayload',
             payload,
             [{ key: 'input', type: 'string', nullable: false }],
         );
 
-        if (errors.length){
+        if (errors.length) {
             this.logErrors(errors);
 
             return null;
@@ -77,7 +77,7 @@ export class ValidatorService {
             ],
         );
 
-        if (errors.length){
+        if (errors.length) {
             this.logErrors(errors);
 
             return null;
@@ -115,7 +115,7 @@ export class ValidatorService {
         const payloadErrors = lib.evaluateObject(
             'RepositioningPayload',
             payload,
-            [{key: 'repositioning', type: 'object', nullable: false}],
+            [{ key: 'repositioning', type: 'object', nullable: false }],
         );
 
         if (payloadErrors.length) {
@@ -151,7 +151,7 @@ export class ValidatorService {
         const gameSetupPayload = payload as GameSetupPayload
 
         const coordinatesAreValid = gameSetupPayload.setupCoordinates
-        .every(value => !!this.validateCoordinates(value));
+            .every(value => !!this.validateCoordinates(value));
 
         if (!coordinatesAreValid)
             return null;
@@ -159,11 +159,11 @@ export class ValidatorService {
         return gameSetupPayload;
     }
 
-    public validateLoadGoodPayload(payload : object | null): LoadGoodPayload | null {
+    public validateLoadGoodPayload(payload: object | null): LoadGoodPayload | null {
         const loadGoodPayloadErrors = lib.evaluateObject(
             'LoadGoodPayload',
             payload,
-            [{key: 'tradeGood', type: 'string', nullable: false}],
+            [{ key: 'tradeGood', type: 'string', nullable: false }],
         );
 
         if (loadGoodPayloadErrors.length) {
@@ -179,7 +179,7 @@ export class ValidatorService {
         const dropItemPayloadErrors = lib.evaluateObject(
             'DropItemPayload',
             payload,
-            [{key: 'item', type: 'string', nullable: false}],
+            [{ key: 'item', type: 'string', nullable: false }],
         );
 
         if (dropItemPayloadErrors.length) {
@@ -197,8 +197,8 @@ export class ValidatorService {
             'Coordinates',
             value,
             [
-                {key: 'x', type: 'number', nullable: false},
-                {key: 'y', type: 'number', nullable: false},
+                { key: 'x', type: 'number', nullable: false },
+                { key: 'y', type: 'number', nullable: false },
             ],
         );
 
