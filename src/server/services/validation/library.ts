@@ -7,26 +7,20 @@ export type Test = {
 }
 export type ObjectTests = Array<Test>
 
-export type ValidationResult = {
-    passed: boolean,
-    error: string
-}
+export type ValidationResult = { passed: true } | { passed: false, error: string }
 
 function pass(): ValidationResult {
-
-    return { passed: true, error: '' }
+    return { passed: true }
 }
 
 function fail(error: string): ValidationResult {
-
     return { passed: false, error }
 }
 
 function getErrors(results: Array<ValidationResult>): Array<string> {
-
     return results
-    .filter(result => !result.passed)
-    .map(result => result.error);
+        .filter(result => !result.passed)
+        .map(result => result.error);
 }
 
 function hasKey(parent: object | null, key: string): ValidationResult {
@@ -39,10 +33,7 @@ function hasKey(parent: object | null, key: string): ValidationResult {
 
 function isString(name: string, value: unknown, nullable: boolean = false): ValidationResult {
 
-    if  (
-        (nullable && value === null)
-        || (typeof value === 'string' && value.length)
-    )
+    if ((nullable && value === null) || (typeof value === 'string' && value.length))
         return pass();
 
     return fail(`${name} property is not a valid string: ${value}`)
@@ -65,10 +56,7 @@ function hasString(parent: object, key: string, nullable: boolean = false): Vali
 
 function isNumber(name: string, value: unknown, nullable: boolean = false): ValidationResult {
 
-    if  (
-        (nullable && value === null)
-        || typeof value === 'number'
-    )
+    if ((nullable && value === null) || typeof value === 'number')
         return pass();
 
     return fail(`${name} property is not a valid number: ${value}`)
@@ -124,15 +112,12 @@ function isArray(name: string, value: unknown, nullable: boolean = false): Valid
     if (nullable && value === null)
         return pass();
 
-    if (
-        Array.isArray(value)
-        && value !== null
-        && Object.keys(value).length
-    )
+    if (Array.isArray(value) && value !== null && Object.keys(value).length)
         return pass();
 
     return fail(`${name} is not a valid array: ${value}`);
 }
+
 function hasArray(parent: object | null, key: string, nullable: boolean = false): ValidationResult {
     const keyTest = hasKey(parent, key);
 
@@ -149,13 +134,20 @@ function hasArray(parent: object | null, key: string, nullable: boolean = false)
     return fail(keyTest.error);
 }
 
+/**
+ * @param objectType Only for error logging
+ * @returns Error message strings
+ * @example ('Foo', foo, tests) => []
+ * @example ('Foo', foo, tests) => ['Foo is not a valid object: null']
+ * @example ('Foo', foo, tests) => ['bar is not a valid string: 0', 'baz is not a valid object, []']
+ */
 function evaluateObject(objectType: string, value: unknown, tests: ObjectTests): Array<string> {
     const objectTest = isObject(objectType, value);
 
     if (objectTest.passed) {
         const object = value as object;
 
-        const propTests =  tests.map(test => {
+        const propTests = tests.map(test => {
             const { key, type, nullable } = test;
 
             switch (type) {
