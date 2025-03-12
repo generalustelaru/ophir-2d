@@ -8,5 +8,3 @@ export const SHUTDOWN_AUTH = String(process.env.SHUTDOWN_AUTH);
 export const IDLE_CHECKS = Boolean(Number(process.env.IDLE_CHECKS));
 export const RICH_PLAYERS = Boolean(Number(process.env.RICH_PLAYERS));
 export const SHORT_GAME = Boolean(Number(process.env.SHORT_GAME));
-console.log({process_SHORT_GAME: process.env.SHORT_GAME});
-console.log({SHORT_GAME})
