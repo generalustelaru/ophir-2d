@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, HexId, PlayerColor, SharedState, DiceSix, ClientMessage } from '../../../shared_types';
+import { Coordinates, ZoneName, PlayerColor, SharedState, DiceSix, ClientMessage } from '../../../shared_types';
 import state from '../../state';
 import clientConstants from '../../client_constants';
 import { MapHexagon } from '../GroupList';
@@ -90,14 +90,14 @@ export class PlayerShip {
                 const mapHex = this.mapHexes[i];
                 mapHex.setRestricted(false);
                 mapHex.setToHitValue(false);
-                mapHex.setFill(player.hexagon.hexId === mapHex.getId() && player.locationActions
+                mapHex.setFill(player.bearings.seaZone === mapHex.getId() && player.locationActions
                     ? COLOR.activeHex
                     : COLOR.defaultHex
                 );
             }
 
             switch (true) {
-                case targetHex.getId() === player.hexagon.hexId:
+                case targetHex.getId() === player.bearings.seaZone:
                     targetHex.setFill(player.locationActions ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
@@ -123,7 +123,7 @@ export class PlayerShip {
 
             const player = state.received.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
-            const departureHex = this.mapHexes.find(hex => hex.getId() === player?.hexagon.hexId);
+            const departureHex = this.mapHexes.find(hex => hex.getId() === player?.bearings.seaZone);
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
             if (!departureHex) {
@@ -177,9 +177,9 @@ export class PlayerShip {
             { detail: detail }
         ));
     }
-    private calculateToSailValue(targetHexId: HexId): DiceSix | false {
+    private calculateToSailValue(targetHexId: ZoneName): DiceSix | false {
         const influencePool = state.received.players
-            .map(player => { return player.hexagon.hexId === targetHexId ? player.influence : 0 });
+            .map(player => { return player.bearings.seaZone === targetHexId ? player.influence : 0 });
         const highestInfluence = Math.max(...influencePool) as DiceSix;
 
         return highestInfluence > 0 ? highestInfluence : false;

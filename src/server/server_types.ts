@@ -1,5 +1,10 @@
-import { SharedState, BarrierId, HexId, PlayerColor, Player, NewState, Trade, LocationData, TradeGood, GoodLocationName, MetalCostTier, MessagePayload} from '../shared_types';
+import {
+    BarrierId, ZoneName, PlayerColor, Player, NewState, Trade, LocationData,
+    TradeGood, GoodLocationName, MessagePayload, ExchangeTier
+} from '../shared_types';
 import { WebSocket } from 'ws';
+import { SharedStateStore } from './data_classes/SharedStateStore';
+
 export type WsClient = {
     clientID: string,
     gameID: string | null,
@@ -9,13 +14,13 @@ export type WsClient = {
 export type WsSignal = 'connection'|'message'|'close';
 
 export type DefaultMoveRule = {
-    from: HexId;
-    allowed: Array<HexId>;
+    from: ZoneName;
+    allowed: Array<ZoneName>;
     blockedBy: Array<BarrierId>;
 };
 export type ProcessedMoveRule = {
-    from: HexId;
-    allowed: Array<HexId>;
+    from: ZoneName;
+    allowed: Array<ZoneName>;
 }
 
 export type PlayerCountables = {
@@ -33,12 +38,12 @@ export type PlayerCountables = {
 export type PrivateState = {
     moveRules: Array<ProcessedMoveRule>,
     tradeDeck: Array<Trade>,
-    costTiers: Array<MetalCostTier>,
+    costTiers: Array<ExchangeTier>,
     gameStats: Array<PlayerCountables>,
 }
 
 export type StateBundle = {
-    sharedState: SharedState,
+    sharedState: SharedStateStore,
     privateState: PrivateState,
 }
 
@@ -48,14 +53,13 @@ export type DataDigest = {
 }
 
 export type BarrierCheck = {
-    between: Array<HexId>,
+    between: Array<ZoneName>,
     incompatible: Array<BarrierId>,
 };
 
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
-    SERVER_NAME: string,
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<GoodLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
@@ -65,5 +69,5 @@ export type ServerConstants = {
     DEFAULT_PLAYER_STATE: Player,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
-    COST_TIERS: Array<MetalCostTier>,
+    COST_TIERS: Array<ExchangeTier>,
 }

@@ -99,7 +99,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
             trade: data.trade,
             isFeasible: (
                 playerCanAct
-                && localPlayer.hexagon.location === 'temple'
+                && localPlayer.bearings.location === 'temple'
                 && localPlayer.feasibleTrades.includes(this.templeTradeSlot)
                 && !!localPlayer.locationActions?.includes('trade_goods')
             )

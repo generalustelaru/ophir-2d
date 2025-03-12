@@ -1,0 +1,12 @@
+import 'process';
+
+export const SERVER_ADDRESS = String(process.env.SERVER_ADDRESS);
+export const HTTP_PORT = String(process.env.HTTP_PORT);
+export const WS_PORT = Number(process.env.WS_PORT);
+export const SERVER_NAME = String(process.env.SERVER_NAME);
+export const SHUTDOWN_AUTH = String(process.env.SHUTDOWN_AUTH);
+export const IDLE_CHECKS = Boolean(Number(process.env.IDLE_CHECKS));
+export const RICH_PLAYERS = Boolean(Number(process.env.RICH_PLAYERS));
+export const SHORT_GAME = Boolean(Number(process.env.SHORT_GAME));
+console.log({process_SHORT_GAME: process.env.SHORT_GAME});
+console.log({SHORT_GAME})

@@ -4,7 +4,7 @@ export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type Coordinates = { x: number, y: number };
 export type PlayerColor = "Purple" | "Yellow" | "Red" | "Green";
-export type HexId = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
+export type ZoneName = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
 export type TradeGood = "gems" | "wood" | "stone" | "cloth";
 export type Metal = "silver" | "gold";
 export type CargoMetal = Metal | "silver_extra" | "gold_extra";
@@ -20,12 +20,16 @@ export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = "A" | "B";
-export type ChatEntry = {id: PlayerColor|null, name: string|null, message: string};
-export type MetalCostTier = {
+export type ChatEntry = { id: PlayerColor|null, name: string|null, message: string };
+
+export type ExchangeTier = {
     templeLevel: number,
+    skipOnPlayerCounts: Array<number>,
+    costs: ExchangeState,
+}
+export type ExchangeState = {
     goldCost: MetalCost,
     silverCost: MetalCost,
-    skipOnPlayerCounts: Array<number>,
 }
 
 export type MetalCost = {
@@ -40,9 +44,9 @@ export type Player = {
     name: string | null,
     turnOrder: number,
     isActive: boolean,
-    hexagon: {
-        hexId: HexId,
-        location: LocationName | null,
+    bearings: {
+        seaZone: ZoneName,
+        location: LocationName | null, //TODO: try removing null
         position: Coordinates,
     },
     favor: number,
@@ -51,7 +55,7 @@ export type Player = {
     moveActions: number,
     isAnchored: boolean,
     locationActions: Array<LocationAction> | null,
-    allowedMoves: Array<HexId>,
+    allowedMoves: Array<ZoneName>,
     hasCargo: boolean,
     cargo: CargoInventory,
     feasibleTrades: Array<MarketSlotKey>
@@ -73,8 +77,8 @@ export type MarketFluctuations = {
     slot_3: Fluctuation,
 }
 
-export type TempleStatus = {
-    tier: MetalCostTier,
+export type TempleState = {
+    treasury: ExchangeState, // TODOȘ what if we get treasury outside of here?
     currentLevel: number,
     maxLevel: number,
     levelCompletion: number,
@@ -104,10 +108,10 @@ export type SharedState = {
     sessionOwner: PlayerColor,
     availableSlots: Array<PlayerColor>,
     players: Array<Player>,
-    marketOffer: MarketOffer,
-    templeStatus: TempleStatus,
+    market: MarketOffer,
+    temple: TempleState,
     setup: GameSetup,
-    sessionChat: Array<ChatEntry>,
+    chat: Array<ChatEntry>,
     itemSupplies: ItemSupplies,
 }
 
@@ -119,10 +123,10 @@ export type NewState = {
     sessionOwner: PlayerColor | null,
     availableSlots: Array<PlayerColor>,
     players: Array<Player>,
-    marketOffer: null,
-    templeStatus: null,
+    market: null,
+    temple: null,
     setup: null,
-    sessionChat: Array<ChatEntry>,
+    chat: Array<ChatEntry>,
 }
 
 export type ResetResponse = {
@@ -138,12 +142,12 @@ export type LocationData = {
 
 export type GameSetup = {
     barriers: Array<BarrierId>,
-    mapPairings: Record<HexId, LocationData>,
+    mapPairings: Record<ZoneName, LocationData>,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
 }
 export type ChatPayload = { input: string }
-export type MovementPayload = { hexId: HexId, position: Coordinates }
+export type MovementPayload = { hexId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
 export type GameSetupPayload = { setupCoordinates: Array<Coordinates> }
 export type LoadGoodPayload = { tradeGood: TradeGood }

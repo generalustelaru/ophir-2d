@@ -1,4 +1,3 @@
-''
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -15,11 +14,9 @@ import { ValidatorService } from "./services/validation/ValidatorService";
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 
-const httpAddress = process.env.SERVER_ADDRESS;
-const httpPort = process.env.HTTP_PORT;
-const wsPort = process.env.WS_PORT && parseInt(process.env.WS_PORT);
+import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, SERVER_NAME } from './configuration';
 
-if (!httpAddress || !httpPort || !wsPort) {
+if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT) {
     console.error('Missing environment variables');
     process.exit(1);
 }
@@ -46,8 +43,8 @@ app.get('/shutdown', (req: Request, res: Response) => {
     shutDown();
 });
 
-app.listen(httpPort, () => {
-    console.info(`Server running at http://${httpAddress}:${httpPort}`);
+app.listen(HTTP_PORT, () => {
+    console.info(`Server running at http://${SERVER_ADDRESS}:${HTTP_PORT}`);
 });
 
 const rl = readline.createInterface({
@@ -82,7 +79,7 @@ function promptForInput(): void {
 promptForInput();
 
 const socketClients: Array<WsClient> = [];
-const socketServer = new WebSocketServer({ port: wsPort });
+const socketServer = new WebSocketServer({ port: WS_PORT });
 // const setupService: GameSetupService = GameSetupService.getInstance();
 const tools = new ToolService();
 const validator = new ValidatorService();
@@ -196,7 +193,7 @@ socketServer.on('connection', function connection(socket) {
                 return;
             }
 
-            lobbyState.sessionChat.push({
+            lobbyState.chat.push({
                 id: playerColor,
                 name: playerName ?? playerColor,
                 message: chatMessage.input,
@@ -328,6 +325,6 @@ function processPlayer(playerColor: PlayerColor | null, playerName: string | nul
 }
 
 function addServerMessage(message: string): void {
-    const chatEntry: ChatEntry = { id: null, name: serverConstants.SERVER_NAME, message };
-    lobbyState.sessionChat.push(chatEntry);
+    const chatEntry: ChatEntry = { id: null, name: SERVER_NAME, message };
+    lobbyState.chat.push(chatEntry);
 }

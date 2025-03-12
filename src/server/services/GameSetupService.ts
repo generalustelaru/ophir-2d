@@ -1,12 +1,16 @@
 
-import { SharedState, BarrierId, HexId, Coordinates, Player, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData, MetalCostTier, NewState, Fluctuation, PlayerColor } from '../../shared_types';
+import {
+    SharedState, BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
+    Trade, MarketOffer, MarketSlotKey, LocationData, NewState, Fluctuation,
+    PlayerColor, ExchangeTier,
+} from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
+import { SharedStateStore } from '../data_classes/SharedStateStore';
+import { SERVER_NAME, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
 
-const debug_rich = Boolean(process.env.RICH_PLAYERS);
-const debug_end =  Boolean(process.env.SHORT_GAME);
-console.log({debug_rich, debug_end});
+console.log({ RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
 
@@ -39,22 +43,22 @@ class GameSetupService {
             gameStats: players.map(p => ({ id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         }
 
-        newState.sessionChat.push({ id: null, name: 'Gamebot', message: 'Game started!' });
+        newState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
 
-        const sharedState: SharedState = {
+        const sharedStateProps: SharedState = {
             isStatusResponse: false,
             gameId: newState.gameId,
             gameStatus: 'started',
             gameResults: null,
             sessionOwner: newState.sessionOwner,
-            sessionChat: newState.sessionChat,
+            chat: newState.chat,
             availableSlots: [],
             players: this.assignTurnOneRules(players, privateState.moveRules, setupCoordinates),
-            marketOffer: marketData.marketOffer,
+            market: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
-            templeStatus: {
+            temple: {
                 maxLevel: privateState.costTiers.length,
-                tier: privateState.costTiers.shift() as MetalCostTier,
+                treasury: privateState.costTiers.shift()?.costs!,
                 levelCompletion: 0,
                 currentLevel: 0,
                 donations: [],
@@ -66,6 +70,8 @@ class GameSetupService {
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
         }
+
+        const sharedState = new SharedStateStore(sharedStateProps);
 
         return { sharedState, privateState };
     };
@@ -93,7 +99,7 @@ class GameSetupService {
         return [b1, b2];
     }
 
-    private determineLocations(): Record<HexId, LocationData> {
+    private determineLocations(): Record<ZoneName, LocationData> {
         const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
 
         if (locations.length !== 7) {
@@ -150,7 +156,7 @@ class GameSetupService {
                 const player = players.find(player => player.id === playerColor) as Player;
                 player.turnOrder = tokenCount;
                 player.isActive = tokenCount === 1;
-                player.hexagon.position = setupCoordinates.pop() as Coordinates;
+                player.bearings.position = setupCoordinates.pop() as Coordinates;
 
                 tokenCount -= 1;
             }
@@ -162,10 +168,10 @@ class GameSetupService {
         const initialRules = this.tools.getCopy(moveRules[0]);
 
         return sortedPlayers.map(player => {
-            player.hexagon.hexId = initialRules.from;
+            player.bearings.seaZone = initialRules.from;
             player.allowedMoves = initialRules.allowed;
 
-            if (debug_rich) {
+            if (RICH_PLAYERS) {
                 player.coins = 99;
                 player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
             }
@@ -227,10 +233,10 @@ class GameSetupService {
     }
 
     // MARK: Exchange
-    private filterCostTiers(playerCount: number): Array<MetalCostTier> {
+    private filterCostTiers(playerCount: number): Array<ExchangeTier> {
         const tiers = this.tools.getCopy(COST_TIERS);
 
-        if (debug_end) {
+        if (SHORT_GAME) {
             return [tiers[0]];
         }
 
