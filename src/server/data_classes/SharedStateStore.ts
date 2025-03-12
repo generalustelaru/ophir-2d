@@ -61,6 +61,7 @@ export class SharedStateStore {
     public getLocationName(hexId: ZoneName) {
         return this.setup.get().mapPairings[hexId].name;
     }
+
     public getSessionOwner() {
         return this.sessionOwner.get();
     }
@@ -129,6 +130,7 @@ export class SharedStateStore {
             return s;
         });
     }
+
     // MARK: Market
     public getMarket() {
         return this.market.get();
@@ -165,7 +167,7 @@ export class SharedStateStore {
     }
 
     public isDeckA() {
-        return this.market.get().deckId;
+        return this.market.get().deckId === 'A';
     }
 
     public markDeckB() {
@@ -204,16 +206,13 @@ export class SharedStateStore {
 
         this.temple.update(t => {
             t.donations.push(metal);
-
             if ((t.levelCompletion += 1) === 3) {
                 t.levelCompletion = 0;
                 t.currentLevel += 1;
                 isNewLevel = true;
             }
-
             if (t.currentLevel === t.maxLevel)
                 isTempleComplete = true;
-
             return t;
         });
 
