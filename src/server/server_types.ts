@@ -1,6 +1,6 @@
 import {
     BarrierId, ZoneName, PlayerColor, Player, NewState, Trade, LocationData,
-    TradeGood, GoodLocationName, MessagePayload, ExchangeTier
+    TradeGood, GoodsLocationName, MessagePayload, ExchangeTier
 } from '../shared_types';
 import { WebSocket } from 'ws';
 import { SharedStateStore } from './data_classes/SharedStateStore';
@@ -61,7 +61,7 @@ export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
     LOCATION_ACTIONS: Array<LocationData>,
-    LOCATION_GOODS: Record<GoodLocationName, TradeGood>,
+    LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
     DEFAULT_NEW_STATE: NewState,
     BARRIER_CHECKS: BarrierChecks,

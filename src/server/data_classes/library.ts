@@ -17,6 +17,17 @@ function deepCopy<T>(input: T): T {
     ) as T;
 }
 
+function valueExists(value: unknown) {
+    switch(true) {
+        case typeof value == 'number':
+            return true;
+        case Array.isArray(value):
+            return Boolean(value.length);
+        default:
+            return Boolean(value);
+    }
+}
+
 // MARK: PRIMITIVES
 
 export type Writable<T> = {
@@ -30,7 +41,7 @@ export type Writable<T> = {
  * @description
  * Creates a writable store primitive which can be used as is or wrapped in a store object to improve readability, customize methods, and enforce typing.
  * The parameter is copied, not referenced. **The store value is mutable**, but only through the methods provided and it can only be retrieved as a copy.
- * @method is() returns true if the store has a value, false if it is null or undefined.
+ * @method exists() returns true if the store has a value. Returns false on null, undefined, empty string, and empty array. True on empty object.
  * @method set() sets the store value to the input.
  * @method get() returns a copy of the store value.
  * @method update() sets the store value to the result of the input function, which takes the current store value as a parameter.
@@ -40,7 +51,7 @@ export function writable<T>(initialValue: T): Writable<T> {
     let value: T = deepCopy(initialValue);
 
     return {
-        exists: () => typeof value !== 'undefined',
+        exists: () => valueExists(value),
         set: (newVal: T) => value = deepCopy(newVal),
         get: () => deepCopy(value),
         update: (fn: Function): void => value = fn(deepCopy(value)),
@@ -49,21 +60,21 @@ export function writable<T>(initialValue: T): Writable<T> {
 }
 
 export type Readable<T> = {
-    is: () => boolean,
+    exists: () => boolean,
     get: () => T,
 }
 /**
  * @description
  * Creates a readable store primitive which can be used as is or wrapped in a store object to improve readability, customize methods, and enforce typing.
  * The parameter is copied, not referenced. **The store value is immutable** and can only be retrieved as a copy.
- * @method is() returns true if the store has a value, false if it is null or undefined.
+ * @method exists() returns true if the store has a value. Returns false on null, undefined, empty string, and empty array. True on empty object.
  * @method get() returns a copy of the store value.
 */
 export function readable<T>(initialValue: T): Readable<T> {
     const value: T = deepCopy(initialValue);
 
     return {
-        is: () => Boolean(value),
+        exists: () => valueExists(value),
         get: () => deepCopy(value),
     }
 }

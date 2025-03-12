@@ -53,7 +53,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         this.marketCard = new TempleMarketCard(
             stage,
             { x: this.group.width() - 62 - margin, y: 10 },
-            { action: 'trade_goods', payload: { slot: marketSlot, location: 'temple' } },
+            { action: 'trade', payload: { slot: marketSlot, location: 'temple' } },
             card,
         );
         this.templeTradeSlot = marketSlot;

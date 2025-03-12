@@ -2,8 +2,8 @@ import process from 'process';
 import { DataDigest, PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
     ZoneName, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction,
-    DiceSix, CargoInventory, MarketSlotKey, ItemName, GoodsTradePayload, Trade, LocationName,
-    GoodLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal,
+    DiceSix, CargoInventory, MarketSlotKey, ItemName, TradePayload, Trade, LocationName,
+    GoodsLocationName, MetalPurchasePayload, ChatEntry, ServerMessage, CargoMetal, Metal,
     ErrorResponse,
     MetalDonationPayload,
 } from "../../shared_types";
@@ -101,7 +101,7 @@ export class GameSession {
                 return this.processRepositioning(digest);
             case 'load_good':
                 return this.processLoadGood(digest);
-            case 'trade_goods':
+            case 'trade':
                 return this.processGoodsTrade(digest);
             case 'buy_metals':
                 return this.processMetalPurchase(digest);
@@ -159,9 +159,11 @@ export class GameSession {
         const destination = movementPayload.hexId;
         const locationName = this.state.getLocationName(destination);
         const remainingMoves = player.moveActions;
-        const hexMoveRule = this.privateState.moveRules.find(rule => rule.from === departure) as ProcessedMoveRule;
+        const moveRule = this.privateState.moveRules.find(
+            rule => rule.from === departure
+        ) as ProcessedMoveRule;
 
-        if (!hexMoveRule.allowed.includes(destination) || remainingMoves === 0) {
+        if (!moveRule.allowed.includes(destination) || remainingMoves === 0) {
             return this.errorResponse('Movement not alowed.', { destination, remainingMoves });
         }
 
@@ -279,7 +281,7 @@ export class GameSession {
         if (nonPickupLocations.includes(locationName))
             return this.errorResponse(`Cannot pick up goods from ${locationName}`);
 
-        const localGood = serverConstants.LOCATION_GOODS[locationName as GoodLocationName];
+        const localGood = serverConstants.LOCATION_GOODS[locationName as GoodsLocationName];
 
         if (localGood !== payload.tradeGood) {
             return this.errorResponse(
@@ -307,7 +309,7 @@ export class GameSession {
     // MARK: GOODS TRADE
     private processGoodsTrade(data: DataDigest): SharedState | ErrorResponse {
         const player = data.player;
-        const details = data.payload as GoodsTradePayload; // TODO: implement validation
+        const details = data.payload as TradePayload; // TODO: implement validation
         const { slot, location } = details;
 
         if (
@@ -369,7 +371,7 @@ export class GameSession {
         const tradeDeck = ((): Array<Trade> => {
 
             // Load trade deck B if required
-            if (this.privateState.tradeDeck.length === 0 && this.state.isDeckA() === 'A') {
+            if (this.privateState.tradeDeck.length === 0 && this.state.isDeckA()) {
                 this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
 
                 this.state.markDeckB();
