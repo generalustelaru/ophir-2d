@@ -2,7 +2,6 @@ import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
 
-    SERVER_NAME: 'Gamebot',
     TRADE_DECK_A: [
         { request: ['wood'], reward: { coins: 1, favorAndVp: 1 } },
         { request: ['wood', 'wood'], reward: { coins: 3, favorAndVp: 3 } },
@@ -108,7 +107,7 @@ const serverConstants: ServerConstants = {
         name: null,
         turnOrder: 0,
         isActive: false,
-        hexagon: { hexId: "center", position: {x: 0, y: 0}, location: null },
+        bearings: { seaZone: "center", position: {x: 0, y: 0}, location: null },
         favor: 2,
         privilegedSailing: false,
         influence: 1,
@@ -128,7 +127,7 @@ const serverConstants: ServerConstants = {
         gameStatus: 'empty',
         gameResults: null,
         sessionOwner: null,
-        sessionChat: [],
+        chat: [],
         availableSlots: [
             'Purple',
             'Yellow',
@@ -136,18 +135,42 @@ const serverConstants: ServerConstants = {
             'Green',
         ],
         players: [],
-        marketOffer: null,
-        templeStatus: null,
+        market: null,
+        temple: null,
         setup: null,
     },
 
     COST_TIERS: [
-        { templeLevel: 0, goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: [2, 3] },
-        { templeLevel: 1, goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3}, skipOnPlayerCounts: [] },
-        { templeLevel: 2, goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: [] },
-        { templeLevel: 3, goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3}, skipOnPlayerCounts: [] },
-        { templeLevel: 4, goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3}, skipOnPlayerCounts: [] },
-        { templeLevel: 5, goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3}, skipOnPlayerCounts: [2] },
+        {
+            templeLevel: 0,
+            skipOnPlayerCounts: [2, 3],
+            costs: { goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3} },
+        },
+        {
+            templeLevel: 1,
+            skipOnPlayerCounts: [],
+            costs: { goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3} },
+        },
+        {
+            templeLevel: 2,
+            skipOnPlayerCounts: [],
+            costs: { goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3} },
+        },
+        {
+            templeLevel: 3,
+            skipOnPlayerCounts: [],
+            costs: { goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3} },
+        },
+        {
+            templeLevel: 4,
+            skipOnPlayerCounts: [],
+            costs: { goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3} },
+        },
+        {
+            templeLevel: 5,
+            skipOnPlayerCounts: [2],
+            costs: { goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3} },
+        },
     ],
 }
 

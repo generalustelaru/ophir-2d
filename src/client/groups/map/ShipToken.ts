@@ -47,8 +47,8 @@ export class ShipToken implements DynamicGroupInterface<Player> {
     }
 
     public update(player: Player): void {
-        this.group.x(player.hexagon.position.x);
-        this.group.y(player.hexagon.position.y);
+        this.group.x(player.bearings.position.x);
+        this.group.y(player.bearings.position.y);
         this.ship.stroke(player.isActive ? COLOR.activeShipBorder : COLOR.shipBorder);
     };
 

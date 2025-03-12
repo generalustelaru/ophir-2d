@@ -1,5 +1,5 @@
 import Konva from "konva"
-import { Coordinates, TempleStatus } from "../../../shared_types"
+import { Coordinates, TempleState } from "../../../shared_types"
 import { DynamicGroupInterface, } from "../../client_types"
 import { TempleLevelDial } from "./TempleLevelDial";
 import clientConstants from "../../client_constants";
@@ -15,7 +15,7 @@ const LEVEL_DIAL_DRIFTS = [
     {id: 5, x: UNIT * 5},
     {id: 6, x: UNIT * 6},
 ];
-export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
+export class MetalDonationsBand implements DynamicGroupInterface<TempleState> {
 
     private group: Konva.Group;
     private cargoDisplayGroup: Konva.Group;
@@ -66,7 +66,7 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleStatus> {
         return this.group;
     }
 
-    update(status: TempleStatus): void {
+    update(status: TempleState): void {
         this.levelDials.forEach(dial => dial.getElement().destroy());
         this.levelDials = [];
         const donationsCount = status.donations.length;

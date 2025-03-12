@@ -92,7 +92,7 @@ export class MapGroup implements MegaGroupInterface {
         players.forEach(player => {
 
             if (player.id && player.id !== state.local.playerColor) {
-                const shipPosition = player.hexagon.position;
+                const shipPosition = player.bearings.position;
                 const ship = new ShipToken(
                     shipPosition.x,
                     shipPosition.y,
@@ -110,7 +110,7 @@ export class MapGroup implements MegaGroupInterface {
         }
 
         //MARK: player ship
-        const shipPosition = localPlayer?.hexagon.position;
+        const shipPosition = localPlayer?.bearings.position;
 
         if (!shipPosition) {
             throw new Error('Missing player data!');
@@ -169,7 +169,7 @@ export class MapGroup implements MegaGroupInterface {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
             localShip.switchHighlight(localPlayer.isActive);
-            localShip.update(localPlayer.hexagon.position);
+            localShip.update(localPlayer.bearings.position);
         }
     }
 
@@ -205,7 +205,7 @@ export class MapGroup implements MegaGroupInterface {
                 default: return 0;
             }
         })();
-        const currentLevel = state.received.templeStatus?.currentLevel || 0;
+        const currentLevel = state.received.temple?.currentLevel || 0;
         const templeData = TEMPLE_CONSTRUCTION_DATA.find(
             item => item.shapeId == currentLevel + skipCount
         );

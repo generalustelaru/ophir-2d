@@ -1,10 +1,10 @@
-import { HexId, PlayerColor, SharedState, Coordinates, LocationName, ItemName, NewState, Trade, MarketOffer, Player,
-    Metal, MetalCostTier, Currency, TempleStatus, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
+import { ZoneName, PlayerColor, SharedState, Coordinates, LocationName, ItemName, NewState, Trade, MarketOffer, Player,
+    Metal, ExchangeState, Currency, TempleState, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
 } from '../shared_types';
 import Konva from 'konva';
 
 export type Color = `#${string}`;
-export type HexOffset = { id: HexId, x: number, y: number };
+export type HexOffset = { id: ZoneName, x: number, y: number };
 export type LocationIconData = { shape: string, fill: Color };
 export type TempleIconData = { shapeId: number, icon: LocationIconData };
 export type PathData = { shape: string, fill: Color };
@@ -28,7 +28,7 @@ export type ClientConstants = {
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
-    ISLAND_DATA: Record<HexId, IslandData>,
+    ISLAND_DATA: Record<ZoneName, IslandData>,
     LOCATION_TOKEN_DATA: Record<LocationName, LocationIconData>,
     TEMPLE_CONSTRUCTION_DATA: Array<TempleIconData>
     SHIP_DATA: {
@@ -83,7 +83,7 @@ export type MarketUpdate = {
 
 export type TreasuryUpdate = {
     localPlayer: Player | null,
-    tier: MetalCostTier,
+    tier: ExchangeState,
 }
 
 export type TreasuryCardUpdate = {
@@ -93,7 +93,7 @@ export type TreasuryCardUpdate = {
 
 export type TempleUpdate = {
     trade: Trade,
-    templeStatus: TempleStatus,
+    templeStatus: TempleState,
     localPlayer: Player | null,
 }
 

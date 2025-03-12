@@ -161,7 +161,7 @@ class UserInterfaceClass extends Communicator {
     }
 
     public updateControls(): void {
-        this.updateChat(state.received.sessionChat);
+        this.updateChat(state.received.chat);
         this.disableButtons();
 
         if(state.local.playerColor){

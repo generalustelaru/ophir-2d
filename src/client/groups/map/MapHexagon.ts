@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { Coordinates, HexId, DiceSix, Player, LocationName } from '../../../shared_types';
+import { Coordinates, ZoneName, DiceSix, Player, LocationName } from '../../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, LocationIconData } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
@@ -25,7 +25,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
     constructor(
         stage: Konva.Stage,
         center: Coordinates,
-        name: HexId,
+        name: ZoneName,
         offsetX:number,
         offsetY:number,
         island: IslandData,
@@ -91,7 +91,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
     update(update: HexUpdate): void {
         const localPlayer = update.player;
         const canAct = (
-            localPlayer?.hexagon.hexId === this.getId()
+            localPlayer?.bearings.seaZone === this.getId()
             && localPlayer.isActive
             && !!localPlayer.locationActions
             && localPlayer.isAnchored
@@ -112,8 +112,8 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
     public getElement(): Konva.Group {
         return this.group;
     }
-    public getId(): HexId {
-        return this.group.attrs.id as HexId;
+    public getId(): ZoneName {
+        return this.group.attrs.id as ZoneName;
     }
 
     public getTokenId(): LocationName {

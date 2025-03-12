@@ -36,7 +36,7 @@ export class LocationGroup implements MegaGroupInterface {
             this.stage,
             state.received.setup.marketFluctuations,
             state.received.setup.templeTradeSlot,
-            state.received.marketOffer,
+            state.received.market,
             {
                 width: this.group.width(),
                 height: heightSegment * 3,
@@ -53,20 +53,20 @@ export class LocationGroup implements MegaGroupInterface {
                 x: 0,
                 y: this.marketPlacard.getElement().height(),
             },
-            { localPlayer: localPlayer, tier: state.received.templeStatus.tier }
+            { localPlayer: localPlayer, tier: state.received.temple.treasury }
         );
 
         this.templePlacard = new TemplePlacard(
             this.stage,
             state.received.setup.templeTradeSlot,
-            state.received.marketOffer,
+            state.received.market,
             {
                 width: this.group.width(),
                 height: heightSegment * 4,
                 x: 0,
                 y: this.marketPlacard.getElement().height() + this.treasuryPlacard.getElement().height(),
             },
-            state.received.templeStatus.maxLevel
+            state.received.temple.maxLevel
         );
 
         this.group.add(
@@ -80,7 +80,7 @@ export class LocationGroup implements MegaGroupInterface {
 
         const sharedState = state.received;
         const activePlayer = sharedState.players.find(player => player.isActive);
-        const marketOffer = sharedState.marketOffer
+        const marketOffer = sharedState.market
         if (!activePlayer || !marketOffer) {
             throw new Error(`Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`);
         }
@@ -92,14 +92,14 @@ export class LocationGroup implements MegaGroupInterface {
         }
         const templeUpdate: TempleUpdate = {
             localPlayer: localPlayer ?? null,
-            templeStatus: sharedState.templeStatus,
-            trade: sharedState.marketOffer[sharedState.setup.templeTradeSlot],
+            templeStatus: sharedState.temple,
+            trade: sharedState.market[sharedState.setup.templeTradeSlot],
         }
 
         this.marketPlacard?.update(marketUpdate);
         this.treasuryPlacard?.update({
             localPlayer: localPlayer ?? null,
-            tier: sharedState.templeStatus.tier
+            tier: sharedState.temple.treasury,
         });
         this.templePlacard?.update(templeUpdate);
     }
