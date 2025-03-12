@@ -97,6 +97,10 @@ export type ClientIdResponse = {
 export type ErrorResponse = {
     error: string,
 }
+
+export type StateResponse = {
+    state: SharedState | NewState
+}
 /**
  * @description Shared between players and server in a session
  */
@@ -133,7 +137,7 @@ export type ResetResponse = {
     resetFrom: string | PlayerColor,
 }
 
-export type ServerMessage = ClientIdResponse | SharedState | NewState | ResetResponse | ErrorResponse;
+export type ServerMessage = ClientIdResponse | StateResponse | ResetResponse | ErrorResponse;
 
 export type LocationData = {
     name: LocationName,

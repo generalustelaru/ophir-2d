@@ -1,4 +1,7 @@
-import { ClientIdResponse, ErrorResponse, SharedState, ClientRequest, ClientMessage, ServerMessage, ResetResponse } from '../../shared_types';
+import {
+    ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
+    ResetResponse, StateResponse
+} from '../../shared_types';
 import { Communicator } from './Communicator';
 import state from '../state';
 
@@ -72,8 +75,8 @@ class CommunicationClass extends Communicator {
                 return;
             }
 
-            if (this.isSharedState(data)) {
-                state.received = data;
+            if (this.isStateResponse(data)) {
+                state.received = data.state;
                 this.broadcastEvent({ type: 'update', detail: null });
 
                 return;
@@ -115,9 +118,9 @@ class CommunicationClass extends Communicator {
     public clearStatusCheck() {
         if (this.statusInterval) clearInterval(this.statusInterval);
     }
-    // TODO: Look for a more thorough solution for type-guarding
-    private isSharedState(data: ServerMessage): data is SharedState {
-        return 'gameStatus' in data;
+
+    private isStateResponse(data: ServerMessage): data is StateResponse {
+        return 'state' in data;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
