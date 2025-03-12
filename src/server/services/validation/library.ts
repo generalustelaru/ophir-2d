@@ -166,5 +166,6 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
 }
 
 export const lib = {
+    isObject,
     evaluateObject,
 }

@@ -8,14 +8,16 @@ import {
     RepositioningPayload,
     DropItemPayload,
     LoadGoodPayload,
+    TradePayload,
+    MetalPurchasePayload,
+    MetalDonationPayload,
 } from "../../../shared_types";
-import { lib } from "./library"
+import { lib, ObjectTests } from "./library"
 
 export class ValidatorService {
 
-    public validateClientRequest(request: unknown): ClientRequest | null {
-
-        const requestErrors = lib.evaluateObject(
+    public validateClientRequest(request: unknown) {
+        const clientRequest = this.validateObject<ClientRequest>(
             'ClientRequest',
             request,
             [
@@ -27,48 +29,34 @@ export class ValidatorService {
             ]
         );
 
-        if (requestErrors.length) {
-            this.logErrors(requestErrors);
-
+        if (!clientRequest)
             return null;
-        }
 
-        const messageErrors = lib.evaluateObject(
+        const message = this.validateObject(
             'ClientMessage',
-            (request as object)['message' as keyof object],
+            clientRequest.message,
             [
                 { key: 'action', type: 'string', nullable: false },
                 { key: 'payload', type: 'object', nullable: true },
             ]
         );
 
-        if (messageErrors.length) {
-            this.logErrors(messageErrors);
-
+        if (!message)
             return null;
-        }
 
-        return request as ClientRequest;
+        return clientRequest;
     }
 
-    public validateChatPayload(payload: object | null): ChatPayload | null {
-        const errors = lib.evaluateObject(
+    public validateChatPayload(payload: unknown) {
+        return this.validateObject<ChatPayload>(
             'ChatPayload',
             payload,
             [{ key: 'input', type: 'string', nullable: false }],
         );
-
-        if (errors.length) {
-            this.logErrors(errors);
-
-            return null;
-        }
-
-        return payload as ChatPayload;
     }
 
-    public validateRebindClientPayload(payload: object | null): RebindClientPayload | null {
-        const errors = lib.evaluateObject(
+    public validateRebindClientPayload(payload: unknown) {
+        return this.validateObject<RebindClientPayload>(
             'RebindClientPayload',
             payload,
             [
@@ -76,18 +64,10 @@ export class ValidatorService {
                 { key: 'myId', type: 'string', nullable: false },
             ],
         );
-
-        if (errors.length) {
-            this.logErrors(errors);
-
-            return null;
-        }
-
-        return payload as RebindClientPayload;
     }
 
-    public validateMovementPayload(payload: object | null): MovementPayload | null {
-        const payloadErrors = lib.evaluateObject(
+    public validateMovementPayload(payload: unknown) {
+        const movementPayload = this.validateObject<MovementPayload>(
             'MovementPayload',
             payload,
             [
@@ -96,59 +76,42 @@ export class ValidatorService {
             ],
         );
 
-        if (payloadErrors.length) {
-            this.logErrors(payloadErrors);
-
-            return null;
-        }
-
-        const movementPayload = payload as MovementPayload;
-        const position = this.validateCoordinates(movementPayload.position);
-
-        if (!position)
+        if (
+            !movementPayload
+            || !this.validateCoordinates(movementPayload.position)
+        )
             return null;
 
         return movementPayload;
     }
 
-    public validateRepositioningPayload(payload: object | null): RepositioningPayload | null {
-        const payloadErrors = lib.evaluateObject(
+    public validateRepositioningPayload(payload: unknown) {
+        const repositioningPayload = this.validateObject<RepositioningPayload>(
             'RepositioningPayload',
             payload,
             [{ key: 'repositioning', type: 'object', nullable: false }],
         );
 
-        if (payloadErrors.length) {
-            this.logErrors(payloadErrors);
-
-            return null;
-        }
-
-        const repositioningPayload = payload as RepositioningPayload;
-
-        if (!this.validateCoordinates(repositioningPayload.repositioning)) {
+        if (
+            !repositioningPayload
+            || !this.validateCoordinates(repositioningPayload.repositioning)
+        ) {
             return null;
         }
 
         return repositioningPayload;
     }
 
-    public validateGameSetupPayload(payload: object | null): GameSetupPayload | null {
-        const gameSetupPayloadErrors = lib.evaluateObject(
+    public validateGameSetupPayload(payload: unknown) {
+        const gameSetupPayload = this.validateObject<GameSetupPayload>(
             'GameSetupPayload',
             payload,
-            [
-                { key: 'setupCoordinates', type: 'array', nullable: false }
-            ],
+            [{ key: 'setupCoordinates', type: 'array', nullable: false }],
         )
 
-        if (gameSetupPayloadErrors.length) {
-            this.logErrors(gameSetupPayloadErrors);
-
+        if (!gameSetupPayload) {
             return null;
         }
-
-        const gameSetupPayload = payload as GameSetupPayload
 
         const coordinatesAreValid = gameSetupPayload.setupCoordinates
             .every(value => !!this.validateCoordinates(value));
@@ -159,41 +122,55 @@ export class ValidatorService {
         return gameSetupPayload;
     }
 
-    public validateLoadGoodPayload(payload: object | null): LoadGoodPayload | null {
-        const loadGoodPayloadErrors = lib.evaluateObject(
+    public validateLoadGoodPayload(payload: unknown) {
+        return this.validateObject<LoadGoodPayload>(
             'LoadGoodPayload',
             payload,
             [{ key: 'tradeGood', type: 'string', nullable: false }],
         );
-
-        if (loadGoodPayloadErrors.length) {
-            this.logErrors(loadGoodPayloadErrors);
-
-            return null;
-        }
-
-        return payload as LoadGoodPayload;
     }
 
-    public validateDropItemPayload(payload: object | null): DropItemPayload | null {
-        const dropItemPayloadErrors = lib.evaluateObject(
+    public validateTradePayload(payload: unknown) {
+        return this.validateObject<TradePayload>(
+            'TradePayload',
+            payload,
+            [
+                { key: 'slot', type: 'string', nullable: false },
+                { key: 'location', type: 'string', nullable: false },
+            ],
+        );
+    }
+
+    public validateMetalPurchasePayload(payload: unknown) {
+        return this.validateObject<MetalPurchasePayload>(
+            'MetalPurchasePayload',
+            payload,
+            [
+                { key: 'metal', type: 'string', nullable: false },
+                { key: 'currency', type: 'string', nullable: false },
+            ],
+        );
+    }
+
+    public validateMetalDonationPayload(payload: unknown) {
+        return this.validateObject<MetalDonationPayload>(
+            'MetalDonationPayload',
+            payload,
+            [{ key: 'metal', type: 'string', nullable: false }],
+        );
+    }
+
+    public validateDropItemPayload(payload: unknown) {
+        return this.validateObject<DropItemPayload>(
             'DropItemPayload',
             payload,
             [{ key: 'item', type: 'string', nullable: false }],
         );
-
-        if (dropItemPayloadErrors.length) {
-            this.logErrors(dropItemPayloadErrors);
-
-            return null;
-        }
-
-        return payload as DropItemPayload;
     }
 
     // MARK: PRIVATE
-    private validateCoordinates(value: unknown): Coordinates | null {
-        const errors = lib.evaluateObject(
+    private validateCoordinates(value: unknown) {
+        return this.validateObject<Coordinates>(
             'Coordinates',
             value,
             [
@@ -201,14 +178,6 @@ export class ValidatorService {
                 { key: 'y', type: 'number', nullable: false },
             ],
         );
-
-        if (errors.length) {
-            this.logErrors(errors);
-
-            return null;
-        }
-
-        return value as Coordinates;
     }
 
     // MARK: UTILITY
@@ -217,5 +186,22 @@ export class ValidatorService {
         errors.forEach(error => {
             console.error(error);
         });
+    }
+
+    /**
+     * @description Wrapper over `evaluateObject`, also logs errors.
+     * @param objectType Only for errror logging
+     * @returns typed object or `null`
+     */
+    private validateObject<T>(objectType: string, value: unknown, tests: ObjectTests) {
+        const errors = lib.evaluateObject(objectType, value, tests);
+
+        if (errors.length) {
+            this.logErrors(errors);
+
+            return null;
+        }
+
+        return value as T;
     }
 }

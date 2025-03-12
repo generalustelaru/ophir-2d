@@ -161,7 +161,10 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === 'inquire') {
-            send(socket, singleSession?.getState() || lobbyState);
+            const stateResponse = {
+                state: singleSession?.getState() || lobbyState,
+            };
+            send(socket, stateResponse);
 
             return;
         }
@@ -177,7 +180,7 @@ socketServer.on('connection', function connection(socket) {
             if (processPlayer(playerColor, playerName)) {
                 addServerMessage(`${playerName ?? playerColor} has joined the game`);
                 lobbyState.gameId = randomUUID();
-                sendAll(lobbyState);
+                sendAll({state: lobbyState});
             } else {
                 send(socket, { error: `Enrollment failed on ${playerColor}` });
             }
@@ -198,7 +201,7 @@ socketServer.on('connection', function connection(socket) {
                 name: playerName ?? playerColor,
                 message: chatMessage.input,
             });
-            sendAll(lobbyState);
+            sendAll({ state: lobbyState });
 
             return;
         }
@@ -216,7 +219,7 @@ socketServer.on('connection', function connection(socket) {
 
             if (sessionCreated && singleSession) {
                 console.log('Game started');
-                sendAll(singleSession.getState());
+                sendAll({ state: singleSession.getState() });
             } else {
                 sendAll({ error: 'Game start failed' });
             }
