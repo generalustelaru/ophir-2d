@@ -1,3 +1,4 @@
+import { Action } from "../shared_types";
 import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
@@ -84,13 +85,13 @@ const serverConstants: ServerConstants = {
     ],
 
     LOCATION_ACTIONS: [
-        {name: 'temple', actions: ['upgrade_hold', 'trade_goods', 'donate_metals']},
-        {name: 'market', actions: ['trade_goods']},
-        {name: 'treasury', actions: ['buy_metals']},
-        {name: 'quary', actions: ['load_good']},
-        {name: 'forest', actions: ['load_good']},
-        {name: 'mines', actions: ['load_good']},
-        {name: 'farms', actions: ['load_good']},
+        {name: 'temple', actions: [Action.upgrade_cargo, Action.make_trade, Action.donate_metals]},
+        {name: 'market', actions: [Action.make_trade]},
+        {name: 'treasury', actions: [Action.buy_metals]},
+        {name: 'quary', actions: [Action.load_good]},
+        {name: 'forest', actions: [Action.load_good]},
+        {name: 'mines', actions: [Action.load_good]},
+        {name: 'farms', actions: [Action.load_good]},
     ],
 
     LOCATION_GOODS: {

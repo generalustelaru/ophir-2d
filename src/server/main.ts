@@ -5,6 +5,7 @@ import serverConstants from './server_constants';
 import {
     PlayerColor, NewState, GameSetupPayload, GameStatus, ChatEntry,
     ClientIdResponse, ServerMessage, ResetResponse,
+    Action,
 } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
 import { gameSetupService } from './services/GameSetupService';
@@ -126,7 +127,7 @@ socketServer.on('connection', function connection(socket) {
         }
         const clientName = playerColor ? colorized[playerColor] : 'anon';
 
-        if (action !== 'get_status') {
+        if (action !== Action.get_status) {
             console.info(
                 '%s -> %s%s',
                 clientName,
@@ -135,7 +136,7 @@ socketServer.on('connection', function connection(socket) {
             );
         }
 
-        if (action === 'rebind_id') {
+        if (action === Action.rebind_id) {
             const rebindPayload = validator.validateRebindClientPayload(payload)
 
             if (!rebindPayload) {
@@ -160,7 +161,7 @@ socketServer.on('connection', function connection(socket) {
             return;
         }
 
-        if (action === 'inquire') {
+        if (action === Action.inquire) {
             const stateResponse = {
                 state: singleSession?.getState() || lobbyState,
             };
@@ -169,7 +170,7 @@ socketServer.on('connection', function connection(socket) {
             return;
         }
 
-        if (action === 'enroll') {
+        if (action === Action.enroll) {
 
             if (!playerHasUniqueName(playerName)) {
                 send(socket, { error: 'This name is already taken' });
@@ -188,7 +189,7 @@ socketServer.on('connection', function connection(socket) {
             return;
         }
 
-        if (action === 'chat' && !singleSession) {
+        if (action === Action.chat && !singleSession) {
             const chatMessage = validator.validateChatPayload(payload);
 
             if (!chatMessage) {
@@ -206,7 +207,7 @@ socketServer.on('connection', function connection(socket) {
             return;
         }
 
-        if (action === 'start') {
+        if (action === Action.start) {
             const setupDetails = validator.validateGameSetupPayload(payload);
 
             if (!setupDetails) {
@@ -227,7 +228,7 @@ socketServer.on('connection', function connection(socket) {
             return;
         }
 
-        if (action === 'reset') {
+        if (action === Action.reset) {
             if (!singleSession || singleSession.getSessionOwner() !== playerColor) {
                 send(socket, { error: 'Only session owner may reset.'});
 

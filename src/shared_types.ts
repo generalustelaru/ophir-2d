@@ -1,5 +1,27 @@
 import { PlayerCountables } from "./server/server_types";
 
+/**
+ * @description Action strings require detailed standardization as they appear in intersecting types.
+ */
+export enum Action {
+    chat = 'chat',
+    start = 'start',
+    move = 'move',
+    load_good = 'load_good',
+    drop_item = 'drop_item',
+    reposition = 'reposition',
+    make_trade = 'make_trade',
+    buy_metals = 'buy_metals',
+    donate_metals = 'donate_metals',
+    rebind_id = 'rebind_id',
+    inquire = "inquire",
+    enroll = "enroll",
+    end_turn = "end_turn",
+    reset = "reset",
+    spend_favor = "spend_favor",
+    upgrade_cargo = 'upgrade_cargo',
+    get_status = 'get_status',
+}
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type Coordinates = { x: number, y: number };
@@ -11,7 +33,9 @@ export type CargoMetal = Metal | "silver_extra" | "gold_extra";
 export type Currency = "coins" | "favor";
 export type GoodsLocationName = "quary" | "forest" | "mines" | "farms";
 export type LocationName = "temple" | "market" | "treasury" | GoodsLocationName;
-export type LocationAction = "upgrade_hold" | "trade_goods" | "buy_metals" | "load_good" | "donate_metals";
+export type LocationAction =
+    | Action.upgrade_cargo | Action.make_trade | Action.buy_metals
+    | Action.load_good | Action.donate_metals;
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
 export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
@@ -150,6 +174,9 @@ export type GameSetup = {
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
 }
+
+// MARK: COMMUNICATION
+
 export type ChatPayload = { input: string }
 export type MovementPayload = { hexId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
@@ -161,37 +188,40 @@ export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type RebindClientPayload = { referenceId: string, myId: string }
 
-type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
-    action: A,
-    payload: P,
-}
-export type MessageAction = LaconicAction | VerboiseAction
-
-export type VerboiseAction =
-    | 'chat' | 'start' | 'move' | 'load_good' | 'drop_item' | 'reposition'
-    | 'trade' | 'buy_metals' | 'donate_metals' | 'rebind_id';
-export type LaconicAction =
-    | "inquire" | "enroll" | "end_turn" | "reset" | "spend_favor"
-    | 'upgrade_hold' | 'get_status';
-export type LaconicMessage = MessageFormat<LaconicAction, null>;
-export type ChatMessage = MessageFormat<'chat', ChatPayload>;
-export type StartMessage = MessageFormat<'start', GameSetupPayload>;
-export type MoveMessage = MessageFormat<'move', MovementPayload>;
-export type LoadGoodMessage = MessageFormat<'load_good', LoadGoodPayload>;
-export type DropItemMessage = MessageFormat<'drop_item', DropItemPayload>;
-export type RepositionMessage = MessageFormat<'reposition', RepositioningPayload>;
-export type TradeMessage = MessageFormat<'trade', TradePayload>;
-export type BuyMetalsMessage = MessageFormat<'buy_metals', MetalPurchasePayload>;
-export type DonateMetalMessage = MessageFormat<'donate_metals', MetalDonationPayload>;
-export type RebindIdMessage = MessageFormat<'rebind_id', RebindClientPayload>;
-export type ClientMessage =
-    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage
-    | RepositionMessage | TradeMessage | BuyMetalsMessage | DonateMetalMessage
-    | ChatMessage | RebindIdMessage;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
     | RepositioningPayload | TradePayload | MetalPurchasePayload
     | MetalDonationPayload | RebindClientPayload | LoadGoodPayload;
+
+export type MessageAction = LaconicAction | VerboiseAction
+type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
+    action: A,
+    payload: P,
+}
+
+
+export type VerboiseAction =
+    | Action.chat | Action.start | Action.move | Action.load_good | Action.drop_item | Action.reposition
+    | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.rebind_id;
+export type LaconicAction =
+    | Action.inquire | Action.enroll | Action.end_turn | Action.reset | Action.spend_favor
+    | Action.upgrade_cargo | Action.get_status;
+export type LaconicMessage = MessageFormat<LaconicAction, null>;
+export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
+export type StartMessage = MessageFormat<Action.start, GameSetupPayload>;
+export type MoveMessage = MessageFormat<Action.move, MovementPayload>;
+export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
+export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
+export type RepositionMessage = MessageFormat<Action.reposition, RepositioningPayload>;
+export type TradeMessage = MessageFormat<Action.make_trade, TradePayload>;
+export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
+export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonationPayload>;
+export type RebindIdMessage = MessageFormat<Action.rebind_id, RebindClientPayload>;
+export type ClientMessage =
+    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage
+    | RepositionMessage | TradeMessage | BuyMetalsMessage | DonateMetalMessage
+    | ChatMessage | RebindIdMessage;
+
 export type ClientRequest = {
     gameId: string | null,
     clientId: string | null,

@@ -3,7 +3,7 @@ import { DynamicGroupInterface, TreasuryCardUpdate } from "../../client_types";
 import { ActionButton } from "../ActionButton";
 import { CoinDial, FavorDial } from "../GroupList";
 import clientConstants from "../../client_constants";
-import { Coordinates } from "../../../shared_types";
+import { Coordinates, Action } from "../../../shared_types";
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
@@ -20,7 +20,7 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
             stage,
             { width: 66, height: 96, x: position.x, y: position.y },
             {
-                action: 'buy_metals',
+                action: Action.buy_metals,
                 payload: { metal: update.treasury.metal, currency: update.treasury.currency }
             });
 

@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "../../client_types";
 import clientConstants from "../../client_constants";
-import { MarketSlotKey, MarketOffer } from "../../../shared_types";
+import { MarketSlotKey, MarketOffer, Action } from "../../../shared_types";
 import { UpgradeButton, TempleMarketCard, TempleDonationCard, MetalDonationsBand } from "../GroupList";
 
 const { COLOR } = clientConstants;
@@ -53,7 +53,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         this.marketCard = new TempleMarketCard(
             stage,
             { x: this.group.width() - 62 - margin, y: 10 },
-            { action: 'trade', payload: { slot: marketSlot, location: 'temple' } },
+            { action: Action.make_trade, payload: { slot: marketSlot, location: 'temple' } },
             card,
         );
         this.templeTradeSlot = marketSlot;
@@ -101,19 +101,19 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
                 playerCanAct
                 && localPlayer.bearings.location === 'temple'
                 && localPlayer.feasibleTrades.includes(this.templeTradeSlot)
-                && !!localPlayer.locationActions?.includes('trade_goods')
+                && !!localPlayer.locationActions?.includes(Action.make_trade)
             )
         });
 
         this.upgradeButton.update((
             playerCanAct
-            && !!localPlayer.locationActions?.includes('upgrade_hold')
+            && !!localPlayer.locationActions?.includes(Action.upgrade_cargo)
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
         ));
 
         const playerCanDonateMetals = (
-            playerCanAct && !!localPlayer.locationActions?.includes('donate_metals')
+            playerCanAct && !!localPlayer.locationActions?.includes(Action.donate_metals)
         );
 
         this.goldDonationCard.update((

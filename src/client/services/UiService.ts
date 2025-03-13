@@ -1,4 +1,4 @@
-import { PlayerColor, NewState, ChatEntry } from '../../shared_types';
+import { PlayerColor, NewState, ChatEntry, Action } from '../../shared_types';
 
 import { Communicator } from './Communicator';
 import state from '../state';
@@ -76,7 +76,7 @@ class UserInterfaceClass extends Communicator {
         return this.broadcastEvent({
             type: 'action',
             detail: {
-                action: 'chat',
+                action: Action.chat,
                 payload: { input: message },
             },
         });
@@ -105,14 +105,14 @@ class UserInterfaceClass extends Communicator {
     private processStart = (): void => {
         this.startButton.disable();
 
-        return this.broadcastEvent({ type: 'start', detail: null });
+        return this.broadcastEvent({ type: Action.start, detail: null });
     }
 
     private processReset = (): void => {
 
         return this.broadcastEvent({
             type: 'action',
-            detail: { action: 'reset', payload: null }
+            detail: { action: Action.reset , payload: null }
         });
     }
 
@@ -131,7 +131,7 @@ class UserInterfaceClass extends Communicator {
 
             return this.broadcastEvent({
                 type: 'action',
-                detail: { action: 'enroll', payload: null }
+                detail: { action: Action.enroll, payload: null }
             });
         }
 

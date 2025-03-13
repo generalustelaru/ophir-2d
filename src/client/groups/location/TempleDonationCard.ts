@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { Coordinates, Metal } from "../../../shared_types";
+import { Action, Coordinates, Metal } from "../../../shared_types";
 import { DynamicGroupInterface } from "../../client_types";
 import { ActionButton } from "../ActionButton";
 import clientConstants from "../../client_constants";
@@ -17,7 +17,7 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
         super(
             stage,
             { x: position.x, y: position.y, width: 66, height: 96 },
-            { action: 'donate_metals', payload: { metal: metalType } },
+            { action: Action.donate_metals, payload: { metal: metalType } },
         );
 
         this.background = new Konva.Rect({

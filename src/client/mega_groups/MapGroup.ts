@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, GameSetupPayload, LocationName, PlayerColor, SharedState } from '../../shared_types';
+import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, SharedState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import state from '../state';
@@ -44,13 +44,13 @@ export class MapGroup implements MegaGroupInterface {
         this.endTurnButton = new EndTurnButton(
             this.stage,
             this.group,
-            { action: 'end_turn', payload: null },
+            { action: Action.end_turn, payload: null },
             isActivePlayer,
         );
 
         this.favorButton = new FavorButton(
             this.stage,
-            { action: 'spend_favor', payload: null },
+            { action: Action.spend_favor, payload: null },
             localPlayer || null,
             { width: 50, height: 50, x: 500, y: 70 },
         );

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { LocationIconData, DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { LocationName, TradeGood } from '../../../shared_types';
+import { Action, LocationName, TradeGood } from '../../../shared_types';
 
 type LocationTokenUpdate = {
     mayPickup: boolean
@@ -32,7 +32,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
             stage,
             { width: 100, height: 100, x: 0, y: 0 },
             goodToPickup
-                ? { action: 'load_good', payload: { tradeGood: goodToPickup } }
+                ? { action: Action.load_good, payload: { tradeGood: goodToPickup } }
                 : null,
         );
 

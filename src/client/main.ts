@@ -4,7 +4,7 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterfaceService } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { SharedState, ClientMessage, ResetResponse } from "../shared_types";
+import { Action, SharedState, ClientMessage, ResetResponse } from "../shared_types";
 
 //@ts-ignore
 let stateDebug: SharedState | null = null;
@@ -27,9 +27,9 @@ window.addEventListener('action', (event: CustomEventInit) => {
 });
 
 //Send start message to server
-window.addEventListener('start', () => {
+window.addEventListener(Action.start, () => {
     const message: ClientMessage = {
-        action: 'start',
+        action: Action.start,
         payload: CanvasService.getSetupCoordinates()
     }
     CommunicationService.sendMessage(message);
@@ -44,7 +44,7 @@ window.addEventListener('error', (event: CustomEventInit) => {
 
 // Get server data on connection
 window.addEventListener('connected', () => {
-    CommunicationService.sendMessage({ action: 'inquire', payload: null })
+    CommunicationService.sendMessage({ action: Action.inquire, payload: null })
 });
 
 window.addEventListener('timeout', () => {
@@ -69,7 +69,7 @@ window.addEventListener('identification', (event: CustomEventInit) => {
     sessionStorage.setItem('localState', JSON.stringify(state.local));
 });
 
-window.addEventListener('reset', (event: CustomEventInit) => {
+window.addEventListener(Action.reset, (event: CustomEventInit) => {
     const response: ResetResponse = event.detail;
     sessionStorage.removeItem('localState');
     alert(`The game has been reset by ${response.resetFrom}`);

@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { Coordinates, ZoneName, DiceSix, Player, LocationName } from '../../../shared_types';
+import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action } from '../../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, LocationIconData } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
@@ -102,7 +102,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         this.location.update({
             mayPickup: (
                 canAct
-                && !!localPlayer.locationActions?.includes('load_good')
+                && !!localPlayer.locationActions?.includes(Action.load_good)
                 && localPlayer.cargo.includes('empty')
             ),
             templeIcon: update.templeIcon,
