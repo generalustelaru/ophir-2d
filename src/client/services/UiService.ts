@@ -1,5 +1,4 @@
 import { PlayerColor, NewState, ChatEntry, Action } from '../../shared_types';
-
 import { Communicator } from './Communicator';
 import state from '../state';
 import { Button } from '../html_behaviors/button';
@@ -8,6 +7,7 @@ import { ChatInput } from '../html_behaviors/ChatInput';
 import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
 
+const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 class UserInterfaceClass extends Communicator {
 
     private createButton: Button;
@@ -193,7 +193,7 @@ class UserInterfaceClass extends Communicator {
         // session owner
         if (state.received.sessionOwner === state.local.playerColor) {
 
-            if (state.received.players.length > 1) {
+            if (state.received.players.length > 1 || SINGLE_PLAYER) {
                 this.enableElements(this.startButton, this.resetButton);
 
                 return this.setInfo('You may start whenever you want');
