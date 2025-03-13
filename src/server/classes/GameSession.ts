@@ -4,8 +4,7 @@ import {
     ZoneName, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction,
     DiceSix, CargoInventory, MarketSlotKey, ItemName, Trade, LocationName,
     GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal,
-    ErrorResponse,
-    StateResponse,
+    ErrorResponse, StateResponse, Action,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
@@ -71,7 +70,7 @@ export class GameSession {
         const { playerColor, message } = request;
         const { action, payload } = message;
 
-        if (action === 'get_status') {
+        if (action === Action.get_status) {
             return this.processStatusRequest();
         }
 
@@ -91,27 +90,27 @@ export class GameSession {
         const digest: DataDigest = { player , payload }
 
         switch (action) {
-            case 'chat':
+            case Action.chat:
                 return this.processChat(digest);
-            case 'spend_favor':
+            case Action.spend_favor:
                 return this.processFavorSpending(digest);
-            case 'move':
+            case Action.move:
                 return this.processMove(digest);
-            case 'reposition':
+            case Action.reposition:
                 return this.processRepositioning(digest);
-            case 'load_good':
+            case Action.load_good:
                 return this.processLoadGood(digest);
-            case 'trade':
+            case Action.make_trade:
                 return this.processGoodsTrade(digest);
-            case 'buy_metals':
+            case Action.buy_metals:
                 return this.processMetalPurchase(digest);
-            case 'donate_metals':
+            case Action.donate_metals:
                 return this.processMetalDonation(digest);
-            case 'end_turn':
+            case Action.end_turn:
                 return this.processEndTurn(digest);
-            case 'upgrade_hold':
+            case Action.upgrade_cargo:
                 return this.processUpgrade(digest);
-            case 'drop_item':
+            case Action.drop_item:
                 return this.processItemDrop(digest);
             default:
                 return this.issueErrorResponse(`Unknown action: ${action}`);
@@ -140,11 +139,6 @@ export class GameSession {
         });
 
         return this.issueStateResponse();
-    }
-
-    private addServerMessage(message: string): void {
-        const chatEntry: ChatEntry = { id: null, name: serverName, message };
-        this.state.addChatEntry(chatEntry);
     }
 
     // MARK: MOVE
@@ -199,6 +193,7 @@ export class GameSession {
 
         return this.issueStateResponse();
     }
+
     // MARK: REPOSITIONING
     private processRepositioning(data: DataDigest): StateResponse |ErrorResponse {
         const payload = this.validator.validateRepositioningPayload(data.payload);
@@ -212,6 +207,7 @@ export class GameSession {
 
         return this.issueStateResponse();
     }
+
     // MARK: FAVOR
     private processFavorSpending(data: DataDigest): StateResponse |ErrorResponse {
         const player = data.player;
@@ -268,7 +264,7 @@ export class GameSession {
 
         if (
             !player.isAnchored
-            || !player.locationActions?.includes('load_good')
+            || !player.locationActions?.includes(Action.load_good)
             || !this.hasCargoRoom(player.cargo, 1)
         ) {
             return this.issueErrorResponse(`Cannot load goods for ${player.id}`, player);
@@ -297,7 +293,7 @@ export class GameSession {
         player.cargo = res.data;
         player.hasCargo = true;
         player.moveActions = 0;
-        player.locationActions = this.removeAction(player.locationActions, 'load_good');
+        player.locationActions = this.removeAction(player.locationActions, Action.load_good);
         player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
         this.state.savePlayer(player);
 
@@ -306,7 +302,7 @@ export class GameSession {
         return this.issueStateResponse();
     }
     // MARK: GOODS TRADE
-    private processGoodsTrade(data: DataDigest): StateResponse |ErrorResponse {
+    private processGoodsTrade(data: DataDigest): StateResponse | ErrorResponse {
         const { player, payload } = data;
         const tradePayload = this.validator.validateTradePayload(payload);
 
@@ -316,7 +312,7 @@ export class GameSession {
         const { slot, location } = tradePayload;
 
         if (
-            !player.locationActions?.includes('trade_goods')
+            !player.locationActions?.includes(Action.make_trade)
             || player.bearings.location !== location
             || !player.feasibleTrades.includes(slot)
             || !player.isAnchored
@@ -364,7 +360,7 @@ export class GameSession {
 
         player.cargo = newCargo;
         player.hasCargo = Boolean(player.cargo.find(item => item !== 'empty'));
-        player.locationActions = this.removeAction(player.locationActions, 'trade_goods');
+        player.locationActions = this.removeAction(player.locationActions, Action.make_trade);
         player.moveActions = 0;
         this.state.savePlayer(player);
 
@@ -420,7 +416,7 @@ export class GameSession {
             return this.validationErrorResponse();
 
         if (
-            !player.locationActions?.includes('buy_metals')
+            !player.locationActions?.includes(Action.buy_metals)
             || !player.isAnchored
             || !this.hasCargoRoom(player.cargo, 2)
         ) {
@@ -488,7 +484,7 @@ export class GameSession {
             return this.validationErrorResponse();
 
         if (
-            !player.locationActions?.includes('donate_metals')
+            !player.locationActions?.includes(Action.donate_metals)
             || !player.isAnchored
             || !player.cargo.includes(donationPayload.metal)
         ) {
@@ -565,13 +561,13 @@ export class GameSession {
         const { coins, cargo, locationActions } = player;
 
         if (
-            locationActions?.includes('upgrade_hold')
+            locationActions?.includes(Action.upgrade_cargo)
             && coins >= 2
             && cargo.length < 4
         ) {
             player.coins -= 2;
             player.cargo.push('empty');
-            player.locationActions = this.removeAction(locationActions, 'upgrade_hold');
+            player.locationActions = this.removeAction(locationActions, Action.upgrade_cargo);
             player.moveActions = 0;
             this.state.savePlayer(player);
             this.addServerMessage(`${player.name} upgraded their hold`);
@@ -584,6 +580,9 @@ export class GameSession {
 
     // MARK: UTILITIES
 
+
+    
+    // MARK: checkInfluence
     // TODO: too many side effects. move functionality to store to be executed methodically
     private checkInfluence(activePlayer: Player, registry: { id: PlayerColor, influence: DiceSix }[]): boolean {
         let canMove = true;
@@ -620,6 +619,7 @@ export class GameSession {
         return false;
     }
 
+    //MARK: passActiveStatus
     private passActiveStatus(): Probable<Player> {
         const activePlayer = this.state.getActivePlayer();
 
@@ -648,6 +648,7 @@ export class GameSession {
         return this.pass(nextActivePlayer);
     }
 
+    // MARK: setTurnStartCondition
     private setTurnStartCondition(player: Player): void {
 
         player.isAnchored = false;
@@ -664,6 +665,7 @@ export class GameSession {
         this.state.savePlayer(player);
     }
 
+    // MARK: removeAction
     private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Array<LocationAction> | null {
         const index = actions.indexOf(toRemove);
 
@@ -678,12 +680,14 @@ export class GameSession {
         return actions;
     }
 
-    private hasCargoRoom(cargo: CargoInventory, requirement: 1|2): boolean {
+    // MARK: hasCargoRoom
+    private hasCargoRoom(cargo: CargoInventory, requirement: 1 | 2): boolean {
         const emptySlots = cargo.filter(item => item === 'empty').length;
 
         return (emptySlots >= requirement);
     }
 
+    // MARK:  pickFeasibleTrades
     private pickFeasibleTrades(cargo: CargoInventory): Array<MarketSlotKey> {
         const market = this.state.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
@@ -716,6 +720,7 @@ export class GameSession {
         return feasible;
     }
 
+    //  MARK: loadItem
     private loadItem(cargo: CargoInventory, item: ItemName): Probable<CargoInventory> {
         const filled = cargo.filter(item => item !== 'empty') as CargoInventory;
         const empty = cargo.filter(item => item === 'empty') as CargoInventory;
@@ -756,6 +761,7 @@ export class GameSession {
         return this.pass(orderedCargo);
     }
 
+    // MARK: unloadItem
     private unloadItem(cargo: CargoInventory, item: ItemName): CargoInventory | null {
         const newCargo = this.tools.getCopy(cargo);
         const itemIndex = newCargo.indexOf(item);
@@ -777,6 +783,7 @@ export class GameSession {
         return newCargo;
     }
 
+    // MARK: compileGameResults
     private compileGameResults(): Probable<Array<PlayerCountables>> {
         const players = this.state.getAllPlayers();
         const gameStats = this.privateState.gameStats;
@@ -799,6 +806,7 @@ export class GameSession {
         return this.pass(gameStats);
     }
 
+    // MARK: startIdleChecks
     private startIdleChecks(): void {
         this.idleCheckInterval = setInterval(() => {
             const activePlayer = this.state.getActivePlayer();
@@ -820,6 +828,13 @@ export class GameSession {
         }, 60000);
     }
 
+    // MARK: addServerMessage
+    private addServerMessage(message: string): void {
+        const chatEntry: ChatEntry = { id: null, name: serverName, message };
+        this.state.addChatEntry(chatEntry);
+    }
+
+    // MARK: RETURN WRAPPERS
     private validationErrorResponse(){
         return this.issueErrorResponse('Malformed request.');
     }
@@ -827,6 +842,7 @@ export class GameSession {
     private issueStateResponse(): StateResponse {
         return { state: this.state.toDto() };
     }
+
     private issueErrorResponse(message: string, params?: object): ErrorResponse {
         const error = `ERROR: ${message}`;
         console.error(error, params);

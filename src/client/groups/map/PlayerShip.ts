@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, SharedState, DiceSix, ClientMessage } from '../../../shared_types';
+import { Coordinates, ZoneName, PlayerColor, SharedState, DiceSix, ClientMessage, Action } from '../../../shared_types';
 import state from '../../state';
 import clientConstants from '../../client_constants';
 import { MapHexagon } from '../GroupList';
@@ -134,7 +134,7 @@ export class PlayerShip {
                 case targetHex && this.isDestinationValid:
                     targetHex.setFill(COLOR.activeHex);
                     this.broadcastAction({
-                        action: 'move',
+                        action: Action.move,
                         payload: {
                             hexId: targetHex.getId(),
                             position: { x: this.group.x(), y: this.group.y() }
@@ -143,7 +143,7 @@ export class PlayerShip {
                     break;
                 case departureHex === targetHex:
                     this.broadcastAction({
-                        action: 'reposition',
+                        action: Action.reposition,
                         payload: {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }

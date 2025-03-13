@@ -3,6 +3,7 @@ import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import clientConstants from "../../client_constants";
 import { ActionButton } from "../ActionButton";
 import { CoinDial } from "../CoinDial";
+import { Action } from "../../../shared_types";
 
 const { COLOR } = clientConstants;
 
@@ -15,7 +16,7 @@ export class UpgradeButton extends ActionButton implements DynamicGroupInterface
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        super(stage, layout, { action: 'upgrade_hold', payload: null });
+        super(stage, layout, { action: Action.upgrade_cargo, payload: null });
 
         this.background = new Konva.Rect({
             width: layout.width,

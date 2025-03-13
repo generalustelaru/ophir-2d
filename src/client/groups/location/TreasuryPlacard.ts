@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '../../client_types';
 import clientConstants from '../../client_constants';
-import { CargoInventory } from '../../../shared_types';
+import { Action, CargoInventory } from '../../../shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
@@ -107,7 +107,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
     public update(update: TreasuryUpdate): void {
 
         const playerCanAct = (
-            update.localPlayer?.locationActions?.includes('buy_metals')
+            update.localPlayer?.locationActions?.includes(Action.buy_metals)
             && update.localPlayer.isAnchored
             && this.hasCargoRoom(update.localPlayer.cargo)
         );

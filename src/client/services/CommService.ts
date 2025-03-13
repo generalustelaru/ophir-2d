@@ -1,6 +1,6 @@
 import {
     ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
-    ResetResponse, StateResponse
+    ResetResponse, StateResponse, Action,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import state from '../state';
@@ -54,7 +54,7 @@ class CommunicationClass extends Communicator {
                     });
                 } else {
                     this.sendMessage({
-                        action: 'rebind_id',
+                        action: Action.rebind_id,
                         payload: { referenceId: data.clientId, myId: state.local.myId }
                     });
                 }
@@ -70,7 +70,7 @@ class CommunicationClass extends Communicator {
             }
 
             if (this.isResetOrder(data)) {
-                this.broadcastEvent({ type: 'reset', detail: data });
+                this.broadcastEvent({ type: Action.reset, detail: data });
 
                 return;
             }
@@ -111,7 +111,7 @@ class CommunicationClass extends Communicator {
             return;
 
         this.statusInterval = setInterval(() => {
-            this.sendMessage({ action: 'get_status', payload: null });
+            this.sendMessage({ action: Action.get_status, payload: null });
         }, 5000);
     }
 
