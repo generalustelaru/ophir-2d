@@ -7,4 +7,6 @@ export const SERVER_NAME = String(process.env.SERVER_NAME);
 export const SHUTDOWN_AUTH = String(process.env.SHUTDOWN_AUTH);
 export const IDLE_CHECKS = Boolean(Number(process.env.IDLE_CHECKS));
 export const RICH_PLAYERS = Boolean(Number(process.env.RICH_PLAYERS));
+export const LOADED_PLAYERS = Boolean(Number(process.env.LOADED_PLAYERS));
+export const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 export const SHORT_GAME = Boolean(Number(process.env.SHORT_GAME));

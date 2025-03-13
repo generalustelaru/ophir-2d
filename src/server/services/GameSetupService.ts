@@ -8,9 +8,9 @@ import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
 import { SharedStateStore } from '../data_classes/SharedStateStore';
-import { SERVER_NAME, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
+import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
 
-console.log({ RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
+console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
 
@@ -29,7 +29,7 @@ class GameSetupService {
             throw new Error('Cannot start game while the session owner is null');
         }
 
-        if (players.length < 2) {
+        if (players.length < 2 && !SINGLE_PLAYER) {
             throw new Error('Not enough players to start a game');
         }
 
@@ -171,10 +171,10 @@ class GameSetupService {
             player.bearings.seaZone = initialRules.from;
             player.allowedMoves = initialRules.allowed;
 
-            if (RICH_PLAYERS) {
+            if (RICH_PLAYERS)
                 player.coins = 99;
+            if (LOADED_PLAYERS)
                 player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
-            }
 
             return player;
         });
