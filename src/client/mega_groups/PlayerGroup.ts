@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerPlacard } from '../groups/GroupList';
-import state from '../state';
-import { Player } from '../../shared_types';
+import localState from '../state';
+import { Player, GameState } from '../../shared_types';
 
 export class PlayerGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
@@ -21,24 +21,24 @@ export class PlayerGroup implements MegaGroupInterface {
     }
 
     // MARK: DRAW
-    public drawElements(): void {
+    public drawElements(state: GameState): void {
         const verticalOffsets = [20, 140, 260, 380];
 
-        const playersByLocalPlayer = state.local.playerColor
+        const playersByLocalPlayer = localState.playerColor
             ? (() => {
-                const players = [...state.received.players];
-                while (players[0].id !== state.local.playerColor) {
+                const players = [...state.players];
+                while (players[0].id !== localState.playerColor) {
                     players.push(players.shift() as Player);
                 }
                 return players;
             })()
-            : state.received.players;
+            : state.players;
 
         playersByLocalPlayer.forEach(player => {
             const placard = new PlayerPlacard(
                 this.stage,
                 player,
-                state.local.playerColor,
+                localState.playerColor,
                 verticalOffsets.shift() as number
             );
             this.group.add(placard.getElement());
@@ -47,10 +47,10 @@ export class PlayerGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public update(): void {
+    public update(state: GameState): void {
 
         this.playerPlacards.forEach(placard => {
-            const player = state.received.players.find(player => player.id === placard.getId());
+            const player = state.players.find(player => player.id === placard.getId());
             if (player) {
                 placard.update(player);
             } else {

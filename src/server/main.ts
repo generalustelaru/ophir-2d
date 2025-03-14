@@ -3,9 +3,10 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
 import {
-    PlayerColor, NewState, GameSetupPayload, GameStatus, ChatEntry,
+    PlayerColor, LobbyState, GameSetupPayload, GameStatus, ChatEntry,
     ClientIdResponse, ServerMessage, ResetResponse,
     Action,
+    PlayerScaffold,
 } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
 import { gameSetupService } from './services/GameSetupService';
@@ -62,6 +63,14 @@ function shutDown() {
         process.exit(0);
     }, 3000);
 }
+function reset() {
+    console.log('Session is resetting!');
+    singleSession = singleSession?.wipeSession() ?? null;
+    lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+    const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
+
+    sendAll(resetMessage);
+}
 function promptForInput(): void {
     rl.question('\n', (input) => {
 
@@ -71,6 +80,9 @@ function promptForInput(): void {
             return;
             case 'debug':
                 console.log(JSON.stringify(singleSession?.getPrivateState()));
+            break;
+            case 'reset':
+                reset();
             break;
         }
 
@@ -85,7 +97,7 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 const tools = new ToolService();
 const validator = new ValidatorService();
 
-let lobbyState: NewState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+let lobbyState: LobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
 let singleSession: GameSession | null = null;
 
 function sendAll (message: ServerMessage): void {
@@ -162,9 +174,10 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === Action.inquire) {
-            const stateResponse = {
-                state: singleSession?.getState() || lobbyState,
-            };
+            const stateResponse = singleSession
+                ? { game: singleSession.getState() }
+                : { lobby: lobbyState };
+
             send(socket, stateResponse);
 
             return;
@@ -178,10 +191,13 @@ socketServer.on('connection', function connection(socket) {
                 return;
             }
 
+            if (!playerColor || !lobbyState.availableSlots.includes(playerColor))
+                send(socket, { error: 'Color is is already taken' });
+
             if (processPlayer(playerColor, playerName)) {
                 addServerMessage(`${playerName ?? playerColor} has joined the game`);
                 lobbyState.gameId = randomUUID();
-                sendAll({state: lobbyState});
+                sendAll({ lobby: lobbyState });
             } else {
                 send(socket, { error: `Enrollment failed on ${playerColor}` });
             }
@@ -202,7 +218,7 @@ socketServer.on('connection', function connection(socket) {
                 name: playerName ?? playerColor,
                 message: chatMessage.input,
             });
-            sendAll({ state: lobbyState });
+            sendAll({ lobby: lobbyState });
 
             return;
         }
@@ -220,7 +236,7 @@ socketServer.on('connection', function connection(socket) {
 
             if (sessionCreated && singleSession) {
                 console.log('Game started');
-                sendAll({ state: singleSession.getState() });
+                sendAll({ game: singleSession.getState() });
             } else {
                 sendAll({ error: 'Game start failed' });
             }
@@ -307,9 +323,11 @@ function processPlayer(playerColor: PlayerColor | null, playerName: string | nul
 
     lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerColor);
 
-    const newPlayer = tools.getCopy(serverConstants.DEFAULT_PLAYER_STATE);
-    newPlayer.id = playerColor;
-    newPlayer.name = playerName || playerColor
+    const newPlayer: PlayerScaffold = {
+        id: playerColor,
+        name: playerName || playerColor,
+    }
+
     lobbyState.players.push(newPlayer);
 
     console.log(`${playerColor} enrolled`);

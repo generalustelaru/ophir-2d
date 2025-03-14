@@ -61,18 +61,20 @@ export type MetalCost = {
     favor: number,
 }
 
+export type ShipBearings = {
+    seaZone: ZoneName,
+    location: LocationName,
+    position: Coordinates,
+}
+
 export type Player = {
     id: PlayerColor,
     timeStamp: number,
     isIdle: boolean,
-    name: string | null,
+    name: string,
     turnOrder: number,
     isActive: boolean,
-    bearings: {
-        seaZone: ZoneName,
-        location: LocationName | null, //TODO: try removing null
-        position: Coordinates,
-    },
+    bearings: ShipBearings,
     favor: number,
     privilegedSailing: boolean,
     influence: DiceSix,
@@ -84,6 +86,11 @@ export type Player = {
     cargo: CargoInventory,
     feasibleTrades: Array<MarketSlotKey>
     coins: number,
+}
+
+export type PlayerScaffold = {
+    id: PlayerColor,
+    name: string,
 }
 
 export type MarketOffer = {
@@ -118,21 +125,26 @@ export type ClientIdResponse = {
     clientId: string,
 }
 
+export type GameStateResponse = {
+    game: GameState,
+}
+
+export type LobbyStateResponse = {
+    lobby: LobbyState,
+}
+
 export type ErrorResponse = {
     error: string,
 }
 
-export type StateResponse = {
-    state: SharedState | NewState
-}
 /**
- * @description Shared between players and server in a session
+ * @description Shared between players and server in an ongoing session
  */
-export type SharedState = {
+export type GameState = {
     isStatusResponse: boolean,
     gameId: string,
     gameStatus: GameStatus,
-    gameResults: null | Array<PlayerCountables>,
+    gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
     availableSlots: Array<PlayerColor>,
     players: Array<Player>,
@@ -143,17 +155,15 @@ export type SharedState = {
     itemSupplies: ItemSupplies,
 }
 
-export type NewState = {
-    isStatusResponse: boolean,
+/**
+ * @description Shared between players and server in a pending session
+ */
+export type LobbyState = {
     gameId: string | null,
     gameStatus: GameStatus,
-    gameResults: null,
     sessionOwner: PlayerColor | null,
     availableSlots: Array<PlayerColor>,
-    players: Array<Player>,
-    market: null,
-    temple: null,
-    setup: null,
+    players: Array<PlayerScaffold>,
     chat: Array<ChatEntry>,
 }
 
@@ -161,7 +171,7 @@ export type ResetResponse = {
     resetFrom: string | PlayerColor,
 }
 
-export type ServerMessage = ClientIdResponse | StateResponse | ResetResponse | ErrorResponse;
+export type ServerMessage = ClientIdResponse | GameStateResponse | LobbyStateResponse | ResetResponse | ErrorResponse;
 
 export type LocationData = {
     name: LocationName,

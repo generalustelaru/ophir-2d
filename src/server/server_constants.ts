@@ -101,32 +101,9 @@ const serverConstants: ServerConstants = {
         farms: 'cloth',
     },
 
-    DEFAULT_PLAYER_STATE: {
-        id: 'Purple',
-        timeStamp: 0,
-        isIdle: false,
-        name: null,
-        turnOrder: 0,
-        isActive: false,
-        bearings: { seaZone: "center", position: {x: 0, y: 0}, location: null },
-        favor: 2,
-        privilegedSailing: false,
-        influence: 1,
-        allowedMoves: [],
-        isAnchored: true,
-        locationActions: null,
-        moveActions: 2,
-        hasCargo: false,
-        cargo: ['empty', 'empty'],
-        feasibleTrades: [],
-        coins: 0,
-    },
-
     DEFAULT_NEW_STATE: {
-        isStatusResponse: false,
         gameId: null,
         gameStatus: 'empty',
-        gameResults: null,
         sessionOwner: null,
         chat: [],
         availableSlots: [
@@ -136,9 +113,6 @@ const serverConstants: ServerConstants = {
             'Green',
         ],
         players: [],
-        market: null,
-        temple: null,
-        setup: null,
     },
 
     COST_TIERS: [

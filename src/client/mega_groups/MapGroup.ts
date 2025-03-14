@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, SharedState } from '../../shared_types';
+import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, GameState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
 import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
-import state from '../state';
+import localState from '../state';
 import clientConstants from '../client_constants';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA} = clientConstants;
@@ -32,11 +32,10 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: DRAW
-    public drawElements(): void {
+    public drawElements(state: GameState): void {
         const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
-        const serverState = state.received as SharedState;
-        const players = serverState.players;
-        const localPlayer = players.find(player => player.id === state.local.playerColor);
+        const players = state.players;
+        const localPlayer = players.find(player => player.id === localState.playerColor);
         const isActivePlayer = localPlayer?.isActive || false;
         //MARK: dials
         this.movesDial = new MovesDial(isActivePlayer);
@@ -66,7 +65,7 @@ export class MapGroup implements MegaGroupInterface {
 
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
-            const locationData = serverState.setup.mapPairings[hexItem.id];
+            const locationData = state.setup.mapPairings[hexItem.id];
             const mapHex = new MapHexagon(
                 this.stage,
                 centerPoint,
@@ -75,7 +74,7 @@ export class MapGroup implements MegaGroupInterface {
                 hexItem.y,
                 ISLAND_DATA[hexItem.id],
                 locationData.name,
-                this.getIconData(locationData.name),
+                this.getIconData(locationData.name, state),
                 COLOR.defaultHex,
             );
             this.mapHexes.push(mapHex);
@@ -83,7 +82,7 @@ export class MapGroup implements MegaGroupInterface {
         });
 
         // MARK: barriers
-        const barriersIds = serverState.setup.barriers
+        const barriersIds = state.setup.barriers
         const barrier_1 = new BarrierToken(centerPoint, barriersIds[0]);
         const barrier_2 = new BarrierToken(centerPoint, barriersIds[1]);
         this.group.add(barrier_1.getElement(), barrier_2.getElement());
@@ -91,7 +90,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: ships
         players.forEach(player => {
 
-            if (player.id && player.id !== state.local.playerColor) {
+            if (player.id && player.id !== localState.playerColor) {
                 const shipPosition = player.bearings.position;
                 const ship = new ShipToken(
                     shipPosition.x,
@@ -105,7 +104,7 @@ export class MapGroup implements MegaGroupInterface {
             }
         });
 
-        if (!state.local.playerColor) {
+        if (!localState.playerColor) {
             return;
         }
 
@@ -120,9 +119,10 @@ export class MapGroup implements MegaGroupInterface {
             this.stage,
             shipPosition.x,
             shipPosition.y,
-            COLOR[state.local.playerColor],
+            COLOR[localState.playerColor],
             localPlayer.isActive,
             this.mapHexes,
+            state.players,
         );
         this.localShip.switchControl(localPlayer.isActive);
 
@@ -130,10 +130,9 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public update(): void {
-        const serverState = state.received as SharedState;
-        const players = serverState.players;
-        const localPlayer = players.find(player => player.id === state.local.playerColor);
+    public update(state: GameState): void {
+        const players = state.players;
+        const localPlayer = players.find(player => player.id === localState.playerColor);
 
         //MARK: dials & hexes
         if (localPlayer) {
@@ -146,7 +145,7 @@ export class MapGroup implements MegaGroupInterface {
         for (const mapHex of this.mapHexes) {
             mapHex.update({
                 player: localPlayer || null,
-                templeIcon: this.getIconData(mapHex.getTokenId())
+                templeIcon: this.getIconData(mapHex.getTokenId(), state)
             });
         }
 
@@ -169,7 +168,7 @@ export class MapGroup implements MegaGroupInterface {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive);
             localShip.switchHighlight(localPlayer.isActive);
-            localShip.update(localPlayer.bearings.position);
+            localShip.update(localPlayer.bearings.position, state.players);
         }
     }
 
@@ -192,20 +191,20 @@ export class MapGroup implements MegaGroupInterface {
         return { setupCoordinates: startingPositions };
     }
 
-    private getIconData(locationName: LocationName): LocationIconData {
+    private getIconData(locationName: LocationName, state: GameState): LocationIconData {
 
         if (locationName != 'temple')
             return LOCATION_TOKEN_DATA[locationName];
 
         const skipCount = (() => {
-            const playerCount = state.received.players.length;
+            const playerCount = state.players.length;
             switch (playerCount) {
                 case 2: return 2;
                 case 3: return 1;
                 default: return 0;
             }
         })();
-        const currentLevel = state.received.temple?.currentLevel || 0;
+        const currentLevel = state.temple.currentLevel || 0;
         const templeData = TEMPLE_CONSTRUCTION_DATA.find(
             item => item.shapeId == currentLevel + skipCount
         );

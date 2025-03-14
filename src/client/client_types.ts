@@ -1,5 +1,7 @@
-import { ZoneName, PlayerColor, SharedState, Coordinates, LocationName, ItemName, NewState, Trade, MarketOffer, Player,
-    Metal, ExchangeState, Currency, TempleState, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
+import {
+    ZoneName, PlayerColor, GameState, Coordinates, LocationName, ItemName,
+    LobbyState, Trade, MarketOffer, Player, Metal, ExchangeState, Currency,
+    TempleState, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
 } from '../shared_types';
 import Konva from 'konva';
 
@@ -20,7 +22,8 @@ export type LocalState = {
 
 export type ClientState = {
     local: LocalState,
-    received: SharedState | NewState,
+    // newState: NewState,
+    // sharedState: SharedState | null;
 }
 
 export type ClientConstants = {
@@ -45,8 +48,8 @@ export interface HTMLHandlerInterface {
 }
 
 export interface MegaGroupInterface {
-    drawElements(): void,
-    update(): void,
+    drawElements(state: GameState): void,
+    update(state: GameState): void,
 }
 
 export interface DynamicGroupInterface<S> {
@@ -107,15 +110,19 @@ export interface ClientEventInterface<T, D> {
     detail: D,
 }
 
-export type LaconicType = "connected" | "update" | "start" | "close" | "timeout";
+export type LaconicType = "connected" | "start" | "close" | "timeout";
 export type LaconicEvent = ClientEventInterface<LaconicType, null>;
 export type ActionEvent = ClientEventInterface<"action", ClientMessage>;
 export type ErrorEvent = ClientEventInterface<"error", ErrorDetail>;
 export type InfoEvent = ClientEventInterface<"info", InfoDetail>;
 export type ResetEvent = ClientEventInterface<"reset", ResetResponse>;
+export type GameStateUpdateEvent = ClientEventInterface<"game_update", GameState>;
+export type LobbyStateUpdateEvent = ClientEventInterface<"lobby_update", LobbyState>;
 export type IdentificationEvent = ClientEventInterface<"identification", ClientIdResponse>;
 
-export type ClientEvent = LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent | ResetEvent;
+export type ClientEvent =
+    | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent
+    | ResetEvent | GameStateUpdateEvent | LobbyStateUpdateEvent;
 
 export type InfoDetail = {
     text: string,

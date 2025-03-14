@@ -1,27 +1,28 @@
 import process from 'process';
 import { DataDigest, PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
 import {
-    ZoneName, PlayerColor, Player, SharedState, ClientRequest, TradeGood, LocationAction,
+    ZoneName, PlayerColor, Player, GameState, ClientRequest, TradeGood, LocationAction,
     DiceSix, CargoInventory, MarketSlotKey, ItemName, Trade, LocationName,
     GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal,
-    ErrorResponse, StateResponse, Action,
+    ErrorResponse, Action,
+    GameStateResponse,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 import { ValidatorService } from "../services/validation/ValidatorService";
-import { SharedStateStore } from "../data_classes/SharedStateStore";
+import { GameStateHandler } from "../data_classes/GameState";
+import { IDLE_CHECKS } from "../configuration";
 
 const { TRADE_DECK_B } = serverConstants;
 const serverName = String(process.env.SERVER_NAME);
 const MAX_FAVOR = 6;
-const IDLE_CHECKS = Boolean(process.env.IDLE_CHECKS);
 
 type Probable<T> = { err: true, data: string } | { err: false, data: T };
 
 export class GameSession {
 
     private privateState: PrivateState;
-    private state: SharedStateStore;
+    private state: GameStateHandler;
     private tools: ToolService;
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private validator: ValidatorService;
@@ -46,7 +47,7 @@ export class GameSession {
             this.startIdleChecks();
     }
 
-    public getState(): SharedState {
+    public getState(): GameState {
         return this.state.toDto();
     }
 
@@ -117,15 +118,15 @@ export class GameSession {
         }
     }
 
-    private processStatusRequest(): StateResponse {
+    private processStatusRequest(): GameStateResponse {
         const stateDto = this.state.toDto()
         stateDto.isStatusResponse = true;
 
-        return { state: stateDto };
+        return { game: stateDto };
     }
 
     // MARK: CHAT
-    private processChat(data: DataDigest): StateResponse |ErrorResponse {
+    private processChat(data: DataDigest) {
         const { player , payload } = data;
         const chatPayload = this.validator.validateChatPayload(payload);
 
@@ -142,7 +143,7 @@ export class GameSession {
     }
 
     // MARK: MOVE
-    private processMove(data: DataDigest): StateResponse |ErrorResponse {
+    private processMove(data: DataDigest) {
         const { player, payload } = data;
         const movementPayload = this.validator.validateMovementPayload(payload);
 
@@ -195,7 +196,7 @@ export class GameSession {
     }
 
     // MARK: REPOSITIONING
-    private processRepositioning(data: DataDigest): StateResponse |ErrorResponse {
+    private processRepositioning(data: DataDigest) {
         const payload = this.validator.validateRepositioningPayload(data.payload);
         const player  = data.player;
 
@@ -209,7 +210,7 @@ export class GameSession {
     }
 
     // MARK: FAVOR
-    private processFavorSpending(data: DataDigest): StateResponse |ErrorResponse {
+    private processFavorSpending(data: DataDigest) {
         const player = data.player;
         const { isActive, favor, privilegedSailing } = player;
 
@@ -230,7 +231,7 @@ export class GameSession {
         );
     }
     // MARK: DROP ITEM
-    private processItemDrop(data: DataDigest): StateResponse |ErrorResponse {
+    private processItemDrop(data: DataDigest) {
         const payload = this.validator.validateDropItemPayload(data.payload);
 
         if (!payload)
@@ -254,7 +255,7 @@ export class GameSession {
         return this.issueStateResponse();
     }
     // MARK: LOAD TRADE GOOD
-    private processLoadGood(data: DataDigest): StateResponse |ErrorResponse {
+    private processLoadGood(data: DataDigest) {
         const payload = this.validator.validateLoadGoodPayload(data.payload);
 
         if (!payload)
@@ -302,7 +303,7 @@ export class GameSession {
         return this.issueStateResponse();
     }
     // MARK: GOODS TRADE
-    private processGoodsTrade(data: DataDigest): StateResponse | ErrorResponse {
+    private processGoodsTrade(data: DataDigest) {
         const { player, payload } = data;
         const tradePayload = this.validator.validateTradePayload(payload);
 
@@ -407,7 +408,7 @@ export class GameSession {
     }
 
     // MARK: METAL PURCHASE
-    private processMetalPurchase(data: DataDigest): StateResponse |ErrorResponse {
+    private processMetalPurchase(data: DataDigest) {
         const { player, payload } = data;
 
         const purchasePayload = this.validator.validateMetalPurchasePayload(payload);
@@ -476,7 +477,7 @@ export class GameSession {
     }
 
     // MARK: DONATE METALS
-    private processMetalDonation(data: DataDigest): StateResponse |ErrorResponse {
+    private processMetalDonation(data: DataDigest) {
         const { player, payload } = data;
         const donationPayload = this.validator.validateMetalDonationPayload(payload);
 
@@ -537,7 +538,7 @@ export class GameSession {
     }
 
     // MARK: END TURN
-    private processEndTurn(data: DataDigest): StateResponse |ErrorResponse {
+    private processEndTurn(data: DataDigest) {
         const player = data.player;
         const { isActive, isAnchored } = player;
 
@@ -556,7 +557,7 @@ export class GameSession {
     }
 
     // MARK: UPGRADE HOLD
-    private processUpgrade(data: DataDigest): StateResponse |ErrorResponse {
+    private processUpgrade(data: DataDigest) {
         const player = data.player;
         const { coins, cargo, locationActions } = player;
 
@@ -581,7 +582,7 @@ export class GameSession {
     // MARK: UTILITIES
 
 
-    
+
     // MARK: checkInfluence
     // TODO: too many side effects. move functionality to store to be executed methodically
     private checkInfluence(activePlayer: Player, registry: { id: PlayerColor, influence: DiceSix }[]): boolean {
@@ -839,8 +840,8 @@ export class GameSession {
         return this.issueErrorResponse('Malformed request.');
     }
 
-    private issueStateResponse(): StateResponse {
-        return { state: this.state.toDto() };
+    private issueStateResponse(): GameStateResponse {
+        return { game: this.state.toDto() };
     }
 
     private issueErrorResponse(message: string, params?: object): ErrorResponse {

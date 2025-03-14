@@ -1,13 +1,13 @@
 import { InfoDetail, ErrorDetail, LocalState } from "./client_types";
-import state from "./state";
+import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
-import { UserInterfaceService } from "./services/UiService";
+import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { Action, SharedState, ClientMessage, ResetResponse } from "../shared_types";
+import { Action, GameState, ClientMessage, ResetResponse, LobbyState } from "../shared_types";
 
 //@ts-ignore
-let stateDebug: SharedState | null = null;
+// let stateDebug: SharedState | NewState | null = null;
 
 // Initializations
 const serverAddress = process.env.SERVER_ADDRESS;
@@ -17,8 +17,18 @@ if (!wsPort || !serverAddress)
     throw new Error('Server address and port must be provided in the environment');
 
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
+
 const savedState = sessionStorage.getItem('localState');
-state.local = savedState ? JSON.parse(savedState) : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
+const retrieved = savedState
+    ? JSON.parse(savedState) as LocalState
+    : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
+localState.myId = retrieved.myId;
+localState.playerColor = retrieved.playerColor;
+localState.playerName = retrieved.playerName;
+localState.isBoardDrawn = retrieved.isBoardDrawn;
+
+
+// const UserInterface = new UserInterfaceClass();
 
 //Send player action to server
 window.addEventListener('action', (event: CustomEventInit) => {
@@ -38,8 +48,7 @@ window.addEventListener(Action.start, () => {
 //Display errors
 window.addEventListener('error', (event: CustomEventInit) => {
     const detail: ErrorDetail = event.detail;
-    console.error(detail.message || 'An error occurred');
-    alert(detail.message || 'An error occurred');
+    signalError(detail.message);
 });
 
 // Get server data on connection
@@ -48,8 +57,8 @@ window.addEventListener('connected', () => {
 });
 
 window.addEventListener('timeout', () => {
-    UserInterfaceService.setInfo('Connection timeout');
-    UserInterfaceService.disable();
+    UserInterface.setInfo('Connection timeout');
+    UserInterface.disable();
     CanvasService.disable();
     alert('Please refresh the page');
 });
@@ -57,16 +66,16 @@ window.addEventListener('timeout', () => {
 window.addEventListener('close', () => {
     CommunicationService.clearStatusCheck();
     sessionStorage.removeItem('localState');
-    UserInterfaceService.disable();
+    UserInterface.disable();
     CanvasService.disable();
-    UserInterfaceService.setInfo('Connection closed. Try again later.');
+    UserInterface.setInfo('Connection closed. Try again later.');
     alert('The connection was closed');
 });
 
 window.addEventListener('identification', (event: CustomEventInit) => {
     const payload = event.detail;
-    state.local.myId = payload.clientId;
-    sessionStorage.setItem('localState', JSON.stringify(state.local));
+    localState.myId = payload.clientId;
+    sessionStorage.setItem('localState', JSON.stringify(localState));
 });
 
 window.addEventListener(Action.reset, (event: CustomEventInit) => {
@@ -76,58 +85,86 @@ window.addEventListener(Action.reset, (event: CustomEventInit) => {
     window.location.reload();
 });
 
-// Update client on server state update
-window.addEventListener('update', () => {
-    const sharedState = state.received as SharedState;
+window.addEventListener('lobby_update', (event: CustomEventInit) => {
 
-    switch(sharedState.gameStatus) {
-        case 'started':
-            CommunicationService.setKeepStatusCheck();
-            CanvasService.drawUpdateElements();
-            UserInterfaceService.setInfo('You are playing.');
-            break;
+    if (!event.detail)
+        return signalError('State is missing!');
 
-        case 'ended':
-            CommunicationService.clearStatusCheck();
-            CanvasService.drawUpdateElements(true);
-            break;
+    const lobbyState = event.detail as LobbyState;
 
+    UserInterface.updateAsLobby(lobbyState);
+
+    switch (lobbyState.gameStatus) {
         case 'created':
-            state.local.gameId = sharedState.gameId;
-            sessionStorage.setItem('localState', JSON.stringify(state.local));
+            localState.gameId = lobbyState.gameId;
+            sessionStorage.setItem('localState', JSON.stringify(localState));
             break;
-
         case 'empty':
         case "full":
         default:
             break;
     }
 
-    UserInterfaceService.updateControls();
+    debug(lobbyState);
+});
 
-    // Debugging
-    if (sharedState.isStatusResponse)
-        return;
+// Update client on server state update
+window.addEventListener('game_update', (event: CustomEventInit) => {
 
-    localStorage.setItem('gameStatus', sharedState.gameStatus);
-    localStorage.setItem('received', JSON.stringify(sharedState));
-    localStorage.setItem('client', JSON.stringify(state));
+    if (!event.detail)
+        return signalError('State is missing!');
 
-    ['Red', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
-        localStorage.removeItem(playerColor);
-    });
+    const gameState = event.detail as GameState;
 
-    for (const player of state.received.players) {
-        localStorage.setItem(player.id, JSON.stringify(player));
+    UserInterface.updateAsGame(gameState);
+
+    switch(gameState.gameStatus) {
+        case 'started':
+            CommunicationService.setKeepStatusCheck();
+            CanvasService.drawUpdateElements(gameState);
+            break;
+
+        case 'ended':
+            CommunicationService.clearStatusCheck();
+            CanvasService.drawUpdateElements(gameState, true);
+            break;
+        default:
+            break;
     }
+
+    debug(gameState);
 });
 
 window.addEventListener(
     'info',
     (event: CustomEventInit) => {
         const payload: InfoDetail = event.detail;
-        UserInterfaceService.setInfo(payload.text)
+        UserInterface.setInfo(payload.text)
     }
 );
 
+// MARK: CONNECTION
 CommunicationService.createConnection(wsAddress);
+
+function signalError(message?: string) {
+    console.error(message || 'An error occurred');
+    alert(message || 'An error occurred');
+}
+
+// Debugging
+function debug(state: GameState | LobbyState) {
+    if ('isStatusResponse' in state && state.isStatusResponse)
+        return;
+
+    localStorage.setItem('gameStatus', state.gameStatus);
+    localStorage.setItem('received', JSON.stringify(state));
+    localStorage.setItem('client', JSON.stringify(localState));
+
+    ['Red', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
+        localStorage.removeItem(playerColor);
+    });
+
+    for (const player of state.players) {
+        localStorage.setItem(player.id, JSON.stringify(player));
+    }
+}

@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { GameSetupPayload } from '../../shared_types';
+import { GameSetupPayload, GameState } from '../../shared_types';
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
-import state from '../state';
+import localState from '../state';
 
 class CanvasClass extends Communicator {
     private stage: Konva.Stage;
@@ -63,12 +63,12 @@ class CanvasClass extends Communicator {
         return this.mapGroup.calculateShipPositions();
     }
 
-    private drawElements(): void {
-        this.locationGroup.drawElements();
-        this.playerGroup.drawElements();
-        this.mapGroup.drawElements();
+    private drawElements(state: GameState): void {
+        this.locationGroup.drawElements(state);
+        this.playerGroup.drawElements(state);
+        this.mapGroup.drawElements(state);
 
-        if (!state.local.playerColor) {
+        if (!localState.playerColor) {
             this.broadcastEvent({
                 type: 'info',
                 detail: { text: 'You are a spectator' }
@@ -77,17 +77,17 @@ class CanvasClass extends Communicator {
         this.isDrawn = true;
     }
 
-    public drawUpdateElements(disable = false): void {
-        if (state.received.isStatusResponse) {
+    public drawUpdateElements(state:GameState, disable = false): void {
+        if (state.isStatusResponse) {
             return;
         }
 
         if(!this.isDrawn)
-            this.drawElements();
+            this.drawElements(state);
 
-        this.locationGroup.update();
-        this.mapGroup.update();
-        this.playerGroup.update();
+        this.locationGroup.update(state);
+        this.mapGroup.update(state);
+        this.playerGroup.update(state);
         disable && this.disable();
     }
 

@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, SharedState, DiceSix, ClientMessage, Action } from '../../../shared_types';
-import state from '../../state';
+import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player } from '../../../shared_types';
+import localState from '../../state';
 import clientConstants from '../../client_constants';
 import { MapHexagon } from '../GroupList';
 
@@ -14,6 +14,7 @@ export class PlayerShip {
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
     private mapHexes: Array<MapHexagon> = [];
+    private players: Array<Player>;
 
     public switchControl(isActivePlayer: boolean) {
         this.group.draggable(isActivePlayer);
@@ -23,7 +24,8 @@ export class PlayerShip {
         return this.group
     };
 
-    public update(coordinates: Coordinates) {
+    public update(coordinates: Coordinates, players: Array<Player>) {
+        this.players = players;
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };
@@ -35,10 +37,12 @@ export class PlayerShip {
         offsetY: number,
         fill: string,
         isActivePlayer: boolean,
-        mapHexes: Array<MapHexagon>
+        mapHexes: Array<MapHexagon>,
+        players: Array<Player>,
     ) {
         this.mapHexes = mapHexes;
-        const playerColor = state.local.playerColor;
+        this.players = players;
+        const playerColor = localState.playerColor;
 
         if (!playerColor) {
             throw new Error('Cannot create PlayerShip w/o Player ID!');
@@ -77,8 +81,7 @@ export class PlayerShip {
         // MARK: - Dragging (move)
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
-            const serverState = state.received as SharedState
-            const player = serverState.players.find(player => player.id === playerColor);
+            const player = this.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
 
@@ -121,7 +124,7 @@ export class PlayerShip {
                 mapHex.setFill(COLOR.defaultHex);
             }
 
-            const player = state.received.players.find(player => player.id === playerColor);
+            const player = this.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
             const departureHex = this.mapHexes.find(hex => hex.getId() === player?.bearings.seaZone);
             const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
@@ -178,7 +181,7 @@ export class PlayerShip {
         ));
     }
     private calculateToSailValue(targetHexId: ZoneName): DiceSix | false {
-        const influencePool = state.received.players
+        const influencePool = this.players
             .map(player => { return player.bearings.seaZone === targetHexId ? player.influence : 0 });
         const highestInfluence = Math.max(...influencePool) as DiceSix;
 
