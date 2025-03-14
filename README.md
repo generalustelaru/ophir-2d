@@ -11,7 +11,7 @@ Work in progress.
 - The game is playable but has no lobby (a server supports only one session at a time).
 - The game is missing "Specialists" (variable players powers).
 - The 2 Player game should include a neutral ship, which is missing.
-- Items are unlimited (should be limited by design).
+- Items are limited (5) but the counts are not represented in the Canvas UI.
 - The interface language not yet standardized and missing quality of life features.
 
 Try it out
@@ -39,7 +39,7 @@ Alternatively, follow these steps:
 
 Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser*. The sessionStorage is being used to identify each client and resume the connection in case of page refresh.
 
-To shut down the server gracefully, input `shutdown` in the running server's command line.
+To shut down the server gracefully, input `shutdown` in the running server's command line interface (CLI).
 You can also shut it down remotely by making a regular http request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<SHUTDOWN_AUTH>". Use the values in your .env file.
 
 To start the server again run `make run` or `node public/server.cjs`.
@@ -47,6 +47,7 @@ To start the server again run `make run` or `node public/server.cjs`.
 ## Troubleshooting
 If you experience mouseover issues try using an alternative browser.
 If the client tab gets stuck, clear the browser's Session Storage record for the URL or restart the browser.
+If the server session gets stuck, input `reset` in the running server's CLI.
 
 ## How to play
 
