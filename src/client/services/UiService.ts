@@ -1,6 +1,6 @@
-import { PlayerColor, NewState, ChatEntry, Action } from '../../shared_types';
+import { PlayerColor, LobbyState, ChatEntry, Action, GameStatus, GameState } from '../../shared_types';
 import { Communicator } from './Communicator';
-import state from '../state';
+import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
 import { ChatInput } from '../html_behaviors/ChatInput';
@@ -20,6 +20,8 @@ class UserInterfaceClass extends Communicator {
     private chatInput: ChatInput;
     private chatSendButton: Button;
     private kickPlayerButton: Button;
+    private availableSlots: Array<PlayerColor> = ['Green', 'Purple', 'Red', 'Yellow'];
+    private gameStatus: GameStatus = 'empty';
 
     constructor() {
         super();
@@ -33,10 +35,8 @@ class UserInterfaceClass extends Communicator {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
             enable: () => {
                 this.playerColorSelect.element.disabled = false;
-                const players = state.received.players
                 Array.from(this.playerColorSelect.element.options).forEach(option => {
-                    const player = players.find(player => player.id === option.value);
-                    option.disabled = !!player || !option.value;
+                    option.disabled = !this.availableSlots.includes(option.value as PlayerColor);
                 });
             },
 
@@ -50,8 +50,8 @@ class UserInterfaceClass extends Communicator {
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
 
-        this.playerNameInput.setValue(state.local.playerName);
-        this.playerColorSelect.setValue(state.local.playerColor);
+        this.playerNameInput.setValue(localState.playerName);
+        this.playerColorSelect.setValue(localState.playerColor);
 
         this.playerColorSelect.element.addEventListener('change', () => {
             this.playerColorSelect.element.value && this.handleColorSelect();
@@ -64,8 +64,8 @@ class UserInterfaceClass extends Communicator {
     }
 
     private updatePlayerName = (): void => {
-        state.local.playerName = this.playerNameInput.element.value;
-        sessionStorage.setItem('localState', JSON.stringify(state.local));
+        localState.playerName = this.playerNameInput.element.value;
+        sessionStorage.setItem('localState', JSON.stringify(localState));
     }
 
     private sendChatMessage = (): void => {
@@ -83,7 +83,7 @@ class UserInterfaceClass extends Communicator {
     }
 
     private handleColorSelect = () => {
-        switch(state.received.gameStatus) {
+        switch(this.gameStatus) {
             case 'empty':
                 this.createButton.enable();
                 break;
@@ -117,17 +117,14 @@ class UserInterfaceClass extends Communicator {
     }
 
     private processEnroll = (): void => {
-        const lobbyState = state.received as NewState;
         const selectedId = this.playerColorSelect.element.value as PlayerColor;
 
-        if (!selectedId) {
+        if (!selectedId)
             return alert('Select your player color first.');
-        }
 
-
-        if (lobbyState.availableSlots.includes(selectedId)) {
-            state.local.playerColor = selectedId;
-            sessionStorage.setItem('localState', JSON.stringify(state.local));
+        if (this.availableSlots.includes(selectedId)) {
+            localState.playerColor = selectedId;
+            sessionStorage.setItem('localState', JSON.stringify(localState));
 
             return this.broadcastEvent({
                 type: 'action',
@@ -160,27 +157,42 @@ class UserInterfaceClass extends Communicator {
         this.chatSendButton.disable();
     }
 
-    public updateControls(): void {
-        this.updateChat(state.received.chat);
+    public updateAsLobby(state: LobbyState): void {
+        this.availableSlots = state.availableSlots;
+        this.gameStatus = state.gameStatus;
+
+        this.updateChat(state.chat);
         this.disableButtons();
 
-        if(state.local.playerColor){
+        if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
-        }
 
-        switch (state.received.gameStatus) {
+        switch (this.gameStatus) {
             case 'empty': this.handleEmptyState(); break;
-            case 'created': this.handleCreatedState(); break;
-            case 'full': this.handleFullState(); break;
-            case 'started': this.handleStartedState(); break;
-            case 'ended': this.handleEndedState(); break;
+            case 'created': this.handleCreatedState(state); break;
+            case 'full': this.handleFullState(state); break;
+        }
+    }
+    public updateAsGame(state: GameState): void {
+        this.availableSlots = state.availableSlots;
+        this.gameStatus = state.gameStatus;
+
+        this.updateChat(state.chat);
+        this.disableButtons();
+
+        if(localState.playerColor)
+            this.enableElements(this.chatInput, this.chatSendButton);
+
+        switch (this.gameStatus) {
+            case 'started': this.handleStartedState(state); break;
+            case 'ended': this.handleEndedState(state); break;
         }
     }
 
-    private handleCreatedState(): void {
+    private handleCreatedState(state: LobbyState): void {
 
         // guest/anon/spectator
-        if (!state.local.playerColor) {
+        if (!localState.playerColor) {
             this.enableElements(this.playerColorSelect, this.playerNameInput);
             this.playerColorSelect.element.value && this.joinButton.enable();
 
@@ -191,12 +203,12 @@ class UserInterfaceClass extends Communicator {
         this.disableElements(this.playerNameInput, this.playerColorSelect)
 
         // session owner
-        if (state.received.sessionOwner === state.local.playerColor) {
+        if (state.sessionOwner === localState.playerColor) {
 
-            if (state.received.players.length > 1 || SINGLE_PLAYER) {
+            if (state.players.length > 1 || SINGLE_PLAYER) {
                 this.enableElements(this.startButton, this.resetButton);
 
-                return this.setInfo('You may start whenever you want');
+                return this.setInfo('You may start whenever you want!');
             }
 
             return this.setInfo('Waiting for more players to join...');
@@ -212,16 +224,16 @@ class UserInterfaceClass extends Communicator {
         return this.setInfo('You may create the game');
     }
 
-    private handleFullState(): void {
+    private handleFullState(state: LobbyState): void {
 
         this.disableElements(this.playerColorSelect, this.playerNameInput);
 
-        if (!state.local.playerColor) {
+        if (!localState.playerColor) {
 
             return this.setInfo('The game is full, sorry :(');
         }
 
-        if (state.local.playerColor === state.received.sessionOwner) {
+        if (localState.playerColor === state.sessionOwner) {
             this.enableElements(this.startButton, this.resetButton);
 
             return this.setInfo('You may start whenever you want');
@@ -230,13 +242,19 @@ class UserInterfaceClass extends Communicator {
         return this.setInfo('The game might start at any time.');
     }
 
-    private handleStartedState(): void {
+    private handleStartedState(state: GameState): void {
 
         this.disableElements(this.playerColorSelect, this.playerNameInput);
 
-        if (state.local.playerColor === state.received.sessionOwner) {
+        if (localState.playerColor) {
+            this.setInfo('You are playing.');
+        } else {
+            this.setInfo('You are spectating.');
+        }
+
+        if (localState.playerColor === state.sessionOwner) {
             this.resetButton.enable();
-            const activePlayer = state.received.players.find(p => p.isActive);
+            const activePlayer = state.players.find(p => p.isActive);
 
             if (activePlayer?.isIdle) {
                 this.kickPlayerButton.enable();
@@ -244,28 +262,23 @@ class UserInterfaceClass extends Communicator {
         }
     }
 
-    private handleEndedState(): void {
-        if (state.received.isStatusResponse) {
+    private handleEndedState(state: GameState): void {
+
+        if (state.isStatusResponse)
             return;
-        }
 
         this.setInfo('The game has ended');
         this.resetButton.enable();
         this.kickPlayerButton.disable();
 
         setTimeout(() => {
-            this.alertGameResults();
+            this.alertGameResults(state.gameResults);
         }, 1000);
     }
 
-    private alertGameResults(): void {
+    private alertGameResults(gameResults: Array<PlayerCountables>): void {
         sessionStorage.removeItem('playerColor');
-        const results = state.received.gameResults;
         let message = 'The game has ended\n\n';
-
-        if (!results){
-            return alert(message);
-        }
 
         const getLeaders = (tiedPlayers: Array<PlayerCountables>, criteria: string) : Array<PlayerCountables> => {
             const key = criteria as keyof typeof tiedPlayers[0];
@@ -277,6 +290,7 @@ class UserInterfaceClass extends Communicator {
 
             return tiedPlayers.filter(player => player[key] === topValue);
         }
+
         const addWinner = (winnerAsArray: Array<PlayerCountables>, criteria: string, message: string) : string => {
             const winner = winnerAsArray[0];
             const key = criteria as keyof typeof winner;
@@ -293,11 +307,11 @@ class UserInterfaceClass extends Communicator {
             );
         }
 
-        for (const player of results) {
+        for (const player of gameResults) {
             message = message.concat(`${player.id} : ${player.vp} VP\n`);
         }
 
-        const vpWinners = getLeaders(results, 'vp');
+        const vpWinners = getLeaders(gameResults, 'vp');
 
         if (vpWinners.length == 1){
             return alert(addWinner(vpWinners, 'vp', message));
@@ -337,4 +351,4 @@ class UserInterfaceClass extends Communicator {
     }
 }
 
-export const UserInterfaceService = new UserInterfaceClass();
+export const UserInterface = new UserInterfaceClass();

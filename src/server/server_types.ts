@@ -1,9 +1,9 @@
 import {
-    BarrierId, ZoneName, PlayerColor, Player, NewState, Trade, LocationData,
-    TradeGood, GoodsLocationName, MessagePayload, ExchangeTier
+    BarrierId, ZoneName, PlayerColor, Player, LobbyState, Trade, LocationData,
+    TradeGood, GoodsLocationName, MessagePayload, ExchangeTier,
 } from '../shared_types';
 import { WebSocket } from 'ws';
-import { SharedStateStore } from './data_classes/SharedStateStore';
+import { GameStateHandler } from './data_classes/GameState';
 
 export type WsClient = {
     clientID: string,
@@ -43,7 +43,7 @@ export type PrivateState = {
 }
 
 export type StateBundle = {
-    sharedState: SharedStateStore,
+    sharedState: GameStateHandler,
     privateState: PrivateState,
 }
 
@@ -63,11 +63,14 @@ export type ServerConstants = {
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DefaultMoveRule>,
-    DEFAULT_NEW_STATE: NewState,
+    DEFAULT_NEW_STATE: LobbyState,
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerColor>,
-    DEFAULT_PLAYER_STATE: Player,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
     COST_TIERS: Array<ExchangeTier>,
+}
+
+export interface ObjectHandler<T> {
+    toDto: () => T,
 }

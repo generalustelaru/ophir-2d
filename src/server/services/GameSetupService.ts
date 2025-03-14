@@ -1,59 +1,60 @@
 
 import {
-    SharedState, BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
-    Trade, MarketOffer, MarketSlotKey, LocationData, NewState, Fluctuation,
-    PlayerColor, ExchangeTier,
+    GameState, BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
+    Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
+    ExchangeTier, PlayerScaffold,
 } from '../../shared_types';
 import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
-import { SharedStateStore } from '../data_classes/SharedStateStore';
+import { GameStateHandler } from '../data_classes/GameState';
 import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
 
 console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
-
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
 
 class GameSetupService {
 
     private tools: ToolService = new ToolService();
 
-    public produceGameData(newState: NewState, setupCoordinates: Array<Coordinates>): StateBundle {
+    public produceGameData(newState: LobbyState, setupCoordinates: Array<Coordinates>): StateBundle {
+
+        if (newState.gameId === null)
+            throw new Error('Cannot start game without a game ID');
+
+        if (newState.sessionOwner === null)
+            throw new Error('Cannot start game while the session owner is null');
+
         const players = this.tools.getCopy(newState.players);
 
-        if (newState.gameId === null) {
-            throw new Error('Cannot start game without a game ID');
-        }
-
-        if (newState.sessionOwner === null) {
-            throw new Error('Cannot start game while the session owner is null');
-        }
-
-        if (players.length < 2 && !SINGLE_PLAYER) {
+        if (!players.every(p => Boolean(p.id)))
             throw new Error('Not enough players to start a game');
-        }
+
+        if (players.length < 2 && !SINGLE_PLAYER)
+            throw new Error('Not enough players to start a game');
 
         const barriers = this.determineBarriers();
+        const mapPairings = this.determineLocations();
         const marketData = this.prepareDeckAndGetOffer();
 
         const privateState: PrivateState = {
             moveRules: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
             costTiers: this.filterCostTiers(players.length),
-            gameStats: players.map(p => ({ id: p.id, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
+            gameStats: players.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         }
 
         newState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
 
-        const sharedStateProps: SharedState = {
+        const sharedStateProps: GameState = {
             isStatusResponse: false,
             gameId: newState.gameId,
             gameStatus: 'started',
-            gameResults: null,
+            gameResults: [],
             sessionOwner: newState.sessionOwner,
             chat: newState.chat,
             availableSlots: [],
-            players: this.assignTurnOneRules(players, privateState.moveRules, setupCoordinates),
+            players: this.hydratePlayers(players, privateState.moveRules, setupCoordinates, mapPairings),
             market: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
             temple: {
@@ -64,14 +65,14 @@ class GameSetupService {
                 donations: [],
             },
             setup: {
-                barriers: barriers,
-                mapPairings: this.determineLocations(),
+                barriers,
+                mapPairings,
                 marketFluctuations: this.getMarketFluctuations(),
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
         }
 
-        const sharedState = new SharedStateStore(sharedStateProps);
+        const sharedState = new GameStateHandler(sharedStateProps);
 
         return { sharedState, privateState };
     };
@@ -143,34 +144,60 @@ class GameSetupService {
     }
 
     // MARK: Players
-    private assignTurnOneRules(players: Array<Player>, moveRules: Array<ProcessedMoveRule>, setupCoordinates: Array<Coordinates>): Array<Player> {
-        const sortedPlayers = ((): Array<Player> => {
-            const playerColors = players.map(player => player.id);
 
-            let tokenCount = playerColors.length;
-            let error: string = '';
+    private hydratePlayers(
+        scaffolds: Array<PlayerScaffold>,
+        moveRules: Array<ProcessedMoveRule>,
+        setupCoordinates: Array<Coordinates>,
+        mapPairings: Record<ZoneName, LocationData>,
+    ): Array<Player> {
+        const initialRules = this.tools.getCopy(moveRules[0]);
+        const startingZone = initialRules.from;
+        const randomScaffolds = scaffolds
+            .map(p => {
+                return { player: p, order: Math.random() }
+            })
+            .sort((a, b) => a.order - b.order)
+            .map(o => o.player);
 
-            while (tokenCount > 0 && !error) {
-                const pick = Math.floor(Math.random() * playerColors.length);
-                const playerColor = playerColors.splice(pick, 1).shift() as PlayerColor;
-                const player = players.find(player => player.id === playerColor) as Player;
-                player.turnOrder = tokenCount;
-                player.isActive = tokenCount === 1;
-                player.bearings.position = setupCoordinates.pop() as Coordinates;
+        const orderTokens = (() => {
+            const t = Array.from(Array(5).keys());
+            t.shift();
+            return t;
+        })(); // [1,2,3,4]
 
-                tokenCount -= 1;
+        const players = randomScaffolds.map(p => {
+            const order = orderTokens.shift()!;
+            const player: Player = {
+                id: p.id,
+                timeStamp: 0,
+                isIdle: false,
+                name: p.name,
+                turnOrder: order,
+                isActive: order === 1,
+                bearings: {
+                    seaZone: startingZone,
+                    position: setupCoordinates.pop() as Coordinates,
+                    location: mapPairings[startingZone].name
+                },
+                favor: 2,
+                privilegedSailing: false,
+                influence: 1,
+                moveActions: 2,
+                isAnchored: true,
+                locationActions: null,
+                allowedMoves: initialRules.allowed,
+                hasCargo: false,
+                cargo: ['empty', 'empty'],
+                feasibleTrades: [],
+                coins: 0,
             }
 
-            return players.sort((a, b) => a.turnOrder - b.turnOrder);
-        })();
+            return player;
+        });
 
-
-        const initialRules = this.tools.getCopy(moveRules[0]);
-
-        return sortedPlayers.map(player => {
-            player.bearings.seaZone = initialRules.from;
-            player.allowedMoves = initialRules.allowed;
-
+        // debug options
+        return players.map(player => {
             if (RICH_PLAYERS)
                 player.coins = 99;
             if (LOADED_PLAYERS)

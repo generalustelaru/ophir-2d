@@ -1,18 +1,18 @@
 import {
     ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer,
-    MarketSlotKey, Player, PlayerColor, SharedState, TempleState, Trade,
+    MarketSlotKey, Player, PlayerColor, GameState, TempleState, Trade,
     ExchangeState, Metal, DiceSix, TradeGood,
 } from "../../shared_types";
-import { PlayerCountables } from "../server_types";
+import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
-export class SharedStateStore {
+export class GameStateHandler implements ObjectHandler<GameState>{
     private gameId: Readable<string>;
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
     private isStatusResponse: Writable<boolean>;
     private gameStatus: Writable<GameStatus>;
-    private gameResults: Writable<null | Array<PlayerCountables>>;
+    private gameResults: Writable<Array<PlayerCountables>>;
     private availableSlots: Writable<Array<PlayerColor>>;
     private players: ArrayWritable<Player>;
     private market: Writable<MarketOffer>;
@@ -20,7 +20,7 @@ export class SharedStateStore {
     private chat: ArrayWritable<ChatEntry>;
     private itemSupplies: Writable<ItemSupplies>;
 
-    constructor(props: SharedState) {
+    constructor(props: GameState) {
         const {
             gameId, sessionOwner, setup, isStatusResponse, gameStatus, gameResults,
             availableSlots, players, market, temple, chat, itemSupplies
@@ -40,7 +40,7 @@ export class SharedStateStore {
         this.itemSupplies = writable(itemSupplies);
     }
 
-    public toDto(): SharedState {
+    public toDto(): GameState {
 
         return {
             gameId: this.gameId.get(),

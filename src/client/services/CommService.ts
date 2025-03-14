@@ -1,9 +1,9 @@
 import {
     ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
-    ResetResponse, StateResponse, Action,
+    ResetResponse, Action, GameStateResponse, LobbyStateResponse,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
-import state from '../state';
+import localState from '../state';
 
 class CommunicationClass extends Communicator {
 
@@ -47,7 +47,7 @@ class CommunicationClass extends Communicator {
             console.debug('<-', data);
 
             if (this.isClientIdResponse(data)) {
-                if (state.local.myId === null) {
+                if (localState.myId === null) {
                     this.broadcastEvent({
                         type: 'identification',
                         detail: { clientId: data.clientId }
@@ -55,7 +55,7 @@ class CommunicationClass extends Communicator {
                 } else {
                     this.sendMessage({
                         action: Action.rebind_id,
-                        payload: { referenceId: data.clientId, myId: state.local.myId }
+                        payload: { referenceId: data.clientId, myId: localState.myId }
                     });
                 }
 
@@ -75,9 +75,14 @@ class CommunicationClass extends Communicator {
                 return;
             }
 
-            if (this.isStateResponse(data)) {
-                state.received = data.state;
-                this.broadcastEvent({ type: 'update', detail: null });
+            if (this.isGameStateResponse(data)) {
+                this.broadcastEvent({ type: 'game_update', detail: data.game });
+
+                return;
+            }
+
+            if (this.isLobbyStateResponse(data)) {
+                this.broadcastEvent({ type: 'lobby_update', detail: data.lobby });
 
                 return;
             }
@@ -97,7 +102,7 @@ class CommunicationClass extends Communicator {
             return;
         }
 
-        const { gameId, myId: clientId, playerColor, playerName } = state.local;
+        const { gameId, myId: clientId, playerColor, playerName } = localState;
         const message: ClientRequest = { gameId, clientId, playerColor, playerName, message: payload };
 
         console.debug('->', message);
@@ -119,8 +124,12 @@ class CommunicationClass extends Communicator {
         if (this.statusInterval) clearInterval(this.statusInterval);
     }
 
-    private isStateResponse(data: ServerMessage): data is StateResponse {
-        return 'state' in data;
+    private isGameStateResponse(data: ServerMessage): data is GameStateResponse {
+        return 'game' in data;
+    }
+
+    private isLobbyStateResponse(data: ServerMessage): data is LobbyStateResponse {
+        return 'lobby' in data;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
