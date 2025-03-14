@@ -11,8 +11,6 @@ export type WsClient = {
     socket: WebSocket
 }
 
-export type WsSignal = 'connection'|'message'|'close';
-
 export type DefaultMoveRule = {
     from: ZoneName;
     allowed: Array<ZoneName>;

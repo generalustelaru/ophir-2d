@@ -20,12 +20,6 @@ export type LocalState = {
     isBoardDrawn: boolean,
 }
 
-export type ClientState = {
-    local: LocalState,
-    // newState: NewState,
-    // sharedState: SharedState | null;
-}
-
 export type ClientConstants = {
     DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
@@ -130,8 +124,4 @@ export type InfoDetail = {
 
 export type ErrorDetail = {
     message: string,
-}
-
-export type SetupDetail = {
-    playerPositions: Array<Coordinates>,
 }
