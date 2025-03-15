@@ -12,9 +12,9 @@ function deepCopy<T>(input: T): T {
         return input.map(deepCopy) as T;
     }
 
-    return Object.fromEntries(
-        Object.entries(input).map(([key, value]) => [key, deepCopy(value)])
-    ) as T;
+    return Object.fromEntries(Object.entries(input).map(
+        ([k, val]: [string, unknown]): [string, unknown] => [k, deepCopy(val)]
+    )) as T;
 }
 
 function valueExists(value: unknown) {
@@ -82,21 +82,36 @@ export function readable<T>(initialValue: T): Readable<T> {
 // MARK: WRAPPERS
 
 export type ArrayWritable<T> = {
+    count: () => number,
     getAll: () => Array<T>,
-    find: (id: string|number) => T | null,
+    includes: (key: string|number) => boolean,
+    findOne: (key: string|number) => T | null,
     add: (element: T) => void,
-    update: (id: string|number, element: T) => void,
-    remove: (id: string|number) => void,
+    updateOne: (key: string|number, element: T) => void,
+    removeOne: (key: string|number) => void,
+    overwrite: (element: Array<T>) => void,
     reset: () => void,
 }
-export function arrayWritable<T>(initialArray: Array<T>, key?: string): ArrayWritable<T> {
+
+/**
+ * @description Writable wrapper that implements array-specific methods.
+ * @param initialArray May be empty.
+ * @param keyName Unique object property used for searching. Unnecessary for scalar arrays.
+ */
+export function arrayWritable<T>(initialArray: Array<T>, keyName?: string): ArrayWritable<T> {
     const array = writable(initialArray);
 
     return {
+        count: () => array.get().length,
         getAll: () => array.get(),
-        find: (id) => {
-            return key
-                ? array.get().find(e => e[key as keyof T] === id) || null
+        includes: (id) => {
+            return keyName
+                ? !!array.get().find(e => e[keyName as keyof T] === id)
+                : !!array.get().find(e => e === id);
+        },
+        findOne: (id) => {
+            return keyName
+                ? array.get().find(e => e[keyName as keyof T] === id) || null
                 : array.get().find(e => e === id) || null;
         },
         add: (element) => {
@@ -105,25 +120,28 @@ export function arrayWritable<T>(initialArray: Array<T>, key?: string): ArrayWri
                 return arr;
             });
         },
-        update: (id, element) => {
+        updateOne: (id, element) => {
             array.update(arr => {
-                const stateElement = key
-                    ? arr.find(e => e[key as keyof T] === id)
+                const stateElement = keyName
+                    ? arr.find(e => e[keyName as keyof T] === id)
                     : arr.find(e => e === id);
                 if (stateElement)
                     arr.splice(arr.indexOf(stateElement), 1, element);
                 return arr;
             });
         },
-        remove: (id) => {
+        removeOne: (id) => {
             array.update(arr => {
-                const element = key
-                    ? arr.find(e => e[key as keyof T] === id)
+                const element = keyName
+                    ? arr.find(e => e[keyName as keyof T] === id)
                     : arr.find(e => e === id);
                 if (element)
                     arr.splice(arr.indexOf(element), 1);
                 return arr;
             });
+        },
+        overwrite: (newArr) => {
+            array.set(newArr);
         },
         reset: () => array.reset(),
     }

@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, GameState, Coordinates, LocationName, ItemName,
     LobbyState, Trade, MarketOffer, Player, Metal, ExchangeState, Currency,
-    TempleState, ClientMessage, ResetResponse, ClientIdResponse, CargoInventory,
+    TempleState, ClientMessage, ResetResponse, ClientIdResponse,
 } from '../shared_types';
 import Konva from 'konva';
 
@@ -95,7 +95,7 @@ export type TempleUpdate = {
 }
 
 export type CargoBandUpdate = {
-    cargo: CargoInventory,
+    cargo: Array<ItemName>,
     canDrop: boolean,
 }
 

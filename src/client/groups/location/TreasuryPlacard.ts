@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '../../client_types';
 import clientConstants from '../../client_constants';
-import { Action, CargoInventory } from '../../../shared_types';
+import { Action, ItemName } from '../../../shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
@@ -155,7 +155,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
         return this.group;
     }
 
-    private hasCargoRoom(cargo: CargoInventory): boolean {
+    private hasCargoRoom(cargo: Array<ItemName>): boolean {
         const emptySlots = cargo.filter(item => item === 'empty').length;
 
         return emptySlots >= 2;

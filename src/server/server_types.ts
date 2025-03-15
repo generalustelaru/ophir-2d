@@ -1,9 +1,10 @@
 import {
-    BarrierId, ZoneName, PlayerColor, Player, LobbyState, Trade, LocationData,
+    BarrierId, ZoneName, PlayerColor, LobbyState, Trade, LocationData,
     TradeGood, GoodsLocationName, MessagePayload, ExchangeTier,
 } from '../shared_types';
 import { WebSocket } from 'ws';
 import { GameStateHandler } from './data_classes/GameState';
+import { PlayerHandler } from './data_classes/Player';
 
 export type WsClient = {
     clientID: string,
@@ -41,12 +42,12 @@ export type PrivateState = {
 }
 
 export type StateBundle = {
-    sharedState: GameStateHandler,
+    gameState: GameStateHandler,
     privateState: PrivateState,
 }
 
 export type DataDigest = {
-    player: Player,
+    player: PlayerHandler,
     payload: MessagePayload
 }
 

@@ -72,11 +72,11 @@ export class GameStateHandler implements ObjectHandler<GameState>{
 
     // MARK: Player
     public savePlayer(player: Player) {
-        this.players.update(player.id, player);
+        this.players.updateOne(player.id, player);
     }
 
     public getPlayer(id: PlayerColor) {
-        return this.players.find(id);
+        return this.players.findOne(id);
     }
 
     public getActivePlayer() {
@@ -88,10 +88,22 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     }
 
     // MARK: Map
-    public getZoneInfluenceData(zone: ZoneName): { id: PlayerColor, influence: DiceSix }[] {
+    public getPlayersByZone(zone: ZoneName): Array<Player> {
         return this.players.getAll()
             .filter(p => p.bearings.seaZone === zone)
-            .map(p => { return { id: p.id, influence: p.influence }});
+    }
+
+    public trimInfluenceByZone(zone: ZoneName) {
+        const players = this.getPlayersByZone(zone).sort(
+            (a, b) => b.influence - a.influence,
+        );
+        const threshold = players.length ? players[0].influence : 6;
+        const affectedPlayers = players.filter(p => p.influence == threshold);
+        const trimmedInfluence = threshold - 1 as DiceSix;
+
+        for (const player of affectedPlayers) {
+            this.savePlayer({...player, influence: trimmedInfluence})
+        }
     }
 
     public getLocationActions(zone: ZoneName) {

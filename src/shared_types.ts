@@ -39,7 +39,6 @@ export type LocationAction =
 export type GameStatus = "empty" | "created" | "full" | "started" | "ended";
 export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
-export type CargoInventory = Array<ItemName>;
 export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
@@ -83,7 +82,7 @@ export type Player = {
     locationActions: Array<LocationAction> | null,
     allowedMoves: Array<ZoneName>,
     hasCargo: boolean,
-    cargo: CargoInventory,
+    cargo: Array<ItemName>,
     feasibleTrades: Array<MarketSlotKey>
     coins: number,
 }
