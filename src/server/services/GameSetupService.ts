@@ -190,7 +190,7 @@ class GameSetupService {
                 influence: 1,
                 moveActions: 0,
                 isAnchored: true,
-                locationActions: null,
+                locationActions: [],
                 allowedMoves: initialRules.allowed,
                 hasCargo: false,
                 cargo: ['empty', 'empty'],

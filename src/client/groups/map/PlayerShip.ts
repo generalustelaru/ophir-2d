@@ -101,7 +101,7 @@ export class PlayerShip {
 
             switch (true) {
                 case targetHex.getId() === player.bearings.seaZone:
-                    targetHex.setFill(player.locationActions ? COLOR.activeHex : COLOR.defaultHex);
+                    targetHex.setFill(player.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
@@ -151,12 +151,12 @@ export class PlayerShip {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
                     });
-                    departureHex.setFill(player?.locationActions ? COLOR.activeHex : COLOR.defaultHex);
+                    departureHex.setFill(player?.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
-                    departureHex.setFill(player?.locationActions ? COLOR.activeHex: COLOR.defaultHex);
+                    departureHex.setFill(player?.locationActions.length ? COLOR.activeHex: COLOR.defaultHex);
             }
         });
         this.group.add(this.ship);

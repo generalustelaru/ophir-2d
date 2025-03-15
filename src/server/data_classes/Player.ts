@@ -61,7 +61,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             influence: this.influence.get(),
             moveActions: this.moveActions.get(),
             isAnchored: this.isAnchored.get(),
-            locationActions: this.locationActions.count() ? this.locationActions.getAll() : null,
+            locationActions: this.locationActions.getAll(),
             allowedMoves: this.allowedMoves.getAll(),
             hasCargo: this.hasCargo.get(),
             cargo: this.cargo.getAll(),

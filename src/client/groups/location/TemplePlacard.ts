@@ -92,7 +92,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         const playerCanAct = (
             !!localPlayer
             && localPlayer.isAnchored
-            && !!localPlayer.locationActions
+            && !!localPlayer.locationActions.length
         );
 
         this.marketCard.update({
@@ -101,19 +101,19 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
                 playerCanAct
                 && localPlayer.bearings.location === 'temple'
                 && localPlayer.feasibleTrades.includes(this.templeTradeSlot)
-                && !!localPlayer.locationActions?.includes(Action.make_trade)
+                && localPlayer.locationActions.includes(Action.make_trade)
             )
         });
 
         this.upgradeButton.update((
             playerCanAct
-            && !!localPlayer.locationActions?.includes(Action.upgrade_cargo)
+            && localPlayer.locationActions.includes(Action.upgrade_cargo)
             && localPlayer.coins >= 2
             && localPlayer.cargo.length < 4
         ));
 
         const playerCanDonateMetals = (
-            playerCanAct && !!localPlayer.locationActions?.includes(Action.donate_metals)
+            playerCanAct && !!localPlayer.locationActions.includes(Action.donate_metals)
         );
 
         this.goldDonationCard.update((
