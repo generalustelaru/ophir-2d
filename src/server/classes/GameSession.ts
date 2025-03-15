@@ -1,23 +1,21 @@
 import process from 'process';
-import { DataDigest, PlayerCountables, PrivateState, ProcessedMoveRule, StateBundle } from "../server_types";
+import { DataDigest, PlayerCountables, PrivateState, StateBundle } from "../server_types";
 import {
-    ZoneName, PlayerColor, Player, GameState, ClientRequest, TradeGood, LocationAction,
-    DiceSix, CargoInventory, MarketSlotKey, ItemName, Trade, LocationName,
-    GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal,
-    ErrorResponse, Action,
+    ZoneName, GameState, ClientRequest, TradeGood, LocationAction, MarketSlotKey, ItemName, Trade,
+    LocationName, GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal, ErrorResponse, Action,
     GameStateResponse,
 } from "../../shared_types";
 import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 import { ValidatorService } from "../services/validation/ValidatorService";
 import { GameStateHandler } from "../data_classes/GameState";
+import { PlayerHandler } from '../data_classes/Player';
 import { IDLE_CHECKS } from "../configuration";
 
 const { TRADE_DECK_B } = serverConstants;
 const serverName = String(process.env.SERVER_NAME);
-const MAX_FAVOR = 6;
 
-type Probable<T> = { err: true, data: string } | { err: false, data: T };
+type Probable<T> = { err: true, message: string } | { err?: false, data: T };
 
 export class GameSession {
 
@@ -30,7 +28,7 @@ export class GameSession {
     constructor(bundle: StateBundle) {
         (global as any).myInstance = this;
         this.privateState = bundle.privateState;
-        this.state = bundle.sharedState;
+        this.state = bundle.gameState;
         this.tools = new ToolService();
         this.validator = new ValidatorService();
         const activePlayer = this.state.getActivePlayer();
@@ -38,8 +36,6 @@ export class GameSession {
         if (!activePlayer) {
             throw new Error('No active player found');
         }
-
-        this.setTurnStartCondition(activePlayer);
 
         console.info('Game session created');
 
@@ -55,7 +51,7 @@ export class GameSession {
         return this.state.getSessionOwner();
     }
 
-    public getPrivateState(): PrivateState {
+    public getPrivateState(): PrivateState { // such private, very external
         return this.privateState;
     }
 
@@ -78,21 +74,23 @@ export class GameSession {
         if (!playerColor)
             return this.issueErrorResponse('No player ID provided');
 
-        const player = this.state.getPlayer(playerColor);
+        const playerObject = this.state.getPlayer(playerColor);
 
-        if (!player)
+        if (!playerObject)
             return this.issueErrorResponse(`Player does not exist: ${playerColor}`);
 
-        player.isIdle = false;
-        player.timeStamp = Date.now();
+        const player = new PlayerHandler(playerObject);
+        player.refreshTimeStamp();
 
-        this.state.savePlayer(player);
+        const digest: DataDigest = { player, payload }
 
-        const digest: DataDigest = { player , payload }
+        if (action == Action.chat)
+            return this.processChat(digest);
+
+        if (!player.isActivePlayer())
+            return this.issueErrorResponse(`It is not [${player.getIdentity().name}]'s turn!`);
 
         switch (action) {
-            case Action.chat:
-                return this.processChat(digest);
             case Action.spend_favor:
                 return this.processFavorSpending(digest);
             case Action.move:
@@ -133,13 +131,14 @@ export class GameSession {
         if (!chatPayload)
             return this.validationErrorResponse();
 
+        const { id, name } = player.getIdentity();
         this.state.addChatEntry({
-            id: player.id,
-            name: player.name,
+            id,
+            name,
             message: chatPayload.input,
         });
 
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
 
     // MARK: MOVE
@@ -150,86 +149,95 @@ export class GameSession {
         if (!movementPayload)
             return this.validationErrorResponse();
 
-        const departure = player.bearings.seaZone;
         const destination = movementPayload.hexId;
         const locationName = this.state.getLocationName(destination);
-        const remainingMoves = player.moveActions;
-        const moveRule = this.privateState.moveRules.find(
-            rule => rule.from === departure
-        ) as ProcessedMoveRule;
 
-        if (!moveRule.allowed.includes(destination) || remainingMoves === 0) {
-            return this.issueErrorResponse('Movement not alowed.', { destination, remainingMoves });
+        if (!player.isDestinationValid(destination) || !player.getMoves()) {
+            return this.issueErrorResponse(
+                'Movement not alowed.',
+                { destination, moves: player.getMoves() },
+            );
         }
 
-        player.moveActions = remainingMoves - 1;
-        const localInfluence = this.state.getZoneInfluenceData(destination);
-        const sailSuccess = !localInfluence.length || player.privilegedSailing
-            ? true
-            : this.checkInfluence(player, localInfluence);
+        const sailAttempt = ((): {successful: boolean} => {
+            player.spendMove();
+            const playersInZone = this.state.getPlayersByZone(destination);
 
-        if (sailSuccess) {
-            player.bearings = {
+            if (!playersInZone.length || player.isPrivileged())
+                return {successful: true};
+
+            player.rollInfluence();
+            const blockingPlayers = playersInZone.filter(
+                p => p.influence > player.getInfluence()
+            );
+
+            if (!blockingPlayers.length)
+                return {successful: true};
+
+
+            this.state.trimInfluenceByZone(destination);
+            this.addServerMessage(`Influence at the [${locationName}] was trimmed`);
+
+            this.addServerMessage(`${player.getIdentity().name} was blocked from sailing.`);
+            return {successful: false};
+        })();
+
+        if (sailAttempt.successful) {
+            player.setBearings({
                 seaZone: destination,
                 position: movementPayload.position,
                 location: this.state.getLocationName(destination),
-            };
-            player.allowedMoves = (
+            });
+
+            player.setDestinationOptions(
                 this.privateState.moveRules
                     .find(rule => rule.from === destination)?.allowed
-                    .filter(move => move !== departure) as Array<ZoneName>
+                    .filter(move => move !== player.getBearings().seaZone) as Array<ZoneName>
             );
-            player.isAnchored = true;
-            player.locationActions = this.state.getLocationActions(destination);
-        } else {
-            this.addServerMessage(`${player.name} was blocked from sailing towards the ${locationName}`);
+
+            player.setAnchoredActions(this.state.getLocationActions(destination));
+
+        } else if(!player.getMoves()) {
+            player.setAnchoredActions();
+            this.addServerMessage(
+                `${player.getIdentity().name} also ran out of moves and cannot act further`
+            );
         }
 
-        if (player.moveActions === 0 && !sailSuccess) {
-            player.isAnchored = true;
-            player.locationActions = null;
-            this.addServerMessage(`${player.name} also ran out of moves and cannot act further`);
-        }
-        this.state.savePlayer(player);
-
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
 
     // MARK: REPOSITIONING
     private processRepositioning(data: DataDigest) {
-        const payload = this.validator.validateRepositioningPayload(data.payload);
-        const player  = data.player;
+        const { payload, player } = data;
+        const repositioningPayload = this.validator.validateRepositioningPayload(payload);
 
-        if (!payload)
+        if (!repositioningPayload)
             return this.validationErrorResponse();
 
-        player.bearings.position = payload.repositioning;
-        this.state.savePlayer(player);
+        const position = repositioningPayload.repositioning;
+        player.setBearings({...player.getBearings(), position})
 
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
 
     // MARK: FAVOR
     private processFavorSpending(data: DataDigest) {
-        const player = data.player;
-        const { isActive, favor, privilegedSailing } = player;
+        const { player } = data;
 
-        if (isActive && favor > 0 && privilegedSailing === false) {
-            player.favor -= 1;
-            player.privilegedSailing = true;
-            player.isAnchored = true;
-            this.state.savePlayer(player);
-
-            this.addServerMessage(`${player.name} spent favor to remain anchored or sail without influence roll`);
-
-            return this.issueStateResponse();
+        if (!player.getFavor() || player.isPrivileged()) {
+            return this.issueErrorResponse(
+                `${player.getIdentity().name} cannot spend favor`,
+                { favor: player.getFavor(), isPrivileged: player.isPrivileged() },
+            );
         }
 
-        return this.issueErrorResponse(
-            `Could not process favor for ${player.id}`,
-            { isActive, favor, privilegedSailing },
-        );
+        this.addServerMessage(`${player.getIdentity().name} has spent favor`);
+        player.enablePrivilege();
+
+        return this.issueStateResponse(player);
     }
+
     // MARK: DROP ITEM
     private processItemDrop(data: DataDigest) {
         const payload = this.validator.validateDropItemPayload(data.payload);
@@ -238,21 +246,17 @@ export class GameSession {
             return this.validationErrorResponse();
 
         const player = data.player;
-        const lighterCargo = this.unloadItem(player.cargo, payload.item);
+        const result = this.unloadItem(player.getCargo(), payload.item);
 
-        if (!lighterCargo)
-            return this.issueErrorResponse(`Could not drop item for ${player.id}`);
+        if (result.err)
+            return this.issueErrorResponse(result.message, {cargo: player.getCargo()});
 
-        player.hasCargo = Boolean(
-            lighterCargo.find(item => item !== 'empty')
-        );
-        player.cargo = lighterCargo;
-        player.feasibleTrades = this.pickFeasibleTrades(lighterCargo);
-        this.state.savePlayer(player);
+        player.setCargo(result.data);
+        player.setTrades(this.pickFeasibleTrades(result.data));
 
-        this.addServerMessage(`${player.name} just threw ${payload.item} overboard`);
+        this.addServerMessage(`${player.getIdentity().name} ditched one ${payload.item}`);
 
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
     // MARK: LOAD TRADE GOOD
     private processLoadGood(data: DataDigest) {
@@ -263,15 +267,14 @@ export class GameSession {
 
         const player = data.player;
 
-        if (
-            !player.isAnchored
-            || !player.locationActions?.includes(Action.load_good)
-            || !this.hasCargoRoom(player.cargo, 1)
-        ) {
-            return this.issueErrorResponse(`Cannot load goods for ${player.id}`, player);
+        if (!player.mayLoadGood()) {
+            return this.issueErrorResponse(
+                `${player.getIdentity().id} Cannot load good`,
+                player.toDto(),
+            );
         }
 
-        const locationName = this.state.getLocationName(player.bearings.seaZone);
+        const locationName = this.state.getLocationName(player.getBearings().seaZone);
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationName))
@@ -286,21 +289,24 @@ export class GameSession {
             );
         }
 
-        const res = this.loadItem(player.cargo, localGood);
+        const loadItem = this.loadItem(player.getCargo(), localGood);
 
-        if (res.err)
-            return this.issueErrorResponse(res.data);
+        if (loadItem.err)
+            return this.issueErrorResponse(loadItem.message);
 
-        player.cargo = res.data;
-        player.hasCargo = true;
-        player.moveActions = 0;
-        player.locationActions = this.removeAction(player.locationActions, Action.load_good);
-        player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-        this.state.savePlayer(player);
+        const removeAction = this.removeAction(player.getActions(), Action.load_good);
 
-        this.addServerMessage(`${player.name} picked up ${localGood}`);
+        if (removeAction.err)
+            return this.issueErrorResponse(removeAction.message, player.getActions());
 
-        return this.issueStateResponse();
+        player.setCargo(loadItem.data);
+        player.clearMoves();
+        player.setActions(removeAction.data);
+        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+
+        this.addServerMessage(`${player.getIdentity().name} picked up ${localGood}`);
+
+        return this.issueStateResponse(player);
     }
     // MARK: GOODS TRADE
     private processGoodsTrade(data: DataDigest) {
@@ -311,59 +317,64 @@ export class GameSession {
             return this.validationErrorResponse();
 
         const { slot, location } = tradePayload;
+        const {id, name} = player.getIdentity();
 
-        if (
-            !player.locationActions?.includes(Action.make_trade)
-            || player.bearings.location !== location
-            || !player.feasibleTrades.includes(slot)
-            || !player.isAnchored
-        ) {
-            return this.issueErrorResponse(`Conditions for trade not satisfied for ${player.id}`);
+        if (Boolean(
+            player.canAct(Action.make_trade)
+            && player.getBearings().location == location
+            && player.getTrades().includes(slot)
+        ) == false) {
+            return this.issueErrorResponse(`${name} cannnot trade`);
         }
 
         const trade = this.state.getMarketTrade(slot);
 
         switch (location) {
             case 'market':
-                const modifier = this.state.getFluctuation(slot);
-                player.coins += trade.reward.coins + modifier;
-                this.addServerMessage(`${player.name} sold goods for ${trade.reward.coins + modifier} coins`);
+                const amount = trade.reward.coins + this.state.getFluctuation(slot);
+                player.gainCoins(amount);
+                this.addServerMessage(`${name} sold goods for ${amount} coins`);
                 break;
             case 'temple':
                 const reward = trade.reward.favorAndVp;
-                player.favor = Math.min(MAX_FAVOR, player.favor + reward);
-                this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
-                this.addServerMessage(`${player.name} donated goods for ${reward} favor and ${reward} VP`);
+                player.gainFavor(reward);
+                this.privateState.gameStats.find(p => p.id == id)!.vp += reward;
+                this.addServerMessage(`${name} donated for ${reward} favor and VP`);
                 console.info(this.privateState.gameStats);
                 break;
             default:
                 return this.issueErrorResponse(`Unknown trade location: ${location}`);
         }
 
-        const newCargo = (() => {
-            let cargo = this.tools.getCopy(player.cargo);
+        const cargoTransfer = ((): Probable<Array<ItemName>> => {
+            let cargo = player.getCargo()
 
-            for (const goodId of trade.request) {
-                const result =  this.unloadItem(cargo, goodId);
+            for (const tradeGood of trade.request) {
+                const result = this.unloadItem(cargo, tradeGood);
 
-                if (!result)
-                    return null;
+                if (result.err)
+                    return result;
 
-                cargo = result;
+                cargo = result.data;
             }
 
-            return cargo;
+            return this.pass(cargo);
         })();
 
-        if (!newCargo) {
-            return this.issueErrorResponse(`Could not match cargo item to trade request: ${player.cargo}`);
-        }
+        if (cargoTransfer.err)
+            return this.issueErrorResponse(
+                `Cannot match cargo to trade`,
+                {c: player.getCargo(), t: trade.request},
+            );
 
-        player.cargo = newCargo;
-        player.hasCargo = Boolean(player.cargo.find(item => item !== 'empty'));
-        player.locationActions = this.removeAction(player.locationActions, Action.make_trade);
-        player.moveActions = 0;
-        this.state.savePlayer(player);
+        const removeAction = this.removeAction(player.getActions(), Action.make_trade);
+
+        if (removeAction.err)
+            return this.issueErrorResponse(removeAction.message, player.getActions());
+
+        player.setCargo(cargoTransfer.data);
+        player.setActions(removeAction.data);
+        player.clearMoves();
 
         // Update market offer
         this.state.shiftMarketCards();
@@ -373,9 +384,7 @@ export class GameSession {
             // Load trade deck B if required
             if (this.privateState.tradeDeck.length === 0 && this.state.isDeckA()) {
                 this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
-
                 this.state.markDeckB();
-
                 this.addServerMessage('Market deck B is now in play');
             }
 
@@ -397,131 +406,124 @@ export class GameSession {
             const result = this.compileGameResults();
 
             if (result.err)
-                return this.issueErrorResponse(result.data);
+                return this.issueErrorResponse(result.message);
 
             this.state.setGameResults(result.data);
             this.state.setGameStatus('ended');
             this.addServerMessage('Market deck is empty! Game has ended.');
         }
 
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
 
     // MARK: METAL PURCHASE
+    // TODO: looks like it could be streamlined
     private processMetalPurchase(data: DataDigest) {
         const { player, payload } = data;
-
+        const { name } = player.getIdentity();
         const purchasePayload = this.validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
             return this.validationErrorResponse();
 
-        if (
-            !player.locationActions?.includes(Action.buy_metals)
-            || !player.isAnchored
-            || !this.hasCargoRoom(player.cargo, 2)
-        ) {
-            return this.issueErrorResponse(`Player ${player?.id} cannot buy metals`);
-        }
+        if (!player.mayLoadMetal())
+            return this.issueErrorResponse(`Player ${name} cannot buy metals`);
 
-        const costs = this.state.getMetalCosts();
         const metalCost = (() => {
+            const costs = this.state.getMetalCosts();
+
             switch (purchasePayload.metal) {
                 case 'gold': return costs.gold;
                 case 'silver': return costs.silver;
                 default: return null;
             }
         })();
+
         const playerAmount = (() => {
             switch (purchasePayload.currency) {
-                case 'coins': return player.coins;
-                case 'favor': return player.favor;
+                case 'coins': return player.getCoinAmount()
+                case 'favor': return player.getFavorAmount();
                 default: return null;
             }
         })();
 
         if (!metalCost || !playerAmount) {
-            return this.issueErrorResponse(`No such cost or player amount found: ${metalCost}, ${player}`);
+            return this.issueErrorResponse(
+                `No such cost or player amount found for ${name}`,
+                { currency: purchasePayload.currency, metalCost, playerAmount }
+            );
         }
-
-        const remainder = playerAmount - metalCost[purchasePayload.currency];
+        const price = metalCost[purchasePayload.currency];
+        const remainder = playerAmount - price;
 
         if (remainder < 0) {
-            return this.issueErrorResponse(`Player ${player.id} cannot afford metal purchase`);
+            return this.issueErrorResponse(`Player ${name} cannot afford metal purchase`);
         }
 
         switch (purchasePayload.currency) {
             case 'coins':
-                player.coins = remainder;
-                this.addServerMessage(`${player.name} bought ${purchasePayload.metal} for ${metalCost.coins} coins`);
+                player.spendCoins(price);
+                this.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.coins} coins`);
                 break;
             case 'favor':
-                player.favor = remainder;
-                this.addServerMessage(`${player.name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
+                player.spendCoins(price)
+                this.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
                 break;
             default:
                 return this.issueErrorResponse(`Unknown currency: ${purchasePayload.currency}`);
         }
 
-        const result = this.loadItem(player.cargo, purchasePayload.metal);
+        const result = this.loadItem(player.getCargo(), purchasePayload.metal);
 
         if (result.err)
-            return this.issueErrorResponse(result.data);
+            return this.issueErrorResponse(result.message);
 
-        player.cargo = result.data;
-        player.hasCargo = true;
-        player.moveActions = 0;
-        this.state.savePlayer(player);
+        player.setCargo(result.data);
+        player.clearMoves()
 
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
 
     // MARK: DONATE METALS
     private processMetalDonation(data: DataDigest) {
         const { player, payload } = data;
+        const {id, name} = player.getIdentity();
         const donationPayload = this.validator.validateMetalDonationPayload(payload);
 
         if (!donationPayload)
             return this.validationErrorResponse();
 
-        if (
-            !player.locationActions?.includes(Action.donate_metals)
-            || !player.isAnchored
-            || !player.cargo.includes(donationPayload.metal)
-        ) {
-            return this.issueErrorResponse(`Player ${player?.id} cannot donate ${donationPayload.metal}`);
-        }
+        if (!player.mayDonateMetal(donationPayload.metal))
+            return this.issueErrorResponse(
+        `${name} cannot donate ${donationPayload.metal}`);
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
-        this.privateState.gameStats.find(p => p.id === player.id)!.vp += reward;
-        this.addServerMessage(`${player.name} donated ${donationPayload.metal} for ${reward} VP`);
+        this.privateState.gameStats.find(p => p.id === id)!.vp += reward;
+        this.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`);
         console.info(this.privateState.gameStats);
 
-        const newCargo = this.unloadItem(player.cargo, donationPayload.metal);
+        const result = this.unloadItem(player.getCargo(), donationPayload.metal);
 
-        if (!newCargo)
-            return this.issueErrorResponse(`Could not refresh cargo for ${player.id}`);
+        if (result.err)
+            return this.issueErrorResponse(result.message, {cargo: player.getCargo()});
 
-        player.cargo = newCargo;
-        player.hasCargo = Boolean(player.cargo.find(item => item !== 'empty'));
-        player.moveActions = 0;
-        this.state.savePlayer(player);
+        player.setCargo(result.data);
+        player.clearMoves();
 
         const { isNewLevel, isTempleComplete } = this.state.processMetalDonation(donationPayload.metal);
 
         if (isTempleComplete) {
-            player.locationActions = null;
-            this.state.savePlayer(player);
+            player.clearActions();
             const result = this.compileGameResults();
 
             if (result.err)
-                return this.issueErrorResponse('Could not conclude game session', {results: result.data});
+                return this.issueErrorResponse('Could not conclude game session', result);
 
             this.addServerMessage('The temple construction is complete! Game has ended.');
             this.addServerMessage(JSON.stringify(result.data));
             this.state.registerGameEnd(result.data);
 
-            return this.issueStateResponse();
+            return this.issueStateResponse(player);
         }
 
         if (isNewLevel) {
@@ -534,162 +536,84 @@ export class GameSession {
             this.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
 
-        return this.issueStateResponse();
+        return this.issueStateResponse(player);
     }
 
     // MARK: END TURN
     private processEndTurn(data: DataDigest) {
         const player = data.player;
-        const { isActive, isAnchored } = player;
+        const { order } = player.getIdentity();
 
-        if (!isActive || !isAnchored)
-            return this.issueErrorResponse(`Cannot process turn for ${player.id}`, { isActive, isAnchored });
+        if (!player.mayEndTurn())
+            return this.issueErrorResponse(`Ship is not anchored.`);
 
-        const result = this.passActiveStatus();
+        player.deactivate();
+        this.state.savePlayer(player.toDto());
 
-        if (result.err)
-            return this.issueErrorResponse(result.data);
+        const newPlayerResult = ((): Probable<PlayerHandler> => {
+            const allPlayers = this.state.getAllPlayers();
+            const nextOrder = order === allPlayers.length ? 1 : order + 1;
+            const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextOrder);
 
-        const activePlayer = result.data;
-        this.addServerMessage(`${activePlayer.name} is now active!`);
+            if (!nextPlayerDto)
+                return this.fail('Could not find the next player');
 
-        return this.issueStateResponse();
+            const nextPlayer = new PlayerHandler(nextPlayerDto);
+            const { seaZone } = nextPlayer.getBearings();
+            nextPlayer.activate(this.state.getLocationActions(seaZone));
+
+            return this.pass(nextPlayer);
+        })();
+
+        if (newPlayerResult.err)
+            return this.issueErrorResponse(newPlayerResult.message);
+
+        const newPlayer = newPlayerResult.data;
+        this.addServerMessage(`${newPlayer.getIdentity().name} is now active!`);
+
+        return this.issueStateResponse(newPlayer);
     }
 
     // MARK: UPGRADE HOLD
     private processUpgrade(data: DataDigest) {
         const player = data.player;
-        const { coins, cargo, locationActions } = player;
 
-        if (
-            locationActions?.includes(Action.upgrade_cargo)
-            && coins >= 2
-            && cargo.length < 4
-        ) {
-            player.coins -= 2;
-            player.cargo.push('empty');
-            player.locationActions = this.removeAction(locationActions, Action.upgrade_cargo);
-            player.moveActions = 0;
-            this.state.savePlayer(player);
-            this.addServerMessage(`${player.name} upgraded their hold`);
+        if (player.mayUpgradeCargo()) {
+            const removeAction = this.removeAction(player.getActions(), Action.upgrade_cargo);
 
-            return this.issueStateResponse();
+            if (removeAction.err)
+                return this.issueErrorResponse(removeAction.message, player.getActions())
+
+            player.spendCoins(2);
+            player.addCargoSpace();
+            player.setActions(removeAction.data);
+            player.clearMoves();
+            this.addServerMessage(`${player.getIdentity().name} upgraded their hold`);
+
+            return this.issueStateResponse(player);
         }
 
-        return this.issueErrorResponse(`Could not resolve upgrade`, { coins, cargo, locationActions });
+        return this.issueErrorResponse(`Conditions for upgrade not met`, player.toDto());
     }
 
     // MARK: UTILITIES
 
 
 
-    // MARK: checkInfluence
-    // TODO: too many side effects. move functionality to store to be executed methodically
-    private checkInfluence(activePlayer: Player, registry: { id: PlayerColor, influence: DiceSix }[]): boolean {
-        let canMove = true;
-
-        activePlayer.influence = Math.ceil(Math.random() * 6) as DiceSix;
-        this.state.savePlayer(activePlayer);
-
-        let highestInfluence = activePlayer.influence;
-
-        registry.forEach(item => {
-            if (item.influence > highestInfluence) {
-                canMove = false;
-                highestInfluence = item.influence;
-            }
-        });
-
-        if (canMove) {
-            this.addServerMessage(
-                `${activePlayer.name} rolled a ${activePlayer.influence} and sailed successfully!`
-            );
-
-            return true;
-        }
-
-        registry.forEach(item => {
-            const player = this.state.getPlayer(item.id);
-
-            if (player?.influence === highestInfluence) {
-                player.influence -= 1;
-                this.state.savePlayer(player);
-            }
-        });
-
-        return false;
-    }
-
-    //MARK: passActiveStatus
-    private passActiveStatus(): Probable<Player> {
-        const activePlayer = this.state.getActivePlayer();
-
-        if (!activePlayer)
-            return this.fail('No active player found');
-
-        activePlayer.isActive = false;
-        activePlayer.locationActions = null;
-        activePlayer.privilegedSailing = false;
-        this.state.savePlayer(activePlayer);
-
-        const allPlayers = this.state.getAllPlayers();
-        const nextToken = activePlayer.turnOrder === allPlayers.length
-            ? 1
-            : activePlayer.turnOrder + 1;
-
-        const nextActivePlayer = allPlayers.find(player => player.turnOrder === nextToken);
-
-        if (!nextActivePlayer)
-            return this.fail('Could not find the next player');
-
-        nextActivePlayer.isActive = true;
-        this.state.savePlayer(nextActivePlayer);
-        this.setTurnStartCondition(nextActivePlayer);
-
-        return this.pass(nextActivePlayer);
-    }
-
-    // MARK: setTurnStartCondition
-    private setTurnStartCondition(player: Player): void {
-
-        player.isAnchored = false;
-        player.privilegedSailing = false;
-        player.moveActions = 2;
-        player.locationActions = this.state.getLocationActions(player.bearings.seaZone);
-        player.timeStamp = Date.now();
-
-        const rules = this.privateState.moveRules.find(
-            rule => rule.from === player.bearings.seaZone
-        ) as ProcessedMoveRule;
-
-        player.allowedMoves = rules.allowed as Array<ZoneName>;
-        this.state.savePlayer(player);
-    }
-
     // MARK: removeAction
-    private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Array<LocationAction> | null {
+    private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Probable<Array<LocationAction>> {
         const index = actions.indexOf(toRemove);
 
         if (index === -1)
-            return null; // TODO: return empty array instead, adjust consumers
+            return this.fail(`Action ${toRemove} does not exist in selection`);
 
         actions.splice(index, 1);
 
-        if (actions.length === 0)
-            return null;
-
-        return actions;
-    }
-
-    // MARK: hasCargoRoom
-    private hasCargoRoom(cargo: CargoInventory, requirement: 1 | 2): boolean {
-        const emptySlots = cargo.filter(item => item === 'empty').length;
-
-        return (emptySlots >= requirement);
+        return this.pass(actions);
     }
 
     // MARK:  pickFeasibleTrades
-    private pickFeasibleTrades(cargo: CargoInventory): Array<MarketSlotKey> {
+    private pickFeasibleTrades(cargo: Array<ItemName>): Array<MarketSlotKey> {
         const market = this.state.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
@@ -722,9 +646,9 @@ export class GameSession {
     }
 
     //  MARK: loadItem
-    private loadItem(cargo: CargoInventory, item: ItemName): Probable<CargoInventory> {
-        const filled = cargo.filter(item => item !== 'empty') as CargoInventory;
-        const empty = cargo.filter(item => item === 'empty') as CargoInventory;
+    private loadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
+        const filled = cargo.filter(item => item !== 'empty') as Array<ItemName>;
+        const empty = cargo.filter(item => item === 'empty') as Array<ItemName>;
         const orderedCargo = filled.concat(empty);
 
         const emptyIndex = orderedCargo.indexOf('empty');
@@ -733,7 +657,7 @@ export class GameSession {
             return this.fail('Could not find an empty slot to load item');
         }
 
-        const metalNames: CargoInventory = ['gold', 'silver'];
+        const metalNames: Array<ItemName> = ['gold', 'silver'];
         const supplies = this.state.getItemSupplies();
 
         if (metalNames.includes(item)) {
@@ -763,25 +687,24 @@ export class GameSession {
     }
 
     // MARK: unloadItem
-    private unloadItem(cargo: CargoInventory, item: ItemName): CargoInventory | null {
-        const newCargo = this.tools.getCopy(cargo);
-        const itemIndex = newCargo.indexOf(item);
+    private unloadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
+        const itemIndex = cargo.indexOf(item);
 
         if (itemIndex === -1)
-            return null;
+            return this.fail('Cannot find item in cargo.');
 
-        newCargo.splice(itemIndex, 1, 'empty');
+        cargo.splice(itemIndex, 1, 'empty');
 
-        const controlGroup: Array<ItemName> = ['gold', 'silver'];
+        const metals: Array<ItemName> = ['gold', 'silver'];
 
-        if (controlGroup.includes(item)) {
-            newCargo.splice(itemIndex + 1, 1, 'empty');
+        if (metals.includes(item)) {
+            cargo.splice(itemIndex + 1, 1, 'empty');
             this.state.returnMetal(item as Metal);
         } else {
             this.state.returnTradeGood(item as TradeGood);
         }
 
-        return newCargo;
+        return this.pass(cargo);
     }
 
     // MARK: compileGameResults
@@ -840,7 +763,9 @@ export class GameSession {
         return this.issueErrorResponse('Malformed request.');
     }
 
-    private issueStateResponse(): GameStateResponse {
+    private issueStateResponse(player: PlayerHandler): GameStateResponse {
+        this.state.savePlayer(player.toDto());
+
         return { game: this.state.toDto() };
     }
 
@@ -856,6 +781,6 @@ export class GameSession {
     }
 
     private fail(message: string): Probable<any> {
-        return { err: true, data: message }
+        return { err: true, message }
     }
 }

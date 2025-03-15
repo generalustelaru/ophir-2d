@@ -9,6 +9,7 @@ import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
 import { GameStateHandler } from '../data_classes/GameState';
 import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
+import { PlayerHandler } from '../data_classes/Player';
 
 console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
@@ -17,21 +18,25 @@ class GameSetupService {
 
     private tools: ToolService = new ToolService();
 
-    public produceGameData(newState: LobbyState, setupCoordinates: Array<Coordinates>): StateBundle {
+    /**
+     * @param setupCoordinates Coordinates are required for client distribution via the gameState
+     * @returns `{gameState, privateState}`  Used expressily for a game session instance.
+     */
+    public produceGameData(lobbyState: LobbyState, setupCoordinates: Array<Coordinates>): StateBundle {
 
-        if (newState.gameId === null)
+        if (lobbyState.gameId === null)
             throw new Error('Cannot start game without a game ID');
 
-        if (newState.sessionOwner === null)
+        if (lobbyState.sessionOwner === null)
             throw new Error('Cannot start game while the session owner is null');
 
-        const players = this.tools.getCopy(newState.players);
+        const players = this.tools.getCopy(lobbyState.players);
 
         if (!players.every(p => Boolean(p.id)))
-            throw new Error('Not enough players to start a game');
+            throw new Error('Found unidentifiable players.');
 
         if (players.length < 2 && !SINGLE_PLAYER)
-            throw new Error('Not enough players to start a game');
+            throw new Error('Not enough players to start a game.');
 
         const barriers = this.determineBarriers();
         const mapPairings = this.determineLocations();
@@ -44,15 +49,15 @@ class GameSetupService {
             gameStats: players.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         }
 
-        newState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
+        lobbyState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
 
-        const sharedStateProps: GameState = {
+        const stateDto: GameState = {
             isStatusResponse: false,
-            gameId: newState.gameId,
+            gameId: lobbyState.gameId,
             gameStatus: 'started',
             gameResults: [],
-            sessionOwner: newState.sessionOwner,
-            chat: newState.chat,
+            sessionOwner: lobbyState.sessionOwner,
+            chat: lobbyState.chat,
             availableSlots: [],
             players: this.hydratePlayers(players, privateState.moveRules, setupCoordinates, mapPairings),
             market: marketData.marketOffer,
@@ -72,9 +77,9 @@ class GameSetupService {
             },
         }
 
-        const sharedState = new GameStateHandler(sharedStateProps);
+        const gameState = new GameStateHandler(stateDto);
 
-        return { sharedState, privateState };
+        return { gameState, privateState };
     };
 
     // MARK: Map
@@ -166,15 +171,15 @@ class GameSetupService {
             return t;
         })(); // [1,2,3,4]
 
-        const players = randomScaffolds.map(p => {
+        const players: Array<Player> = randomScaffolds.map(p => {
             const order = orderTokens.shift()!;
-            const player: Player = {
+            const playerDto: Player = {
                 id: p.id,
                 timeStamp: 0,
                 isIdle: false,
                 name: p.name,
                 turnOrder: order,
-                isActive: order === 1,
+                isActive: order == 1,
                 bearings: {
                     seaZone: startingZone,
                     position: setupCoordinates.pop() as Coordinates,
@@ -183,7 +188,7 @@ class GameSetupService {
                 favor: 2,
                 privilegedSailing: false,
                 influence: 1,
-                moveActions: 2,
+                moveActions: 0,
                 isAnchored: true,
                 locationActions: null,
                 allowedMoves: initialRules.allowed,
@@ -193,7 +198,14 @@ class GameSetupService {
                 coins: 0,
             }
 
-            return player;
+            if (playerDto.isActive) {
+                const player = new PlayerHandler(playerDto);
+                player.activate(mapPairings[startingZone].actions);
+
+                return player.toDto();
+            }
+
+            return playerDto;
         });
 
         // debug options

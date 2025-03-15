@@ -78,7 +78,7 @@ function promptForInput(): void {
             case 'shutdown':
                 shutDown();
             return;
-            case 'debug':
+            case 'debug': // TODO: replace with file-based logging.
                 console.log(JSON.stringify(singleSession?.getPrivateState()));
             break;
             case 'reset':
@@ -209,7 +209,7 @@ socketServer.on('connection', function connection(socket) {
             const chatMessage = validator.validateChatPayload(payload);
 
             if (!chatMessage) {
-                sendAll({ error: `Could not process chat message on ${playerColor}` })
+                send(socket, { error: `Could not process chat message on ${playerColor}` })
                 return;
             }
 
@@ -245,7 +245,7 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === Action.reset) {
-            if (!singleSession || singleSession.getSessionOwner() !== playerColor) {
+            if (lobbyState.sessionOwner !== playerColor) {
                 send(socket, { error: 'Only session owner may reset.'});
 
                 return;
