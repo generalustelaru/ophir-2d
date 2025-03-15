@@ -93,7 +93,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         const canAct = (
             localPlayer?.bearings.seaZone === this.getId()
             && localPlayer.isActive
-            && !!localPlayer.locationActions
+            && !!localPlayer.locationActions.length
             && localPlayer.isAnchored
         );
 
@@ -102,7 +102,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         this.location.update({
             mayPickup: (
                 canAct
-                && !!localPlayer.locationActions?.includes(Action.load_good)
+                && !!localPlayer.locationActions.includes(Action.load_good)
                 && localPlayer.cargo.includes('empty')
             ),
             templeIcon: update.templeIcon,

@@ -79,7 +79,7 @@ export type Player = {
     influence: DiceSix,
     moveActions: number,
     isAnchored: boolean,
-    locationActions: Array<LocationAction> | null,
+    locationActions: Array<LocationAction>,
     allowedMoves: Array<ZoneName>,
     hasCargo: boolean,
     cargo: Array<ItemName>,

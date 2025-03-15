@@ -107,7 +107,7 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
     public update(update: TreasuryUpdate): void {
 
         const playerCanAct = (
-            update.localPlayer?.locationActions?.includes(Action.buy_metals)
+            update.localPlayer?.locationActions.includes(Action.buy_metals)
             && update.localPlayer.isAnchored
             && this.hasCargoRoom(update.localPlayer.cargo)
         );
