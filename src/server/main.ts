@@ -78,9 +78,7 @@ function promptForInput(): void {
             case 'shutdown':
                 shutDown();
             return;
-            case 'debug': // TODO: replace with file-based logging.
-                console.log(JSON.stringify(singleSession?.getPrivateState()));
-            break;
+
             case 'reset':
                 reset();
             break;
@@ -262,7 +260,12 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (singleSession) {
-            sendAll(singleSession.processAction(clientRequest));
+            const response = singleSession.processAction(clientRequest);
+
+            if ('error' in response)
+                send(socket, response);
+
+            sendAll(response);
 
             return;
         }
