@@ -5,7 +5,7 @@ import { Player, PlayerColor } from '../../../shared_types';
 import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import clientConstants from '../../client_constants';
 
-const { COLOR } = clientConstants;
+const { COLOR, DYNAMIC_COLORS } = clientConstants;
 
 export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
@@ -22,16 +22,19 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     constructor(
         stage: Konva.Stage,
         player: Player,
-        localPlayerColor: PlayerColor | null,
+        localColorName: PlayerColor | null,
         yOffset: number,
     ) {
+        const isLocalPlayer = localColorName === player.id;
+        const playerColors = DYNAMIC_COLORS.PLAYERS[player.id];
+
         this.stage = stage;
         this.id = player.id;
-        this.localPlayerColor = localPlayerColor;
+        this.localPlayerColor = localColorName;
         this.group = new Konva.Group({
-            width: 200,
+            width: isLocalPlayer ? 250 : 200,
             height: 100,
-            x: localPlayerColor === player.id ? 25 : 50,
+            x: isLocalPlayer ? 25 : 50,
             y: yOffset,
         });
 
