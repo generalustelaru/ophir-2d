@@ -45,6 +45,14 @@ const clientConstants: ClientConstants = {
         vpCardPurple: '#A70FFA',
         vpCardLightPurple: '#E37AF5',
     },
+    DYNAMIC_COLORS:{
+        PLAYERS: {
+            Purple: {active: '##FFC0FF', inactive: '#A55A9A'},
+            Yellow: {active: '#FFFFB0', inactive: '#FFC94A'},
+            Red: {active: '#FF86B4', inactive: '#FF204E'},
+            Green: {active: '#EDFF88', inactive: '#87A922'},
+        }
+    },
     COLOR_PROFILES: {
         favorStampReady: { primary: '#aa0000', secondary: '#850c03', tertiary: null },
         favorStampActive: { primary: '#e70000', secondary: '#aa0000', tertiary: null },
