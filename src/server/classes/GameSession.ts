@@ -1,16 +1,15 @@
 import process from 'process';
-import { DataDigest, PlayerCountables, PrivateState, StateBundle } from "../server_types";
+import { DataDigest, PlayerCountables, StateBundle } from "../server_types";
 import {
-    ZoneName, GameState, ClientRequest, TradeGood, LocationAction, MarketSlotKey, ItemName, Trade,
+    GameState, ClientRequest, TradeGood, LocationAction, MarketSlotKey, ItemName, GameStateResponse,
     LocationName, GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal, ErrorResponse, Action,
-    GameStateResponse,
 } from "../../shared_types";
-import { ToolService } from '../services/ToolService';
 import serverConstants from "../server_constants";
 import { ValidatorService } from "../services/validation/ValidatorService";
 import { GameStateHandler } from "../data_classes/GameState";
 import { PlayerHandler } from '../data_classes/Player';
 import { IDLE_CHECKS } from "../configuration";
+import { PrivateStateHandler } from '../data_classes/PrivateState';
 
 const { TRADE_DECK_B } = serverConstants;
 const serverName = String(process.env.SERVER_NAME);
@@ -19,9 +18,8 @@ type Probable<T> = { err: true, message: string } | { err?: false, data: T };
 
 export class GameSession {
 
-    private privateState: PrivateState;
+    private privateState: PrivateStateHandler;
     private state: GameStateHandler;
-    private tools: ToolService;
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private validator: ValidatorService;
 
@@ -29,7 +27,6 @@ export class GameSession {
         (global as any).myInstance = this;
         this.privateState = bundle.privateState;
         this.state = bundle.gameState;
-        this.tools = new ToolService();
         this.validator = new ValidatorService();
         const activePlayer = this.state.getActivePlayer();
 
@@ -49,10 +46,6 @@ export class GameSession {
 
     public getSessionOwner() {
         return this.state.getSessionOwner();
-    }
-
-    public getPrivateState(): PrivateState { // such private, very external
-        return this.privateState;
     }
 
     public wipeSession(): null {
@@ -149,22 +142,22 @@ export class GameSession {
         if (!movementPayload)
             return this.validationErrorResponse();
 
-        const destination = movementPayload.hexId;
-        const locationName = this.state.getLocationName(destination);
+        const target = movementPayload.hexId;
+        const locationName = this.state.getLocationName(target);
 
-        if (!player.isDestinationValid(destination) || !player.getMoves()) {
+        if (!player.isDestinationValid(target) || !player.getMoves()) {
             return this.issueErrorResponse(
                 'Movement not alowed.',
-                { destination, moves: player.getMoves() },
+                { target, moves: player.getMoves() },
             );
         }
 
-        const sailAttempt = ((): {successful: boolean} => {
+        const hasSailed = (() => {
             player.spendMove();
-            const playersInZone = this.state.getPlayersByZone(destination);
+            const playersInZone = this.state.getPlayersByZone(target);
 
             if (!playersInZone.length || player.isPrivileged())
-                return {successful: true};
+                return true;
 
             player.rollInfluence();
             const blockingPlayers = playersInZone.filter(
@@ -172,33 +165,36 @@ export class GameSession {
             );
 
             if (!blockingPlayers.length)
-                return {successful: true};
+                return true;
 
-
-            this.state.trimInfluenceByZone(destination);
-            this.addServerMessage(`Influence at the [${locationName}] was trimmed`);
-
-            this.addServerMessage(`${player.getIdentity().name} was blocked from sailing.`);
-            return {successful: false};
-        })();
-
-        if (sailAttempt.successful) {
-            player.setBearings({
-                seaZone: destination,
-                position: movementPayload.position,
-                location: this.state.getLocationName(destination),
-            });
-
-            player.setDestinationOptions(
-                this.privateState.moveRules
-                    .find(rule => rule.from === destination)?.allowed
-                    .filter(move => move !== player.getBearings().seaZone) as Array<ZoneName>
+            this.state.trimInfluenceByZone(target);
+            this.addServerMessage(
+                `${player.getIdentity().name} was blocked from sailing.
+                <br>Influence at the [${locationName}] was trimmed.`
             );
 
-            player.setAnchoredActions(this.state.getLocationActions(destination));
+            return false;
+        })();
 
-        } else if(!player.getMoves()) {
-            player.setAnchoredActions();
+        if (hasSailed) {
+            player.setBearings({
+                seaZone: target,
+                position: movementPayload.position,
+                location: this.state.getLocationName(target),
+            });
+
+            player.setAnchoredActions(this.state.getLocationActions(target));
+
+            if (player.getMoves() > 0) {
+                const nextDestinations = this.privateState.getDestinations(target);
+
+                player.setDestinationOptions(
+                    nextDestinations.filter(zone => zone !== player.getOvernightZone())
+                );
+            }
+
+        } else if(player.getMoves() == 0)  {
+            player.setAnchoredActions([]);
             this.addServerMessage(
                 `${player.getIdentity().name} also ran out of moves and cannot act further`
             );
@@ -258,6 +254,7 @@ export class GameSession {
 
         return this.issueStateResponse(player);
     }
+
     // MARK: LOAD TRADE GOOD
     private processLoadGood(data: DataDigest) {
         const payload = this.validator.validateLoadGoodPayload(data.payload);
@@ -308,6 +305,7 @@ export class GameSession {
 
         return this.issueStateResponse(player);
     }
+
     // MARK: GOODS TRADE
     private processGoodsTrade(data: DataDigest) {
         const { player, payload } = data;
@@ -338,9 +336,9 @@ export class GameSession {
             case 'temple':
                 const reward = trade.reward.favorAndVp;
                 player.gainFavor(reward);
-                this.privateState.gameStats.find(p => p.id == id)!.vp += reward;
+                this.privateState.updateVictoryPoints(id, reward);
                 this.addServerMessage(`${name} donated for ${reward} favor and VP`);
-                console.info(this.privateState.gameStats);
+                console.info(this.privateState.getGameStats());
                 break;
             default:
                 return this.issueErrorResponse(`Unknown trade location: ${location}`);
@@ -376,41 +374,37 @@ export class GameSession {
         player.setActions(removeAction.data);
         player.clearMoves();
 
-        // Update market offer
-        this.state.shiftMarketCards();
+        const newTrade = this.privateState.drawTrade();
 
-        const tradeDeck = ((): Array<Trade> => {
+        if (newTrade === null) {
 
-            // Load trade deck B if required
-            if (this.privateState.tradeDeck.length === 0 && this.state.isDeckA()) {
-                this.privateState.tradeDeck = this.tools.getCopy(TRADE_DECK_B);
-                this.state.markDeckB();
+            if (this.state.isDeckA()) {
+                this.state.setLabelB();
+                this.privateState.loadTradeDeck(TRADE_DECK_B);
+                this.state.shiftMarketCards(this.privateState.drawTrade()!);
                 this.addServerMessage('Market deck B is now in play');
+            } else {
+                const compilation = this.compileGameResults();
+
+                if (compilation.err)
+                    return this.issueErrorResponse(compilation.message);
+
+                this.state.setGameResults(compilation.data);
+                this.state.setGameStatus('ended');
+                this.addServerMessage('Market deck is empty! Game has ended.');
             }
 
-            return this.privateState.tradeDeck;
-        })();
+            return this.issueStateResponse(player);
+        }
 
-        const pick = Math.floor(Math.random() * tradeDeck.length);
-        const newTrade = tradeDeck.splice(pick, 1).shift() || null;
+        this.state.shiftMarketCards(newTrade);
+        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
-        if (newTrade) {
-            this.state.setFutureTrade(newTrade);
-
-            for (const player of this.state.getAllPlayers()) {
+        for (const player of this.state.getAllPlayers()) {
+            if (player.id !== id) {
                 player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
                 this.state.savePlayer(player);
             }
-
-        } else {
-            const result = this.compileGameResults();
-
-            if (result.err)
-                return this.issueErrorResponse(result.message);
-
-            this.state.setGameResults(result.data);
-            this.state.setGameStatus('ended');
-            this.addServerMessage('Market deck is empty! Game has ended.');
         }
 
         return this.issueStateResponse(player);
@@ -449,10 +443,11 @@ export class GameSession {
 
         if (!metalCost || !playerAmount) {
             return this.issueErrorResponse(
-                `No such cost or player amount found for ${name}`,
+                `No such cost or player amount found.`,
                 { currency: purchasePayload.currency, metalCost, playerAmount }
             );
         }
+
         const price = metalCost[purchasePayload.currency];
         const remainder = playerAmount - price;
 
@@ -466,7 +461,7 @@ export class GameSession {
                 this.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.coins} coins`);
                 break;
             case 'favor':
-                player.spendCoins(price)
+                player.spendFavor(price)
                 this.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
                 break;
             default:
@@ -498,9 +493,9 @@ export class GameSession {
         `${name} cannot donate ${donationPayload.metal}`);
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
-        this.privateState.gameStats.find(p => p.id === id)!.vp += reward;
+        this.privateState.updateVictoryPoints(id, reward);
         this.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`);
-        console.info(this.privateState.gameStats);
+        console.info(this.privateState.getGameStats());
 
         const result = this.unloadItem(player.getCargo(), donationPayload.metal);
 
@@ -527,12 +522,12 @@ export class GameSession {
         }
 
         if (isNewLevel) {
-            const newPrices = this.privateState.costTiers.shift()?.costs;
+            const newPrices = this.privateState.drawMetalPrices();
 
             if (!newPrices)
                 return this.issueErrorResponse('Donation could not be resolved', { newPrices, isNewLevel });
 
-            this.state.setMetalCosts(newPrices);
+            this.state.setMetalPrices(newPrices);
             this.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
 
@@ -542,7 +537,7 @@ export class GameSession {
     // MARK: END TURN
     private processEndTurn(data: DataDigest) {
         const player = data.player;
-        const { order } = player.getIdentity();
+        const { turnOrder } = player.getIdentity();
 
         if (!player.mayEndTurn())
             return this.issueErrorResponse(`Ship is not anchored.`);
@@ -552,15 +547,18 @@ export class GameSession {
 
         const newPlayerResult = ((): Probable<PlayerHandler> => {
             const allPlayers = this.state.getAllPlayers();
-            const nextOrder = order === allPlayers.length ? 1 : order + 1;
-            const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextOrder);
+            const nextInOrder = turnOrder === allPlayers.length ? 1 : turnOrder + 1;
+            const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextInOrder);
 
             if (!nextPlayerDto)
                 return this.fail('Could not find the next player');
 
             const nextPlayer = new PlayerHandler(nextPlayerDto);
             const { seaZone } = nextPlayer.getBearings();
-            nextPlayer.activate(this.state.getLocationActions(seaZone));
+            nextPlayer.activate(
+                this.state.getLocationActions(seaZone),
+                this.privateState.getDestinations(seaZone),
+            );
 
             return this.pass(nextPlayer);
         })();
@@ -710,7 +708,7 @@ export class GameSession {
     // MARK: compileGameResults
     private compileGameResults(): Probable<Array<PlayerCountables>> {
         const players = this.state.getAllPlayers();
-        const gameStats = this.privateState.gameStats;
+        const gameStats = this.privateState.getGameStats();
 
         for (let i = 0; i < gameStats.length; i++) {
             const playerStat = gameStats[i];
@@ -777,7 +775,7 @@ export class GameSession {
     }
 
     private pass<T>(data: T): Probable<T> {
-        return { err: false, data }
+        return { data }
     }
 
     private fail(message: string): Probable<any> {

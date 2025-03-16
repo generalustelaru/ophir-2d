@@ -48,9 +48,9 @@ export type ChatEntry = { id: PlayerColor|null, name: string|null, message: stri
 export type ExchangeTier = {
     templeLevel: number,
     skipOnPlayerCounts: Array<number>,
-    costs: ExchangeState,
+    costs: MetalPrices,
 }
-export type ExchangeState = {
+export type MetalPrices = {
     goldCost: MetalCost,
     silverCost: MetalCost,
 }
@@ -74,13 +74,14 @@ export type Player = {
     turnOrder: number,
     isActive: boolean,
     bearings: ShipBearings,
+    overnightZone: ZoneName,
     favor: number,
     privilegedSailing: boolean,
     influence: DiceSix,
     moveActions: number,
     isAnchored: boolean,
     locationActions: Array<LocationAction>,
-    allowedMoves: Array<ZoneName>,
+    destinations: Array<ZoneName>,
     hasCargo: boolean,
     cargo: Array<ItemName>,
     feasibleTrades: Array<MarketSlotKey>
@@ -108,7 +109,7 @@ export type MarketFluctuations = {
 }
 
 export type TempleState = {
-    treasury: ExchangeState, // TODOȘ what if we get treasury outside of here?
+    treasury: MetalPrices, // TODO: what if we get treasury outside of here?
     currentLevel: number,
     maxLevel: number,
     levelCompletion: number,

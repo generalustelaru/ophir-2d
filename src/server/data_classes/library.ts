@@ -81,15 +81,38 @@ export function readable<T>(initialValue: T): Readable<T> {
 
 // MARK: WRAPPERS
 
+export type ArrayReadable<T> = {
+    count: () => number,
+    getAll: () => Array<T>,
+    findOne: (criteria: string|number) => T | null,
+}
+
+export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): ArrayReadable<T> {
+    const array = readable(fixedArray);
+    return {
+        count: () => array.get().length,
+        getAll: () => deepCopy(fixedArray),
+        findOne: (criteria) => {
+            return keyName
+                ? array.get().find(e => e[keyName] === criteria) || null
+                : array.get().find(e => e === criteria) || null;
+        },
+    }
+}
+
+// TODO: transfomr this to take an index and (modyifying the internals into a record).
 export type ArrayWritable<T> = {
     count: () => number,
     getAll: () => Array<T>,
-    includes: (key: string|number) => boolean,
-    findOne: (key: string|number) => T | null,
+    includes: (criteria: string|number) => boolean,
+    findOne: (criteria: string|number) => T | null,
     add: (element: T) => void,
-    updateOne: (key: string|number, element: T) => void,
-    removeOne: (key: string|number) => void,
+    updateOne: (criteria: string|number, element: T) => void,
+    removeOne: (criteria: string|number) => void,
+    drawFirst: () => T | null,
+    // drawLast: () => T,
     overwrite: (element: Array<T>) => void,
+    clear: () => void,
     reset: () => void,
 }
 
@@ -98,20 +121,20 @@ export type ArrayWritable<T> = {
  * @param initialArray May be empty.
  * @param keyName Unique object property used for searching. Unnecessary for scalar arrays.
  */
-export function arrayWritable<T>(initialArray: Array<T>, keyName?: string): ArrayWritable<T> {
+export function arrayWritable<T>(initialArray: Array<T>, keyName?: keyof T): ArrayWritable<T> {
     const array = writable(initialArray);
 
     return {
         count: () => array.get().length,
         getAll: () => array.get(),
-        includes: (id) => {
+        includes: (criteria) => {
             return keyName
-                ? !!array.get().find(e => e[keyName as keyof T] === id)
-                : !!array.get().find(e => e === id);
+                ? !!array.get().find(e => e[keyName] === criteria)
+                : !!array.get().find(e => e === criteria);
         },
         findOne: (id) => {
             return keyName
-                ? array.get().find(e => e[keyName as keyof T] === id) || null
+                ? array.get().find(e => e[keyName] === id) || null
                 : array.get().find(e => e === id) || null;
         },
         add: (element) => {
@@ -120,11 +143,11 @@ export function arrayWritable<T>(initialArray: Array<T>, keyName?: string): Arra
                 return arr;
             });
         },
-        updateOne: (id, element) => {
+        updateOne: (criteria, element) => {
             array.update(arr => {
                 const stateElement = keyName
-                    ? arr.find(e => e[keyName as keyof T] === id)
-                    : arr.find(e => e === id);
+                    ? arr.find(e => e[keyName as keyof T] === criteria)
+                    : arr.find(e => e === criteria);
                 if (stateElement)
                     arr.splice(arr.indexOf(stateElement), 1, element);
                 return arr;
@@ -140,9 +163,15 @@ export function arrayWritable<T>(initialArray: Array<T>, keyName?: string): Arra
                 return arr;
             });
         },
+        drawFirst: () => {
+            const first = array.get().length ? array.get()[0] : null;
+            array.update(a => { a.shift(); return a; });
+            return first;
+        },
         overwrite: (newArr) => {
             array.set(newArr);
         },
+        clear: () => array.set([]),
         reset: () => array.reset(),
     }
 }

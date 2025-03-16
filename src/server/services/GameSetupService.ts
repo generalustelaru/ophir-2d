@@ -1,18 +1,19 @@
 
 import {
-    GameState, BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
+    BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
     ExchangeTier, PlayerScaffold,
 } from '../../shared_types';
-import { PrivateState, ProcessedMoveRule, StateBundle } from '../server_types';
+import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
 import { GameStateHandler } from '../data_classes/GameState';
 import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
 import { PlayerHandler } from '../data_classes/Player';
+import { PrivateStateHandler } from '../data_classes/PrivateState';
 
 console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS } = serverConstants;
+const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
 
 class GameSetupService {
 
@@ -42,16 +43,16 @@ class GameSetupService {
         const mapPairings = this.determineLocations();
         const marketData = this.prepareDeckAndGetOffer();
 
-        const privateState: PrivateState = {
-            moveRules: this.produceMoveRules(barriers),
+        const privateState = new PrivateStateHandler({
+            destinationPackages: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
             costTiers: this.filterCostTiers(players.length),
             gameStats: players.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
-        }
+        });
 
         lobbyState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
 
-        const stateDto: GameState = {
+        const gameState = new GameStateHandler({
             isStatusResponse: false,
             gameId: lobbyState.gameId,
             gameStatus: 'started',
@@ -59,12 +60,12 @@ class GameSetupService {
             sessionOwner: lobbyState.sessionOwner,
             chat: lobbyState.chat,
             availableSlots: [],
-            players: this.hydratePlayers(players, privateState.moveRules, setupCoordinates, mapPairings),
+            players: this.hydratePlayers(players, privateState.getDestinationPackages(), setupCoordinates, mapPairings),
             market: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
             temple: {
-                maxLevel: privateState.costTiers.length,
-                treasury: privateState.costTiers.shift()?.costs!,
+                maxLevel: privateState.getTempleLevelCount(),
+                treasury: privateState.drawMetalPrices()!,
                 levelCompletion: 0,
                 currentLevel: 0,
                 donations: [],
@@ -75,9 +76,7 @@ class GameSetupService {
                 marketFluctuations: this.getMarketFluctuations(),
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
-        }
-
-        const gameState = new GameStateHandler(stateDto);
+        });
 
         return { gameState, privateState };
     };
@@ -106,30 +105,31 @@ class GameSetupService {
     }
 
     private determineLocations(): Record<ZoneName, LocationData> {
-        const locations = this.tools.getCopy(serverConstants.LOCATION_ACTIONS);
+        const locations = LOCATION_ACTIONS
+            .map(location => { return {key: Math.random(), location} })
+            .sort((a,b) => a.key - b.key)
+            .map(item => item.location);
 
         if (locations.length !== 7) {
             throw new Error(`Invalid number of locations! Expected 7, got {${locations.length}}`);
         }
 
-        function locationData(): LocationData {
-            const pick = Math.floor(Math.random() * locations.length);
-
-            return locations.splice(pick, 1).shift() as LocationData;
+        function drawLocation(): LocationData {
+            return locations.shift() as LocationData;
         }
 
         return {
-            center: locationData(),
-            topRight: locationData(),
-            right: locationData(),
-            bottomRight: locationData(),
-            bottomLeft: locationData(),
-            left: locationData(),
-            topLeft: locationData(),
+            center: drawLocation(),
+            topRight: drawLocation(),
+            right: drawLocation(),
+            bottomRight: drawLocation(),
+            bottomLeft: drawLocation(),
+            left: drawLocation(),
+            topLeft: drawLocation(),
         }
     }
 
-    private produceMoveRules(barrierIds: Array<BarrierId>): Array<ProcessedMoveRule> {
+    private produceMoveRules(barrierIds: Array<BarrierId>): Array<DestinationPackage> {
 
         return this.tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
 
@@ -152,16 +152,14 @@ class GameSetupService {
 
     private hydratePlayers(
         scaffolds: Array<PlayerScaffold>,
-        moveRules: Array<ProcessedMoveRule>,
+        moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
         mapPairings: Record<ZoneName, LocationData>,
     ): Array<Player> {
         const initialRules = this.tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
         const randomScaffolds = scaffolds
-            .map(p => {
-                return { player: p, order: Math.random() }
-            })
+            .map(p => {return { player: p, order: Math.random() }})
             .sort((a, b) => a.order - b.order)
             .map(o => o.player);
 
@@ -179,28 +177,29 @@ class GameSetupService {
                 isIdle: false,
                 name: p.name,
                 turnOrder: order,
-                isActive: order == 1,
+                isActive: false,
                 bearings: {
                     seaZone: startingZone,
                     position: setupCoordinates.pop() as Coordinates,
                     location: mapPairings[startingZone].name
                 },
+                overnightZone: startingZone,
                 favor: 2,
                 privilegedSailing: false,
                 influence: 1,
                 moveActions: 0,
                 isAnchored: true,
                 locationActions: [],
-                allowedMoves: initialRules.allowed,
+                destinations: [],
                 hasCargo: false,
                 cargo: ['empty', 'empty'],
                 feasibleTrades: [],
                 coins: 0,
             }
 
-            if (playerDto.isActive) {
+            if (playerDto.turnOrder == 1) {
                 const player = new PlayerHandler(playerDto);
-                player.activate(mapPairings[startingZone].actions);
+                player.activate(mapPairings[startingZone].actions, initialRules.allowed);
 
                 return player.toDto();
             }
@@ -237,25 +236,26 @@ class GameSetupService {
     }
 
     private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
-        const tradeDeck = this.tools.getCopy(TRADE_DECK_A);
+        const tradeDeck = TRADE_DECK_A
+            .map(t => { return { key: Math.random(), trade: t } })
+            .sort((a,b) => a.key - b.key)
+            .map(s => s.trade);
 
-        function drawRandomCard(): Trade {
-            const pick = Math.floor(Math.random() * tradeDeck.length);
-
-            return tradeDeck.splice(pick, 1).shift() as Trade;
+        function drawTrade(): Trade {
+            return tradeDeck.shift() as Trade;
         }
 
         // Remove 5 random cards from the deck
         for (let i = 0; i < 5; i++) {
-            drawRandomCard();
+            drawTrade();
         }
 
         const marketOffer: MarketOffer = {
             deckId: 'A',
-            future: drawRandomCard(),
-            slot_1: drawRandomCard(),
-            slot_2: drawRandomCard(),
-            slot_3: drawRandomCard(),
+            future: drawTrade(),
+            slot_1: drawTrade(),
+            slot_2: drawTrade(),
+            slot_3: drawTrade(),
             deckSize: tradeDeck.length + TRADE_DECK_B.length, // 35,
         };
 

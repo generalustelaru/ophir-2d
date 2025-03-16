@@ -103,7 +103,7 @@ export class PlayerShip {
                 case targetHex.getId() === player.bearings.seaZone:
                     targetHex.setFill(player.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
-                case player.moveActions && player.allowedMoves.includes(targetHex.getId()):
+                case player.moveActions && player.destinations.includes(targetHex.getId()):
                     targetHex.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
                     targetHex.setToHitValue(player.privilegedSailing ? false : this.calculateToSailValue(targetHex.getId()));

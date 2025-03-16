@@ -1,6 +1,6 @@
 import {
     ZoneName, PlayerColor, GameState, Coordinates, LocationName, ItemName,
-    LobbyState, Trade, MarketOffer, Player, Metal, ExchangeState, Currency,
+    LobbyState, Trade, MarketOffer, Player, Metal, MetalPrices, Currency,
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
 } from '../shared_types';
 import Konva from 'konva';
@@ -80,7 +80,7 @@ export type MarketUpdate = {
 
 export type TreasuryUpdate = {
     localPlayer: Player | null,
-    tier: ExchangeState,
+    tier: MetalPrices,
 }
 
 export type TreasuryCardUpdate = {

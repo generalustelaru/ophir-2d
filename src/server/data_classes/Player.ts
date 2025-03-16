@@ -14,13 +14,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private turnOrder: Readable<number>;
     private isActive: Writable<boolean>;
     private bearings: Writable<ShipBearings>;
+    private overnightZone: Writable<ZoneName>;
     private favor: Writable<number>;
     private privilegedSailing: Writable<boolean>;
     private influence: Writable<DiceSix>;
     private moveActions: Writable<number>;
     private isAnchored: Writable<boolean>;
-    private locationActions: ArrayWritable<LocationAction>; // TODO:  return null on empty array, shoud remove null or adapt writable function
-    private allowedMoves: ArrayWritable<ZoneName>;
+    private locationActions: ArrayWritable<LocationAction>;
+    private destinations: ArrayWritable<ZoneName>;
     private hasCargo: Writable<boolean>;
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
@@ -34,13 +35,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.turnOrder = readable(player.turnOrder);
         this.isActive = writable(player.isActive);
         this.bearings = writable(player.bearings);
+        this.overnightZone = writable(player.overnightZone);
         this.favor = writable(player.favor);
         this.privilegedSailing = writable(player.privilegedSailing);
         this.influence = writable(player.influence);
         this.moveActions = writable(player.moveActions);
         this.isAnchored = writable(player.isAnchored);
-        this.locationActions = arrayWritable(player.locationActions || []);
-        this.allowedMoves = arrayWritable(player.allowedMoves);
+        this.locationActions = arrayWritable(player.locationActions);
+        this.destinations = arrayWritable(player.destinations);
         this.hasCargo = writable(player.hasCargo);
         this.cargo = arrayWritable(player.cargo);
         this.feasibleTrades = arrayWritable(player.feasibleTrades);
@@ -56,13 +58,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
             turnOrder: this.turnOrder.get(),
             isActive: this.isActive.get(),
             bearings: this.bearings.get(),
+            overnightZone: this.overnightZone.get(),
             favor: this.favor.get(),
             privilegedSailing: this.privilegedSailing.get(),
             influence: this.influence.get(),
             moveActions: this.moveActions.get(),
             isAnchored: this.isAnchored.get(),
             locationActions: this.locationActions.getAll(),
-            allowedMoves: this.allowedMoves.getAll(),
+            destinations: this.destinations.getAll(),
             hasCargo: this.hasCargo.get(),
             cargo: this.cargo.getAll(),
             feasibleTrades: this.feasibleTrades.getAll(),
@@ -81,7 +84,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return {
             id: this.id.get(),
             name: this.name.get(),
-            order: this.turnOrder.get()
+            turnOrder: this.turnOrder.get()
         }
     }
 
@@ -102,16 +105,16 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public isDestinationValid(destination: ZoneName) {
-        return Boolean(this.allowedMoves.findOne(destination))
+        return Boolean(this.destinations.findOne(destination))
     }
 
     public setDestinationOptions(options: Array<ZoneName>) {
-        this.allowedMoves.overwrite(options);
+        this.destinations.overwrite(options);
     }
 
-    public setAnchoredActions(actions?: Array<LocationAction>) {
+    public setAnchoredActions(actions: Array<LocationAction>) {
         this.isAnchored.set(true);
-        this.locationActions.overwrite(actions || []);
+        this.locationActions.overwrite(actions);
     }
 
     public spendMove() {
@@ -121,10 +124,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
     public clearMoves() {
         this.moveActions.set(0);
     }
+    public getOvernightZone() {
+        return this.overnightZone.get();
+    }
 
     public getBearings() {
         return this.bearings.get();
     }
+
 
     public setBearings(bearings: ShipBearings) {
         this.bearings.set(bearings);
@@ -195,7 +202,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public setCargo(cargo: Array<ItemName>) {
-        const hasItems = !!cargo.find(item => item !== 'empty')
+        const hasItems = !!cargo.find(item => item !== 'empty');
         this.hasCargo.set(hasItems);
         this.cargo.overwrite(cargo);
     }
@@ -223,9 +230,15 @@ export class PlayerHandler implements ObjectHandler<Player>{
     public getFavorAmount() {
         return this.favor.get();
     }
+
     public gainFavor(amount: number) {
         this.favor.update(f => Math.min(f + amount, MAX_FAVOR));
     }
+
+    public spendFavor(cost: number) {
+        this.favor.update(f => f -= cost)
+    }
+
     public getActions() {
         return this.locationActions.getAll();
     }
@@ -235,21 +248,26 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public clearActions() {
-        this.locationActions.overwrite([]);
+        this.locationActions.clear();
     }
 
-    public activate(newActions: Array<LocationAction>) {
+    public activate(zoneActions: Array<LocationAction>, destinations: Array<ZoneName>) {
         this.isActive.set(true);
         this.isAnchored.set(false);
-        this.moveActions.set(2);
         this.timeStamp.set(Date.now());
-        this.setActions(newActions);
+        this.moveActions.set(2);
+        this.locationActions.overwrite(zoneActions);
+        this.destinations.overwrite(destinations);
     }
 
     public deactivate() {
         this.isActive.set(false);
+        this.isAnchored.set(true);
         this.privilegedSailing.set(false);
-        this.clearActions();
+        this.moveActions.set(0);
+        this.locationActions.clear();
+        this.destinations.clear();
+        this.overnightZone.set(this.getBearings().seaZone);
     }
 
     // MARK: PRIVATE

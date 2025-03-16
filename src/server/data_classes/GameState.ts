@@ -1,7 +1,7 @@
 import {
     ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer,
     MarketSlotKey, Player, PlayerColor, GameState, TempleState, Trade,
-    ExchangeState, Metal, DiceSix, TradeGood,
+    MetalPrices, Metal, DiceSix, TradeGood,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -159,21 +159,14 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     /**
      * @description Shifts slot contents to the right and reduces deckSize count.
      * @example (future) -> slot_1 -> slot_2 -> slot_3 -> out
-     * @warning call setFutureTrade to replenish the future slot.
      */
-    public shiftMarketCards() {
+    public shiftMarketCards(trade: Trade) {
         this.market.update(m => {
             m.slot_3 = m.slot_2
             m.slot_2 = m.slot_1;
             m.slot_1 = m.future;
-            m.deckSize -= 1;
-            return m;
-        })
-    }
-
-    public setFutureTrade(trade: Trade) {
-        this.market.update(m => {
             m.future = trade;
+            m.deckSize -= 1;
             return m;
         })
     }
@@ -182,7 +175,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         return this.market.get().deckId === 'A';
     }
 
-    public markDeckB() {
+    public setLabelB() {
         this.market.update(m => {
             m.deckId = 'B';
             return m;
@@ -231,7 +224,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         return { isNewLevel, isTempleComplete };
     }
 
-    public setMetalCosts(prices: ExchangeState) {
+    public setMetalPrices(prices: MetalPrices) {
         this.temple.update(t => {
             t.treasury = prices;
             return t;
