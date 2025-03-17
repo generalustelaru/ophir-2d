@@ -71,7 +71,7 @@ export class ValidatorService {
             'MovementPayload',
             payload,
             [
-                { key: 'hexId', type: 'string', nullable: false },
+                { key: 'zoneId', type: 'string', nullable: false },
                 { key: 'position', type: 'object', nullable: false },
             ],
         );
