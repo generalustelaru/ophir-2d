@@ -9,7 +9,7 @@ import { InfluenceDial, LocationToken } from '../GroupList';
 const { COLOR, ICON_DATA } = clientConstants;
 
 type SeaZoneUpdate = {
-    player: Player|null,
+    player: Player | null,
     templeIcon: IconLayer | null,
 }
 
