@@ -1,19 +1,19 @@
 
 import Konva from 'konva';
 import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action } from '../../../shared_types';
-import { Color, DynamicGroupInterface, IslandData, LocationIconData } from '../../client_types';
+import { Color, DynamicGroupInterface, IslandData, IconLayer } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
 import { InfluenceDial, LocationToken } from '../GroupList';
 
 const { COLOR, ICON_DATA } = clientConstants;
 
-type HexUpdate = {
+type SeaZoneUpdate = {
     player: Player|null,
-    templeIcon: LocationIconData | null,
+    templeIcon: IconLayer | null,
 }
 
-export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
+export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
 
     private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;
@@ -30,7 +30,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         offsetY:number,
         island: IslandData,
         locationId: LocationName,
-        iconData: LocationIconData,
+        iconData: IconLayer,
         fill: Color
     ) {
 
@@ -88,7 +88,7 @@ export class MapHexagon implements DynamicGroupInterface<HexUpdate> {
         this.group.add(this.influenceDial.getElement());
     }
 
-    update(update: HexUpdate): void {
+    update(update: SeaZoneUpdate): void {
         const localPlayer = update.player;
         const canAct = (
             localPlayer?.bearings.seaZone === this.getId()

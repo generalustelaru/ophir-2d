@@ -142,7 +142,7 @@ export class GameSession {
         if (!movementPayload)
             return this.validationErrorResponse();
 
-        const target = movementPayload.hexId;
+        const target = movementPayload.zoneId;
         const locationName = this.state.getLocationName(target);
 
         if (!player.isDestinationValid(target) || !player.getMoves()) {

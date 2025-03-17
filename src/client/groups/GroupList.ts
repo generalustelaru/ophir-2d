@@ -2,7 +2,7 @@ import { EndTurnButton } from './map/EndTurnButton';
 import { BarrierToken } from './map/BarrierToken';
 import { InfluenceDial } from './InfluenceDial';
 import { LocationToken } from './map/LocationToken';
-import { MapHexagon } from './map/MapHexagon';
+import { SeaZone } from './map/SeaZoneTile';
 import { ActionDial } from './map/ActionDial';
 import { PlayerShip } from './map/PlayerShip';
 import { ShipToken } from './map/ShipToken';
@@ -27,7 +27,7 @@ import { TempleDonationCard } from './location/TempleDonationCard';
 import { MetalDonationsBand } from './location/MetalDonationsBand';
 
 export {
-    EndTurnButton, BarrierToken, InfluenceDial, LocationToken, MapHexagon, ActionDial, PlayerShip,
+    EndTurnButton, BarrierToken, InfluenceDial, LocationToken, SeaZone, ActionDial, PlayerShip,
     ShipToken, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
     TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, TempleDonationCard,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
