@@ -5,7 +5,7 @@ import { Player, PlayerColor } from '../../../shared_types';
 import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import clientConstants from '../../client_constants';
 
-const { COLOR, DYNAMIC_COLORS } = clientConstants;
+const { COLOR } = clientConstants;
 
 export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
@@ -26,7 +26,6 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         yOffset: number,
     ) {
         const isLocalPlayer = localColorName === player.id;
-        const playerColors = DYNAMIC_COLORS.PLAYERS[player.id];
 
         this.stage = stage;
         this.id = player.id;

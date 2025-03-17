@@ -24,7 +24,6 @@ export type LocalState = {
 export type ClientConstants = {
     DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
-    DYNAMIC_COLORS: { PLAYERS: Record<PlayerColor, DynamicColor> },
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<ZoneName, IslandData>,
