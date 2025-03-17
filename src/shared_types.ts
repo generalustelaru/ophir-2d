@@ -188,7 +188,7 @@ export type GameSetup = {
 // MARK: COMMUNICATION
 
 export type ChatPayload = { input: string }
-export type MovementPayload = { hexId: ZoneName, position: Coordinates }
+export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
 export type GameSetupPayload = { setupCoordinates: Array<Coordinates> }
 export type LoadGoodPayload = { tradeGood: TradeGood }

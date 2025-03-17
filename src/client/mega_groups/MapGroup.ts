@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, GameState } from '../../shared_types';
-import { MegaGroupInterface, GroupLayoutData, LocationIconData } from '../client_types';
-import { MapHexagon, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
+import { MegaGroupInterface, GroupLayoutData, IconLayer } from '../client_types';
+import { SeaZone, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
 import localState from '../state';
 import clientConstants from '../client_constants';
 
@@ -14,7 +14,7 @@ export class MapGroup implements MegaGroupInterface {
     private endTurnButton: EndTurnButton | null = null;
     private actionDial: ActionDial | null = null;
     private favorButton: FavorButton | null = null;
-    private mapHexes: Array<MapHexagon> = [];
+    private seaZones: Array<SeaZone> = [];
     private opponentShips: Array<ShipToken> = [];
     private localShip: PlayerShip | null = null;
 
@@ -66,7 +66,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: hexes
         HEX_OFFSET_DATA.forEach(hexItem => {
             const locationData = state.setup.mapPairings[hexItem.id];
-            const mapHex = new MapHexagon(
+            const seaZone = new SeaZone(
                 this.stage,
                 centerPoint,
                 hexItem.id,
@@ -77,8 +77,8 @@ export class MapGroup implements MegaGroupInterface {
                 this.getIconData(locationData.name, state),
                 COLOR.defaultHex,
             );
-            this.mapHexes.push(mapHex);
-            this.group.add(mapHex.getElement());
+            this.seaZones.push(seaZone);
+            this.group.add(seaZone.getElement());
         });
 
         // MARK: barriers
@@ -121,7 +121,7 @@ export class MapGroup implements MegaGroupInterface {
             shipPosition.y,
             COLOR[localState.playerColor],
             localPlayer.isActive,
-            this.mapHexes,
+            this.seaZones,
             state.players,
         );
         this.localShip.switchControl(localPlayer.isActive);
@@ -142,10 +142,10 @@ export class MapGroup implements MegaGroupInterface {
             this.favorButton?.update(localPlayer);
         }
 
-        for (const mapHex of this.mapHexes) {
-            mapHex.update({
+        for (const zone of this.seaZones) {
+            zone.update({
                 player: localPlayer || null,
-                templeIcon: this.getIconData(mapHex.getTokenId(), state)
+                templeIcon: this.getIconData(zone.getTokenId(), state)
             });
         }
 
@@ -191,7 +191,7 @@ export class MapGroup implements MegaGroupInterface {
         return { setupCoordinates: startingPositions };
     }
 
-    private getIconData(locationName: LocationName, state: GameState): LocationIconData {
+    private getIconData(locationName: LocationName, state: GameState): IconLayer {
 
         if (locationName != 'temple')
             return LOCATION_TOKEN_DATA[locationName];

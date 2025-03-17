@@ -8,8 +8,14 @@ import Konva from 'konva';
 export type Color = `#${string}`;
 export type DynamicColor = {active: Color, inactive: Color}
 export type HexOffset = { id: ZoneName, x: number, y: number };
-export type LocationIconData = { shape: string, fill: Color };
-export type TempleIconData = { shapeId: number, icon: LocationIconData };
+export type IconLayer = { shape: string, fill: Color }
+export type IconName = 'empty_location'
+export type LayeredIconData = {
+    layer_1: IconLayer,
+    layer_2: IconLayer,
+    layer_3: IconLayer | null,
+};
+export type TempleIconData = { shapeId: number, icon: IconLayer };
 export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 
@@ -27,7 +33,8 @@ export type ClientConstants = {
     COLOR_PROFILES: Record<string, ColorProfile>,
     HEX_OFFSET_DATA: Array<HexOffset>,
     ISLAND_DATA: Record<ZoneName, IslandData>,
-    LOCATION_TOKEN_DATA: Record<LocationName, LocationIconData>,
+    LOCATION_TOKEN_DATA: Record<LocationName, IconLayer>,
+    LAYERED_ICONS: Record<IconName, LayeredIconData>
     TEMPLE_CONSTRUCTION_DATA: Array<TempleIconData>
     SHIP_DATA: {
         setupDrifts: Array<Coordinates>,

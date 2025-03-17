@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player } from '../../../shared_types';
 import localState from '../../state';
 import clientConstants from '../../client_constants';
-import { MapHexagon } from '../GroupList';
+import { SeaZone } from '../GroupList';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 const HEX_COUNT = 7;
@@ -13,7 +13,7 @@ export class PlayerShip {
     private group: Konva.Group;
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
-    private mapHexes: Array<MapHexagon> = [];
+    private seaZones: Array<SeaZone> = [];
     private players: Array<Player>;
 
     public switchControl(isActivePlayer: boolean) {
@@ -37,10 +37,10 @@ export class PlayerShip {
         offsetY: number,
         fill: string,
         isActivePlayer: boolean,
-        mapHexes: Array<MapHexagon>,
+        seaZones: Array<SeaZone>,
         players: Array<Player>,
     ) {
-        this.mapHexes = mapHexes;
+        this.seaZones = seaZones;
         this.players = players;
         const playerColor = localState.playerColor;
 
@@ -83,34 +83,34 @@ export class PlayerShip {
             this.isDestinationValid = false;
             const player = this.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
-            const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
+            const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
-            if (!player || !position || !targetHex) {
+            if (!player || !position || !targetZone) {
                 return;
             }
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                const mapHex = this.mapHexes[i];
-                mapHex.setRestricted(false);
-                mapHex.setToHitValue(false);
-                mapHex.setFill(player.bearings.seaZone === mapHex.getId() && player.locationActions
+                const seaZone = this.seaZones[i];
+                seaZone.setRestricted(false);
+                seaZone.setToHitValue(false);
+                seaZone.setFill(player.bearings.seaZone === seaZone.getId() && player.locationActions
                     ? COLOR.activeHex
                     : COLOR.defaultHex
                 );
             }
 
             switch (true) {
-                case targetHex.getId() === player.bearings.seaZone:
-                    targetHex.setFill(player.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
+                case targetZone.getId() === player.bearings.seaZone:
+                    targetZone.setFill(player.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
-                case player.moveActions && player.destinations.includes(targetHex.getId()):
-                    targetHex.setFill(COLOR.validHex);
+                case player.moveActions && player.destinations.includes(targetZone.getId()):
+                    targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
-                    targetHex.setToHitValue(player.privilegedSailing ? false : this.calculateToSailValue(targetHex.getId()));
+                    targetZone.setToHitValue(player.privilegedSailing ? false : this.calculateToSailValue(targetZone.getId()));
                     break;
                 default:
-                    targetHex.setRestricted(true);
-                    targetHex.setFill(COLOR.illegal);
+                    targetZone.setRestricted(true);
+                    targetZone.setFill(COLOR.illegal);
             }
         });
 
@@ -118,45 +118,45 @@ export class PlayerShip {
         this.group.on('dragend', () => {
 
             for (let i = 0; i < HEX_COUNT; i++) {
-                const mapHex = this.mapHexes[i];
-                mapHex.setRestricted(false);
-                mapHex.setToHitValue(false);
-                mapHex.setFill(COLOR.defaultHex);
+                const seaZone = this.seaZones[i];
+                seaZone.setRestricted(false);
+                seaZone.setToHitValue(false);
+                seaZone.setFill(COLOR.defaultHex);
             }
 
             const player = this.players.find(player => player.id === playerColor);
             const position = stage.getPointerPosition();
-            const departureHex = this.mapHexes.find(hex => hex.getId() === player?.bearings.seaZone);
-            const targetHex = this.mapHexes.find(hex => hex.isIntersecting(position));
+            const departureZone = this.seaZones.find(hex => hex.getId() === player?.bearings.seaZone);
+            const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
-            if (!departureHex) {
+            if (!departureZone) {
                 throw new Error('Missing departure hex data to compute repositioning/moving!');
             }
 
             switch (true) {
-                case targetHex && this.isDestinationValid:
-                    targetHex.setFill(COLOR.activeHex);
+                case targetZone && this.isDestinationValid:
+                    targetZone.setFill(COLOR.activeHex);
                     this.broadcastAction({
                         action: Action.move,
                         payload: {
-                            hexId: targetHex.getId(),
+                            zoneId: targetZone.getId(),
                             position: { x: this.group.x(), y: this.group.y() }
                         }
                     });
                     break;
-                case departureHex === targetHex:
+                case departureZone === targetZone:
                     this.broadcastAction({
                         action: Action.reposition,
                         payload: {
                             repositioning: { x: this.group.x(), y: this.group.y() }
                         }
                     });
-                    departureHex.setFill(player?.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
+                    departureZone.setFill(player?.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
-                    departureHex.setFill(player?.locationActions.length ? COLOR.activeHex: COLOR.defaultHex);
+                    departureZone.setFill(player?.locationActions.length ? COLOR.activeHex: COLOR.defaultHex);
             }
         });
         this.group.add(this.ship);
