@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, GameState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer } from '../client_types';
-import { SeaZone, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton } from '../groups/GroupList';
+import { SeaZone, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip} from '../groups/GroupList';
 import localState from '../state';
 import clientConstants from '../client_constants';
 
@@ -17,6 +17,7 @@ export class MapGroup implements MegaGroupInterface {
     private seaZones: Array<SeaZone> = [];
     private opponentShips: Array<ShipToken> = [];
     private localShip: PlayerShip | null = null;
+    private rivalShip: RivalShip | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.stage = stage;
@@ -88,13 +89,25 @@ export class MapGroup implements MegaGroupInterface {
         this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: ships
+        const rivalShipData = state.rivalShip;
+
+        if (rivalShipData.isIncluded) {
+            const { bearings } = rivalShipData;
+            const offsets = HEX_OFFSET_DATA.find(item => item.id === bearings.seaZone)!;
+
+            const offsetX = centerPoint.x - offsets.x;
+            const offsetY = centerPoint.y - offsets.y;
+            this.rivalShip = new RivalShip(offsetX, offsetY);
+            this.group.add(this.rivalShip.getElement());
+        }
+
         players.forEach(player => {
 
             if (player.id && player.id !== localState.playerColor) {
-                const shipPosition = player.bearings.position;
+                const { position } = player.bearings;
                 const ship = new ShipToken(
-                    shipPosition.x,
-                    shipPosition.y,
+                    position.x,
+                    position.y,
                     COLOR[player.id],
                     player.isActive,
                     player.id

@@ -26,10 +26,11 @@ import { TempleMarketCard } from './location/TempleMarketCard';
 import { TempleRewardDial } from './location/TempleRewardDial';
 import { TempleDonationCard } from './location/TempleDonationCard';
 import { MetalDonationsBand } from './location/MetalDonationsBand';
+import { RivalShip } from './map/RivalShip';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, EmptyLocationToken, SeaZone, ActionDial, PlayerShip,
-    ShipToken, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
+    RivalShip, ShipToken, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
     TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, TempleDonationCard,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
 };

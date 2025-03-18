@@ -3,7 +3,7 @@ import {
     BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
     ExchangeTier, PlayerScaffold,
-    RivalShip,
+    RivalShipData,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -79,7 +79,6 @@ class GameSetupService {
             },
             rivalShip: this.getRivalShipData(
                 Boolean(players.length < 3),
-                privateState.getDestinationPackages(),
                 setupCoordinates,
                 mapPairings,
             ),
@@ -227,22 +226,24 @@ class GameSetupService {
 
     private getRivalShipData(
         isIncluded: boolean,
-        moveRules: Array<DestinationPackage>,
         setupCoordinates: Coordinates[],
         mapPairings: Record<ZoneName, LocationData>,
-    ): RivalShip {
+    ): RivalShipData {
+
         if (!isIncluded)
             return { isIncluded: false }
 
-        const initialRules = this.tools.getCopy(moveRules[0]);
-        const startingZone = initialRules.from;
+        const marketZone = Object.keys(mapPairings).find(key => {
+            const zoneName = key as keyof Record<ZoneName, LocationData>;
+            return mapPairings[zoneName].name === 'market';
+        }) as ZoneName;
 
         return {
             isIncluded: true,
             bearings: {
-                seaZone: startingZone,
+                seaZone: marketZone,
                 position: setupCoordinates.pop() as Coordinates,
-                location: mapPairings[startingZone].name
+                location: 'market',
             },
             influence: 1,
         }

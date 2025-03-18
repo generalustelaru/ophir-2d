@@ -1,7 +1,7 @@
 import {
     ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer,
     MarketSlotKey, Player, PlayerColor, GameState, TempleState, Trade,
-    MetalPrices, Metal, DiceSix, TradeGood, RivalShip,
+    MetalPrices, Metal, DiceSix, TradeGood, RivalShipData,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -19,7 +19,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;
     private itemSupplies: Writable<ItemSupplies>;
-    private rivalShip: Writable<RivalShip>;
+    private rivalShip: Writable<RivalShipData>;
 
     constructor(props: GameState) {
         const {
