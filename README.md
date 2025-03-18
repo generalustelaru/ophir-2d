@@ -4,14 +4,13 @@ Web-based implementation of **Ophir** (Terra Nova Games)
 ## Description
 Ophir is a multiplayer pickup & deliver game for 2-4 players which takes place in a 7 island (zones) archipelago.
 
-On a player's turn he/she will move his/her ship from island to island, picking up goods and delivering them to the market for coins or to the temple for victory points (VP). Players spend coins to upgrade their ship cargo capacity and to purchase precious metals -- which are donated at the temple for more VP. The goal is to gather the most VP before the game ends.
+During the game, players move their ships across the archipelago, picking up and delivering cargo. Players gain coins by supplying goods to the market, which they can use to upgrade their ship cargo capacity and purchase precious metals to donate towards the temple construction. Metals are worth VP. The goal is to gather the most VP before the game ends.
 
 Work in progress.
 
 - The game is playable but has no lobby (a server supports only one session at a time).
 - The game is missing "Specialists" (variable players powers).
 - The 2 Player game should include a neutral ship, which is missing.
-- Items are limited (5) but the counts are not represented in the Canvas UI.
 - The interface language not yet standardized and missing quality of life features.
 
 Try it out
