@@ -54,7 +54,7 @@ export class LocationGroup implements MegaGroupInterface {
                 x: 0,
                 y: this.marketPlacard.getElement().height(),
             },
-            { localPlayer: localPlayer, tier: state.temple.treasury }
+            { localPlayer: localPlayer, tier: state.temple.treasury, metalSupplies: state.itemSupplies.metals }
         );
 
         this.templePlacard = new TemplePlacard(
@@ -100,6 +100,7 @@ export class LocationGroup implements MegaGroupInterface {
         this.treasuryPlacard?.update({
             localPlayer: localPlayer ?? null,
             tier: state.temple.treasury,
+            metalSupplies: state.itemSupplies.metals,
         });
         this.templePlacard?.update(templeUpdate);
     }

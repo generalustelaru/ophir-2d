@@ -209,7 +209,6 @@ type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
     payload: P,
 }
 
-
 export type VerboiseAction =
     | Action.chat | Action.start | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.rebind_id;

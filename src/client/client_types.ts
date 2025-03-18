@@ -89,11 +89,12 @@ export type MarketUpdate = {
 export type TreasuryUpdate = {
     localPlayer: Player | null,
     tier: MetalPrices,
+    metalSupplies: Record<Metal, number>,
 }
 
 export type TreasuryCardUpdate = {
     playerAmounts: { coins: number, favor: number } | null,
-    treasury: { currency: Currency, amount: number, metal: Metal },
+    treasury: { currency: Currency, price: number, metal: Metal, supply: number },
 }
 
 export type TempleUpdate = {
