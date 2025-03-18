@@ -1,7 +1,7 @@
 import {
     ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer,
     MarketSlotKey, Player, PlayerColor, GameState, TempleState, Trade,
-    MetalPrices, Metal, DiceSix, TradeGood,
+    MetalPrices, Metal, DiceSix, TradeGood, RivalShip,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -19,11 +19,12 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;
     private itemSupplies: Writable<ItemSupplies>;
+    private rivalShip: Writable<RivalShip>;
 
     constructor(props: GameState) {
         const {
             gameId, sessionOwner, setup, isStatusResponse, gameStatus, gameResults,
-            availableSlots, players, market, temple, chat, itemSupplies
+            availableSlots, players, market, temple, chat, itemSupplies, rivalShip,
         } = props;
 
         this.gameId = readable(gameId);
@@ -38,6 +39,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         this.temple = writable(temple);
         this.chat = arrayWritable(chat);
         this.itemSupplies = writable(itemSupplies);
+        this.rivalShip = writable(rivalShip);
     }
 
     public toDto(): GameState {
@@ -55,6 +57,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
             temple: this.temple.get(),
             chat: this.chat.getAll(),
             itemSupplies: this.itemSupplies.get(),
+            rivalShip: this.rivalShip.get(),
         }
     }
 
