@@ -1,11 +1,15 @@
 import Konva from 'konva';
-import { Player, PlayerColor } from '../../../shared_types';
+import { PlayerColor, ShipBearings } from '../../../shared_types';
 import { DynamicGroupInterface } from '../../client_types';
 import clientConstants from '../../client_constants';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 
-export class ShipToken implements DynamicGroupInterface<Player> {
+export type RivalShipUpdate = {
+    isControllable: boolean,
+    bearings: ShipBearings,
+}
+export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
     ship: Konva.Path;
     group: Konva.Group;
@@ -13,25 +17,21 @@ export class ShipToken implements DynamicGroupInterface<Player> {
     constructor(
         offsetX: number,
         offsetY: number,
-        fill: string,
-        isActivePlayer: boolean,
-        id: PlayerColor,
     ) {
         this.group = new Konva.Group({
-            x: offsetX,
-            y: offsetY,
+            x: offsetX + 25,
+            y: offsetY + 25,
             width: SHIP_DATA.dimensions.width,
             height: SHIP_DATA.dimensions.height,
-            id,
         });
 
         this.ship = new Konva.Path({
             x: -15,
             y: -5,
             data: SHIP_DATA.shape,
-            fill,
+            fill: COLOR.boneWhite,
             scale: {x: 1.5, y: 1.5},
-            stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder,
+            stroke: COLOR.shipBorder,
             strokeWidth: 2,
         });
 
@@ -46,10 +46,10 @@ export class ShipToken implements DynamicGroupInterface<Player> {
         return this.group.attrs.id as PlayerColor
     }
 
-    public update(player: Player): void {
-        this.group.x(player.bearings.position.x);
-        this.group.y(player.bearings.position.y);
-        this.ship.stroke(player.isActive ? COLOR.activeShipBorder : COLOR.shipBorder);
+    public update(data: RivalShipUpdate): void {
+        this.group.x(data.bearings.position.x);
+        this.group.y(data.bearings.position.y);
+        this.ship.stroke(data.isControllable ? COLOR.activeShipBorder : COLOR.shipBorder);
     };
 
     public destroy(): void {

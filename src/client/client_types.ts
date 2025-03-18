@@ -37,6 +37,7 @@ export type ClientConstants = {
     LAYERED_ICONS: Record<IconName, LayeredIconData>
     TEMPLE_CONSTRUCTION_DATA: Array<TempleIconData>
     SHIP_DATA: {
+        dimensions: { width: number, height: number }
         setupDrifts: Array<Coordinates>,
         shape: string
     },
