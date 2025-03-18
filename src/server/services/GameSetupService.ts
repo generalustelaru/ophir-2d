@@ -3,6 +3,7 @@ import {
     BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
     ExchangeTier, PlayerScaffold,
+    RivalShip,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -76,6 +77,12 @@ class GameSetupService {
                 marketFluctuations: this.getMarketFluctuations(),
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
+            rivalShip: this.getRivalShipData(
+                Boolean(players.length < 3),
+                privateState.getDestinationPackages(),
+                setupCoordinates,
+                mapPairings,
+            ),
         });
 
         return { gameState, privateState };
@@ -216,6 +223,29 @@ class GameSetupService {
 
             return player;
         });
+    }
+
+    private getRivalShipData(
+        isIncluded: boolean,
+        moveRules: Array<DestinationPackage>,
+        setupCoordinates: Coordinates[],
+        mapPairings: Record<ZoneName, LocationData>,
+    ): RivalShip {
+        if (!isIncluded)
+            return { isIncluded: false }
+
+        const initialRules = this.tools.getCopy(moveRules[0]);
+        const startingZone = initialRules.from;
+
+        return {
+            isIncluded: true,
+            bearings: {
+                seaZone: startingZone,
+                position: setupCoordinates.pop() as Coordinates,
+                location: mapPairings[startingZone].name
+            },
+            influence: 1,
+        }
     }
 
     // MARK: Market
