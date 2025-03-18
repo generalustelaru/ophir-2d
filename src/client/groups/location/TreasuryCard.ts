@@ -34,8 +34,8 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
         });
 
         this.currencyDial = update.treasury.currency === 'coins'
-            ? new CoinDial({ x: this.group.width() / 2, y: 32 }, update.treasury.amount)
-            : new FavorDial({ x: 7, y: 7 }, update.treasury.amount);
+            ? new CoinDial({ x: this.group.width() / 2, y: 32 }, update.treasury.price)
+            : new FavorDial({ x: 7, y: 7 }, update.treasury.price);
 
         const metalIcon = new Konva.Path({
             data: CARGO_ITEM_DATA[update.treasury.metal].shape,
@@ -57,9 +57,9 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
         return this.group;
     }
     public update(data: TreasuryCardUpdate): void {
-        this.currencyDial.update(data.treasury.amount);
-        const isFeasible = (data.playerAmounts
-            ? data.treasury.amount <= data.playerAmounts[data.treasury.currency]
+        this.currencyDial.update(data.treasury.price);
+        const isFeasible = (data.playerAmounts && data.treasury.supply
+            ? data.treasury.price <= data.playerAmounts[data.treasury.currency]
             : false
         );
         this.setEnabled(isFeasible);

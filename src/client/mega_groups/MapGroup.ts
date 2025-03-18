@@ -145,7 +145,8 @@ export class MapGroup implements MegaGroupInterface {
         for (const zone of this.seaZones) {
             zone.update({
                 player: localPlayer || null,
-                templeIcon: this.getIconData(zone.getTokenId(), state)
+                templeIcon: this.getIconData(zone.getTokenId(), state),
+                itemSupplies: state.itemSupplies,
             });
         }
 

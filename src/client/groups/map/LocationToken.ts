@@ -5,14 +5,16 @@ import { Action, LocationName, TradeGood } from '../../../shared_types';
 import { EmptyLocationToken } from './EmptyLocationToken';
 
 type LocationTokenUpdate = {
+    tradeGoodSupplies: Record<TradeGood, number>
     mayPickup: boolean
     templeIcon: IconLayer|null
 };
 
 export class LocationToken extends ActionButton implements DynamicGroupInterface<LocationTokenUpdate> {
-    icon: Konva.Path;
-    id: LocationName;
-    emptyLocation: EmptyLocationToken
+    private icon: Konva.Path;
+    private id: LocationName;
+    private emptyLocation: EmptyLocationToken;
+    private tradeGood: TradeGood | null;
 
     constructor(
         stage: Konva.Stage,
@@ -28,6 +30,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
                 default: return null;
             }
         })();
+
         const scale = 3;
 
         super(
@@ -39,6 +42,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         );
 
         this.id = locationId;
+        this.tradeGood = goodToPickup;
 
         const verticalDrift = ((): number => {
             switch (locationId) {
@@ -67,7 +71,10 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         this.group.add(this.icon);
 
         this.emptyLocation = new EmptyLocationToken();
-        this.group.add(this.emptyLocation.getElement());
+
+        if (this.tradeGood) {
+            this.group.add(this.emptyLocation.getElement());
+        }
     }
 
     public getElement() {
@@ -79,8 +86,12 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
     }
 
     public update(update: LocationTokenUpdate): void {
-        this.setEnabled(update.mayPickup);
-        this.emptyLocation.update(update.mayPickup);
+        if (this.tradeGood) {
+            const supply = update.tradeGoodSupplies[this.tradeGood]
+
+            this.setEnabled(supply > 0 && update.mayPickup);
+            this.emptyLocation.update(supply > 0);
+        }
 
         if (update.templeIcon) {
             this.icon.data(update.templeIcon.shape);

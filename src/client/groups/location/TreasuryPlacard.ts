@@ -50,8 +50,9 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'favor',
-                    amount: update.tier.goldCost.favor,
+                    price: update.tier.goldCost.favor,
                     metal: 'gold',
+                    supply: update.metalSupplies.gold,
                 }
             }
         );
@@ -63,8 +64,9 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'favor',
-                    amount: update.tier.silverCost.favor,
+                    price: update.tier.silverCost.favor,
                     metal: 'silver',
+                    supply: update.metalSupplies.silver,
                 }
             }
         );
@@ -76,8 +78,9 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'coins',
-                    amount: update.tier.goldCost.coins,
+                    price: update.tier.goldCost.coins,
                     metal: 'gold',
+                    supply: update.metalSupplies.gold,
                 }
             }
         );
@@ -89,19 +92,20 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
                 playerAmounts,
                 treasury: {
                     currency: 'coins',
-                    amount: update.tier.silverCost.coins,
+                    price: update.tier.silverCost.coins,
                     metal: 'silver',
+                    supply: update.metalSupplies.silver,
                 }
             }
         );
 
-        this.group.add(...[
+        this.group.add(
             this.background,
             this.goldForFavorCard.getElement(),
             this.silverForFavorCard.getElement(),
             this.goldForCoinsCard.getElement(),
             this.silverForCoinsCard.getElement(),
-        ]);
+        );
     }
 
     public update(update: TreasuryUpdate): void {
@@ -121,32 +125,36 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
             playerAmounts,
             treasury: {
                 currency: 'favor',
-                amount: update.tier.goldCost.favor,
+                price: update.tier.goldCost.favor,
                 metal: 'gold',
+                supply: update.metalSupplies.gold,
             }
         });
         this.silverForFavorCard.update({
             playerAmounts,
             treasury: {
                 currency: 'favor',
-                amount: update.tier.silverCost.favor,
+                price: update.tier.silverCost.favor,
                 metal: 'silver',
+                supply: update.metalSupplies.silver,
             }
         });
         this.goldForCoinsCard.update({
             playerAmounts,
             treasury: {
                 currency: 'coins',
-                amount: update.tier.goldCost.coins,
+                price: update.tier.goldCost.coins,
                 metal: 'gold',
+                supply: update.metalSupplies.gold,
             }
         });
         this.silverForCoinsCard.update({
             playerAmounts,
             treasury: {
                 currency: 'coins',
-                amount: update.tier.silverCost.coins,
+                price: update.tier.silverCost.coins,
                 metal: 'silver',
+                supply: update.metalSupplies.silver,
             }
         });
     }
