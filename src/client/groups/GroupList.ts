@@ -6,7 +6,7 @@ import { EmptyLocationToken } from './map/EmptyLocationToken';
 import { SeaZone } from './map/SeaZoneTile';
 import { ActionDial } from './map/ActionDial';
 import { PlayerShip } from './map/PlayerShip';
-import { ShipToken } from './map/ShipToken';
+import { RemoteShip } from './map/RemoteShip';
 import { PlayerPlacard } from './player/PlayerPlacard';
 import { FavorDial } from './FavorDial';
 import { CargoBand } from './player/CargoBand';
@@ -30,7 +30,7 @@ import { RivalShip } from './map/RivalShip';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, EmptyLocationToken, SeaZone, ActionDial, PlayerShip,
-    RivalShip, ShipToken, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
+    RivalShip, RemoteShip, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
     TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, TempleDonationCard,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
 };
