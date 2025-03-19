@@ -3,13 +3,15 @@ import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Pla
 import localState from '../../state';
 import clientConstants from '../../client_constants';
 import { SeaZone } from '../GroupList';
+import { ShipToken } from './ShipToken';
+import { Color } from '../../client_types';
 
-const { COLOR, SHIP_DATA } = clientConstants;
+const { COLOR } = clientConstants;
 const HEX_COUNT = 7;
 
 export class PlayerShip {
 
-    private ship: Konva.Path;
+    private ship: ShipToken;
     private group: Konva.Group;
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
@@ -35,7 +37,7 @@ export class PlayerShip {
         stage: Konva.Stage,
         offsetX: number,
         offsetY: number,
-        fill: string,
+        fill: Color,
         isActivePlayer: boolean,
         seaZones: Array<SeaZone>,
         players: Array<Player>,
@@ -55,15 +57,10 @@ export class PlayerShip {
             id: playerColor,
         });
 
-        this.ship = new Konva.Path({
-            x: -15,
-            y: -5,
-            data: SHIP_DATA.shape,
+        this.ship = new ShipToken(
             fill,
-            scale: { x: 1.5, y: 1.5 },
-            stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder,
-            strokeWidth: 2,
-        });
+            isActivePlayer && COLOR.activeShipBorder || COLOR.shipBorder,
+        );
 
         this.group.on('mouseenter', () => {
             stage.container().style.cursor = 'grab';
@@ -159,7 +156,7 @@ export class PlayerShip {
                     departureZone.setFill(player?.locationActions.length ? COLOR.activeHex: COLOR.defaultHex);
             }
         });
-        this.group.add(this.ship);
+        this.group.add(this.ship.getElement());
     }
 
     public getId(): PlayerColor {
@@ -171,7 +168,7 @@ export class PlayerShip {
     }
 
     public switchHighlight(isHighlighted: boolean): void {
-        this.ship.stroke(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
+        this.ship.update(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
     }
 
     private broadcastAction(detail: ClientMessage): void {
