@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, GameState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer } from '../client_types';
-import { SeaZone, BarrierToken, ShipToken, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip} from '../groups/GroupList';
+import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip} from '../groups/GroupList';
 import localState from '../state';
 import clientConstants from '../client_constants';
 
@@ -15,7 +15,7 @@ export class MapGroup implements MegaGroupInterface {
     private actionDial: ActionDial | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
-    private opponentShips: Array<ShipToken> = [];
+    private opponentShips: Array<RemoteShip> = [];
     private localShip: PlayerShip | null = null;
     private rivalShip: RivalShip | null = null;
 
@@ -105,7 +105,7 @@ export class MapGroup implements MegaGroupInterface {
 
             if (player.id && player.id !== localState.playerColor) {
                 const { position } = player.bearings;
-                const ship = new ShipToken(
+                const ship = new RemoteShip(
                     position.x,
                     position.y,
                     COLOR[player.id],

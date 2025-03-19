@@ -5,7 +5,7 @@ import clientConstants from '../../client_constants';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 
-export class ShipToken implements DynamicGroupInterface<Player> {
+export class RemoteShip implements DynamicGroupInterface<Player> {
 
     ship: Konva.Path;
     group: Konva.Group;
