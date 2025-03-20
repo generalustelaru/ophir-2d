@@ -27,6 +27,7 @@ import { TempleRewardDial } from './location/TempleRewardDial';
 import { TempleDonationCard } from './location/TempleDonationCard';
 import { MetalDonationsBand } from './location/MetalDonationsBand';
 import { RivalShip } from './map/RivalShip';
+// import { ShiftMarketButton }
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, EmptyLocationToken, SeaZone, ActionDial, PlayerShip,

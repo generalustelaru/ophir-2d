@@ -99,6 +99,7 @@ export class MapGroup implements MegaGroupInterface {
             const offsetY = centerPoint.y - offsets.y;
             this.rivalShip = new RivalShip(offsetX, offsetY);
             this.group.add(this.rivalShip.getElement());
+            // TODO: must deliver rival coordinates via start session action
         }
 
         players.forEach(player => {
@@ -154,6 +155,14 @@ export class MapGroup implements MegaGroupInterface {
             this.actionDial?.update(localPlayer);
             this.favorButton?.update(localPlayer);
         }
+
+        // if(this.rivalShip && state.rival.isIncluded) {
+        //     const { isControllable, bearings } = state.rival;
+        //     this.rivalShip.update({
+        //         isControllable,
+        //         bearings,
+        //     });
+        // }
 
         for (const zone of this.seaZones) {
             zone.update({

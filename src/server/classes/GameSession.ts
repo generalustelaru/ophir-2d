@@ -152,7 +152,7 @@ export class GameSession {
             );
         }
 
-        const rival = this.state.getRivalData();
+        const rival = this.state.isRivalIncluded();
 
         const hasSailed = (() => {
             player.spendMove();
@@ -194,7 +194,14 @@ export class GameSession {
                 );
             }
 
-        } else if(player.getMoves() == 0)  {
+            if(this.state.isRivalIncluded()) {
+                if (this.state.getRivalBearings()!.seaZone === player.getBearings().seaZone)
+                    this.state.enableRivalControl(player.getIdentity().id);
+                else
+                    this.state.disableRivalControl();
+            }
+
+        } else if(player.getMoves() === 0)  {
             player.setAnchoredActions([]);
             this.addServerMessage(
                 `${player.getIdentity().name} also ran out of moves and cannot act further`
