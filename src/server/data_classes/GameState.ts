@@ -91,8 +91,31 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     }
 
     // MARK: Rival
-    public getRivalData() {
-        return this.rival.get();
+    public isRivalIncluded() {
+        return this.rival.get().isIncluded;
+    }
+
+    public enableRivalControl(color: PlayerColor) {
+        this.rival.update(r => {
+            if (r.isIncluded) {
+                r.activePlayerColor = color;
+                r.isControllable = true;
+            }
+            return r;
+        });
+    }
+
+    public disableRivalControl() {
+        this.rival.update(r => {
+            if (r.isIncluded)
+                r.isControllable = false;
+            return r;
+        })
+    }
+
+    public getRivalBearings() {
+        const r = this.rival.get();
+        return r.isIncluded ? r.bearings : null;
     }
 
     // MARK: Map
