@@ -66,8 +66,10 @@ export type ShipBearings = {
     position: Coordinates,
 }
 
-export type RivalShipData = {
+export type RivalData = {
     isIncluded: true,
+    isControllable: boolean,
+    activePlayerColor: PlayerColor,
     bearings: ShipBearings,
     influence: DiceSix,
 } | { isIncluded: false }
@@ -159,7 +161,7 @@ export type GameState = {
     setup: GameSetup,
     chat: Array<ChatEntry>,
     itemSupplies: ItemSupplies,
-    rivalShip: RivalShipData,
+    rival: RivalData,
 }
 
 /**

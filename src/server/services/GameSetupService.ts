@@ -1,9 +1,8 @@
 
 import {
-    BarrierId, ZoneName, Coordinates, Player, MarketFluctuations,
+    BarrierId, ZoneName, Coordinates, Player, PlayerColor, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
-    ExchangeTier, PlayerScaffold,
-    RivalShipData,
+    ExchangeTier, PlayerScaffold, RivalData,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -32,12 +31,12 @@ class GameSetupService {
         if (lobbyState.sessionOwner === null)
             throw new Error('Cannot start game while the session owner is null');
 
-        const players = this.tools.getCopy(lobbyState.players);
+        const playerScaffolds = this.tools.getCopy(lobbyState.players);
 
-        if (!players.every(p => Boolean(p.id)))
+        if (!playerScaffolds.every(p => Boolean(p.id)))
             throw new Error('Found unidentifiable players.');
 
-        if (players.length < 2 && !SINGLE_PLAYER)
+        if (playerScaffolds.length < 2 && !SINGLE_PLAYER)
             throw new Error('Not enough players to start a game.');
 
         const barriers = this.determineBarriers();
@@ -47,11 +46,12 @@ class GameSetupService {
         const privateState = new PrivateStateHandler({
             destinationPackages: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
-            costTiers: this.filterCostTiers(players.length),
-            gameStats: players.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
+            costTiers: this.filterCostTiers(playerScaffolds.length),
+            gameStats: playerScaffolds.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         });
 
         lobbyState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
+        const { players, startingPlayerColor } = this.hydratePlayers(playerScaffolds, privateState.getDestinationPackages(), setupCoordinates, mapPairings);
 
         const gameState = new GameStateHandler({
             isStatusResponse: false,
@@ -61,7 +61,7 @@ class GameSetupService {
             sessionOwner: lobbyState.sessionOwner,
             chat: lobbyState.chat,
             availableSlots: [],
-            players: this.hydratePlayers(players, privateState.getDestinationPackages(), setupCoordinates, mapPairings),
+            players,
             market: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
             temple: {
@@ -77,10 +77,11 @@ class GameSetupService {
                 marketFluctuations: this.getMarketFluctuations(),
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
-            rivalShip: this.getRivalShipData(
-                Boolean(players.length < 3),
+            rival: this.getRivalShipData(
+                Boolean(playerScaffolds.length < 3),
                 setupCoordinates,
                 mapPairings,
+                startingPlayerColor,
             ),
         });
 
@@ -161,7 +162,10 @@ class GameSetupService {
         moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
         mapPairings: Record<ZoneName, LocationData>,
-    ): Array<Player> {
+    ): {
+        players: Array<Player>,
+        startingPlayerColor: PlayerColor
+    } {
         const initialRules = this.tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
         const randomScaffolds = scaffolds
@@ -213,22 +217,28 @@ class GameSetupService {
             return playerDto;
         });
 
-        // debug options
-        return players.map(player => {
-            if (RICH_PLAYERS)
-                player.coins = 99;
-            if (LOADED_PLAYERS)
-                player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
+        const startingPlayerColor = players[0].id;
 
-            return player;
-        });
+        // debug options
+        return {
+            players: players.map(player => {
+                if (RICH_PLAYERS)
+                    player.coins = 99;
+                if (LOADED_PLAYERS)
+                    player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
+
+                return player;
+            }),
+            startingPlayerColor,
+        };
     }
 
     private getRivalShipData(
         isIncluded: boolean,
         setupCoordinates: Coordinates[],
         mapPairings: Record<ZoneName, LocationData>,
-    ): RivalShipData {
+        activePlayerColor: PlayerColor,
+    ): RivalData {
 
         if (!isIncluded)
             return { isIncluded: false }
@@ -240,6 +250,8 @@ class GameSetupService {
 
         return {
             isIncluded: true,
+            isControllable: false,
+            activePlayerColor,
             bearings: {
                 seaZone: marketZone,
                 position: setupCoordinates.pop() as Coordinates,

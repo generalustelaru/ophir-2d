@@ -89,10 +89,10 @@ export class MapGroup implements MegaGroupInterface {
         this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: ships
-        const rivalShipData = state.rivalShip;
+        const rival = state.rival;
 
-        if (rivalShipData.isIncluded) {
-            const { bearings } = rivalShipData;
+        if (rival.isIncluded) {
+            const { bearings } = rival;
             const offsets = HEX_OFFSET_DATA.find(item => item.id === bearings.seaZone)!;
 
             const offsetX = centerPoint.x - offsets.x;

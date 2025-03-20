@@ -4,6 +4,7 @@ import { InfluenceDial, PlayerPlacard } from '../groups/GroupList';
 import localState from '../state';
 import { Player, GameState } from '../../shared_types';
 import clientConstants from '../client_constants';
+import { RivalPlacard } from '../groups/player/RivalPlacard';
 
 const { COLOR } = clientConstants;
 
@@ -11,7 +12,7 @@ export class PlayerGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private playerPlacards: Array<PlayerPlacard> = [];
-    private rivalInfluenceDial: InfluenceDial | null = null;
+    private rivalPlacard: RivalPlacard | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -27,10 +28,10 @@ export class PlayerGroup implements MegaGroupInterface {
     // MARK: DRAW
     public drawElements(state: GameState): void {
         const verticalOffsets = [20, 140, 260, 380];
+        const { players, rival } = state;
 
         const playersByLocalPlayer = localState.playerColor
             ? (() => {
-                const players = [...state.players];
                 while (players[0].id !== localState.playerColor) {
                     players.push(players.shift() as Player);
                 }
@@ -49,21 +50,18 @@ export class PlayerGroup implements MegaGroupInterface {
             this.playerPlacards.push(placard);
         });
 
-        const rivalShipData = state.rivalShip;
-
-        if (rivalShipData.isIncluded) {
-            this.rivalInfluenceDial = new InfluenceDial(
-                {
-                    width: 50,
-                    height: 50,
-                    x: 10,
-                    y: -1 * ((verticalOffsets.shift() as number) + 25)
-                },
-                COLOR.boneWhite,
+        if (rival.isIncluded) {
+            this.rivalPlacard = new RivalPlacard(
+                this.stage,
+                verticalOffsets.shift() as number,
             );
 
-            this.rivalInfluenceDial.update(rivalShipData.influence);
-            this.group.add(this.rivalInfluenceDial.getElement());
+            this.rivalPlacard.update({
+                influence: rival.influence,
+                isControllable: rival.isControllable,
+                playerColor: rival.activePlayerColor,
+            });
+            this.group.add(this.rivalPlacard.getElement());
         }
     }
 
