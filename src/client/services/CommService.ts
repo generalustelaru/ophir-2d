@@ -94,6 +94,7 @@ class CommunicationClass extends Communicator {
     public sendMessage(payload: ClientMessage) {
 
         if (!this.socket || !this.socket.readyState) {
+            this.socket?.close();
             this.broadcastEvent({
                 type: 'error',
                 detail: { message: 'The connection is not open' }
