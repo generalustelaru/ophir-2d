@@ -1,7 +1,7 @@
 import {
     ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer,
     MarketSlotKey, Player, PlayerColor, GameState, TempleState, Trade,
-    MetalPrices, Metal, DiceSix, TradeGood, RivalShipData,
+    MetalPrices, Metal, DiceSix, TradeGood, RivalData,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -19,12 +19,12 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;
     private itemSupplies: Writable<ItemSupplies>;
-    private rivalShip: Writable<RivalShipData>;
+    private rival: Writable<RivalData>;
 
     constructor(props: GameState) {
         const {
             gameId, sessionOwner, setup, isStatusResponse, gameStatus, gameResults,
-            availableSlots, players, market, temple, chat, itemSupplies, rivalShip,
+            availableSlots, players, market, temple, chat, itemSupplies, rival,
         } = props;
 
         this.gameId = readable(gameId);
@@ -39,7 +39,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         this.temple = writable(temple);
         this.chat = arrayWritable(chat);
         this.itemSupplies = writable(itemSupplies);
-        this.rivalShip = writable(rivalShip);
+        this.rival = writable(rival);
     }
 
     public toDto(): GameState {
@@ -57,7 +57,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
             temple: this.temple.get(),
             chat: this.chat.getAll(),
             itemSupplies: this.itemSupplies.get(),
-            rivalShip: this.rivalShip.get(),
+            rival: this.rival.get(),
         }
     }
 
@@ -88,6 +88,11 @@ export class GameStateHandler implements ObjectHandler<GameState>{
 
     public getAllPlayers() {
         return this.players.getAll();
+    }
+
+    // MARK: Rival
+    public getRivalData() {
+        return this.rival.get();
     }
 
     // MARK: Map

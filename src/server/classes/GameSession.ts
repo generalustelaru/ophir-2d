@@ -152,6 +152,8 @@ export class GameSession {
             );
         }
 
+        const rival = this.state.getRivalData();
+
         const hasSailed = (() => {
             player.spendMove();
             const playersInZone = this.state.getPlayersByZone(target);
@@ -169,8 +171,7 @@ export class GameSession {
 
             this.state.trimInfluenceByZone(target);
             this.addServerMessage(
-                `${player.getIdentity().name} was blocked from sailing.
-                <br>Influence at the [${locationName}] was trimmed.`
+                `${player.getIdentity().name} was blocked from sailing. Influence at the [${locationName}] was trimmed.`
             );
 
             return false;
