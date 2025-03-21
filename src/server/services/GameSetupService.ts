@@ -245,7 +245,7 @@ class GameSetupService {
 
     private getRivalShipData(
         isIncluded: boolean,
-        setupCoordinates: HexCoordinates[],
+        hexCoordinates: HexCoordinates[],
         mapPairings: Record<ZoneName, LocationData>,
         activePlayerColor: PlayerColor,
     ): RivalData {
@@ -258,7 +258,11 @@ class GameSetupService {
             return mapPairings[zoneName].name === 'market';
         }) as ZoneName;
 
-        const position = setupCoordinates.find(c => c.id === marketZone)!;
+        const hexPosition = hexCoordinates.find(c => c.id === marketZone)!;
+        const shipPosition = {
+            x: hexPosition.x + 25,
+            y: hexPosition.y + 25,
+        }
 
         return {
             isIncluded: true,
@@ -266,7 +270,7 @@ class GameSetupService {
             activePlayerColor,
             bearings: {
                 seaZone: marketZone,
-                position: { x: position.x, y: position.y },
+                position: shipPosition,
                 location: 'market',
             },
             influence: 1,

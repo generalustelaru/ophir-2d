@@ -1,12 +1,9 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
-import { InfluenceDial, PlayerPlacard } from '../groups/GroupList';
+import { PlayerPlacard } from '../groups/GroupList';
 import localState from '../state';
 import { Player, GameState } from '../../shared_types';
-import clientConstants from '../client_constants';
 import { RivalPlacard } from '../groups/player/RivalPlacard';
-
-const { COLOR } = clientConstants;
 
 export class PlayerGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
@@ -51,16 +48,13 @@ export class PlayerGroup implements MegaGroupInterface {
         });
 
         if (rival.isIncluded) {
+            const { isControllable, activePlayerColor, influence } = rival;
             this.rivalPlacard = new RivalPlacard(
                 this.stage,
+                { isControllable, activePlayerColor, influence },
                 verticalOffsets.shift() as number,
             );
 
-            this.rivalPlacard.update({
-                influence: rival.influence,
-                isControllable: rival.isControllable,
-                playerColor: rival.activePlayerColor,
-            });
             this.group.add(this.rivalPlacard.getElement());
         }
     }
@@ -76,6 +70,12 @@ export class PlayerGroup implements MegaGroupInterface {
                 placard.getElement().destroy();
             }
         });
+
+        if (state.rival.isIncluded && this.rivalPlacard) {
+            const { isControllable, activePlayerColor, influence } = state.rival;
+
+            this.rivalPlacard.update({ isControllable, activePlayerColor, influence });
+        }
     }
 
     public disable(): void {
