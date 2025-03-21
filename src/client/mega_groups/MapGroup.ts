@@ -91,7 +91,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: ships
 
         if (state.rival.isIncluded) {
-            this.rivalShip = new RivalShip(state.rival);
+            this.rivalShip = new RivalShip(state.rival, localState.playerColor);
             this.group.add(this.rivalShip.getElement());
         }
 

@@ -21,16 +21,17 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private influenceDial: InfluenceDial;
-    // private endTurnButton: ShiftMarketButton;
-    // private endTurnButton: EndTurnButton;
+    private localPlayerColor: PlayerColor | null;
+    // TODO: private endTurnButton: ShiftMarketButton;
+    // TODO: private endTurnButton: EndTurnButton;
 
     constructor(
         stage: Konva.Stage,
         data: RivalPlacardUpdate,
-        // playerInControl: PlayerColor,
-        // localColorName: PlayerColor,
+        localPlayerColor: PlayerColor | null,
         yOffset: number,
     ){
+        this.localPlayerColor = localPlayerColor;
         this.stage = stage;
 
         this.group = new Konva.Group({
@@ -43,14 +44,15 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR['boneWhite'],
+            stroke: COLOR.boneWhite,
+            fill: COLOR.boneWhite,
             cornerRadius: 15,
             strokeWidth: 0,
         });
 
         this.influenceDial = new InfluenceDial(
             { width: 50, height: 50, x: 60, y: -25 },
-            COLOR['boneWhite']);
+            COLOR.boneWhite);
         this.influenceDial.update(1);
 
         this.group.add(...[
@@ -67,8 +69,8 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
     public update(data: RivalPlacardUpdate) {
         const { isControllable, activePlayerColor, influence } = data;
 
-        activePlayerColor && this.background.stroke(activePlayerColor);
-        this.background.strokeWidth(isControllable ? 6 : 0);
+        activePlayerColor && this.background.fill(isControllable ? COLOR[activePlayerColor] : COLOR.boneWhite);
+        this.background.strokeWidth(isControllable ? 3 : 0);
         this.influenceDial.update(influence);
     }
 }
