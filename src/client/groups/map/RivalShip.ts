@@ -9,6 +9,7 @@ const { COLOR } = clientConstants;
 export type RivalShipUpdate = {
     isControllable: boolean,
     bearings: ShipBearings,
+    activePlayerColor: PlayerColor
 }
 export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
@@ -16,16 +17,17 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     group: Konva.Group;
 
     constructor(
-        bearings: ShipBearings,
+        data: RivalShipUpdate,
     ) {
         this.group = new Konva.Group({
-            x: bearings.position.x + 25,
-            y: bearings.position.y + 25,
+            x: data.bearings.position.x,
+            y: data.bearings.position.y,
         });
 
         this.ship = new ShipToken(COLOR.boneWhite);
 
         this.group.add(this.ship.getElement());
+        this.update(data);
     }
 
     public getElement(): Konva.Group {
@@ -39,7 +41,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     public update(data: RivalShipUpdate): void {
         this.group.x(data.bearings.position.x);
         this.group.y(data.bearings.position.y);
-        this.ship.update(data.isControllable ? COLOR.activeShipBorder : COLOR.shipBorder);
+        this.ship.update(data.isControllable ? COLOR[data.activePlayerColor] : COLOR.shipBorder);
     };
 
     public destroy(): void {

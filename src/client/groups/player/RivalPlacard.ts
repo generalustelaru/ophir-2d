@@ -12,7 +12,7 @@ const { COLOR } = clientConstants;
 
 type RivalPlacardUpdate = {
     isControllable: boolean,
-    playerColor: PlayerColor | null,
+    activePlayerColor: PlayerColor | null,
     influence: DiceSix,
 }
 export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
@@ -26,6 +26,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
 
     constructor(
         stage: Konva.Stage,
+        data: RivalPlacardUpdate,
         // playerInControl: PlayerColor,
         // localColorName: PlayerColor,
         yOffset: number,
@@ -54,7 +55,9 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
 
         this.group.add(...[
             this.background, this.influenceDial.getElement(),
-        ])
+        ]);
+
+        this.update(data);
     }
 
     public getElement() {
@@ -62,10 +65,10 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
     }
 
     public update(data: RivalPlacardUpdate) {
-        const { isControllable, playerColor, influence } = data;
+        const { isControllable, activePlayerColor, influence } = data;
 
-        playerColor && this.background.stroke(playerColor);
-        this.background.strokeWidth(isControllable ? 3 : 0);
+        activePlayerColor && this.background.stroke(activePlayerColor);
+        this.background.strokeWidth(isControllable ? 6 : 0);
         this.influenceDial.update(influence);
     }
 }
