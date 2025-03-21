@@ -3,7 +3,7 @@ update:
 	npm update
 
 build:
-	make public
+	make layout
 	npm run build_client
 	npm run build_server
 	make run
@@ -19,7 +19,7 @@ server:
 client:
 	npm run build_client
 
-public:
+layout:
 ifeq ($(OS),Windows_NT)
 	powershell -command "if (-not (Test-Path 'public')) { New-Item -ItemType Directory -Name 'public' }"
 	powershell -command "if (Get-ChildItem 'public' -ErrorAction SilentlyContinue) { Get-ChildItem 'public' -Recurse | Remove-Item -Force }"
