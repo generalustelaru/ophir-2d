@@ -3,6 +3,7 @@ import {
     BarrierId, ZoneName, Coordinates, Player, PlayerColor, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
     ExchangeTier, PlayerScaffold, RivalData,
+    GameSetupPayload,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -11,6 +12,7 @@ import { GameStateHandler } from '../data_classes/GameState';
 import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
 import { PlayerHandler } from '../data_classes/Player';
 import { PrivateStateHandler } from '../data_classes/PrivateState';
+import { HexCoordinates } from '../../client/client_types';
 
 console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
@@ -20,10 +22,13 @@ class GameSetupService {
     private tools: ToolService = new ToolService();
 
     /**
-     * @param setupCoordinates Coordinates are required for client distribution via the gameState
+     * @param clientSetupPayload Coordinates are required for client distribution via the gameState
      * @returns `{gameState, privateState}`  Used expressily for a game session instance.
      */
-    public produceGameData(lobbyState: LobbyState, setupCoordinates: Array<Coordinates>): StateBundle {
+    public produceGameData(
+        lobbyState: LobbyState,
+        clientSetupPayload: GameSetupPayload,
+    ): StateBundle {
 
         if (lobbyState.gameId === null)
             throw new Error('Cannot start game without a game ID');
@@ -50,8 +55,12 @@ class GameSetupService {
             gameStats: playerScaffolds.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         });
 
-        lobbyState.chat.push({ id: null, name: SERVER_NAME, message: 'Game started!' });
-        const { players, startingPlayerColor } = this.hydratePlayers(playerScaffolds, privateState.getDestinationPackages(), setupCoordinates, mapPairings);
+        const { players, startingPlayerColor } = this.hydratePlayers(
+            playerScaffolds,
+            privateState.getDestinationPackages(),
+            clientSetupPayload.startingPositions,
+            mapPairings
+        );
 
         const gameState = new GameStateHandler({
             isStatusResponse: false,
@@ -79,11 +88,12 @@ class GameSetupService {
             },
             rival: this.getRivalShipData(
                 Boolean(playerScaffolds.length < 3),
-                setupCoordinates,
+                clientSetupPayload.hexPositions,
                 mapPairings,
                 startingPlayerColor,
             ),
         });
+        gameState.addChatEntry({ id: null, name: SERVER_NAME, message: 'Game started!' });
 
         return { gameState, privateState };
     };
@@ -235,7 +245,7 @@ class GameSetupService {
 
     private getRivalShipData(
         isIncluded: boolean,
-        setupCoordinates: Coordinates[],
+        setupCoordinates: HexCoordinates[],
         mapPairings: Record<ZoneName, LocationData>,
         activePlayerColor: PlayerColor,
     ): RivalData {
@@ -248,13 +258,15 @@ class GameSetupService {
             return mapPairings[zoneName].name === 'market';
         }) as ZoneName;
 
+        const position = setupCoordinates.find(c => c.id === marketZone)!;
+
         return {
             isIncluded: true,
             isControllable: false,
             activePlayerColor,
             bearings: {
                 seaZone: marketZone,
-                position: setupCoordinates.pop() as Coordinates,
+                position: { x: position.x, y: position.y },
                 location: 'market',
             },
             influence: 1,

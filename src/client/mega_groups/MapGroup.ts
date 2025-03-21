@@ -89,17 +89,10 @@ export class MapGroup implements MegaGroupInterface {
         this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: ships
-        const rival = state.rival;
 
-        if (rival.isIncluded) {
-            const { bearings } = rival;
-            const offsets = HEX_OFFSET_DATA.find(item => item.id === bearings.seaZone)!;
-
-            const offsetX = centerPoint.x - offsets.x;
-            const offsetY = centerPoint.y - offsets.y;
-            this.rivalShip = new RivalShip(offsetX, offsetY);
+        if (state.rival.isIncluded) {
+            this.rivalShip = new RivalShip(state.rival.bearings);
             this.group.add(this.rivalShip.getElement());
-            // TODO: must deliver rival coordinates via start session action
         }
 
         players.forEach(player => {
@@ -201,17 +194,29 @@ export class MapGroup implements MegaGroupInterface {
         this.favorButton?.disableAction();
     }
 
-    public calculateShipPositions(): GameSetupPayload {
-        const startingPositions: Array<Coordinates> = [];
+    public createSetupPayload(): GameSetupPayload {
+        const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
 
+        const startingPositions: Array<Coordinates> = [];
         SHIP_DATA.setupDrifts.forEach((drift) => {
             startingPositions.push({
-                x: this.group.width() / 2 + drift.x,
-                y: this.group.height() / 2 + drift.y
+                x: centerPoint.x + drift.x,
+                y: centerPoint.y + drift.y
             });
         });
 
-        return { setupCoordinates: startingPositions };
+        const hexPositions = HEX_OFFSET_DATA.map(h => {
+            return {
+                id: h.id,
+                x: centerPoint.x - h.x,
+                y: centerPoint.y - h.y,
+            }
+        })
+
+        return {
+            hexPositions,
+            startingPositions,
+        };
     }
 
     private getIconData(locationName: LocationName, state: GameState): IconLayer {

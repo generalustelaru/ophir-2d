@@ -1,3 +1,4 @@
+import { HexCoordinates } from "./client/client_types";
 import { PlayerCountables } from "./server/server_types";
 
 /**
@@ -199,7 +200,10 @@ export type GameSetup = {
 export type ChatPayload = { input: string }
 export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
-export type GameSetupPayload = { setupCoordinates: Array<Coordinates> }
+export type GameSetupPayload = {
+    hexPositions: Array<HexCoordinates>,
+    startingPositions: Array<Coordinates>,
+}
 export type LoadGoodPayload = { tradeGood: TradeGood }
 export type DropItemPayload = { item: ItemName }
 export type TradePayload = { slot: MarketSlotKey, location: LocationName }

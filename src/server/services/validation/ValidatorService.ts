@@ -1,3 +1,4 @@
+import { HexCoordinates } from "../../../client/client_types";
 import {
     ChatPayload,
     ClientRequest,
@@ -106,17 +107,36 @@ export class ValidatorService {
         const gameSetupPayload = this.validateObject<GameSetupPayload>(
             'GameSetupPayload',
             payload,
-            [{ key: 'setupCoordinates', type: 'array', nullable: false }],
+            [
+                { key: 'hexPositions', type: 'array', nullable: false },
+                { key: 'startingPositions', type: 'array', nullable: false },
+            ],
         )
 
         if (!gameSetupPayload) {
             return null;
         }
 
-        const coordinatesAreValid = gameSetupPayload.setupCoordinates
+
+        const hexPositions = gameSetupPayload.hexPositions.map(
+            value => this.validateObject<HexCoordinates>(
+                'HexCoordinates',
+                value,
+                [
+                    {key: 'id', type: 'string', nullable: false},
+                    {key: 'x', type: 'number', nullable: false},
+                    {key: 'y', type: 'number', nullable: false},
+                ],
+            )
+        );
+
+        const startingPositionsAreValid = gameSetupPayload.startingPositions
             .every(value => !!this.validateCoordinates(value));
 
-        if (!coordinatesAreValid)
+        if (
+            !startingPositionsAreValid
+            || hexPositions.includes(null)
+        )
             return null;
 
         return gameSetupPayload;
