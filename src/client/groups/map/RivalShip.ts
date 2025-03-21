@@ -16,12 +16,11 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     group: Konva.Group;
 
     constructor(
-        offsetX: number,
-        offsetY: number,
+        bearings: ShipBearings,
     ) {
         this.group = new Konva.Group({
-            x: offsetX + 25,
-            y: offsetY + 25,
+            x: bearings.position.x + 25,
+            y: bearings.position.y + 25,
         });
 
         this.ship = new ShipToken(COLOR.boneWhite);

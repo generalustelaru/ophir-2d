@@ -7,7 +7,7 @@ import Konva from 'konva';
 
 export type Color = `#${string}`;
 export type DynamicColor = {active: Color, inactive: Color}
-export type HexOffset = { id: ZoneName, x: number, y: number };
+export type HexCoordinates = { id: ZoneName, x: number, y: number };
 export type IconLayer = { shape: string, fill: Color }
 export type IconName = 'empty_location'
 export type LayeredIconData = {
@@ -31,7 +31,7 @@ export type ClientConstants = {
     DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,
-    HEX_OFFSET_DATA: Array<HexOffset>,
+    HEX_OFFSET_DATA: Array<HexCoordinates>,
     ISLAND_DATA: Record<ZoneName, IslandData>,
     LOCATION_TOKEN_DATA: Record<LocationName, IconLayer>,
     LAYERED_ICONS: Record<IconName, LayeredIconData>

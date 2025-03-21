@@ -60,7 +60,7 @@ class CanvasClass extends Communicator {
     }
 
     public getSetupCoordinates(): GameSetupPayload {
-        return this.mapGroup.calculateShipPositions();
+        return this.mapGroup.createSetupPayload();
     }
 
     private drawElements(state: GameState): void {

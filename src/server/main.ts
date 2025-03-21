@@ -281,10 +281,10 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
-function processGameStart(details: GameSetupPayload): boolean {
+function processGameStart(payload: GameSetupPayload): boolean {
 
     try {
-        const bundle: StateBundle = gameSetupService.produceGameData(lobbyState, details.setupCoordinates);
+        const bundle: StateBundle = gameSetupService.produceGameData(lobbyState, payload);
         singleSession = new GameSession(bundle);
     } catch (error) {
         console.error('Game start failed:', error);
