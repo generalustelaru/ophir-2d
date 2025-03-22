@@ -76,6 +76,7 @@ export type RivalData = {
     isControllable: boolean,
     activePlayerColor: PlayerColor,
     bearings: ShipBearings,
+    moves: number,
     destinations: Array<ZoneName>,
     influence: DiceSix,
 } | { isIncluded: false }
@@ -236,11 +237,11 @@ export type LaconicAction =
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start, GameSetupPayload>;
-export type MoveMessage = MessageFormat<Action.move, MovementPayload>;
+export type MoveMessage = MessageFormat<Action.move | Action.move_rival, MovementPayload>;
 export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>;
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
-export type RepositionMessage = MessageFormat<Action.reposition, RepositioningPayload>;
+export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, RepositioningPayload>;
 export type TradeMessage = MessageFormat<Action.make_trade, TradePayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonationPayload>;
