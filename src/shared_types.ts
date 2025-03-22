@@ -8,6 +8,10 @@ export enum Action {
     chat = 'chat',
     start = 'start',
     move = 'move',
+    move_rival = 'move_rival',
+    reposition_rival = 'reposition_rival',
+    shift_market = 'shift_market',
+    end_rival_turn = 'end_rival_turn',
     load_good = 'load_good',
     drop_item = 'drop_item',
     reposition = 'reposition',
@@ -72,6 +76,7 @@ export type RivalData = {
     isControllable: boolean,
     activePlayerColor: PlayerColor,
     bearings: ShipBearings,
+    destinations: Array<ZoneName>,
     influence: DiceSix,
 } | { isIncluded: false }
 
@@ -226,12 +231,13 @@ export type VerboiseAction =
     | Action.chat | Action.start | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.rebind_id;
 export type LaconicAction =
-    | Action.inquire | Action.enroll | Action.end_turn | Action.reset | Action.spend_favor
-    | Action.upgrade_cargo | Action.get_status;
+    | Action.inquire | Action.enroll | Action.end_turn | Action.reset | Action.spend_favor | Action.move_rival
+    | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival;
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start, GameSetupPayload>;
 export type MoveMessage = MessageFormat<Action.move, MovementPayload>;
+export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>;
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition, RepositioningPayload>;

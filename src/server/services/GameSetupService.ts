@@ -91,6 +91,7 @@ class GameSetupService {
                 clientSetupPayload.hexPositions,
                 mapPairings,
                 startingPlayerColor,
+                privateState.getDestinationPackages(),
             ),
         });
         gameState.addChatEntry({ id: null, name: SERVER_NAME, message: 'Game started!' });
@@ -248,6 +249,7 @@ class GameSetupService {
         hexCoordinates: HexCoordinates[],
         mapPairings: Record<ZoneName, LocationData>,
         activePlayerColor: PlayerColor,
+        moveRules: Array<DestinationPackage>,
     ): RivalData {
 
         if (!isIncluded)
@@ -268,6 +270,7 @@ class GameSetupService {
             isIncluded: true,
             isControllable: false,
             activePlayerColor,
+            destinations: moveRules.find(r => r.from === marketZone)!.allowed,
             bearings: {
                 seaZone: marketZone,
                 position: shipPosition,
