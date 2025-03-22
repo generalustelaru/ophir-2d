@@ -254,6 +254,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.locationActions.clear();
     }
 
+    public handlesRival() {
+        return this.isHandlingRival.get();
+    }
+
     public freeze() {
         this.isHandlingRival.set(true);
     }
