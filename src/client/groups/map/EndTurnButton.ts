@@ -47,9 +47,9 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
     }
 
     public update(player: Player): void {
-            const data = player.isAnchored? ICON_DATA.anchored : ICON_DATA.not_anchored;
-            this.anchor.data(data.shape);
-            this.anchor.fill(player.isActive ? data.fill : COLOR.disabled);
-            this.setEnabled(player.isActive && player.isAnchored);
+            const icon = player.isAnchored && !player.isHandlingRival ? ICON_DATA.anchored : ICON_DATA.not_anchored;
+            this.anchor.data(icon.shape);
+            this.anchor.fill(player.isActive ? icon.fill : COLOR.disabled);
+            this.setEnabled(player.isActive && player.isAnchored && !player.isHandlingRival);
     }
 }
