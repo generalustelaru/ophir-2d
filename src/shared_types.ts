@@ -94,6 +94,7 @@ export type Player = {
     privilegedSailing: boolean,
     influence: DiceSix,
     moveActions: number,
+    isHandlingRival: boolean,
     isAnchored: boolean,
     locationActions: Array<LocationAction>,
     destinations: Array<ZoneName>,
