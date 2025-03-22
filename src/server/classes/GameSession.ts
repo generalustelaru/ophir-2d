@@ -193,10 +193,14 @@ export class GameSession {
             }
 
             if(this.state.isRivalIncluded()) {
-                if (this.state.getRivalBearings()!.seaZone === player.getBearings().seaZone)
+                if (this.state.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
                     this.state.enableRivalControl(player.getIdentity().id);
-                else
+                    player.freeze();
+                }
+                else {
                     this.state.disableRivalControl();
+                    player.unfreeze();
+                }
             }
 
         } else if(player.getMoves() === 0)  {

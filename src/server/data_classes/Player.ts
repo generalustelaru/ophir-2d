@@ -20,6 +20,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private influence: Writable<DiceSix>;
     private moveActions: Writable<number>;
     private isAnchored: Writable<boolean>;
+    private isHandlingRival: Writable<boolean>;
     private locationActions: ArrayWritable<LocationAction>;
     private destinations: ArrayWritable<ZoneName>;
     private hasCargo: Writable<boolean>;
@@ -41,6 +42,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.influence = writable(player.influence);
         this.moveActions = writable(player.moveActions);
         this.isAnchored = writable(player.isAnchored);
+        this.isHandlingRival = writable(player.isHandlingRival);
         this.locationActions = arrayWritable(player.locationActions);
         this.destinations = arrayWritable(player.destinations);
         this.hasCargo = writable(player.hasCargo);
@@ -64,6 +66,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             influence: this.influence.get(),
             moveActions: this.moveActions.get(),
             isAnchored: this.isAnchored.get(),
+            isHandlingRival: this.isHandlingRival.get(),
             locationActions: this.locationActions.getAll(),
             destinations: this.destinations.getAll(),
             hasCargo: this.hasCargo.get(),
@@ -249,6 +252,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public clearActions() {
         this.locationActions.clear();
+    }
+
+    public freeze() {
+        this.isHandlingRival.set(true);
+    }
+
+    public unfreeze() {
+        this.isHandlingRival.set(false);
     }
 
     public activate(zoneActions: Array<LocationAction>, destinations: Array<ZoneName>) {
