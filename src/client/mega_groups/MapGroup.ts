@@ -91,7 +91,12 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: ships
 
         if (state.rival.isIncluded) {
-            this.rivalShip = new RivalShip(state.rival, localState.playerColor);
+            this.rivalShip = new RivalShip(
+                this.stage,
+                this.seaZones,
+                state.rival,
+                localState.playerColor
+            );
             this.group.add(this.rivalShip.getElement());
         }
 
@@ -150,11 +155,12 @@ export class MapGroup implements MegaGroupInterface {
         }
 
         if(this.rivalShip && state.rival.isIncluded) {
-            const { isControllable, bearings, activePlayerColor } = state.rival;
+            const { isControllable, bearings, activePlayerColor, destinations } = state.rival;
             this.rivalShip.update({
                 isControllable,
                 bearings,
-                activePlayerColor
+                activePlayerColor,
+                destinations,
             });
         }
 
