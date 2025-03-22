@@ -264,8 +264,8 @@ socketServer.on('connection', function connection(socket) {
 
             if ('error' in response)
                 send(socket, response);
-
-            sendAll(response);
+            else
+                sendAll(response);
 
             return;
         }

@@ -271,6 +271,7 @@ class GameSetupService {
             isControllable: false,
             activePlayerColor,
             destinations: moveRules.find(r => r.from === marketZone)!.allowed,
+            moves: 2,
             bearings: {
                 seaZone: marketZone,
                 position: shipPosition,

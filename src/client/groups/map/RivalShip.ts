@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, PlayerColor, ShipBearings, ZoneName } from '../../../shared_types';
+import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from '../../../shared_types';
 import { DynamicGroupInterface } from '../../client_types';
 import clientConstants from '../../client_constants';
 import { ShipToken } from './ShipToken';
@@ -87,7 +87,45 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
         this.group.on('dragend', () => {
 
-            console.log({ x: this.group.x(), y: this.group.y() })
+            for (let i = 0; i < 7; i++) {
+                const seaZone = this.seaZones[i];
+                seaZone.setRestricted(false);
+                seaZone.setToHitValue(false);
+                seaZone.setFill(COLOR.defaultHex);
+            }
+
+            const position = stage.getPointerPosition();
+            const departureZone = this.seaZones.find(hex => hex.getId() === data.bearings.seaZone);
+            const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
+
+            if (!departureZone)
+                throw new Error('Missing data for repositioning/moving!');
+
+            switch (true) {
+                case targetZone && this.isDestinationValid:
+                    targetZone.setFill(COLOR.activeHex);
+                    this.broadcastAction({
+                        action: Action.move_rival,
+                        payload: {
+                            zoneId: targetZone.getId(),
+                            position: { x: this.group.x(), y: this.group.y() }
+                        }
+                    });
+                    break;
+                case departureZone === targetZone:
+                    this.broadcastAction({
+                        action: Action.reposition_rival,
+                        payload: {
+                            repositioning: { x: this.group.x(), y: this.group.y() }
+                        }
+                    });
+                    departureZone.setFill( COLOR.activeHex);
+                    break;
+                default:
+                    this.group.x(this.initialPosition.x);
+                    this.group.y(this.initialPosition.y);
+                    departureZone.setFill(COLOR.activeHex);
+            }
         });
 
         this.group.add(this.ship.getElement());
@@ -104,4 +142,11 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         this.group.draggable(data.isControllable && data.activePlayerColor === this.localPlayerColor);
         this.ship.update(data.isControllable ? COLOR[data.activePlayerColor] : COLOR.shipBorder);
     };
+
+    private broadcastAction(detail: ClientMessage): void {
+        window.dispatchEvent(new CustomEvent(
+            'action',
+            { detail: detail }
+        ));
+    }
 }

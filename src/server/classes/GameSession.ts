@@ -152,8 +152,6 @@ export class GameSession {
             );
         }
 
-        const rival = this.state.isRivalIncluded();
-
         const hasSailed = (() => {
             player.spendMove();
             const playersInZone = this.state.getPlayersByZone(target);
