@@ -210,6 +210,7 @@ class GameSetupService {
                 influence: 1,
                 moveActions: 0,
                 isAnchored: true,
+                isHandlingRival: false,
                 locationActions: [],
                 destinations: [],
                 hasCargo: false,

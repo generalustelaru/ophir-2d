@@ -18,8 +18,8 @@ export class PlayerShip {
     private seaZones: Array<SeaZone> = [];
     private players: Array<Player>;
 
-    public switchControl(isActivePlayer: boolean) {
-        this.group.draggable(isActivePlayer);
+    public switchControl(isDraggable: boolean) {
+        this.group.draggable(isDraggable);
     }
 
     public getElement() {

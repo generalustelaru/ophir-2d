@@ -145,7 +145,7 @@ export class GameSession {
         const target = movementPayload.zoneId;
         const locationName = this.state.getLocationName(target);
 
-        if (!player.isDestinationValid(target) || !player.getMoves()) {
+        if (!player.isDestinationValid(target) || !player.getMoves() || player.handlesRival()) {
             return this.issueErrorResponse(
                 'Movement not alowed.',
                 { target, moves: player.getMoves() },
