@@ -1,8 +1,8 @@
 import process from 'process';
 import { DataDigest, PlayerCountables, StateBundle } from "../server_types";
 import {
-    GameState, ClientRequest, TradeGood, LocationAction, MarketSlotKey, ItemName, GameStateResponse,
-    LocationName, GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal, ErrorResponse, Action,
+    GameState, ClientRequest, TradeGood, LocationAction, MarketSlotKey, ItemName, GameStateResponse, ZoneName,
+    LocationName, GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal, ErrorResponse, Action, Coordinates,
 } from "../../shared_types";
 import serverConstants from "../server_constants";
 import { ValidatorService } from "../services/validation/ValidatorService";
@@ -88,6 +88,8 @@ export class GameSession {
                 return this.processFavorSpending(digest);
             case Action.move:
                 return this.processMove(digest);
+            case Action.move_rival:
+                return this.processMove(digest, true);
             case Action.reposition:
                 return this.processRepositioning(digest);
             case Action.load_good:
@@ -135,7 +137,7 @@ export class GameSession {
     }
 
     // MARK: MOVE
-    private processMove(data: DataDigest) {
+    private processMove(data: DataDigest, isRivalShip: boolean = false) {
         const { player, payload } = data;
         const movementPayload = this.validator.validateMovementPayload(payload);
 
@@ -144,6 +146,9 @@ export class GameSession {
 
         const target = movementPayload.zoneId;
         const locationName = this.state.getLocationName(target);
+
+        if (isRivalShip)
+            return this.processRivalMovement(target, locationName, movementPayload.position, player);
 
         if (!player.isDestinationValid(target) || !player.getMoves() || player.handlesRival()) {
             return this.issueErrorResponse(
@@ -192,7 +197,7 @@ export class GameSession {
                 );
             }
 
-            if(this.state.isRivalIncluded()) {
+            if (this.state.isRivalIncluded()) {
                 if (this.state.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
                     this.state.enableRivalControl(player.getIdentity().id);
                     player.freeze();
@@ -209,6 +214,28 @@ export class GameSession {
                 `${player.getIdentity().name} also ran out of moves and cannot act further`
             );
         }
+
+        return this.issueStateResponse(player);
+    }
+
+    private processRivalMovement(target: ZoneName, locationName: LocationName, position: Coordinates, player: PlayerHandler) {
+        if (this.checkConditions([
+            player.handlesRival(),
+            this.state.rivalHasMoves(),
+            this.state.isRivalDestinationValid(target),
+        ]).err)
+            return this.issueErrorResponse('Rival ship movement is illegal!', {
+                player: player.toDto(), rival: this.state.getRivalData()
+            });
+
+        this.state.moveRivalShip(
+            {
+                seaZone: target,
+                location: locationName,
+                position
+            },
+            this.privateState.getDestinations(target),
+        );
 
         return this.issueStateResponse(player);
     }
@@ -767,6 +794,13 @@ export class GameSession {
     }
 
     // MARK: RETURN WRAPPERS
+
+    private checkConditions(arr: Array<boolean>): Probable<true> {
+        if (arr.includes(false))
+            return this.fail('');
+        return this.pass(true);
+    }
+
     private validationErrorResponse(){
         return this.issueErrorResponse('Malformed request.');
     }

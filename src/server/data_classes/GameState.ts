@@ -1,7 +1,6 @@
 import {
-    ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer,
-    MarketSlotKey, Player, PlayerColor, GameState, TempleState, Trade,
-    MetalPrices, Metal, DiceSix, TradeGood, RivalData,
+    ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
+    GameState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -113,10 +112,48 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         })
     }
 
-    public getRivalBearings() {
-        const r = this.rival.get();
-        return r.isIncluded ? r.bearings : null;
+    public isRivalDestinationValid(target: ZoneName) {
+        const rival = this.rival.get();
+        return rival.isIncluded
+            ? rival.destinations.includes(target)
+            : false;
     }
+
+    public rivalHasMoves() {
+        const rival = this.rival.get();
+        return rival.isIncluded ? rival.moves > 0 : false;
+    }
+
+    public getRivalData() {
+        return this.rival.get();
+    }
+
+    public getRivalBearings() {
+        const rival = this.rival.get();
+        return rival.isIncluded ? rival.bearings : null;
+    }
+
+    public moveRivalShip(newBearings: ShipBearings, newDestinations: Array<ZoneName>) {
+        this.rival.update(r => {
+            if (r.isIncluded) {
+                r.destinations = newDestinations.filter(d => d != r.bearings.seaZone)
+                r.bearings = newBearings;
+                r.moves -= 1;
+            }
+            return r;
+        });
+    }
+
+    // TODO: repurpose into new rival state upon player freeze
+    // public  setRivalDestinations(destinations: Array<ZoneName>) {
+    //     this.rival.update(r => {
+    //         if (r.isIncluded)
+    //             r.destinations = r.moves
+    //                 ? destinations.filter(d => d != r.bearings.seaZone)
+    //                 : destinations;
+    //         return r;
+    //     });
+    // }
 
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {

@@ -15,13 +15,14 @@ export type RivalShipUpdate = {
 }
 export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
-    private stage: Konva.Stage;
+    // private stage: Konva.Stage;
     private seaZones: Array<SeaZone>;
     private ship: ShipToken;
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
     private group: Konva.Group;
     private localPlayerColor: PlayerColor | null;
+    private destinations: Array<ZoneName>;
 
     constructor(
         stage: Konva.Stage,
@@ -29,9 +30,10 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         data: RivalShipUpdate,
         localPlayerColor: PlayerColor | null
     ) {
-        this.stage = stage;
+        // this.stage = stage;
         this.seaZones = seaZones;
         this.localPlayerColor = localPlayerColor;
+        this.destinations = data.destinations;
 
         this.group = new Konva.Group({
             x: data.bearings.position.x,
@@ -75,7 +77,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                 case targetZone.getId() === data.bearings.seaZone:
                     targetZone.setFill(COLOR.activeHex);
                     break;
-                case data.destinations.includes(targetZone.getId()):
+                case this.destinations.includes(targetZone.getId()):
                     targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
                     break;
@@ -137,6 +139,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     }
 
     public update(data: RivalShipUpdate): void {
+        this.destinations = data.destinations;
         this.group.x(data.bearings.position.x);
         this.group.y(data.bearings.position.y);
         this.group.draggable(data.isControllable && data.activePlayerColor === this.localPlayerColor);
