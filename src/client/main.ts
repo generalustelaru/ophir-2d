@@ -152,13 +152,16 @@ function signalError(message?: string) {
 }
 
 // Debugging
-function debug(state: GameState | LobbyState) {
+function debug(state: GameState|LobbyState) {
     if ('isStatusResponse' in state && state.isStatusResponse)
         return;
 
     localStorage.setItem('gameStatus', state.gameStatus);
     localStorage.setItem('received', JSON.stringify(state));
     localStorage.setItem('client', JSON.stringify(localState));
+
+    if ('rival' in state)
+        localStorage.setItem('rival', JSON.stringify(state.rival));
 
     ['Red', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
         localStorage.removeItem(playerColor);
