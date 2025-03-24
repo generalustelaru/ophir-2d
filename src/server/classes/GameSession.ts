@@ -163,7 +163,12 @@ export class GameSession {
             player.spendMove();
             const playersInZone = this.state.getPlayersByZone(target);
 
-            if (!playersInZone.length || player.isPrivileged())
+            const rival = this.state.getRivalData()
+            const rivalInfluence = rival.isIncluded && rival.bearings.seaZone === target
+                    ? rival.influence
+                    : 0;
+
+            if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged())
                 return true;
 
             player.rollInfluence();
@@ -171,10 +176,10 @@ export class GameSession {
                 p => p.influence > player.getInfluence()
             );
 
-            if (!blockingPlayers.length)
+            if (!blockingPlayers.length && player.getInfluence() >= rivalInfluence)
                 return true;
 
-            this.state.trimInfluenceByZone(target);
+            this.state.trimInfluenceByZone(target, rivalInfluence);
             this.addServerMessage(
                 `${player.getIdentity().name} was blocked from sailing. Influence at the [${locationName}] was trimmed.`
             );

@@ -278,7 +278,7 @@ class GameSetupService {
                 position: shipPosition,
                 location: 'market',
             },
-            influence: 1,
+            influence: 6,
         }
     }
 
