@@ -169,16 +169,26 @@ export class GameStateHandler implements ObjectHandler<GameState>{
             .filter(p => p.bearings.seaZone === zone)
     }
 
-    public trimInfluenceByZone(zone: ZoneName) {
+    public trimInfluenceByZone(zone: ZoneName, rivalInfluence: number) {
         const players = this.getPlayersByZone(zone).sort(
             (a, b) => b.influence - a.influence,
         );
-        const threshold = players.length ? players[0].influence : 6;
+        const playerThreshold = players.length ? players[0].influence : 0;
+        const threshold = playerThreshold || rivalInfluence
+
         const affectedPlayers = players.filter(p => p.influence == threshold);
         const trimmedInfluence = threshold - 1 as DiceSix;
 
         for (const player of affectedPlayers) {
             this.savePlayer({...player, influence: trimmedInfluence})
+        }
+
+        if (rivalInfluence === threshold) {
+            this.rival.update(r => {
+                if (r.isIncluded)
+                    r.influence -= 1;
+                return r;
+            });
         }
     }
 
