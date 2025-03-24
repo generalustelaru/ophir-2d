@@ -6,17 +6,20 @@ import { ShipToken } from './ShipToken';
 import { SeaZone } from './SeaZoneTile';
 
 const { COLOR } = clientConstants;
-
+const SEA_ZONE_COUNT = 7; // TODO: move to constants
 export type RivalShipUpdate = {
     isControllable: boolean,
     bearings: ShipBearings,
     destinations: Array<ZoneName>,
+    moves: number,
     activePlayerColor: PlayerColor,
 }
 export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
     // private stage: Konva.Stage;
     private seaZones: Array<SeaZone>;
+    private currentZone: ZoneName;
+    private movesLeft: number;
     private ship: ShipToken;
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
@@ -32,6 +35,8 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     ) {
         // this.stage = stage;
         this.seaZones = seaZones;
+        this.currentZone = data.bearings.seaZone;
+        this.movesLeft = data.moves;
         this.localPlayerColor = localPlayerColor;
         this.destinations = data.destinations;
 
@@ -63,21 +68,22 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
             if (!position || !targetZone)
                 return;
 
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
                 seaZone.setRestricted(false);
                 seaZone.setToHitValue(false);
-                seaZone.setFill(data.bearings.seaZone === seaZone.getId()
+                seaZone.setFill(this.currentZone === seaZone.getId()
                     ? COLOR.activeHex
                     : COLOR.defaultHex
                 );
             }
 
             switch (true) {
-                case targetZone.getId() === data.bearings.seaZone:
+                case targetZone.getId() === this.currentZone:
+                    console.log('im home');
                     targetZone.setFill(COLOR.activeHex);
                     break;
-                case this.destinations.includes(targetZone.getId()):
+                case this.movesLeft && this.destinations.includes(targetZone.getId()):
                     targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
                     break;
@@ -89,7 +95,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
         this.group.on('dragend', () => {
 
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
                 seaZone.setRestricted(false);
                 seaZone.setToHitValue(false);
@@ -97,7 +103,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
             }
 
             const position = stage.getPointerPosition();
-            const departureZone = this.seaZones.find(hex => hex.getId() === data.bearings.seaZone);
+            const departureZone = this.seaZones.find(hex => hex.getId() === this.currentZone);
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
             if (!departureZone)
@@ -105,6 +111,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
             switch (true) {
                 case targetZone && this.isDestinationValid:
+                    console.log('new active hex')
                     targetZone.setFill(COLOR.activeHex);
                     this.broadcastAction({
                         action: Action.move_rival,
@@ -140,6 +147,8 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
     public update(data: RivalShipUpdate): void {
         this.destinations = data.destinations;
+        this.currentZone = data.bearings.seaZone;
+        this.movesLeft = data.moves;
         this.group.x(data.bearings.position.x);
         this.group.y(data.bearings.position.y);
         this.group.draggable(data.isControllable && data.activePlayerColor === this.localPlayerColor);
