@@ -92,6 +92,8 @@ export class GameSession {
                 return this.processMove(digest, true);
             case Action.reposition:
                 return this.processRepositioning(digest);
+                case Action.reposition_rival:
+                return this.processRepositioning(digest, true);
             case Action.load_good:
                 return this.processLoadGood(digest);
             case Action.make_trade:
@@ -241,7 +243,7 @@ export class GameSession {
     }
 
     // MARK: REPOSITIONING
-    private processRepositioning(data: DataDigest) {
+    private processRepositioning(data: DataDigest, isRivalShip: boolean = false) {
         const { payload, player } = data;
         const repositioningPayload = this.validator.validateRepositioningPayload(payload);
 
@@ -249,7 +251,11 @@ export class GameSession {
             return this.validationErrorResponse();
 
         const position = repositioningPayload.repositioning;
-        player.setBearings({...player.getBearings(), position})
+
+        if (isRivalShip)
+            this.state.repositionRivalShip(position);
+        else
+            player.setBearings({...player.getBearings(), position});
 
         return this.issueStateResponse(player);
     }
