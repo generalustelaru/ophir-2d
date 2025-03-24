@@ -135,6 +135,7 @@ export class MapGroup implements MegaGroupInterface {
             localPlayer.isActive,
             this.seaZones,
             state.players,
+            state.rival
         );
         this.localShip.switchControl(localPlayer.isActive);
 
@@ -193,7 +194,7 @@ export class MapGroup implements MegaGroupInterface {
             const localShip = this.localShip as PlayerShip;
             localShip.switchControl(localPlayer.isActive && !localPlayer.isHandlingRival);
             localShip.switchHighlight(localPlayer.isActive);
-            localShip.update(localPlayer.bearings.position, state.players);
+            localShip.update(localPlayer.bearings.position, state.players, state.rival);
         }
     }
 
