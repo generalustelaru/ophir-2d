@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player } from '../../../shared_types';
+import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, RivalData } from '../../../shared_types';
 import localState from '../../state';
 import clientConstants from '../../client_constants';
 import { SeaZone } from '../GroupList';
@@ -17,6 +17,7 @@ export class PlayerShip {
     private isDestinationValid: boolean = false;
     private seaZones: Array<SeaZone> = [];
     private players: Array<Player>;
+    private rival: RivalData;
 
     public switchControl(isDraggable: boolean) {
         this.group.draggable(isDraggable);
@@ -26,8 +27,9 @@ export class PlayerShip {
         return this.group
     };
 
-    public update(coordinates: Coordinates, players: Array<Player>) {
+    public update(coordinates: Coordinates, players: Array<Player>, rival: RivalData) {
         this.players = players;
+        this.rival = rival;
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
     };
@@ -41,9 +43,11 @@ export class PlayerShip {
         isActivePlayer: boolean,
         seaZones: Array<SeaZone>,
         players: Array<Player>,
+        rival: RivalData,
     ) {
         this.seaZones = seaZones;
         this.players = players;
+        this.rival = rival;
         const playerColor = localState.playerColor;
 
         if (!playerColor) {
@@ -181,9 +185,13 @@ export class PlayerShip {
         ));
     }
     private calculateToSailValue(targetHexId: ZoneName): DiceSix | false {
+        const rival = this.rival.isIncluded ? this.rival : null;
+        const rivalInfluence = rival && rival.bearings.seaZone === targetHexId ? rival.influence : 0;
+
         const influencePool = this.players
-            .map(player => { return player.bearings.seaZone === targetHexId ? player.influence : 0 });
-        const highestInfluence = Math.max(...influencePool) as DiceSix;
+            .map(player => { return player.bearings.seaZone === targetHexId ? player.influence : 0 })
+
+        const highestInfluence = Math.max(...influencePool, rivalInfluence) as DiceSix;
 
         return highestInfluence > 0 ? highestInfluence : false;
     }
