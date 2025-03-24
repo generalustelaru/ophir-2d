@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies } from '../../../shared_types';
+import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, RivalData } from '../../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, IconLayer } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
@@ -10,6 +10,7 @@ const { COLOR, ICON_DATA } = clientConstants;
 
 type SeaZoneUpdate = {
     player: Player | null,
+    rival: RivalData,
     templeIcon: IconLayer | null,
     itemSupplies: ItemSupplies,
 }
@@ -96,9 +97,17 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
             && localPlayer.isActive
             && !!localPlayer.locationActions.length
             && localPlayer.isAnchored
+            && !localPlayer.isHandlingRival
         );
 
-        this.setFill(canAct ? COLOR.activeHex : COLOR.defaultHex);
+        const rival = update.rival;
+        const canRivalAct = (
+            rival.isIncluded
+            && rival.isControllable
+            && rival.bearings.seaZone === this.getId()
+        );
+
+        this.setFill(canAct || canRivalAct ? COLOR.activeHex : COLOR.defaultHex);
 
         this.location.update({
             tradeGoodSupplies: update.itemSupplies.goods,

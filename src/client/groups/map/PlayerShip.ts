@@ -7,7 +7,7 @@ import { ShipToken } from './ShipToken';
 import { Color } from '../../client_types';
 
 const { COLOR } = clientConstants;
-const HEX_COUNT = 7;
+const SEA_ZONE_COUNT = 7; // TODO: move to constants
 
 export class PlayerShip {
 
@@ -86,7 +86,7 @@ export class PlayerShip {
                 return;
             }
 
-            for (let i = 0; i < HEX_COUNT; i++) {
+            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
                 seaZone.setRestricted(false);
                 seaZone.setToHitValue(false);
@@ -117,7 +117,7 @@ export class PlayerShip {
         // MARK: - Dragging (end)
         this.group.on('dragend', () => {
 
-            for (let i = 0; i < HEX_COUNT; i++) {
+            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
                 seaZone.setRestricted(false);
                 seaZone.setToHitValue(false);
