@@ -1,6 +1,6 @@
 import {
     ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
-    GameState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings,
+    GameState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings, Coordinates,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -140,6 +140,14 @@ export class GameStateHandler implements ObjectHandler<GameState>{
                 r.bearings = newBearings;
                 r.moves -= 1;
             }
+            return r;
+        });
+    }
+
+    public repositionRivalShip(position: Coordinates) {
+        this.rival.update(r => {
+            if (r.isIncluded)
+                r.bearings.position = position;
             return r;
         });
     }

@@ -80,7 +80,6 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
             switch (true) {
                 case targetZone.getId() === this.currentZone:
-                    console.log('im home');
                     targetZone.setFill(COLOR.activeHex);
                     break;
                 case this.movesLeft && this.destinations.includes(targetZone.getId()):
@@ -111,7 +110,6 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
             switch (true) {
                 case targetZone && this.isDestinationValid:
-                    console.log('new active hex')
                     targetZone.setFill(COLOR.activeHex);
                     this.broadcastAction({
                         action: Action.move_rival,
