@@ -255,10 +255,16 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public freeze() {
         this.isHandlingRival.set(true);
+        this.locationActions.clear();
     }
 
-    public unfreeze() {
+    public unfreeze(actions: Array<LocationAction>) {
         this.isHandlingRival.set(false);
+        this.locationActions.overwrite(actions);
+    }
+
+    public isFrozen() {
+        return this.isHandlingRival.get();
     }
 
     public activate(zoneActions: Array<LocationAction>, destinations: Array<ZoneName>) {

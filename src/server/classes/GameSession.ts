@@ -83,6 +83,16 @@ export class GameSession {
         if (!player.isActivePlayer())
             return this.issueErrorResponse(`It is not [${player.getIdentity().name}]'s turn!`);
 
+        const actionsWhileFrozen: Array<Action> = [
+            Action.move_rival,
+            Action.drop_item,
+            Action.reposition,
+            Action.reposition_rival
+        ];
+
+        if (player.isFrozen() && !actionsWhileFrozen.includes(action))
+            return this.issueErrorResponse(`[${player.getIdentity().name}] is handling rival and cannot act.`)
+
         switch (action) {
             case Action.spend_favor:
                 return this.processFavorSpending(digest);
@@ -209,10 +219,10 @@ export class GameSession {
                     this.state.enableRivalControl(player.getIdentity().id);
                     player.freeze();
                 }
-                else {
-                    this.state.disableRivalControl();
-                    player.unfreeze();
-                }
+                // else { // TODO: to be used when rival control is released
+                //     this.state.disableRivalControl();
+                //     player.unfreeze(this.state.getLocationActions(target));
+                // }
             }
 
         } else if(player.getMoves() === 0)  {
