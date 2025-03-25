@@ -295,5 +295,4 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
         return (emptySlots >= req);
     }
-
 }

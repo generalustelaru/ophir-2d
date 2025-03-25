@@ -375,11 +375,11 @@ export class GameSession {
         const { slot, location } = tradePayload;
         const {id, name} = player.getIdentity();
 
-        if (Boolean(
-            player.canAct(Action.make_trade)
-            && player.getBearings().location == location
-            && player.getTrades().includes(slot)
-        ) == false) {
+        if (this.checkConditions([
+            player.canAct(Action.make_trade),
+            player.getBearings().location == location,
+            player.getTrades().includes(slot),
+        ]).err) {
             return this.issueErrorResponse(`${name} cannnot trade`);
         }
 
