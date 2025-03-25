@@ -16,24 +16,16 @@ type RivalPlacardUpdate = {
     influence: DiceSix,
 }
 export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
-
-    private stage: Konva.Stage;
     private group: Konva.Group;
     private background: Konva.Rect;
     private influenceDial: InfluenceDial;
-    private localPlayerColor: PlayerColor | null;
     // TODO: private endTurnButton: ShiftMarketButton;
     // TODO: private endTurnButton: EndTurnButton;
 
     constructor(
-        stage: Konva.Stage,
         data: RivalPlacardUpdate,
-        localPlayerColor: PlayerColor | null,
         yOffset: number,
     ){
-        this.localPlayerColor = localPlayerColor;
-        this.stage = stage;
-
         this.group = new Konva.Group({
             width: 100,
             height: 100,

@@ -23,7 +23,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private isHandlingRival: Writable<boolean>;
     private locationActions: ArrayWritable<LocationAction>;
     private destinations: ArrayWritable<ZoneName>;
-    private hasCargo: Writable<boolean>;
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
     private coins: Writable<number>;
@@ -45,7 +44,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.isHandlingRival = writable(player.isHandlingRival);
         this.locationActions = arrayWritable(player.locationActions);
         this.destinations = arrayWritable(player.destinations);
-        this.hasCargo = writable(player.hasCargo);
         this.cargo = arrayWritable(player.cargo);
         this.feasibleTrades = arrayWritable(player.feasibleTrades);
         this.coins = writable(player.coins);
@@ -69,7 +67,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
             isHandlingRival: this.isHandlingRival.get(),
             locationActions: this.locationActions.getAll(),
             destinations: this.destinations.getAll(),
-            hasCargo: this.hasCargo.get(),
             cargo: this.cargo.getAll(),
             feasibleTrades: this.feasibleTrades.getAll(),
             coins: this.coins.get(),
@@ -205,8 +202,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public setCargo(cargo: Array<ItemName>) {
-        const hasItems = !!cargo.find(item => item !== 'empty');
-        this.hasCargo.set(hasItems);
         this.cargo.overwrite(cargo);
     }
 
