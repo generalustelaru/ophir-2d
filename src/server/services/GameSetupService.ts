@@ -9,12 +9,12 @@ import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import { ToolService } from '../services/ToolService';
 import { GameStateHandler } from '../data_classes/GameState';
-import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
+import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS} from '../configuration';
 import { PlayerHandler } from '../data_classes/Player';
 import { PrivateStateHandler } from '../data_classes/PrivateState';
 import { HexCoordinates } from '../../client/client_types';
 
-console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS });
+console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS });
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
 
 class GameSetupService {
@@ -237,6 +237,8 @@ class GameSetupService {
                     player.coins = 99;
                 if (LOADED_PLAYERS)
                     player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
+                if (PEDDLING_PLAYERS)
+                    player.cargo = ['stone', 'gems', 'wood', 'cloth'];
 
                 return player;
             }),
