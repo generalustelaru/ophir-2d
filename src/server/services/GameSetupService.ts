@@ -213,7 +213,6 @@ class GameSetupService {
                 isHandlingRival: false,
                 locationActions: [],
                 destinations: [],
-                hasCargo: false,
                 cargo: ['empty', 'empty'],
                 feasibleTrades: [],
                 coins: 0,

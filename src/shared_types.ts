@@ -98,7 +98,6 @@ export type Player = {
     isAnchored: boolean,
     locationActions: Array<LocationAction>,
     destinations: Array<ZoneName>,
-    hasCargo: boolean,
     cargo: Array<ItemName>,
     feasibleTrades: Array<MarketSlotKey>
     coins: number,
