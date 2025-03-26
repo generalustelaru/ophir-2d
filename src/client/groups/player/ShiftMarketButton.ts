@@ -2,7 +2,7 @@ import { DynamicGroupInterface } from "../../client_types";
 import { ActionButton } from "../ActionButton";
 import clientConstants from "../../client_constants";
 import Konva from "konva";
-import { Coordinates } from "../../../shared_types";
+import { Action, Coordinates } from "../../../shared_types";
 
 const { COLOR } = clientConstants;
 
@@ -17,7 +17,7 @@ export class ShiftMarketButton extends ActionButton implements DynamicGroupInter
         super(
             stage,
             { x: position.x, y: position.y, width: 50, height: 81 },
-            null, // TODO: add action
+            { action: Action.shift_market, payload: null },
         );
 
         this.card = new Konva.Rect({
@@ -48,7 +48,7 @@ export class ShiftMarketButton extends ActionButton implements DynamicGroupInter
         return this.group;
     }
 
-    update(isVisible: boolean) {
-        this.group.visible(isVisible);
+    update(mayShift: boolean) {
+        this.setEnabled(mayShift);
     }
 }

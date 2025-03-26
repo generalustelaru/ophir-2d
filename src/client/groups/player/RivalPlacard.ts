@@ -8,6 +8,7 @@ import { DiceSix, PlayerColor } from "../../../shared_types";
 import { InfluenceDial } from "../GroupList";
 import { ShiftMarketButton } from "./ShiftMarketButton";
 import clientConstants from '../../client_constants';
+import { ConcludeButton } from "./ConcludeButton";
 
 const { COLOR } = clientConstants;
 
@@ -17,17 +18,21 @@ type RivalPlacardUpdate = {
     influence: DiceSix,
 }
 export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
+
+    private localPlayerColor: PlayerColor | null;
     private group: Konva.Group;
     private background: Konva.Rect;
     private influenceDial: InfluenceDial;
     private shiftMarketButton: ShiftMarketButton;
-    // TODO: private endTurnButton: EndTurnButton;
+    private concludeButton: ConcludeButton;
 
     constructor(
         stage: Konva.Stage,
+        localPlayerColor: PlayerColor | null,
         data: RivalPlacardUpdate,
         yOffset: number,
     ){
+        this.localPlayerColor = localPlayerColor,
         this.group = new Konva.Group({
             width: 100,
             height: 100,
@@ -48,14 +53,15 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
             { width: 50, height: 50, x: 60, y: -25 },
             COLOR.boneWhite,
         );
-        this.influenceDial.update(1);
 
-        this.shiftMarketButton = new ShiftMarketButton(stage, {x: 25, y: 10})
+        this.shiftMarketButton = new ShiftMarketButton(stage, {x: 25, y: 10});
+        this.concludeButton = new ConcludeButton({x: this.group.width() + 25, y: 25});
 
         this.group.add(...[
             this.background,
             this.influenceDial.getElement(),
             this.shiftMarketButton.getElement(),
+            this.concludeButton.getElement(),
         ]);
 
         this.update(data);
@@ -71,5 +77,6 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
         activePlayerColor && this.background.fill(isControllable ? COLOR[activePlayerColor] : COLOR.boneWhite);
         this.background.strokeWidth(isControllable ? 3 : 0);
         this.influenceDial.update(influence);
+        this.shiftMarketButton.update(isControllable)
     }
 }
