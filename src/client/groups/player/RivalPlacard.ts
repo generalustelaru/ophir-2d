@@ -55,7 +55,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
         );
 
         this.shiftMarketButton = new ShiftMarketButton(stage, {x: 25, y: 10});
-        this.concludeButton = new ConcludeButton({x: this.group.width() + 25, y: 25});
+        this.concludeButton = new ConcludeButton(stage, {x: this.group.width() + 25, y: 25});
 
         this.group.add(...[
             this.background,

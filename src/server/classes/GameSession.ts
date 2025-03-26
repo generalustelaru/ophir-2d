@@ -84,10 +84,12 @@ export class GameSession {
             return this.issueErrorResponse(`It is not [${player.getIdentity().name}]'s turn!`);
 
         const actionsWhileFrozen: Array<Action> = [
-            Action.move_rival,
             Action.drop_item,
             Action.reposition,
-            Action.reposition_rival
+            Action.reposition_rival,
+            Action.move_rival,
+            Action.end_rival_turn,
+            Action.shift_market,
         ];
 
         if (player.isFrozen() && !actionsWhileFrozen.includes(action))
@@ -114,6 +116,10 @@ export class GameSession {
                 return this.processMetalDonation(digest);
             case Action.end_turn:
                 return this.processEndTurn(digest);
+            case Action.end_rival_turn:
+                return this.processRivalTurn(digest);
+                case Action.shift_market:
+                return this.processRivalTurn(digest, true);
             case Action.upgrade_cargo:
                 return this.processUpgrade(digest);
             case Action.drop_item:
@@ -219,10 +225,6 @@ export class GameSession {
                     this.state.enableRivalControl(player.getIdentity().id);
                     player.freeze();
                 }
-                // else { // TODO: to be used when rival control is released
-                //     this.state.disableRivalControl();
-                //     player.unfreeze(this.state.getLocationActions(target));
-                // }
             }
 
         } else if(player.getMoves() === 0)  {
@@ -432,40 +434,7 @@ export class GameSession {
         player.setActions(removeAction.data);
         player.clearMoves();
 
-        const newTrade = this.privateState.drawTrade();
-
-        if (newTrade === null) {
-
-            if (this.state.isDeckA()) {
-                this.state.setLabelB();
-                this.privateState.loadTradeDeck(TRADE_DECK_B);
-                this.state.shiftMarketCards(this.privateState.drawTrade()!);
-                this.addServerMessage('Market deck B is now in play');
-            } else {
-                const compilation = this.compileGameResults();
-
-                if (compilation.err)
-                    return this.issueErrorResponse(compilation.message);
-
-                this.state.setGameResults(compilation.data);
-                this.state.setGameStatus('ended');
-                this.addServerMessage('Market deck is empty! Game has ended.');
-            }
-
-            return this.issueStateResponse(player);
-        }
-
-        this.state.shiftMarketCards(newTrade);
-        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
-
-        for (const player of this.state.getAllPlayers()) {
-            if (player.id !== id) {
-                player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-                this.state.savePlayer(player);
-            }
-        }
-
-        return this.issueStateResponse(player);
+        return this.issueMarketShiftResponse(player);
     }
 
     // MARK: METAL PURCHASE
@@ -630,6 +599,29 @@ export class GameSession {
         return this.issueStateResponse(newPlayer);
     }
 
+    private processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false) {
+        const rival = this.state.getRivalData();
+
+        if (!rival.isIncluded)
+            return this.issueErrorResponse('Rival is not active!', rival);
+
+        this.state.concludeRivalTurn();
+
+        const { player } = digest;
+        player.unfreeze(
+            this.state.getLocationActions(
+                player.getBearings().seaZone,
+            ),
+            // TODO: add logic to prevent the player from entering rivalShip zone a second time.
+        );
+
+        if (isShiftingMarket)
+            // TODO: add conditions to make sure the action was legal
+            return this.issueMarketShiftResponse(player);
+
+        return this.issueStateResponse(player);
+    }
+
     // MARK: UPGRADE HOLD
     private processUpgrade(data: DataDigest) {
         const player = data.player;
@@ -699,6 +691,44 @@ export class GameSession {
         });
 
         return feasible;
+    }
+
+    private issueMarketShiftResponse(player: PlayerHandler) {
+        const newTrade = this.privateState.drawTrade();
+
+        if (newTrade === null) {
+
+            if (this.state.isDeckA()) {
+                this.state.setLabelB();
+                this.privateState.loadTradeDeck(TRADE_DECK_B);
+                this.state.shiftMarketCards(this.privateState.drawTrade()!);
+                this.addServerMessage('Market deck B is now in play');
+            } else {
+                const compilation = this.compileGameResults();
+
+                if (compilation.err)
+                    return this.issueErrorResponse(compilation.message);
+
+                this.state.setGameResults(compilation.data);
+                this.state.setGameStatus('ended');
+                this.addServerMessage('Market deck is empty! Game has ended.');
+            }
+
+            return this.issueStateResponse(player);
+        }
+
+        this.state.shiftMarketCards(newTrade);
+        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+        const activePlayerId = player.getIdentity().id;
+
+        for (const player of this.state.getAllPlayers()) {
+            if (player.id !== activePlayerId) {
+                player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
+                this.state.savePlayer(player);
+            }
+        }
+
+        return this.issueStateResponse(player);
     }
 
     //  MARK: loadItem
