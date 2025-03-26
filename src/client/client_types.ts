@@ -9,7 +9,7 @@ export type Color = `#${string}`;
 export type DynamicColor = {active: Color, inactive: Color}
 export type HexCoordinates = { id: ZoneName, x: number, y: number };
 export type IconLayer = { shape: string, fill: Color }
-export type IconName = 'empty_location'
+export type IconName = 'empty_location' | 'shift_market_button'
 export type LayeredIconData = {
     layer_1: IconLayer,
     layer_2: IconLayer,
