@@ -6,6 +6,7 @@ import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
 import { DiceSix, PlayerColor } from "../../../shared_types";
 import { InfluenceDial } from "../GroupList";
+import { ShiftMarketButton } from "./ShiftMarketButton";
 import clientConstants from '../../client_constants';
 
 const { COLOR } = clientConstants;
@@ -19,10 +20,11 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private influenceDial: InfluenceDial;
-    // TODO: private endTurnButton: ShiftMarketButton;
+    private shiftMarketButton: ShiftMarketButton;
     // TODO: private endTurnButton: EndTurnButton;
 
     constructor(
+        stage: Konva.Stage,
         data: RivalPlacardUpdate,
         yOffset: number,
     ){
@@ -44,11 +46,16 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
 
         this.influenceDial = new InfluenceDial(
             { width: 50, height: 50, x: 60, y: -25 },
-            COLOR.boneWhite);
+            COLOR.boneWhite,
+        );
         this.influenceDial.update(1);
 
+        this.shiftMarketButton = new ShiftMarketButton(stage)
+
         this.group.add(...[
-            this.background, this.influenceDial.getElement(),
+            this.background,
+            this.influenceDial.getElement(),
+            this.shiftMarketButton.getElement(),
         ]);
 
         this.update(data);
