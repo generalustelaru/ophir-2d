@@ -50,7 +50,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
         );
         this.influenceDial.update(1);
 
-        this.shiftMarketButton = new ShiftMarketButton(stage)
+        this.shiftMarketButton = new ShiftMarketButton(stage, {x: 25, y: 10})
 
         this.group.add(...[
             this.background,

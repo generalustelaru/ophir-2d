@@ -2,46 +2,46 @@ import { DynamicGroupInterface } from "../../client_types";
 import { ActionButton } from "../ActionButton";
 import clientConstants from "../../client_constants";
 import Konva from "konva";
+import { Coordinates } from "../../../shared_types";
 
-const { LAYERED_ICONS, COLOR } = clientConstants;
-const SCALE = 5;
+const { COLOR } = clientConstants;
+
 export class ShiftMarketButton extends ActionButton implements DynamicGroupInterface<boolean> {
 
+    private card: Konva.Rect;
+    private coin: Konva.Circle;
     constructor(
-        stage: Konva.Stage
+        stage: Konva.Stage,
+        position: Coordinates,
     ) {
         super(
             stage,
-            { x: 0, y: 0, width: 100, height: 100 },
-            null,
+            { x: position.x, y: position.y, width: 50, height: 81 },
+            null, // TODO: add action
         );
 
-        this.group = new Konva.Group;
-        this.group.offsetX(75);
-        this.group.offsetY(125);
-
-        const pathData = LAYERED_ICONS.shift_market_button;
-
-        const card = new Konva.Path({
-            data: pathData.layer_1.shape,
-            fill: pathData.layer_1.fill,
-            scale: { x: SCALE, y: SCALE },
-            // stroke: COLOR.marketOrange,
-            // strokeWidth: 0.2,
+        this.card = new Konva.Rect({
+            width: this.group.width(),
+            height: this.group.height(),
+            fill: COLOR.marketDarkOrange,
+            cornerRadius: 11,
+            stroke: COLOR.boneWhite,
+            strokeWidth: 2,
         });
-        const coin = new Konva.Path({
-            data: pathData.layer_2.shape,
-            fill: pathData.layer_2.fill,
-            scale: { x: SCALE, y: SCALE },
+
+        this.coin = new Konva.Circle({
+            x: this.group.width() / 2,
+            y: this.group.height() / 3 * 2,
+            radius: 15,
+            border: 1,
+            borderFill: 'black',
+            fill: COLOR.coinSilver,
         });
-        // const arrow = new Konva.Path({
-        //     data: pathData.layer_3?.shape,
-        //     fill: pathData.layer_3?.fill,
-        //     scale: { x: SCALE, y: SCALE },
-        //     stroke: COLOR.marketOrange,
-        //     strokeWidth: 0.2,
-        // });
-        this.group.add(card, coin);
+
+        this.group.add(...[
+            this.card,
+            this.coin,
+        ]);
     }
 
     public getElement(): Konva.Group {
