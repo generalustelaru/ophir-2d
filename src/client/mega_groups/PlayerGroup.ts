@@ -51,6 +51,7 @@ export class PlayerGroup implements MegaGroupInterface {
             const { isControllable, activePlayerColor, influence } = rival;
             this.rivalPlacard = new RivalPlacard(
                 this.stage,
+                localState.playerColor,
                 { isControllable, activePlayerColor, influence },
                 verticalOffsets.shift() as number,
             );
