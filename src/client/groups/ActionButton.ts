@@ -10,15 +10,8 @@ export class ActionButton {
     constructor(stage: Konva.Stage, layout: GroupLayoutData, actionMessage: ClientMessage | null) {
         this.stage = stage;
         this.message = actionMessage;
-        const layer = stage.getLayers()[0];
 
-        this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            x: layout.x,
-            y: layout.y,
-        });
-        layer.add(this.group);
+        this.group = new Konva.Group(layout);
 
         if (!actionMessage) {
             return;
