@@ -62,3 +62,13 @@ The Temple (blue construction icon) a source of VP and Favor. On the Temple Plac
    - Upgrade Cargo: Once per turn, you may click on the Upgrade Button (bottom right on the Temple Placard) to increase your Cargo capacity by 1 space.
    - Donate Trade Goods: Once per turn you may donate Trade Goods to the temple to get Favor and VP in equal amounts. This donation does not contribute to the construction. The blue Market Card is mirroring a regular Market Card on the Market Placard. The small blue Temple Icon on the upper edge of the Market Placard indicates the slot that's always mirrored on the Temple Placard. Donating Trade Goods will also shift the Market Cards,
    - Donate Metal: Donation Cards are fixed and award 10 VP for Gold and 5 VP for Silver. If you're carrying 2 Metal, you may donate both. The Temple Donations Swatch keeps track of every delivered Metal. The metals stack upwards to 3. When a third Metal is donated, the Coin prices of metals at the exchange increase. Gold price increases roughly by 1 Coin for every completed stack. Silver price increases only half as often. When the swatch fills, the game ends.
+
+### Two player games
+
+When starting a game with two players, a third ship (white) will spawn in the market's sea zone. This ship also has an influence die, and may block your movement like any other player ship (trimming its value on failed attempts).
+
+When a player manages to enter the neutral ship's zone, his turn is paused while he gets in control of the neutral ship.
+
+While controlling the neutral ship the player must move it once or twice according to the regular movement rules, as if it's using favor. After movement, the player must conclude its turn by either: clicking the anchor icon next to its card or -- if the ship ended its movement at the market zone -- clicking the market card icon found on its card to shift the market as if a trade was performed. In either case, the neutral ship will conclude its turn by rolling its influence die.
+
+After concluding the neutral ship's turn, the player resumes his turn. Note that a player cannot enter the zone containing the nutral ship a second time.

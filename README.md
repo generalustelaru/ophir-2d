@@ -11,7 +11,6 @@ Work in progress.
 - The game is playable but has no lobby (a server supports only one session at a time).
 - No db. Nothing is saved, nothing is safe.
 - The game is missing "Specialists" (variable players powers).
-- The 2 Player game ncludes a controllable neutral ship -- currently under development.
 - The interface language not yet standardized and missing quality of life features (incl. animations, transitions, tooltips, FTUE screens).
 
 Try it out
@@ -58,5 +57,7 @@ If the server session gets stuck, input `reset` in the running server's CLI.
  On the board, players are identified by their Ship Figure (on the map center zone) and the Player Card (on the right side of the screen), both displayed in their chosen color. Player Cards are arranged from top to bottom, signifying the turn order. Your Player Card appears first and is wider than the rest. The three placards on the left display information and actions available at the Market, Exchange, and Temple locations on the map.
 
  On your turn you will move and get to perform available Actions at your destination by clicking on elements. Interactive elements are generally depicted as cards or icons. Your cursor will turn into a pointer when hovering over them if they're available or into a restricted icon if they're not available. When done you will have to end your turn by clicking on the green anchor icon (lower right of the map). The next player will be able to take his or her turn immediately after.
+
+ With two players, a third ship is added. Players can move it during their turn when they enter its zone.   
 
  There's decent amount of rules to Ophir. Refer to the included RULES.md document for details. You can also play by following your intuition (the rules are enforced, you can't cheat).
