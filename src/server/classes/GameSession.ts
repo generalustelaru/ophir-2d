@@ -387,23 +387,6 @@ export class GameSession {
 
         const trade = this.state.getMarketTrade(slot);
 
-        switch (location) {
-            case 'market':
-                const amount = trade.reward.coins + this.state.getFluctuation(slot);
-                player.gainCoins(amount);
-                this.addServerMessage(`${name} sold goods for ${amount} coins`);
-                break;
-            case 'temple':
-                const reward = trade.reward.favorAndVp;
-                player.gainFavor(reward);
-                this.privateState.updateVictoryPoints(id, reward);
-                this.addServerMessage(`${name} donated for ${reward} favor and VP`);
-                console.info(this.privateState.getGameStats());
-                break;
-            default:
-                return this.issueErrorResponse(`Unknown trade location: ${location}`);
-        }
-
         const cargoTransfer = ((): Probable<Array<ItemName>> => {
             let cargo = player.getCargo()
 
@@ -429,6 +412,23 @@ export class GameSession {
 
         if (removeAction.err)
             return this.issueErrorResponse(removeAction.message, player.getActions());
+
+        switch (location) {
+            case 'market':
+                const amount = trade.reward.coins + this.state.getFluctuation(slot);
+                player.gainCoins(amount);
+                this.addServerMessage(`${name} sold goods for ${amount} coins`);
+                break;
+            case 'temple':
+                const reward = trade.reward.favorAndVp;
+                player.gainFavor(reward);
+                this.privateState.updateVictoryPoints(id, reward);
+                this.addServerMessage(`${name} donated for ${reward} favor and VP`);
+                console.info(this.privateState.getGameStats());
+                break;
+            default:
+                return this.issueErrorResponse(`Unknown trade location: ${location}`);
+        }
 
         player.setCargo(cargoTransfer.data);
         player.setActions(removeAction.data);
