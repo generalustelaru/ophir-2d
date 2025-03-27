@@ -70,7 +70,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalData> {
         if (!rival.isIncluded)
             return;
 
-        const { isControllable, activePlayerColor, bearings, influence, moves} = rival;
+        const { isControllable, activePlayerColor, bearings, influence, moves } = rival;
 
         const mayConclude = this.localPlayerColor === activePlayerColor && isControllable && moves < 2;
         const mayShift = bearings.location === 'market' && mayConclude;
