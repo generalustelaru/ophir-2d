@@ -2,8 +2,7 @@
 import {
     BarrierId, ZoneName, Coordinates, Player, PlayerColor, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
-    ExchangeTier, PlayerScaffold, RivalData,
-    GameSetupPayload,
+    ExchangeTier, PlayerScaffold, RivalData, GameSetupPayload,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';

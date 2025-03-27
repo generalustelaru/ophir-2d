@@ -48,11 +48,10 @@ export class PlayerGroup implements MegaGroupInterface {
         });
 
         if (rival.isIncluded) {
-            const { isControllable, activePlayerColor, influence } = rival;
             this.rivalPlacard = new RivalPlacard(
                 this.stage,
                 localState.playerColor,
-                { isControllable, activePlayerColor, influence },
+                rival,
                 verticalOffsets.shift() as number,
             );
 
@@ -73,9 +72,7 @@ export class PlayerGroup implements MegaGroupInterface {
         });
 
         if (state.rival.isIncluded && this.rivalPlacard) {
-            const { isControllable, activePlayerColor, influence } = state.rival;
-
-            this.rivalPlacard.update({ isControllable, activePlayerColor, influence });
+            this.rivalPlacard.update(state.rival);
         }
     }
 
