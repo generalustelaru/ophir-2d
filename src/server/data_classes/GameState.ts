@@ -164,17 +164,6 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         });
     }
 
-    // TODO: repurpose into new rival state upon player freeze
-    // public  setRivalDestinations(destinations: Array<ZoneName>) {
-    //     this.rival.update(r => {
-    //         if (r.isIncluded)
-    //             r.destinations = r.moves
-    //                 ? destinations.filter(d => d != r.bearings.seaZone)
-    //                 : destinations;
-    //         return r;
-    //     });
-    // }
-
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {
         return this.players.getAll()

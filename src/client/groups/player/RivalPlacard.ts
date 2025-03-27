@@ -4,7 +4,7 @@
 
 import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
-import { DiceSix, PlayerColor } from "../../../shared_types";
+import { PlayerColor, RivalData } from "../../../shared_types";
 import { InfluenceDial } from "../GroupList";
 import { ShiftMarketButton } from "./ShiftMarketButton";
 import clientConstants from '../../client_constants';
@@ -12,12 +12,7 @@ import { ConcludeButton } from "./ConcludeButton";
 
 const { COLOR } = clientConstants;
 
-type RivalPlacardUpdate = {
-    isControllable: boolean,
-    activePlayerColor: PlayerColor | null,
-    influence: DiceSix,
-}
-export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
+export class RivalPlacard implements DynamicGroupInterface<RivalData> {
 
     private localPlayerColor: PlayerColor | null;
     private group: Konva.Group;
@@ -29,9 +24,9 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
     constructor(
         stage: Konva.Stage,
         localPlayerColor: PlayerColor | null,
-        data: RivalPlacardUpdate,
+        rival: RivalData,
         yOffset: number,
-    ){
+    ) {
         this.localPlayerColor = localPlayerColor,
         this.group = new Konva.Group({
             width: 100,
@@ -64,20 +59,26 @@ export class RivalPlacard implements DynamicGroupInterface<RivalPlacardUpdate> {
             this.concludeButton.getElement(),
         ]);
 
-        this.update(data);
+        this.update(rival);
     }
 
     public getElement() {
         return this.group;
     }
 
-    public update(data: RivalPlacardUpdate) {
-        const { isControllable, activePlayerColor, influence } = data;
+    public update(rival: RivalData) {
+        if (!rival.isIncluded)
+            return;
+
+        const { isControllable, activePlayerColor, bearings, influence, moves} = rival;
+
+        const mayConclude = this.localPlayerColor === activePlayerColor && isControllable && moves < 2;
+        const mayShift = bearings.location === 'market' && mayConclude;
 
         activePlayerColor && this.background.fill(isControllable ? COLOR[activePlayerColor] : COLOR.boneWhite);
         this.background.strokeWidth(isControllable ? 3 : 0);
         this.influenceDial.update(influence);
-        this.shiftMarketButton.update(isControllable);
-        this.concludeButton.update(isControllable);
+        this.concludeButton.update(mayConclude);
+        this.shiftMarketButton.update(mayShift);
     }
 }

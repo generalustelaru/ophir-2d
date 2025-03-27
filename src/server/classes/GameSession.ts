@@ -603,8 +603,11 @@ export class GameSession {
     private processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false) {
         const rival = this.state.getRivalData();
 
-        if (!rival.isIncluded)
+        if (!rival.isIncluded || !rival.isControllable)
             return this.issueErrorResponse('Rival is not active!', rival);
+
+        if (rival.moves === 2)
+            return this.issueErrorResponse('Rival cannot act before moving', rival);
 
         this.state.concludeRivalTurn();
 
@@ -616,9 +619,13 @@ export class GameSession {
             rival.bearings.seaZone,
         );
 
-        if (isShiftingMarket)
-            // TODO: add conditions to make sure the action was legal
+        if (isShiftingMarket) {
+
+            if (this.state.getLocationName(rival.bearings.seaZone) !== 'market')
+                return this.issueErrorResponse('Cannot shift market from here!', rival);
+
             return this.issueMarketShiftResponse(player);
+        }
 
         return this.issueStateResponse(player);
     }
