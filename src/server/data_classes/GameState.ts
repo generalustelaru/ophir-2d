@@ -90,15 +90,24 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     }
 
     // MARK: Rival
+
+    public updateRival(playerColor: PlayerColor) {
+        this.rival.update(r => {
+            if (r.isIncluded)
+                r.activePlayerColor = playerColor;
+            return r;
+        });
+    }
+
     public isRivalIncluded() {
         return this.rival.get().isIncluded;
     }
 
-    public enableRivalControl(color: PlayerColor) {
+    public enableRivalControl(destinations: Array<ZoneName>) {
         this.rival.update(r => {
             if (r.isIncluded) {
-                r.activePlayerColor = color;
                 r.isControllable = true;
+                r.destinations = destinations;
             }
             return r;
         });
