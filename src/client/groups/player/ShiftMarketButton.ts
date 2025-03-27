@@ -49,6 +49,7 @@ export class ShiftMarketButton extends ActionButton implements DynamicGroupInter
     }
 
     update(mayShift: boolean) {
+        this.card.fill(mayShift ? COLOR.marketOrange : COLOR.marketDarkOrange)
         this.setEnabled(mayShift);
     }
 }
