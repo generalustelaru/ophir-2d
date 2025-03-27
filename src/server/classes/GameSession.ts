@@ -613,7 +613,7 @@ export class GameSession {
             this.state.getLocationActions(
                 player.getBearings().seaZone,
             ),
-            // TODO: add logic to prevent the player from entering rivalShip zone a second time.
+            rival.bearings.seaZone,
         );
 
         if (isShiftingMarket)
