@@ -6,7 +6,7 @@ import { ActionButton } from "../ActionButton";
 
 const { ICON_DATA, COLOR } = constants;
 
-export class ConcludeButton extends ActionButton implements DynamicGroupInterface<void>{
+export class ConcludeButton extends ActionButton implements DynamicGroupInterface<boolean>{
     private anchor: Konva.Path;
 
     constructor(
@@ -36,8 +36,8 @@ export class ConcludeButton extends ActionButton implements DynamicGroupInterfac
         this.group.add(hoverZone, this.anchor);
     }
 
-    public update() {
-        return;
+    public update(mayConclude: boolean) {
+        this.setEnabled(mayConclude);
     }
 
     public getElement() {

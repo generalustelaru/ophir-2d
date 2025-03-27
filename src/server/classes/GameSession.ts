@@ -222,7 +222,7 @@ export class GameSession {
 
             if (this.state.isRivalIncluded()) {
                 if (this.state.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
-                    this.state.enableRivalControl(player.getIdentity().id);
+                    this.state.enableRivalControl(this.privateState.getDestinations(target));
                     player.freeze();
                 }
             }
@@ -586,6 +586,7 @@ export class GameSession {
                 this.state.getLocationActions(seaZone),
                 this.privateState.getDestinations(seaZone),
             );
+            this.state.updateRival(nextPlayer.getIdentity().id);
 
             return this.pass(nextPlayer);
         })();

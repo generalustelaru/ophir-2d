@@ -87,7 +87,7 @@ class GameSetupService {
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
             rival: this.getRivalShipData(
-                Boolean(playerScaffolds.length < 3),
+                Boolean(playerScaffolds.length == 2),
                 clientSetupPayload.hexPositions,
                 mapPairings,
                 startingPlayerColor,
