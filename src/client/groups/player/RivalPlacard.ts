@@ -78,7 +78,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalData> {
         activePlayerColor && this.background.fill(isControllable ? COLOR[activePlayerColor] : COLOR.boneWhite);
         this.background.strokeWidth(isControllable ? 3 : 0);
         this.influenceDial.update(influence);
-        this.concludeButton.update(mayConclude);
+        this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
     }
 }
