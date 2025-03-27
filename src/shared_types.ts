@@ -71,6 +71,26 @@ export type ShipBearings = {
     position: Coordinates,
 }
 
+// type SetupPower = 'large_cargo'
+// type InGamePower = ''
+// type SpecialistName = ''
+
+// type SpecialistData = {
+//     name: SpecialistName,
+//     stats: {
+//         favor: number,
+//         specialty: TradeGood | null
+//     }
+//     setup: Record<SetupPower, boolean>
+//     inGame: Record<InGamePower, boolean>
+// }
+
+// type Specialist = {
+//     name: SpecialistName,
+//     speciality: TradeGood | null,
+//     powers: Record<InGamePower, boolean>
+// }
+//
 export type RivalData = {
     isIncluded: true,
     isControllable: boolean,
@@ -87,6 +107,7 @@ export type Player = {
     isIdle: boolean,
     name: string,
     turnOrder: number,
+    // specialist: Specialist | null,
     isActive: boolean,
     bearings: ShipBearings,
     overnightZone: ZoneName,
