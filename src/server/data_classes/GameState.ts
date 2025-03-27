@@ -115,7 +115,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
 
     public concludeRivalTurn() {
         this.rival.update(r => {
-            if (r.isIncluded){
+            if (r.isIncluded) {
                 r.isControllable = false;
                 r.influence = Math.ceil(Math.random() * 6) as DiceSix;
                 r.moves = 2;
