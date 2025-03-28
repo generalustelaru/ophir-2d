@@ -119,6 +119,10 @@ window.addEventListener('game_update', (event: CustomEventInit) => {
     UserInterface.updateAsGame(gameState);
 
     switch(gameState.gameStatus) {
+        case 'setup':
+            CanvasService.drawUpdateElements(gameState);
+            break;
+
         case 'started':
             CommunicationService.setKeepStatusCheck();
             CanvasService.drawUpdateElements(gameState);
