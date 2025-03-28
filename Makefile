@@ -35,3 +35,16 @@ run:
 
 check:
 	npx tsc --noEmit
+
+
+# Docker
+.PHONY: check-docker-compose
+
+check-docker-compose:
+    command -v docker-compose > /dev/null 2>&1 || (echo "Error: Docker Compose is not installed. Please install it and try again." && exit 1)
+
+up: check-docker-compose
+	docker-compose up -d
+
+down:
+	docker-compose down
