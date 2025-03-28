@@ -703,25 +703,31 @@ export class GameSession {
     }
 
     private issueMarketShiftResponse(player: PlayerHandler) {
-        const newTrade = this.privateState.drawTrade();
 
-        if (newTrade === null) {
+        const newTrade = (() => {
+            const trade = this.privateState.drawTrade();
+
+            if (trade)
+                return trade;
 
             if (this.state.isDeckA()) {
                 this.state.setLabelB();
                 this.privateState.loadTradeDeck(TRADE_DECK_B);
-                this.state.shiftMarketCards(this.privateState.drawTrade()!);
                 this.addServerMessage('Market deck B is now in play');
-            } else {
-                const compilation = this.compileGameResults();
-
-                if (compilation.err)
-                    return this.issueErrorResponse(compilation.message);
-
-                this.state.setGameResults(compilation.data);
-                this.state.setGameStatus('ended');
-                this.addServerMessage('Market deck is empty! Game has ended.');
             }
+
+            return this.privateState.drawTrade();
+        })();
+
+        if (!newTrade) {
+            const compilation = this.compileGameResults();
+
+            if (compilation.err)
+                return this.issueErrorResponse(compilation.message);
+
+            this.state.setGameResults(compilation.data);
+            this.state.setGameStatus('ended');
+            this.addServerMessage('Market deck is empty! Game has ended.');
 
             return this.issueStateResponse(player);
         }
