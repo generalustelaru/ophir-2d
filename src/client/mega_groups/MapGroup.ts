@@ -20,16 +20,14 @@ export class MapGroup implements MegaGroupInterface {
     private rivalShip: RivalShip | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
-        this.stage = stage;
-        const layer = stage.getLayers()[0];
-
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
             x: layout.x,
             y: layout.y,
         });
-        layer.add(this.group);
+        stage.getLayers()[0].add(this.group);
+        this.stage = stage;
     }
 
     // MARK: DRAW

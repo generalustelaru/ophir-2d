@@ -24,7 +24,6 @@ class CanvasClass extends Communicator {
         });
         const layer = new Konva.Layer();
         this.stage.add(layer);
-        layer.draw();
 
         const segmentWidth = this.stage.width() / 4;
 
