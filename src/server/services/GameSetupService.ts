@@ -64,7 +64,7 @@ class GameSetupService {
         const gameState = new GameStateHandler({
             isStatusResponse: false,
             gameId: lobbyState.gameId,
-            gameStatus: 'started',
+            gameStatus: 'setup', // TODO: should create dedicated service/method for handling this intermediary state. Maybe keep using scaffolds but determine everything else. set started after player selection
             gameResults: [],
             sessionOwner: lobbyState.sessionOwner,
             chat: lobbyState.chat,
