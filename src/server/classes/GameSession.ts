@@ -402,16 +402,17 @@ export class GameSession {
             return this.pass(cargo);
         })();
 
-        if (cargoTransfer.err)
+        if (cargoTransfer.err) {
             return this.issueErrorResponse(
                 `Cannot match cargo to trade`,
-                {c: player.getCargo(), t: trade.request},
+                { c: player.getCargo(), t: trade.request },
             );
+        }
 
-        const removeAction = this.removeAction(player.getActions(), Action.make_trade);
+        const actionRemoval = this.removeAction(player.getActions(), Action.make_trade);
 
-        if (removeAction.err)
-            return this.issueErrorResponse(removeAction.message, player.getActions());
+        if (actionRemoval.err)
+            return this.issueErrorResponse(actionRemoval.message, player.getActions());
 
         switch (location) {
             case 'market':
@@ -431,7 +432,7 @@ export class GameSession {
         }
 
         player.setCargo(cargoTransfer.data);
-        player.setActions(removeAction.data);
+        player.setActions(actionRemoval.data);
         player.clearMoves();
 
         return this.issueMarketShiftResponse(player);
