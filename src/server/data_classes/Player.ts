@@ -176,7 +176,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         );
     }
 
-    public mayDonateMetal(metal: CargoMetal) {
+    public canDonateMetal(metal: CargoMetal) {
         return (
             this.isAnchored.get()
             && this.cargo.includes(metal)
