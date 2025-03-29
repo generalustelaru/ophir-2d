@@ -516,9 +516,8 @@ export class GameSession {
         if (!donationPayload)
             return this.validationErrorResponse();
 
-        if (!player.mayDonateMetal(donationPayload.metal))
-            return this.issueErrorResponse(
-        `${name} cannot donate ${donationPayload.metal}`);
+        if (!player.canDonateMetal(donationPayload.metal))
+            return this.issueErrorResponse(`${name} cannot donate ${donationPayload.metal}`);
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(id, reward);
