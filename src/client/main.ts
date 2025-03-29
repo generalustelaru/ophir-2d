@@ -120,7 +120,7 @@ window.addEventListener('game_update', (event: CustomEventInit) => {
 
     switch(gameState.gameStatus) {
         case 'setup':
-            CanvasService.drawUpdateElements(gameState);
+            CanvasService.drawUpdateElements(gameState, true);
             break;
 
         case 'started':
