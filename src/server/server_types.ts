@@ -1,5 +1,5 @@
 import {
-    BarrierId, ZoneName, PlayerColor, LobbyState, Trade, LocationData,
+    BarrierId, ZoneName, PlayerColor, LobbyState, Trade, LocationData, SpecialistName, Specialist,
     TradeGood, GoodsLocationName, MessagePayload, ExchangeTier,
 } from '../shared_types';
 import { WebSocket } from 'ws';
@@ -61,6 +61,7 @@ export type BarrierCheck = {
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
+    SPECIALISTS: Record<SpecialistName, Specialist>
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
