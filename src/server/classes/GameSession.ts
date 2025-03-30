@@ -118,7 +118,7 @@ export class GameSession {
                 return this.processEndTurn(digest);
             case Action.end_rival_turn:
                 return this.processRivalTurn(digest);
-                case Action.shift_market:
+            case Action.shift_market:
                 return this.processRivalTurn(digest, true);
             case Action.upgrade_cargo:
                 return this.processUpgrade(digest);
