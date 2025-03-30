@@ -24,8 +24,11 @@ class CanvasClass extends Communicator {
             width: 1200,
             height: 500,
         });
-        // const layer = new Konva.Layer();
-        this.stage.add(new Konva.Layer(), new Konva.Layer());
+
+        this.stage.add(...[
+            new Konva.Layer(), // [0] for the board
+            new Konva.Layer(), // [1] for overlay modals, popups, tooltips.
+        ]);
 
         const segmentWidth = this.stage.width() / 4;
 
