@@ -71,26 +71,17 @@ export type ShipBearings = {
     position: Coordinates,
 }
 
-// type SetupPower = 'large_cargo'
-// type InGamePower = ''
-// type SpecialistName = ''
+export type SpecialistName =
+    | 'advisor' | 'ambassador' | 'chancellor' | 'harbormaster' | 'moneychanger'
+    | 'navigator' | 'priest' | 'general' | 'postmaster' | 'peddler';
 
-// type SpecialistData = {
-//     name: SpecialistName,
-//     stats: {
-//         favor: number,
-//         specialty: TradeGood | null
-//     }
-//     setup: Record<SetupPower, boolean>
-//     inGame: Record<InGamePower, boolean>
-// }
+export type Specialist = {
+    name: SpecialistName,
+    startingFavor: number,
+    specialty: TradeGood | null,
+    description: string,
+}
 
-// type Specialist = {
-//     name: SpecialistName,
-//     speciality: TradeGood | null,
-//     powers: Record<InGamePower, boolean>
-// }
-//
 export type RivalData = {
     isIncluded: true,
     isControllable: boolean,
@@ -107,7 +98,8 @@ export type Player = {
     isIdle: boolean,
     name: string,
     turnOrder: number,
-    // specialist: Specialist | null,
+    specialist: SpecialistName,
+    speciality: TradeGood | null,
     isActive: boolean,
     bearings: ShipBearings,
     overnightZone: ZoneName,
@@ -127,6 +119,14 @@ export type Player = {
 export type PlayerScaffold = {
     id: PlayerColor,
     name: string,
+}
+
+export type PlayerBuild = {
+    id: PlayerColor,
+    name: string,
+    turnOrder: number,
+    bearings: ShipBearings,
+    specialist: SpecialistName | null
 }
 
 export type MarketOffer = {
@@ -190,6 +190,15 @@ export type GameState = {
     chat: Array<ChatEntry>,
     itemSupplies: ItemSupplies,
     rival: RivalData,
+}
+
+export type SetupState = {
+    gameId: string,
+    gameStatus: GameStatus,
+    sessionOwner: PlayerColor,
+    availableSlots: Array<PlayerColor>,
+    players: Array<PlayerScaffold>,
+    chat: Array<ChatEntry>,
 }
 
 /**

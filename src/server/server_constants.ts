@@ -3,6 +3,68 @@ import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
 
+    SPECIALISTS: {
+        advisor: {
+            name: 'advisor',
+            startingFavor: 1,
+            specialty: 'cloth',
+            description: 'May complete the temple trade using any market slot.',
+        },
+        ambassador: {
+            name: 'ambassador',
+            startingFavor: 0,
+            specialty: null,
+            description: 'Begins with fully upgraded cargo hold.',
+        },
+        chancellor: {
+            name: 'chancellor',
+            startingFavor: 1,
+            specialty: 'gems',
+            description: 'Substitutes missing goods with Favor at Market.',
+        },
+        harbormaster: {
+            name: 'harbormaster',
+            startingFavor: 2,
+            specialty: 'stone',
+            description: 'Can complete actions after first and second move when spending Favor.',
+        },
+        moneychanger: {
+            name: 'moneychanger',
+            startingFavor: 2,
+            specialty: 'cloth',
+            description : 'May perform a market trade instead of the temple trade.',
+        },
+        navigator: {
+            name: 'navigator',
+            startingFavor: 1,
+            specialty: 'wood',
+            description: 'May cross barriers when moving. When doing so, no influence check is made.',
+        },
+        priest: {
+            name: 'priest',
+            startingFavor: 2,
+            specialty: 'stone',
+            description: 'Gains Favor when ending the turn at the Temple.',
+        },
+        general: {
+            name: 'general',
+            startingFavor: 2,
+            specialty: 'wood',
+            description: 'Adds 1 to influence checks (up to 6).'
+        },
+        postmaster: {
+            name: 'postmaster',
+            startingFavor: 1,
+            specialty: 'gems',
+            description: 'May donate metals from one zone away from the Temple.',
+        },
+        peddler: {
+            name: 'peddler',
+            startingFavor: 2,
+            specialty: null,
+            description: 'Recoups one trade good after completing a reduced value market trade.',
+        },
+    },
     TRADE_DECK_A: [
         { request: ['wood'], reward: { coins: 1, favorAndVp: 1 } },
         { request: ['wood', 'wood'], reward: { coins: 3, favorAndVp: 3 } },

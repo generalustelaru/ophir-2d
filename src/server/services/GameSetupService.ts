@@ -197,6 +197,8 @@ class GameSetupService {
                 isIdle: false,
                 name: p.name,
                 turnOrder: order,
+                specialist: 'ambassador',
+                speciality: null,
                 isActive: false,
                 bearings: {
                     seaZone: startingZone,
