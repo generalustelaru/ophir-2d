@@ -1,4 +1,5 @@
 import { ErrorResponse, GameStatus, LobbyState, LobbyStateResponse, PlayerColor, PlayerEntry } from "../../../shared_types";
+import lib, { Probable } from '../session/library';
 
 const serverName = String(process.env.SERVER_NAME);
 
@@ -17,13 +18,15 @@ export class EnrolmentService {
 
         const stateUpdate = this.processPlayer(state, color, name);
 
-        if (stateUpdate) {
-            state.chat.push({ id: null, name: serverName, message: `${name} has joined the game` });
+        if (stateUpdate.err) {
+            console.log(stateUpdate.message);
 
-            return { lobby: state };
+            return { error: stateUpdate.message };
         }
 
-        return { error: `Enrollment failed on player ${color}` };
+        stateUpdate.data.chat.push({ id: null, name: serverName, message: `${name} has joined the game` });
+
+        return { lobby: stateUpdate.data };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
@@ -37,13 +40,11 @@ export class EnrolmentService {
         return players.some(player => player.name === name);
     }
 
-    private processPlayer(state: LobbyState, playerColor: PlayerColor, playerName: string | null): LobbyState | null {
-        const incompatibleStatuses: Array<GameStatus> = ['full', 'setup', 'ongoing', 'ended'];
+    private processPlayer(state: LobbyState, playerColor: PlayerColor, playerName: string | null): Probable<LobbyState> {
+        const incompatibleStatuses: Array<GameStatus> = ['full', 'setup', 'play', 'ended'];
 
         if (incompatibleStatuses.includes(state.gameStatus)) {
-            console.log(`${playerColor} cannot enroll`);
-
-            return null;
+            return lib.fail(`${playerColor} cannot enroll`);
         }
 
         state.availableSlots = state.availableSlots.filter(slot => slot !== playerColor);
@@ -68,6 +69,6 @@ export class EnrolmentService {
             console.log(`Session is full`);
         }
 
-        return state;
+        return lib.pass(state);
     }
 }

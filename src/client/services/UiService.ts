@@ -184,7 +184,7 @@ class UserInterfaceClass extends Communicator {
             this.enableElements(this.chatInput, this.chatSendButton);
 
         switch (this.gameStatus) {
-            case 'ongoing': this.handleStartedState(state); break;
+            case 'play': this.handleStartedState(state); break;
             case 'ended': this.handleEndedState(state); break;
         }
     }
