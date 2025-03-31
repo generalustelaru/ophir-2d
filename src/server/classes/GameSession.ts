@@ -10,11 +10,10 @@ import { GameStateHandler } from "../data_classes/GameState";
 import { PlayerHandler } from '../data_classes/Player';
 import { IDLE_CHECKS } from "../configuration";
 import { PrivateStateHandler } from '../data_classes/PrivateState';
+import lib, { Probable } from '../services/session/library'
 
 const { TRADE_DECK_B } = serverConstants;
 const serverName = String(process.env.SERVER_NAME);
-
-type Probable<T> = { err: true, message: string } | { err?: false, data: T };
 
 export class GameSession {
 
@@ -65,12 +64,12 @@ export class GameSession {
         }
 
         if (!playerColor)
-            return this.issueErrorResponse('No player ID provided');
+            return lib.issueErrorResponse('No player ID provided');
 
         const playerObject = this.state.getPlayer(playerColor);
 
         if (!playerObject)
-            return this.issueErrorResponse(`Player does not exist: ${playerColor}`);
+            return lib.issueErrorResponse(`Player does not exist: ${playerColor}`);
 
         const player = new PlayerHandler(playerObject);
         player.refreshTimeStamp();
@@ -81,7 +80,7 @@ export class GameSession {
             return this.processChat(digest);
 
         if (!player.isActivePlayer())
-            return this.issueErrorResponse(`It is not [${player.getIdentity().name}]'s turn!`);
+            return lib.issueErrorResponse(`It is not [${player.getIdentity().name}]'s turn!`);
 
         const actionsWhileFrozen: Array<Action> = [
             Action.drop_item,
@@ -93,7 +92,7 @@ export class GameSession {
         ];
 
         if (player.isFrozen() && !actionsWhileFrozen.includes(action))
-            return this.issueErrorResponse(`[${player.getIdentity().name}] is handling rival and cannot act.`)
+            return lib.issueErrorResponse(`[${player.getIdentity().name}] is handling rival and cannot act.`)
 
         switch (action) {
             case Action.spend_favor:
@@ -125,7 +124,7 @@ export class GameSession {
             case Action.drop_item:
                 return this.processItemDrop(digest);
             default:
-                return this.issueErrorResponse(`Unknown action: ${action}`);
+                return lib.issueErrorResponse(`Unknown action: ${action}`);
         }
     }
 
@@ -142,7 +141,7 @@ export class GameSession {
         const chatPayload = this.validator.validateChatPayload(payload);
 
         if (!chatPayload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         const { id, name } = player.getIdentity();
         this.state.addChatEntry({
@@ -160,7 +159,7 @@ export class GameSession {
         const movementPayload = this.validator.validateMovementPayload(payload);
 
         if (!movementPayload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         const target = movementPayload.zoneId;
         const locationName = this.state.getLocationName(target);
@@ -169,7 +168,7 @@ export class GameSession {
             return this.processRivalMovement(target, locationName, movementPayload.position, player);
 
         if (!player.isDestinationValid(target) || !player.getMoves() || player.handlesRival()) {
-            return this.issueErrorResponse(
+            return lib.issueErrorResponse(
                 'Movement not alowed.',
                 { target, moves: player.getMoves() },
             );
@@ -238,12 +237,12 @@ export class GameSession {
     }
 
     private processRivalMovement(target: ZoneName, locationName: LocationName, position: Coordinates, player: PlayerHandler) {
-        if (this.checkConditions([
+        if (lib.checkConditions([
             player.handlesRival(),
             this.state.rivalHasMoves(),
             this.state.isRivalDestinationValid(target),
         ]).err)
-            return this.issueErrorResponse('Rival ship movement is illegal!', {
+            return lib.issueErrorResponse('Rival ship movement is illegal!', {
                 player: player.toDto(), rival: this.state.getRivalData()
             });
 
@@ -265,7 +264,7 @@ export class GameSession {
         const repositioningPayload = this.validator.validateRepositioningPayload(payload);
 
         if (!repositioningPayload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         const position = repositioningPayload.repositioning;
 
@@ -282,7 +281,7 @@ export class GameSession {
         const { player } = data;
 
         if (!player.getFavor() || player.isPrivileged()) {
-            return this.issueErrorResponse(
+            return lib.issueErrorResponse(
                 `${player.getIdentity().name} cannot spend favor`,
                 { favor: player.getFavor(), isPrivileged: player.isPrivileged() },
             );
@@ -299,13 +298,13 @@ export class GameSession {
         const payload = this.validator.validateDropItemPayload(data.payload);
 
         if (!payload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         const player = data.player;
         const result = this.unloadItem(player.getCargo(), payload.item);
 
         if (result.err)
-            return this.issueErrorResponse(result.message, {cargo: player.getCargo()});
+            return lib.issueErrorResponse(result.message, {cargo: player.getCargo()});
 
         player.setCargo(result.data);
         player.setTrades(this.pickFeasibleTrades(result.data));
@@ -320,12 +319,12 @@ export class GameSession {
         const payload = this.validator.validateLoadGoodPayload(data.payload);
 
         if (!payload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         const player = data.player;
 
         if (!player.mayLoadGood()) {
-            return this.issueErrorResponse(
+            return lib.issueErrorResponse(
                 `${player.getIdentity().id} Cannot load good`,
                 player.toDto(),
             );
@@ -335,12 +334,12 @@ export class GameSession {
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationName))
-            return this.issueErrorResponse(`Cannot pick up goods from ${locationName}`);
+            return lib.issueErrorResponse(`Cannot pick up goods from ${locationName}`);
 
         const localGood = serverConstants.LOCATION_GOODS[locationName as GoodsLocationName];
 
         if (localGood !== payload.tradeGood) {
-            return this.issueErrorResponse(
+            return lib.issueErrorResponse(
                 `Cannot load ${payload.tradeGood} here.`,
                 {localGood, payload},
             );
@@ -349,12 +348,12 @@ export class GameSession {
         const loadItem = this.loadItem(player.getCargo(), localGood);
 
         if (loadItem.err)
-            return this.issueErrorResponse(loadItem.message);
+            return lib.issueErrorResponse(loadItem.message);
 
         const removeAction = this.removeAction(player.getActions(), Action.load_good);
 
         if (removeAction.err)
-            return this.issueErrorResponse(removeAction.message, player.getActions());
+            return lib.issueErrorResponse(removeAction.message, player.getActions());
 
         player.setCargo(loadItem.data);
         player.clearMoves();
@@ -372,17 +371,17 @@ export class GameSession {
         const tradePayload = this.validator.validateTradePayload(payload);
 
         if (!tradePayload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         const { slot, location } = tradePayload;
         const {id, name} = player.getIdentity();
 
-        if (this.checkConditions([
+        if (lib.checkConditions([
             player.canAct(Action.make_trade),
             player.getBearings().location == location,
             player.getTrades().includes(slot),
         ]).err) {
-            return this.issueErrorResponse(`${name} cannnot trade`);
+            return lib.issueErrorResponse(`${name} cannnot trade`);
         }
 
         const trade = this.state.getMarketTrade(slot);
@@ -399,11 +398,11 @@ export class GameSession {
                 cargo = result.data;
             }
 
-            return this.pass(cargo);
+            return lib.pass(cargo);
         })();
 
         if (cargoTransfer.err) {
-            return this.issueErrorResponse(
+            return lib.issueErrorResponse(
                 `Cannot match cargo to trade`,
                 { c: player.getCargo(), t: trade.request },
             );
@@ -412,7 +411,7 @@ export class GameSession {
         const actionRemoval = this.removeAction(player.getActions(), Action.make_trade);
 
         if (actionRemoval.err)
-            return this.issueErrorResponse(actionRemoval.message, player.getActions());
+            return lib.issueErrorResponse(actionRemoval.message, player.getActions());
 
         switch (location) {
             case 'market':
@@ -428,7 +427,7 @@ export class GameSession {
                 console.info(this.privateState.getGameStats());
                 break;
             default:
-                return this.issueErrorResponse(`Unknown trade location: ${location}`);
+                return lib.issueErrorResponse(`Unknown trade location: ${location}`);
         }
 
         player.setCargo(cargoTransfer.data);
@@ -446,10 +445,10 @@ export class GameSession {
         const purchasePayload = this.validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         if (!player.mayLoadMetal())
-            return this.issueErrorResponse(`Player ${name} cannot buy metals`);
+            return lib.issueErrorResponse(`Player ${name} cannot buy metals`);
 
         const metalCost = (() => {
             const costs = this.state.getMetalCosts();
@@ -470,7 +469,7 @@ export class GameSession {
         })();
 
         if (!metalCost || !playerAmount) {
-            return this.issueErrorResponse(
+            return lib.issueErrorResponse(
                 `No such cost or player amount found.`,
                 { currency: purchasePayload.currency, metalCost, playerAmount }
             );
@@ -480,7 +479,7 @@ export class GameSession {
         const remainder = playerAmount - price;
 
         if (remainder < 0) {
-            return this.issueErrorResponse(`Player ${name} cannot afford metal purchase`);
+            return lib.issueErrorResponse(`Player ${name} cannot afford metal purchase`);
         }
 
         switch (purchasePayload.currency) {
@@ -493,13 +492,13 @@ export class GameSession {
                 this.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
                 break;
             default:
-                return this.issueErrorResponse(`Unknown currency: ${purchasePayload.currency}`);
+                return lib.issueErrorResponse(`Unknown currency: ${purchasePayload.currency}`);
         }
 
         const result = this.loadItem(player.getCargo(), purchasePayload.metal);
 
         if (result.err)
-            return this.issueErrorResponse(result.message);
+            return lib.issueErrorResponse(result.message);
 
         player.setCargo(result.data);
         player.clearMoves()
@@ -514,10 +513,10 @@ export class GameSession {
         const donationPayload = this.validator.validateMetalDonationPayload(payload);
 
         if (!donationPayload)
-            return this.validationErrorResponse();
+            return lib.validationErrorResponse();
 
         if (!player.canDonateMetal(donationPayload.metal))
-            return this.issueErrorResponse(`${name} cannot donate ${donationPayload.metal}`);
+            return lib.issueErrorResponse(`${name} cannot donate ${donationPayload.metal}`);
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(id, reward);
@@ -527,7 +526,7 @@ export class GameSession {
         const result = this.unloadItem(player.getCargo(), donationPayload.metal);
 
         if (result.err)
-            return this.issueErrorResponse(result.message, {cargo: player.getCargo()});
+            return lib.issueErrorResponse(result.message, {cargo: player.getCargo()});
 
         player.setCargo(result.data);
         player.clearMoves();
@@ -539,7 +538,7 @@ export class GameSession {
             const result = this.compileGameResults();
 
             if (result.err)
-                return this.issueErrorResponse('Could not conclude game session', result);
+                return lib.issueErrorResponse('Could not conclude game session', result);
 
             this.addServerMessage('The temple construction is complete! Game has ended.');
             this.addServerMessage(JSON.stringify(result.data));
@@ -552,7 +551,7 @@ export class GameSession {
             const newPrices = this.privateState.drawMetalPrices();
 
             if (!newPrices)
-                return this.issueErrorResponse('Donation could not be resolved', { newPrices, isNewLevel });
+                return lib.issueErrorResponse('Donation could not be resolved', { newPrices, isNewLevel });
 
             this.state.setMetalPrices(newPrices);
             this.addServerMessage('Current temple level is complete. Metal costs increase.');
@@ -567,7 +566,7 @@ export class GameSession {
         const { turnOrder } = player.getIdentity();
 
         if (!player.mayEndTurn())
-            return this.issueErrorResponse(`Ship is not anchored.`);
+            return lib.issueErrorResponse(`Ship is not anchored.`);
 
         player.deactivate();
         this.state.savePlayer(player.toDto());
@@ -578,7 +577,7 @@ export class GameSession {
             const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextInOrder);
 
             if (!nextPlayerDto)
-                return this.fail('Could not find the next player');
+                return lib.fail('Could not find the next player');
 
             const nextPlayer = new PlayerHandler(nextPlayerDto);
             const { seaZone } = nextPlayer.getBearings();
@@ -588,11 +587,11 @@ export class GameSession {
             );
             this.state.updateRival(nextPlayer.getIdentity().id);
 
-            return this.pass(nextPlayer);
+            return lib.pass(nextPlayer);
         })();
 
         if (newPlayerResult.err)
-            return this.issueErrorResponse(newPlayerResult.message);
+            return lib.issueErrorResponse(newPlayerResult.message);
 
         const newPlayer = newPlayerResult.data;
         this.addServerMessage(`${newPlayer.getIdentity().name} is now active!`);
@@ -604,10 +603,10 @@ export class GameSession {
         const rival = this.state.getRivalData();
 
         if (!rival.isIncluded || !rival.isControllable)
-            return this.issueErrorResponse('Rival is not active!', rival);
+            return lib.issueErrorResponse('Rival is not active!', rival);
 
         if (rival.moves === 2)
-            return this.issueErrorResponse('Rival cannot act before moving', rival);
+            return lib.issueErrorResponse('Rival cannot act before moving', rival);
 
         this.state.concludeRivalTurn();
 
@@ -622,7 +621,7 @@ export class GameSession {
         if (isShiftingMarket) {
 
             if (this.state.getLocationName(rival.bearings.seaZone) !== 'market')
-                return this.issueErrorResponse('Cannot shift market from here!', rival);
+                return lib.issueErrorResponse('Cannot shift market from here!', rival);
 
             return this.issueMarketShiftResponse(player);
         }
@@ -638,7 +637,7 @@ export class GameSession {
             const removeAction = this.removeAction(player.getActions(), Action.upgrade_cargo);
 
             if (removeAction.err)
-                return this.issueErrorResponse(removeAction.message, player.getActions())
+                return lib.issueErrorResponse(removeAction.message, player.getActions())
 
             player.spendCoins(2);
             player.addCargoSpace();
@@ -649,7 +648,7 @@ export class GameSession {
             return this.issueStateResponse(player);
         }
 
-        return this.issueErrorResponse(`Conditions for upgrade not met`, player.toDto());
+        return lib.issueErrorResponse(`Conditions for upgrade not met`, player.toDto());
     }
 
     // MARK: UTILITIES
@@ -661,11 +660,11 @@ export class GameSession {
         const index = actions.indexOf(toRemove);
 
         if (index === -1)
-            return this.fail(`Action ${toRemove} does not exist in selection`);
+            return lib.fail(`Action ${toRemove} does not exist in selection`);
 
         actions.splice(index, 1);
 
-        return this.pass(actions);
+        return lib.pass(actions);
     }
 
     // MARK:  pickFeasibleTrades
@@ -722,7 +721,7 @@ export class GameSession {
             const compilation = this.compileGameResults();
 
             if (compilation.err)
-                return this.issueErrorResponse(compilation.message);
+                return lib.issueErrorResponse(compilation.message);
 
             this.state.setGameResults(compilation.data);
             this.state.setGameStatus('ended');
@@ -754,7 +753,7 @@ export class GameSession {
         const emptyIndex = orderedCargo.indexOf('empty');
 
         if (emptyIndex === -1) {
-            return this.fail('Could not find an empty slot to load item');
+            return lib.fail('Could not find an empty slot to load item');
         }
 
         const metalNames: Array<ItemName> = ['gold', 'silver'];
@@ -763,27 +762,27 @@ export class GameSession {
         if (metalNames.includes(item)) {
 
             if (supplies.metals[item as Metal] < 1)
-                return this.fail(`No ${item} available for loading`);
+                return lib.fail(`No ${item} available for loading`);
 
             if (orderedCargo[emptyIndex + 1] !== 'empty')
-                return this.fail(`Not enough empty slots for storing metal`);
+                return lib.fail(`Not enough empty slots for storing metal`);
 
             orderedCargo[emptyIndex] = item;
             orderedCargo[emptyIndex + 1] = `${item}_extra` as CargoMetal;
             this.state.removeMetal(item as Metal);
 
-            return this.pass(orderedCargo);
+            return lib.pass(orderedCargo);
         }
 
         const tradeGood = item as TradeGood;
 
         if (supplies.goods[tradeGood] < 1)
-            return this.fail(`No ${item} available for loading`);
+            return lib.fail(`No ${item} available for loading`);
 
         orderedCargo[emptyIndex] = item;
         this.state.removeTradeGood(tradeGood);
 
-        return this.pass(orderedCargo);
+        return lib.pass(orderedCargo);
     }
 
     // MARK: unloadItem
@@ -791,7 +790,7 @@ export class GameSession {
         const itemIndex = cargo.indexOf(item);
 
         if (itemIndex === -1)
-            return this.fail('Cannot find item in cargo.');
+            return lib.fail('Cannot find item in cargo.');
 
         cargo.splice(itemIndex, 1, 'empty');
 
@@ -804,7 +803,7 @@ export class GameSession {
             this.state.returnTradeGood(item as TradeGood);
         }
 
-        return this.pass(cargo);
+        return lib.pass(cargo);
     }
 
     // MARK: compileGameResults
@@ -817,7 +816,7 @@ export class GameSession {
             const player = players.find(p => p.id === playerStat.id);
 
             if (!player) {
-                return this.fail(`No player found for ${playerStat.id}`);
+                return lib.fail(`No player found for ${playerStat.id}`);
             }
 
             playerStat.gold = player.cargo.filter(item => item === 'gold').length;
@@ -827,7 +826,7 @@ export class GameSession {
             playerStat.coins = player.coins;
         }
 
-        return this.pass(gameStats);
+        return lib.pass(gameStats);
     }
 
     // MARK: startIdleChecks
@@ -836,7 +835,7 @@ export class GameSession {
             const activePlayer = this.state.getActivePlayer();
 
             if (!activePlayer) {
-                this.issueErrorResponse('No active player found in idle check!')
+                lib.issueErrorResponse('No active player found in idle check!')
                 return;
             }
 
@@ -860,34 +859,9 @@ export class GameSession {
 
     // MARK: RETURN WRAPPERS
 
-    private checkConditions(arr: Array<boolean>): Probable<true> {
-        if (arr.includes(false))
-            return this.fail('');
-        return this.pass(true);
-    }
-
-    private validationErrorResponse(){
-        return this.issueErrorResponse('Malformed request.');
-    }
-
     private issueStateResponse(player: PlayerHandler): GameStateResponse {
         this.state.savePlayer(player.toDto());
 
         return { game: this.state.toDto() };
-    }
-
-    private issueErrorResponse(message: string, params?: object): ErrorResponse {
-        const error = `ERROR: ${message}`;
-        console.error(error, params);
-
-        return { error };
-    }
-
-    private pass<T>(data: T): Probable<T> {
-        return { data }
-    }
-
-    private fail(message: string): Probable<any> {
-        return { err: true, message }
     }
 }
