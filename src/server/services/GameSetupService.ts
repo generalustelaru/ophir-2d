@@ -38,12 +38,12 @@ class GameSetupService {
         if (lobbyState.sessionOwner === null)
             throw new Error('Cannot start game while the session owner is null');
 
-        const playerScaffolds = this.tools.getCopy(lobbyState.players);
+        const playerEntries = this.tools.getCopy(lobbyState.players);
 
-        if (!playerScaffolds.every(p => Boolean(p.id)))
+        if (!playerEntries.every(p => Boolean(p.id)))
             throw new Error('Found unidentifiable players.');
 
-        if (playerScaffolds.length < 2 && !SINGLE_PLAYER)
+        if (playerEntries.length < 2 && !SINGLE_PLAYER)
             throw new Error('Not enough players to start a game.');
 
         const barriers = this.determineBarriers();
@@ -53,12 +53,12 @@ class GameSetupService {
         const privateState = new PrivateStateHandler({
             destinationPackages: this.produceMoveRules(barriers),
             tradeDeck: marketData.tradeDeck,
-            costTiers: this.filterCostTiers(playerScaffolds.length),
-            gameStats: playerScaffolds.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
+            costTiers: this.filterCostTiers(playerEntries.length),
+            gameStats: playerEntries.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         });
 
         const { players, startingPlayerColor } = this.hydratePlayers(
-            playerScaffolds,
+            playerEntries,
             privateState.getDestinationPackages(),
             clientSetupPayload.startingPositions,
             mapPairings
@@ -67,7 +67,7 @@ class GameSetupService {
         const gameState = new GameStateHandler({
             isStatusResponse: false,
             gameId: lobbyState.gameId,
-            gameStatus: 'setup', // TODO: should create dedicated service/method for handling this intermediary state. Maybe keep using scaffolds but determine everything else. set started after player selection
+            gameStatus: 'play', // TODO: should create dedicated service/method for handling this intermediary state. Maybe keep using scaffolds but determine everything else. set started after player selection
             gameResults: [],
             sessionOwner: lobbyState.sessionOwner,
             chat: lobbyState.chat,
@@ -89,7 +89,7 @@ class GameSetupService {
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
             rival: this.getRivalShipData(
-                Boolean(playerScaffolds.length == 2),
+                Boolean(playerEntries.length == 2),
                 clientSetupPayload.hexPositions,
                 mapPairings,
                 startingPlayerColor,

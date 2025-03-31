@@ -2,7 +2,7 @@ import process from 'process';
 import { DataDigest, PlayerCountables, StateBundle } from "../server_types";
 import {
     GameState, ClientRequest, TradeGood, LocationAction, MarketSlotKey, ItemName, GameStateResponse, ZoneName,
-    LocationName, GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal, ErrorResponse, Action, Coordinates,
+    LocationName, GoodsLocationName, ChatEntry, ServerMessage, CargoMetal, Metal, Action, Coordinates,
 } from "../../shared_types";
 import serverConstants from "../server_constants";
 import { ValidatorService } from "../services/validation/ValidatorService";

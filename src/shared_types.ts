@@ -41,7 +41,7 @@ export type LocationName = "temple" | "market" | "treasury" | GoodsLocationName;
 export type LocationAction =
     | Action.upgrade_cargo | Action.make_trade | Action.buy_metals
     | Action.load_good | Action.donate_metals;
-export type GameStatus = "empty" | "created" | "full" | "setup" | "ongoing" | "ended";
+export type GameStatus = "empty" | "created" | "full" | "setup" | "play" | "ended";
 export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
 export type Trade = { request: Array<TradeGood>, reward: Reward };
