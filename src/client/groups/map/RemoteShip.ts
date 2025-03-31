@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { Player, PlayerColor } from '../../../shared_types';
+import { PlayerState, PlayerColor } from '../../../shared_types';
 import { Color, DynamicGroupInterface } from '../../client_types';
 import clientConstants from '../../client_constants';
 import { ShipToken } from './ShipToken';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 
-export class RemoteShip implements DynamicGroupInterface<Player> {
+export class RemoteShip implements DynamicGroupInterface<PlayerState> {
 
     ship: ShipToken;
     group: Konva.Group;
@@ -42,7 +42,7 @@ export class RemoteShip implements DynamicGroupInterface<Player> {
         return this.group.attrs.id as PlayerColor
     }
 
-    public update(player: Player): void {
+    public update(player: PlayerState): void {
         this.group.x(player.bearings.position.x);
         this.group.y(player.bearings.position.y);
         this.ship.update(player.isActive ? COLOR.activeShipBorder : COLOR.shipBorder);

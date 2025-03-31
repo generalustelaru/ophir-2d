@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, RivalData } from '../../../shared_types';
+import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, PlayerState, RivalData } from '../../../shared_types';
 import localState from '../../state';
 import clientConstants from '../../client_constants';
 import { SeaZone } from '../GroupList';
@@ -16,7 +16,7 @@ export class PlayerShip {
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
     private seaZones: Array<SeaZone> = [];
-    private players: Array<Player>;
+    private players: Array<PlayerState>;
     private rival: RivalData;
 
     public switchControl(isDraggable: boolean) {
@@ -27,7 +27,7 @@ export class PlayerShip {
         return this.group
     };
 
-    public update(coordinates: Coordinates, players: Array<Player>, rival: RivalData) {
+    public update(coordinates: Coordinates, players: Array<PlayerState>, rival: RivalData) {
         this.players = players;
         this.rival = rival;
         this.group.x(coordinates.x);
@@ -42,7 +42,7 @@ export class PlayerShip {
         fill: Color,
         isActivePlayer: boolean,
         seaZones: Array<SeaZone>,
-        players: Array<Player>,
+        players: Array<PlayerState>,
         rival: RivalData,
     ) {
         this.seaZones = seaZones;

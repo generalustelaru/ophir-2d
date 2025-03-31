@@ -92,14 +92,14 @@ export type RivalData = {
     influence: DiceSix,
 } | { isIncluded: false }
 
-export type Player = {
+export type PlayerState = {
     id: PlayerColor,
     timeStamp: number,
     isIdle: boolean,
     name: string,
     turnOrder: number,
     specialist: SpecialistName,
-    speciality: TradeGood | null,
+    specialty: TradeGood | null,
     isActive: boolean,
     bearings: ShipBearings,
     overnightZone: ZoneName,
@@ -116,7 +116,7 @@ export type Player = {
     coins: number,
 }
 
-export type PlayerScaffold = {
+export type PlayerEntry = {
     id: PlayerColor,
     name: string,
 }
@@ -183,7 +183,7 @@ export type GameState = {
     gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
     availableSlots: Array<PlayerColor>,
-    players: Array<Player>,
+    players: Array<PlayerState>,
     market: MarketOffer,
     temple: TempleState,
     setup: GameSetup,
@@ -197,7 +197,7 @@ export type SetupState = {
     gameStatus: GameStatus,
     sessionOwner: PlayerColor,
     availableSlots: Array<PlayerColor>,
-    players: Array<PlayerScaffold>,
+    players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,
 }
 
@@ -209,7 +209,7 @@ export type LobbyState = {
     gameStatus: GameStatus,
     sessionOwner: PlayerColor | null,
     availableSlots: Array<PlayerColor>,
-    players: Array<PlayerScaffold>,
+    players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,
 }
 

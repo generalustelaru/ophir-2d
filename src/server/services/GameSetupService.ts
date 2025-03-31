@@ -1,8 +1,8 @@
 
 import {
-    BarrierId, ZoneName, Coordinates, Player, PlayerColor, MarketFluctuations,
+    BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
-    ExchangeTier, PlayerScaffold, RivalData, GameSetupPayload,
+    ExchangeTier, PlayerEntry, RivalData, GameSetupPayload,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -171,12 +171,12 @@ class GameSetupService {
     // MARK: Players
 
     private hydratePlayers(
-        scaffolds: Array<PlayerScaffold>,
+        scaffolds: Array<PlayerEntry>,
         moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
         mapPairings: Record<ZoneName, LocationData>,
     ): {
-        players: Array<Player>,
+        players: Array<PlayerState>,
         startingPlayerColor: PlayerColor
     } {
         const initialRules = this.tools.getCopy(moveRules[0]);
@@ -192,16 +192,16 @@ class GameSetupService {
             return t;
         })(); // [1,2,3,4]
 
-        const players: Array<Player> = randomScaffolds.map(p => {
+        const players: Array<PlayerState> = randomScaffolds.map(p => {
             const order = orderTokens.shift()!;
-            const playerDto: Player = {
+            const playerDto: PlayerState = {
                 id: p.id,
                 timeStamp: 0,
                 isIdle: false,
                 name: p.name,
                 turnOrder: order,
                 specialist: 'ambassador',
-                speciality: null,
+                specialty: null,
                 isActive: false,
                 bearings: {
                     seaZone: startingZone,

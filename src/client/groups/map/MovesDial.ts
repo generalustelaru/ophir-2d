@@ -1,11 +1,11 @@
 import Konva from "konva";
 import constants from "../../client_constants";
-import { Player } from "../../../shared_types";
+import { PlayerState } from "../../../shared_types";
 import { DynamicGroupInterface } from "../../client_types";
 
 const { ICON_DATA, COLOR } = constants;
 
-export class MovesDial implements DynamicGroupInterface<Player> {
+export class MovesDial implements DynamicGroupInterface<PlayerState> {
 
     private group: Konva.Group;
     private upperWave: Konva.Path;
@@ -42,7 +42,7 @@ export class MovesDial implements DynamicGroupInterface<Player> {
         return this.group;
     }
 
-    public update(player: Player): void {
+    public update(player: PlayerState): void {
         const waveColor = ICON_DATA.ocean_wave.fill;
         if (player.isActive) {
             this.upperWave.fill(player.moveActions > 1 ? waveColor : COLOR.disabled);

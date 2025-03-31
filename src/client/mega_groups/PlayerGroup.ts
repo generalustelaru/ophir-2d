@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerPlacard } from '../groups/GroupList';
 import localState from '../state';
-import { Player, GameState } from '../../shared_types';
+import { PlayerState, GameState } from '../../shared_types';
 import { RivalPlacard } from '../groups/player/RivalPlacard';
 
 export class PlayerGroup implements MegaGroupInterface {
@@ -30,7 +30,7 @@ export class PlayerGroup implements MegaGroupInterface {
         const playersByLocalPlayer = localState.playerColor
             ? (() => {
                 while (players[0].id !== localState.playerColor) {
-                    players.push(players.shift() as Player);
+                    players.push(players.shift() as PlayerState);
                 }
                 return players;
             })()

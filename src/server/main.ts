@@ -4,9 +4,7 @@ import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
 import {
     PlayerColor, LobbyState, GameSetupPayload, GameStatus, ChatEntry,
-    ClientIdResponse, ServerMessage, ResetResponse,
-    Action,
-    PlayerScaffold,
+    ClientIdResponse, ServerMessage, ResetResponse, Action, PlayerEntry,
 } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
 import { gameSetupService } from './services/GameSetupService';
@@ -326,7 +324,7 @@ function processPlayer(playerColor: PlayerColor | null, playerName: string | nul
 
     lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerColor);
 
-    const newPlayer: PlayerScaffold = {
+    const newPlayer: PlayerEntry = {
         id: playerColor,
         name: playerName || playerColor,
     }
