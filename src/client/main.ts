@@ -123,7 +123,7 @@ window.addEventListener('game_update', (event: CustomEventInit) => {
             CanvasService.drawUpdateElements(gameState, true);
             break;
 
-        case 'started':
+        case 'ongoing':
             CommunicationService.setKeepStatusCheck();
             CanvasService.drawUpdateElements(gameState);
             break;
