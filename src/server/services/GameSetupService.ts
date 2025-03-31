@@ -13,7 +13,10 @@ import { PlayerHandler } from '../data_classes/Player';
 import { PrivateStateHandler } from '../data_classes/PrivateState';
 import { HexCoordinates } from '../../client/client_types';
 
-console.log({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS });
+// @ts-ignore
+const activeKeys = Object.entries({SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS}).reduce((acc, [k, v]) => {if (v) acc[k] = v; return acc}, {})
+console.log(activeKeys);
+
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
 
 class GameSetupService {
