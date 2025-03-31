@@ -302,7 +302,7 @@ function playerHasUniqueName(playerName: string|null): boolean {
 }
 
 function processPlayer(playerColor: PlayerColor | null, playerName: string | null): boolean {
-    const incompatibleStatuses: Array<GameStatus> = ['started', 'full'];
+    const incompatibleStatuses: Array<GameStatus> = ['ongoing', 'full'];
 
     if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
         console.log(`${playerColor} cannot enroll`);
