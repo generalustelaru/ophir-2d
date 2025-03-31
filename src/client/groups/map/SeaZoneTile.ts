@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, RivalData } from '../../../shared_types';
+import { Coordinates, ZoneName, DiceSix, PlayerState, LocationName, Action, ItemSupplies, RivalData } from '../../../shared_types';
 import { Color, DynamicGroupInterface, IslandData, IconLayer } from '../../client_types';
 import { Vector2d } from 'konva/lib/types';
 import clientConstants from '../../client_constants';
@@ -9,7 +9,7 @@ import { InfluenceDial, LocationToken } from '../GroupList';
 const { COLOR, ICON_DATA } = clientConstants;
 
 type SeaZoneUpdate = {
-    player: Player | null,
+    player: PlayerState | null,
     rival: RivalData,
     templeIcon: IconLayer | null,
     itemSupplies: ItemSupplies,

@@ -1,20 +1,20 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { Player, ClientMessage } from '../../../shared_types';
+import { PlayerState, ClientMessage } from '../../../shared_types';
 import { FavorIcon } from '../FavorIcon';
 import clientConstants from '../../client_constants';
 
 const { COLOR_PROFILES, ICON_DATA } = clientConstants;
 
-export class FavorButton extends ActionButton implements DynamicGroupInterface<Player> {
+export class FavorButton extends ActionButton implements DynamicGroupInterface<PlayerState> {
 
     private favorIcon: FavorIcon;
     private checkmark: Konva.Path;
     constructor(
         stage: Konva.Stage,
         message: ClientMessage | null,
-        player: Player | null,
+        player: PlayerState | null,
         layout: GroupLayoutData,
     ) {
         super(stage, layout, message);
@@ -36,7 +36,7 @@ export class FavorButton extends ActionButton implements DynamicGroupInterface<P
         return this.group;
     }
 
-    public update(player: Player | null): void {
+    public update(player: PlayerState | null): void {
         switch (true) {
             case (player?.isHandlingRival):
                 this.setEnabled(false);

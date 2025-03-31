@@ -1,5 +1,5 @@
 import {
-    ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
+    ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, PlayerState, PlayerColor,
     GameState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings, Coordinates,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
@@ -13,7 +13,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     private gameStatus: Writable<GameStatus>;
     private gameResults: Writable<Array<PlayerCountables>>;
     private availableSlots: Writable<Array<PlayerColor>>;
-    private players: ArrayWritable<Player>;
+    private players: ArrayWritable<PlayerState>;
     private market: Writable<MarketOffer>;
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;
@@ -73,7 +73,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     }
 
     // MARK: Player
-    public savePlayer(player: Player) {
+    public savePlayer(player: PlayerState) {
         this.players.updateOne(player.id, player);
     }
 
@@ -165,7 +165,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     }
 
     // MARK: Map
-    public getPlayersByZone(zone: ZoneName): Array<Player> {
+    public getPlayersByZone(zone: ZoneName): Array<PlayerState> {
         return this.players.getAll()
             .filter(p => p.bearings.seaZone === zone)
     }
