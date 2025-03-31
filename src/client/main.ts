@@ -6,9 +6,6 @@ import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
 import { Action, GameState, ClientMessage, ResetResponse, LobbyState } from "../shared_types";
 
-//@ts-ignore
-// let stateDebug: SharedState | NewState | null = null;
-
 // Initializations
 const serverAddress = process.env.SERVER_ADDRESS;
 const wsPort = process.env.WS_PORT;
