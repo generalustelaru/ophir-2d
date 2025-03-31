@@ -2,15 +2,13 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import serverConstants from './server_constants';
-import {
-    PlayerColor, LobbyState, GameSetupPayload, GameStatus, ChatEntry,
-    ClientIdResponse, ServerMessage, ResetResponse, Action, PlayerEntry,
-} from '../shared_types';
+import { LobbyState, GameSetupPayload, ClientIdResponse, ServerMessage, ResetResponse, Action } from '../shared_types';
 import { StateBundle, WsClient } from './server_types';
 import { gameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
 import { ValidatorService } from "./services/validation/ValidatorService";
+import { EnrolmentService } from './services/session/EnrolmentService';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 
@@ -92,8 +90,10 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 // const setupService: GameSetupService = GameSetupService.getInstance();
 const tools = new ToolService();
 const validator = new ValidatorService();
+const enroller = new EnrolmentService();
 
 let lobbyState: LobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+lobbyState.gameId = randomUUID();
 let singleSession: GameSession | null = null;
 
 function sendAll (message: ServerMessage): void {
@@ -180,22 +180,13 @@ socketServer.on('connection', function connection(socket) {
         }
 
         if (action === Action.enroll) {
+            const message = enroller.processEnrol(lobbyState, playerColor, playerName);
 
-            if (!playerHasUniqueName(playerName)) {
-                send(socket, { error: 'This name is already taken' });
-
-                return;
-            }
-
-            if (!playerColor || !lobbyState.availableSlots.includes(playerColor))
-                send(socket, { error: 'Color is is already taken' });
-
-            if (processPlayer(playerColor, playerName)) {
-                addServerMessage(`${playerName ?? playerColor} has joined the game`);
-                lobbyState.gameId = randomUUID();
-                sendAll({ lobby: lobbyState });
+            if ('error' in message) {
+                send(socket, message);
             } else {
-                send(socket, { error: `Enrollment failed on ${playerColor}` });
+                lobbyState = message.lobby;
+                sendAll(message);
             }
 
             return;
@@ -293,61 +284,3 @@ function processGameStart(payload: GameSetupPayload): boolean {
     return true;
 }
 
-function playerHasUniqueName(playerName: string|null): boolean {
-    if (!playerName) {
-        return true;
-    }
-
-    return !lobbyState.players.some(player => player.name === playerName);
-}
-
-function processPlayer(playerColor: PlayerColor | null, playerName: string | null): boolean {
-    const incompatibleStatuses: Array<GameStatus> = ['ongoing', 'full'];
-
-    if (incompatibleStatuses.includes(lobbyState.gameStatus)) {
-        console.log(`${playerColor} cannot enroll`);
-
-        return false;
-    }
-
-    if (!playerColor) {
-        console.log('Player color is missing');
-
-        return false;
-    }
-
-    if (false == serverConstants.PLAYER_IDS.includes(playerColor)) {
-        console.log(`${playerColor} is not a valid player`);
-
-        return false;
-    }
-
-    lobbyState.availableSlots = lobbyState.availableSlots.filter(slot => slot !== playerColor);
-
-    const newPlayer: PlayerEntry = {
-        id: playerColor,
-        name: playerName || playerColor,
-    }
-
-    lobbyState.players.push(newPlayer);
-
-    console.log(`${playerColor} enrolled`);
-
-    if (lobbyState.sessionOwner === null) {
-        lobbyState.gameStatus = 'created';
-        lobbyState.sessionOwner = playerColor;
-        console.log(`${playerColor} is the session owner`);
-    }
-
-    if (lobbyState.availableSlots.length === 0) {
-        lobbyState.gameStatus = 'full';
-        console.log(`Session is full`);
-    }
-
-    return true;
-}
-
-function addServerMessage(message: string): void {
-    const chatEntry: ChatEntry = { id: null, name: SERVER_NAME, message };
-    lobbyState.chat.push(chatEntry);
-}
