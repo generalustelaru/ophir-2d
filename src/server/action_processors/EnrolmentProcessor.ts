@@ -16,7 +16,7 @@ export class EnrolmentProcessor {
         if (this.isNameTaken(state.players, name))
             return { error: 'This name is already taken' }
 
-        const stateUpdate = this.processPlayer(state, color, name);
+        const stateUpdate = this.addPlayerEntry(state, color, name);
 
         if (stateUpdate.err) {
             console.log(stateUpdate.message);
@@ -40,7 +40,7 @@ export class EnrolmentProcessor {
         return players.some(player => player.name === name);
     }
 
-    private processPlayer(state: LobbyState, playerColor: PlayerColor, playerName: string | null): Probable<LobbyState> {
+    private addPlayerEntry(state: LobbyState, playerColor: PlayerColor, playerName: string | null): Probable<LobbyState> {
         const incompatibleStatuses: Array<GameStatus> = ['full', 'setup', 'play', 'ended'];
 
         if (incompatibleStatuses.includes(state.gameStatus)) {
