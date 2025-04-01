@@ -6,9 +6,9 @@ import { LobbyState, GameSetupPayload, ClientIdResponse, ServerMessage, ResetRes
 import { StateBundle, WsClient } from './server_types';
 import { gameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
-import { GameSession } from './classes/GameSession';
+import { GameSession } from './GameSession';
 import { validator } from "./services/validation/ValidatorService";
-import { EnrolmentService } from './services/session/EnrolmentService';
+import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 
@@ -89,7 +89,7 @@ const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: WS_PORT });
 // const setupService: GameSetupService = GameSetupService.getInstance();
 const tools = new ToolService();
-const enroller = new EnrolmentService();
+const enroller = new EnrolmentProcessor();
 
 let lobbyState: LobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
 lobbyState.gameId = randomUUID();

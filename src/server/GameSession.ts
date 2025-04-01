@@ -1,16 +1,16 @@
 import process from 'process';
-import { DataDigest, StateBundle } from "../server_types";
+import { DataDigest, StateBundle } from "./server_types";
 import {
     GameState, ClientRequest, GameStateResponse,
     ChatEntry, ServerMessage, Action,
-} from "../../shared_types";
-import { validator } from "../services/validation/ValidatorService";
-import { GameStateHandler } from "../data_classes/GameState";
-import { PlayerHandler } from '../data_classes/Player';
-import { IDLE_CHECKS } from "../configuration";
+} from "./../shared_types";
+import { validator } from "./services/validation/ValidatorService";
+import { GameStateHandler } from "./object_handlers/GameStateHandler";
+import { PlayerHandler } from './object_handlers/PlayerHandler';
+import { IDLE_CHECKS } from "./configuration";
 // import { PrivateStateHandler } from '../data_classes/PrivateState';
-import lib from '../services/session/library'
-import { PlayService } from '../services/session/PlayService';
+import lib from './action_processors/library'
+import { PlayProcessor } from './action_processors/PlayProcessor';
 
 const serverName = String(process.env.SERVER_NAME);
 
@@ -18,14 +18,14 @@ export class GameSession {
 
     // private privateState: PrivateStateHandler;
     private state: GameStateHandler;
-    private play: PlayService;
+    private play: PlayProcessor;
     private idleCheckInterval: NodeJS.Timeout | null = null;
 
     constructor(bundle: StateBundle) {
         (global as any).myInstance = this;
         // this.privateState = bundle.privateState;
         this.state = bundle.gameState;
-        this.play = new PlayService(bundle);
+        this.play = new PlayProcessor(bundle);
         const activePlayer = this.state.getActivePlayer();
 
         if (!activePlayer) {

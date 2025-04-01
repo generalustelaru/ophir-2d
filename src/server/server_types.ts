@@ -3,9 +3,9 @@ import {
     TradeGood, GoodsLocationName, MessagePayload, ExchangeTier,
 } from '../shared_types';
 import { WebSocket } from 'ws';
-import { GameStateHandler } from './data_classes/GameState';
-import { PlayerHandler } from './data_classes/Player';
-import { PrivateStateHandler } from './data_classes/PrivateState';
+import { GameStateHandler } from './object_handlers/GameStateHandler';
+import { PlayerHandler } from './object_handlers/PlayerHandler';
+import { PrivateStateHandler } from './object_handlers/PrivateStateHandler';
 
 export type WsClient = {
     clientID: string,
