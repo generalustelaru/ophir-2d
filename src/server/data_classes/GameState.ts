@@ -6,6 +6,7 @@ import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
 export class GameStateHandler implements ObjectHandler<GameState>{
+    private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
@@ -20,11 +21,13 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     private itemSupplies: Writable<ItemSupplies>;
     private rival: Writable<RivalData>;
 
-    constructor(props: GameState) {
+    constructor(serverName: string, state: GameState) {
+        this.serverName = readable(serverName);
+
         const {
             gameId, sessionOwner, setup, isStatusResponse, gameStatus, gameResults,
             availableSlots, players, market, temple, chat, itemSupplies, rival,
-        } = props;
+        } = state;
 
         this.gameId = readable(gameId);
         this.sessionOwner = readable(sessionOwner);
@@ -70,6 +73,10 @@ export class GameStateHandler implements ObjectHandler<GameState>{
 
     public addChatEntry(chat: ChatEntry) {
         this.chat.add(chat);
+    }
+
+    public addServerMessage(message: string) {
+        this.chat.add({ id: null, name: this.serverName.get(), message });
     }
 
     // MARK: Player
