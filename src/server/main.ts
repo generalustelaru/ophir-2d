@@ -7,7 +7,7 @@ import { StateBundle, WsClient } from './server_types';
 import { gameSetupService } from './services/GameSetupService';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './classes/GameSession';
-import { ValidatorService } from "./services/validation/ValidatorService";
+import { validator } from "./services/validation/ValidatorService";
 import { EnrolmentService } from './services/session/EnrolmentService';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
@@ -89,7 +89,6 @@ const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: WS_PORT });
 // const setupService: GameSetupService = GameSetupService.getInstance();
 const tools = new ToolService();
-const validator = new ValidatorService();
 const enroller = new EnrolmentService();
 
 let lobbyState: LobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);

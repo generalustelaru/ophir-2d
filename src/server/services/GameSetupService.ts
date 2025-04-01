@@ -64,7 +64,9 @@ class GameSetupService {
             mapPairings
         );
 
-        const gameState = new GameStateHandler({
+        const gameState = new GameStateHandler(
+            SERVER_NAME,
+            {
             isStatusResponse: false,
             gameId: lobbyState.gameId,
             gameStatus: 'play', // TODO: should create dedicated service/method for handling this intermediary state. Maybe keep using scaffolds but determine everything else. set started after player selection
@@ -96,7 +98,7 @@ class GameSetupService {
                 privateState.getDestinationPackages(),
             ),
         });
-        gameState.addChatEntry({ id: null, name: SERVER_NAME, message: 'Game started!' });
+        gameState.addServerMessage('Game started!');
 
         return { gameState, privateState };
     };

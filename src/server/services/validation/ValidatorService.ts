@@ -15,7 +15,7 @@ import {
 } from "../../../shared_types";
 import { lib, ObjectTests } from "./library"
 
-export class ValidatorService {
+class ValidatorService {
 
     public validateClientRequest(request: unknown) {
         const clientRequest = this.validateObject<ClientRequest>(
@@ -225,3 +225,5 @@ export class ValidatorService {
         return value as T;
     }
 }
+
+export const validator = new ValidatorService();
