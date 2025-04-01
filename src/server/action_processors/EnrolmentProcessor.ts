@@ -1,9 +1,9 @@
-import { ErrorResponse, GameStatus, LobbyState, LobbyStateResponse, PlayerColor, PlayerEntry } from "../../../shared_types";
-import lib, { Probable } from '../session/library';
+import { ErrorResponse, GameStatus, LobbyState, LobbyStateResponse, PlayerColor, PlayerEntry } from "../../shared_types";
+import lib, { Probable } from './library';
 
 const serverName = String(process.env.SERVER_NAME);
 
-export class EnrolmentService {
+export class EnrolmentProcessor {
 
     public processEnrol(state: LobbyState, color: PlayerColor | null, name: string | null): LobbyStateResponse | ErrorResponse {
 

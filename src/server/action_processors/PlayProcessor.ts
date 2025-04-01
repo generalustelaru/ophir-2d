@@ -1,15 +1,15 @@
-import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, GameStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal } from '../../../shared_types';
-import { GameStateHandler } from '../../data_classes/GameState';
-import { PlayerHandler } from '../../data_classes/Player';
-import { PrivateStateHandler } from '../../data_classes/PrivateState';
-import serverConstants from '../../server_constants';
-import { DataDigest, PlayerCountables, StateBundle } from '../../server_types';
-import lib, { Probable } from '../session/library';
-import { validator } from '../validation/ValidatorService'
+import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, GameStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal } from '../../shared_types';
+import { GameStateHandler } from '../object_handlers/GameStateHandler';
+import { PlayerHandler } from '../object_handlers/PlayerHandler';
+import { PrivateStateHandler } from '../object_handlers/PrivateStateHandler';
+import serverConstants from '../server_constants';
+import { DataDigest, PlayerCountables, StateBundle } from '../server_types';
+import lib, { Probable } from './library';
+import { validator } from '../services/validation/ValidatorService'
 
 const { TRADE_DECK_B } = serverConstants;
 
-export class PlayService {
+export class PlayProcessor {
     private gameState: GameStateHandler;
     private privateState: PrivateStateHandler;
     constructor(stateBundle: StateBundle) {
