@@ -1,6 +1,6 @@
 import {
     BarrierId, ZoneName, PlayerColor, LobbyState, Trade, LocationData, SpecialistName, Specialist,
-    TradeGood, GoodsLocationName, MessagePayload, ExchangeTier,
+    TradeGood, GoodsLocationName, MessagePayload, ExchangeTier, ServerMessage,
 } from '../shared_types';
 import { WebSocket } from 'ws';
 import { GameStateHandler } from './object_handlers/GameStateHandler';
@@ -11,6 +11,11 @@ export type WsClient = {
     clientID: string,
     gameID: string | null,
     socket: WebSocket
+}
+
+export type WsDigest = {
+    senderOnly: boolean,
+    message: ServerMessage,
 }
 
 export type DestinationSetupReference = {
@@ -75,4 +80,8 @@ export type ServerConstants = {
 
 export interface ObjectHandler<T> {
     toDto: () => T,
+}
+
+export interface SessionProcessor {
+    getState: () => ServerMessage
 }
