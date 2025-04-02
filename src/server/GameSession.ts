@@ -1,85 +1,165 @@
 import process from 'process';
-import { DataDigest, StateBundle } from "./server_types";
-import {
-    GameState, ClientRequest, GameStateResponse,
-    ChatEntry, ServerMessage, Action,
-} from "./../shared_types";
-import { validator } from "./services/validation/ValidatorService";
+import {WsDigest, DataDigest } from "./server_types";
+import { randomUUID } from 'crypto';
+import { ClientRequest, ServerMessage, Action, LobbyState, ResetResponse, GameState } from "./../shared_types";
 import { GameStateHandler } from "./object_handlers/GameStateHandler";
 import { PlayerHandler } from './object_handlers/PlayerHandler';
-import { IDLE_CHECKS } from "./configuration";
-// import { PrivateStateHandler } from '../data_classes/PrivateState';
 import lib from './action_processors/library'
 import { PlayProcessor } from './action_processors/PlayProcessor';
-
-const serverName = String(process.env.SERVER_NAME);
+import { SetupProcessor } from './action_processors/SetupProcessor';
+import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
+import serverConstants from '../server/server_constants';
 
 export class GameSession {
+    private gameState: GameStateHandler | null = null;
+    private enrol: EnrolmentProcessor | null;
+    private setup: SetupProcessor | null = null;
+    private play: PlayProcessor | null = null;
 
-    // private privateState: PrivateStateHandler;
-    private state: GameStateHandler;
-    private play: PlayProcessor;
-    private idleCheckInterval: NodeJS.Timeout | null = null;
+    constructor() {
+        this.enrol = new EnrolmentProcessor(this.getNewState());
+        console.info('Game session created');
+    }
 
-    constructor(bundle: StateBundle) {
-        (global as any).myInstance = this;
-        // this.privateState = bundle.privateState;
-        this.state = bundle.gameState;
-        this.play = new PlayProcessor(bundle);
-        const activePlayer = this.state.getActivePlayer();
+    public localReset() {
+        this.play?.killIdleChecks();
+        this.play = null;
+        this.setup = null;
+        this.enrol = new EnrolmentProcessor(this.getNewState());
+    }
 
-        if (!activePlayer) {
-            throw new Error('No active player found');
+    private wipeSession(request: ClientRequest, state: LobbyState|GameState): ResetResponse | null {
+        const { playerColor } = request;
+        const { sessionOwner } = state;
+        if (playerColor != sessionOwner) {
+            return null;
         }
 
-        console.info('Game session created');
+        this.play?.killIdleChecks();
+        this.play = null;
+        this.setup = null;
+        this.enrol = new EnrolmentProcessor(this.getNewState());
 
-        if(IDLE_CHECKS)
-            this.startIdleChecks();
+        return { resetFrom: request.playerName || request.playerColor || 'anon'};
     }
 
-    public getState(): GameState {
-        return this.state.toDto();
+    public processAction(request: ClientRequest): WsDigest {
+        switch (true) {
+            case Boolean(this.enrol):
+                return this.processEnrolAction(request);
+            case Boolean(this.setup):
+                return this.processSetupAction(request);
+            case Boolean(this.play):
+                return this.processPlayAction(request);
+            default:
+                return this.issueNominalDigest(lib.issueErrorResponse('State is missing in session.'));
+        }
     }
 
-    public getSessionOwner() {
-        return this.state.getSessionOwner();
+    // MARK: ENROL
+    private processEnrolAction(request: ClientRequest): WsDigest {
+
+        if (!this.enrol)
+            return this.issueNominalDigest({ error: 'Could not resolve enrol state' });
+
+        const { playerColor, playerName, message } = request;
+        const { action, payload } = message;
+
+        switch (action) {
+            case Action.inquire:
+                return this.issueNominalDigest({ lobby: this.enrol.getState()});
+            case Action.enroll:
+                return this.issueBroadcastDigest(this.enrol.processEnrol(playerColor, playerName));
+            case Action.chat:
+                return this.issueBroadcastDigest(this.enrol.processChat(request));
+            case Action.reset: {
+                const response = this.wipeSession(request, this.enrol.getState());
+
+                if (!response)
+                    return this.issueNominalDigest(lib.issueErrorResponse(
+                        'Only session owner may reset.',
+                        { playerColor, sessionOwner: this.enrol.getState().sessionOwner }
+                    ));
+
+                return this.issueBroadcastDigest(response);
+            }
+            case Action.start: {
+                this.setup = new SetupProcessor();
+                const { privateState, gameState } = this.setup.processStart(
+                    this.enrol.getState(),
+                    payload
+                );
+                this.gameState = gameState;
+                this.enrol = null;
+                this.setup = null;
+                this.play = new PlayProcessor({ privateState, gameState });
+
+                return this.issueBroadcastDigest({ game: gameState.toDto() });
+            }
+            default:
+                return this.issueNominalDigest(
+                    lib.issueErrorResponse(`Unsupported enrol action: [${action}]`),
+                );
+        }
     }
 
-    public wipeSession(): null {
-        this.idleCheckInterval && clearInterval(this.idleCheckInterval);
-        delete (global as any).myInstance;
-
-        return null;
+    // MARK: SETUP
+    private processSetupAction(request: ClientRequest) {
+        const { action } = request.message;
+        return this.issueNominalDigest(
+            lib.issueErrorResponse('Action not supported!', { action }),
+        );
     }
 
-    // MARK: ACTION SWITCH
-    public processAction(request: ClientRequest): ServerMessage {
+    // MARK: PLAY
+    public processPlayAction(request: ClientRequest): WsDigest {
+
+        if (!this.play)
+            return this.issueNominalDigest(lib.issueErrorResponse('Session is not in play!'));
+
         const { playerColor, message } = request;
         const { action, payload } = message;
 
-        if (action === Action.get_status) {
-            return this.processStatusRequest();
+        if (!playerColor)
+            return this.issueNominalDigest(lib.issueErrorResponse('No player ID provided'));
+
+        if (action === Action.inquire)
+            return this.issueNominalDigest({ game: this.play.getState() })
+
+        if (action === Action.get_status)
+            return this.issueNominalDigest(this.processStatusRequest());
+
+        if (action === Action.reset) {
+            const result = this.wipeSession(request, this.play.getState());
+
+            if (!result)
+                return this.issueNominalDigest(lib.issueErrorResponse(
+                    'Only session owner may reset.',
+                    { playerColor, sessionOwner: this.play.getState().sessionOwner }
+                ));
+
+            return this.issueBroadcastDigest(result);
         }
 
-        if (!playerColor)
-            return lib.issueErrorResponse('No player ID provided');
-
-        const playerObject = this.state.getPlayer(playerColor);
+        const playerObject = this.gameState?.getPlayer(playerColor);
 
         if (!playerObject)
-            return lib.issueErrorResponse(`Player does not exist: ${playerColor}`);
+            return this.issueNominalDigest(
+                lib.issueErrorResponse(`Player does not exist: ${playerColor}`),
+            );
 
         const player = new PlayerHandler(playerObject);
         player.refreshTimeStamp();
 
         const digest: DataDigest = { player, payload }
 
-        if (action == Action.chat)
-            return this.processChat(digest);
+        if (action === Action.chat)
+            return this.issueBroadcastDigest(this.play.processChat(digest));
 
         if (!player.isActivePlayer())
-            return lib.issueErrorResponse(`It is not [${player.getIdentity().name}]'s turn!`);
+            return this.issueNominalDigest(lib.issueErrorResponse(
+                `It is not [${player.getIdentity().name}]'s turn!`,
+            ));
 
         const actionsWhileFrozen: Array<Action> = [
             Action.drop_item,
@@ -91,100 +171,77 @@ export class GameSession {
         ];
 
         if (player.isFrozen() && !actionsWhileFrozen.includes(action))
-            return lib.issueErrorResponse(`[${player.getIdentity().name}] is handling rival and cannot act.`)
+            return this.issueNominalDigest(lib.issueErrorResponse(
+                `[${player.getIdentity().name}] is handling rival and cannot act.`,
+            ));
 
-        switch (action) {
-            case Action.spend_favor:
-                return this.play.processFavorSpending(digest);
-            case Action.move:
-                return this.play.processMove(digest);
-            case Action.move_rival:
-                return this.play.processMove(digest, true);
-            case Action.reposition:
-                return this.play.processRepositioning(digest);
+        const result = (() => {
+            switch (action) {
+                case Action.spend_favor:
+                    return this.play.processFavorSpending(digest);
+                case Action.move:
+                    return this.play.processMove(digest);
+                case Action.move_rival:
+                    return this.play.processMove(digest, true);
+                case Action.reposition:
+                    return this.play.processRepositioning(digest);
                 case Action.reposition_rival:
-                return this.play.processRepositioning(digest, true);
-            case Action.load_good:
-                return this.play.processLoadGood(digest);
-            case Action.make_trade:
-                return this.play.processGoodsTrade(digest);
-            case Action.buy_metals:
-                return this.play.processMetalPurchase(digest);
-            case Action.donate_metals:
-                return this.play.processMetalDonation(digest);
-            case Action.end_turn:
-                return this.play.processEndTurn(digest);
-            case Action.end_rival_turn:
-                return this.play.processRivalTurn(digest);
-            case Action.shift_market:
-                return this.play.processRivalTurn(digest, true);
-            case Action.upgrade_cargo:
-                return this.play.processUpgrade(digest);
-            case Action.drop_item:
-                return this.play.processItemDrop(digest);
-            default:
-                return lib.issueErrorResponse(`Unknown action: ${action}`);
+                    return this.play.processRepositioning(digest, true);
+                case Action.load_good:
+                    return this.play.processLoadGood(digest);
+                case Action.make_trade:
+                    return this.play.processGoodsTrade(digest);
+                case Action.buy_metals:
+                    return this.play.processMetalPurchase(digest);
+                case Action.donate_metals:
+                    return this.play.processMetalDonation(digest);
+                case Action.end_turn:
+                    return this.play.processEndTurn(digest);
+                case Action.end_rival_turn:
+                    return this.play.processRivalTurn(digest);
+                case Action.shift_market:
+                    return this.play.processRivalTurn(digest, true);
+                case Action.upgrade_cargo:
+                    return this.play.processUpgrade(digest);
+                case Action.drop_item:
+                    return this.play.processItemDrop(digest);
+                default:
+                    return lib.issueErrorResponse(`Unknown action: ${action}`);
+            }
+        })();
+
+        if ('error' in result)
+            return this.issueNominalDigest(result);
+
+        return this.issueBroadcastDigest(result);
+    }
+
+    private processStatusRequest() {
+        const stateDto = this.gameState?.toDto();
+
+        if (stateDto) {
+            stateDto.isStatusResponse = true;
+
+            return { game: stateDto };
         }
+
+        return lib.issueErrorResponse('status update is not suppoorted at this time.');
     }
 
-    private processStatusRequest(): GameStateResponse {
-        const stateDto = this.state.toDto()
-        stateDto.isStatusResponse = true;
+    private issueNominalDigest(message: ServerMessage): WsDigest {
 
-        return { game: stateDto };
+        return { senderOnly: true, message }
     }
 
-    // MARK: CHAT
-    private processChat(data: DataDigest) {
-        const { player , payload } = data;
-        const chatPayload = validator.validateChatPayload(payload);
+    private issueBroadcastDigest(message: ServerMessage): WsDigest {
 
-        if (!chatPayload)
-            return lib.validationErrorResponse();
-
-        const { id, name } = player.getIdentity();
-        this.state.addChatEntry({
-            id,
-            name,
-            message: chatPayload.input,
-        });
-
-        return this.issueStateResponse(player);
+        return { senderOnly: false, message }
     }
 
-    // MARK: startIdleChecks
-    private startIdleChecks(): void {
-        this.idleCheckInterval = setInterval(() => {
-            const activePlayer = this.state.getActivePlayer();
+    private getNewState() {
+        const lobbyState = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE)) as LobbyState;
+        const gameId = randomUUID();
 
-            if (!activePlayer) {
-                lib.issueErrorResponse('No active player found in idle check!')
-                return;
-            }
-
-            const timeNow = Date.now();
-
-            if (timeNow - activePlayer.timeStamp > 60000 && !activePlayer.isIdle) {
-                activePlayer.isIdle = true;
-                this.state.savePlayer(activePlayer);
-                this.addServerMessage(`${activePlayer.name} is idle`);
-                // this.processEndTurn(activePlayer.id);
-            }
-
-        }, 60000);
-    }
-
-    // MARK: addServerMessage
-    private addServerMessage(message: string): void {
-        const chatEntry: ChatEntry = { id: null, name: serverName, message };
-        this.state.addChatEntry(chatEntry);
-    }
-
-    // MARK: RETURN WRAPPERS
-
-    private issueStateResponse(player: PlayerHandler): GameStateResponse {
-        this.state.savePlayer(player.toDto());
-
-        return { game: this.state.toDto() };
+        return { ...lobbyState, gameId }
     }
 }

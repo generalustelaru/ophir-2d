@@ -5,16 +5,25 @@ import { PrivateStateHandler } from '../object_handlers/PrivateStateHandler';
 import serverConstants from '../server_constants';
 import { DataDigest, PlayerCountables, StateBundle } from '../server_types';
 import lib, { Probable } from './library';
-import { validator } from '../services/validation/ValidatorService'
+import { validator } from '../services/validation/ValidatorService';
+import { IDLE_CHECKS } from "../configuration";
 
 const { TRADE_DECK_B } = serverConstants;
 
 export class PlayProcessor {
+    private idleCheckInterval: NodeJS.Timeout | null = null;
     private gameState: GameStateHandler;
     private privateState: PrivateStateHandler;
     constructor(stateBundle: StateBundle) {
         this.gameState = stateBundle.gameState;
         this.privateState = stateBundle.privateState;
+
+        if (IDLE_CHECKS)
+            this.startIdleChecks();
+    }
+
+    public getState() {
+        return this.gameState.toDto();
     }
 
     // MARK: MOVE
@@ -516,6 +525,27 @@ export class PlayProcessor {
         return lib.issueErrorResponse(`Conditions for upgrade not met`, player.toDto());
     }
 
+    public processChat(data: DataDigest) {
+        const { player, payload } = data;
+        const chatPayload = validator.validateChatPayload(payload);
+
+        if (!chatPayload)
+            return lib.validationErrorResponse();
+
+        const { id, name } = player.getIdentity();
+
+        if (!this.gameState)
+            return lib.issueErrorResponse('Cannot add chat to state.');
+
+        this.gameState.addChatEntry({
+            id,
+            name,
+            message: chatPayload.input,
+        });
+
+        return this.issueStateResponse(player);
+    }
+
     // MARK: PRIVATE
 
     private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Probable<Array<LocationAction>> {
@@ -691,5 +721,30 @@ export class PlayProcessor {
         this.gameState.savePlayer(player.toDto());
 
         return { game: this.gameState.toDto() };
+    }
+
+    private startIdleChecks(): void {
+        this.idleCheckInterval = setInterval(() => {
+            const activePlayer = this.gameState.getActivePlayer();
+
+            if (!activePlayer) {
+                lib.issueErrorResponse('No active player found in idle check!')
+                return;
+            }
+
+            const timeNow = Date.now();
+
+            if (timeNow - activePlayer.timeStamp > 60000 && !activePlayer.isIdle) {
+                activePlayer.isIdle = true;
+                this.gameState.savePlayer(activePlayer);
+                this.gameState.addServerMessage(`${activePlayer.name} is idle`);
+                // this.processEndTurn(activePlayer.id);
+            }
+
+        }, 60000);
+    }
+
+    public killIdleChecks() {
+        this.idleCheckInterval && clearInterval(this.idleCheckInterval);
     }
 }

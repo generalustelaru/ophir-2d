@@ -1,14 +1,11 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import serverConstants from './server_constants';
-import { LobbyState, GameSetupPayload, ClientIdResponse, ServerMessage, ResetResponse, Action } from '../shared_types';
-import { StateBundle, WsClient } from './server_types';
-import { gameSetupService } from './services/GameSetupService';
+import { ClientIdResponse, ServerMessage, ResetResponse, Action } from '../shared_types';
+import { WsClient } from './server_types';
 import { ToolService } from './services/ToolService';
 import { GameSession } from './GameSession';
 import { validator } from "./services/validation/ValidatorService";
-import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 
@@ -61,8 +58,7 @@ function shutDown() {
 }
 function reset() {
     console.log('Session is resetting!');
-    singleSession = singleSession?.wipeSession() ?? null;
-    lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
+    singleSession.localReset();
     const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
 
     sendAll(resetMessage);
@@ -87,13 +83,9 @@ promptForInput();
 
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: WS_PORT });
-// const setupService: GameSetupService = GameSetupService.getInstance();
 const tools = new ToolService();
-const enroller = new EnrolmentProcessor();
 
-let lobbyState: LobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
-lobbyState.gameId = randomUUID();
-let singleSession: GameSession | null = null;
+const singleSession = new GameSession();
 
 function sendAll (message: ServerMessage): void {
     socketClients.forEach(client => {
@@ -168,92 +160,13 @@ socketServer.on('connection', function connection(socket) {
             return;
         }
 
-        if (action === Action.inquire) {
-            const stateResponse = singleSession
-                ? { game: singleSession.getState() }
-                : { lobby: lobbyState };
-
-            send(socket, stateResponse);
-
-            return;
-        }
-
-        if (action === Action.enroll) {
-            const message = enroller.processEnrol(lobbyState, playerColor, playerName);
-
-            if ('error' in message) {
-                send(socket, message);
-            } else {
-                lobbyState = message.lobby;
-                sendAll(message);
-            }
-
-            return;
-        }
-
-        if (action === Action.chat && !singleSession) {
-            const chatMessage = validator.validateChatPayload(payload);
-
-            if (!chatMessage) {
-                send(socket, { error: `Could not process chat message on ${playerColor}` })
-                return;
-            }
-
-            lobbyState.chat.push({
-                id: playerColor,
-                name: playerName ?? playerColor,
-                message: chatMessage.input,
-            });
-            sendAll({ lobby: lobbyState });
-
-            return;
-        }
-
-        if (action === Action.start) {
-            const setupDetails = validator.validateGameSetupPayload(payload);
-
-            if (!setupDetails) {
-                sendAll({error: 'Could not process setup request.'})
-
-                return;
-            }
-
-            const sessionCreated = processGameStart(setupDetails);
-
-            if (sessionCreated && singleSession) {
-                console.log('Game started');
-                sendAll({ game: singleSession.getState() });
-            } else {
-                sendAll({ error: 'Game start failed' });
-            }
-
-            return;
-        }
-
-        if (action === Action.reset) {
-            if (lobbyState.sessionOwner !== playerColor) {
-                send(socket, { error: 'Only session owner may reset.'});
-
-                return;
-            }
-
-            console.log('Session is resetting!');
-            singleSession = singleSession?.wipeSession() ?? null;
-            lobbyState = tools.getCopy(serverConstants.DEFAULT_NEW_STATE);
-            const resetResponse: ResetResponse = { resetFrom:  playerName ?? playerColor ?? 'anon' };
-
-            sendAll(resetResponse);
-
-            return;
-        }
-
         if (singleSession) {
             const response = singleSession.processAction(clientRequest);
 
-            if ('error' in response)
-                send(socket, response);
+            if (response.senderOnly)
+                send(socket, response.message);
             else
-                sendAll(response);
+                sendAll(response.message);
 
             return;
         }
@@ -268,18 +181,3 @@ process.on('SIGINT', () => {
     console.log('Shutting down...');
     process.exit(0);
 });
-
-function processGameStart(payload: GameSetupPayload): boolean {
-
-    try {
-        const bundle: StateBundle = gameSetupService.produceGameData(lobbyState, payload);
-        singleSession = new GameSession(bundle);
-    } catch (error) {
-        console.error('Game start failed:', error);
-
-        return false;
-    }
-
-    return true;
-}
-
