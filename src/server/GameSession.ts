@@ -1,4 +1,3 @@
-import process from 'process';
 import {WsDigest, DataDigest } from "./server_types";
 import { randomUUID } from 'crypto';
 import { ClientRequest, ServerMessage, Action, LobbyState, ResetResponse, GameState } from "./../shared_types";
