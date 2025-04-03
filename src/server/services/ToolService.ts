@@ -1,6 +1,5 @@
 
-export class ToolService {
-
+class ToolService {
     /**
      * Deep copy a data object
      * 'cc' stands for carbon copy/copycat/clear clone/cocopuffs etc.
@@ -29,3 +28,6 @@ export class ToolService {
         return null;
     }
 }
+
+const tools = new ToolService();
+export default tools;

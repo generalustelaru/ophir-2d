@@ -5,7 +5,7 @@ import {
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
-import { ToolService } from '../services/ToolService';
+import tools from '../services/ToolService';
 import { GameStateHandler } from '../object_handlers/GameStateHandler';
 import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS} from '../configuration';
 import { PlayerHandler } from '../object_handlers/PlayerHandler';
@@ -19,8 +19,6 @@ console.log(activeKeys);
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
 
 export class SetupProcessor {
-
-    private tools: ToolService = new ToolService();
 
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
@@ -37,7 +35,7 @@ export class SetupProcessor {
         if (lobbyState.sessionOwner === null)
             throw new Error('Cannot start game while the session owner is null');
 
-        const playerEntries = this.tools.getCopy(lobbyState.players);
+        const playerEntries = tools.getCopy(lobbyState.players);
 
         if (!playerEntries.every(p => Boolean(p.id)))
             throw new Error('Found unidentifiable players.');
@@ -68,7 +66,7 @@ export class SetupProcessor {
             {
             isStatusResponse: false,
             gameId: lobbyState.gameId,
-            gameStatus: 'play', // TODO: should create dedicated service/method for handling this intermediary state. Maybe keep using scaffolds but determine everything else. set started after player selection
+            gameStatus: 'play', // TODO: Expand this class to handle two calls, one for handling and intermediary state (without market but w/ specialist selection) and the other to return the play state.
             gameResults: [],
             sessionOwner: lobbyState.sessionOwner,
             chat: lobbyState.chat,
@@ -152,7 +150,7 @@ export class SetupProcessor {
 
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<DestinationPackage> {
 
-        return this.tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
+        return tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
 
             barrierIds.forEach(barrierId => {
 
@@ -180,7 +178,7 @@ export class SetupProcessor {
         players: Array<PlayerState>,
         startingPlayerColor: PlayerColor
     } {
-        const initialRules = this.tools.getCopy(moveRules[0]);
+        const initialRules = tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
         const randomScaffolds = scaffolds
             .map(p => {return { player: p, order: Math.random() }})
@@ -343,7 +341,7 @@ export class SetupProcessor {
 
     // MARK: Exchange
     private filterCostTiers(playerCount: number): Array<ExchangeTier> {
-        const tiers = this.tools.getCopy(COST_TIERS);
+        const tiers = tools.getCopy(COST_TIERS);
 
         if (SHORT_GAME) {
             return [tiers[0]];

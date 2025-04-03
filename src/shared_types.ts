@@ -18,7 +18,7 @@ export enum Action {
     make_trade = 'make_trade',
     buy_metals = 'buy_metals',
     donate_metals = 'donate_metals',
-    rebind_id = 'rebind_id',
+    waiver_client = 'rebind_id',
     inquire = "inquire",
     enroll = "enroll",
     end_turn = "end_turn",
@@ -245,12 +245,12 @@ export type DropItemPayload = { item: ItemName }
 export type TradePayload = { slot: MarketSlotKey, location: LocationName }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
-export type RebindClientPayload = { referenceId: string, myId: string }
+export type WaiverClientPayload = { waiveredId: string, myId: string }
 
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
     | RepositioningPayload | TradePayload | MetalPurchasePayload
-    | MetalDonationPayload | RebindClientPayload | LoadGoodPayload;
+    | MetalDonationPayload | WaiverClientPayload | LoadGoodPayload;
 
 export type MessageAction = LaconicAction | VerboiseAction
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
@@ -260,7 +260,7 @@ type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
 
 export type VerboiseAction =
     | Action.chat | Action.start | Action.move | Action.load_good | Action.drop_item | Action.reposition
-    | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.rebind_id;
+    | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client;
 export type LaconicAction =
     | Action.inquire | Action.enroll | Action.end_turn | Action.reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival;
@@ -275,11 +275,11 @@ export type RepositionMessage = MessageFormat<Action.reposition | Action.reposit
 export type TradeMessage = MessageFormat<Action.make_trade, TradePayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonationPayload>;
-export type RebindIdMessage = MessageFormat<Action.rebind_id, RebindClientPayload>;
+export type WaiverClientMessage = MessageFormat<Action.waiver_client, WaiverClientPayload>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage
     | RepositionMessage | TradeMessage | BuyMetalsMessage | DonateMetalMessage
-    | ChatMessage | RebindIdMessage;
+    | ChatMessage | WaiverClientMessage;
 
 export type ClientRequest = {
     gameId: string | null,

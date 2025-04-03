@@ -2,7 +2,7 @@ import { HexCoordinates } from "../../../client/client_types";
 import {
     ChatPayload,
     ClientRequest,
-    RebindClientPayload,
+    WaiverClientPayload,
     GameSetupPayload,
     MovementPayload,
     Coordinates,
@@ -57,11 +57,11 @@ class ValidatorService {
     }
 
     public validateRebindClientPayload(payload: unknown) {
-        return this.validateObject<RebindClientPayload>(
-            'RebindClientPayload',
+        return this.validateObject<WaiverClientPayload>(
+            'WaiverClientPayload',
             payload,
             [
-                { key: 'referenceId', type: 'string', nullable: false },
+                { key: 'waiveredId', type: 'string', nullable: false },
                 { key: 'myId', type: 'string', nullable: false },
             ],
         );

@@ -2,7 +2,7 @@ import { ClientEvent } from "../client_types";
 
 export abstract class Communicator {
 
-    protected broadcastEvent(
+    protected createEvent(
         event: ClientEvent
     ): void {
         const { type, detail } = event;

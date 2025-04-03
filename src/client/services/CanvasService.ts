@@ -84,7 +84,7 @@ class CanvasClass extends Communicator {
         this.setupGroup.drawElements();
 
         if (!localState.playerColor) {
-            this.broadcastEvent({
+            this.createEvent({
                 type: 'info',
                 detail: { text: 'You are a spectator' }
             });

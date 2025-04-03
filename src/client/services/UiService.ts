@@ -73,7 +73,7 @@ class UserInterfaceClass extends Communicator {
 
         if (!message || false === !!message.match(/[^\s]/)) return;
 
-        return this.broadcastEvent({
+        return this.createEvent({
             type: 'action',
             detail: {
                 action: Action.chat,
@@ -105,12 +105,12 @@ class UserInterfaceClass extends Communicator {
     private processStart = (): void => {
         this.startButton.disable();
 
-        return this.broadcastEvent({ type: Action.start, detail: null });
+        return this.createEvent({ type: Action.start, detail: null });
     }
 
     private processReset = (): void => {
 
-        return this.broadcastEvent({
+        return this.createEvent({
             type: 'action',
             detail: { action: Action.reset , payload: null }
         });
@@ -126,7 +126,7 @@ class UserInterfaceClass extends Communicator {
             localState.playerColor = selectedId;
             sessionStorage.setItem('localState', JSON.stringify(localState));
 
-            return this.broadcastEvent({
+            return this.createEvent({
                 type: 'action',
                 detail: { action: Action.enroll, payload: null }
             });
