@@ -1,6 +1,6 @@
 import {
-    ZoneName, PlayerColor, GameState, Coordinates, LocationName, ItemName,
-    LobbyState, Trade, MarketOffer, PlayerState, Metal, MetalPrices, Currency,
+    ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName,
+    EnrolmentState, Trade, MarketOffer, PlayerState, Metal, MetalPrices, Currency,
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
 } from '../shared_types';
 import Konva from 'konva';
@@ -51,8 +51,8 @@ export interface HTMLHandlerInterface {
 }
 
 export interface MegaGroupInterface {
-    drawElements(state: GameState): void,
-    update(state: GameState): void,
+    drawElements(state: PlayState): void,
+    update(state: PlayState): void,
 }
 
 export interface DynamicGroupInterface<S> {
@@ -120,13 +120,13 @@ export type ActionEvent = ClientEventInterface<"action", ClientMessage>;
 export type ErrorEvent = ClientEventInterface<"error", ErrorDetail>;
 export type InfoEvent = ClientEventInterface<"info", InfoDetail>;
 export type ResetEvent = ClientEventInterface<"reset", ResetResponse>;
-export type GameStateUpdateEvent = ClientEventInterface<"game_update", GameState>;
-export type LobbyStateUpdateEvent = ClientEventInterface<"lobby_update", LobbyState>;
+export type PlayStateUpdateEvent = ClientEventInterface<"play_update", PlayState>;
+export type EnrolmentStateUpdateEvent = ClientEventInterface<"enrolment_update", EnrolmentState>;
 export type IdentificationEvent = ClientEventInterface<"identification", ClientIdResponse>;
 
 export type ClientEvent =
     | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent
-    | ResetEvent | GameStateUpdateEvent | LobbyStateUpdateEvent;
+    | ResetEvent | PlayStateUpdateEvent | EnrolmentStateUpdateEvent;
 
 export type InfoDetail = {
     text: string,

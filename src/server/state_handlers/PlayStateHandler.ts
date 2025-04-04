@@ -1,17 +1,17 @@
 import {
-    ChatEntry, GameSetup, GameStatus, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, PlayerState, PlayerColor,
-    GameState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings, Coordinates,
+    ChatEntry, GameSetup, SessionPhase, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, PlayerState, PlayerColor,
+    PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings, Coordinates,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
-export class GameStateHandler implements ObjectHandler<GameState>{
+export class PlayStateHandler implements ObjectHandler<PlayState>{
     private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
     private isStatusResponse: Writable<boolean>;
-    private gameStatus: Writable<GameStatus>;
+    private sessionPhase: Writable<SessionPhase>;
     private gameResults: Writable<Array<PlayerCountables>>;
     private availableSlots: Writable<Array<PlayerColor>>;
     private players: ArrayWritable<PlayerState>;
@@ -21,11 +21,11 @@ export class GameStateHandler implements ObjectHandler<GameState>{
     private itemSupplies: Writable<ItemSupplies>;
     private rival: Writable<RivalData>;
 
-    constructor(serverName: string, state: GameState) {
+    constructor(serverName: string, state: PlayState) {
         this.serverName = readable(serverName);
 
         const {
-            gameId, sessionOwner, setup, isStatusResponse, gameStatus, gameResults,
+            gameId, sessionOwner, setup, isStatusResponse, sessionPhase: gameStatus, gameResults,
             availableSlots, players, market, temple, chat, itemSupplies, rival,
         } = state;
 
@@ -33,7 +33,7 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         this.sessionOwner = readable(sessionOwner);
         this.setup = readable(setup);
         this.isStatusResponse = writable(isStatusResponse);
-        this.gameStatus = writable(gameStatus);
+        this.sessionPhase = writable(gameStatus);
         this.gameResults = writable(gameResults);
         this.availableSlots = writable(availableSlots);
         this.players = arrayWritable(players, 'id');
@@ -44,14 +44,14 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         this.rival = writable(rival);
     }
 
-    public toDto(): GameState {
+    public toDto(): PlayState {
 
         return {
             gameId: this.gameId.get(),
             sessionOwner: this.sessionOwner.get(),
             setup: this.setup.get(),
             isStatusResponse: this.isStatusResponse.get(),
-            gameStatus: this.gameStatus.get(),
+            sessionPhase: this.sessionPhase.get(),
             gameResults: this.gameResults.get(),
             availableSlots: this.availableSlots.get(),
             players: this.players.getAll(),
@@ -280,8 +280,8 @@ export class GameStateHandler implements ObjectHandler<GameState>{
         this.gameResults.set(results);
     }
 
-    public setGameStatus(status: GameStatus) {
-        this.gameStatus.set(status);
+    public setPhase(status: SessionPhase) {
+        this.sessionPhase.set(status);
     }
 
     public getTemple() {
@@ -330,6 +330,6 @@ export class GameStateHandler implements ObjectHandler<GameState>{
      */
     public registerGameEnd(results: PlayerCountables[]) {
         this.gameResults.set(results);
-        this.gameStatus.set('ended');
+        this.sessionPhase.set('ended');
     }
 }

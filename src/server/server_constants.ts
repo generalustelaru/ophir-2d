@@ -165,7 +165,7 @@ const serverConstants: ServerConstants = {
 
     DEFAULT_NEW_STATE: {
         gameId: null,
-        gameStatus: 'empty',
+        sessionPhase: 'inactive',
         sessionOwner: null,
         chat: [],
         availableSlots: [

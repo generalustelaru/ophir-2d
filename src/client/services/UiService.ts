@@ -1,4 +1,4 @@
-import { PlayerColor, LobbyState, ChatEntry, Action, GameStatus, GameState } from '../../shared_types';
+import { PlayerColor, EnrolmentState, ChatEntry, Action, SessionPhase, PlayState } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
@@ -21,7 +21,7 @@ class UserInterfaceClass extends Communicator {
     private chatSendButton: Button;
     private kickPlayerButton: Button;
     private availableSlots: Array<PlayerColor> = ['Green', 'Purple', 'Red', 'Yellow'];
-    private gameStatus: GameStatus = 'empty';
+    private sessionPhase: SessionPhase = 'inactive';
 
     constructor() {
         super();
@@ -83,11 +83,11 @@ class UserInterfaceClass extends Communicator {
     }
 
     private handleColorSelect = () => {
-        switch(this.gameStatus) {
-            case 'empty':
+        switch(this.sessionPhase) {
+            case 'inactive':
                 this.createButton.enable();
                 break;
-            case 'created':
+            case 'owned':
                 this.joinButton.enable();
                 break;
             default:
@@ -128,7 +128,7 @@ class UserInterfaceClass extends Communicator {
 
             return this.createEvent({
                 type: 'action',
-                detail: { action: Action.enroll, payload: null }
+                detail: { action: Action.enrol, payload: null }
             });
         }
 
@@ -157,9 +157,9 @@ class UserInterfaceClass extends Communicator {
         this.chatSendButton.disable();
     }
 
-    public updateAsLobby(state: LobbyState): void {
+    public updateAsEnrolment(state: EnrolmentState): void {
         this.availableSlots = state.availableSlots;
-        this.gameStatus = state.gameStatus;
+        this.sessionPhase = state.sessionPhase;
 
         this.updateChat(state.chat);
         this.disableButtons();
@@ -167,15 +167,15 @@ class UserInterfaceClass extends Communicator {
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
 
-        switch (this.gameStatus) {
-            case 'empty': this.handleEmptyState(); break;
-            case 'created': this.handleCreatedState(state); break;
+        switch (this.sessionPhase) {
+            case 'inactive': this.handleEmptyState(); break;
+            case 'owned': this.handleCreatedState(state); break;
             case 'full': this.handleFullState(state); break;
         }
     }
-    public updateAsGame(state: GameState): void {
+    public updateAsPlay(state: PlayState): void {
         this.availableSlots = state.availableSlots;
-        this.gameStatus = state.gameStatus;
+        this.sessionPhase = state.sessionPhase;
 
         this.updateChat(state.chat);
         this.disableButtons();
@@ -183,13 +183,13 @@ class UserInterfaceClass extends Communicator {
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
 
-        switch (this.gameStatus) {
-            case 'play': this.handleStartedState(state); break;
+        switch (this.sessionPhase) {
+            case 'playing': this.handleStartedState(state); break;
             case 'ended': this.handleEndedState(state); break;
         }
     }
 
-    private handleCreatedState(state: LobbyState): void {
+    private handleCreatedState(state: EnrolmentState): void {
 
         // guest/anon/spectator
         if (!localState.playerColor) {
@@ -224,7 +224,7 @@ class UserInterfaceClass extends Communicator {
         return this.setInfo('You may create the game');
     }
 
-    private handleFullState(state: LobbyState): void {
+    private handleFullState(state: EnrolmentState): void {
 
         this.disableElements(this.playerColorSelect, this.playerNameInput);
 
@@ -242,7 +242,7 @@ class UserInterfaceClass extends Communicator {
         return this.setInfo('The game might start at any time.');
     }
 
-    private handleStartedState(state: GameState): void {
+    private handleStartedState(state: PlayState): void {
 
         this.disableElements(this.playerColorSelect, this.playerNameInput);
 
@@ -262,7 +262,7 @@ class UserInterfaceClass extends Communicator {
         }
     }
 
-    private handleEndedState(state: GameState): void {
+    private handleEndedState(state: PlayState): void {
 
         if (state.isStatusResponse)
             return;

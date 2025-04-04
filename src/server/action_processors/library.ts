@@ -6,7 +6,7 @@ function pass<T>(data: T): Probable<T> {
     return { data }
 }
 
-function fail(message: string): Probable<any> {
+function fail<T>(message: string): Probable<T> {
     return { err: true, message }
 }
 

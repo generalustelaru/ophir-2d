@@ -1,15 +1,15 @@
 import {
     BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations,
-    Trade, MarketOffer, MarketSlotKey, LocationData, LobbyState, Fluctuation,
+    Trade, MarketOffer, MarketSlotKey, LocationData, EnrolmentState, Fluctuation,
     ExchangeTier, PlayerEntry, RivalData, GameSetupPayload,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import tools from '../services/ToolService';
-import { GameStateHandler } from '../object_handlers/GameStateHandler';
+import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS} from '../configuration';
-import { PlayerHandler } from '../object_handlers/PlayerHandler';
-import { PrivateStateHandler } from '../object_handlers/PrivateStateHandler';
+import { PlayerHandler } from '../state_handlers/PlayerHandler';
+import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from '../../client/client_types';
 
 // @ts-ignore
@@ -25,7 +25,7 @@ export class SetupProcessor {
      * @returns `{gameState, privateState}`  Used expressily for a game session instance.
      */
     public processStart(
-        lobbyState: LobbyState,
+        lobbyState: EnrolmentState,
         clientSetupPayload: GameSetupPayload,
     ): StateBundle {
 
@@ -61,12 +61,12 @@ export class SetupProcessor {
             mapPairings
         );
 
-        const gameState = new GameStateHandler(
+        const playState = new PlayStateHandler(
             SERVER_NAME,
             {
             isStatusResponse: false,
             gameId: lobbyState.gameId,
-            gameStatus: 'play', // TODO: Expand this class to handle two calls, one for handling and intermediary state (without market but w/ specialist selection) and the other to return the play state.
+            sessionPhase: 'playing', // TODO: Expand this class to handle two calls, one for handling and intermediary state (without market but w/ specialist selection) and the other to return the play state.
             gameResults: [],
             sessionOwner: lobbyState.sessionOwner,
             chat: lobbyState.chat,
@@ -95,9 +95,9 @@ export class SetupProcessor {
                 privateState.getDestinationPackages(),
             ),
         });
-        gameState.addServerMessage('Game started!');
+        playState.addServerMessage('Game started!');
 
-        return { gameState, privateState };
+        return { playState: playState, privateState };
     };
 
     // MARK: Map

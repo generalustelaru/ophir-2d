@@ -1,20 +1,20 @@
-import { ClientRequest, ErrorResponse, GameStatus, LobbyState, LobbyStateResponse, PlayerColor, PlayerEntry } from "../../shared_types";
+import { ClientRequest, ErrorResponse, SessionPhase, EnrolmentState, EnrolmentStateResponse, PlayerColor, PlayerEntry } from "../../shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
 
 const serverName = String(process.env.SERVER_NAME);
 
 export class EnrolmentProcessor {
-    state: LobbyState;
-    constructor(lobbyState: LobbyState) {
+    state: EnrolmentState;
+    constructor(lobbyState: EnrolmentState) {
         this.state = lobbyState;
     }
 
-    public getState(): LobbyState {
+    public getState(): EnrolmentState {
         return this.state;
     }
 
-    public processEnrol(color: PlayerColor | null, name: string | null): LobbyStateResponse | ErrorResponse {
+    public processEnrol(color: PlayerColor | null, name: string | null): EnrolmentStateResponse | ErrorResponse {
 
         if (!color)
             return { error: 'Color is missing!' }
@@ -35,7 +35,7 @@ export class EnrolmentProcessor {
 
         stateUpdate.data.chat.push({ id: null, name: serverName, message: `${name} has joined the game` });
 
-        return { lobby: stateUpdate.data };
+        return { enrolment: stateUpdate.data };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
@@ -62,13 +62,13 @@ export class EnrolmentProcessor {
             message: chatPayload.input,
         });
 
-        return { lobby: this.state };
+        return { enrolment: this.state };
     }
 
-    private addPlayerEntry(state: LobbyState, playerColor: PlayerColor, playerName: string | null): Probable<LobbyState> {
-        const incompatibleStatuses: Array<GameStatus> = ['full', 'setup', 'play', 'ended'];
+    private addPlayerEntry(state: EnrolmentState, playerColor: PlayerColor, playerName: string | null): Probable<EnrolmentState> {
+        const incompatibleStatuses: Array<SessionPhase> = ['full', 'prepairing', 'playing', 'ended'];
 
-        if (incompatibleStatuses.includes(state.gameStatus)) {
+        if (incompatibleStatuses.includes(state.sessionPhase)) {
             return lib.fail(`${playerColor} cannot enroll`);
         }
 
@@ -84,13 +84,13 @@ export class EnrolmentProcessor {
         console.log(`${playerColor} enrolled`);
 
         if (state.sessionOwner === null) {
-            state.gameStatus = 'created';
+            state.sessionPhase = 'owned';
             state.sessionOwner = playerColor;
             console.log(`${playerColor} is the session owner`);
         }
 
         if (state.availableSlots.length === 0) {
-            state.gameStatus = 'full';
+            state.sessionPhase = 'full';
             console.log(`Session is full`);
         }
 

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, GameState } from '../../shared_types';
+import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, PlayState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer } from '../client_types';
 import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip} from '../groups/GroupList';
 import localState from '../state';
@@ -31,7 +31,7 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: DRAW
-    public drawElements(state: GameState): void {
+    public drawElements(state: PlayState): void {
         const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
         const players = state.players;
         const localPlayer = players.find(player => player.id === localState.playerColor);
@@ -141,7 +141,7 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public update(state: GameState): void {
+    public update(state: PlayState): void {
         const players = state.players;
         const localPlayer = players.find(player => player.id === localState.playerColor);
 
@@ -227,7 +227,7 @@ export class MapGroup implements MegaGroupInterface {
         };
     }
 
-    private getIconData(locationName: LocationName, state: GameState): IconLayer {
+    private getIconData(locationName: LocationName, state: PlayState): IconLayer {
 
         if (locationName != 'temple')
             return LOCATION_TOKEN_DATA[locationName];

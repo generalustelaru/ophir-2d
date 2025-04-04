@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupPayload, GameState } from '../../shared_types';
+import { GameSetupPayload, PlayState } from '../../shared_types';
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -77,7 +77,7 @@ class CanvasClass extends Communicator {
         return this.mapGroup.createSetupPayload();
     }
 
-    private drawElements(state: GameState): void {
+    private drawElements(state: PlayState): void {
         this.locationGroup.drawElements(state);
         this.playerGroup.drawElements(state);
         this.mapGroup.drawElements(state);
@@ -92,7 +92,7 @@ class CanvasClass extends Communicator {
         this.isDrawn = true;
     }
 
-    public drawUpdateElements(state:GameState, disable = false): void {
+    public drawUpdateElements(state:PlayState, disable = false): void {
         if (state.isStatusResponse) {
             return;
         }

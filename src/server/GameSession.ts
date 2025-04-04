@@ -1,8 +1,8 @@
 import {WsDigest, DataDigest } from "./server_types";
 import { randomUUID } from 'crypto';
-import { ClientRequest, ServerMessage, Action, LobbyState, ResetResponse, GameState } from "./../shared_types";
-import { GameStateHandler } from "./object_handlers/GameStateHandler";
-import { PlayerHandler } from './object_handlers/PlayerHandler';
+import { ClientRequest, ServerMessage, Action, EnrolmentState, ResetResponse, PlayState } from "./../shared_types";
+import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
+import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library'
 import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
@@ -10,7 +10,7 @@ import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from '../server/server_constants';
 
 export class GameSession {
-    private gameState: GameStateHandler | null = null;
+    private gameState: PlayStateHandler | null = null;
     private enrol: EnrolmentProcessor | null;
     private setup: SetupProcessor | null = null;
     private play: PlayProcessor | null = null;
@@ -27,7 +27,7 @@ export class GameSession {
         this.enrol = new EnrolmentProcessor(this.getNewState());
     }
 
-    private wipeSession(request: ClientRequest, state: LobbyState|GameState): ResetResponse | null {
+    private wipeSession(request: ClientRequest, state: EnrolmentState|PlayState): ResetResponse | null {
         const { playerColor } = request;
         const { sessionOwner } = state;
         if (playerColor != sessionOwner) {
@@ -66,8 +66,8 @@ export class GameSession {
 
         switch (action) {
             case Action.inquire:
-                return this.issueNominalDigest({ lobby: this.enrol.getState()});
-            case Action.enroll:
+                return this.issueNominalDigest({ enrolment: this.enrol.getState()});
+            case Action.enrol:
                 return this.issueBroadcastDigest(this.enrol.processEnrol(playerColor, playerName));
             case Action.chat:
                 return this.issueBroadcastDigest(this.enrol.processChat(request));
@@ -84,16 +84,16 @@ export class GameSession {
             }
             case Action.start: {
                 this.setup = new SetupProcessor();
-                const { privateState, gameState } = this.setup.processStart(
+                const { privateState, playState: gameState } = this.setup.processStart(
                     this.enrol.getState(),
                     payload
                 );
                 this.gameState = gameState;
                 this.enrol = null;
                 this.setup = null;
-                this.play = new PlayProcessor({ privateState, gameState });
+                this.play = new PlayProcessor({ privateState, playState: gameState });
 
-                return this.issueBroadcastDigest({ game: gameState.toDto() });
+                return this.issueBroadcastDigest({ play: gameState.toDto() });
             }
             default:
                 return this.issueNominalDigest(
@@ -123,7 +123,7 @@ export class GameSession {
             return this.issueNominalDigest(lib.issueErrorResponse('No player ID provided'));
 
         if (action === Action.inquire)
-            return this.issueNominalDigest({ game: this.play.getState() })
+            return this.issueNominalDigest({ play: this.play.getState() })
 
         if (action === Action.get_status)
             return this.issueNominalDigest(this.processStatusRequest());
@@ -221,7 +221,7 @@ export class GameSession {
         if (stateDto) {
             stateDto.isStatusResponse = true;
 
-            return { game: stateDto };
+            return { play: stateDto };
         }
 
         return lib.issueErrorResponse('status update is not suppoorted at this time.');
@@ -238,7 +238,7 @@ export class GameSession {
     }
 
     private getNewState() {
-        const lobbyState = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE)) as LobbyState;
+        const lobbyState = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE)) as EnrolmentState;
         const gameId = randomUUID();
 
         return { ...lobbyState, gameId }

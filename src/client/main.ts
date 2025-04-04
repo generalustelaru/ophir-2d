@@ -4,7 +4,7 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { Action, GameState, ClientMessage, ResetResponse, LobbyState } from "../shared_types";
+import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState } from "../shared_types";
 
 // Initializations
 const serverAddress = process.env.SERVER_ADDRESS;
@@ -87,22 +87,22 @@ window.addEventListener('lobby_update', (event: CustomEventInit) => {
     if (!event.detail)
         return signalError('State is missing!');
 
-    const lobbyState = event.detail as LobbyState;
+    const enrolmentState = event.detail as EnrolmentState;
 
-    UserInterface.updateAsLobby(lobbyState);
+    UserInterface.updateAsEnrolment(enrolmentState);
 
-    switch (lobbyState.gameStatus) {
-        case 'created':
-            localState.gameId = lobbyState.gameId;
+    switch (enrolmentState.sessionPhase) {
+        case 'owned':
+            localState.gameId = enrolmentState.gameId;
             sessionStorage.setItem('localState', JSON.stringify(localState));
             break;
-        case 'empty':
+        case 'inactive':
         case "full":
         default:
             break;
     }
 
-    debug(lobbyState);
+    debug(enrolmentState);
 });
 
 // Update client on server state update
@@ -111,16 +111,16 @@ window.addEventListener('game_update', (event: CustomEventInit) => {
     if (!event.detail)
         return signalError('State is missing!');
 
-    const gameState = event.detail as GameState;
+    const gameState = event.detail as PlayState;
 
-    UserInterface.updateAsGame(gameState);
+    UserInterface.updateAsPlay(gameState);
 
-    switch(gameState.gameStatus) {
-        case 'setup':
+    switch(gameState.sessionPhase) {
+        case 'prepairing':
             CanvasService.drawUpdateElements(gameState, true);
             break;
 
-        case 'play':
+        case 'playing':
             CommunicationService.setKeepStatusCheck();
             CanvasService.drawUpdateElements(gameState);
             break;
@@ -153,11 +153,11 @@ function signalError(message?: string) {
 }
 
 // Debugging
-function debug(state: GameState|LobbyState) {
+function debug(state: PlayState|EnrolmentState) {
     if ('isStatusResponse' in state && state.isStatusResponse)
         return;
 
-    localStorage.setItem('gameStatus', state.gameStatus);
+    localStorage.setItem('sessionPhase', state.sessionPhase);
     localStorage.setItem('received', JSON.stringify(state));
     localStorage.setItem('client', JSON.stringify(localState));
 
