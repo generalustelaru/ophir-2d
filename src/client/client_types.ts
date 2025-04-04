@@ -114,15 +114,29 @@ export interface ClientEventInterface<T, D> {
     detail: D,
 }
 
-export type LaconicType = "connected" | "start" | "close" | "timeout";
+export enum EventName {
+    connected = 'connected',
+    start = 'start',
+    close = 'close',
+    timeout = 'timeout',
+    action = 'action',
+    error = 'error',
+    info = 'info',
+    reset = 'reset',
+    play_update = 'play_update',
+    enrolment_update = 'enrolment_update',
+    identification = 'identification',
+}
+
+export type LaconicType = EventName.connected | EventName.start | EventName.close | EventName.timeout;
 export type LaconicEvent = ClientEventInterface<LaconicType, null>;
-export type ActionEvent = ClientEventInterface<"action", ClientMessage>;
-export type ErrorEvent = ClientEventInterface<"error", ErrorDetail>;
-export type InfoEvent = ClientEventInterface<"info", InfoDetail>;
-export type ResetEvent = ClientEventInterface<"reset", ResetResponse>;
-export type PlayStateUpdateEvent = ClientEventInterface<"play_update", PlayState>;
-export type EnrolmentStateUpdateEvent = ClientEventInterface<"enrolment_update", EnrolmentState>;
-export type IdentificationEvent = ClientEventInterface<"identification", ClientIdResponse>;
+export type ActionEvent = ClientEventInterface<EventName.action, ClientMessage>;
+export type ErrorEvent = ClientEventInterface<EventName.error, ErrorDetail>;
+export type InfoEvent = ClientEventInterface<EventName.info, InfoDetail>;
+export type ResetEvent = ClientEventInterface<EventName.reset, ResetResponse>;
+export type PlayStateUpdateEvent = ClientEventInterface<EventName.play_update, PlayState>;
+export type EnrolmentStateUpdateEvent = ClientEventInterface<EventName.enrolment_update, EnrolmentState>;
+export type IdentificationEvent = ClientEventInterface<EventName.identification, ClientIdResponse>;
 
 export type ClientEvent =
     | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent

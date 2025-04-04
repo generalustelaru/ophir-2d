@@ -6,6 +6,7 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
+import { EventName } from '../client_types';
 
 class CanvasClass extends Communicator {
     private stage: Konva.Stage;
@@ -85,7 +86,7 @@ class CanvasClass extends Communicator {
 
         if (!localState.playerColor) {
             this.createEvent({
-                type: 'info',
+                type: EventName.info,
                 detail: { text: 'You are a spectator' }
             });
         }

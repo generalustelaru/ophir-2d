@@ -4,6 +4,7 @@ import {
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
+import { EventName } from '../client_types';
 
 class CommunicationClass extends Communicator {
 
@@ -19,16 +20,16 @@ class CommunicationClass extends Communicator {
 
         this.socket.onopen = () => {
             console.info('Connection established');
-            this.createEvent({ type: 'connected', detail: null });
+            this.createEvent({ type: EventName.connected, detail: null });
         }
 
         this.socket.onclose = (event) => {
             if (event.wasClean) {
                 console.info('Connection terminated');
-                this.createEvent({type: 'close', detail: null });
+                this.createEvent({type: EventName.close, detail: null });
             } else {
                 console.info('Connection timeout');
-                this.createEvent({ type: 'timeout', detail: null });
+                this.createEvent({ type: EventName.timeout, detail: null });
             }
 
             this.socket?.close();
@@ -38,7 +39,7 @@ class CommunicationClass extends Communicator {
         this.socket.onerror = (error) => {
             console.error(error);
             this.createEvent({
-                type: 'error',
+                type: EventName.error,
                 detail: { message: 'The connection encountered an error' }
             });
         }
@@ -49,7 +50,7 @@ class CommunicationClass extends Communicator {
             if (this.isClientIdResponse(data)) {
                 if (localState.myId === null) {
                     this.createEvent({
-                        type: 'identification',
+                        type: EventName.identification,
                         detail: { clientId: data.clientId }
                     });
                 } else {
@@ -64,30 +65,30 @@ class CommunicationClass extends Communicator {
 
             if (this.isErrorResponse(data)) {
                 console.error('<-', data.error);
-                this.createEvent({ type:'error', detail:{ message: data.error } });
+                this.createEvent({ type: EventName.error, detail:{ message: data.error } });
 
                 return;
             }
 
             if (this.isResetOrder(data)) {
-                this.createEvent({ type: Action.reset, detail: data });
+                this.createEvent({ type: EventName.reset, detail: data });
 
                 return;
             }
 
             if (this.isPlayStateResponse(data)) {
-                this.createEvent({ type: 'play_update', detail: data.play });
+                this.createEvent({ type: EventName.play_update, detail: data.play });
 
                 return;
             }
 
             if (this.isEnrolmentStateResponse(data)) {
-                this.createEvent({ type: 'enrolment_update', detail: data.enrolment });
+                this.createEvent({ type: EventName.enrolment_update, detail: data.enrolment });
 
                 return;
             }
 
-            this.createEvent({ type: 'error', detail: { message: 'Could not determine message type.' } });
+            this.createEvent({ type: EventName.error, detail: { message: 'Could not determine message type.' } });
         }
     }
 
@@ -96,7 +97,7 @@ class CommunicationClass extends Communicator {
         if (!this.socket || !this.socket.readyState) {
             this.socket?.close();
             this.createEvent({
-                type: 'error',
+                type: EventName.error,
                 detail: { message: 'The connection is not open' }
             });
 
