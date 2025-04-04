@@ -1,7 +1,7 @@
-import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, GameStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal } from '../../shared_types';
-import { GameStateHandler } from '../object_handlers/GameStateHandler';
-import { PlayerHandler } from '../object_handlers/PlayerHandler';
-import { PrivateStateHandler } from '../object_handlers/PrivateStateHandler';
+import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, PlayStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal } from '../../shared_types';
+import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
+import { PlayerHandler } from '../state_handlers/PlayerHandler';
+import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '../server_constants';
 import { DataDigest, PlayerCountables, StateBundle } from '../server_types';
 import lib, { Probable } from './library';
@@ -12,10 +12,10 @@ const { TRADE_DECK_B } = serverConstants;
 
 export class PlayProcessor {
     private idleCheckInterval: NodeJS.Timeout | null = null;
-    private gameState: GameStateHandler;
+    private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     constructor(stateBundle: StateBundle) {
-        this.gameState = stateBundle.gameState;
+        this.playState = stateBundle.playState;
         this.privateState = stateBundle.privateState;
 
         if (IDLE_CHECKS)
@@ -23,7 +23,7 @@ export class PlayProcessor {
     }
 
     public getState() {
-        return this.gameState.toDto();
+        return this.playState.toDto();
     }
 
     // MARK: MOVE
@@ -36,7 +36,7 @@ export class PlayProcessor {
             return lib.validationErrorResponse();
 
         const target = movementPayload.zoneId;
-        const locationName = this.gameState.getLocationName(target);
+        const locationName = this.playState.getLocationName(target);
 
         if (isRivalShip)
             return this.processRivalMovement(target, locationName, movementPayload.position, player);
@@ -50,9 +50,9 @@ export class PlayProcessor {
 
         const hasSailed = (() => {
             player.spendMove();
-            const playersInZone = this.gameState.getPlayersByZone(target);
+            const playersInZone = this.playState.getPlayersByZone(target);
 
-            const rival = this.gameState.getRivalData()
+            const rival = this.playState.getRivalData()
             const rivalInfluence = rival.isIncluded && rival.bearings.seaZone === target
                 ? rival.influence
                 : 0;
@@ -68,8 +68,8 @@ export class PlayProcessor {
             if (!blockingPlayers.length && player.getInfluence() >= rivalInfluence)
                 return true;
 
-            this.gameState.trimInfluenceByZone(target, rivalInfluence);
-            this.gameState.addServerMessage(
+            this.playState.trimInfluenceByZone(target, rivalInfluence);
+            this.playState.addServerMessage(
                 `${player.getIdentity().name} was blocked from sailing. Influence at the [${locationName}] was trimmed.`
             );
 
@@ -80,10 +80,10 @@ export class PlayProcessor {
             player.setBearings({
                 seaZone: target,
                 position: movementPayload.position,
-                location: this.gameState.getLocationName(target),
+                location: this.playState.getLocationName(target),
             });
 
-            player.setAnchoredActions(this.gameState.getLocationActions(target));
+            player.setAnchoredActions(this.playState.getLocationActions(target));
 
             if (player.getMoves() > 0) {
                 const nextDestinations = this.privateState.getDestinations(target);
@@ -93,16 +93,16 @@ export class PlayProcessor {
                 );
             }
 
-            if (this.gameState.isRivalIncluded()) {
-                if (this.gameState.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
-                    this.gameState.enableRivalControl(this.privateState.getDestinations(target));
+            if (this.playState.isRivalIncluded()) {
+                if (this.playState.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
+                    this.playState.enableRivalControl(this.privateState.getDestinations(target));
                     player.freeze();
                 }
             }
 
         } else if (player.getMoves() === 0) {
             player.setAnchoredActions([]);
-            this.gameState.addServerMessage(
+            this.playState.addServerMessage(
                 `${player.getIdentity().name} also ran out of moves and cannot act further`
             );
         }
@@ -113,14 +113,14 @@ export class PlayProcessor {
     public processRivalMovement(target: ZoneName, locationName: LocationName, position: Coordinates, player: PlayerHandler) {
         if (lib.checkConditions([
             player.handlesRival(),
-            this.gameState.rivalHasMoves(),
-            this.gameState.isRivalDestinationValid(target),
+            this.playState.rivalHasMoves(),
+            this.playState.isRivalDestinationValid(target),
         ]).err)
             return lib.issueErrorResponse('Rival ship movement is illegal!', {
-                player: player.toDto(), rival: this.gameState.getRivalData()
+                player: player.toDto(), rival: this.playState.getRivalData()
             });
 
-        this.gameState.moveRivalShip(
+        this.playState.moveRivalShip(
             {
                 seaZone: target,
                 location: locationName,
@@ -143,7 +143,7 @@ export class PlayProcessor {
         const position = repositioningPayload.repositioning;
 
         if (isRivalShip)
-            this.gameState.repositionRivalShip(position);
+            this.playState.repositionRivalShip(position);
         else
             player.setBearings({ ...player.getBearings(), position });
 
@@ -161,7 +161,7 @@ export class PlayProcessor {
             );
         }
 
-        this.gameState.addServerMessage(`${player.getIdentity().name} has spent favor`);
+        this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`);
         player.enablePrivilege();
 
         return this.issueStateResponse(player);
@@ -183,7 +183,7 @@ export class PlayProcessor {
         player.setCargo(result.data);
         player.setTrades(this.pickFeasibleTrades(result.data));
 
-        this.gameState.addServerMessage(`${player.getIdentity().name} ditched one ${payload.item}`);
+        this.playState.addServerMessage(`${player.getIdentity().name} ditched one ${payload.item}`);
 
         return this.issueStateResponse(player);
     }
@@ -204,7 +204,7 @@ export class PlayProcessor {
             );
         }
 
-        const locationName = this.gameState.getLocationName(player.getBearings().seaZone);
+        const locationName = this.playState.getLocationName(player.getBearings().seaZone);
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationName))
@@ -234,7 +234,7 @@ export class PlayProcessor {
         player.setActions(removeAction.data);
         player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
-        this.gameState.addServerMessage(`${player.getIdentity().name} picked up ${localGood}`);
+        this.playState.addServerMessage(`${player.getIdentity().name} picked up ${localGood}`);
 
         return this.issueStateResponse(player);
     }
@@ -258,7 +258,7 @@ export class PlayProcessor {
             return lib.issueErrorResponse(`${name} cannnot trade`);
         }
 
-        const trade = this.gameState.getMarketTrade(slot);
+        const trade = this.playState.getMarketTrade(slot);
 
         const cargoTransfer = ((): Probable<Array<ItemName>> => {
             let cargo = player.getCargo()
@@ -289,15 +289,15 @@ export class PlayProcessor {
 
         switch (location) {
             case 'market':
-                const amount = trade.reward.coins + this.gameState.getFluctuation(slot);
+                const amount = trade.reward.coins + this.playState.getFluctuation(slot);
                 player.gainCoins(amount);
-                this.gameState.addServerMessage(`${name} sold goods for ${amount} coins`);
+                this.playState.addServerMessage(`${name} sold goods for ${amount} coins`);
                 break;
             case 'temple':
                 const reward = trade.reward.favorAndVp;
                 player.gainFavor(reward);
                 this.privateState.updateVictoryPoints(id, reward);
-                this.gameState.addServerMessage(`${name} donated for ${reward} favor and VP`);
+                this.playState.addServerMessage(`${name} donated for ${reward} favor and VP`);
                 console.info(this.privateState.getGameStats());
                 break;
             default:
@@ -325,7 +325,7 @@ export class PlayProcessor {
             return lib.issueErrorResponse(`Player ${name} cannot buy metals`);
 
         const metalCost = (() => {
-            const costs = this.gameState.getMetalCosts();
+            const costs = this.playState.getMetalCosts();
 
             switch (purchasePayload.metal) {
                 case 'gold': return costs.gold;
@@ -359,11 +359,11 @@ export class PlayProcessor {
         switch (purchasePayload.currency) {
             case 'coins':
                 player.spendCoins(price);
-                this.gameState.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.coins} coins`);
+                this.playState.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.coins} coins`);
                 break;
             case 'favor':
                 player.spendFavor(price)
-                this.gameState.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
+                this.playState.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
                 break;
             default:
                 return lib.issueErrorResponse(`Unknown currency: ${purchasePayload.currency}`);
@@ -394,7 +394,7 @@ export class PlayProcessor {
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(id, reward);
-        this.gameState.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`);
+        this.playState.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`);
         console.info(this.privateState.getGameStats());
 
         const result = this.unloadItem(player.getCargo(), donationPayload.metal);
@@ -405,7 +405,7 @@ export class PlayProcessor {
         player.setCargo(result.data);
         player.clearMoves();
 
-        const { isNewLevel, isTempleComplete } = this.gameState.processMetalDonation(donationPayload.metal);
+        const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(donationPayload.metal);
 
         if (isTempleComplete) {
             player.clearActions();
@@ -414,9 +414,9 @@ export class PlayProcessor {
             if (result.err)
                 return lib.issueErrorResponse('Could not conclude game session', result);
 
-            this.gameState.addServerMessage('The temple construction is complete! Game has ended.');
-            this.gameState.addServerMessage(JSON.stringify(result.data));
-            this.gameState.registerGameEnd(result.data);
+            this.playState.addServerMessage('The temple construction is complete! Game has ended.');
+            this.playState.addServerMessage(JSON.stringify(result.data));
+            this.playState.registerGameEnd(result.data);
 
             return this.issueStateResponse(player);
         }
@@ -427,8 +427,8 @@ export class PlayProcessor {
             if (!newPrices)
                 return lib.issueErrorResponse('Donation could not be resolved', { newPrices, isNewLevel });
 
-            this.gameState.setMetalPrices(newPrices);
-            this.gameState.addServerMessage('Current temple level is complete. Metal costs increase.');
+            this.playState.setMetalPrices(newPrices);
+            this.playState.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
 
         return this.issueStateResponse(player);
@@ -443,10 +443,10 @@ export class PlayProcessor {
             return lib.issueErrorResponse(`Ship is not anchored.`);
 
         player.deactivate();
-        this.gameState.savePlayer(player.toDto());
+        this.playState.savePlayer(player.toDto());
 
         const newPlayerResult = ((): Probable<PlayerHandler> => {
-            const allPlayers = this.gameState.getAllPlayers();
+            const allPlayers = this.playState.getAllPlayers();
             const nextInOrder = turnOrder === allPlayers.length ? 1 : turnOrder + 1;
             const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextInOrder);
 
@@ -456,10 +456,10 @@ export class PlayProcessor {
             const nextPlayer = new PlayerHandler(nextPlayerDto);
             const { seaZone } = nextPlayer.getBearings();
             nextPlayer.activate(
-                this.gameState.getLocationActions(seaZone),
+                this.playState.getLocationActions(seaZone),
                 this.privateState.getDestinations(seaZone),
             );
-            this.gameState.updateRival(nextPlayer.getIdentity().id);
+            this.playState.updateRival(nextPlayer.getIdentity().id);
 
             return lib.pass(nextPlayer);
         })();
@@ -468,13 +468,13 @@ export class PlayProcessor {
             return lib.issueErrorResponse(newPlayerResult.message);
 
         const newPlayer = newPlayerResult.data;
-        this.gameState.addServerMessage(`${newPlayer.getIdentity().name} is now active!`);
+        this.playState.addServerMessage(`${newPlayer.getIdentity().name} is now active!`);
 
         return this.issueStateResponse(newPlayer);
     }
 
     public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false) {
-        const rival = this.gameState.getRivalData();
+        const rival = this.playState.getRivalData();
 
         if (!rival.isIncluded || !rival.isControllable)
             return lib.issueErrorResponse('Rival is not active!', rival);
@@ -482,11 +482,11 @@ export class PlayProcessor {
         if (rival.moves === 2)
             return lib.issueErrorResponse('Rival cannot act before moving', rival);
 
-        this.gameState.concludeRivalTurn();
+        this.playState.concludeRivalTurn();
 
         const { player } = digest;
         player.unfreeze(
-            this.gameState.getLocationActions(
+            this.playState.getLocationActions(
                 player.getBearings().seaZone,
             ),
             rival.bearings.seaZone,
@@ -494,7 +494,7 @@ export class PlayProcessor {
 
         if (isShiftingMarket) {
 
-            if (this.gameState.getLocationName(rival.bearings.seaZone) !== 'market')
+            if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
                 return lib.issueErrorResponse('Cannot shift market from here!', rival);
 
             return this.issueMarketShiftResponse(player);
@@ -517,7 +517,7 @@ export class PlayProcessor {
             player.addCargoSpace();
             player.setActions(removeAction.data);
             player.clearMoves();
-            this.gameState.addServerMessage(`${player.getIdentity().name} upgraded their hold`);
+            this.playState.addServerMessage(`${player.getIdentity().name} upgraded their hold`);
 
             return this.issueStateResponse(player);
         }
@@ -534,10 +534,10 @@ export class PlayProcessor {
 
         const { id, name } = player.getIdentity();
 
-        if (!this.gameState)
+        if (!this.playState)
             return lib.issueErrorResponse('Cannot add chat to state.');
 
-        this.gameState.addChatEntry({
+        this.playState.addChatEntry({
             id,
             name,
             message: chatPayload.input,
@@ -571,7 +571,7 @@ export class PlayProcessor {
         }
 
         const metalNames: Array<ItemName> = ['gold', 'silver'];
-        const supplies = this.gameState.getItemSupplies();
+        const supplies = this.playState.getItemSupplies();
 
         if (metalNames.includes(item)) {
 
@@ -583,7 +583,7 @@ export class PlayProcessor {
 
             orderedCargo[emptyIndex] = item;
             orderedCargo[emptyIndex + 1] = `${item}_extra` as CargoMetal;
-            this.gameState.removeMetal(item as Metal);
+            this.playState.removeMetal(item as Metal);
 
             return lib.pass(orderedCargo);
         }
@@ -594,7 +594,7 @@ export class PlayProcessor {
             return lib.fail(`No ${item} available for loading`);
 
         orderedCargo[emptyIndex] = item;
-        this.gameState.removeTradeGood(tradeGood);
+        this.playState.removeTradeGood(tradeGood);
 
         return lib.pass(orderedCargo);
     }
@@ -611,16 +611,16 @@ export class PlayProcessor {
 
         if (metals.includes(item)) {
             cargo.splice(itemIndex + 1, 1, 'empty');
-            this.gameState.returnMetal(item as Metal);
+            this.playState.returnMetal(item as Metal);
         } else {
-            this.gameState.returnTradeGood(item as TradeGood);
+            this.playState.returnTradeGood(item as TradeGood);
         }
 
         return lib.pass(cargo);
     }
 
     private pickFeasibleTrades(cargo: Array<ItemName>): Array<MarketSlotKey> {
-        const market = this.gameState.getMarket();
+        const market = this.playState.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
         const slots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
@@ -652,7 +652,7 @@ export class PlayProcessor {
     }
 
     private compileGameResults(): Probable<Array<PlayerCountables>> {
-        const players = this.gameState.getAllPlayers();
+        const players = this.playState.getAllPlayers();
         const gameStats = this.privateState.getGameStats();
 
         for (let i = 0; i < gameStats.length; i++) {
@@ -681,10 +681,10 @@ export class PlayProcessor {
             if (trade)
                 return trade;
 
-            if (this.gameState.isDeckA()) {
-                this.gameState.setLabelB();
+            if (this.playState.isDeckA()) {
+                this.playState.setLabelB();
                 this.privateState.loadTradeDeck(TRADE_DECK_B);
-                this.gameState.addServerMessage('Market deck B is now in play');
+                this.playState.addServerMessage('Market deck B is now in play');
             }
 
             return this.privateState.drawTrade();
@@ -696,36 +696,36 @@ export class PlayProcessor {
             if (compilation.err)
                 return lib.issueErrorResponse(compilation.message);
 
-            this.gameState.setGameResults(compilation.data);
-            this.gameState.setGameStatus('ended');
-            this.gameState.addServerMessage('Market deck is empty! Game has ended.');
+            this.playState.setGameResults(compilation.data);
+            this.playState.setPhase('ended');
+            this.playState.addServerMessage('Market deck is empty! Game has ended.');
 
             return this.issueStateResponse(player);
         }
 
-        this.gameState.shiftMarketCards(newTrade);
+        this.playState.shiftMarketCards(newTrade);
         player.setTrades(this.pickFeasibleTrades(player.getCargo()));
         const activePlayerId = player.getIdentity().id;
 
-        for (const player of this.gameState.getAllPlayers()) {
+        for (const player of this.playState.getAllPlayers()) {
             if (player.id !== activePlayerId) {
                 player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-                this.gameState.savePlayer(player);
+                this.playState.savePlayer(player);
             }
         }
 
         return this.issueStateResponse(player);
     }
 
-    private issueStateResponse(player: PlayerHandler): GameStateResponse {
-        this.gameState.savePlayer(player.toDto());
+    private issueStateResponse(player: PlayerHandler): PlayStateResponse {
+        this.playState.savePlayer(player.toDto());
 
-        return { game: this.gameState.toDto() };
+        return { play: this.playState.toDto() };
     }
 
     private startIdleChecks(): void {
         this.idleCheckInterval = setInterval(() => {
-            const activePlayer = this.gameState.getActivePlayer();
+            const activePlayer = this.playState.getActivePlayer();
 
             if (!activePlayer) {
                 lib.issueErrorResponse('No active player found in idle check!')
@@ -736,8 +736,8 @@ export class PlayProcessor {
 
             if (timeNow - activePlayer.timeStamp > 60000 && !activePlayer.isIdle) {
                 activePlayer.isIdle = true;
-                this.gameState.savePlayer(activePlayer);
-                this.gameState.addServerMessage(`${activePlayer.name} is idle`);
+                this.playState.savePlayer(activePlayer);
+                this.playState.addServerMessage(`${activePlayer.name} is idle`);
                 // this.processEndTurn(activePlayer.id);
             }
 

@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerPlacard } from '../groups/GroupList';
 import localState from '../state';
-import { PlayerState, GameState } from '../../shared_types';
+import { PlayerState, PlayState } from '../../shared_types';
 import { RivalPlacard } from '../groups/player/RivalPlacard';
 
 export class PlayerGroup implements MegaGroupInterface {
@@ -23,7 +23,7 @@ export class PlayerGroup implements MegaGroupInterface {
     }
 
     // MARK: DRAW
-    public drawElements(state: GameState): void {
+    public drawElements(state: PlayState): void {
         const verticalOffsets = [20, 140, 260, 380];
         const { players, rival } = state;
 
@@ -60,7 +60,7 @@ export class PlayerGroup implements MegaGroupInterface {
     }
 
     // MARK: UPDATE
-    public update(state: GameState): void {
+    public update(state: PlayState): void {
 
         this.playerPlacards.forEach(placard => {
             const player = state.players.find(player => player.id === placard.getId());

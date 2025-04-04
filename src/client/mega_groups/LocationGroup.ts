@@ -2,7 +2,7 @@ import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from "../client_types";
 import { MarketPlacard, TreasuryPlacard, TemplePlacard } from "../groups/GroupList";
 import localState from '../state';
-import { GameState } from "../../shared_types";
+import { PlayState } from "../../shared_types";
 
 export class LocationGroup implements MegaGroupInterface {
 
@@ -23,7 +23,7 @@ export class LocationGroup implements MegaGroupInterface {
         this.stage = stage;
     }
 
-    public drawElements(state: GameState): void {
+    public drawElements(state: PlayState): void {
         const setup = state.setup;
         const localPlayer = state.players.find(player => player.id === localState.playerColor) || null;
 
@@ -77,7 +77,7 @@ export class LocationGroup implements MegaGroupInterface {
         );
     }
 
-    public update(state: GameState): void {
+    public update(state: PlayState): void {
 
         const activePlayer = state.players.find(player => player.isActive);
         const marketOffer = state.market

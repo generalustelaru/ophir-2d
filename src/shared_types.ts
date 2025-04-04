@@ -18,9 +18,9 @@ export enum Action {
     make_trade = 'make_trade',
     buy_metals = 'buy_metals',
     donate_metals = 'donate_metals',
-    waiver_client = 'rebind_id',
+    waiver_client = 'waiver_client',
     inquire = "inquire",
-    enroll = "enroll",
+    enrol = "enrol",
     end_turn = "end_turn",
     reset = "reset",
     spend_favor = "spend_favor",
@@ -41,7 +41,7 @@ export type LocationName = "temple" | "market" | "treasury" | GoodsLocationName;
 export type LocationAction =
     | Action.upgrade_cargo | Action.make_trade | Action.buy_metals
     | Action.load_good | Action.donate_metals;
-export type GameStatus = "empty" | "created" | "full" | "setup" | "play" | "ended";
+export type SessionPhase = "inactive" | "owned" | "full" | "prepairing" | "playing" | "ended";
 export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
 export type Trade = { request: Array<TradeGood>, reward: Reward };
@@ -161,12 +161,12 @@ export type ClientIdResponse = {
     clientId: string,
 }
 
-export type GameStateResponse = {
-    game: GameState,
+export type PlayStateResponse = {
+    play: PlayState,
 }
 
-export type LobbyStateResponse = {
-    lobby: LobbyState,
+export type EnrolmentStateResponse = {
+    enrolment: EnrolmentState,
 }
 
 export type ErrorResponse = {
@@ -176,10 +176,10 @@ export type ErrorResponse = {
 /**
  * @description Shared between players and server in an ongoing session
  */
-export type GameState = {
+export type PlayState = {
     isStatusResponse: boolean,
     gameId: string,
-    gameStatus: GameStatus,
+    sessionPhase: SessionPhase,
     gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
     availableSlots: Array<PlayerColor>,
@@ -194,7 +194,7 @@ export type GameState = {
 
 export type SetupState = {
     gameId: string,
-    gameStatus: GameStatus,
+    sessionPhase: SessionPhase,
     sessionOwner: PlayerColor,
     availableSlots: Array<PlayerColor>,
     players: Array<PlayerEntry>,
@@ -204,9 +204,9 @@ export type SetupState = {
 /**
  * @description Shared between players and server in a pending session
  */
-export type LobbyState = {
+export type EnrolmentState = {
     gameId: string | null,
-    gameStatus: GameStatus,
+    sessionPhase: SessionPhase,
     sessionOwner: PlayerColor | null,
     availableSlots: Array<PlayerColor>,
     players: Array<PlayerEntry>,
@@ -217,7 +217,7 @@ export type ResetResponse = {
     resetFrom: string | PlayerColor,
 }
 
-export type ServerMessage = ClientIdResponse | GameStateResponse | LobbyStateResponse | ResetResponse | ErrorResponse;
+export type ServerMessage = ClientIdResponse | PlayStateResponse | EnrolmentStateResponse | ResetResponse | ErrorResponse;
 
 export type LocationData = {
     name: LocationName,
@@ -262,7 +262,7 @@ export type VerboiseAction =
     | Action.chat | Action.start | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client;
 export type LaconicAction =
-    | Action.inquire | Action.enroll | Action.end_turn | Action.reset | Action.spend_favor | Action.move_rival
+    | Action.inquire | Action.enrol | Action.end_turn | Action.reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival;
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;

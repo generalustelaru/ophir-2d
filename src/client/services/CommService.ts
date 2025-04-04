@@ -1,6 +1,6 @@
 import {
     ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
-    ResetResponse, Action, GameStateResponse, LobbyStateResponse,
+    ResetResponse, Action, PlayStateResponse, EnrolmentStateResponse,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -75,14 +75,14 @@ class CommunicationClass extends Communicator {
                 return;
             }
 
-            if (this.isGameStateResponse(data)) {
-                this.createEvent({ type: 'game_update', detail: data.game });
+            if (this.isPlayStateResponse(data)) {
+                this.createEvent({ type: 'play_update', detail: data.play });
 
                 return;
             }
 
-            if (this.isLobbyStateResponse(data)) {
-                this.createEvent({ type: 'lobby_update', detail: data.lobby });
+            if (this.isEnrolmentStateResponse(data)) {
+                this.createEvent({ type: 'enrolment_update', detail: data.enrolment });
 
                 return;
             }
@@ -125,12 +125,12 @@ class CommunicationClass extends Communicator {
         if (this.statusInterval) clearInterval(this.statusInterval);
     }
 
-    private isGameStateResponse(data: ServerMessage): data is GameStateResponse {
-        return 'game' in data;
+    private isPlayStateResponse(data: ServerMessage): data is PlayStateResponse {
+        return 'play' in data;
     }
 
-    private isLobbyStateResponse(data: ServerMessage): data is LobbyStateResponse {
-        return 'lobby' in data;
+    private isEnrolmentStateResponse(data: ServerMessage): data is EnrolmentStateResponse {
+        return 'enrolment' in data;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {

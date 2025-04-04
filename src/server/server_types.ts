@@ -1,11 +1,11 @@
 import {
-    BarrierId, ZoneName, PlayerColor, LobbyState, Trade, LocationData, SpecialistName, Specialist,
+    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, SpecialistName, Specialist,
     TradeGood, GoodsLocationName, MessagePayload, ExchangeTier, ServerMessage,
 } from '../shared_types';
 import { WebSocket } from 'ws';
-import { GameStateHandler } from './object_handlers/GameStateHandler';
-import { PlayerHandler } from './object_handlers/PlayerHandler';
-import { PrivateStateHandler } from './object_handlers/PrivateStateHandler';
+import { PlayStateHandler } from './state_handlers/PlayStateHandler';
+import { PlayerHandler } from './state_handlers/PlayerHandler';
+import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 
 export type WsClient = {
     clientID: string,
@@ -49,7 +49,7 @@ export type PrivateState = {
 }
 
 export type StateBundle = {
-    gameState: GameStateHandler,
+    playState: PlayStateHandler,
     privateState: PrivateStateHandler,
 }
 
@@ -70,7 +70,7 @@ export type ServerConstants = {
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
-    DEFAULT_NEW_STATE: LobbyState,
+    DEFAULT_NEW_STATE: EnrolmentState,
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerColor>,
     TRADE_DECK_A: Array<Trade>,
