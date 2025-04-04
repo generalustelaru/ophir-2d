@@ -6,6 +6,7 @@ import { TextInput } from '../html_behaviors/TextInput';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
+import { EventName } from '../client_types';
 
 const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 class UserInterfaceClass extends Communicator {
@@ -74,7 +75,7 @@ class UserInterfaceClass extends Communicator {
         if (!message || false === !!message.match(/[^\s]/)) return;
 
         return this.createEvent({
-            type: 'action',
+            type: EventName.action,
             detail: {
                 action: Action.chat,
                 payload: { input: message },
@@ -105,13 +106,13 @@ class UserInterfaceClass extends Communicator {
     private processStart = (): void => {
         this.startButton.disable();
 
-        return this.createEvent({ type: Action.start, detail: null });
+        return this.createEvent({ type: EventName.start, detail: null });
     }
 
     private processReset = (): void => {
 
         return this.createEvent({
-            type: 'action',
+            type: EventName.action,
             detail: { action: Action.reset , payload: null }
         });
     }
@@ -127,7 +128,7 @@ class UserInterfaceClass extends Communicator {
             sessionStorage.setItem('localState', JSON.stringify(localState));
 
             return this.createEvent({
-                type: 'action',
+                type: EventName.action,
                 detail: { action: Action.enrol, payload: null }
             });
         }

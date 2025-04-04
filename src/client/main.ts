@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, LocalState } from "./client_types";
+import { InfoDetail, ErrorDetail, LocalState, EventName } from "./client_types";
 import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
@@ -28,7 +28,7 @@ localState.isBoardDrawn = retrieved.isBoardDrawn;
 // const UserInterface = new UserInterfaceClass();
 
 //Send player action to server
-window.addEventListener('action', (event: CustomEventInit) => {
+window.addEventListener(EventName.action, (event: CustomEventInit) => {
     const message = event.detail as ClientMessage;
     CommunicationService.sendMessage(message);
 });
@@ -43,13 +43,13 @@ window.addEventListener(Action.start, () => {
 });
 
 //Display errors
-window.addEventListener('error', (event: CustomEventInit) => {
+window.addEventListener(EventName.error, (event: CustomEventInit) => {
     const detail: ErrorDetail = event.detail;
     signalError(detail.message);
 });
 
 // Get server data on connection
-window.addEventListener('connected', () => {
+window.addEventListener(EventName.connected, () => {
     CommunicationService.sendMessage({ action: Action.inquire, payload: null })
 });
 
@@ -60,7 +60,7 @@ window.addEventListener('timeout', () => {
     alert('Please refresh the page');
 });
 
-window.addEventListener('close', () => {
+window.addEventListener(EventName.close, () => {
     CommunicationService.clearStatusCheck();
     sessionStorage.removeItem('localState');
     UserInterface.disable();
@@ -69,7 +69,7 @@ window.addEventListener('close', () => {
     alert('The connection was closed');
 });
 
-window.addEventListener('identification', (event: CustomEventInit) => {
+window.addEventListener(EventName.identification, (event: CustomEventInit) => {
     const payload = event.detail;
     localState.myId = payload.clientId;
     sessionStorage.setItem('localState', JSON.stringify(localState));
@@ -82,7 +82,7 @@ window.addEventListener(Action.reset, (event: CustomEventInit) => {
     window.location.reload();
 });
 
-window.addEventListener('lobby_update', (event: CustomEventInit) => {
+window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => {
 
     if (!event.detail)
         return signalError('State is missing!');
@@ -106,34 +106,34 @@ window.addEventListener('lobby_update', (event: CustomEventInit) => {
 });
 
 // Update client on server state update
-window.addEventListener('game_update', (event: CustomEventInit) => {
+window.addEventListener('play_update', (event: CustomEventInit) => {
 
     if (!event.detail)
         return signalError('State is missing!');
 
-    const gameState = event.detail as PlayState;
+    const playState = event.detail as PlayState;
 
-    UserInterface.updateAsPlay(gameState);
+    UserInterface.updateAsPlay(playState);
 
-    switch(gameState.sessionPhase) {
+    switch(playState.sessionPhase) {
         case 'prepairing':
-            CanvasService.drawUpdateElements(gameState, true);
+            CanvasService.drawUpdateElements(playState, true);
             break;
 
         case 'playing':
             CommunicationService.setKeepStatusCheck();
-            CanvasService.drawUpdateElements(gameState);
+            CanvasService.drawUpdateElements(playState);
             break;
 
         case 'ended':
             CommunicationService.clearStatusCheck();
-            CanvasService.drawUpdateElements(gameState, true);
+            CanvasService.drawUpdateElements(playState, true);
             break;
         default:
             break;
     }
 
-    debug(gameState);
+    debug(playState);
 });
 
 window.addEventListener(
