@@ -15,7 +15,7 @@ class UserInterfaceClass extends Communicator {
     private joinButton: Button;
     private startButton: Button;
     private resetButton: Button;
-    private playerNameInput;
+    private playerNameInput: TextInput;
     private playerColorSelect;
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
