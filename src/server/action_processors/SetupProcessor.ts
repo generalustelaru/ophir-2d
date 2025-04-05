@@ -22,7 +22,7 @@ export class SetupProcessor {
 
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
-     * @returns `{gameState, privateState}`  Used expressily for a game session instance.
+     * @returns `{playState, privateState}`  Used expressily for a game session instance.
      */
     public processStart(
         lobbyState: EnrolmentState,
