@@ -66,7 +66,7 @@ export class GameSession {
 
         switch (action) {
             case Action.inquire:
-                return this.issueNominalDigest({ gamePhase: Phase.enrolment, state: this.enrol.getState()});
+                return this.issueNominalDigest({ phase: Phase.enrolment, state: this.enrol.getState()});
             case Action.enrol:
                 return this.issueBroadcastDigest(this.enrol.processEnrol(playerColor, playerName));
             case Action.chat:
@@ -93,7 +93,7 @@ export class GameSession {
                 this.setup = null;
                 this.play = new PlayProcessor({ privateState, playState: gameState });
 
-                return this.issueBroadcastDigest({ gamePhase: Phase.play, state: gameState.toDto() });
+                return this.issueBroadcastDigest({ phase: Phase.play, state: gameState.toDto() });
             }
             default:
                 return this.issueNominalDigest(
@@ -123,7 +123,7 @@ export class GameSession {
             return this.issueNominalDigest(lib.issueErrorResponse('No player ID provided'));
 
         if (action === Action.inquire)
-            return this.issueNominalDigest({ gamePhase: Phase.play, state: this.play.getState() })
+            return this.issueNominalDigest({ phase: Phase.play, state: this.play.getState() })
 
         if (action === Action.get_status)
             return this.issueNominalDigest(this.processStatusRequest());
@@ -221,7 +221,7 @@ export class GameSession {
         if (stateDto) {
             stateDto.isStatusResponse = true;
 
-            return { gamePhase: Phase.play, state: stateDto };
+            return { phase: Phase.play, state: stateDto };
         }
 
         return lib.issueErrorResponse('status update is not suppoorted at this time.');
