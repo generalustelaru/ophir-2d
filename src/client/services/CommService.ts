@@ -122,15 +122,15 @@ class CommunicationClass extends Communicator {
     }
 
     private isPlayStateResponse(data: ServerMessage): data is PlayStateResponse {
-        return 'type' in data && data.gamePhase === Phase.play;
+        return 'phase' in data && data.phase === Phase.play;
     }
 
     private isSetupStateResponse(data: ServerMessage): data is SetupStateResponse {
-        return 'type' in data && data.gamePhase === Phase.setup;
+        return 'phase' in data && data.phase === Phase.setup;
     }
 
     private isEnrolmentStateResponse(data: ServerMessage): data is EnrolmentStateResponse {
-        return 'type' in data && data.gamePhase === Phase.enrolment;
+        return 'phase' in data && data.phase === Phase.enrolment;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {

@@ -167,9 +167,8 @@ export enum Phase {
     play = "play",
 }
 
-export type GameState = PlayState | SetupState | EnrolmentState
-type StateResponseFormat<T extends Phase, S extends GameState> = {
-    gamePhase: T,
+type StateResponseFormat<P extends Phase, S extends PlayState | SetupState | EnrolmentState> = {
+    phase: P,
     state: S,
 }
 export type PlayStateResponse = StateResponseFormat<Phase.play, PlayState>

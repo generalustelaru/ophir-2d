@@ -719,7 +719,7 @@ export class PlayProcessor {
     private issueStateResponse(player: PlayerHandler): PlayStateResponse {
         this.playState.savePlayer(player.toDto());
 
-        return { gamePhase: Phase.play, state: this.playState.toDto() };
+        return { phase: Phase.play, state: this.playState.toDto() };
     }
 
     private startIdleChecks(): void {

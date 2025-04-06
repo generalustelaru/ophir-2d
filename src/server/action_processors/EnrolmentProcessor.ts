@@ -38,7 +38,7 @@ export class EnrolmentProcessor {
 
         stateUpdate.data.chat.push({ id: null, name: serverName, message: `${name} has joined the game` });
 
-        return { gamePhase: Phase.enrolment, state: stateUpdate.data };
+        return { phase: Phase.enrolment, state: stateUpdate.data };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
@@ -65,7 +65,7 @@ export class EnrolmentProcessor {
             message: chatPayload.input,
         });
 
-        return { gamePhase: Phase.enrolment, state: this.state };
+        return { phase: Phase.enrolment, state: this.state };
     }
 
     private addPlayerEntry(state: EnrolmentState, playerColor: PlayerColor, playerName: string | null): Probable<EnrolmentState> {
