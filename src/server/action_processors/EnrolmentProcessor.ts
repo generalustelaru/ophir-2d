@@ -1,4 +1,7 @@
-import { ClientRequest, ErrorResponse, SessionPhase, EnrolmentState, EnrolmentStateResponse, PlayerColor, PlayerEntry } from "../../shared_types";
+import {
+    ClientRequest, ErrorResponse, EnrolmentState, EnrolmentStateResponse,
+    PlayerColor, PlayerEntry, Phase,
+} from "../../shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
 
@@ -35,7 +38,7 @@ export class EnrolmentProcessor {
 
         stateUpdate.data.chat.push({ id: null, name: serverName, message: `${name} has joined the game` });
 
-        return { enrolment: stateUpdate.data };
+        return { gamePhase: Phase.enrolment, state: stateUpdate.data };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
@@ -49,7 +52,7 @@ export class EnrolmentProcessor {
         return players.some(player => player.name === name);
     }
 
-    public processChat(request: ClientRequest) {
+    public processChat(request: ClientRequest): ErrorResponse | EnrolmentStateResponse {
         const { playerColor, playerName, message } = request;
         const chatPayload = validator.validateChatPayload(message.payload);
 
@@ -62,16 +65,10 @@ export class EnrolmentProcessor {
             message: chatPayload.input,
         });
 
-        return { enrolment: this.state };
+        return { gamePhase: Phase.enrolment, state: this.state };
     }
 
     private addPlayerEntry(state: EnrolmentState, playerColor: PlayerColor, playerName: string | null): Probable<EnrolmentState> {
-        const incompatibleStatuses: Array<SessionPhase> = ['full', 'prepairing', 'playing', 'ended'];
-
-        if (incompatibleStatuses.includes(state.sessionPhase)) {
-            return lib.fail(`${playerColor} cannot enroll`);
-        }
-
         state.availableSlots = state.availableSlots.filter(slot => slot !== playerColor);
 
         const newPlayer: PlayerEntry = {
@@ -84,13 +81,11 @@ export class EnrolmentProcessor {
         console.log(`${playerColor} enrolled`);
 
         if (state.sessionOwner === null) {
-            state.sessionPhase = 'owned';
             state.sessionOwner = playerColor;
             console.log(`${playerColor} is the session owner`);
         }
 
         if (state.availableSlots.length === 0) {
-            state.sessionPhase = 'full';
             console.log(`Session is full`);
         }
 

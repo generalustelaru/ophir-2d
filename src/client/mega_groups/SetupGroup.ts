@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { GroupLayoutData, MegaGroupInterface } from "../client_types";
-import { PlayState } from "../../shared_types";
+import { SetupState } from "../../shared_types";
 import { ModalButton } from "../groups/setup/ModalButton";
 
 export class SetupGroup implements MegaGroupInterface {
@@ -40,8 +40,13 @@ export class SetupGroup implements MegaGroupInterface {
         this.group.add(this.modal, this.showHideButton.getElement())
     }
 
-    public update(state: PlayState) {
-        state.sessionPhase === 'prepairing' ? this.group.show() : this.group.hide();
+    public update(state: SetupState) {
+        this.group.show();
+        console.log(state);
+    }
+
+    public disable() {
+        this.group.hide();
     }
 
     private switchModal() {

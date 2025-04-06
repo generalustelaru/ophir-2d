@@ -1,6 +1,6 @@
 import {WsDigest, DataDigest } from "./server_types";
 import { randomUUID } from 'crypto';
-import { ClientRequest, ServerMessage, Action, EnrolmentState, ResetResponse, PlayState } from "./../shared_types";
+import { ClientRequest, ServerMessage, Action, EnrolmentState, ResetResponse, PlayState, Phase, PlayStateResponse, ErrorResponse } from "./../shared_types";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library'
@@ -66,7 +66,7 @@ export class GameSession {
 
         switch (action) {
             case Action.inquire:
-                return this.issueNominalDigest({ enrolment: this.enrol.getState()});
+                return this.issueNominalDigest({ gamePhase: Phase.enrolment, state: this.enrol.getState()});
             case Action.enrol:
                 return this.issueBroadcastDigest(this.enrol.processEnrol(playerColor, playerName));
             case Action.chat:
@@ -93,7 +93,7 @@ export class GameSession {
                 this.setup = null;
                 this.play = new PlayProcessor({ privateState, playState: gameState });
 
-                return this.issueBroadcastDigest({ play: gameState.toDto() });
+                return this.issueBroadcastDigest({ gamePhase: Phase.play, state: gameState.toDto() });
             }
             default:
                 return this.issueNominalDigest(
@@ -123,7 +123,7 @@ export class GameSession {
             return this.issueNominalDigest(lib.issueErrorResponse('No player ID provided'));
 
         if (action === Action.inquire)
-            return this.issueNominalDigest({ play: this.play.getState() })
+            return this.issueNominalDigest({ gamePhase: Phase.play, state: this.play.getState() })
 
         if (action === Action.get_status)
             return this.issueNominalDigest(this.processStatusRequest());
@@ -215,13 +215,13 @@ export class GameSession {
         return this.issueBroadcastDigest(result);
     }
 
-    private processStatusRequest() {
+    private processStatusRequest(): ErrorResponse | PlayStateResponse {
         const stateDto = this.gameState?.toDto();
 
         if (stateDto) {
             stateDto.isStatusResponse = true;
 
-            return { play: stateDto };
+            return { gamePhase: Phase.play, state: stateDto };
         }
 
         return lib.issueErrorResponse('status update is not suppoorted at this time.');

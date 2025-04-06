@@ -1,6 +1,6 @@
 import {
-    ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
-    ResetResponse, Action, PlayStateResponse, EnrolmentStateResponse,
+    Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
+    ResetResponse, Action, PlayStateResponse, EnrolmentStateResponse, SetupStateResponse,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -43,6 +43,7 @@ class CommunicationClass extends Communicator {
                 detail: { message: 'The connection encountered an error' }
             });
         }
+
         this.socket.onmessage = (event) => {
             const data: ServerMessage = JSON.parse(event.data);
             console.debug('<-', data);
@@ -63,32 +64,26 @@ class CommunicationClass extends Communicator {
                 return;
             }
 
-            if (this.isErrorResponse(data)) {
-                console.error('<-', data.error);
-                this.createEvent({ type: EventName.error, detail:{ message: data.error } });
-
-                return;
+            switch (true) {
+                case this.isErrorResponse(data):
+                    this.createEvent({ type: EventName.error, detail:{ message: data.error } });
+                    break;
+                case this.isResetOrder(data):
+                    this.createEvent({ type: EventName.reset, detail: data });
+                    break;
+                case this.isPlayStateResponse(data):
+                    this.createEvent({ type: EventName.play_update, detail: data.state });
+                    break;
+                case this.isSetupStateResponse(data):
+                    this.createEvent({ type: EventName.setup_update, detail: data.state });
+                    break;
+                case this.isEnrolmentStateResponse(data):
+                    this.createEvent({ type: EventName.enrolment_update, detail: data.state });
+                    break;
+                default:
+                    this.createEvent({ type: EventName.error, detail: { message: 'Could not determine message type.' } });
+                    break;
             }
-
-            if (this.isResetOrder(data)) {
-                this.createEvent({ type: EventName.reset, detail: data });
-
-                return;
-            }
-
-            if (this.isPlayStateResponse(data)) {
-                this.createEvent({ type: EventName.play_update, detail: data.play });
-
-                return;
-            }
-
-            if (this.isEnrolmentStateResponse(data)) {
-                this.createEvent({ type: EventName.enrolment_update, detail: data.enrolment });
-
-                return;
-            }
-
-            this.createEvent({ type: EventName.error, detail: { message: 'Could not determine message type.' } });
         }
     }
 
@@ -127,11 +122,15 @@ class CommunicationClass extends Communicator {
     }
 
     private isPlayStateResponse(data: ServerMessage): data is PlayStateResponse {
-        return 'play' in data;
+        return 'type' in data && data.gamePhase === Phase.play;
+    }
+
+    private isSetupStateResponse(data: ServerMessage): data is SetupStateResponse {
+        return 'type' in data && data.gamePhase === Phase.setup;
     }
 
     private isEnrolmentStateResponse(data: ServerMessage): data is EnrolmentStateResponse {
-        return 'enrolment' in data;
+        return 'type' in data && data.gamePhase === Phase.enrolment;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {

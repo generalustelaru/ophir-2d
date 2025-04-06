@@ -1,4 +1,4 @@
-import { PlayerColor, EnrolmentState, ChatEntry, Action, SessionPhase, PlayState } from '../../shared_types';
+import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
@@ -22,7 +22,6 @@ class UserInterfaceClass extends Communicator {
     private chatSendButton: Button;
     private kickPlayerButton: Button;
     private availableSlots: Array<PlayerColor> = ['Green', 'Purple', 'Red', 'Yellow'];
-    private sessionPhase: SessionPhase = 'inactive';
 
     constructor() {
         super();
@@ -55,7 +54,7 @@ class UserInterfaceClass extends Communicator {
         this.playerColorSelect.setValue(localState.playerColor);
 
         this.playerColorSelect.element.addEventListener('change', () => {
-            this.playerColorSelect.element.value && this.handleColorSelect();
+            this.playerColorSelect.element.value && this.updateEnrolButtons();
         });
     }
 
@@ -83,12 +82,12 @@ class UserInterfaceClass extends Communicator {
         });
     }
 
-    private handleColorSelect = () => {
-        switch(this.sessionPhase) {
-            case 'inactive':
+    private updateEnrolButtons = () => {
+        switch (true) {
+            case this.availableSlots.length === 4:
                 this.createButton.enable();
                 break;
-            case 'owned':
+            case this.availableSlots.length > 0:
                 this.joinButton.enable();
                 break;
             default:
@@ -160,7 +159,6 @@ class UserInterfaceClass extends Communicator {
 
     public updateAsEnrolment(state: EnrolmentState): void {
         this.availableSlots = state.availableSlots;
-        this.sessionPhase = state.sessionPhase;
 
         this.updateChat(state.chat);
         this.disableButtons();
@@ -168,15 +166,13 @@ class UserInterfaceClass extends Communicator {
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
 
-        switch (this.sessionPhase) {
-            case 'inactive': this.handleEmptyState(); break;
-            case 'owned': this.handleCreatedState(state); break;
-            case 'full': this.handleFullState(state); break;
+        switch (this.availableSlots.length) {
+            case 4: this.handleEmptyState(); break;
+            case 0: this.handleFullState(state); break;
+            default: this.handleCreatedState(state); break;
         }
     }
     public updateAsPlay(state: PlayState): void {
-        this.availableSlots = state.availableSlots;
-        this.sessionPhase = state.sessionPhase;
 
         this.updateChat(state.chat);
         this.disableButtons();
@@ -184,10 +180,10 @@ class UserInterfaceClass extends Communicator {
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
 
-        switch (this.sessionPhase) {
-            case 'playing': this.handleStartedState(state); break;
-            case 'ended': this.handleEndedState(state); break;
-        }
+        if (state.hasGameEnded)
+            this.handleEndedState(state);
+        else
+            this.handleStartedState(state);
     }
 
     private handleCreatedState(state: EnrolmentState): void {
