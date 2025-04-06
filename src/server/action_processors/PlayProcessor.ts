@@ -1,4 +1,4 @@
-import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, PlayStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal } from '../../shared_types';
+import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, PlayStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal, Phase } from '../../shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
@@ -696,8 +696,7 @@ export class PlayProcessor {
             if (compilation.err)
                 return lib.issueErrorResponse(compilation.message);
 
-            this.playState.setGameResults(compilation.data);
-            this.playState.setPhase('ended');
+            this.playState.registerGameEnd(compilation.data);
             this.playState.addServerMessage('Market deck is empty! Game has ended.');
 
             return this.issueStateResponse(player);
@@ -720,7 +719,7 @@ export class PlayProcessor {
     private issueStateResponse(player: PlayerHandler): PlayStateResponse {
         this.playState.savePlayer(player.toDto());
 
-        return { play: this.playState.toDto() };
+        return { gamePhase: Phase.play, state: this.playState.toDto() };
     }
 
     private startIdleChecks(): void {

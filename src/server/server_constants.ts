@@ -1,4 +1,4 @@
-import { Action } from "../shared_types";
+import { Action, Phase } from "../shared_types";
 import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
@@ -165,7 +165,7 @@ const serverConstants: ServerConstants = {
 
     DEFAULT_NEW_STATE: {
         gameId: null,
-        sessionPhase: 'inactive',
+        sessionPhase: Phase.enrolment,
         sessionOwner: null,
         chat: [],
         availableSlots: [

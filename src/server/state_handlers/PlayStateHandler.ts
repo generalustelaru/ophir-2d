@@ -1,6 +1,7 @@
 import {
-    ChatEntry, GameSetup, SessionPhase, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, PlayerState, PlayerColor,
+    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, PlayerState, PlayerColor,
     PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings, Coordinates,
+    Phase,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -11,9 +12,9 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
     private isStatusResponse: Writable<boolean>;
-    private sessionPhase: Writable<SessionPhase>;
+    private sessionPhase: Readable<Phase.play>;
+    private hasGameEnded: Writable<Boolean>;
     private gameResults: Writable<Array<PlayerCountables>>;
-    private availableSlots: Writable<Array<PlayerColor>>;
     private players: ArrayWritable<PlayerState>;
     private market: Writable<MarketOffer>;
     private temple: Writable<TempleState>;
@@ -25,17 +26,17 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.serverName = readable(serverName);
 
         const {
-            gameId, sessionOwner, setup, isStatusResponse, sessionPhase: gameStatus, gameResults,
-            availableSlots, players, market, temple, chat, itemSupplies, rival,
+            gameId, sessionOwner, setup, isStatusResponse, sessionPhase, gameResults,
+            players, market, temple, chat, itemSupplies, rival, hasGameEnded,
         } = state;
 
         this.gameId = readable(gameId);
         this.sessionOwner = readable(sessionOwner);
         this.setup = readable(setup);
         this.isStatusResponse = writable(isStatusResponse);
-        this.sessionPhase = writable(gameStatus);
+        this.sessionPhase = writable(sessionPhase);
+        this.hasGameEnded = writable(hasGameEnded);
         this.gameResults = writable(gameResults);
-        this.availableSlots = writable(availableSlots);
         this.players = arrayWritable(players, 'id');
         this.market = writable(market);
         this.temple = writable(temple);
@@ -52,8 +53,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             setup: this.setup.get(),
             isStatusResponse: this.isStatusResponse.get(),
             sessionPhase: this.sessionPhase.get(),
+            hasGameEnded: this.hasGameEnded.get(),
             gameResults: this.gameResults.get(),
-            availableSlots: this.availableSlots.get(),
             players: this.players.getAll(),
             market: this.market.get(),
             temple: this.temple.get(),
@@ -276,14 +277,6 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         })
     }
 
-    public setGameResults(results: Array<PlayerCountables>) {
-        this.gameResults.set(results);
-    }
-
-    public setPhase(status: SessionPhase) {
-        this.sessionPhase.set(status);
-    }
-
     public getTemple() {
         return this.temple.get();
     }
@@ -328,8 +321,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     /**
      * @description Loads results and sets 'ended' status.
      */
-    public registerGameEnd(results: PlayerCountables[]) {
+    public registerGameEnd(results: Array<PlayerCountables>) {
         this.gameResults.set(results);
-        this.sessionPhase.set('ended');
+        this.hasGameEnded.set(true);
     }
 }

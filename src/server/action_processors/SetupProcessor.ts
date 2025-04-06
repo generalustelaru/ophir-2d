@@ -2,6 +2,7 @@ import {
     BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations,
     Trade, MarketOffer, MarketSlotKey, LocationData, EnrolmentState, Fluctuation,
     ExchangeTier, PlayerEntry, RivalData, GameSetupPayload,
+    Phase,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -11,6 +12,7 @@ import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, I
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from '../../client/client_types';
+// import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 
 // @ts-ignore
 const activeKeys = Object.entries({SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS}).reduce((acc, [k, v]) => {if (v) acc[k] = v; return acc}, {})
@@ -20,22 +22,121 @@ const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIE
 
 export class SetupProcessor {
 
+    public processSetup(
+        enrolmentState: EnrolmentState,
+        clientSetupPayload: GameSetupPayload,
+    ): StateBundle {
+
+        if (enrolmentState.gameId === null)
+            throw new Error('Cannot start game without a game ID');
+
+        if (enrolmentState.sessionOwner === null)
+            throw new Error('Cannot start game while the session owner is null');
+
+        const playerEntries = tools.getCopy(enrolmentState.players);
+
+        if (!playerEntries.every(p => Boolean(p.id)))
+            throw new Error('Found unidentifiable players.');
+
+        if (playerEntries.length < 2 && !SINGLE_PLAYER)
+            throw new Error('Not enough players to start a game.');
+
+        const barriers = this.determineBarriers();
+        const mapPairings = this.determineLocations();
+        const marketData = this.prepareDeckAndGetOffer();
+
+        const privateState = new PrivateStateHandler({
+            destinationPackages: this.produceMoveRules(barriers),
+            tradeDeck: marketData.tradeDeck,
+            costTiers: this.filterCostTiers(playerEntries.length),
+            gameStats: playerEntries.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
+        });
+
+        const { players, startingPlayerColor } = this.hydratePlayers(
+            playerEntries,
+            privateState.getDestinationPackages(),
+            clientSetupPayload.startingPositions,
+            mapPairings
+        );
+
+        // const setupState = new SetupStateHandler(
+        //     SERVER_NAME,
+        //     {
+        //     gameId: enrolmentState.gameId,
+        //     sessionPhase: Phase.setup,
+        //     sessionOwner: enrolmentState.sessionOwner,
+        //     players,
+        //     setup: {
+        //         barriers,
+        //         mapPairings,
+        //         marketFluctuations: this.getMarketFluctuations(),
+        //         templeTradeSlot: this.determineTempleTradeSlot(),
+        //     },
+        //     rival: this.getRivalShipData(
+        //         Boolean(playerEntries.length == 2),
+        //         clientSetupPayload.hexPositions,
+        //         mapPairings,
+        //         startingPlayerColor,
+        //         privateState.getDestinationPackages(),
+        //     ),
+        //     chat: enrolmentState.chat,
+        // });
+
+        const playState = new PlayStateHandler(
+            SERVER_NAME,
+            {
+            isStatusResponse: false,
+            gameId: enrolmentState.gameId,
+            sessionPhase: Phase.play,
+            hasGameEnded: false,
+            gameResults: [],
+            sessionOwner: enrolmentState.sessionOwner,
+            chat: enrolmentState.chat,
+            players,
+            market: marketData.marketOffer,
+            itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
+            temple: {
+                maxLevel: privateState.getTempleLevelCount(),
+                treasury: privateState.drawMetalPrices()!,
+                levelCompletion: 0,
+                currentLevel: 0,
+                donations: [],
+            },
+            setup: {
+                barriers,
+                mapPairings,
+                marketFluctuations: this.getMarketFluctuations(),
+                templeTradeSlot: this.determineTempleTradeSlot(),
+            },
+            rival: this.getRivalShipData(
+                Boolean(playerEntries.length == 2),
+                clientSetupPayload.hexPositions,
+                mapPairings,
+                startingPlayerColor,
+                privateState.getDestinationPackages(),
+            ),
+        });
+        playState.addServerMessage('Game started!');
+
+        return { playState: playState, privateState };
+    };
+
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
      * @returns `{playState, privateState}`  Used expressily for a game session instance.
      */
     public processStart(
-        lobbyState: EnrolmentState,
+        enrolmentState: EnrolmentState,
         clientSetupPayload: GameSetupPayload,
     ): StateBundle {
 
-        if (lobbyState.gameId === null)
+        if (enrolmentState.gameId === null)
             throw new Error('Cannot start game without a game ID');
 
-        if (lobbyState.sessionOwner === null)
+        if (enrolmentState.sessionOwner === null)
             throw new Error('Cannot start game while the session owner is null');
 
-        const playerEntries = tools.getCopy(lobbyState.players);
+        const playerEntries = tools.getCopy(enrolmentState.players);
 
         if (!playerEntries.every(p => Boolean(p.id)))
             throw new Error('Found unidentifiable players.');
@@ -65,12 +166,12 @@ export class SetupProcessor {
             SERVER_NAME,
             {
             isStatusResponse: false,
-            gameId: lobbyState.gameId,
-            sessionPhase: 'playing', // TODO: Expand this class to handle two calls, one for handling and intermediary state (without market but w/ specialist selection) and the other to return the play state.
+            gameId: enrolmentState.gameId,
+            sessionPhase: Phase.play,
+            hasGameEnded: false,
             gameResults: [],
-            sessionOwner: lobbyState.sessionOwner,
-            chat: lobbyState.chat,
-            availableSlots: [],
+            sessionOwner: enrolmentState.sessionOwner,
+            chat: enrolmentState.chat,
             players,
             market: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },

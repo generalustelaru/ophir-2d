@@ -41,7 +41,7 @@ export type LocationName = "temple" | "market" | "treasury" | GoodsLocationName;
 export type LocationAction =
     | Action.upgrade_cargo | Action.make_trade | Action.buy_metals
     | Action.load_good | Action.donate_metals;
-export type SessionPhase = "inactive" | "owned" | "full" | "prepairing" | "playing" | "ended";
+
 export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
 export type Trade = { request: Array<TradeGood>, reward: Reward };
@@ -161,13 +161,22 @@ export type ClientIdResponse = {
     clientId: string,
 }
 
-export type PlayStateResponse = {
-    play: PlayState,
+export enum Phase {
+    enrolment = "enrolment",
+    setup = "setup",
+    play = "play",
 }
 
-export type EnrolmentStateResponse = {
-    enrolment: EnrolmentState,
+export type GameState = PlayState | SetupState | EnrolmentState
+type StateResponseFormat<T extends Phase, S extends GameState> = {
+    gamePhase: T,
+    state: S,
 }
+export type PlayStateResponse = StateResponseFormat<Phase.play, PlayState>
+export type SetupStateResponse = StateResponseFormat<Phase.setup, SetupState>
+export type EnrolmentStateResponse = StateResponseFormat<Phase.enrolment, EnrolmentState>
+
+export type GameStateResponse = PlayStateResponse | SetupStateResponse | EnrolmentStateResponse
 
 export type ErrorResponse = {
     error: string,
@@ -179,10 +188,10 @@ export type ErrorResponse = {
 export type PlayState = {
     isStatusResponse: boolean,
     gameId: string,
-    sessionPhase: SessionPhase,
+    sessionPhase: Phase.play,
+    hasGameEnded: Boolean,
     gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
-    availableSlots: Array<PlayerColor>,
     players: Array<PlayerState>,
     market: MarketOffer,
     temple: TempleState,
@@ -194,11 +203,12 @@ export type PlayState = {
 
 export type SetupState = {
     gameId: string,
-    sessionPhase: SessionPhase,
+    sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
-    availableSlots: Array<PlayerColor>,
     players: Array<PlayerEntry>,
+    setup: GameSetup,
     chat: Array<ChatEntry>,
+    rival: RivalData,
 }
 
 /**
@@ -206,7 +216,7 @@ export type SetupState = {
  */
 export type EnrolmentState = {
     gameId: string | null,
-    sessionPhase: SessionPhase,
+    sessionPhase: Phase.enrolment,
     sessionOwner: PlayerColor | null,
     availableSlots: Array<PlayerColor>,
     players: Array<PlayerEntry>,
@@ -217,7 +227,7 @@ export type ResetResponse = {
     resetFrom: string | PlayerColor,
 }
 
-export type ServerMessage = ClientIdResponse | PlayStateResponse | EnrolmentStateResponse | ResetResponse | ErrorResponse;
+export type ServerMessage = ClientIdResponse | GameStateResponse | ResetResponse | ErrorResponse;
 
 export type LocationData = {
     name: LocationName,

@@ -4,7 +4,7 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState } from "../shared_types";
+import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState } from "../shared_types";
 
 // Initializations
 const serverAddress = process.env.SERVER_ADDRESS;
@@ -91,15 +91,9 @@ window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => 
 
     UserInterface.updateAsEnrolment(enrolmentState);
 
-    switch (enrolmentState.sessionPhase) {
-        case 'owned':
-            localState.gameId = enrolmentState.gameId;
-            sessionStorage.setItem('localState', JSON.stringify(localState));
-            break;
-        case 'inactive':
-        case "full":
-        default:
-            break;
+    if (enrolmentState.players.length) {
+        localState.gameId = enrolmentState.gameId;
+        sessionStorage.setItem('localState', JSON.stringify(localState));
     }
 
     debug(enrolmentState);
@@ -115,25 +109,33 @@ window.addEventListener('play_update', (event: CustomEventInit) => {
 
     UserInterface.updateAsPlay(playState);
 
-    switch(playState.sessionPhase) {
-        case 'prepairing':
-            CanvasService.drawUpdateElements(playState, true);
-            break;
-
-        case 'playing':
-            CommunicationService.setKeepStatusCheck();
-            CanvasService.drawUpdateElements(playState);
-            break;
-
-        case 'ended':
-            CommunicationService.clearStatusCheck();
-            CanvasService.drawUpdateElements(playState, true);
-            break;
-        default:
-            break;
+    if (playState.hasGameEnded) {
+        CommunicationService.clearStatusCheck();
+        CanvasService.drawUpdateElements(playState, true);
+    } else {
+        CommunicationService.setKeepStatusCheck();
+        CanvasService.drawUpdateElements(playState);
     }
 
     debug(playState);
+});
+
+window.addEventListener('setup_update', (event: CustomEventInit) => {
+    if (!event.detail)
+        return signalError('State is missing!');
+
+    const setupState = event.detail as SetupState;
+
+    CanvasService.drawUpdateElements(setupState, true);
+});
+
+window.addEventListener('enrolment_update', (event: CustomEventInit) => {
+    if (!event.detail)
+        return signalError('State is missing!');
+
+    const enrolmentState = event.detail as EnrolmentState;
+
+    UserInterface.updateAsEnrolment(enrolmentState);
 });
 
 window.addEventListener(

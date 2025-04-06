@@ -2,6 +2,7 @@ import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName,
     EnrolmentState, Trade, MarketOffer, PlayerState, Metal, MetalPrices, Currency,
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
+    SetupState,
 } from '../shared_types';
 import Konva from 'konva';
 
@@ -51,8 +52,9 @@ export interface HTMLHandlerInterface {
 }
 
 export interface MegaGroupInterface {
-    drawElements(state: PlayState): void,
-    update(state: PlayState): void,
+    drawElements(state: PlayState | SetupState): void,
+    update(state: PlayState | SetupState): void,
+    disable(): void,
 }
 
 export interface DynamicGroupInterface<S> {
@@ -124,6 +126,7 @@ export enum EventName {
     info = 'info',
     reset = 'reset',
     play_update = 'play_update',
+    setup_update = 'setup_update',
     enrolment_update = 'enrolment_update',
     identification = 'identification',
 }
@@ -135,12 +138,13 @@ export type ErrorEvent = ClientEventInterface<EventName.error, ErrorDetail>;
 export type InfoEvent = ClientEventInterface<EventName.info, InfoDetail>;
 export type ResetEvent = ClientEventInterface<EventName.reset, ResetResponse>;
 export type PlayStateUpdateEvent = ClientEventInterface<EventName.play_update, PlayState>;
+export type SetupStateUpdateEvent = ClientEventInterface<EventName.setup_update, SetupState>;
 export type EnrolmentStateUpdateEvent = ClientEventInterface<EventName.enrolment_update, EnrolmentState>;
 export type IdentificationEvent = ClientEventInterface<EventName.identification, ClientIdResponse>;
 
 export type ClientEvent =
     | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent
-    | ResetEvent | PlayStateUpdateEvent | EnrolmentStateUpdateEvent;
+    | ResetEvent | PlayStateUpdateEvent | SetupStateUpdateEvent | EnrolmentStateUpdateEvent;
 
 export type InfoDetail = {
     text: string,
