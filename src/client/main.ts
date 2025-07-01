@@ -16,16 +16,13 @@ if (!wsPort || !serverAddress)
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
 const savedState = sessionStorage.getItem('localState');
-const retrieved = savedState
+const { myId, playerColor, playerName, isBoardDrawn } = savedState
     ? JSON.parse(savedState) as LocalState
     : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
-localState.myId = retrieved.myId;
-localState.playerColor = retrieved.playerColor;
-localState.playerName = retrieved.playerName;
-localState.isBoardDrawn = retrieved.isBoardDrawn;
-
-
-// const UserInterface = new UserInterfaceClass();
+localState.myId = myId;
+localState.playerColor = playerColor;
+localState.playerName = playerName;
+localState.isBoardDrawn = isBoardDrawn;
 
 //Send player action to server
 window.addEventListener(EventName.action, (event: CustomEventInit) => {
@@ -115,7 +112,7 @@ window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
     UserInterface.updateAsSetup(setupState);
 
     debug(setupState);
-})
+});
 
 // Update client on server state update
 window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
