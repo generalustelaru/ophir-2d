@@ -9,7 +9,7 @@ import clientConstants from '../client_constants';
 import { EventName } from '../client_types';
 
 const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
-class UserInterfaceClass extends Communicator {
+export const UserInterface = new class extends Communicator {
 
     private createButton: Button;
     private joinButton: Button;
@@ -185,6 +185,7 @@ class UserInterfaceClass extends Communicator {
     public updateAsSetup(state: SetupState): void {
         this.updateChat(state.chat);
         this.disableButtons();
+        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
@@ -198,6 +199,7 @@ class UserInterfaceClass extends Communicator {
     public updateAsPlay(state: PlayState): void {
         this.updateChat(state.chat);
         this.disableButtons();
+        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
@@ -262,8 +264,6 @@ class UserInterfaceClass extends Communicator {
     }
 
     private handleStartedState(state: PlayState): void {
-
-        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
         if (localState.playerColor) {
             this.setInfo('You are playing.');
@@ -369,5 +369,3 @@ class UserInterfaceClass extends Communicator {
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
 }
-
-export const UserInterface = new UserInterfaceClass();
