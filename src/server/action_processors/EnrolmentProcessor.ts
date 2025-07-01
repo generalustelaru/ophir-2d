@@ -1,6 +1,5 @@
 import {
-    ClientRequest, ErrorResponse, EnrolmentState, EnrolmentStateResponse,
-    PlayerColor, PlayerEntry, Phase,
+    ClientRequest, ErrorResponse, EnrolmentState, PlayerColor, PlayerEntry, GameStateResponse,
 } from "../../shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
@@ -17,10 +16,10 @@ export class EnrolmentProcessor {
         return this.state;
     }
 
-    public processEnrol(color: PlayerColor | null, name: string | null): EnrolmentStateResponse | ErrorResponse {
+    public processEnrol(color: PlayerColor | null, name: string | null): GameStateResponse | ErrorResponse {
 
         if (!color)
-            return { error: 'Color is missing!' }
+            return { error: 'Cannot enrol: Missing player color' }
 
         if (this.isColorTaken(this.state.players, color))
             return { error: 'Color is is already taken' }
@@ -36,9 +35,9 @@ export class EnrolmentProcessor {
             return { error: stateUpdate.message };
         }
 
-        stateUpdate.data.chat.push({ id: null, name: serverName, message: `${name} has joined the game` });
+        stateUpdate.data.chat.push({ id: color, name: serverName, message: `${name||color} has joined the game` });
 
-        return { phase: Phase.enrolment, state: stateUpdate.data };
+        return { state: stateUpdate.data };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
@@ -52,7 +51,7 @@ export class EnrolmentProcessor {
         return players.some(player => player.name === name);
     }
 
-    public processChat(request: ClientRequest): ErrorResponse | EnrolmentStateResponse {
+    public processChat(request: ClientRequest): ErrorResponse | GameStateResponse {
         const { playerColor, playerName, message } = request;
         const chatPayload = validator.validateChatPayload(message.payload);
 
@@ -65,7 +64,7 @@ export class EnrolmentProcessor {
             message: chatPayload.input,
         });
 
-        return { phase: Phase.enrolment, state: this.state };
+        return { state: this.state };
     }
 
     private addPlayerEntry(state: EnrolmentState, playerColor: PlayerColor, playerName: string | null): Probable<EnrolmentState> {

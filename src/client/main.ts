@@ -33,11 +33,18 @@ window.addEventListener(EventName.action, (event: CustomEventInit) => {
     CommunicationService.sendMessage(message);
 });
 
-//Send start message to server
-window.addEventListener(Action.start, () => {
+//Send state change message to server
+window.addEventListener(EventName.draft, () => {
     const message: ClientMessage = {
-        action: Action.start,
-        payload: CanvasService.getSetupCoordinates()
+        action: Action.start_setup,
+        payload: null
+    }
+    CommunicationService.sendMessage(message);
+});
+window.addEventListener(EventName.start, () => {
+    const message: ClientMessage = {
+        action: Action.start_play,
+        payload: CanvasService.getSetupCoordinates(),
     }
     CommunicationService.sendMessage(message);
 });
@@ -99,8 +106,19 @@ window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => 
     debug(enrolmentState);
 });
 
+window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
+    if (!event.detail)
+        return signalError("State is missing!");
+
+    const setupState = event.detail as SetupState;
+
+    UserInterface.updateAsSetup(setupState);
+
+    debug(setupState);
+})
+
 // Update client on server state update
-window.addEventListener('play_update', (event: CustomEventInit) => {
+window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
 
     if (!event.detail)
         return signalError('State is missing!');
@@ -125,7 +143,7 @@ window.addEventListener('setup_update', (event: CustomEventInit) => {
         return signalError('State is missing!');
 
     const setupState = event.detail as SetupState;
-
+    // TODO: an update AsSetup needed to enable specific buttons during setup phase (state).
     CanvasService.drawUpdateElements(setupState, true);
 });
 
@@ -155,7 +173,7 @@ function signalError(message?: string) {
 }
 
 // Debugging
-function debug(state: PlayState|EnrolmentState) {
+function debug(state: PlayState|SetupState|EnrolmentState) {
     if ('isStatusResponse' in state && state.isStatusResponse)
         return;
 

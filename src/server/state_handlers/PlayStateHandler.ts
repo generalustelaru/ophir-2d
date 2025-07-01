@@ -228,7 +228,6 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             s.goods[tradeGood] -= 1;
             return s;
         });
-
     }
 
     public returnTradeGood(tradeGood: TradeGood) {

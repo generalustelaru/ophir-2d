@@ -1,4 +1,4 @@
-import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState } from '../../shared_types';
+import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState, SetupState } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
@@ -13,6 +13,7 @@ class UserInterfaceClass extends Communicator {
 
     private createButton: Button;
     private joinButton: Button;
+    private draftButton: Button;
     private startButton: Button;
     private resetButton: Button;
     private playerNameInput: TextInput;
@@ -27,6 +28,7 @@ class UserInterfaceClass extends Communicator {
         super();
         this.createButton = new Button('createButton', this.processEnroll);
         this.joinButton = new Button('joinButton', this.processEnroll);
+        this.draftButton =  new Button('draftButton', this.processDraft);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
         this.kickPlayerButton = new Button('kickPlayerButton', ()=>{});
@@ -102,6 +104,12 @@ class UserInterfaceClass extends Communicator {
         }, 5);
     }
 
+    private processDraft = (): void => {
+        this.draftButton.disable();
+
+        return this.createEvent({ type: EventName.draft, detail: null });
+    }
+
     private processStart = (): void => {
         this.startButton.disable();
 
@@ -151,6 +159,7 @@ class UserInterfaceClass extends Communicator {
     private disableButtons(): void {
         this.createButton.disable();
         this.joinButton.disable();
+        this.draftButton.disable();
         this.startButton.disable();
         this.resetButton.disable();
         this.kickPlayerButton.disable();
@@ -172,8 +181,21 @@ class UserInterfaceClass extends Communicator {
             default: this.handleCreatedState(state); break;
         }
     }
-    public updateAsPlay(state: PlayState): void {
 
+    public updateAsSetup(state: SetupState): void {
+        this.updateChat(state.chat);
+        this.disableButtons();
+
+        if(localState.playerColor)
+            this.enableElements(this.chatInput, this.chatSendButton);
+
+        if (localState.playerColor === state.sessionOwner) {
+            this.resetButton.enable();
+            this.startButton.enable(); // TODO: should only be enabled provided players have drafted their psecialists.
+        }
+    }
+
+    public updateAsPlay(state: PlayState): void {
         this.updateChat(state.chat);
         this.disableButtons();
 
@@ -203,7 +225,7 @@ class UserInterfaceClass extends Communicator {
         if (state.sessionOwner === localState.playerColor) {
 
             if (state.players.length > 1 || SINGLE_PLAYER) {
-                this.enableElements(this.startButton, this.resetButton);
+                this.enableElements(this.draftButton, this.resetButton);
 
                 return this.setInfo('You may start whenever you want!');
             }
@@ -231,7 +253,7 @@ class UserInterfaceClass extends Communicator {
         }
 
         if (localState.playerColor === state.sessionOwner) {
-            this.enableElements(this.startButton, this.resetButton);
+            this.enableElements(this.draftButton, this.resetButton);
 
             return this.setInfo('You may start whenever you want');
         }

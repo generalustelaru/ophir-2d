@@ -1,4 +1,7 @@
-import { ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, PlayStateResponse, MarketSlotKey, TradeGood, CargoMetal, LocationAction, Metal, Phase } from '../../shared_types';
+import {
+    ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
+    LocationAction, Metal, GameStateResponse,
+} from '../../shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
@@ -716,10 +719,10 @@ export class PlayProcessor {
         return this.issueStateResponse(player);
     }
 
-    private issueStateResponse(player: PlayerHandler): PlayStateResponse {
+    private issueStateResponse(player: PlayerHandler): GameStateResponse {
         this.playState.savePlayer(player.toDto());
 
-        return { phase: Phase.play, state: this.playState.toDto() };
+        return { state: this.playState.toDto() };
     }
 
     private startIdleChecks(): void {

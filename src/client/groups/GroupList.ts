@@ -34,4 +34,4 @@ export {
     RivalShip, RemoteShip, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
     TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, TempleDonationCard,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
-};
+}; //TODO: might want to ditch this for performance sake.

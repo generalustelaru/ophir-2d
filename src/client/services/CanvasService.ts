@@ -78,11 +78,22 @@ class CanvasClass extends Communicator {
         return this.mapGroup.createSetupPayload();
     }
 
-    private drawElements(state: PlayState): void {
-        this.locationGroup.drawElements(state);
-        this.playerGroup.drawElements(state);
-        this.mapGroup.drawElements(state);
-        this.setupGroup.drawElements();
+    private drawElements(state: PlayState | SetupState): void {
+
+        switch(state.sessionPhase) {
+            case Phase.setup:
+                this.setupGroup.drawElements();
+                 // TODO: need to create draw logic for incomplete setup (missing market and ships)
+                break;
+            case Phase.play:
+                this.locationGroup.drawElements(state);
+                this.playerGroup.drawElements(state);
+                this.mapGroup.drawElements(state);
+                this.isDrawn = true;
+                break;
+            default:
+                console.error('session phase is incompatible', state);
+        }
 
         if (!localState.playerColor) {
             this.createEvent({
@@ -90,10 +101,12 @@ class CanvasClass extends Communicator {
                 detail: { text: 'You are a spectator' }
             });
         }
-        this.isDrawn = true;
     }
 
     public drawUpdateElements(state: PlayState | SetupState, disable = false): void {
+
+        if(!this.isDrawn)
+            this.drawElements(state);
 
         if (state.sessionPhase === Phase.setup) {
             this.setupGroup.update(state);
@@ -103,9 +116,6 @@ class CanvasClass extends Communicator {
 
         if (state.isStatusResponse)
             return;
-
-        if(!this.isDrawn)
-            this.drawElements(state);
 
         this.setupGroup.disable();
         this.locationGroup.update(state);
