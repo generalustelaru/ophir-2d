@@ -6,7 +6,7 @@ import { Communicator } from './Communicator';
 import localState from '../state';
 import { EventName } from '../client_types';
 
-class CommunicationClass extends Communicator {
+export const CommunicationService = new class extends Communicator {
 
     private socket: WebSocket | null = null;
     private statusInterval: NodeJS.Timeout | null = null;
@@ -148,5 +148,3 @@ class CommunicationClass extends Communicator {
         }
     }
 }
-
-export const CommunicationService = new CommunicationClass();

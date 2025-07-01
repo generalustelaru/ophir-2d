@@ -8,7 +8,7 @@ import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
 import { EventName } from '../client_types';
 
-class CanvasClass extends Communicator {
+export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
@@ -131,5 +131,3 @@ class CanvasClass extends Communicator {
         this.playerGroup.disable();
     }
 }
-
-export const CanvasService = new CanvasClass();
