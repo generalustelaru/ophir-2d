@@ -190,6 +190,7 @@ export class MapGroup implements MegaGroupInterface {
         //MARK: player ship
         if (localPlayer) {
             const localShip = this.localShip as PlayerShip;
+
             localShip.switchControl(localPlayer.isActive && !localPlayer.isHandlingRival);
             localShip.switchHighlight(localPlayer.isActive);
             localShip.update(localPlayer.bearings.position, state.players, state.rival);

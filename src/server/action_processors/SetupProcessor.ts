@@ -1,8 +1,6 @@
 import {
-    BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations,
-    Trade, MarketOffer, MarketSlotKey, LocationData, EnrolmentState, Fluctuation,
-    ExchangeTier, PlayerEntry, RivalData, GameSetupPayload,
-    Phase,
+    BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
+    LocationData, Fluctuation, ExchangeTier, PlayerEntry, RivalData, GameSetupPayload, Phase, PlayerBuild, SetupDigest,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -12,7 +10,7 @@ import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, I
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from '../../client/client_types';
-// import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
+import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 
 // @ts-ignore
 const activeKeys = Object.entries({SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS}).reduce((acc, [k, v]) => {if (v) acc[k] = v; return acc}, {})
@@ -22,156 +20,74 @@ const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIE
 
 export class SetupProcessor {
 
-    public processSetup(
-        enrolmentState: EnrolmentState,
-        clientSetupPayload: GameSetupPayload,
-    ): StateBundle {
+    private state: SetupStateHandler;
 
-        if (enrolmentState.gameId === null)
-            throw new Error('Cannot start game without a game ID');
+    constructor(digest: SetupDigest) {
 
-        if (enrolmentState.sessionOwner === null)
-            throw new Error('Cannot start game while the session owner is null');
-
-        const playerEntries = tools.getCopy(enrolmentState.players);
-
-        if (!playerEntries.every(p => Boolean(p.id)))
-            throw new Error('Found unidentifiable players.');
+        const playerEntries = tools.getCopy(digest.players);
 
         if (playerEntries.length < 2 && !SINGLE_PLAYER)
             throw new Error('Not enough players to start a game.');
 
         const barriers = this.determineBarriers();
         const mapPairings = this.determineLocations();
-        const marketData = this.prepareDeckAndGetOffer();
 
-        const privateState = new PrivateStateHandler({
-            destinationPackages: this.produceMoveRules(barriers),
-            tradeDeck: marketData.tradeDeck,
-            costTiers: this.filterCostTiers(playerEntries.length),
-            gameStats: playerEntries.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
-        });
-
-        const { players, startingPlayerColor } = this.hydratePlayers(
-            playerEntries,
-            privateState.getDestinationPackages(),
-            clientSetupPayload.startingPositions,
-            mapPairings
-        );
-
-        // const setupState = new SetupStateHandler(
-        //     SERVER_NAME,
-        //     {
-        //     gameId: enrolmentState.gameId,
-        //     sessionPhase: Phase.setup,
-        //     sessionOwner: enrolmentState.sessionOwner,
-        //     players,
-        //     setup: {
-        //         barriers,
-        //         mapPairings,
-        //         marketFluctuations: this.getMarketFluctuations(),
-        //         templeTradeSlot: this.determineTempleTradeSlot(),
-        //     },
-        //     rival: this.getRivalShipData(
-        //         Boolean(playerEntries.length == 2),
-        //         clientSetupPayload.hexPositions,
-        //         mapPairings,
-        //         startingPlayerColor,
-        //         privateState.getDestinationPackages(),
-        //     ),
-        //     chat: enrolmentState.chat,
-        // });
-
-        const playState = new PlayStateHandler(
+        this.state = new SetupStateHandler(
             SERVER_NAME,
             {
-            isStatusResponse: false,
-            gameId: enrolmentState.gameId,
-            sessionPhase: Phase.play,
-            hasGameEnded: false,
-            gameResults: [],
-            sessionOwner: enrolmentState.sessionOwner,
-            chat: enrolmentState.chat,
-            players,
-            market: marketData.marketOffer,
-            itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
-            temple: {
-                maxLevel: privateState.getTempleLevelCount(),
-                treasury: privateState.drawMetalPrices()!,
-                levelCompletion: 0,
-                currentLevel: 0,
-                donations: [],
-            },
+            gameId: digest.gameId,
+            sessionPhase: Phase.setup,
+            sessionOwner: digest.sessionOwner,
+            players: this.buildPlayers(playerEntries),
             setup: {
                 barriers,
                 mapPairings,
-                marketFluctuations: this.getMarketFluctuations(),
-                templeTradeSlot: this.determineTempleTradeSlot(),
             },
-            rival: this.getRivalShipData(
-                Boolean(playerEntries.length == 2),
-                clientSetupPayload.hexPositions,
-                mapPairings,
-                startingPlayerColor,
-                privateState.getDestinationPackages(),
-            ),
+            chat: digest.chat,
         });
-        playState.addServerMessage('Game started!');
 
-        return { playState: playState, privateState };
+        this.state.addServerMessage('Select Specialists.');
     };
+
+    public getState() {
+        return this.state.toDto();
+    }
 
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
      * @returns `{playState, privateState}`  Used expressily for a game session instance.
      */
     public processStart(
-        enrolmentState: EnrolmentState,
         clientSetupPayload: GameSetupPayload,
     ): StateBundle {
 
-        if (enrolmentState.gameId === null)
-            throw new Error('Cannot start game without a game ID');
-
-        if (enrolmentState.sessionOwner === null)
-            throw new Error('Cannot start game while the session owner is null');
-
-        const playerEntries = tools.getCopy(enrolmentState.players);
-
-        if (!playerEntries.every(p => Boolean(p.id)))
-            throw new Error('Found unidentifiable players.');
-
-        if (playerEntries.length < 2 && !SINGLE_PLAYER)
-            throw new Error('Not enough players to start a game.');
-
-        const barriers = this.determineBarriers();
-        const mapPairings = this.determineLocations();
+        const setupState = this.state.toDto();
+        const playerBuilds = tools.getCopy(setupState.players);
         const marketData = this.prepareDeckAndGetOffer();
-
         const privateState = new PrivateStateHandler({
-            destinationPackages: this.produceMoveRules(barriers),
+            destinationPackages: this.produceMoveRules(setupState.setup.barriers),
             tradeDeck: marketData.tradeDeck,
-            costTiers: this.filterCostTiers(playerEntries.length),
-            gameStats: playerEntries.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
+            costTiers: this.filterCostTiers(playerBuilds.length),
+            gameStats: playerBuilds.map(p => ({ id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 })),
         });
 
         const { players, startingPlayerColor } = this.hydratePlayers(
-            playerEntries,
+            playerBuilds,
             privateState.getDestinationPackages(),
             clientSetupPayload.startingPositions,
-            mapPairings
+            setupState.setup.mapPairings,
         );
 
         const playState = new PlayStateHandler(
             SERVER_NAME,
             {
             isStatusResponse: false,
-            gameId: enrolmentState.gameId,
+            gameId: setupState.gameId,
             sessionPhase: Phase.play,
             hasGameEnded: false,
             gameResults: [],
-            sessionOwner: enrolmentState.sessionOwner,
-            chat: enrolmentState.chat,
+            sessionOwner: setupState.sessionOwner,
+            chat: setupState.chat,
             players,
             market: marketData.marketOffer,
             itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
@@ -183,15 +99,15 @@ export class SetupProcessor {
                 donations: [],
             },
             setup: {
-                barriers,
-                mapPairings,
+                barriers: setupState.setup.barriers,
+                mapPairings: setupState.setup.mapPairings,
                 marketFluctuations: this.getMarketFluctuations(),
                 templeTradeSlot: this.determineTempleTradeSlot(),
             },
             rival: this.getRivalShipData(
-                Boolean(playerEntries.length == 2),
+                Boolean(playerBuilds.length == 2),
                 clientSetupPayload.hexPositions,
-                mapPairings,
+                setupState.setup.mapPairings,
                 startingPlayerColor,
                 privateState.getDestinationPackages(),
             ),
@@ -269,9 +185,30 @@ export class SetupProcessor {
     }
 
     // MARK: Players
+    private buildPlayers(entries: Array<PlayerEntry>,): Array<PlayerBuild> {
+        const randomized = entries
+            .map(e => {return { entry: e, order: Math.random() }})
+            .sort((a, b) => a.order - b.order)
+            .map(o => o.entry);
+
+        const orderTokens = (() => {
+            const t = Array.from(Array(5).keys());
+            t.shift();
+            return t;
+        })(); // [1,2,3,4]
+
+        return randomized.map(e => {
+            return {
+                id: e.id,
+                name: e.name,
+                turnOrder: orderTokens.shift()!,
+                specialist: null,
+            }
+        });
+    }
 
     private hydratePlayers(
-        scaffolds: Array<PlayerEntry>,
+        builds: Array<PlayerBuild>,
         moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
         mapPairings: Record<ZoneName, LocationData>,
@@ -281,26 +218,22 @@ export class SetupProcessor {
     } {
         const initialRules = tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
-        const randomScaffolds = scaffolds
-            .map(p => {return { player: p, order: Math.random() }})
-            .sort((a, b) => a.order - b.order)
-            .map(o => o.player);
 
-        const orderTokens = (() => {
-            const t = Array.from(Array(5).keys());
-            t.shift();
-            return t;
-        })(); // [1,2,3,4]
+        for (let i = 0; i < builds.length; i++) {
+            const build = builds[i];
 
-        const players: Array<PlayerState> = randomScaffolds.map(p => {
-            const order = orderTokens.shift()!;
+            if (!build.specialist) // TODO: should check earlier
+                console.error("Player specialist missing", {builds});
+        }
+
+        const players: Array<PlayerState> = builds.map(b => {
             const playerDto: PlayerState = {
-                id: p.id,
+                id: b.id,
                 timeStamp: 0,
                 isIdle: false,
-                name: p.name,
-                turnOrder: order,
-                specialist: 'ambassador',
+                name: b.name,
+                turnOrder: b.turnOrder,
+                specialist: b.specialist!,
                 specialty: null,
                 isActive: false,
                 bearings: {
@@ -453,5 +386,3 @@ export class SetupProcessor {
         );
     }
 }
-
-export const gameSetupService = new SetupProcessor();

@@ -1,6 +1,6 @@
 import {
-    Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage,
-    ResetResponse, Action, PlayStateResponse, EnrolmentStateResponse, SetupStateResponse,
+    Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, Action,
+    GameStateResponse,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -71,14 +71,8 @@ class CommunicationClass extends Communicator {
                 case this.isResetOrder(data):
                     this.createEvent({ type: EventName.reset, detail: data });
                     break;
-                case this.isPlayStateResponse(data):
-                    this.createEvent({ type: EventName.play_update, detail: data.state });
-                    break;
-                case this.isSetupStateResponse(data):
-                    this.createEvent({ type: EventName.setup_update, detail: data.state });
-                    break;
-                case this.isEnrolmentStateResponse(data):
-                    this.createEvent({ type: EventName.enrolment_update, detail: data.state });
+                case this.isGameStateResponse(data):
+                    this.createStateEvent(data);
                     break;
                 default:
                     this.createEvent({ type: EventName.error, detail: { message: 'Could not determine message type.' } });
@@ -121,16 +115,8 @@ class CommunicationClass extends Communicator {
         if (this.statusInterval) clearInterval(this.statusInterval);
     }
 
-    private isPlayStateResponse(data: ServerMessage): data is PlayStateResponse {
-        return 'phase' in data && data.phase === Phase.play;
-    }
-
-    private isSetupStateResponse(data: ServerMessage): data is SetupStateResponse {
-        return 'phase' in data && data.phase === Phase.setup;
-    }
-
-    private isEnrolmentStateResponse(data: ServerMessage): data is EnrolmentStateResponse {
-        return 'phase' in data && data.phase === Phase.enrolment;
+    private isGameStateResponse(data: ServerMessage): data is GameStateResponse {
+        return 'state' in data;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
@@ -143,6 +129,23 @@ class CommunicationClass extends Communicator {
 
     private isResetOrder(data: ServerMessage): data is ResetResponse {
         return 'resetFrom' in data;
+    }
+
+    private createStateEvent(data: GameStateResponse) {
+        const { state } = data;
+
+        switch (state.sessionPhase) {
+            case Phase.enrolment:
+                return this.createEvent({ type: EventName.enrolment_update, detail: state });
+            case Phase.setup:
+                return this.createEvent({ type: EventName.setup_update, detail: state });
+            case Phase.play:
+                return this.createEvent({ type: EventName.play_update, detail: state });
+            default:
+                return this.createEvent({
+                    type: EventName.error, detail: { message: 'Unknown phase value in state.'}
+                });
+        }
     }
 }
 

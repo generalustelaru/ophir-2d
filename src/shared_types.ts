@@ -6,7 +6,8 @@ import { PlayerCountables } from "./server/server_types";
  */
 export enum Action {
     chat = 'chat',
-    start = 'start',
+    start_setup = 'start_setup',
+    start_play = 'start_play',
     move = 'move',
     move_rival = 'move_rival',
     reposition_rival = 'reposition_rival',
@@ -116,18 +117,14 @@ export type PlayerState = {
     coins: number,
 }
 
-export type PlayerEntry = {
-    id: PlayerColor,
-    name: string,
-}
-
 export type PlayerBuild = {
     id: PlayerColor,
     name: string,
     turnOrder: number,
-    bearings: ShipBearings,
     specialist: SpecialistName | null
 }
+
+export type PlayerEntry = Pick<PlayerBuild, 'id'|'name'>
 
 export type MarketOffer = {
     deckSize: number,
@@ -157,29 +154,12 @@ export type ItemSupplies = {
     goods: Record<TradeGood, number>,
 }
 
-export type ClientIdResponse = {
-    clientId: string,
-}
-
 export enum Phase {
     enrolment = "enrolment",
     setup = "setup",
     play = "play",
 }
 
-type StateResponseFormat<P extends Phase, S extends PlayState | SetupState | EnrolmentState> = {
-    phase: P,
-    state: S,
-}
-export type PlayStateResponse = StateResponseFormat<Phase.play, PlayState>
-export type SetupStateResponse = StateResponseFormat<Phase.setup, SetupState>
-export type EnrolmentStateResponse = StateResponseFormat<Phase.enrolment, EnrolmentState>
-
-export type GameStateResponse = PlayStateResponse | SetupStateResponse | EnrolmentStateResponse
-
-export type ErrorResponse = {
-    error: string,
-}
 
 /**
  * @description Shared between players and server in an ongoing session
@@ -204,10 +184,9 @@ export type SetupState = {
     gameId: string,
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
-    players: Array<PlayerEntry>,
-    setup: GameSetup,
+    players: Array<PlayerBuild>,
+    setup: GamePartialSetup,
     chat: Array<ChatEntry>,
-    rival: RivalData,
 }
 
 /**
@@ -222,11 +201,14 @@ export type EnrolmentState = {
     chat: Array<ChatEntry>,
 }
 
-export type ResetResponse = {
-    resetFrom: string | PlayerColor,
-}
+export type GameState = EnrolmentState | SetupState | PlayState;
 
-export type ServerMessage = ClientIdResponse | GameStateResponse | ResetResponse | ErrorResponse;
+export type SetupDigest = {
+    gameId: string,
+    sessionOwner: PlayerColor,
+    players: Array<PlayerEntry>,
+    chat: Array<ChatEntry>,
+}
 
 export type LocationData = {
     name: LocationName,
@@ -239,6 +221,8 @@ export type GameSetup = {
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
 }
+
+export type GamePartialSetup = Pick<GameSetup, 'barriers'|'mapPairings'>
 
 // MARK: COMMUNICATION
 
@@ -268,14 +252,15 @@ type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
 }
 
 export type VerboiseAction =
-    | Action.chat | Action.start | Action.move | Action.load_good | Action.drop_item | Action.reposition
+    | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client;
 export type LaconicAction =
     | Action.inquire | Action.enrol | Action.end_turn | Action.reset | Action.spend_favor | Action.move_rival
-    | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival;
+    | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival
+    | Action.start_setup;
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
-export type StartMessage = MessageFormat<Action.start, GameSetupPayload>;
+export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;
 export type MoveMessage = MessageFormat<Action.move | Action.move_rival, MovementPayload>;
 export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>;
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
@@ -297,3 +282,14 @@ export type ClientRequest = {
     playerName: string | null,
     message: ClientMessage,
 }
+
+export type ClientIdResponse = { clientId: string }
+
+export type GameStateResponse = { state: GameState }
+
+export type ResetResponse = { resetFrom: string | PlayerColor }
+
+export type ErrorResponse = { error: string }
+
+export type ServerMessage = ClientIdResponse | GameStateResponse | ResetResponse | ErrorResponse;
+
