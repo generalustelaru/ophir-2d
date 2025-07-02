@@ -62,7 +62,7 @@ export class SetupProcessor {
     ): StateBundle {
 
         const setupState = this.state.toDto();
-        const playerBuilds = tools.getCopy(setupState.players);
+        const playerBuilds = tools.getCopy(setupState.players); // TODO: is getCopy necessary?
         const marketData = this.prepareDeckAndGetOffer();
         const privateState = new PrivateStateHandler({
             destinationPackages: this.produceMoveRules(setupState.setup.barriers),
