@@ -130,19 +130,20 @@ export class GameSession {
     private processSetupAction(processor: SetupProcessor, request: ClientRequest) {
         const { message, playerColor } = request;
         const { action, payload } = message;
+        const state = processor.getState();
 
         switch(action) {
             case Action.inquire:
-                return this.issueNominalDigest({ state: processor.getState()});
+                return this.issueNominalDigest({ state });
             case Action.chat:
-                return this.issueBroadcastDigest(this.processChat(request, processor.getState()));
+                return this.issueBroadcastDigest(this.processChat(request, state));
             case Action.reset: {
-                const response = this.wipeSession(request, processor.getState());
+                const response = this.wipeSession(request, state);
 
                 if (!response) {
                     return this.issueNominalDigest(lib.issueErrorResponse(
                         'Only session owner may reset.',
-                        { playerColor, sessionOwner: processor.getState().sessionOwner },
+                        { playerColor, sessionOwner: state.sessionOwner },
                     ));
                 }
 
@@ -204,7 +205,7 @@ export class GameSession {
         const digest: DataDigest = { player, payload }
 
         if (action === Action.chat)
-            return this.issueBroadcastDigest(this.processChat(request, processor.getState()));
+            return this.issueBroadcastDigest(processor.processChat(digest));
 
         if (!player.isActivePlayer())
             return this.issueNominalDigest(lib.issueErrorResponse(
