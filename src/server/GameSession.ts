@@ -1,8 +1,7 @@
 import {WsDigest, DataDigest } from "./server_types";
 import { randomUUID } from 'crypto';
 import {
-    ClientRequest, ServerMessage, Action, EnrolmentState, ResetResponse, PlayState, GameStateResponse, ErrorResponse,
-    GameState,
+    ClientRequest, ServerMessage, Action, ResetResponse, PlayState, GameStateResponse, GameState, Phase,
 } from "./../shared_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library'
@@ -13,67 +12,53 @@ import serverConstants from '../server/server_constants';
 import { validator } from "./services/validation/ValidatorService";
 
 export class GameSession {
-    private enrolment: EnrolmentProcessor | null;
-    private setup: SetupProcessor | null = null;
-    private play: PlayProcessor | null = null;
+    private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
 
     constructor() {
-        this.enrolment = new EnrolmentProcessor(this.getNewState());
+        this.actionProcessor = new EnrolmentProcessor(this.getNewState());
         console.info('Game session created');
     }
 
-    public localReset() {
-        this.play?.killIdleChecks();
-        this.play = null;
-        this.setup = null;
-        this.enrolment = new EnrolmentProcessor(this.getNewState());
+    public resetSession() {
+        if (this.actionProcessor.hasOwnProperty('killIdleChecks')) {
+            (this.actionProcessor as PlayProcessor).killIdleChecks();
+        }
+
+        this.actionProcessor = new EnrolmentProcessor(this.getNewState());
     }
 
-    private wipeSession(request: ClientRequest, state: GameState): ResetResponse | null {
+    private processReset(request: ClientRequest, state: GameState): ResetResponse | null {
         const { playerColor } = request;
         const { sessionOwner } = state;
 
         if (playerColor != sessionOwner)
             return null;
 
-        this.play?.killIdleChecks();
-        this.play = null;
-        this.setup = null;
-        this.enrolment = new EnrolmentProcessor(this.getNewState());
+        this.resetSession();
 
         return { resetFrom: request.playerName || request.playerColor || 'anon'};
     }
 
     public processAction(request: ClientRequest): WsDigest {
+        const state = this.actionProcessor.getState();
 
-        switch (true) {
-            case !!this.enrolment:
-                return this.processEnrolmentAction(this.enrolment, request);
-            case !!this.setup:
-                return this.processSetupAction(this.setup, request);
-            case !!this.play:
-                return this.processPlayAction(this.play, request);
+        if (request.message.action === Action.inquire) {
+            return this.issueNominalResponse({ state });
+        }
+
+        switch (state.sessionPhase) {
+            case Phase.play:
+                return this.processPlayAction(request);
+            case Phase.setup:
+                return this.processSetupAction(request);
+            case Phase.enrolment:
+                return this.processEnrolmentAction(request);
             default:
-                return this.issueNominalDigest(lib.issueErrorResponse('State is missing in session.'));
+                return this.issueNominalResponse(lib.issueErrorResponse('Unknown game phase!'));
         }
     }
 
     // MARK: COMMON
-    private processChat(request: ClientRequest, state: GameState): ErrorResponse | GameStateResponse {
-        const { playerColor, playerName, message } = request;
-        const chatPayload = validator.validateChatPayload(message.payload);
-
-        if (!chatPayload)
-            return lib.validationErrorResponse();
-
-        state.chat.push({
-            id: playerColor,
-            name: playerName || playerColor,
-            message: chatPayload.input,
-        });
-
-        return { state };
-    }
 
     private processStatusRequest(state: PlayState): GameStateResponse { // TODO: Investigate the need for client sending this,
         state.isStatusResponse = true;
@@ -82,133 +67,158 @@ export class GameSession {
     }
 
     // MARK: ENROL
-    private processEnrolmentAction(processor: EnrolmentProcessor, request: ClientRequest): WsDigest {
-        const { playerColor, playerName, message } = request;
-        const { action } = message;
+    private processEnrolmentAction(request: ClientRequest): WsDigest {
+        const processor = this.actionProcessor as EnrolmentProcessor;
+
+        if (request.message.action === Action.enrol) {
+            const {playerColor, playerName} = request;
+
+            if (!playerColor || !playerName)
+                return this.issueNominalResponse(lib.issueErrorResponse('Missing enrolment data!'));
+
+            return this.issueGroupResponse(processor.processEnrol(
+                playerColor,
+                playerName,
+            ));
+        }
+
+        const { playerRequest, playerOk } = this.confirmPlayer(request);
+
+        if (!playerRequest || !playerOk)
+            return this.issueNominalResponse(lib.issueErrorResponse('Invalid client request!'));
+
+        const { message, playerColor } = playerRequest;
+
+
+        const { action, payload } = message;
+        const state = processor.getState();
+
+        const playerEntry = state.players.find(p => p.id === playerColor)!;
 
         switch (action) {
-            case Action.inquire:
-                return this.issueNominalDigest({ state: processor.getState()});
             case Action.chat:
-                return this.issueBroadcastDigest(this.processChat(request, processor.getState()));
+                return this.issueGroupResponse(processor.processChat(playerEntry, payload));
             case Action.reset: {
-                const response = this.wipeSession(request, processor.getState());
+                const response = this.processReset(request, state);
 
                 if (!response)
-                    return this.issueNominalDigest(lib.issueErrorResponse(
+                    return this.issueNominalResponse(lib.issueErrorResponse(
                         'Only session owner may reset.',
-                        { playerColor, sessionOwner: processor.getState().sessionOwner },
+                        { playerColor, sessionOwner: state.sessionOwner },
                     ));
 
-                    return this.issueBroadcastDigest(response);
+                    return this.issueGroupResponse(response);
                 }
-            case Action.enrol:
-                return this.issueBroadcastDigest(processor.processEnrol(playerColor, playerName));
+            // case Action.enrol:
+            //     return this.issueGroupResponse(processor.processEnrol(playerColor, playerEntry.name));
             case Action.start_setup: {
-                const { gameId, sessionOwner, players, chat } = processor.getState();
+                const { gameId, sessionOwner, players, chat } = state;
 
-                if (!gameId || !sessionOwner || !players.length) {
-                    return this.issueNominalDigest(lib.issueErrorResponse(
+                if (!sessionOwner || !players.length) {
+                    return this.issueNominalResponse(lib.issueErrorResponse(
                         'Setup data is incomplete',
-                        { enrolmentState: processor.getState() },
+                        { enrolmentState: state },
                     ));
                 }
 
-                this.enrolment = null;
-                this.setup = new SetupProcessor({ gameId, sessionOwner, players, chat });
+                this.actionProcessor = new SetupProcessor({ gameId, sessionOwner, players, chat });
 
-                return this.issueBroadcastDigest({ state: this.setup.getState() });
+                return this.issueGroupResponse({ state: this.actionProcessor.getState() });
             }
             default:
-                return this.issueNominalDigest(
+                return this.issueNominalResponse(
                     lib.issueErrorResponse('Unsupported enrol action', { action }),
                 );
         }
     }
 
     // MARK: SETUP
-    private processSetupAction(processor: SetupProcessor, request: ClientRequest) {
-        const { message, playerColor } = request;
+    private processSetupAction(request: ClientRequest) {
+        const processor = this.actionProcessor as SetupProcessor;
+
+        const { playerRequest, playerOk } = this.confirmPlayer(request);
+
+        if (!playerRequest || !playerOk)
+            return this.issueNominalResponse(lib.issueErrorResponse('Invalid player client!'));
+
+        const { message, playerColor } = playerRequest;
         const { action, payload } = message;
         const state = processor.getState();
 
+        // if (!playerColor)
+        //     return this.issueNominalResponse(lib.issueErrorResponse('No player ID provided'));
+
+        const playerBuild = state.players.find(p => p.id === playerColor)!;
+
         switch(action) {
-            case Action.inquire:
-                return this.issueNominalDigest({ state });
             case Action.chat:
-                return this.issueBroadcastDigest(this.processChat(request, state));
+                return this.issueGroupResponse(processor.processChat(playerBuild, payload));
             case Action.reset: {
-                const response = this.wipeSession(request, state);
+                const response = this.processReset(request, state);
 
                 if (!response) {
-                    return this.issueNominalDigest(lib.issueErrorResponse(
+                    return this.issueNominalResponse(lib.issueErrorResponse(
                         'Only session owner may reset.',
                         { playerColor, sessionOwner: state.sessionOwner },
                     ));
                 }
 
-                return this.issueBroadcastDigest(response);
+                return this.issueGroupResponse(response);
             }
             // case select_specialist
             case Action.start_play: {
                 const { privateState, playState } = processor.processStart(
                     payload
                 );
-                this.enrolment = null;
-                this.setup = null;
-                this.play = new PlayProcessor({ privateState, playState });
-                return this.issueBroadcastDigest({ state: playState.toDto() });
+                this.actionProcessor = new PlayProcessor({ privateState, playState });
+                return this.issueGroupResponse({ state: playState.toDto() });
             }
         }
-        return this.issueNominalDigest(
+        return this.issueNominalResponse(
             lib.issueErrorResponse('Unsupported setup action', { action }),
         );
     }
 
     // MARK: PLAY
-    public processPlayAction(processor: PlayProcessor, request: ClientRequest): WsDigest {
+    public processPlayAction(request: ClientRequest): WsDigest {
+        const processor = this.actionProcessor as PlayProcessor;
 
-        const { playerColor, message } = request;
+        const { playerRequest, playerOk } = this.confirmPlayer(request);
+
+        if (!playerRequest || !playerOk)
+            return this.issueNominalResponse(lib.issueErrorResponse('Invalid player client!'));
+
+        const { playerColor, message } = playerRequest;
         const { action, payload } = message;
 
-        if (!playerColor)
-            return this.issueNominalDigest(lib.issueErrorResponse('No player ID provided'));
-
-        if (action === Action.inquire)
-            return this.issueNominalDigest({ state: processor.getState() })
-
         if (action === Action.get_status)
-            return this.issueNominalDigest(this.processStatusRequest(processor.getState()));
+            return this.issueNominalResponse(this.processStatusRequest(processor.getState()));
 
         if (action === Action.reset) {
-            const result = this.wipeSession(request, processor.getState());
+            const result = this.processReset(request, processor.getState());
 
             if (!result)
-                return this.issueNominalDigest(lib.issueErrorResponse(
+                return this.issueNominalResponse(lib.issueErrorResponse(
                     'Only session owner may reset.',
                     { playerColor, sessionOwner: processor.getState().sessionOwner }
                 ));
 
-            return this.issueBroadcastDigest(result);
+            return this.issueGroupResponse(result);
         }
 
-        const playerObject = processor.getState().players.find(p => p.id === playerColor);
+        const player = new PlayerHandler(
+            processor.getState().players.find(p => p.id === playerColor)!
+        );
 
-        if (!playerObject)
-            return this.issueNominalDigest(
-                lib.issueErrorResponse(`Player does not exist: ${playerColor}`),
-            );
-
-        const player = new PlayerHandler(playerObject);
         player.refreshTimeStamp();
 
         const digest: DataDigest = { player, payload }
 
         if (action === Action.chat)
-            return this.issueBroadcastDigest(processor.processChat(digest));
+            return this.issueGroupResponse(processor.processChat(digest));
 
         if (!player.isActivePlayer())
-            return this.issueNominalDigest(lib.issueErrorResponse(
+            return this.issueNominalResponse(lib.issueErrorResponse(
                 `It is not [${player.getIdentity().name}]'s turn!`,
             ));
 
@@ -223,7 +233,7 @@ export class GameSession {
         ];
 
         if (player.isFrozen() && !actionsWhileFrozen.includes(action))
-            return this.issueNominalDigest(lib.issueErrorResponse(
+            return this.issueNominalResponse(lib.issueErrorResponse(
                 `[${player.getIdentity().name}] is handling rival and cannot act.`,
             ));
 
@@ -263,25 +273,35 @@ export class GameSession {
         })();
 
         if ('error' in result)
-            return this.issueNominalDigest(result);
+            return this.issueNominalResponse(result);
 
-        return this.issueBroadcastDigest(result);
+        return this.issueGroupResponse(result);
     }
 
-    private issueNominalDigest(message: ServerMessage): WsDigest {
-
+    private issueNominalResponse(message: ServerMessage): WsDigest {
         return { senderOnly: true, message }
     }
 
-    private issueBroadcastDigest(message: ServerMessage): WsDigest {
-
+    private issueGroupResponse(message: ServerMessage): WsDigest {
         return { senderOnly: false, message }
     }
 
     private getNewState() {
-        const state = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE)) as EnrolmentState;
+        const state = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE));
         const gameId = randomUUID();
 
         return { ...state, gameId }
+    }
+
+    private confirmPlayer(request: ClientRequest) {
+        const playerRequest = validator.validatePlayerRequest(request);
+
+        const playerOk = playerRequest
+            ? Boolean(this.actionProcessor.getState().players
+                .find(p => p.id === playerRequest.playerColor)
+            )
+            : false
+
+        return { playerRequest, playerOk };
     }
 }

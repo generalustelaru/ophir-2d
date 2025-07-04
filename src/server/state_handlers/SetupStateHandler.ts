@@ -32,6 +32,10 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         }
     };
 
+    public addChatEntry(chat: ChatEntry) {
+        this.chat.add(chat);
+    }
+
     public addServerMessage(message: string) {
         this.chat.add({ id: null, name: this.serverName.get(), message });
     }

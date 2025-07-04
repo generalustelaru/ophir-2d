@@ -1,5 +1,5 @@
 import {
-    ClientRequest, ErrorResponse, EnrolmentState, PlayerColor, PlayerEntry, GameStateResponse,
+    ErrorResponse, EnrolmentState, PlayerColor, PlayerEntry, GameStateResponse,
 } from "../../shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
@@ -8,18 +8,15 @@ const serverName = String(process.env.SERVER_NAME);
 
 export class EnrolmentProcessor {
     state: EnrolmentState;
-    constructor(lobbyState: EnrolmentState) {
-        this.state = lobbyState;
+    constructor(state: EnrolmentState) {
+        this.state = state;
     }
 
     public getState(): EnrolmentState {
         return this.state;
     }
 
-    public processEnrol(color: PlayerColor | null, name: string | null): GameStateResponse | ErrorResponse {
-
-        if (!color)
-            return { error: 'Cannot enrol: Missing player color' }
+    public processEnrol(color: PlayerColor, name: string): GameStateResponse | ErrorResponse {
 
         if (this.isColorTaken(this.state.players, color))
             return { error: 'Color is is already taken' }
@@ -27,17 +24,17 @@ export class EnrolmentProcessor {
         if (this.isNameTaken(this.state.players, name))
             return { error: 'This name is already taken' }
 
-        const stateUpdate = this.addPlayerEntry(this.state, color, name);
+        const result = this.addPlayerEntry(color, name);
 
-        if (stateUpdate.err) {
-            console.log(stateUpdate.message);
+        if (result.err) {
+            console.log(result.message);
 
-            return { error: stateUpdate.message };
+            return { error: result.message };
         }
 
-        stateUpdate.data.chat.push({ id: color, name: serverName, message: `${name||color} has joined the game` });
+        this.state.chat.push({ id: color, name: serverName, message: `${name} has joined the game` });
 
-        return { state: stateUpdate.data };
+        return { state: this.state };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
@@ -51,43 +48,47 @@ export class EnrolmentProcessor {
         return players.some(player => player.name === name);
     }
 
-    public processChat(request: ClientRequest): ErrorResponse | GameStateResponse {
-        const { playerColor, playerName, message } = request;
-        const chatPayload = validator.validateChatPayload(message.payload);
+    public processChat(player: PlayerEntry, payload: unknown) {
+        if (!player)
+            return lib.issueErrorResponse('Visitors cannot use the chat!')
+
+        const chatPayload = validator.validateChatPayload(payload);
 
         if (!chatPayload)
             return lib.validationErrorResponse();
 
+        const { id, name } = player;
+
         this.state.chat.push({
-            id: playerColor,
-            name: playerName || playerColor,
+            id,
+            name,
             message: chatPayload.input,
         });
 
         return { state: this.state };
     }
 
-    private addPlayerEntry(state: EnrolmentState, playerColor: PlayerColor, playerName: string | null): Probable<EnrolmentState> {
-        state.availableSlots = state.availableSlots.filter(slot => slot !== playerColor);
+    private addPlayerEntry(playerColor: PlayerColor, playerName: string): Probable<true> {
+        this.state.availableSlots = this.state.availableSlots.filter(slot => slot !== playerColor);
 
         const newPlayer: PlayerEntry = {
             id: playerColor,
-            name: playerName || playerColor,
+            name: playerName,
         }
 
-        state.players.push(newPlayer);
+        this.state.players.push(newPlayer);
 
         console.log(`${playerColor} enrolled`);
 
-        if (state.sessionOwner === null) {
-            state.sessionOwner = playerColor;
+        if (this.state.sessionOwner === null) {
+            this.state.sessionOwner = playerColor;
             console.log(`${playerColor} is the session owner`);
         }
 
-        if (state.availableSlots.length === 0) {
+        if (this.state.availableSlots.length === 0) {
             console.log(`Session is full`);
         }
 
-        return lib.pass(state);
+        return lib.pass(true);
     }
 }

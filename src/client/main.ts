@@ -95,7 +95,7 @@ window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => 
 
     UserInterface.updateAsEnrolment(enrolmentState);
 
-    if (enrolmentState.players.length) {
+    if (!localState.gameId) {
         localState.gameId = enrolmentState.gameId;
         sessionStorage.setItem('localState', JSON.stringify(localState));
     }
@@ -135,7 +135,7 @@ window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
     debug(playState);
 });
 
-window.addEventListener('setup_update', (event: CustomEventInit) => {
+window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
     if (!event.detail)
         return signalError('State is missing!');
 
@@ -144,7 +144,7 @@ window.addEventListener('setup_update', (event: CustomEventInit) => {
     CanvasService.drawUpdateElements(setupState, true);
 });
 
-window.addEventListener('enrolment_update', (event: CustomEventInit) => {
+window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => {
     if (!event.detail)
         return signalError('State is missing!');
 

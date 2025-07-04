@@ -117,14 +117,11 @@ export type PlayerState = {
     coins: number,
 }
 
-export type PlayerBuild = {
-    id: PlayerColor,
-    name: string,
-    turnOrder: number,
+export type PlayerBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
     specialist: SpecialistName | null
 }
 
-export type PlayerEntry = Pick<PlayerBuild, 'id'|'name'>
+export type PlayerEntry = Pick<PlayerState, 'id'|'name'>
 
 export type MarketOffer = {
     deckSize: number,
@@ -193,7 +190,7 @@ export type SetupState = {
  * @description Shared between players and server in a pending session
  */
 export type EnrolmentState = {
-    gameId: string | null,
+    gameId: string,
     sessionPhase: Phase.enrolment,
     sessionOwner: PlayerColor | null,
     availableSlots: Array<PlayerColor>,
@@ -280,6 +277,14 @@ export type ClientRequest = {
     clientId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
+    message: ClientMessage,
+}
+
+export type PlayerRequest = {
+    gameId: string,
+    clientId: string,
+    playerColor: PlayerColor,
+    playerName: string,
     message: ClientMessage,
 }
 

@@ -112,7 +112,8 @@ export const CommunicationService = new class extends Communicator {
     }
 
     public clearStatusCheck() {
-        if (this.statusInterval) clearInterval(this.statusInterval);
+        if (this.statusInterval)
+            clearInterval(this.statusInterval);
     }
 
     private isGameStateResponse(data: ServerMessage): data is GameStateResponse {
