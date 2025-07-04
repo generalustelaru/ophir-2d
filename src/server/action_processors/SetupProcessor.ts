@@ -6,14 +6,16 @@ import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
-import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS} from '../configuration';
+import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS } from '../configuration';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from '../../client/client_types';
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
+import { validator } from '../services/validation/ValidatorService';
+import lib from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS}).reduce((acc, [k, v]) => {if (v) acc[k] = v; return acc}, {})
+const activeKeys = Object.entries({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
 console.log(activeKeys);
 
 const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
@@ -35,16 +37,16 @@ export class SetupProcessor {
         this.state = new SetupStateHandler(
             SERVER_NAME,
             {
-            gameId: digest.gameId,
-            sessionPhase: Phase.setup,
-            sessionOwner: digest.sessionOwner,
-            players: this.buildPlayers(playerEntries),
-            setup: {
-                barriers,
-                mapPairings,
-            },
-            chat: digest.chat,
-        });
+                gameId: digest.gameId,
+                sessionPhase: Phase.setup,
+                sessionOwner: digest.sessionOwner,
+                players: this.buildPlayers(playerEntries),
+                setup: {
+                    barriers,
+                    mapPairings,
+                },
+                chat: digest.chat,
+            });
 
         this.state.addServerMessage('Select Specialists.');
     };
@@ -53,6 +55,22 @@ export class SetupProcessor {
         return this.state.toDto();
     }
 
+    public processChat(player: PlayerBuild, payload: unknown) {
+        const chatPayload = validator.validateChatPayload(payload);
+
+        if (!chatPayload)
+            return lib.validationErrorResponse();
+
+        const { id, name } = player;
+
+        this.state.addChatEntry({
+            id,
+            name,
+            message: chatPayload.input,
+        });
+
+        return { state: this.state.toDto() };
+    }
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
      * @returns `{playState, privateState}`  Used expressily for a game session instance.
@@ -81,37 +99,37 @@ export class SetupProcessor {
         const playState = new PlayStateHandler(
             SERVER_NAME,
             {
-            isStatusResponse: false,
-            gameId: setupState.gameId,
-            sessionPhase: Phase.play,
-            hasGameEnded: false,
-            gameResults: [],
-            sessionOwner: setupState.sessionOwner,
-            chat: setupState.chat,
-            players,
-            market: marketData.marketOffer,
-            itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
-            temple: {
-                maxLevel: privateState.getTempleLevelCount(),
-                treasury: privateState.drawMetalPrices()!,
-                levelCompletion: 0,
-                currentLevel: 0,
-                donations: [],
-            },
-            setup: {
-                barriers: setupState.setup.barriers,
-                mapPairings: setupState.setup.mapPairings,
-                marketFluctuations: this.getMarketFluctuations(),
-                templeTradeSlot: this.determineTempleTradeSlot(),
-            },
-            rival: this.getRivalShipData(
-                Boolean(playerBuilds.length == 2),
-                clientSetupPayload.hexPositions,
-                setupState.setup.mapPairings,
-                startingPlayerColor,
-                privateState.getDestinationPackages(),
-            ),
-        });
+                isStatusResponse: false,
+                gameId: setupState.gameId,
+                sessionPhase: Phase.play,
+                hasGameEnded: false,
+                gameResults: [],
+                sessionOwner: setupState.sessionOwner,
+                chat: setupState.chat,
+                players,
+                market: marketData.marketOffer,
+                itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
+                temple: {
+                    maxLevel: privateState.getTempleLevelCount(),
+                    treasury: privateState.drawMetalPrices()!,
+                    levelCompletion: 0,
+                    currentLevel: 0,
+                    donations: [],
+                },
+                setup: {
+                    barriers: setupState.setup.barriers,
+                    mapPairings: setupState.setup.mapPairings,
+                    marketFluctuations: this.getMarketFluctuations(),
+                    templeTradeSlot: this.determineTempleTradeSlot(),
+                },
+                rival: this.getRivalShipData(
+                    Boolean(playerBuilds.length == 2),
+                    clientSetupPayload.hexPositions,
+                    setupState.setup.mapPairings,
+                    startingPlayerColor,
+                    privateState.getDestinationPackages(),
+                ),
+            });
         playState.addServerMessage('Game started!');
 
         return { playState: playState, privateState };
@@ -142,8 +160,8 @@ export class SetupProcessor {
 
     private determineLocations(): Record<ZoneName, LocationData> {
         const locations = LOCATION_ACTIONS
-            .map(location => { return {key: Math.random(), location} })
-            .sort((a,b) => a.key - b.key)
+            .map(location => { return { key: Math.random(), location } })
+            .sort((a, b) => a.key - b.key)
             .map(item => item.location);
 
         if (locations.length !== 7) {
@@ -187,7 +205,7 @@ export class SetupProcessor {
     // MARK: Players
     private buildPlayers(entries: Array<PlayerEntry>,): Array<PlayerBuild> {
         const randomized = entries
-            .map(e => {return { entry: e, order: Math.random() }})
+            .map(e => { return { entry: e, order: Math.random() } })
             .sort((a, b) => a.order - b.order)
             .map(o => o.entry);
 
@@ -223,7 +241,7 @@ export class SetupProcessor {
             const build = builds[i];
 
             if (!build.specialist) // TODO: should check earlier
-                console.error("Player specialist missing", {builds});
+                console.error("Player specialist missing", { builds });
         }
 
         const players: Array<PlayerState> = builds.map(b => {
@@ -340,7 +358,7 @@ export class SetupProcessor {
     private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
         const tradeDeck = TRADE_DECK_A
             .map(t => { return { key: Math.random(), trade: t } })
-            .sort((a,b) => a.key - b.key)
+            .sort((a, b) => a.key - b.key)
             .map(s => s.trade);
 
         function drawTrade(): Trade {

@@ -170,7 +170,7 @@ function shutDown() {
 
 function reset() {
     console.log('Session is resetting!');
-    singleSession.localReset();
+    singleSession.resetSession();
     const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
 
     broadcast(resetMessage);

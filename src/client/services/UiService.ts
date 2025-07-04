@@ -126,12 +126,14 @@ export const UserInterface = new class extends Communicator {
 
     private processEnroll = (): void => {
         const selectedId = this.playerColorSelect.element.value as PlayerColor;
+        const name = this.playerNameInput.element.value;
 
         if (!selectedId)
             return alert('Select your player color first.');
 
         if (this.availableSlots.includes(selectedId)) {
             localState.playerColor = selectedId;
+            localState.playerName = (/\w/).test(name) ? name : selectedId;
             sessionStorage.setItem('localState', JSON.stringify(localState));
 
             return this.createEvent({

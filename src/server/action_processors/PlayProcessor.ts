@@ -537,9 +537,6 @@ export class PlayProcessor {
 
         const { id, name } = player.getIdentity();
 
-        if (!this.playState)
-            return lib.issueErrorResponse('Cannot add chat to state.');
-
         this.playState.addChatEntry({
             id,
             name,
@@ -740,6 +737,7 @@ export class PlayProcessor {
                 activePlayer.isIdle = true;
                 this.playState.savePlayer(activePlayer);
                 this.playState.addServerMessage(`${activePlayer.name} is idle`);
+                // TODO: broadcast a state update on this, remove client status check, convert kick button to end turn for the idler
                 // this.processEndTurn(activePlayer.id);
             }
 

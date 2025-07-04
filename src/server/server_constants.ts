@@ -164,7 +164,7 @@ const serverConstants: ServerConstants = {
     },
 
     DEFAULT_NEW_STATE: {
-        gameId: null,
+        gameId: 'default',
         sessionPhase: Phase.enrolment,
         sessionOwner: null,
         chat: [],
