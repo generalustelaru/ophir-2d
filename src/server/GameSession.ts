@@ -109,8 +109,6 @@ export class GameSession {
 
                     return this.issueGroupResponse(response);
                 }
-            // case Action.enrol:
-            //     return this.issueGroupResponse(processor.processEnrol(playerColor, playerEntry.name));
             case Action.start_setup: {
                 const { gameId, sessionOwner, players, chat } = state;
 
@@ -144,9 +142,6 @@ export class GameSession {
         const { message, playerColor } = playerRequest;
         const { action, payload } = message;
         const state = processor.getState();
-
-        // if (!playerColor)
-        //     return this.issueNominalResponse(lib.issueErrorResponse('No player ID provided'));
 
         const playerBuild = state.players.find(p => p.id === playerColor)!;
 
