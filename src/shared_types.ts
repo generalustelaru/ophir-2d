@@ -23,7 +23,7 @@ export enum Action {
     inquire = "inquire",
     enrol = "enrol",
     end_turn = "end_turn",
-    reset = "reset",
+    declare_reset = "declare_reset",
     spend_favor = "spend_favor",
     upgrade_cargo = 'upgrade_cargo',
     get_status = 'get_status',
@@ -252,7 +252,7 @@ export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client;
 export type LaconicAction =
-    | Action.inquire | Action.enrol | Action.end_turn | Action.reset | Action.spend_favor | Action.move_rival
+    | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival
     | Action.start_setup;
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
