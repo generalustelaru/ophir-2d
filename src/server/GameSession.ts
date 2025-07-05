@@ -98,7 +98,7 @@ export class GameSession {
         switch (action) {
             case Action.chat:
                 return this.issueGroupResponse(processor.processChat(playerEntry, payload));
-            case Action.reset: {
+            case Action.declare_reset: {
                 const response = this.processReset(request, state);
 
                 if (!response)
@@ -148,7 +148,7 @@ export class GameSession {
         switch(action) {
             case Action.chat:
                 return this.issueGroupResponse(processor.processChat(playerBuild, payload));
-            case Action.reset: {
+            case Action.declare_reset: {
                 const response = this.processReset(request, state);
 
                 if (!response) {
@@ -189,7 +189,7 @@ export class GameSession {
         if (action === Action.get_status)
             return this.issueNominalResponse(this.processStatusRequest(processor.getState()));
 
-        if (action === Action.reset) {
+        if (action === Action.declare_reset) {
             const result = this.processReset(request, processor.getState());
 
             if (!result)

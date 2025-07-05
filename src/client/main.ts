@@ -79,7 +79,7 @@ window.addEventListener(EventName.identification, (event: CustomEventInit) => {
     sessionStorage.setItem('localState', JSON.stringify(localState));
 });
 
-window.addEventListener(Action.reset, (event: CustomEventInit) => {
+window.addEventListener(EventName.reset, (event: CustomEventInit) => {
     const response: ResetResponse = event.detail;
     sessionStorage.removeItem('localState');
     alert(`The game has been reset by ${response.resetFrom}`);

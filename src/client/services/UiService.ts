@@ -120,7 +120,7 @@ export const UserInterface = new class extends Communicator {
 
         return this.createEvent({
             type: EventName.action,
-            detail: { action: Action.reset , payload: null }
+            detail: { action: Action.declare_reset , payload: null }
         });
     }
 
