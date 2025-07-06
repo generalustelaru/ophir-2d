@@ -1,11 +1,11 @@
 import Konva from 'konva';
-import { Action, Coordinates, GameSetupPayload, LocationName, PlayerColor, PlayState } from '../../shared_types';
+import { Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState } from '../../shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer } from '../client_types';
-import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip} from '../groups/GroupList';
+import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip } from '../groups/GroupList';
 import localState from '../state';
 import clientConstants from '../client_constants';
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA} = clientConstants;
+const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA } = clientConstants;
 
 export class MapGroup implements MegaGroupInterface {
     private group: Konva.Group;
@@ -31,8 +31,37 @@ export class MapGroup implements MegaGroupInterface {
     }
 
     // MARK: DRAW
-    public drawElements(state: PlayState): void {
+    public drawElements(state: PlayState|SetupState): void {
         const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
+
+        if(this.seaZones.length === 0) {
+            //MARK: hexes
+            HEX_OFFSET_DATA.forEach(hexItem => {
+                const locationData = state.setup.mapPairings[hexItem.id];
+                const seaZone = new SeaZone(
+                    this.stage,
+                    centerPoint,
+                    hexItem.id,
+                    hexItem.x,
+                    hexItem.y,
+                    ISLAND_DATA[hexItem.id],
+                    locationData.name,
+                    this.getIconData(locationData.name, state),
+                    COLOR.defaultHex,
+                );
+                this.seaZones.push(seaZone);
+                this.group.add(seaZone.getElement());
+            });
+            // MARK: barriers
+            const barriersIds = state.setup.barriers
+            const barrier_1 = new BarrierToken(centerPoint, barriersIds[0]);
+            const barrier_2 = new BarrierToken(centerPoint, barriersIds[1]);
+            this.group.add(barrier_1.getElement(), barrier_2.getElement());
+        }
+
+        if(state.sessionPhase === Phase.setup)
+            return;
+
         const players = state.players;
         const localPlayer = players.find(player => player.id === localState.playerColor);
         const isActivePlayer = localPlayer?.isActive || false;
@@ -61,30 +90,6 @@ export class MapGroup implements MegaGroupInterface {
             this.actionDial.getElement(),
             this.favorButton.getElement(),
         ]);
-
-        //MARK: hexes
-        HEX_OFFSET_DATA.forEach(hexItem => {
-            const locationData = state.setup.mapPairings[hexItem.id];
-            const seaZone = new SeaZone(
-                this.stage,
-                centerPoint,
-                hexItem.id,
-                hexItem.x,
-                hexItem.y,
-                ISLAND_DATA[hexItem.id],
-                locationData.name,
-                this.getIconData(locationData.name, state),
-                COLOR.defaultHex,
-            );
-            this.seaZones.push(seaZone);
-            this.group.add(seaZone.getElement());
-        });
-
-        // MARK: barriers
-        const barriersIds = state.setup.barriers
-        const barrier_1 = new BarrierToken(centerPoint, barriersIds[0]);
-        const barrier_2 = new BarrierToken(centerPoint, barriersIds[1]);
-        this.group.add(barrier_1.getElement(), barrier_2.getElement());
 
         //MARK: ships
 
@@ -133,7 +138,7 @@ export class MapGroup implements MegaGroupInterface {
             localPlayer.isActive,
             this.seaZones,
             state.players,
-            state.rival
+            state.rival,
         );
         this.localShip.switchControl(localPlayer.isActive);
 
@@ -153,14 +158,14 @@ export class MapGroup implements MegaGroupInterface {
             this.favorButton?.update(localPlayer);
         }
 
-        if(this.rivalShip && state.rival.isIncluded) {
+        if (this.rivalShip && state.rival.isIncluded) {
             const { isControllable, bearings, activePlayerColor, destinations, moves } = state.rival;
             this.rivalShip.update({
                 isControllable,
                 bearings,
                 activePlayerColor,
                 destinations,
-                moves
+                moves,
             });
         }
 
@@ -210,7 +215,7 @@ export class MapGroup implements MegaGroupInterface {
         SHIP_DATA.setupDrifts.forEach((drift) => {
             startingPositions.push({
                 x: centerPoint.x + drift.x,
-                y: centerPoint.y + drift.y
+                y: centerPoint.y + drift.y,
             });
         });
 
@@ -228,9 +233,9 @@ export class MapGroup implements MegaGroupInterface {
         };
     }
 
-    private getIconData(locationName: LocationName, state: PlayState): IconLayer {
+    private getIconData(locationName: LocationName, state: PlayState | SetupState): IconLayer {
 
-        if (locationName != 'temple')
+        if (locationName != 'temple' || state.sessionPhase === Phase.setup)
             return LOCATION_TOKEN_DATA[locationName];
 
         const skipCount = (() => {
