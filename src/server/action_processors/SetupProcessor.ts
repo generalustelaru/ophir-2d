@@ -1,6 +1,7 @@
 import {
     BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
     LocationData, Fluctuation, ExchangeTier, PlayerEntry, RivalData, GameSetupPayload, Phase, PlayerBuild, SetupDigest,
+    Specialist,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -18,7 +19,9 @@ import lib from './library';
 const activeKeys = Object.entries({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
 console.log(activeKeys);
 
-const { BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS } = serverConstants;
+const {
+    BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS, SPECIALISTS,
+} = serverConstants;
 
 export class SetupProcessor {
 
@@ -34,6 +37,16 @@ export class SetupProcessor {
         const barriers = this.determineBarriers();
         const mapPairings = this.determineLocations();
 
+        const specialists = (() => {
+            const deck = tools.getCopy(SPECIALISTS);
+            const randomized: Array<Specialist> = deck
+                .map(specialist => {return {key:Math.random(), specialist}})
+                .sort((a, b) => a.key - b.key)
+                .map(s => s.specialist);
+
+            return randomized.slice(0,playerEntries.length + 1);
+        })();
+
         this.state = new SetupStateHandler(
             SERVER_NAME,
             {
@@ -41,6 +54,7 @@ export class SetupProcessor {
                 sessionPhase: Phase.setup,
                 sessionOwner: digest.sessionOwner,
                 players: this.buildPlayers(playerEntries),
+                specialists,
                 setup: {
                     barriers,
                     mapPairings,

@@ -182,6 +182,7 @@ export type SetupState = {
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
     players: Array<PlayerBuild>,
+    specialists: Array<Specialist>,
     setup: GamePartialSetup,
     chat: Array<ChatEntry>,
 }
