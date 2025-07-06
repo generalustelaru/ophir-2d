@@ -83,7 +83,7 @@ export class PlayerHandler implements ObjectHandler<PlayerState>{
     // MARK: PUBLIC
 
     public refreshTimeStamp() {
-        this.isIdle.reset();
+        this.isIdle.set(false);
         this.timeStamp.set(Date.now());
     }
 
@@ -205,7 +205,7 @@ export class PlayerHandler implements ObjectHandler<PlayerState>{
     }
 
     public mayEndTurn(){
-        return this.isAnchored.get();
+        return this.isAnchored.get() && !this.handlesRival();
     }
 
     public setCargo(cargo: Array<ItemName>) {

@@ -10,7 +10,7 @@ import serverConstants from '../server_constants';
 import { DataDigest, PlayerCountables, StateBundle } from '../server_types';
 import lib, { Probable } from './library';
 import { validator } from '../services/validation/ValidatorService';
-import { IDLE_CHECKS } from "../configuration";
+import { IDLE_CHECKS, IDLE_TIMEOUT } from "../configuration";
 
 const { TRADE_DECK_B } = serverConstants;
 
@@ -524,8 +524,11 @@ export class PlayProcessor {
         if (!activePlayer.isIdle)
             return lib.issueErrorResponse('Cannot force turn on non-idle player')
 
+        if (activePlayer.isHandlingRival)
+            this.playState.concludeRivalTurn();
+
         const idlerHandler = new PlayerHandler(
-                { ...activePlayer, isIdle: false, isAnchored: true }
+                { ...activePlayer, isIdle: false, isAnchored: true, isHandlingRival: false }
             );
 
         return this.processEndTurn({
@@ -769,7 +772,7 @@ export class PlayProcessor {
                 this.autoBroadcast(this.playState.toDto());
             }
 
-        }, 10000);
+        }, 60000);
     }
 
     public killIdleChecks() {
