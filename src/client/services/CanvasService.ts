@@ -82,13 +82,13 @@ export const CanvasService = new class extends Communicator {
 
         switch(state.sessionPhase) {
             case Phase.setup:
+                this.mapGroup.drawElements(state);
                 this.setupGroup.drawElements();
-                 // TODO: need to create draw logic for incomplete setup (missing market and ships)
                 break;
             case Phase.play:
                 this.locationGroup.drawElements(state);
-                this.playerGroup.drawElements(state);
                 this.mapGroup.drawElements(state);
+                this.playerGroup.drawElements(state);
                 this.isDrawn = true;
                 break;
             default:

@@ -46,14 +46,14 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
 
         const verticalDrift = ((): number => {
             switch (locationId) {
-                case 'temple': return -36;
+                // case 'temple': return -36;
                 default: return -18;
             }
         })();
 
         const horizontalDrift = ((): number => {
             switch (locationId) {
-                case 'temple': return -36;
+                // case 'temple':
                 case 'treasury': return -36;
                 default: return -18;
             }
@@ -93,9 +93,11 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
             this.emptyLocation.update(supply > 0);
         }
 
-        if (update.templeIcon) {
+        if (update.templeIcon && this.id === "temple") {
             this.icon.data(update.templeIcon.shape);
             this.icon.fill(update.templeIcon.fill);
+            this.icon.x(-36);
+            this.icon.y(-36);
         }
     }
 }
