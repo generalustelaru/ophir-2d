@@ -99,7 +99,6 @@ export class SetupProcessor {
         const playState = new PlayStateHandler(
             SERVER_NAME,
             {
-                isStatusResponse: false,
                 gameId: setupState.gameId,
                 sessionPhase: Phase.play,
                 hasGameEnded: false,

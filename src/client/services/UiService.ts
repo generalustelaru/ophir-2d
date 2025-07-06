@@ -21,7 +21,7 @@ export const UserInterface = new class extends Communicator {
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
     private chatSendButton: Button;
-    private kickPlayerButton: Button;
+    private forceTurnButton: Button;
     private availableSlots: Array<PlayerColor> = ['Green', 'Purple', 'Red', 'Yellow'];
 
     constructor() {
@@ -31,7 +31,7 @@ export const UserInterface = new class extends Communicator {
         this.draftButton =  new Button('draftButton', this.processDraft);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
-        this.kickPlayerButton = new Button('kickPlayerButton', ()=>{});
+        this.forceTurnButton = new Button('forceTurnButton', this.processForceTurn);
         this.playerNameInput = new TextInput('playerNameInput', this.updatePlayerName);
         this.playerColorSelect = {
             element: document.getElementById('playerColorSelect') as HTMLSelectElement,
@@ -113,7 +113,7 @@ export const UserInterface = new class extends Communicator {
     private processStart = (): void => {
         this.startButton.disable();
 
-        return this.createEvent({ type: EventName.start, detail: null });
+        return this.createEvent({ type: EventName.start_action, detail: null });
     }
 
     private processReset = (): void => {
@@ -145,6 +145,14 @@ export const UserInterface = new class extends Communicator {
         return this.setInfo('This color has just been taken :(');
     }
 
+    private processForceTurn = () => {
+
+        return this.createEvent({
+            type: EventName.action,
+            detail: { action: Action.force_turn, payload: null }
+        });
+    }
+
     public setInfo(text: string): void {
         const info = document.getElementById('info') as HTMLDivElement;
         info.innerHTML = text;
@@ -164,7 +172,7 @@ export const UserInterface = new class extends Communicator {
         this.draftButton.disable();
         this.startButton.disable();
         this.resetButton.disable();
-        this.kickPlayerButton.disable();
+        this.forceTurnButton.disable();
         this.chatSendButton.disable();
     }
 
@@ -202,6 +210,12 @@ export const UserInterface = new class extends Communicator {
         this.updateChat(state.chat);
         this.disableButtons();
         this.disableElements(this.playerColorSelect, this.playerNameInput);
+
+        const activePlayer = state.players.find(p => p.isActive);
+
+        if (activePlayer && activePlayer.isIdle && localState.playerColor != activePlayer.id ) {
+            this.forceTurnButton.enable();
+        }
 
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
@@ -275,22 +289,13 @@ export const UserInterface = new class extends Communicator {
 
         if (localState.playerColor === state.sessionOwner) {
             this.resetButton.enable();
-            const activePlayer = state.players.find(p => p.isActive);
-
-            if (activePlayer?.isIdle) {
-                this.kickPlayerButton.enable();
-            }
         }
     }
 
     private handleEndedState(state: PlayState): void {
-
-        if (state.isStatusResponse)
-            return;
-
         this.setInfo('The game has ended');
         this.resetButton.enable();
-        this.kickPlayerButton.disable();
+        this.forceTurnButton.disable();
 
         setTimeout(() => {
             this.alertGameResults(state.gameResults);

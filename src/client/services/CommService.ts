@@ -9,7 +9,6 @@ import { EventName } from '../client_types';
 export const CommunicationService = new class extends Communicator {
 
     private socket: WebSocket | null = null;
-    private statusInterval: NodeJS.Timeout | null = null;
 
     constructor() {
         super();
@@ -99,21 +98,6 @@ export const CommunicationService = new class extends Communicator {
         console.debug('->', message);
 
         this.socket.send(JSON.stringify(message));
-    }
-
-    public setKeepStatusCheck() {
-
-        if (this.statusInterval)
-            return;
-
-        this.statusInterval = setInterval(() => {
-            this.sendMessage({ action: Action.get_status, payload: null });
-        }, 5000);
-    }
-
-    public clearStatusCheck() {
-        if (this.statusInterval)
-            clearInterval(this.statusInterval);
     }
 
     private isGameStateResponse(data: ServerMessage): data is GameStateResponse {

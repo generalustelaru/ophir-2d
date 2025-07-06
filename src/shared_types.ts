@@ -23,10 +23,10 @@ export enum Action {
     inquire = "inquire",
     enrol = "enrol",
     end_turn = "end_turn",
+    force_turn = "force_turn",
     declare_reset = "declare_reset",
     spend_favor = "spend_favor",
     upgrade_cargo = 'upgrade_cargo',
-    get_status = 'get_status',
 }
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
@@ -162,10 +162,9 @@ export enum Phase {
  * @description Shared between players and server in an ongoing session
  */
 export type PlayState = {
-    isStatusResponse: boolean,
     gameId: string,
     sessionPhase: Phase.play,
-    hasGameEnded: Boolean,
+    hasGameEnded: boolean,
     gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
     players: Array<PlayerState>,
@@ -253,8 +252,8 @@ export type VerboiseAction =
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client;
 export type LaconicAction =
     | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
-    | Action.upgrade_cargo | Action.get_status | Action.shift_market | Action.end_rival_turn | Action.reposition_rival
-    | Action.start_setup;
+    | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival
+    | Action.start_setup | Action.force_turn;
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;

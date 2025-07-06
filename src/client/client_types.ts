@@ -119,7 +119,7 @@ export interface ClientEventInterface<T, D> {
 export enum EventName {
     connected = 'connected',
     draft = 'draft',
-    start = 'start',
+    start_action = 'start',
     close = 'close',
     timeout = 'timeout',
     action = 'action',
@@ -132,7 +132,7 @@ export enum EventName {
     identification = 'identification',
 }
 
-export type LaconicType = EventName.connected | EventName.draft | EventName.start | EventName.close | EventName.timeout;
+export type LaconicType = EventName.connected | EventName.draft | EventName.start_action | EventName.close | EventName.timeout;
 export type LaconicEvent = ClientEventInterface<LaconicType, null>;
 export type ActionEvent = ClientEventInterface<EventName.action, ClientMessage>;
 export type ErrorEvent = ClientEventInterface<EventName.error, ErrorDetail>;

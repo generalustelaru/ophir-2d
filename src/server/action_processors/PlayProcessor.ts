@@ -1,6 +1,7 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
     LocationAction, Metal, GameStateResponse,
+    PlayState,
 } from '../../shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -17,9 +18,12 @@ export class PlayProcessor {
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
-    constructor(stateBundle: StateBundle) {
+    private autoBroadcast: (state: PlayState) => void;
+
+    constructor(stateBundle: StateBundle, broadcastCallback: (state: PlayState) => void) {
         this.playState = stateBundle.playState;
         this.privateState = stateBundle.privateState;
+        this.autoBroadcast = broadcastCallback;
 
         if (IDLE_CHECKS)
             this.startIdleChecks();
@@ -439,7 +443,7 @@ export class PlayProcessor {
 
     // MARK: END TURN
     public processEndTurn(data: DataDigest) {
-        const player = data.player;
+        const { player } = data;
         const { turnOrder } = player.getIdentity();
 
         if (!player.mayEndTurn())
@@ -504,6 +508,30 @@ export class PlayProcessor {
         }
 
         return this.issueStateResponse(player);
+    }
+
+    public processForcedTurn(digest: DataDigest) {
+        const { player } = digest;
+
+        if (player.isActivePlayer())
+            return lib.issueErrorResponse('Active player cannot force own turn!')
+
+        const activePlayer = this.playState.getActivePlayer();
+
+        if (!activePlayer)
+            return lib.issueErrorResponse('Cannot find active player!')
+
+        if (!activePlayer.isIdle)
+            return lib.issueErrorResponse('Cannot force turn on non-idle player')
+
+        const idlerHandler = new PlayerHandler(
+                { ...activePlayer, isIdle: false, isAnchored: true }
+            );
+
+        return this.processEndTurn({
+            player: idlerHandler,
+            payload: null
+        })
     }
 
     // MARK: UPGRADE
@@ -733,15 +761,15 @@ export class PlayProcessor {
 
             const timeNow = Date.now();
 
-            if (timeNow - activePlayer.timeStamp > 60000 && !activePlayer.isIdle) {
+            if (timeNow - activePlayer.timeStamp > 10000 && !activePlayer.isIdle) {
                 activePlayer.isIdle = true;
-                this.playState.savePlayer(activePlayer);
                 this.playState.addServerMessage(`${activePlayer.name} is idle`);
-                // TODO: broadcast a state update on this, remove client status check, convert kick button to end turn for the idler
-                // this.processEndTurn(activePlayer.id);
+                this.playState.savePlayer(activePlayer);
+
+                this.autoBroadcast(this.playState.toDto());
             }
 
-        }, 60000);
+        }, 10000);
     }
 
     public killIdleChecks() {

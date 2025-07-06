@@ -114,9 +114,6 @@ export const CanvasService = new class extends Communicator {
             return;
         }
 
-        if (state.isStatusResponse)
-            return;
-
         this.setupGroup.disable();
         this.locationGroup.update(state);
         this.mapGroup.update(state);
