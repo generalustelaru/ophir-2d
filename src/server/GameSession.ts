@@ -23,11 +23,12 @@ export class GameSession {
     }
 
     public resetSession() {
-        if (this.actionProcessor.hasOwnProperty('killIdleChecks')) {
+        if ('killIdleChecks' in this.actionProcessor) {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
         this.actionProcessor = new EnrolmentProcessor(this.getNewState());
+        console.log('Session was reset')
     }
 
     private processReset(request: ClientRequest, state: GameState): ResetResponse | null {
@@ -39,7 +40,7 @@ export class GameSession {
 
         this.resetSession();
 
-        return { resetFrom: request.playerName || request.playerColor || 'anon'};
+        return { resetFrom: request.playerName || 'anon'};
     }
 
     public processAction(request: ClientRequest): WsDigest {

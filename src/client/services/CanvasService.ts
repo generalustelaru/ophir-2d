@@ -14,7 +14,8 @@ export const CanvasService = new class extends Communicator {
     private mapGroup: MapGroup;
     private playerGroup: PlayerGroup;
     private setupGroup: SetupGroup;
-    private isDrawn = false;
+    private isSetupDrawn: boolean = false
+    private isPlayDrawn: boolean = false;
 
     public constructor() {
         super();
@@ -78,35 +79,28 @@ export const CanvasService = new class extends Communicator {
         return this.mapGroup.createSetupPayload();
     }
 
-    private drawElements(state: PlayState | SetupState): void {
 
-        switch(state.sessionPhase) {
-            case Phase.setup:
-                this.mapGroup.drawElements(state);
-                this.setupGroup.drawElements();
-                break;
-            case Phase.play:
-                this.locationGroup.drawElements(state);
-                this.mapGroup.drawElements(state);
-                this.playerGroup.drawElements(state);
-                this.isDrawn = true;
-                break;
-            default:
-                console.error('session phase is incompatible', state);
+    private checkAndDraw(state: PlayState | SetupState) {
+        const phase = state.sessionPhase;
+
+        if (phase === Phase.setup && !this.isSetupDrawn) {
+            this.mapGroup.drawElements(state);
+            this.setupGroup.drawElements();
+            this.isSetupDrawn = true;
         }
 
-        if (!localState.playerColor) {
-            this.createEvent({
-                type: EventName.info,
-                detail: { text: 'You are a spectator' }
-            });
+        if (phase === Phase.play && !this.isPlayDrawn) {
+            this.mapGroup.drawElements(state);
+            this.locationGroup.drawElements(state);
+            this.playerGroup.drawElements(state);
+            this.isPlayDrawn = true;
         }
     }
 
-    public drawUpdateElements(state: PlayState | SetupState, disable = false): void {
 
-        if(!this.isDrawn)
-            this.drawElements(state);
+    public drawUpdateElements(state: PlayState | SetupState, toDisable = false): void {
+
+        this.checkAndDraw(state);
 
         if (state.sessionPhase === Phase.setup) {
             this.setupGroup.update(state);
@@ -119,7 +113,14 @@ export const CanvasService = new class extends Communicator {
         this.mapGroup.update(state);
         this.playerGroup.update(state);
 
-        disable && this.disable();
+        toDisable && this.disable();
+
+        if (!localState.playerColor) {
+            this.createEvent({
+                type: EventName.info,
+                detail: { text: 'You are a spectator' }
+            });
+        }
     }
 
     public disable(): void {
