@@ -5,8 +5,8 @@ import clientConstants from '../../client_constants';
 import { ShipToken } from './ShipToken';
 import { SeaZone } from './SeaZoneTile';
 
-const { COLOR } = clientConstants;
-const SEA_ZONE_COUNT = 7; // TODO: move to constants
+const { COLOR, SEA_ZONE_COUNT } = clientConstants;
+
 export type RivalShipUpdate = {
     isControllable: boolean,
     bearings: ShipBearings,

@@ -6,8 +6,7 @@ import { SeaZone } from '../GroupList';
 import { ShipToken } from './ShipToken';
 import { Color } from '../../client_types';
 
-const { COLOR } = clientConstants;
-const SEA_ZONE_COUNT = 7; // TODO: move to constants
+const { COLOR, SEA_ZONE_COUNT } = clientConstants;
 
 export class PlayerShip {
 

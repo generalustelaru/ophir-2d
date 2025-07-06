@@ -32,6 +32,7 @@ export type ClientConstants = {
     DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,
+    SEA_ZONE_COUNT: 7,
     HEX_OFFSET_DATA: Array<HexCoordinates>,
     ISLAND_DATA: Record<ZoneName, IslandData>,
     LOCATION_TOKEN_DATA: Record<LocationName, IconLayer>,

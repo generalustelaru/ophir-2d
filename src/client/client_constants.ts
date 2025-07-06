@@ -50,6 +50,7 @@ const clientConstants: ClientConstants = {
         favorStampActive: { primary: '#e70000', secondary: '#aa0000', tertiary: null },
         favorStampDisabled: { primary: '#999999', secondary: '#666666', tertiary: null },
     },
+    SEA_ZONE_COUNT: 7,
     HEX_OFFSET_DATA: [
         { id: 'center', x: 0, y: 0 },
         { id: 'topLeft', x: 86, y: 150 },
