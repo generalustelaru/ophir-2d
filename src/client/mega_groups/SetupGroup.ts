@@ -34,14 +34,15 @@ export class SetupGroup implements MegaGroupInterface {
             { x: 550, y: 450 },
             '#002255',
             'Show / Hide',
-            () => this.modal?.switchVisibility()
+            () => {
+                this.modal && this.modal.switchVisibility();
+            },
         )
         this.group.add(this.modal.getElement(), this.showHideButton.getElement())
     }
 
     public update(state: SetupState) {
-        this.group.show();
-        console.log(state);
+        console.log('setup update!', {state});
     }
 
     public disable() {
