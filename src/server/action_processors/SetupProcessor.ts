@@ -1,7 +1,8 @@
 import {
-    BarrierId, ZoneName, Coordinates, PlayerState, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
+    BarrierId, Coordinates, PlayerState, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
     LocationData, Fluctuation, ExchangeTier, PlayerEntry, RivalData, GameSetupPayload, Phase, PlayerBuild, SetupDigest,
     Specialist,
+    MapPairings,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -171,7 +172,7 @@ export class SetupProcessor {
         return [b1, b2];
     }
 
-    private determineLocations(): Record<ZoneName, LocationData> {
+    private determineLocations(): MapPairings {
         const locations = LOCATION_ACTIONS
             .map(location => { return { key: Math.random(), location } })
             .sort((a, b) => a.key - b.key)
@@ -185,7 +186,7 @@ export class SetupProcessor {
             return locations.shift() as LocationData;
         }
 
-        return {
+        const locationByZone = {
             center: drawLocation(),
             topRight: drawLocation(),
             right: drawLocation(),
@@ -194,6 +195,13 @@ export class SetupProcessor {
             left: drawLocation(),
             topLeft: drawLocation(),
         }
+
+        const zoneByLocation = Object.fromEntries(
+            Object.entries(locationByZone)
+            .map(([k, v]) => [v, k])
+        );
+
+        return { locationByZone, zoneByLocation }
     }
 
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<DestinationPackage> {
@@ -242,7 +250,7 @@ export class SetupProcessor {
         builds: Array<PlayerBuild>,
         moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
-        mapPairings: Record<ZoneName, LocationData>,
+        mapPairings: MapPairings,
     ): {
         players: Array<PlayerState>,
         startingPlayerColor: PlayerColor
@@ -270,7 +278,7 @@ export class SetupProcessor {
                 bearings: {
                     seaZone: startingZone,
                     position: setupCoordinates.pop() as Coordinates,
-                    location: mapPairings[startingZone].name
+                    location: mapPairings.locationByZone[startingZone].name
                 },
                 overnightZone: startingZone,
                 favor: 2,
@@ -288,7 +296,10 @@ export class SetupProcessor {
 
             if (playerDto.turnOrder == 1) {
                 const player = new PlayerHandler(playerDto);
-                player.activate(mapPairings[startingZone].actions, initialRules.allowed);
+                player.activate(
+                    mapPairings.locationByZone[startingZone].actions,
+                    initialRules.allowed
+                );
 
                 return player.toDto();
             }
@@ -317,7 +328,7 @@ export class SetupProcessor {
     private getRivalShipData(
         isIncluded: boolean,
         hexCoordinates: HexCoordinates[],
-        mapPairings: Record<ZoneName, LocationData>,
+        mapPairings: MapPairings,
         activePlayerColor: PlayerColor,
         moveRules: Array<DestinationPackage>,
     ): RivalData {
@@ -325,10 +336,7 @@ export class SetupProcessor {
         if (!isIncluded)
             return { isIncluded: false }
 
-        const marketZone = Object.keys(mapPairings).find(key => {
-            const zoneName = key as keyof Record<ZoneName, LocationData>;
-            return mapPairings[zoneName].name === 'market';
-        }) as ZoneName;
+        const marketZone = mapPairings.zoneByLocation['market']
 
         const hexPosition = hexCoordinates.find(c => c.id === marketZone)!;
         const shipPosition = {
