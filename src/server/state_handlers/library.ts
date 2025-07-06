@@ -54,7 +54,7 @@ export function writable<T>(initialValue: T): Writable<T> {
         exists: () => valueExists(value),
         set: (newVal: T) => value = deepCopy(newVal),
         get: () => deepCopy(value),
-        update: (fn: Function): void => value = fn(deepCopy(value)),
+        update: (fn: Function): void => value = deepCopy(fn(deepCopy(value))),
         reset: () => value = deepCopy(initialValue),
     }
 }
