@@ -73,8 +73,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.chat.add(chat);
     }
 
-    public addServerMessage(message: string) {
-        this.chat.add({ id: null, name: this.serverName.get(), message });
+    public addServerMessage(message: string, as: PlayerColor | null = null) {
+        this.chat.add({ id: as, name: this.serverName.get(), message });
     }
 
     // MARK: Player
