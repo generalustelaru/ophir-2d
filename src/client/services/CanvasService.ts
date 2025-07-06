@@ -79,41 +79,7 @@ export const CanvasService = new class extends Communicator {
         return this.mapGroup.createSetupPayload();
     }
 
-
-    private checkAndDraw(state: PlayState | SetupState) {
-        const phase = state.sessionPhase;
-
-        if (phase === Phase.setup && !this.isSetupDrawn) {
-            this.mapGroup.drawElements(state);
-            this.setupGroup.drawElements();
-            this.isSetupDrawn = true;
-        }
-
-        if (phase === Phase.play && !this.isPlayDrawn) {
-            this.mapGroup.drawElements(state);
-            this.locationGroup.drawElements(state);
-            this.playerGroup.drawElements(state);
-            this.isPlayDrawn = true;
-        }
-    }
-
-
     public drawUpdateElements(state: PlayState | SetupState, toDisable = false): void {
-
-        this.checkAndDraw(state);
-
-        if (state.sessionPhase === Phase.setup) {
-            this.setupGroup.update(state);
-
-            return;
-        }
-
-        this.setupGroup.disable();
-        this.locationGroup.update(state);
-        this.mapGroup.update(state);
-        this.playerGroup.update(state);
-
-        toDisable && this.disable();
 
         if (!localState.playerColor) {
             this.createEvent({
@@ -121,6 +87,43 @@ export const CanvasService = new class extends Communicator {
                 detail: { text: 'You are a spectator' }
             });
         }
+
+        const { sessionPhase } = state;
+
+        if (sessionPhase === Phase.setup) {
+
+            if (this.isSetupDrawn)
+                return this.setupGroup.update(state);
+
+            this.mapGroup.drawElements(state);
+            this.setupGroup.drawElements();
+            this.isSetupDrawn = true;
+
+            return;
+        }
+
+        if (sessionPhase === Phase.play) {
+            this.setupGroup.disable();
+
+            if (this.isPlayDrawn) {
+                this.locationGroup.update(state);
+                this.mapGroup.update(state);
+                this.playerGroup.update(state);
+
+                toDisable && this.disable();
+
+                return;
+            }
+
+            this.mapGroup.drawElements(state);
+            this.locationGroup.drawElements(state);
+            this.playerGroup.drawElements(state);
+            this.isPlayDrawn = true;
+
+            return;
+        }
+
+        throw new Error("Update case not covered!");
     }
 
     public disable(): void {
