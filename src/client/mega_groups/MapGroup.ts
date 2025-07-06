@@ -62,6 +62,15 @@ export class MapGroup implements MegaGroupInterface {
         if(state.sessionPhase === Phase.setup)
             return;
 
+        for (const zone of this.seaZones) {
+            zone.update({
+                player: null,
+                rival: state.rival,
+                templeIcon: this.getIconData(zone.getTokenId(), state),
+                itemSupplies: state.itemSupplies,
+            });
+        }
+
         const players = state.players;
         const localPlayer = players.find(player => player.id === localState.playerColor);
         const isActivePlayer = localPlayer?.isActive || false;
