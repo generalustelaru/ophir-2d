@@ -1,4 +1,4 @@
-import { PlayerColor, ChatEntry, SetupState, Phase, PlayerBuild, GamePartialSetup } from "../../shared_types";
+import { PlayerColor, ChatEntry, SetupState, Phase, PlayerBuild, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
 import { Readable, readable, arrayWritable, ArrayWritable } from "./library";
 
@@ -8,6 +8,7 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
     private sessionPhase: Readable<Phase.setup>;
     private sessionOwner: Readable<PlayerColor>;
     private players: Readable<Array<PlayerBuild>>;
+    private specialists: Readable<Array<Specialist>>;
     private setup: Readable<GamePartialSetup>;
     private chat: ArrayWritable<ChatEntry>;
 
@@ -17,6 +18,7 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         this.sessionPhase = readable(state.sessionPhase);
         this.sessionOwner = readable(state.sessionOwner);
         this.players = readable(state.players);
+        this.specialists = readable(state.specialists);
         this.setup = readable(state.setup);
         this.chat = arrayWritable(state.chat);
     }
@@ -27,6 +29,7 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
             sessionPhase: this.sessionPhase.get(),
             sessionOwner: this.sessionOwner.get(),
             players: this.players.get(),
+            specialists: this.specialists.get(),
             setup: this.setup.get(),
             chat: this.chat.getAll(),
         }

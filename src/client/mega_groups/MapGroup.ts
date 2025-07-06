@@ -32,9 +32,9 @@ export class MapGroup implements MegaGroupInterface {
 
     // MARK: DRAW
     public drawElements(state: PlayState|SetupState): void {
-        const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
 
         if(this.seaZones.length === 0) {
+            const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
             //MARK: hexes
             HEX_OFFSET_DATA.forEach(hexItem => {
                 const locationData = state.setup.mapPairings[hexItem.id];

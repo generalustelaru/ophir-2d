@@ -2,11 +2,12 @@ import Konva from "konva";
 import { GroupLayoutData, MegaGroupInterface } from "../client_types";
 import { SetupState } from "../../shared_types";
 import { ModalButton } from "../groups/setup/ModalButton";
+import { SetupModal } from "../groups/setup/SetupModal";
 
 export class SetupGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
-    private modal: Konva.Rect | null = null;
+    private modal: SetupModal | null = null;
     private showHideButton: ModalButton | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
@@ -21,13 +22,11 @@ export class SetupGroup implements MegaGroupInterface {
     }
 
     public drawElements(){
-        this.modal = new Konva.Rect({
+        this.modal = new SetupModal({
             x: 50,
             y: 50,
             width: this.group.width() - 100,
             height: this.group.height() - 100,
-            cornerRadius: 15,
-            fill: '#002255',
         });
 
         this.showHideButton = new ModalButton(
@@ -35,9 +34,9 @@ export class SetupGroup implements MegaGroupInterface {
             { x: 550, y: 450 },
             '#002255',
             'Show / Hide',
-            () => this.switchModal()
+            () => this.modal?.switchVisibility()
         )
-        this.group.add(this.modal, this.showHideButton.getElement())
+        this.group.add(this.modal.getElement(), this.showHideButton.getElement())
     }
 
     public update(state: SetupState) {
@@ -47,12 +46,5 @@ export class SetupGroup implements MegaGroupInterface {
 
     public disable() {
         this.group.hide();
-    }
-
-    private switchModal() {
-        if (this.modal?.visible())
-            this.modal?.hide();
-        else
-            this.modal?.show();
     }
 }

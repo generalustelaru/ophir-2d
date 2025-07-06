@@ -1,5 +1,5 @@
 import {
-    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, SpecialistName, Specialist,
+    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Specialist,
     TradeGood, GoodsLocationName, MessagePayload, ExchangeTier, ServerMessage,
 } from '../shared_types';
 import { WebSocket } from 'ws';
@@ -66,7 +66,7 @@ export type BarrierCheck = {
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
-    SPECIALISTS: Record<SpecialistName, Specialist>
+    SPECIALISTS: Array<Specialist>
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,

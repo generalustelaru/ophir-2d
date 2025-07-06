@@ -70,7 +70,7 @@ export const CanvasService = new class extends Communicator {
                 width: this.stage.width(),
                 x: 0,
                 y: 0,
-            }
+            },
         )
     }
 
