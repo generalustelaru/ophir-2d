@@ -213,9 +213,13 @@ export type LocationData = {
     actions: Array<LocationAction>,
 }
 
+export type MapPairings = {
+    locationByZone: Record<ZoneName, LocationData>
+    zoneByLocation: Record<LocationName, ZoneName>
+}
 export type GameSetup = {
     barriers: Array<BarrierId>,
-    mapPairings: Record<ZoneName, LocationData>,
+    mapPairings: MapPairings,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
 }

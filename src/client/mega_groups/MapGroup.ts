@@ -37,7 +37,7 @@ export class MapGroup implements MegaGroupInterface {
             const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
             //MARK: hexes
             HEX_OFFSET_DATA.forEach(hexItem => {
-                const locationData = state.setup.mapPairings[hexItem.id];
+                const locationData = state.setup.mapPairings.locationByZone[hexItem.id];
                 const seaZone = new SeaZone(
                     this.stage,
                     centerPoint,

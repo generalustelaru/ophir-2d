@@ -62,7 +62,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     public getLocationName(hexId: ZoneName) {
-        return this.setup.get().mapPairings[hexId].name;
+        return this.setup.get().mapPairings.locationByZone[hexId].name;
     }
 
     public getSessionOwner() {
@@ -199,7 +199,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     public getLocationActions(zone: ZoneName) {
-        return this.setup.get().mapPairings[zone].actions;
+        return this.setup.get().mapPairings.locationByZone[zone].actions;
     }
 
     public getItemSupplies() {
