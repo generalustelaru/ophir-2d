@@ -78,6 +78,7 @@ export type SpecialistName =
 
 export type Specialist = {
     name: SpecialistName,
+    displayName: string,
     startingFavor: number,
     specialty: TradeGood | null,
     description: string,

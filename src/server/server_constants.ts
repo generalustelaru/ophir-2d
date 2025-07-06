@@ -6,60 +6,70 @@ const serverConstants: ServerConstants = {
     SPECIALISTS: {
         advisor: {
             name: 'advisor',
+            displayName: 'Advisor',
             startingFavor: 1,
             specialty: 'cloth',
             description: 'May complete the temple trade using any market slot.',
         },
         ambassador: {
             name: 'ambassador',
+            displayName: 'Ambassador',
             startingFavor: 0,
             specialty: null,
             description: 'Begins with fully upgraded cargo hold.',
         },
         chancellor: {
             name: 'chancellor',
+            displayName: 'Chancellor',
             startingFavor: 1,
             specialty: 'gems',
             description: 'Substitutes missing goods with Favor at Market.',
         },
         harbormaster: {
             name: 'harbormaster',
+            displayName: 'Harbormaster',
             startingFavor: 2,
             specialty: 'stone',
             description: 'Can complete actions after first and second move when spending Favor.',
         },
         moneychanger: {
             name: 'moneychanger',
+            displayName: 'Moneychanger',
             startingFavor: 2,
             specialty: 'cloth',
             description : 'May perform a market trade instead of the temple trade.',
         },
         navigator: {
             name: 'navigator',
+            displayName: 'Navigator',
             startingFavor: 1,
             specialty: 'wood',
             description: 'May cross barriers when moving. When doing so, no influence check is made.',
         },
         priest: {
             name: 'priest',
+            displayName: 'Priest',
             startingFavor: 2,
             specialty: 'stone',
             description: 'Gains Favor when ending the turn at the Temple.',
         },
         general: {
             name: 'general',
+            displayName: 'General',
             startingFavor: 2,
             specialty: 'wood',
             description: 'Adds 1 to influence checks (up to 6).'
         },
         postmaster: {
             name: 'postmaster',
+            displayName: 'Postmaster',
             startingFavor: 1,
             specialty: 'gems',
             description: 'May donate metals from one zone away from the Temple.',
         },
         peddler: {
             name: 'peddler',
+            displayName: 'Peddler',
             startingFavor: 2,
             specialty: null,
             description: 'Recoups one trade good after completing a reduced value market trade.',
@@ -113,7 +123,6 @@ const serverConstants: ServerConstants = {
         { request: ['gems', 'cloth'], reward: { coins: 3, favorAndVp: 2 } },
         { request: ['gems'], reward: { coins: 2, favorAndVp: 1 } },
     ],
-
     DEFAULT_MOVE_RULES: [
         { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
         { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1, 2, 3] },
@@ -123,7 +132,6 @@ const serverConstants: ServerConstants = {
         { from: 'left', allowed: ['center', 'topLeft', 'bottomLeft'], blockedBy: [9, 10, 11] },
         { from: 'topLeft', allowed: ['center', 'left', 'topRight'], blockedBy: [1, 11, 12] },
     ],
-
     BARRIER_CHECKS: {
         1: { between: ['topLeft', 'topRight'], incompatible: [1, 11, 12, 2, 3] },
         2: { between: ['topRight', 'center'], incompatible: [1, 2, 3] },
@@ -138,14 +146,12 @@ const serverConstants: ServerConstants = {
         11: { between: ['left', 'topLeft'], incompatible: [9, 10, 11, 12, 1] },
         12: { between: ['topLeft', 'center'], incompatible: [11, 12, 1] },
     },
-
     PLAYER_IDS: [
         'Purple',
         'Yellow',
         'Red',
         'Green',
     ],
-
     LOCATION_ACTIONS: [
         {name: 'temple', actions: [Action.upgrade_cargo, Action.make_trade, Action.donate_metals]},
         {name: 'market', actions: [Action.make_trade]},
@@ -155,14 +161,12 @@ const serverConstants: ServerConstants = {
         {name: 'mines', actions: [Action.load_good]},
         {name: 'farms', actions: [Action.load_good]},
     ],
-
     LOCATION_GOODS: {
         quary: 'stone',
         forest: 'wood',
         mines: 'gems',
         farms: 'cloth',
     },
-
     DEFAULT_NEW_STATE: {
         gameId: 'default',
         sessionPhase: Phase.enrolment,
@@ -176,7 +180,6 @@ const serverConstants: ServerConstants = {
         ],
         players: [],
     },
-
     COST_TIERS: [
         {
             templeLevel: 0,
