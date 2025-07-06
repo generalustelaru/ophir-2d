@@ -16,9 +16,11 @@ if (!wsPort || !serverAddress)
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
 const savedState = sessionStorage.getItem('localState');
-const { myId, playerColor, playerName, isBoardDrawn } = savedState
+const { gameId, myId, playerColor, playerName, isBoardDrawn } = savedState
     ? JSON.parse(savedState) as LocalState
     : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
+
+localState.gameId = gameId;
 localState.myId = myId;
 localState.playerColor = playerColor;
 localState.playerName = playerName;

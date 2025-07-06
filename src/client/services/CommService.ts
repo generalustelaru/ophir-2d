@@ -80,7 +80,7 @@ export const CommunicationService = new class extends Communicator {
         }
     }
 
-    public sendMessage(payload: ClientMessage) {
+    public sendMessage(message: ClientMessage) {
 
         if (!this.socket || !this.socket.readyState) {
             this.socket?.close();
@@ -93,11 +93,11 @@ export const CommunicationService = new class extends Communicator {
         }
 
         const { gameId, myId: clientId, playerColor, playerName } = localState;
-        const message: ClientRequest = { gameId, clientId, playerColor, playerName, message: payload };
+        const request: ClientRequest = { gameId, clientId, playerColor, playerName, message };
 
-        console.debug('->', message);
+        console.debug('->', request);
 
-        this.socket.send(JSON.stringify(message));
+        this.socket.send(JSON.stringify(request));
     }
 
     private isGameStateResponse(data: ServerMessage): data is GameStateResponse {
