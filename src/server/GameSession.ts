@@ -1,7 +1,8 @@
 import {WsDigest, DataDigest } from "./server_types";
 import { randomUUID } from 'crypto';
 import {
-    ClientRequest, ServerMessage, Action, ResetResponse, PlayState, GameStateResponse, GameState, Phase,
+    ClientRequest, ServerMessage, Action, ResetResponse, GameState, Phase,
+    PlayState,
 } from "./../shared_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library'
@@ -13,9 +14,11 @@ import { validator } from "./services/validation/ValidatorService";
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
+    private autoBroadcast: (state: PlayState) => void
 
-    constructor() {
+    constructor(broadcastCallback: (state: PlayState) => void) {
         this.actionProcessor = new EnrolmentProcessor(this.getNewState());
+        this.autoBroadcast = broadcastCallback
         console.info('Game session created');
     }
 
@@ -56,14 +59,6 @@ export class GameSession {
             default:
                 return this.issueNominalResponse(lib.issueErrorResponse('Unknown game phase!'));
         }
-    }
-
-    // MARK: COMMON
-
-    private processStatusRequest(state: PlayState): GameStateResponse { // TODO: Investigate the need for client sending this,
-        state.isStatusResponse = true;
-
-        return { state };
     }
 
     // MARK: ENROL
@@ -165,7 +160,7 @@ export class GameSession {
                 const { privateState, playState } = processor.processStart(
                     payload
                 );
-                this.actionProcessor = new PlayProcessor({ privateState, playState });
+                this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast);
                 return this.issueGroupResponse({ state: playState.toDto() });
             }
         }
@@ -186,9 +181,6 @@ export class GameSession {
         const { playerColor, message } = playerRequest;
         const { action, payload } = message;
 
-        if (action === Action.get_status)
-            return this.issueNominalResponse(this.processStatusRequest(processor.getState()));
-
         if (action === Action.declare_reset) {
             const result = this.processReset(request, processor.getState());
 
@@ -204,13 +196,15 @@ export class GameSession {
         const player = new PlayerHandler(
             processor.getState().players.find(p => p.id === playerColor)!
         );
-
         player.refreshTimeStamp();
 
         const digest: DataDigest = { player, payload }
 
-        if (action === Action.chat)
+        if (action === Action.chat && !player.isActivePlayer())
             return this.issueGroupResponse(processor.processChat(digest));
+
+        if (action === Action.force_turn)
+            return this.issueGroupResponse(processor.processForcedTurn(digest));
 
         if (!player.isActivePlayer())
             return this.issueNominalResponse(lib.issueErrorResponse(
@@ -234,6 +228,8 @@ export class GameSession {
 
         const result = (() => {
             switch (action) {
+                case Action.chat:
+                    return processor.processChat(digest);
                 case Action.spend_favor:
                     return processor.processFavorSpending(digest);
                 case Action.move:

@@ -1,7 +1,7 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, Action, ClientRequest, WaiverClientPayload } from '../shared_types';
+import { ClientIdResponse, ServerMessage, ResetResponse, Action, ClientRequest, WaiverClientPayload, PlayState } from '../shared_types';
 import { WsClient } from './server_types';
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
@@ -84,7 +84,7 @@ const rl = readline.createInterface({
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: WS_PORT });
 
-const singleSession = new GameSession();
+const singleSession = new GameSession(broadcastCallback);
 
 socketServer.on('connection', function connection(socket) {
     const clientId = randomUUID();
@@ -114,12 +114,14 @@ socketServer.on('connection', function connection(socket) {
 });
 
 // MARK: FUNCTIONS
+
+function broadcastCallback(state: PlayState) {
+    broadcast({ state })
+}
+
 function logRequest(request: ClientRequest) {
     const { playerColor, playerName, message } = request;
     const { action, payload } = message;
-
-    if (action === Action.get_status)
-        return;
 
     const name = playerName || playerColor || '';
     const colorized = {

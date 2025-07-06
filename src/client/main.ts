@@ -38,7 +38,7 @@ window.addEventListener(EventName.draft, () => {
     }
     CommunicationService.sendMessage(message);
 });
-window.addEventListener(EventName.start, () => {
+window.addEventListener(EventName.start_action, () => {
     const message: ClientMessage = {
         action: Action.start_play,
         payload: CanvasService.getSetupCoordinates(),
@@ -65,7 +65,6 @@ window.addEventListener('timeout', () => {
 });
 
 window.addEventListener(EventName.close, () => {
-    CommunicationService.clearStatusCheck();
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();
@@ -124,13 +123,10 @@ window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
 
     UserInterface.updateAsPlay(playState);
 
-    if (playState.hasGameEnded) {
-        CommunicationService.clearStatusCheck();
-        CanvasService.drawUpdateElements(playState, true);
-    } else {
-        CommunicationService.setKeepStatusCheck();
-        CanvasService.drawUpdateElements(playState);
-    }
+    CanvasService.drawUpdateElements(
+        playState,
+        playState.hasGameEnded
+    );
 
     debug(playState);
 });

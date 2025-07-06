@@ -11,9 +11,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     private gameId: Readable<string>;
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
-    private isStatusResponse: Writable<boolean>;
     private sessionPhase: Readable<Phase.play>;
-    private hasGameEnded: Writable<Boolean>;
+    private hasGameEnded: Writable<boolean>;
     private gameResults: Writable<Array<PlayerCountables>>;
     private players: ArrayWritable<PlayerState>;
     private market: Writable<MarketOffer>;
@@ -26,14 +25,13 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.serverName = readable(serverName);
 
         const {
-            gameId, sessionOwner, setup, isStatusResponse, sessionPhase, gameResults,
+            gameId, sessionOwner, setup, sessionPhase, gameResults,
             players, market, temple, chat, itemSupplies, rival, hasGameEnded,
         } = state;
 
         this.gameId = readable(gameId);
         this.sessionOwner = readable(sessionOwner);
         this.setup = readable(setup);
-        this.isStatusResponse = writable(isStatusResponse);
         this.sessionPhase = writable(sessionPhase);
         this.hasGameEnded = writable(hasGameEnded);
         this.gameResults = writable(gameResults);
@@ -51,7 +49,6 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             gameId: this.gameId.get(),
             sessionOwner: this.sessionOwner.get(),
             setup: this.setup.get(),
-            isStatusResponse: this.isStatusResponse.get(),
             sessionPhase: this.sessionPhase.get(),
             hasGameEnded: this.hasGameEnded.get(),
             gameResults: this.gameResults.get(),

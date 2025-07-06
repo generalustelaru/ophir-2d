@@ -218,8 +218,8 @@ class ValidatorService {
     }
 
     // MARK: UTILITY
-    private logErrors(errors: Array<string>) {
-        console.error('Validation Errors:')
+    private logErrors(objectType: string, errors: Array<string>) {
+        console.error(`[${objectType}] Validation Errors:`)
         errors.forEach(error => {
             console.error(error);
         });
@@ -234,7 +234,7 @@ class ValidatorService {
         const errors = lib.evaluateObject(objectType, value, tests);
 
         if (errors.length) {
-            this.logErrors(errors);
+            this.logErrors(objectType, errors);
 
             return null;
         }
