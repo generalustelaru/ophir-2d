@@ -75,10 +75,12 @@ export class PlayProcessor {
             if (!blockingPlayers.length && player.getInfluence() >= rivalInfluence)
                 return true;
 
-            this.playState.trimInfluenceByZone(target, rivalInfluence);
             this.playState.addServerMessage(
-                `${player.getIdentity().name} was blocked from sailing. Influence at the [${locationName}] was trimmed.`
+                `${player.getIdentity().name} was blocked from sailing.`,
+                player.getIdentity().id
             );
+            this.playState.trimInfluenceByZone(target, rivalInfluence);
+            this.playState.addServerMessage(`Influence at the [${locationName}] was trimmed.`)
 
             return false;
         })();
@@ -168,8 +170,8 @@ export class PlayProcessor {
             );
         }
 
-        this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`);
         player.enablePrivilege();
+        this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`, player.getIdentity().id);
 
         return this.issueStateResponse(player);
     }
@@ -190,7 +192,10 @@ export class PlayProcessor {
         player.setCargo(result.data);
         player.setTrades(this.pickFeasibleTrades(result.data));
 
-        this.playState.addServerMessage(`${player.getIdentity().name} ditched one ${payload.item}`);
+        this.playState.addServerMessage(
+            `${player.getIdentity().name} ditched one ${payload.item}`,
+            player.getIdentity().id,
+        );
 
         return this.issueStateResponse(player);
     }
@@ -241,7 +246,10 @@ export class PlayProcessor {
         player.setActions(removeAction.data);
         player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
-        this.playState.addServerMessage(`${player.getIdentity().name} picked up ${localGood}`);
+        this.playState.addServerMessage(
+            `${player.getIdentity().name} picked up ${localGood}`,
+            player.getIdentity().id
+        );
 
         return this.issueStateResponse(player);
     }
@@ -298,13 +306,13 @@ export class PlayProcessor {
             case 'market':
                 const amount = trade.reward.coins + this.playState.getFluctuation(slot);
                 player.gainCoins(amount);
-                this.playState.addServerMessage(`${name} sold goods for ${amount} coins`);
+                this.playState.addServerMessage(`${name} sold goods for ${amount} coins`, id);
                 break;
             case 'temple':
                 const reward = trade.reward.favorAndVp;
                 player.gainFavor(reward);
                 this.privateState.updateVictoryPoints(id, reward);
-                this.playState.addServerMessage(`${name} donated for ${reward} favor and VP`);
+                this.playState.addServerMessage(`${name} donated for ${reward} favor and VP`, id);
                 console.info(this.privateState.getGameStats());
                 break;
             default:
@@ -322,11 +330,13 @@ export class PlayProcessor {
     // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest) {
         const { player, payload } = data;
-        const { name } = player.getIdentity();
+        const { name, id } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
             return lib.validationErrorResponse();
+
+        const {metal, currency} = purchasePayload;
 
         if (!player.mayLoadMetal())
             return lib.issueErrorResponse(`Player ${name} cannot buy metals`);
@@ -334,7 +344,7 @@ export class PlayProcessor {
         const metalCost = (() => {
             const costs = this.playState.getMetalCosts();
 
-            switch (purchasePayload.metal) {
+            switch (metal) {
                 case 'gold': return costs.gold;
                 case 'silver': return costs.silver;
                 default: return null;
@@ -342,7 +352,7 @@ export class PlayProcessor {
         })();
 
         const playerAmount = (() => {
-            switch (purchasePayload.currency) {
+            switch (currency) {
                 case 'coins': return player.getCoinAmount()
                 case 'favor': return player.getFavorAmount();
                 default: return null;
@@ -352,31 +362,31 @@ export class PlayProcessor {
         if (!metalCost || !playerAmount) {
             return lib.issueErrorResponse(
                 `No such cost or player amount found.`,
-                { currency: purchasePayload.currency, metalCost, playerAmount }
+                { currency: currency, metalCost, playerAmount }
             );
         }
 
-        const price = metalCost[purchasePayload.currency];
+        const price = metalCost[currency];
         const remainder = playerAmount - price;
 
         if (remainder < 0) {
             return lib.issueErrorResponse(`Player ${name} cannot afford metal purchase`);
         }
 
-        switch (purchasePayload.currency) {
+        switch (currency) {
             case 'coins':
                 player.spendCoins(price);
-                this.playState.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.coins} coins`);
                 break;
             case 'favor':
                 player.spendFavor(price)
-                this.playState.addServerMessage(`${name} bought ${purchasePayload.metal} for ${metalCost.favor} favor`);
                 break;
             default:
-                return lib.issueErrorResponse(`Unknown currency: ${purchasePayload.currency}`);
+                return lib.issueErrorResponse(`Unknown currency: ${currency}`);
         }
 
-        const result = this.loadItem(player.getCargo(), purchasePayload.metal);
+        this.playState.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, id);
+
+        const result = this.loadItem(player.getCargo(), metal);
 
         if (result.err)
             return lib.issueErrorResponse(result.message);
@@ -401,7 +411,7 @@ export class PlayProcessor {
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(id, reward);
-        this.playState.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`);
+        this.playState.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`, id);
         console.info(this.privateState.getGameStats());
 
         const result = this.unloadItem(player.getCargo(), donationPayload.metal);
@@ -475,7 +485,7 @@ export class PlayProcessor {
             return lib.issueErrorResponse(newPlayerResult.message);
 
         const newPlayer = newPlayerResult.data;
-        this.playState.addServerMessage(`${newPlayer.getIdentity().name} is now active!`);
+        this.playState.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().id);
 
         return this.issueStateResponse(newPlayer);
     }
@@ -531,6 +541,11 @@ export class PlayProcessor {
                 { ...activePlayer, isIdle: false, isAnchored: true, isHandlingRival: false }
             );
 
+        this.playState.addServerMessage(
+            `${player.getIdentity().name} forced ${idlerHandler.getIdentity().name} to end the turn.`,
+            player.getIdentity().id,
+        );
+
         return this.processEndTurn({
             player: idlerHandler,
             payload: null
@@ -551,7 +566,10 @@ export class PlayProcessor {
             player.addCargoSpace();
             player.setActions(removeAction.data);
             player.clearMoves();
-            this.playState.addServerMessage(`${player.getIdentity().name} upgraded their hold`);
+            this.playState.addServerMessage(
+                `${player.getIdentity().name} upgraded their hold`,
+                player.getIdentity().id,
+            );
 
             return this.issueStateResponse(player);
         }
@@ -772,7 +790,7 @@ export class PlayProcessor {
                 this.autoBroadcast(this.playState.toDto());
             }
 
-        }, 60000);
+        }, 2000);
     }
 
     public killIdleChecks() {
