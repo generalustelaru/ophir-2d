@@ -6,6 +6,7 @@ export const WS_PORT = Number(process.env.WS_PORT);
 export const SERVER_NAME = String(process.env.SERVER_NAME);
 export const SHUTDOWN_AUTH = String(process.env.SHUTDOWN_AUTH);
 export const IDLE_CHECKS = Boolean(Number(process.env.IDLE_CHECKS));
+export const IDLE_TIMEOUT = Number(process.env.IDLE_TIMEOUT);
 export const RICH_PLAYERS = Boolean(Number(process.env.RICH_PLAYERS));
 export const LOADED_PLAYERS = Boolean(Number(process.env.LOADED_PLAYERS));
 export const PEDDLING_PLAYERS = Boolean(Number(process.env.PEDDLING_PLAYERS));

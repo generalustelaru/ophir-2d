@@ -761,7 +761,7 @@ export class PlayProcessor {
 
             const timeNow = Date.now();
 
-            if (timeNow - activePlayer.timeStamp > 10000 && !activePlayer.isIdle) {
+            if (timeNow - activePlayer.timeStamp > IDLE_TIMEOUT && !activePlayer.isIdle) {
                 activePlayer.isIdle = true;
                 this.playState.addServerMessage(`${activePlayer.name} is idle`);
                 this.playState.savePlayer(activePlayer);
