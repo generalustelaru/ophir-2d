@@ -44,6 +44,8 @@ const clientConstants: ClientConstants = {
         vpGold: '#E5D280',
         vpCardPurple: '#A70FFA',
         vpCardLightPurple: '#E37AF5',
+        modalBlue: '#002255',
+
     },
     COLOR_PROFILES: {
         favorStampReady: { primary: '#aa0000', secondary: '#850c03', tertiary: null },

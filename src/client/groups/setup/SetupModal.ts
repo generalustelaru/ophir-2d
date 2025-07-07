@@ -1,11 +1,20 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
+import { PlayerBuild, Specialist } from "../../../shared_types";
+import  clientConstants from "../../client_constants"
+import { SpecialistCard } from "./SpecialistCard";
 
-type ModalDigest = {}
+type ModalDigest = {
+    players: Array<PlayerBuild>,
+    specialists: Array<Specialist>,
+}
+
+const { COLOR } = clientConstants
+
 export class SetupModal implements DynamicGroupInterface<ModalDigest> {
     private group: Konva.Group
 
-    constructor(layout: GroupLayoutData) {
+    constructor(layout: GroupLayoutData, digest: ModalDigest) {
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -19,10 +28,23 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
-            fill: '#002255',
+            fill: COLOR.modalBlue,
         });
 
-        this.group.add(background);
+        const oneCard = new SpecialistCard(30);
+        const twoCard = new SpecialistCard(250);
+        const threeCard = new SpecialistCard(460);
+        const fourCard = new SpecialistCard(670);
+        const fiveCard = new SpecialistCard(880);
+        console.log({state: digest})
+        this.group.add(...[
+            background,
+            oneCard.getElement(),
+            twoCard.getElement(),
+            threeCard.getElement(),
+            fourCard.getElement(),
+            fiveCard.getElement(),
+        ]);
     }
 
     public getElement() {
@@ -30,7 +52,7 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
     }
 
     public update(digest: ModalDigest) {
-        console.log(digest);
+        console.log({digest});
     }
 
     public switchVisibility() {
