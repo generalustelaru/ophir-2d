@@ -30,21 +30,22 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
             cornerRadius: 15,
             fill: COLOR.modalBlue,
         });
+        this.group.add(background);
 
-        const oneCard = new SpecialistCard(30);
-        const twoCard = new SpecialistCard(250);
-        const threeCard = new SpecialistCard(460);
-        const fourCard = new SpecialistCard(670);
-        const fiveCard = new SpecialistCard(880);
+        let offset = 20;
+        digest.specialists.forEach( specialist => {
+            const oneCard = new SpecialistCard(
+                {
+                    specialist,
+                    owner: null,
+                },
+                offset,
+            );
+            this.group.add(oneCard.getElement());
+            offset += 220;
+        });
+
         console.log({state: digest})
-        this.group.add(...[
-            background,
-            oneCard.getElement(),
-            twoCard.getElement(),
-            threeCard.getElement(),
-            fourCard.getElement(),
-            fiveCard.getElement(),
-        ]);
     }
 
     public getElement() {

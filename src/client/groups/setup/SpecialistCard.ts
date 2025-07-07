@@ -5,16 +5,22 @@
 import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
 import clientConstants from '../../client_constants';
+import { PlayerColor, Specialist } from "../../../shared_types";
 
 const { COLOR } = clientConstants;
 
-export class SpecialistCard implements DynamicGroupInterface<any> {
+type SpecialistCardDigest = {
+    specialist: Specialist,
+    owner: PlayerColor | null,
+}
+export class SpecialistCard implements DynamicGroupInterface<SpecialistCardDigest> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
 
     constructor(
         // stage: Konva.Stage,
+        digest: SpecialistCardDigest,
         xOffset: number,
     ) {
         this.group = new Konva.Group({
@@ -33,9 +39,19 @@ export class SpecialistCard implements DynamicGroupInterface<any> {
             strokeWidth: 0,
         });
 
+        const { specialist, owner } = digest;
+        const { displayName, description, startingFavor, specialty } = specialist;
+
+        const info = new Konva.Text({
+            text: (`${displayName}\n\n${description}\nFavor: ${startingFavor}\nSpecialty Good: ${specialty||'none'}`),
+            width: 200,
+            wrap: 'word'
+        });
+
 
         this.group.add(...[
             this.background,
+            info,
         ]);
 
     }
