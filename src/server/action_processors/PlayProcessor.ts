@@ -292,7 +292,7 @@ export class PlayProcessor {
 
         if (cargoTransfer.err) {
             return lib.issueErrorResponse(
-                `Cannot match cargo to trade`,
+                cargoTransfer.message,
                 { c: player.getCargo(), t: trade.request },
             );
         }
@@ -652,7 +652,7 @@ export class PlayProcessor {
         const itemIndex = cargo.indexOf(item);
 
         if (itemIndex === -1)
-            return lib.fail('Cannot find item in cargo.');
+            return lib.fail(`Cannot find [${item}] in cargo!`);
 
         cargo.splice(itemIndex, 1, 'empty');
 
@@ -709,7 +709,7 @@ export class PlayProcessor {
             const player = players.find(p => p.id === playerStat.id);
 
             if (!player) {
-                return lib.fail(`No player found for ${playerStat.id}`);
+                return lib.fail(`No player found for [${playerStat.id}]`);
             }
 
             playerStat.gold = player.cargo.filter(item => item === 'gold').length;
