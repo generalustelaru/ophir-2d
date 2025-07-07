@@ -156,7 +156,8 @@ export class GameSession {
 
                 return this.issueGroupResponse(response);
             }
-            // case select_specialist
+            case Action.pick_specialist: {
+            }
             case Action.start_play: {
                 const { privateState, playState } = processor.processStart(
                     payload

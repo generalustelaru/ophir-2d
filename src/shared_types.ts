@@ -83,6 +83,7 @@ export type Specialist = {
     startingFavor: number,
     specialty: TradeGood | null,
     description: string,
+    owner: PlayerColor | null
 }
 
 export type RivalData = {

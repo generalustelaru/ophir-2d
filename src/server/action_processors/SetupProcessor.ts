@@ -85,6 +85,13 @@ export class SetupProcessor {
 
         return { state: this.state.toDto() };
     }
+
+    public processSpecialistSelection(player: PlayerBuild, payload: unknown) {
+        const specialistPayload = validator.validatePickSpecialistPayload(payload);
+
+        if (!specialistPayload)
+            return lib.validationErrorResponse();
+    }
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
      * @returns `{playState, privateState}`  Used expressily for a game session instance.
