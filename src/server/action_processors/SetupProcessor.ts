@@ -13,7 +13,7 @@ import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from '../../client/client_types';
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 import { validator } from '../services/validation/ValidatorService';
-import lib from './library';
+import lib, { Probable } from './library';
 
 // @ts-ignore
 const activeKeys = Object.entries({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
@@ -77,11 +77,7 @@ export class SetupProcessor {
 
         const { id, name } = player;
 
-        this.state.addChatEntry({
-            id,
-            name,
-            message: chatPayload.input,
-        });
+        this.state.addChatEntry({ id, name, message: chatPayload.input });
 
         return { state: this.state.toDto() };
     }
@@ -91,6 +87,16 @@ export class SetupProcessor {
 
         if (!specialistPayload)
             return lib.validationErrorResponse();
+
+        const { name } = specialistPayload;
+
+        if (this.state.isSpecialistAssignable(name) && !player.specialist) {
+            this.state.assignSpecialist(player.id, name)
+
+            return { state: this.state.toDto() }
+        }
+
+        return lib.issueErrorResponse('Specialist already assigned or player has picked')
     }
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
@@ -98,10 +104,17 @@ export class SetupProcessor {
      */
     public processStart(
         clientSetupPayload: GameSetupPayload,
-    ): StateBundle {
+    ): Probable<StateBundle> {
 
         const setupState = this.state.toDto();
         const playerBuilds = tools.getCopy(setupState.players); // TODO: is getCopy necessary?
+
+        if (playerBuilds.some(b => b.specialist === null)) {
+            console.error("Player specialist missing", { playerBuilds });
+
+            return lib.fail('Specialist selection is incomplete')
+        }
+
         const marketData = this.prepareDeckAndGetOffer();
         const privateState = new PrivateStateHandler({
             destinationPackages: this.produceMoveRules(setupState.setup.barriers),
@@ -154,7 +167,7 @@ export class SetupProcessor {
             });
         playState.addServerMessage('Game started!');
 
-        return { playState: playState, privateState };
+        return lib.pass({ playState: playState, privateState });
     };
 
     // MARK: Map
@@ -265,13 +278,6 @@ export class SetupProcessor {
     } {
         const initialRules = tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
-
-        for (let i = 0; i < builds.length; i++) {
-            const build = builds[i];
-
-            if (!build.specialist) // TODO: should check earlier
-                console.error("Player specialist missing", { builds });
-        }
 
         const players: Array<PlayerState> = builds.map(b => {
             const playerDto: PlayerState = {

@@ -10,6 +10,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 1,
             specialty: 'cloth',
             description: 'May complete the temple trade using any market slot.',
+            owner: null,
         },
         {
             name: 'ambassador',
@@ -17,6 +18,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 0,
             specialty: null,
             description: 'Begins with fully upgraded cargo hold.',
+            owner: null,
         },
         {
             name: 'chancellor',
@@ -24,6 +26,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 1,
             specialty: 'gems',
             description: 'Substitutes missing goods with Favor at Market.',
+            owner: null,
         },
         {
             name: 'harbormaster',
@@ -31,6 +34,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: 'stone',
             description: 'Can complete actions after first and second move when spending Favor.',
+            owner: null,
         },
         {
             name: 'moneychanger',
@@ -38,6 +42,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: 'cloth',
             description : 'May perform a market trade instead of the temple trade.',
+            owner: null,
         },
         {
             name: 'navigator',
@@ -45,6 +50,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 1,
             specialty: 'wood',
             description: 'May cross barriers when moving. When doing so, no influence check is made.',
+            owner: null,
         },
         {
             name: 'priest',
@@ -52,13 +58,15 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: 'stone',
             description: 'Gains Favor when ending the turn at the Temple.',
+            owner: null,
         },
         {
             name: 'general',
             displayName: 'General',
             startingFavor: 2,
             specialty: 'wood',
-            description: 'Adds 1 to influence checks (up to 6).'
+            description: 'Adds 1 to influence checks (up to 6).',
+            owner: null,
         },
         {
             name: 'postmaster',
@@ -66,6 +74,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 1,
             specialty: 'gems',
             description: 'May donate metals from one zone away from the Temple.',
+            owner: null,
         },
         {
             name: 'peddler',
@@ -73,6 +82,7 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: null,
             description: 'Recoups one trade good after completing a reduced value market trade.',
+            owner: null,
         },
     ],
     TRADE_DECK_A: [

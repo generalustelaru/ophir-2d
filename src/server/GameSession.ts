@@ -157,11 +157,18 @@ export class GameSession {
                 return this.issueGroupResponse(response);
             }
             case Action.pick_specialist: {
+                return this.issueGroupResponse(processor.processSpecialistSelection(playerBuild, payload ))
             }
             case Action.start_play: {
-                const { privateState, playState } = processor.processStart(
-                    payload
-                );
+                const bundleResult = processor.processStart(payload);
+
+                if (bundleResult.err)
+                    return this.issueGroupResponse(lib.issueErrorResponse(
+                        'Failed to complete setup',
+                        {reason: bundleResult.message}
+                    ));
+
+                const { privateState, playState } = bundleResult.data;
                 this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast);
                 return this.issueGroupResponse({ state: playState.toDto() });
             }
