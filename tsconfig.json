@@ -15,6 +15,7 @@
         "noUnusedParameters": true,
         "esModuleInterop": true, // To lint express only. Use @ts-ignore if it causes trouble.
     },
+    "sourceMaps": true,
     "include": [
         "./src/**/*"
     ],
