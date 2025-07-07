@@ -14,7 +14,7 @@ const { COLOR } = clientConstants
 export class SetupModal implements DynamicGroupInterface<ModalDigest> {
     private group: Konva.Group
 
-    constructor(layout: GroupLayoutData, digest: ModalDigest) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, digest: ModalDigest) {
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -35,6 +35,7 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
         let offset = 20;
         digest.specialists.forEach( specialist => {
             const oneCard = new SpecialistCard(
+                stage,
                 {
                     specialist,
                     owner: null,

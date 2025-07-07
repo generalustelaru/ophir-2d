@@ -5,7 +5,8 @@
 import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
 import clientConstants from '../../client_constants';
-import { PlayerColor, Specialist } from "../../../shared_types";
+import { Action, PlayerColor, Specialist } from "../../../shared_types";
+import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
 
@@ -13,22 +14,29 @@ type SpecialistCardDigest = {
     specialist: Specialist,
     owner: PlayerColor | null,
 }
-export class SpecialistCard implements DynamicGroupInterface<SpecialistCardDigest> {
+export class SpecialistCard extends ActionButton implements DynamicGroupInterface<SpecialistCardDigest> {
 
-    private group: Konva.Group;
+    // private group: Konva.Group;
     private background: Konva.Rect;
 
     constructor(
-        // stage: Konva.Stage,
+        stage: Konva.Stage,
         digest: SpecialistCardDigest,
         xOffset: number,
     ) {
-        this.group = new Konva.Group({
-            width: 200,
-            height: 300,
-            x: xOffset,
-            y: 50,
-        });
+        super(
+            stage,
+            {
+                width: 200,
+                height: 300,
+                x: xOffset,
+                y: 50,
+            },
+            {
+                action: Action.pick_specialist,
+                payload: { name: digest.specialist.name }
+            }
+        );
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -43,7 +51,7 @@ export class SpecialistCard implements DynamicGroupInterface<SpecialistCardDiges
         const { displayName, description, startingFavor, specialty } = specialist;
 
         const info = new Konva.Text({
-            text: (`${displayName}\n\n${description}\nFavor: ${startingFavor}\nSpecialty Good: ${specialty||'none'}`),
+            text: (`${displayName}\n\n${description}\nFavor: ${startingFavor}\nSpecialty Good: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`),
             width: 200,
             wrap: 'word'
         });
@@ -54,6 +62,9 @@ export class SpecialistCard implements DynamicGroupInterface<SpecialistCardDiges
             info,
         ]);
 
+        if (owner === null) {
+            this.setEnabled(true);
+        }
     }
 
     public getElement() {

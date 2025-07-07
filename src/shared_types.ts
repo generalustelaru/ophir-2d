@@ -7,6 +7,7 @@ import { PlayerCountables } from "./server/server_types";
 export enum Action {
     chat = 'chat',
     start_setup = 'start_setup',
+    pick_specialist = 'pick_specialist',
     start_play = 'start_play',
     move = 'move',
     move_rival = 'move_rival',
@@ -241,10 +242,11 @@ export type TradePayload = { slot: MarketSlotKey, location: LocationName }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type WaiverClientPayload = { waiveredId: string, myId: string }
+export type PickSpecialistPayload = { name: SpecialistName }
 
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
-    | RepositioningPayload | TradePayload | MetalPurchasePayload
+    | RepositioningPayload | TradePayload | MetalPurchasePayload | PickSpecialistPayload
     | MetalDonationPayload | WaiverClientPayload | LoadGoodPayload;
 
 export type MessageAction = LaconicAction | VerboiseAction
@@ -255,7 +257,7 @@ type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
-    | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client;
+    | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client | Action.pick_specialist;
 export type LaconicAction =
     | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival
@@ -272,10 +274,11 @@ export type TradeMessage = MessageFormat<Action.make_trade, TradePayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonationPayload>;
 export type WaiverClientMessage = MessageFormat<Action.waiver_client, WaiverClientPayload>;
+export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage
     | RepositionMessage | TradeMessage | BuyMetalsMessage | DonateMetalMessage
-    | ChatMessage | WaiverClientMessage;
+    | ChatMessage | WaiverClientMessage | PickSpecialistMessage;
 
 export type ClientRequest = {
     gameId: string | null,
