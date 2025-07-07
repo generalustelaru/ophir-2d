@@ -1,14 +1,14 @@
 import { PlayerColor, ChatEntry, SetupState, Phase, PlayerBuild, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
-import { Readable, readable, arrayWritable, ArrayWritable } from "./library";
+import { Readable, readable, arrayWritable, ArrayWritable, Writable, writable } from "./library";
 
 export class SetupStateHandler implements ObjectHandler<SetupState> {
     private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.setup>;
     private sessionOwner: Readable<PlayerColor>;
-    private players: Readable<Array<PlayerBuild>>;
-    private specialists: Readable<Array<Specialist>>;
+    private players: Writable<Array<PlayerBuild>>;
+    private specialists: Writable<Array<Specialist>>;
     private setup: Readable<GamePartialSetup>;
     private chat: ArrayWritable<ChatEntry>;
 
@@ -17,8 +17,8 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         this.gameId = readable(state.gameId);
         this.sessionPhase = readable(state.sessionPhase);
         this.sessionOwner = readable(state.sessionOwner);
-        this.players = readable(state.players);
-        this.specialists = readable(state.specialists);
+        this.players = writable(state.players);
+        this.specialists = writable(state.specialists);
         this.setup = readable(state.setup);
         this.chat = arrayWritable(state.chat);
     }
@@ -43,7 +43,23 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         this.chat.add({ id: null, name: this.serverName.get(), message });
     }
 
+    public isSpecialistAssignable(name: SpecialistName) {
+        const s = this.specialists.get().find(s => s.name === name);
+        if (s && s.owner === null)
+            return true;
+        return false;
+    }
+
     public assignSpecialist(playerColor: PlayerColor, specialist: SpecialistName) {
-        
+        this.players.update((ps) => {
+            const p = ps.find(p => p.id);
+            if (p) p.specialist = specialist;
+            return ps;
+        });
+        this.specialists.update((ss) => {
+            const s = ss.find(s => s.name === specialist);
+            if (s) s.owner = playerColor;
+            return ss;
+        })
     }
 }

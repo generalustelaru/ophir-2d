@@ -13,6 +13,7 @@ const { COLOR } = clientConstants
 
 export class SetupModal implements DynamicGroupInterface<ModalDigest> {
     private group: Konva.Group
+    private specialistCards:  Array<SpecialistCard> = [];
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, digest: ModalDigest) {
         this.group = new Konva.Group({
@@ -21,7 +22,6 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
             x: layout.x,
             y: layout.y,
         });
-
         const background = new Konva.Rect({
             // x: 50,
             // y: 50,
@@ -34,15 +34,14 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
 
         let offset = 20;
         digest.specialists.forEach( specialist => {
-            const oneCard = new SpecialistCard(
+            const card = new SpecialistCard(
                 stage,
-                {
-                    specialist,
-                    owner: null,
-                },
+                specialist,
                 offset,
             );
-            this.group.add(oneCard.getElement());
+            this.group.add(card.getElement());
+
+            this.specialistCards.push(card)
             offset += 220;
         });
 
@@ -54,7 +53,14 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
     }
 
     public update(digest: ModalDigest) {
-        console.log({digest});
+        this.specialistCards.forEach(card => {
+            const specialist = digest.specialists.find(s => s.name === card.getCardName())
+
+            if (!specialist)
+                throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
+
+            card.update(specialist)
+        })
     }
 
     public switchVisibility() {
