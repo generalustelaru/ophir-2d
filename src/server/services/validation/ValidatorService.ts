@@ -13,6 +13,7 @@ import {
     MetalPurchasePayload,
     MetalDonationPayload,
     PlayerRequest,
+    PickSpecialistPayload,
 } from "../../../shared_types";
 import { lib, ObjectTests } from "./library"
 
@@ -82,6 +83,14 @@ class ValidatorService {
                 { key: 'myId', type: 'string', nullable: false },
             ],
         );
+    }
+
+    public validatePickSpecialistPayload(payload: unknown) {
+        return this.validateObject<PickSpecialistPayload>(
+            'PickSpecialistayload',
+            payload,
+            [{ key: 'name', type: 'string', nullable: false }],
+        )
     }
 
     public validateMovementPayload(payload: unknown) {

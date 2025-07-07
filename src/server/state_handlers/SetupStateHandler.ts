@@ -1,4 +1,4 @@
-import { PlayerColor, ChatEntry, SetupState, Phase, PlayerBuild, GamePartialSetup, Specialist } from "../../shared_types";
+import { PlayerColor, ChatEntry, SetupState, Phase, PlayerBuild, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
 import { Readable, readable, arrayWritable, ArrayWritable } from "./library";
 
@@ -41,5 +41,9 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
 
     public addServerMessage(message: string) {
         this.chat.add({ id: null, name: this.serverName.get(), message });
+    }
+
+    public assignSpecialist(playerColor: PlayerColor, specialist: SpecialistName) {
+        
     }
 }
