@@ -32,7 +32,7 @@ module.exports = (env, argv) => {
         resolve: {
             extensions: ['.ts', '.js', '.json'],
         },
-        // devtool: 'eval-source-map', // for development debugging
+        devtool: 'source-map', // for development debugging
         mode: 'none',
         module: {
             rules: [{
