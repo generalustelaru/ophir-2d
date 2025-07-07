@@ -24,6 +24,7 @@ export class SetupGroup implements MegaGroupInterface {
     public drawElements(state: SetupState){
         const {players, specialists} = state;
         this.modal = new SetupModal(
+            this.stage,
             {
                 x: 50,
                 y: 50,
