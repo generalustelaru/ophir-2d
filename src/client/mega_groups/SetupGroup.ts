@@ -21,13 +21,17 @@ export class SetupGroup implements MegaGroupInterface {
         this.stage = stage;
     }
 
-    public drawElements(){
-        this.modal = new SetupModal({
-            x: 50,
-            y: 50,
-            width: this.group.width() - 100,
-            height: this.group.height() - 100,
-        });
+    public drawElements(state: SetupState){
+        const {players, specialists} = state;
+        this.modal = new SetupModal(
+            {
+                x: 50,
+                y: 50,
+                width: this.group.width() - 100,
+                height: this.group.height() - 100,
+            },
+            { players, specialists },
+        );
 
         this.showHideButton = new ModalButton(
             this.stage,

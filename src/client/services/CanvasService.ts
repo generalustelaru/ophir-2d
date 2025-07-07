@@ -96,7 +96,7 @@ export const CanvasService = new class extends Communicator {
                 return this.setupGroup.update(state);
 
             this.mapGroup.drawElements(state);
-            this.setupGroup.drawElements();
+            this.setupGroup.drawElements(state);
             this.isSetupDrawn = true;
 
             return;
