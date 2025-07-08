@@ -1,7 +1,9 @@
 import {
     BarrierId, Coordinates, PlayerState, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
-    LocationData, Fluctuation, ExchangeTier, PlayerEntry, RivalData, GameSetupPayload, Phase, PlayerBuild, SetupDigest,
+    LocationData, Fluctuation, ExchangeTier, PlayerEntry, RivalData, GameSetupPayload, Phase, PlayerPreBuild, SetupDigest,
     Specialist, MapPairings, LocationName, ZoneName,
+    PlayerBuild,
+    SpecialistName,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -37,8 +39,12 @@ export class SetupProcessor {
         const barriers = this.determineBarriers();
         const mapPairings = this.determineLocations();
 
-        const specialists = (() => {
+        const specialists = ((): Array<Specialist> => {
             const deck = tools.getCopy(SPECIALISTS);
+
+            if (playerEntries.length >= deck.length)
+                throw new Error("Not enough specialist cards!");
+
             const randomized: Array<Specialist> = deck
                 .map(specialist => {return {key:Math.random(), specialist}})
                 .sort((a, b) => a.key - b.key)
@@ -69,7 +75,7 @@ export class SetupProcessor {
         return this.state.toDto();
     }
 
-    public processChat(player: PlayerBuild, payload: unknown) {
+    public processChat(player: PlayerPreBuild, payload: unknown) {
         const chatPayload = validator.validateChatPayload(payload);
 
         if (!chatPayload)
@@ -82,7 +88,7 @@ export class SetupProcessor {
         return { state: this.state.toDto() };
     }
 
-    public processSpecialistSelection(player: PlayerBuild, payload: unknown) {
+    public processSpecialistSelection(player: PlayerPreBuild, payload: unknown) {
         const specialistPayload = validator.validatePickSpecialistPayload(payload);
 
         if (!specialistPayload)
@@ -107,13 +113,25 @@ export class SetupProcessor {
     ): Probable<StateBundle> {
 
         const setupState = this.state.toDto();
-        const playerBuilds = tools.getCopy(setupState.players); // TODO: is getCopy necessary?
 
-        if (playerBuilds.some(b => b.specialist === null)) {
-            console.error("Player specialist missing", { playerBuilds });
+        const playerBuilds = ((): Array<PlayerBuild> | null => {
+            const builds = setupState.players;
+            const completeBuilds = [];
 
+            for (let i = 0; i < builds.length; i++) {
+                const { id, name, turnOrder, specialist } = builds[i];
+
+                if (!specialist)
+                    return null;
+
+                completeBuilds.push({ id, name, turnOrder, specialist });
+            };
+
+            return completeBuilds;
+        })();
+
+        if (!playerBuilds)
             return lib.fail('Specialist selection is incomplete')
-        }
 
         const marketData = this.prepareDeckAndGetOffer();
         const privateState = new PrivateStateHandler({
@@ -245,7 +263,7 @@ export class SetupProcessor {
     }
 
     // MARK: Players
-    private buildPlayers(entries: Array<PlayerEntry>,): Array<PlayerBuild> {
+    private buildPlayers(entries: Array<PlayerEntry>,): Array<PlayerPreBuild> {
         const randomized = entries
             .map(e => { return { entry: e, order: Math.random() } })
             .sort((a, b) => a.order - b.order)
@@ -286,7 +304,7 @@ export class SetupProcessor {
                 isIdle: false,
                 name: b.name,
                 turnOrder: b.turnOrder,
-                specialist: b.specialist!,
+                specialist: b.specialist,
                 specialty: null,
                 isActive: false,
                 bearings: {
@@ -295,7 +313,7 @@ export class SetupProcessor {
                     location: mapPairings.locationByZone[startingZone].name
                 },
                 overnightZone: startingZone,
-                favor: 2,
+                favor: b.specialist.startingFavor,
                 privilegedSailing: false,
                 influence: 1,
                 moveActions: 0,
@@ -307,6 +325,9 @@ export class SetupProcessor {
                 feasibleTrades: [],
                 coins: 0,
             }
+
+            if (playerDto.specialist.name === SpecialistName.ambassador)
+                playerDto.cargo.push('empty', 'empty');
 
             if (playerDto.turnOrder == 1) {
                 const player = new PlayerHandler(playerDto);
