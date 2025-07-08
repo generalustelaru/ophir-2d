@@ -49,7 +49,6 @@ export class SetupGroup implements MegaGroupInterface {
     public update(state: SetupState) {
         const {players, specialists} = state;
         this.modal?.update({players, specialists})
-        console.log('setup update!', {state});
     }
 
     public disable() {
