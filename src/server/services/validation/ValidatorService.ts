@@ -12,7 +12,6 @@ import {
     TradePayload,
     MetalPurchasePayload,
     MetalDonationPayload,
-    PlayerRequest,
     PickSpecialistPayload,
 } from "../../../shared_types";
 import { lib, ObjectTests } from "./library"
@@ -48,22 +47,6 @@ class ValidatorService {
             return null;
 
         return clientRequest;
-    }
-
-    public validatePlayerRequest(request: ClientRequest): PlayerRequest | null {
-        const playerRequest = this.validateObject<PlayerRequest>(
-            'PlayerRequest',
-            request,
-            [
-                { key: 'clientId', type: 'string', nullable: false },
-                { key: 'gameId', type: 'string', nullable: false },
-                { key: 'playerName', type: 'string', nullable: false },
-                { key: 'playerColor', type: 'string', nullable: false },
-                { key: 'message', type: 'object', nullable: false },
-            ]
-        );
-
-        return playerRequest;
     }
 
     public validateChatPayload(payload: unknown) {

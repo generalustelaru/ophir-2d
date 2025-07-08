@@ -184,6 +184,6 @@ function debug(state: PlayState|SetupState|EnrolmentState) {
     });
 
     for (const player of state.players) {
-        localStorage.setItem(player.id, JSON.stringify(player));
+        localStorage.setItem(player.color, JSON.stringify(player));
     }
 }

@@ -35,7 +35,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.sessionPhase = writable(sessionPhase);
         this.hasGameEnded = writable(hasGameEnded);
         this.gameResults = writable(gameResults);
-        this.players = arrayWritable(players, 'id');
+        this.players = arrayWritable(players, 'color');
         this.market = writable(market);
         this.temple = writable(temple);
         this.chat = arrayWritable(chat);
@@ -74,16 +74,16 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.chat.add({ id: as, name: this.serverName.get(), message });
+        this.chat.add({ color: as, name: this.serverName.get(), message });
     }
 
     // MARK: Player
     public savePlayer(player: Player) {
-        this.players.updateOne(player.id, player);
+        this.players.updateOne(player.color, player);
     }
 
-    public getPlayer(id: PlayerColor) {
-        return this.players.findOne(id);
+    public getPlayer(color: PlayerColor) {
+        return this.players.findOne(color);
     }
 
     public getActivePlayer() {

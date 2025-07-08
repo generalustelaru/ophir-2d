@@ -29,7 +29,7 @@ export class PlayerGroup implements MegaGroupInterface {
 
         const playersByLocalPlayer = localState.playerColor
             ? (() => {
-                while (players[0].id !== localState.playerColor) {
+                while (players[0].color !== localState.playerColor) {
                     players.push(players.shift() as Player);
                 }
                 return players;
@@ -63,7 +63,7 @@ export class PlayerGroup implements MegaGroupInterface {
     public update(state: PlayState): void {
 
         this.playerPlacards.forEach(placard => {
-            const player = state.players.find(player => player.id === placard.getId());
+            const player = state.players.find(player => player.color === placard.getId());
             if (player) {
                 placard.update(player);
             } else {

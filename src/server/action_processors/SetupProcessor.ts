@@ -4,6 +4,7 @@ import {
     Specialist, MapPairings, LocationName, ZoneName,
     PlayerSelection,
     SpecialistName,
+    PlayerEntity,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -75,15 +76,15 @@ export class SetupProcessor {
         return this.state.toDto();
     }
 
-    public processChat(player: PlayerDraft, payload: unknown) {
+    public processChat(player: PlayerEntity, payload: unknown) {
         const chatPayload = validator.validateChatPayload(payload);
 
         if (!chatPayload)
             return lib.validationErrorResponse();
 
-        const { id, name } = player;
+        const { color, name } = player;
 
-        this.state.addChatEntry({ id, name, message: chatPayload.input });
+        this.state.addChatEntry({ color, name, message: chatPayload.input });
 
         return { state: this.state.toDto() };
     }
@@ -97,7 +98,7 @@ export class SetupProcessor {
         const { name } = specialistPayload;
 
         if (this.state.isSpecialistAssignable(name) && !player.specialist) {
-            this.state.assignSpecialist(player.id, name)
+            this.state.assignSpecialist(player.color, name)
 
             return { state: this.state.toDto() }
         }
@@ -115,19 +116,19 @@ export class SetupProcessor {
         const setupState = this.state.toDto();
 
         const playerSelections = ((): Array<PlayerSelection> | null => {
-            const builds = setupState.players;
-            const completeBuilds = [];
+            const drafts = setupState.players;
+            const selections = [];
 
-            for (let i = 0; i < builds.length; i++) {
-                const { id, name, turnOrder, specialist } = builds[i];
+            for (let i = 0; i < drafts.length; i++) {
+                const { color, name, turnOrder, specialist } = drafts[i];
 
                 if (!specialist)
                     return null;
 
-                completeBuilds.push({ id, name, turnOrder, specialist });
+                selections.push({ color, name, turnOrder, specialist });
             };
 
-            return completeBuilds;
+            return selections;
         })();
 
         if (!playerSelections)
@@ -139,7 +140,7 @@ export class SetupProcessor {
             tradeDeck: marketData.tradeDeck,
             costTiers: this.filterCostTiers(playerSelections.length),
             gameStats: playerSelections.map(p => (
-                { id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 }
+                { id: p.color, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 }
             )),
         });
 
@@ -283,7 +284,7 @@ export class SetupProcessor {
             const token = orderTokens.shift() || 0;
 
             return {
-                id: e.id,
+                color: e.color,
                 name: e.name,
                 turnOrder: token,
                 specialist: null,
@@ -306,7 +307,7 @@ export class SetupProcessor {
 
         const players: Array<Player> = builds.map(b => {
             const playerDto: Player = {
-                id: b.id,
+                color: b.color,
                 timeStamp: 0,
                 isIdle: false,
                 name: b.name,
@@ -349,7 +350,7 @@ export class SetupProcessor {
             return playerDto;
         });
 
-        const startingPlayerColor = players[0].id;
+        const startingPlayerColor = players[0].color;
 
         // debug options
         return {

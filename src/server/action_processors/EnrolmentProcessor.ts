@@ -32,13 +32,13 @@ export class EnrolmentProcessor {
             return { error: result.message };
         }
 
-        this.state.chat.push({ id: color, name: serverName, message: `${name} has joined the game` });
+        this.state.chat.push({ color: color, name: serverName, message: `${name} has joined the game` });
 
         return { state: this.state };
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
-        return players.some(player => player.id === color);
+        return players.some(player => player.color === color);
     }
     private isNameTaken(players: PlayerEntry[], name: string | null): boolean {
 
@@ -57,10 +57,10 @@ export class EnrolmentProcessor {
         if (!chatPayload)
             return lib.validationErrorResponse();
 
-        const { id, name } = player;
+        const { color, name } = player;
 
         this.state.chat.push({
-            id,
+            color,
             name,
             message: chatPayload.input,
         });
@@ -72,7 +72,7 @@ export class EnrolmentProcessor {
         this.state.availableSlots = this.state.availableSlots.filter(slot => slot !== playerColor);
 
         const newPlayer: PlayerEntry = {
-            id: playerColor,
+            color: playerColor,
             name: playerName,
         }
 

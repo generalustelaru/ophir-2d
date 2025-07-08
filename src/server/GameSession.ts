@@ -3,14 +3,15 @@ import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, ResetResponse, GameState, Phase,
     PlayState,
+    PlayerRequest,
+    PlayerDraft,
 } from "./../shared_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
-import lib from './action_processors/library'
+import lib, { Probable } from './action_processors/library'
 import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from '../server/server_constants';
-import { validator } from "./services/validation/ValidatorService";
 import { SINGLE_PLAYER } from "./configuration";
 
 export class GameSession {
@@ -32,43 +33,54 @@ export class GameSession {
         console.log('Session was reset')
     }
 
-    private processReset(request: ClientRequest, state: GameState): ResetResponse | null {
-        const { playerColor } = request;
+    private processReset(request: PlayerRequest, state: GameState): ResetResponse | null {
+        const { player } = request;
         const { sessionOwner } = state;
 
-        if (playerColor != sessionOwner)
+        if (player.color != sessionOwner)
             return null;
 
         this.resetSession();
 
-        return { resetFrom: request.playerName || 'anon'};
+        return { resetFrom: player.name || 'anon'};
     }
 
     public processAction(request: ClientRequest): WsDigest {
         const state = this.actionProcessor.getState();
 
-        if (request.message.action === Action.inquire) {
+        if (request.message.action === Action.inquire)
             return this.issueNominalResponse({ state });
+
+        if (request.message.action === Action.enrol && state.sessionPhase === Phase.enrolment)
+            return this.processEnrolmentAction(request);
+
+        const validation = this.confirmPlayer(request);
+
+        if (validation.err) {
+            return this.issueNominalResponse(lib.issueErrorResponse(
+                'Invalid client request!',
+                { reason: validation.message }
+            ));
         }
 
         switch (state.sessionPhase) {
             case Phase.play:
-                return this.processPlayAction(request);
+                return this.processPlayAction(validation.data);
             case Phase.setup:
-                return this.processSetupAction(request);
+                return this.processSetupAction(validation.data);
             case Phase.enrolment:
-                return this.processEnrolmentAction(request);
+                return this.processEnrolmentAction(validation.data);
             default:
                 return this.issueNominalResponse(lib.issueErrorResponse('Unknown game phase!'));
         }
     }
 
     // MARK: ENROL
-    private processEnrolmentAction(request: ClientRequest): WsDigest {
+    private processEnrolmentAction(request: PlayerRequest | ClientRequest): WsDigest {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
-        if (request.message.action === Action.enrol) {
-            const {playerColor, playerName} = request;
+        if (request.message.action === Action.enrol && 'playerColor' in request) {
+            const { playerColor, playerName } = request;
 
             if (!playerColor || !playerName)
                 return this.issueNominalResponse(lib.issueErrorResponse('Missing enrolment data!'));
@@ -79,29 +91,27 @@ export class GameSession {
             ));
         }
 
-        const { playerRequest, playerOk } = this.confirmPlayer(request);
+        if (!('player' in request)) {
+            return this.issueNominalResponse(lib.issueErrorResponse(
+                `Player [${request.playerColor}] is not enrolled`)
+            );
+        }
 
-        if (!playerRequest || !playerOk)
-            return this.issueNominalResponse(lib.issueErrorResponse('Invalid client request!'));
-
-        const { message, playerColor } = playerRequest;
-
-
+        const { message, player } = request;
         const { action, payload } = message;
-        const state = processor.getState();
 
-        const playerEntry = state.players.find(p => p.id === playerColor)!;
+        const state = processor.getState();
 
         switch (action) {
             case Action.chat:
-                return this.issueGroupResponse(processor.processChat(playerEntry, payload));
+                return this.issueGroupResponse(processor.processChat(player, payload));
             case Action.declare_reset: {
                 const response = this.processReset(request, state);
 
                 if (!response)
                     return this.issueNominalResponse(lib.issueErrorResponse(
                         'Only session owner may reset.',
-                        { playerColor, sessionOwner: state.sessionOwner },
+                        { playerColor: player, sessionOwner: state.sessionOwner },
                     ));
 
                     return this.issueGroupResponse(response);
@@ -128,37 +138,39 @@ export class GameSession {
     }
 
     // MARK: SETUP
-    private processSetupAction(request: ClientRequest) {
+    private processSetupAction(request: PlayerRequest) {
         const processor = this.actionProcessor as SetupProcessor;
 
-        const { playerRequest, playerOk } = this.confirmPlayer(request);
-
-        if (!playerRequest || !playerOk)
-            return this.issueNominalResponse(lib.issueErrorResponse('Invalid player client!'));
-
-        const { message, playerColor } = playerRequest;
+        const { message, player } = request;
         const { action, payload } = message;
         const state = processor.getState();
 
-        const playerBuild = state.players.find(p => p.id === playerColor)!;
-
         switch(action) {
             case Action.chat:
-                return this.issueGroupResponse(processor.processChat(playerBuild, payload));
+                return this.issueGroupResponse(processor.processChat(player, payload));
             case Action.declare_reset: {
                 const response = this.processReset(request, state);
 
                 if (!response) {
                     return this.issueNominalResponse(lib.issueErrorResponse(
                         'Only session owner may reset.',
-                        { playerColor, sessionOwner: state.sessionOwner },
+                        { playerColor: player.color, sessionOwner: state.sessionOwner },
                     ));
                 }
 
                 return this.issueGroupResponse(response);
             }
+        }
+
+        if (!('specialist' in player)) {
+            return this.issueNominalResponse(
+                lib.issueErrorResponse('Player entity is unfit', { action, player }),
+            );
+        }
+
+        switch (action) {
             case Action.pick_specialist: {
-                return this.issueGroupResponse(processor.processSpecialistSelection(playerBuild, payload ))
+                    return this.issueGroupResponse(processor.processSpecialistSelection((player as PlayerDraft), payload ))
             }
             case Action.start_play: {
                 const bundleResult = processor.processStart(payload);
@@ -174,21 +186,17 @@ export class GameSession {
                 return this.issueGroupResponse({ state: playState.toDto() });
             }
         }
+
         return this.issueNominalResponse(
             lib.issueErrorResponse('Unsupported setup action', { action }),
         );
     }
 
     // MARK: PLAY
-    public processPlayAction(request: ClientRequest): WsDigest {
+    public processPlayAction(request: PlayerRequest): WsDigest {
         const processor = this.actionProcessor as PlayProcessor;
 
-        const { playerRequest, playerOk } = this.confirmPlayer(request);
-
-        if (!playerRequest || !playerOk)
-            return this.issueNominalResponse(lib.issueErrorResponse('Invalid player client!'));
-
-        const { playerColor, message } = playerRequest;
+        const { player, message } = request;
         const { action, payload } = message;
 
         if (action === Action.declare_reset) {
@@ -197,28 +205,32 @@ export class GameSession {
             if (!result)
                 return this.issueNominalResponse(lib.issueErrorResponse(
                     'Only session owner may reset.',
-                    { playerColor, sessionOwner: processor.getState().sessionOwner }
+                    { playerColor: player.color, sessionOwner: processor.getState().sessionOwner }
                 ));
 
             return this.issueGroupResponse(result);
         }
 
-        const player = new PlayerHandler(
-            processor.getState().players.find(p => p.id === playerColor)!
-        );
-        player.refreshTimeStamp();
+        if (!('timeStamp' in player)) {
+            return this.issueNominalResponse(
+                lib.issueErrorResponse('Player entity is unfit', { action, player }),
+            );
+        }
 
-        const digest: DataDigest = { player, payload }
+        const playerHandler = new PlayerHandler(player);
+        playerHandler.refreshTimeStamp();
 
-        if (action === Action.chat && !player.isActivePlayer())
+        const digest: DataDigest = { player: playerHandler, payload }
+
+        if (action === Action.chat && !playerHandler.isActivePlayer())
             return this.issueGroupResponse(processor.processChat(digest));
 
         if (action === Action.force_turn)
             return this.issueGroupResponse(processor.processForcedTurn(digest));
 
-        if (!player.isActivePlayer())
+        if (!playerHandler.isActivePlayer())
             return this.issueNominalResponse(lib.issueErrorResponse(
-                `It is not [${player.getIdentity().name}]'s turn!`,
+                `It is not [${playerHandler.getIdentity().name}]'s turn!`,
             ));
 
         const actionsWhileFrozen: Array<Action> = [
@@ -231,10 +243,11 @@ export class GameSession {
             Action.chat,
         ];
 
-        if (player.isFrozen() && !actionsWhileFrozen.includes(action))
+        if (playerHandler.isFrozen() && !actionsWhileFrozen.includes(action)) {
             return this.issueNominalResponse(lib.issueErrorResponse(
-                `[${player.getIdentity().name}] is handling rival and cannot act.`,
+                `[${playerHandler.getIdentity().name}] is handling rival and cannot act.`,
             ));
+        }
 
         const result = (() => {
             switch (action) {
@@ -294,15 +307,17 @@ export class GameSession {
         return { ...state, gameId }
     }
 
-    private confirmPlayer(request: ClientRequest) {
-        const playerRequest = validator.validatePlayerRequest(request);
+    private confirmPlayer(request: ClientRequest): Probable<PlayerRequest>  {
+        const { gameId, clientId, playerColor, playerName, message } = request;
 
-        const playerOk = playerRequest
-            ? Boolean(this.actionProcessor.getState().players
-                .find(p => p.id === playerRequest.playerColor)
-            )
-            : false
+        if (!gameId || !clientId || !playerColor || !playerName)
+            return lib.fail(`Request data is incomplete`);
 
-        return { playerRequest, playerOk };
+        const player = this.actionProcessor.getState().players.find(p => p.color === playerColor);
+
+        if (!player)
+            return lib.fail(`Cannot find player [${playerColor}] in state`);
+
+        return lib.pass({ player, message });
     }
 }

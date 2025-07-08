@@ -50,7 +50,7 @@ export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = "A" | "B";
-export type ChatEntry = { id: PlayerColor|null, name: string|null, message: string };
+export type ChatEntry = { color: PlayerColor|null, name: string|null, message: string };
 
 export type ExchangeTier = {
     templeLevel: number,
@@ -106,7 +106,7 @@ export type Rival = {
 } | { isIncluded: false }
 
 export type Player = {
-    id: PlayerColor,
+    color: PlayerColor,
     timeStamp: number,
     isIdle: boolean,
     name: string,
@@ -129,16 +129,18 @@ export type Player = {
     coins: number,
 }
 
-export type PlayerSelection = Pick<Player, 'id'|'name'|'turnOrder'> & {
+export type PlayerSelection = Pick<Player, 'color'|'name'|'turnOrder'> & {
     specialist: Specialist
 }
 
-export type PlayerDraft = Pick<Player, 'id'|'name'|'turnOrder'> & {
+export type PlayerDraft = Pick<Player, 'color'|'name'|'turnOrder'> & {
     mayPick: boolean,
     specialist: Specialist | null
 }
 
-export type PlayerEntry = Pick<Player, 'id'|'name'>
+export type PlayerEntry = Pick<Player, 'color'|'name'>
+
+export type PlayerEntity = PlayerEntry | PlayerDraft | PlayerSelection | Player;
 
 export type MarketOffer = {
     deckSize: number,
@@ -304,10 +306,7 @@ export type ClientRequest = {
 }
 
 export type PlayerRequest = {
-    gameId: string,
-    clientId: string,
-    playerColor: PlayerColor,
-    playerName: string,
+    player: PlayerEntity,
     message: ClientMessage,
 }
 

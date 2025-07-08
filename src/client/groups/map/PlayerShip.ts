@@ -81,7 +81,7 @@ export class PlayerShip {
         // MARK: - Dragging (move)
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
-            const player = this.players.find(player => player.id === playerColor);
+            const player = this.players.find(player => player.color === playerColor);
             const position = stage.getPointerPosition();
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
@@ -127,7 +127,7 @@ export class PlayerShip {
                 seaZone.setFill(COLOR.defaultHex);
             }
 
-            const player = this.players.find(player => player.id === playerColor);
+            const player = this.players.find(player => player.color === playerColor);
             const position = stage.getPointerPosition();
             const departureZone = this.seaZones.find(hex => hex.getId() === player?.bearings.seaZone);
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
