@@ -8,8 +8,8 @@ import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 
 export type WsClient = {
-    clientID: string,
-    gameID: string | null,
+    clientId: string,
+    gameId: string | null,
     socket: WebSocket
 }
 

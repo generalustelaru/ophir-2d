@@ -90,7 +90,7 @@ socketServer.on('connection', function connection(socket) {
     const clientId = randomUUID();
     const response: ClientIdResponse = { clientId };
     socket.send(JSON.stringify(response));
-    socketClients.push({ clientID: clientId, gameID: null, socket: socket });
+    socketClients.push({ clientId, gameId: null, socket });
 
     socket.on('message', function incoming(req: string) {
         const clientRequest = validator.validateClientRequest(tools.parse(req));
@@ -150,8 +150,8 @@ function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
     }
 
     const { waiveredId, myId } = waiverPayload;
-    const originalClient = socketClients.find(c => c.clientID === myId);
-    const waiveredClient = socketClients.find(c => c.clientID === waiveredId);
+    const originalClient = socketClients.find(c => c.clientId === myId);
+    const waiveredClient = socketClients.find(c => c.clientId === waiveredId);
 
     if (originalClient && waiveredClient)
         waiveredClient.socket.close;
