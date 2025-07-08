@@ -11,6 +11,7 @@ import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from '../server/server_constants';
 import { validator } from "./services/validation/ValidatorService";
+import { SINGLE_PLAYER } from "./configuration";
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
@@ -108,7 +109,7 @@ export class GameSession {
             case Action.start_setup: {
                 const { gameId, sessionOwner, players, chat } = state;
 
-                if (!sessionOwner || !players.length) {
+                if (!sessionOwner || !players.length || !SINGLE_PLAYER && players.length < 2) {
                     return this.issueNominalResponse(lib.issueErrorResponse(
                         'Setup data is incomplete',
                         { enrolmentState: state },
@@ -164,7 +165,7 @@ export class GameSession {
 
                 if (bundleResult.err)
                     return this.issueGroupResponse(lib.issueErrorResponse(
-                        'Failed to complete setup',
+                        'Cannot start game!',
                         {reason: bundleResult.message}
                     ));
 
