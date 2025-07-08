@@ -36,7 +36,6 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
                 payload: { name: specialist.name }
             }
         );
-        console.log('New card', {name: specialist.name})
         this.cardName = specialist.name;
 
         this.background = new Konva.Rect({
