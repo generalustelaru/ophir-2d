@@ -156,7 +156,7 @@ function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
     if (originalClient && waiveredClient)
         waiveredClient.socket.close;
     else
-        respond(socket, { error: 'Cannot find clients.' });
+        respond(socket, { resetFrom: SERVER_NAME });
 }
 
 function shutDown() {
