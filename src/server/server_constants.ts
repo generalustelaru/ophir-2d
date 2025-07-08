@@ -1,11 +1,11 @@
-import { Action, Phase } from "../shared_types";
+import { Action, Phase, SpecialistName } from "../shared_types";
 import { ServerConstants } from "./server_types"
 
 const serverConstants: ServerConstants = {
 
     SPECIALISTS: [
         {
-            name: 'advisor',
+            name: SpecialistName.advisor,
             displayName: 'Advisor',
             startingFavor: 1,
             specialty: 'cloth',
@@ -13,7 +13,7 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'ambassador',
+            name: SpecialistName.ambassador,
             displayName: 'Ambassador',
             startingFavor: 0,
             specialty: null,
@@ -21,7 +21,7 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'chancellor',
+            name: SpecialistName.chancellor,
             displayName: 'Chancellor',
             startingFavor: 1,
             specialty: 'gems',
@@ -29,7 +29,7 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'harbormaster',
+            name: SpecialistName.harbormaster,
             displayName: 'Harbormaster',
             startingFavor: 2,
             specialty: 'stone',
@@ -37,7 +37,7 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'moneychanger',
+            name: SpecialistName.moneychanger,
             displayName: 'Moneychanger',
             startingFavor: 2,
             specialty: 'cloth',
@@ -45,7 +45,7 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'navigator',
+            name: SpecialistName.navigator,
             displayName: 'Navigator',
             startingFavor: 1,
             specialty: 'wood',
@@ -53,7 +53,7 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'priest',
+            name: SpecialistName.priest,
             displayName: 'Priest',
             startingFavor: 2,
             specialty: 'stone',
@@ -61,29 +61,29 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'temple_guard',
+            name: SpecialistName.temple_guard,
             displayName: 'Temple Guard',
             startingFavor: 2,
             specialty: 'wood',
             description: 'Adds 1 to influence checks (up to 6).',
             owner: null,
         },
-        {
-            name: 'postmaster',
-            displayName: 'Postmaster',
-            startingFavor: 1,
-            specialty: 'gems',
-            description: 'May donate metals from one zone away from the Temple.',
-            owner: null,
-        },
-        {
-            name: 'peddler',
-            displayName: 'Peddler',
-            startingFavor: 2,
-            specialty: null,
-            description: 'Ignores one required trade good when completing a reduced value market trade.',
-            owner: null,
-        },
+        // {
+        //     name: SpecialistName.postmaster,
+        //     displayName: 'Postmaster',
+        //     startingFavor: 1,
+        //     specialty: 'gems',
+        //     description: 'May donate metals from one zone away from the Temple.',
+        //     owner: null,
+        // },
+        // {
+        //     name: SpecialistName.peddler,
+        //     displayName: 'Peddler',
+        //     startingFavor: 2,
+        //     specialty: null,
+        //     description: 'Ignores one required trade good when completing a reduced value market trade.',
+        //     owner: null,
+        // },
     ],
     TRADE_DECK_A: [
         { request: ['wood'], reward: { coins: 1, favorAndVp: 1 } },
