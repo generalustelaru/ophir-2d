@@ -9,7 +9,7 @@ import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } 
 const MAX_FAVOR = 6;
 export class PlayerHandler implements ObjectHandler<Player>{
 
-    private id: Readable<PlayerColor>;
+    private color: Readable<PlayerColor>;
     private timeStamp: Writable<number>;
     private isIdle: Writable<boolean>;
     private name: Readable<string>;
@@ -32,7 +32,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private coins: Writable<number>;
 
     constructor(player: Player) {
-        this.id = readable(player.id);
+        this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);
         this.isIdle = writable(player.isIdle);
         this.name = readable(player.name);
@@ -57,7 +57,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public toDto(): Player {
         return {
-            id: this.id.get(),
+            color: this.color.get(),
             timeStamp: this.timeStamp.get(),
             isIdle: this.isIdle.get(),
             name: this.name.get(),
@@ -90,7 +90,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public getIdentity() {
         return {
-            id: this.id.get(),
+            color: this.color.get(),
             name: this.name.get(),
             turnOrder: this.turnOrder.get()
         }

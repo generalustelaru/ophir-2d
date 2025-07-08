@@ -77,7 +77,7 @@ export class PlayProcessor {
 
             this.playState.addServerMessage(
                 `${player.getIdentity().name} was blocked from sailing.`,
-                player.getIdentity().id
+                player.getIdentity().color
             );
             this.playState.trimInfluenceByZone(target, rivalInfluence);
             this.playState.addServerMessage(`Influence at the [${locationName}] was trimmed.`)
@@ -171,7 +171,7 @@ export class PlayProcessor {
         }
 
         player.enablePrivilege();
-        this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`, player.getIdentity().id);
+        this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`, player.getIdentity().color);
 
         return this.issueStateResponse(player);
     }
@@ -194,7 +194,7 @@ export class PlayProcessor {
 
         this.playState.addServerMessage(
             `${player.getIdentity().name} ditched one ${payload.item}`,
-            player.getIdentity().id,
+            player.getIdentity().color,
         );
 
         return this.issueStateResponse(player);
@@ -211,7 +211,7 @@ export class PlayProcessor {
 
         if (!player.mayLoadGood()) {
             return lib.issueErrorResponse(
-                `${player.getIdentity().id} Cannot load good`,
+                `${player.getIdentity().color} Cannot load good`,
                 player.toDto(),
             );
         }
@@ -248,7 +248,7 @@ export class PlayProcessor {
 
         this.playState.addServerMessage(
             `${player.getIdentity().name} picked up ${localGood}`,
-            player.getIdentity().id
+            player.getIdentity().color
         );
 
         return this.issueStateResponse(player);
@@ -263,7 +263,7 @@ export class PlayProcessor {
             return lib.validationErrorResponse();
 
         const { slot, location } = tradePayload;
-        const { id, name } = player.getIdentity();
+        const { color: id, name } = player.getIdentity();
 
         if (lib.checkConditions([
             player.canAct(Action.make_trade),
@@ -330,7 +330,7 @@ export class PlayProcessor {
     // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest) {
         const { player, payload } = data;
-        const { name, id } = player.getIdentity();
+        const { name, color: id } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
@@ -400,7 +400,7 @@ export class PlayProcessor {
     // MARK: DONATE
     public processMetalDonation(data: DataDigest) {
         const { player, payload } = data;
-        const { id, name } = player.getIdentity();
+        const { color: id, name } = player.getIdentity();
         const donationPayload = validator.validateMetalDonationPayload(payload);
 
         if (!donationPayload)
@@ -425,6 +425,7 @@ export class PlayProcessor {
         const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(donationPayload.metal);
 
         if (isTempleComplete) {
+            this.killIdleChecks();
             player.clearActions();
             const result = this.compileGameResults();
 
@@ -476,7 +477,7 @@ export class PlayProcessor {
                 this.playState.getLocationActions(seaZone),
                 this.privateState.getDestinations(seaZone),
             );
-            this.playState.updateRival(nextPlayer.getIdentity().id);
+            this.playState.updateRival(nextPlayer.getIdentity().color);
 
             return lib.pass(nextPlayer);
         })();
@@ -485,7 +486,7 @@ export class PlayProcessor {
             return lib.issueErrorResponse(newPlayerResult.message);
 
         const newPlayer = newPlayerResult.data;
-        this.playState.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().id);
+        this.playState.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
 
         return this.issueStateResponse(newPlayer);
     }
@@ -543,7 +544,7 @@ export class PlayProcessor {
 
         this.playState.addServerMessage(
             `${player.getIdentity().name} forced ${idlerHandler.getIdentity().name} to end the turn.`,
-            player.getIdentity().id,
+            player.getIdentity().color,
         );
 
         return this.processEndTurn({
@@ -568,7 +569,7 @@ export class PlayProcessor {
             player.clearMoves();
             this.playState.addServerMessage(
                 `${player.getIdentity().name} upgraded their hold`,
-                player.getIdentity().id,
+                player.getIdentity().color,
             );
 
             return this.issueStateResponse(player);
@@ -584,10 +585,10 @@ export class PlayProcessor {
         if (!chatPayload)
             return lib.validationErrorResponse();
 
-        const { id, name } = player.getIdentity();
+        const { color: color, name } = player.getIdentity();
 
         this.playState.addChatEntry({
-            id,
+            color,
             name,
             message: chatPayload.input,
         });
@@ -706,7 +707,7 @@ export class PlayProcessor {
 
         for (let i = 0; i < gameStats.length; i++) {
             const playerStat = gameStats[i];
-            const player = players.find(p => p.id === playerStat.id);
+            const player = players.find(p => p.color === playerStat.id);
 
             if (!player) {
                 return lib.fail(`No player found for [${playerStat.id}]`);
@@ -740,6 +741,7 @@ export class PlayProcessor {
         })();
 
         if (!newTrade) {
+            this.killIdleChecks();
             const compilation = this.compileGameResults();
 
             if (compilation.err)
@@ -753,10 +755,10 @@ export class PlayProcessor {
 
         this.playState.shiftMarketCards(newTrade);
         player.setTrades(this.pickFeasibleTrades(player.getCargo()));
-        const activePlayerId = player.getIdentity().id;
+        const activePlayerId = player.getIdentity().color;
 
         for (const player of this.playState.getAllPlayers()) {
-            if (player.id !== activePlayerId) {
+            if (player.color !== activePlayerId) {
                 player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
                 this.playState.savePlayer(player);
             }

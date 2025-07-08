@@ -213,7 +213,7 @@ export const UserInterface = new class extends Communicator {
 
         const activePlayer = state.players.find(p => p.isActive);
 
-        if (activePlayer && activePlayer.isIdle && localState.playerColor != activePlayer.id ) {
+        if (activePlayer && activePlayer.isIdle && localState.playerColor != activePlayer.color ) {
             this.forceTurnButton.enable();
         }
 
@@ -370,7 +370,7 @@ export const UserInterface = new class extends Communicator {
         this.chatMessages.innerHTML = chat.map(entry => {
             const name = entry.name ? `${entry.name}: ` : '';
             const message = entry.message;
-            const color = entry.id ? clientConstants.COLOR[entry.id] : 'white';
+            const color = entry.color ? clientConstants.COLOR[entry.color] : 'white';
             return `<span style="color:${color}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;

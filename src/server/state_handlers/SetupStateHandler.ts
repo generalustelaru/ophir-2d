@@ -40,7 +40,7 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
     }
 
     public addServerMessage(message: string) {
-        this.chat.add({ id: null, name: this.serverName.get(), message });
+        this.chat.add({ color: null, name: this.serverName.get(), message });
     }
 
     public isSpecialistAssignable(name: SpecialistName) {
@@ -52,7 +52,7 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
 
     public assignSpecialist(playerColor: PlayerColor, specialistName: SpecialistName) {
         this.players.update((ps) => {
-            const p = ps.find(p => p.id === playerColor);
+            const p = ps.find(p => p.color === playerColor);
             const s = this.specialists.get().find(s => s.name === specialistName);
             if (p && s) p.specialist = s;
             return ps;

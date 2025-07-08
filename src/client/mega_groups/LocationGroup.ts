@@ -25,7 +25,7 @@ export class LocationGroup implements MegaGroupInterface {
 
     public drawElements(state: PlayState): void {
         const setup = state.setup;
-        const localPlayer = state.players.find(player => player.id === localState.playerColor) || null;
+        const localPlayer = state.players.find(player => player.color === localState.playerColor) || null;
 
         if (!setup) {
             throw new Error('State is missing setup data.');
@@ -85,7 +85,7 @@ export class LocationGroup implements MegaGroupInterface {
             throw new Error(`Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`);
         }
 
-        const localPlayer = state.players.find(player => player.id === localState.playerColor);
+        const localPlayer = state.players.find(player => player.color === localState.playerColor);
         const marketUpdate: MarketUpdate = {
             localPlayer: localPlayer ?? null,
             marketOffer: marketOffer,

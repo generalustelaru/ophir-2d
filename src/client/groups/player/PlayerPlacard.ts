@@ -25,10 +25,10 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         localColorName: PlayerColor | null,
         yOffset: number,
     ) {
-        const isLocalPlayer = localColorName === player.id;
+        const isLocalPlayer = localColorName === player.color;
 
         this.stage = stage;
-        this.id = player.id;
+        this.id = player.color;
         this.localPlayerColor = localColorName;
         this.group = new Konva.Group({
             width: isLocalPlayer ? 250 : 200,
@@ -40,16 +40,16 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR[player.id],
+            fill: COLOR[player.color],
             stroke: 'white',
             cornerRadius: 15,
             strokeWidth: player.isActive ? 3 : 0,
         });
 
-        const { id, cargo } = player;
+        const { color, cargo } = player;
         this.cargoBand = new CargoBand(
             this.stage,
-            id,
+            color,
             { cargo, canDrop: false },
         );
 
@@ -65,7 +65,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
         this.influenceDial = new InfluenceDial(
             { width: 50, height: 50, x: 60, y: -25 },
-            COLOR[player.id]);
+            COLOR[player.color]);
         this.influenceDial.update(player.influence);
 
         this.group.add(
@@ -78,9 +78,9 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     }
 
     public update(player: Player): void {
-        const { cargo, favor, isActive, influence, id } = player;
+        const { cargo, favor, isActive, influence, color } = player;
         this.background.strokeWidth(isActive ? 3 : 0);
-        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === id && isActive });
+        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update(influence);
