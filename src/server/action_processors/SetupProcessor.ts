@@ -264,23 +264,30 @@ export class SetupProcessor {
 
     // MARK: Players
     private draftPlayers(entries: Array<PlayerEntry>,): Array<PlayerDraft> {
-        const randomized = entries
+        const rearranged = entries
             .map(e => { return { entry: e, order: Math.random() } })
             .sort((a, b) => a.order - b.order)
             .map(o => o.entry);
 
         const orderTokens = (() => {
-            const t = Array.from(Array(5).keys());
-            t.shift();
-            return t;
-        })(); // [1,2,3,4]
+            const tokens = Array.from(Array(5).keys());
+            tokens.shift();
 
-        return randomized.map(e => {
+            while(tokens.length > rearranged.length)
+                tokens.pop();
+
+            return tokens;
+        })(); // [1,2,...]
+
+        return rearranged.map(e => {
+            const token = orderTokens.shift() || 0;
+
             return {
                 id: e.id,
                 name: e.name,
-                turnOrder: orderTokens.shift()!,
+                turnOrder: token,
                 specialist: null,
+                mayPick: !orderTokens.length,
             }
         });
     }
