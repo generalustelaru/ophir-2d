@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import constants from '../../client_constants';
-import { PlayerState, ClientMessage } from '../../../shared_types';
+import { Player, ClientMessage } from '../../../shared_types';
 import { DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class EndTurnButton extends ActionButton implements DynamicGroupInterface<PlayerState> {
+export class EndTurnButton extends ActionButton implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path
 
     constructor(
@@ -46,7 +46,7 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
         return this.group;
     }
 
-    public update(player: PlayerState): void {
+    public update(player: Player): void {
             const icon = player.isAnchored && !player.isHandlingRival ? ICON_DATA.anchored : ICON_DATA.not_anchored;
             this.anchor.data(icon.shape);
             this.anchor.fill(player.isActive ? icon.fill : COLOR.disabled);

@@ -4,7 +4,7 @@
 
 import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
-import { PlayerColor, RivalData } from "../../../shared_types";
+import { PlayerColor, Rival } from "../../../shared_types";
 import { InfluenceDial } from "../GroupList";
 import { ShiftMarketButton } from "./ShiftMarketButton";
 import clientConstants from '../../client_constants';
@@ -12,7 +12,7 @@ import { ConcludeButton } from "./ConcludeButton";
 
 const { COLOR } = clientConstants;
 
-export class RivalPlacard implements DynamicGroupInterface<RivalData> {
+export class RivalPlacard implements DynamicGroupInterface<Rival> {
 
     private localPlayerColor: PlayerColor | null;
     private group: Konva.Group;
@@ -24,7 +24,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalData> {
     constructor(
         stage: Konva.Stage,
         localPlayerColor: PlayerColor | null,
-        rival: RivalData,
+        rival: Rival,
         yOffset: number,
     ) {
         this.localPlayerColor = localPlayerColor,
@@ -66,7 +66,7 @@ export class RivalPlacard implements DynamicGroupInterface<RivalData> {
         return this.group;
     }
 
-    public update(rival: RivalData) {
+    public update(rival: Rival) {
         if (!rival.isIncluded)
             return;
 

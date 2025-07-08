@@ -95,7 +95,7 @@ export type Specialist = {
     owner: PlayerColor | null
 }
 
-export type RivalData = {
+export type Rival = {
     isIncluded: true,
     isControllable: boolean,
     activePlayerColor: PlayerColor,
@@ -105,7 +105,7 @@ export type RivalData = {
     influence: DiceSix,
 } | { isIncluded: false }
 
-export type PlayerState = {
+export type Player = {
     id: PlayerColor,
     timeStamp: number,
     isIdle: boolean,
@@ -129,15 +129,15 @@ export type PlayerState = {
     coins: number,
 }
 
-export type PlayerPreBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
-    specialist: Specialist | null
-}
-
-export type PlayerBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
+export type PlayerSelection = Pick<Player, 'id'|'name'|'turnOrder'> & {
     specialist: Specialist
 }
 
-export type PlayerEntry = Pick<PlayerState, 'id'|'name'>
+export type PlayerDraft = Pick<Player, 'id'|'name'|'turnOrder'> & {
+    specialist: Specialist | null
+}
+
+export type PlayerEntry = Pick<Player, 'id'|'name'>
 
 export type MarketOffer = {
     deckSize: number,
@@ -183,20 +183,20 @@ export type PlayState = {
     hasGameEnded: boolean,
     gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
-    players: Array<PlayerState>,
+    players: Array<Player>,
     market: MarketOffer,
     temple: TempleState,
     setup: GameSetup,
     chat: Array<ChatEntry>,
     itemSupplies: ItemSupplies,
-    rival: RivalData,
+    rival: Rival,
 }
 
 export type SetupState = {
     gameId: string,
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
-    players: Array<PlayerPreBuild>,
+    players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
     setup: GamePartialSetup,
     chat: Array<ChatEntry>,

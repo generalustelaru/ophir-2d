@@ -1,6 +1,6 @@
 import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName,
-    EnrolmentState, Trade, MarketOffer, PlayerState, Metal, MetalPrices, Currency,
+    EnrolmentState, Trade, MarketOffer, Player, Metal, MetalPrices, Currency,
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
     SetupState,
 } from '../shared_types';
@@ -86,12 +86,12 @@ export type MarketCardUpdate = {
 }
 
 export type MarketUpdate = {
-    localPlayer: PlayerState | null,
+    localPlayer: Player | null,
     marketOffer: MarketOffer,
 }
 
 export type TreasuryUpdate = {
-    localPlayer: PlayerState | null,
+    localPlayer: Player | null,
     tier: MetalPrices,
     metalSupplies: Record<Metal, number>,
 }
@@ -104,7 +104,7 @@ export type TreasuryCardUpdate = {
 export type TempleUpdate = {
     trade: Trade,
     templeStatus: TempleState,
-    localPlayer: PlayerState | null,
+    localPlayer: Player | null,
 }
 
 export type CargoBandUpdate = {

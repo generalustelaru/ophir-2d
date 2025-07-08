@@ -1,6 +1,6 @@
 import {
-    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, PlayerState, PlayerColor,
-    PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, RivalData, ShipBearings, Coordinates,
+    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
+    PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates,
     Phase,
 } from "../../shared_types";
 import { PlayerCountables, ObjectHandler } from "../server_types";
@@ -14,12 +14,12 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     private sessionPhase: Readable<Phase.play>;
     private hasGameEnded: Writable<boolean>;
     private gameResults: Writable<Array<PlayerCountables>>;
-    private players: ArrayWritable<PlayerState>;
+    private players: ArrayWritable<Player>;
     private market: Writable<MarketOffer>;
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;
     private itemSupplies: Writable<ItemSupplies>;
-    private rival: Writable<RivalData>;
+    private rival: Writable<Rival>;
 
     constructor(serverName: string, state: PlayState) {
         this.serverName = readable(serverName);
@@ -78,7 +78,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     // MARK: Player
-    public savePlayer(player: PlayerState) {
+    public savePlayer(player: Player) {
         this.players.updateOne(player.id, player);
     }
 
@@ -170,7 +170,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     // MARK: Map
-    public getPlayersByZone(zone: ZoneName): Array<PlayerState> {
+    public getPlayersByZone(zone: ZoneName): Array<Player> {
         return this.players.getAll()
             .filter(p => p.bearings.seaZone === zone)
     }
