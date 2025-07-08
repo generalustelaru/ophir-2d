@@ -222,13 +222,7 @@ export class GameSession {
 
         const digest: DataDigest = { player: playerHandler, payload }
 
-        if (action === Action.chat && !playerHandler.isActivePlayer())
-            return this.issueGroupResponse(processor.processChat(digest));
-
-        if (action === Action.force_turn)
-            return this.issueGroupResponse(processor.processForcedTurn(digest));
-
-        if (!playerHandler.isActivePlayer())
+        if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action))
             return this.issueNominalResponse(lib.issueErrorResponse(
                 `It is not [${playerHandler.getIdentity().name}]'s turn!`,
             ));
@@ -253,6 +247,8 @@ export class GameSession {
             switch (action) {
                 case Action.chat:
                     return processor.processChat(digest);
+                case Action.force_turn:
+                    return processor.processForcedTurn(digest);
                 case Action.spend_favor:
                     return processor.processFavorSpending(digest);
                 case Action.move:
