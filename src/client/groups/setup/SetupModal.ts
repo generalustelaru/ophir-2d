@@ -1,11 +1,11 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { PlayerPreBuild, Specialist } from "../../../shared_types";
+import { PlayerDraft, Specialist } from "../../../shared_types";
 import  clientConstants from "../../client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 
 type ModalDigest = {
-    players: Array<PlayerPreBuild>,
+    players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
 }
 

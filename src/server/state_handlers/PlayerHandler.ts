@@ -1,13 +1,13 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey,
-    PlayerState, PlayerColor, ShipBearings, ZoneName, TradeGood,
+    Player, PlayerColor, ShipBearings, ZoneName, TradeGood,
     Specialist,
 } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
 const MAX_FAVOR = 6;
-export class PlayerHandler implements ObjectHandler<PlayerState>{
+export class PlayerHandler implements ObjectHandler<Player>{
 
     private id: Readable<PlayerColor>;
     private timeStamp: Writable<number>;
@@ -31,7 +31,7 @@ export class PlayerHandler implements ObjectHandler<PlayerState>{
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
     private coins: Writable<number>;
 
-    constructor(player: PlayerState) {
+    constructor(player: Player) {
         this.id = readable(player.id);
         this.timeStamp = writable(player.timeStamp);
         this.isIdle = writable(player.isIdle);
@@ -55,7 +55,7 @@ export class PlayerHandler implements ObjectHandler<PlayerState>{
         this.coins = writable(player.coins);
     }
 
-    public toDto(): PlayerState {
+    public toDto(): Player {
         return {
             id: this.id.get(),
             timeStamp: this.timeStamp.get(),

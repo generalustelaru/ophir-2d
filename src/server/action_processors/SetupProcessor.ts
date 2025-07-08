@@ -1,8 +1,8 @@
 import {
-    BarrierId, Coordinates, PlayerState, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
-    LocationData, Fluctuation, ExchangeTier, PlayerEntry, RivalData, GameSetupPayload, Phase, PlayerPreBuild, SetupDigest,
+    BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
+    LocationData, Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, SetupDigest,
     Specialist, MapPairings, LocationName, ZoneName,
-    PlayerBuild,
+    PlayerSelection,
     SpecialistName,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
@@ -59,7 +59,7 @@ export class SetupProcessor {
                 gameId: digest.gameId,
                 sessionPhase: Phase.setup,
                 sessionOwner: digest.sessionOwner,
-                players: this.buildPlayers(playerEntries),
+                players: this.draftPlayers(playerEntries),
                 specialists,
                 setup: {
                     barriers,
@@ -75,7 +75,7 @@ export class SetupProcessor {
         return this.state.toDto();
     }
 
-    public processChat(player: PlayerPreBuild, payload: unknown) {
+    public processChat(player: PlayerDraft, payload: unknown) {
         const chatPayload = validator.validateChatPayload(payload);
 
         if (!chatPayload)
@@ -88,7 +88,7 @@ export class SetupProcessor {
         return { state: this.state.toDto() };
     }
 
-    public processSpecialistSelection(player: PlayerPreBuild, payload: unknown) {
+    public processSpecialistSelection(player: PlayerDraft, payload: unknown) {
         const specialistPayload = validator.validatePickSpecialistPayload(payload);
 
         if (!specialistPayload)
@@ -114,7 +114,7 @@ export class SetupProcessor {
 
         const setupState = this.state.toDto();
 
-        const playerBuilds = ((): Array<PlayerBuild> | null => {
+        const playerSelections = ((): Array<PlayerSelection> | null => {
             const builds = setupState.players;
             const completeBuilds = [];
 
@@ -130,21 +130,21 @@ export class SetupProcessor {
             return completeBuilds;
         })();
 
-        if (!playerBuilds)
+        if (!playerSelections)
             return lib.fail('Specialist selection is incomplete')
 
         const marketData = this.prepareDeckAndGetOffer();
         const privateState = new PrivateStateHandler({
             destinationPackages: this.produceMoveRules(setupState.setup.barriers),
             tradeDeck: marketData.tradeDeck,
-            costTiers: this.filterCostTiers(playerBuilds.length),
-            gameStats: playerBuilds.map(p => (
+            costTiers: this.filterCostTiers(playerSelections.length),
+            gameStats: playerSelections.map(p => (
                 { id: p.id!, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 }
             )),
         });
 
         const { players, startingPlayerColor } = this.hydratePlayers(
-            playerBuilds,
+            playerSelections,
             privateState.getDestinationPackages(),
             clientSetupPayload.startingPositions,
             setupState.setup.mapPairings,
@@ -176,7 +176,7 @@ export class SetupProcessor {
                     templeTradeSlot: this.determineTempleTradeSlot(),
                 },
                 rival: this.getRivalShipData(
-                    Boolean(playerBuilds.length == 2),
+                    Boolean(playerSelections.length == 2),
                     clientSetupPayload.hexPositions,
                     setupState.setup.mapPairings,
                     startingPlayerColor,
@@ -263,7 +263,7 @@ export class SetupProcessor {
     }
 
     // MARK: Players
-    private buildPlayers(entries: Array<PlayerEntry>,): Array<PlayerPreBuild> {
+    private draftPlayers(entries: Array<PlayerEntry>,): Array<PlayerDraft> {
         const randomized = entries
             .map(e => { return { entry: e, order: Math.random() } })
             .sort((a, b) => a.order - b.order)
@@ -286,19 +286,19 @@ export class SetupProcessor {
     }
 
     private hydratePlayers(
-        builds: Array<PlayerBuild>,
+        builds: Array<PlayerSelection>,
         moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
         mapPairings: MapPairings,
     ): {
-        players: Array<PlayerState>,
+        players: Array<Player>,
         startingPlayerColor: PlayerColor
     } {
         const initialRules = tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
 
-        const players: Array<PlayerState> = builds.map(b => {
-            const playerDto: PlayerState = {
+        const players: Array<Player> = builds.map(b => {
+            const playerDto: Player = {
                 id: b.id,
                 timeStamp: 0,
                 isIdle: false,
@@ -366,7 +366,7 @@ export class SetupProcessor {
         mapPairings: MapPairings,
         activePlayerColor: PlayerColor,
         moveRules: Array<DestinationPackage>,
-    ): RivalData {
+    ): Rival {
 
         if (!isIncluded)
             return { isIncluded: false }

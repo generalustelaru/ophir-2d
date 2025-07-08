@@ -1,10 +1,10 @@
 import Konva from "konva";
 import constants from "../../client_constants";
-import { PlayerState } from "../../../shared_types";
+import { Player } from "../../../shared_types";
 import { DynamicGroupInterface } from "../../client_types";
 
 const { ICON_DATA, COLOR } = constants;
-export class ActionDial implements DynamicGroupInterface<PlayerState> {
+export class ActionDial implements DynamicGroupInterface<Player> {
 
     private group: Konva.Group;
     private luminary: Konva.Path;
@@ -26,7 +26,7 @@ export class ActionDial implements DynamicGroupInterface<PlayerState> {
         return this.group;
     }
 
-    public update(player: PlayerState): void {
+    public update(player: Player): void {
 
         const pendingAction = player.isActive && (player.locationActions.length || player.moveActions === 2);
 

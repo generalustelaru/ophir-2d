@@ -1,4 +1,4 @@
-import { PlayerColor, ChatEntry, SetupState, Phase, PlayerPreBuild, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
+import { PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
 import { Readable, readable, arrayWritable, ArrayWritable, Writable, writable } from "./library";
 
@@ -7,7 +7,7 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.setup>;
     private sessionOwner: Readable<PlayerColor>;
-    private players: Writable<Array<PlayerPreBuild>>;
+    private players: Writable<Array<PlayerDraft>>;
     private specialists: Writable<Array<Specialist>>;
     private setup: Readable<GamePartialSetup>;
     private chat: ArrayWritable<ChatEntry>;
