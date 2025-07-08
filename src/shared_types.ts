@@ -75,7 +75,7 @@ export type ShipBearings = {
 
 export type SpecialistName =
     | 'advisor' | 'ambassador' | 'chancellor' | 'harbormaster' | 'moneychanger'
-    | 'navigator' | 'priest' | 'general' | 'postmaster' | 'peddler';
+    | 'navigator' | 'priest' | 'temple_guard' | 'postmaster' | 'peddler';
 
 export type Specialist = {
     name: SpecialistName,
@@ -102,7 +102,7 @@ export type PlayerState = {
     isIdle: boolean,
     name: string,
     turnOrder: number,
-    specialist: SpecialistName,
+    specialist: Specialist,
     specialty: TradeGood | null,
     isActive: boolean,
     bearings: ShipBearings,
@@ -121,7 +121,7 @@ export type PlayerState = {
 }
 
 export type PlayerBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
-    specialist: SpecialistName | null
+    specialist: Specialist | null
 }
 
 export type PlayerEntry = Pick<PlayerState, 'id'|'name'>

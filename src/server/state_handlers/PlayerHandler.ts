@@ -1,6 +1,7 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey,
-    PlayerState, PlayerColor, ShipBearings, ZoneName, SpecialistName, TradeGood,
+    PlayerState, PlayerColor, ShipBearings, ZoneName, TradeGood,
+    Specialist,
 } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -13,7 +14,7 @@ export class PlayerHandler implements ObjectHandler<PlayerState>{
     private isIdle: Writable<boolean>;
     private name: Readable<string>;
     private turnOrder: Readable<number>;
-    private specialist: Readable<SpecialistName>;
+    private specialist: Readable<Specialist>;
     private specialty: Readable<TradeGood|null>;
     private isActive: Writable<boolean>;
     private bearings: Writable<ShipBearings>;

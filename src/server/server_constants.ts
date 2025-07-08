@@ -9,7 +9,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Advisor',
             startingFavor: 1,
             specialty: 'cloth',
-            description: 'May complete the temple trade using any market slot.',
+            description: 'May complete temple trades using any market slot.',
             owner: null,
         },
         {
@@ -61,8 +61,8 @@ const serverConstants: ServerConstants = {
             owner: null,
         },
         {
-            name: 'general',
-            displayName: 'General',
+            name: 'temple_guard',
+            displayName: 'Temple Guard',
             startingFavor: 2,
             specialty: 'wood',
             description: 'Adds 1 to influence checks (up to 6).',
@@ -81,7 +81,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Peddler',
             startingFavor: 2,
             specialty: null,
-            description: 'Recoups one trade good after completing a reduced value market trade.',
+            description: 'Ignores one required trade good when completing a reduced value market trade.',
             owner: null,
         },
     ],
