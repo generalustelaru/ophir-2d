@@ -73,9 +73,18 @@ export type ShipBearings = {
     position: Coordinates,
 }
 
-export type SpecialistName =
-    | 'advisor' | 'ambassador' | 'chancellor' | 'harbormaster' | 'moneychanger'
-    | 'navigator' | 'priest' | 'temple_guard' | 'postmaster' | 'peddler';
+export enum SpecialistName {
+    advisor = 'advisor',
+    ambassador = 'ambassador',
+    chancellor = 'chancellor',
+    harbormaster = 'harbormaster',
+    moneychanger = 'moneychanger',
+    navigator = 'navigator',
+    priest = 'priest',
+    temple_guard = 'temple_guard',
+    postmaster = 'postmaster',
+    peddler = 'peddler',
+}
 
 export type Specialist = {
     name: SpecialistName,
@@ -120,8 +129,12 @@ export type PlayerState = {
     coins: number,
 }
 
-export type PlayerBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
+export type PlayerPreBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
     specialist: Specialist | null
+}
+
+export type PlayerBuild = Pick<PlayerState, 'id'|'name'|'turnOrder'> & {
+    specialist: Specialist
 }
 
 export type PlayerEntry = Pick<PlayerState, 'id'|'name'>
@@ -183,7 +196,7 @@ export type SetupState = {
     gameId: string,
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
-    players: Array<PlayerBuild>,
+    players: Array<PlayerPreBuild>,
     specialists: Array<Specialist>,
     setup: GamePartialSetup,
     chat: Array<ChatEntry>,
