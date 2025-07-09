@@ -134,7 +134,7 @@ export type PlayerSelection = Pick<Player, 'color'|'name'|'turnOrder'> & {
 }
 
 export type PlayerDraft = Pick<Player, 'color'|'name'|'turnOrder'> & {
-    mayPick: boolean,
+    turnToPick: boolean,
     specialist: Specialist | null
 }
 

@@ -131,10 +131,10 @@ export class GameSession {
     }
 
     // MARK: SETUP
-    private processSetupAction(request: RequestMatch) {
+    private processSetupAction(match: RequestMatch) {
         const processor = this.actionProcessor as SetupProcessor;
 
-        const { message, player } = request;
+        const { message, player } = match;
         const { action, payload } = message;
 
         if (action === Action.chat) {
@@ -179,10 +179,10 @@ export class GameSession {
     }
 
     // MARK: PLAY
-    public processPlayAction(request: RequestMatch): WsDigest {
+    public processPlayAction(match: RequestMatch): WsDigest {
         const processor = this.actionProcessor as PlayProcessor;
 
-        const { player, message } = request;
+        const { player, message } = match;
         const { action, payload } = message;
 
         if (!('timeStamp' in player)) {

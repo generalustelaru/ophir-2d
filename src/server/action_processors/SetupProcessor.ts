@@ -289,7 +289,7 @@ export class SetupProcessor {
                 name: e.name,
                 turnOrder: token,
                 specialist: null,
-                mayPick: !orderTokens.length,
+                turnToPick: !orderTokens.length,
             }
         });
     }
