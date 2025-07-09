@@ -11,7 +11,7 @@ import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
-import { SERVER_NAME, SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS } from '../configuration';
+import { SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS } from '../configuration';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from '../../client/client_types';
@@ -20,7 +20,7 @@ import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, LOADED_PLAYERS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PEDDLING_PLAYERS }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
+const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
 console.log(activeKeys);
 
 const {
@@ -358,10 +358,20 @@ export class SetupProcessor {
             players: players.map(player => {
                 if (RICH_PLAYERS)
                     player.coins = 99;
-                if (LOADED_PLAYERS)
-                    player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
-                if (PEDDLING_PLAYERS)
-                    player.cargo = ['stone', 'gems', 'wood', 'cloth'];
+
+                switch(CARGO_BONUS) {
+                    case 1:
+                        player.cargo = ['empty', 'empty', 'empty', 'empty'];
+                        break;
+                    case 2:
+                        player.cargo = ['stone', 'gems', 'wood', 'cloth'];
+                        break;
+                    case 3:
+                        player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
+                        break;
+                    default:
+                        break;
+                }
 
                 return player;
             }),
