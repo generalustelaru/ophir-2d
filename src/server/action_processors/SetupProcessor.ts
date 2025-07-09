@@ -98,13 +98,13 @@ export class SetupProcessor {
 
         const { name } = specialistPayload;
 
-        if (this.state.isSpecialistAssignable(name) && !player.specialist) {
+        if (player.turnToPick && !player.specialist && this.state.isSpecialistAssignable(name))  {
             this.state.assignSpecialist(player.color, name)
 
             return lib.pass({ state: this.state.toDto() })
         }
 
-        return lib.fail('Specialist already assigned or player has picked')
+        return lib.fail(`Player cannot choose or specialist already assigned`)
     }
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
@@ -141,7 +141,7 @@ export class SetupProcessor {
             tradeDeck: marketData.tradeDeck,
             costTiers: this.filterCostTiers(playerSelections.length),
             gameStats: playerSelections.map(p => (
-                { id: p.color, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 }
+                { color: p.color, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 }
             )),
         });
 

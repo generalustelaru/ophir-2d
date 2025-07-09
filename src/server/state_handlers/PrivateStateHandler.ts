@@ -16,7 +16,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         this.destinationPackages = arrayReadable(privateState.destinationPackages,'from');
         this.tradeDeck = arrayWritable(privateState.tradeDeck);
         this.costTiers = arrayWritable(privateState.costTiers,'templeLevel');
-        this.gameStats = arrayWritable(privateState.gameStats,'id');
+        this.gameStats = arrayWritable(privateState.gameStats,'color');
 
         this.gameTempleLevels = this.costTiers.count();
     }
@@ -24,9 +24,9 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
     public toDto(): PrivateState {
         return {
             destinationPackages: this.destinationPackages.getAll(),
-            tradeDeck: this.tradeDeck.getAll(),
-            costTiers: this.costTiers.getAll(),
-            gameStats: this.gameStats.getAll(),
+            tradeDeck: this.tradeDeck.get(),
+            costTiers: this.costTiers.get(),
+            gameStats: this.gameStats.get(),
         }
     }
 
@@ -46,17 +46,15 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         return this.costTiers.drawFirst()?.costs || null;
     }
 
-    updateVictoryPoints(id: PlayerColor, amount: number) {
-        const stat = this.gameStats.findOne(id);
-
-        if (!stat) return;
-
-        stat.vp += amount;
-        this.gameStats.updateOne(id, stat);
+    updateVictoryPoints(color: PlayerColor, amount: number) {
+        this.gameStats.updateOne(color, (countables) => {
+            countables.vp += amount;
+            return countables;
+        });
     }
 
     getGameStats() {
-        return this.gameStats.getAll();
+        return this.gameStats.get();
     }
 
     isTradeDeckEmpty() {

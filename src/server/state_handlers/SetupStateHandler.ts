@@ -1,14 +1,14 @@
 import { PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
-import { Readable, readable, arrayWritable, ArrayWritable, Writable, writable } from "./library";
+import { Readable, readable, arrayWritable, ArrayWritable } from "./library";
 
 export class SetupStateHandler implements ObjectHandler<SetupState> {
     private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.setup>;
     private sessionOwner: Readable<PlayerColor>;
-    private players: Writable<Array<PlayerDraft>>;
-    private specialists: Writable<Array<Specialist>>;
+    private players: ArrayWritable<PlayerDraft>;
+    private specialists: ArrayWritable<Specialist>;
     private setup: Readable<GamePartialSetup>;
     private chat: ArrayWritable<ChatEntry>;
 
@@ -17,8 +17,8 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         this.gameId = readable(state.gameId);
         this.sessionPhase = readable(state.sessionPhase);
         this.sessionOwner = readable(state.sessionOwner);
-        this.players = writable(state.players);
-        this.specialists = writable(state.specialists);
+        this.players = arrayWritable(state.players, 'color');
+        this.specialists = arrayWritable(state.specialists, 'name');
         this.setup = readable(state.setup);
         this.chat = arrayWritable(state.chat);
     }
@@ -31,36 +31,36 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
             players: this.players.get(),
             specialists: this.specialists.get(),
             setup: this.setup.get(),
-            chat: this.chat.getAll(),
+            chat: this.chat.get(),
         }
     };
 
     public addChatEntry(chat: ChatEntry) {
-        this.chat.add(chat);
+        this.chat.addOne(chat);
     }
 
     public addServerMessage(message: string) {
-        this.chat.add({ color: null, name: this.serverName.get(), message });
+        this.chat.addOne({ color: null, name: this.serverName.get(), message });
     }
 
     public isSpecialistAssignable(name: SpecialistName) {
-        const s = this.specialists.get().find(s => s.name === name);
+        const s = this.specialists.getOne(name);
         if (s && s.owner === null)
             return true;
         return false;
     }
 
     public assignSpecialist(playerColor: PlayerColor, specialistName: SpecialistName) {
-        this.players.update((ps) => {
-            const p = ps.find(p => p.color === playerColor);
-            const s = this.specialists.get().find(s => s.name === specialistName);
-            if (p && s) p.specialist = s;
-            return ps;
-        });
-        this.specialists.update((ss) => {
-            const s = ss.find(s => s.name === specialistName);
-            if (s) s.owner = playerColor;
-            return ss;
+        this.specialists.updateOne(specialistName, (s) => {
+            if (s)
+                s.owner = playerColor;
+            return s;
         })
+        this.players.updateOne(playerColor, (p) => {
+            const s = this.specialists.getOne(specialistName);
+            if (p && s)
+                p.specialist = s;
+            return p;
+        });
     }
 }

@@ -30,7 +30,7 @@ export type DestinationPackage = {
 }
 
 export type PlayerCountables = {
-    id: PlayerColor;
+    color: PlayerColor;
     vp: number;
     gold: number;
     silver: number;

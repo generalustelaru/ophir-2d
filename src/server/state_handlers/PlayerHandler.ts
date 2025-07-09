@@ -73,10 +73,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
             moveActions: this.moveActions.get(),
             isAnchored: this.isAnchored.get(),
             isHandlingRival: this.isHandlingRival.get(),
-            locationActions: this.locationActions.getAll(),
-            destinations: this.destinations.getAll(),
-            cargo: this.cargo.getAll(),
-            feasibleTrades: this.feasibleTrades.getAll(),
+            locationActions: this.locationActions.get(),
+            destinations: this.destinations.get(),
+            cargo: this.cargo.get(),
+            feasibleTrades: this.feasibleTrades.get(),
             coins: this.coins.get(),
         }
     }
@@ -113,7 +113,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public isDestinationValid(destination: ZoneName) {
-        return Boolean(this.destinations.findOne(destination))
+        return Boolean(this.destinations.getOne(destination))
     }
 
     public setDestinationOptions(options: Array<ZoneName>) {
@@ -165,7 +165,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public getCargo() {
-        return this.cargo.getAll();
+        return this.cargo.get();
     }
 
     public mayLoadGood() {
@@ -202,7 +202,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public addCargoSpace() {
-        this.cargo.add('empty');
+        this.cargo.addOne('empty');
     }
 
     public mayEndTurn(){
@@ -218,7 +218,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public getTrades() {
-        return this.feasibleTrades.getAll();
+        return this.feasibleTrades.get();
     }
 
     public getCoinAmount() {
@@ -246,7 +246,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public getActions() {
-        return this.locationActions.getAll();
+        return this.locationActions.get();
     }
 
     public setActions(actions: Array<LocationAction>) {

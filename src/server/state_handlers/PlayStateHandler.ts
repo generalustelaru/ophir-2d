@@ -52,10 +52,10 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             sessionPhase: this.sessionPhase.get(),
             hasGameEnded: this.hasGameEnded.get(),
             gameResults: this.gameResults.get(),
-            players: this.players.getAll(),
+            players: this.players.get(),
             market: this.market.get(),
             temple: this.temple.get(),
-            chat: this.chat.getAll(),
+            chat: this.chat.get(),
             itemSupplies: this.itemSupplies.get(),
             rival: this.rival.get(),
         }
@@ -70,28 +70,30 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     public addChatEntry(chat: ChatEntry) {
-        this.chat.add(chat);
+        this.chat.addOne(chat);
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.chat.add({ color: as, name: this.serverName.get(), message });
+        this.chat.addOne({ color: as, name: this.serverName.get(), message });
     }
 
     // MARK: Player
     public savePlayer(player: Player) {
-        this.players.updateOne(player.color, player);
+        this.players.updateOne(player.color, () => {
+            return player;
+        });
     }
 
     public getPlayer(color: PlayerColor) {
-        return this.players.findOne(color);
+        return this.players.getOne(color);
     }
 
     public getActivePlayer() {
-        return this.players.getAll().find(p => p.isActive) || null;
+        return this.players.get().find(p => p.isActive) || null;
     }
 
     public getAllPlayers() {
-        return this.players.getAll();
+        return this.players.get();
     }
 
     // MARK: Rival
@@ -171,7 +173,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
 
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {
-        return this.players.getAll()
+        return this.players.get()
             .filter(p => p.bearings.seaZone === zone)
     }
 

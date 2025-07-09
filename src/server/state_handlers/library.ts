@@ -84,7 +84,7 @@ export function readable<T>(initialValue: T): Readable<T> {
 export type ArrayReadable<T> = {
     count: () => number,
     getAll: () => Array<T>,
-    findOne: (criteria: string|number) => T | null,
+    findOne: (value: string|number) => T | null,
 }
 
 export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): ArrayReadable<T> {
@@ -92,10 +92,10 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
     return {
         count: () => array.get().length,
         getAll: () => deepCopy(fixedArray),
-        findOne: (criteria) => {
+        findOne: (value) => {
             return keyName
-                ? array.get().find(e => e[keyName] === criteria) || null
-                : array.get().find(e => e === criteria) || null;
+                ? array.get().find(e => e[keyName] === value) || null
+                : array.get().find(e => e === value) || null;
         },
     }
 }
@@ -103,15 +103,15 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
 // TODO: transfomr this to take an index and (modyifying the internals into a record).
 export type ArrayWritable<T> = {
     count: () => number,
-    getAll: () => Array<T>,
-    includes: (criteria: string|number) => boolean,
-    findOne: (criteria: string|number) => T | null,
-    add: (element: T) => void,
-    updateOne: (criteria: string|number, element: T) => void,
-    removeOne: (criteria: string|number) => void,
+    get: () => Array<T>,
+    includes: (value: string|number) => boolean,
+    getOne: (value: string|number) => T | null,
+    addOne: (element: T) => void,
+    updateOne: (value: string|number, fn: (val: T) => T) => void,
+    removeOne: (value: string|number) => void,
     drawFirst: () => T | null,
     // drawLast: () => T,
-    overwrite: (element: Array<T>) => void,
+    overwrite: (array: Array<T>) => void,
     clear: () => void,
     reset: () => void,
 }
@@ -119,44 +119,52 @@ export type ArrayWritable<T> = {
 /**
  * @description Writable wrapper that implements array-specific methods.
  * @param initialArray May be empty.
- * @param keyName Unique object property used for searching. Unnecessary for scalar arrays.
+ * @param key Unique object property used for searching. Unnecessary for scalar arrays.
  */
-export function arrayWritable<T>(initialArray: Array<T>, keyName?: keyof T): ArrayWritable<T> {
+export function arrayWritable<T>(initialArray: Array<T>, key?: keyof T): ArrayWritable<T> {
     const array = writable(initialArray);
 
     return {
         count: () => array.get().length,
-        getAll: () => array.get(),
-        includes: (criteria) => {
-            return keyName
-                ? !!array.get().find(e => e[keyName] === criteria)
-                : !!array.get().find(e => e === criteria);
+        get: () => array.get(),
+        includes: (value) => {
+            return key
+                ? !!array.get().find(e => e[key] === value)
+                : !!array.get().find(e => e === value);
         },
-        findOne: (id) => {
-            return keyName
-                ? array.get().find(e => e[keyName] === id) || null
-                : array.get().find(e => e === id) || null;
+        getOne: (id) => {
+            return deepCopy(key
+                ? array.get().find(e => e[key] === id) || null
+                : array.get().find(e => e === id) || null,
+            );
         },
-        add: (element) => {
+        addOne: (element) => {
             array.update(arr => {
                 arr.push(element);
                 return arr;
             });
         },
-        updateOne: (criteria, element) => {
+        updateOne: (value, fn: (e: T) => T) => {
             array.update(arr => {
-                const stateElement = keyName
-                    ? arr.find(e => e[keyName as keyof T] === criteria)
-                    : arr.find(e => e === criteria);
-                if (stateElement)
-                    arr.splice(arr.indexOf(stateElement), 1, element);
+                const len = arr.length;
+                for (let i = 0; i < len; i++) {
+                    const e = deepCopy(arr[i]);
+                    if (
+                        key && e[key as keyof T] === value
+                        || !key && e === value
+                    ) {
+                        arr[i] = deepCopy(fn((e)))
+                        break;
+                    }
+                }
+
                 return arr;
             });
         },
         removeOne: (id) => {
             array.update(arr => {
-                const element = keyName
-                    ? arr.find(e => e[keyName as keyof T] === id)
+                const element = key
+                    ? arr.find(e => e[key as keyof T] === id)
                     : arr.find(e => e === id);
                 if (element)
                     arr.splice(arr.indexOf(element), 1);
