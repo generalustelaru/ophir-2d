@@ -47,11 +47,10 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             strokeWidth: 0,
         });
 
-        const { owner, displayName, description, startingFavor, specialty } = specialist;
-
         this.info = new Konva.Text({
-            text: (`${displayName}\n\n${description}\nFavor: ${startingFavor}\nSpecialty Good: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`),
+            text: this.getCardText(specialist),
             width: 200,
+            fontSize: 20,
             wrap: 'word'
         });
 
@@ -60,7 +59,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             this.info,
         ]);
 
-        this.setEnabled(!owner);
+        this.setEnabled(!specialist.owner);
     }
 
     public getCardName() {
@@ -72,10 +71,13 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
     }
 
     public update(specialist: Specialist) {
-        const { owner, displayName, description, startingFavor, specialty } = specialist;
         this.setEnabled(!specialist.owner)
-        this.info.text(
-            `${displayName}\n\n${description}\nFavor: ${startingFavor}\nSpecialty Good: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`,
-        )
+        this.info.text(this.getCardText(specialist))
+    }
+
+    private getCardText(specialist: Specialist) {
+        const { owner, displayName, description, startingFavor, specialty } = specialist;
+
+        return `${displayName}\n\n${description}\n\nFavor: ${startingFavor}\n\nSpecialty Good: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
     }
 }
