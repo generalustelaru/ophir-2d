@@ -76,17 +76,17 @@ export class SetupProcessor {
         return this.state.toDto();
     }
 
-    public processChat(player: PlayerEntity, payload: unknown) {
+    public processChat(player: PlayerEntity, payload: unknown): Probable<true> {
         const chatPayload = validator.validateChatPayload(payload);
 
         if (!chatPayload)
-            return lib.validationErrorResponse();
+            return lib.fail('Invalid chat payload');
 
         const { color, name } = player;
 
         this.state.addChatEntry({ color, name, message: chatPayload.input });
 
-        return { state: this.state.toDto() };
+        return lib.pass(true);
     }
 
     public processSpecialistSelection(player: PlayerDraft, payload: unknown) {

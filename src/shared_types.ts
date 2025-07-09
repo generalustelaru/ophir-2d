@@ -305,7 +305,7 @@ export type ClientRequest = {
     message: ClientMessage,
 }
 
-export type PlayerRequest = {
+export type RequestMatch = {
     player: PlayerEntity,
     message: ClientMessage,
 }

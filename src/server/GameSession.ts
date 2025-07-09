@@ -3,8 +3,9 @@ import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, ResetResponse, GameState, Phase,
     PlayState,
-    PlayerRequest,
+    RequestMatch,
     PlayerDraft,
+    ErrorResponse,
 } from "./../shared_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib, { Probable } from './action_processors/library'
@@ -33,18 +34,6 @@ export class GameSession {
         console.log('Session was reset')
     }
 
-    private processReset(request: PlayerRequest, state: GameState): ResetResponse | null {
-        const { player } = request;
-        const { sessionOwner } = state;
-
-        if (player.color != sessionOwner)
-            return null;
-
-        this.resetSession();
-
-        return { resetFrom: player.name || 'anon'};
-    }
-
     public processAction(request: ClientRequest): WsDigest {
         const state = this.actionProcessor.getState();
 
@@ -63,6 +52,21 @@ export class GameSession {
             ));
         }
 
+        if (request.message.action === Action.declare_reset) {
+            const { player } = validation.data;
+            const { sessionOwner } = state;
+
+            if (player.color != sessionOwner){
+                return this.issueNominalResponse(
+                    lib.issueErrorResponse('Only session owner may reset.')
+                );
+            }
+
+            this.resetSession();
+
+            return this.issueGroupResponse({ resetFrom: player.name });
+        }
+
         switch (state.sessionPhase) {
             case Phase.play:
                 return this.processPlayAction(validation.data);
@@ -76,11 +80,11 @@ export class GameSession {
     }
 
     // MARK: ENROL
-    private processEnrolmentAction(request: PlayerRequest | ClientRequest): WsDigest {
+    private processEnrolmentAction(data: RequestMatch | ClientRequest): WsDigest {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
-        if (request.message.action === Action.enrol && 'playerColor' in request) {
-            const { playerColor, playerName } = request;
+        if (data.message.action === Action.enrol && 'playerColor' in data) {
+            const { playerColor, playerName } = data;
 
             if (!playerColor || !playerName)
                 return this.issueNominalResponse(lib.issueErrorResponse('Missing enrolment data!'));
@@ -91,13 +95,13 @@ export class GameSession {
             ));
         }
 
-        if (!('player' in request)) {
+        if (!('player' in data)) {
             return this.issueNominalResponse(lib.issueErrorResponse(
-                `Player [${request.playerColor}] is not enrolled`)
+                `Player [${data.playerColor}] is not enrolled`)
             );
         }
 
-        const { message, player } = request;
+        const { message, player } = data;
         const { action, payload } = message;
 
         const state = processor.getState();
@@ -105,17 +109,6 @@ export class GameSession {
         switch (action) {
             case Action.chat:
                 return this.issueGroupResponse(processor.processChat(player, payload));
-            case Action.declare_reset: {
-                const response = this.processReset(request, state);
-
-                if (!response)
-                    return this.issueNominalResponse(lib.issueErrorResponse(
-                        'Only session owner may reset.',
-                        { playerColor: player, sessionOwner: state.sessionOwner },
-                    ));
-
-                    return this.issueGroupResponse(response);
-                }
             case Action.start_setup: {
                 const { gameId, sessionOwner, players, chat } = state;
 
@@ -138,28 +131,19 @@ export class GameSession {
     }
 
     // MARK: SETUP
-    private processSetupAction(request: PlayerRequest) {
+    private processSetupAction(request: RequestMatch) {
         const processor = this.actionProcessor as SetupProcessor;
 
         const { message, player } = request;
         const { action, payload } = message;
-        const state = processor.getState();
 
-        switch(action) {
-            case Action.chat:
-                return this.issueGroupResponse(processor.processChat(player, payload));
-            case Action.declare_reset: {
-                const response = this.processReset(request, state);
+        if (action === Action.chat) {
+            const result = processor.processChat(player, payload);
 
-                if (!response) {
-                    return this.issueNominalResponse(lib.issueErrorResponse(
-                        'Only session owner may reset.',
-                        { playerColor: player.color, sessionOwner: state.sessionOwner },
-                    ));
-                }
+            if (result.err)
+                return this.issueNominalResponse(lib.issueErrorResponse(result.message));
 
-                return this.issueGroupResponse(response);
-            }
+            return this.issueGroupResponse(lib.issueStateResponse(this.actionProcessor.getState()))
         }
 
         if (!('specialist' in player)) {
@@ -168,6 +152,7 @@ export class GameSession {
             );
         }
 
+        // TODO: wrap in an autofunction and have the processor return state or error
         switch (action) {
             case Action.pick_specialist: {
                     return this.issueGroupResponse(processor.processSpecialistSelection((player as PlayerDraft), payload ))
@@ -183,6 +168,7 @@ export class GameSession {
 
                 const { privateState, playState } = bundleResult.data;
                 this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast);
+
                 return this.issueGroupResponse({ state: playState.toDto() });
             }
         }
@@ -193,23 +179,11 @@ export class GameSession {
     }
 
     // MARK: PLAY
-    public processPlayAction(request: PlayerRequest): WsDigest {
+    public processPlayAction(request: RequestMatch): WsDigest {
         const processor = this.actionProcessor as PlayProcessor;
 
         const { player, message } = request;
         const { action, payload } = message;
-
-        if (action === Action.declare_reset) {
-            const result = this.processReset(request, processor.getState());
-
-            if (!result)
-                return this.issueNominalResponse(lib.issueErrorResponse(
-                    'Only session owner may reset.',
-                    { playerColor: player.color, sessionOwner: processor.getState().sessionOwner }
-                ));
-
-            return this.issueGroupResponse(result);
-        }
 
         if (!('timeStamp' in player)) {
             return this.issueNominalResponse(
@@ -303,7 +277,7 @@ export class GameSession {
         return { ...state, gameId }
     }
 
-    private confirmPlayer(request: ClientRequest): Probable<PlayerRequest>  {
+    private confirmPlayer(request: ClientRequest): Probable<RequestMatch>  {
         const { gameId, clientId, playerColor, playerName, message } = request;
 
         if (!gameId || !clientId || !playerColor || !playerName)
