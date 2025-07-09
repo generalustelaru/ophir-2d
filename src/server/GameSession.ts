@@ -1,11 +1,7 @@
 import {WsDigest, DataDigest } from "./server_types";
 import { randomUUID } from 'crypto';
 import {
-    ClientRequest, ServerMessage, Action, ResetResponse, GameState, Phase,
-    PlayState,
-    RequestMatch,
-    PlayerDraft,
-    ErrorResponse,
+    ClientRequest, ServerMessage, Action, Phase, PlayState, RequestMatch, PlayerDraft, StateResponse,
 } from "./../shared_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib, { Probable } from './action_processors/library'
@@ -46,7 +42,7 @@ export class GameSession {
         const validation = this.confirmPlayer(request);
 
         if (validation.err) {
-            return this.issueNominalResponse(lib.issueErrorResponse(
+            return this.issueNominalResponse(lib.errorResponse(
                 'Invalid client request!',
                 { reason: validation.message }
             ));
@@ -58,7 +54,7 @@ export class GameSession {
 
             if (player.color != sessionOwner){
                 return this.issueNominalResponse(
-                    lib.issueErrorResponse('Only session owner may reset.')
+                    lib.errorResponse('Only session owner may reset.')
                 );
             }
 
@@ -75,7 +71,7 @@ export class GameSession {
             case Phase.enrolment:
                 return this.processEnrolmentAction(validation.data);
             default:
-                return this.issueNominalResponse(lib.issueErrorResponse('Unknown game phase!'));
+                return this.issueNominalResponse(lib.errorResponse('Unknown game phase!'));
         }
     }
 
@@ -87,16 +83,18 @@ export class GameSession {
             const { playerColor, playerName } = data;
 
             if (!playerColor || !playerName)
-                return this.issueNominalResponse(lib.issueErrorResponse('Missing enrolment data!'));
+                return this.issueNominalResponse(lib.errorResponse('Missing enrolment data!'));
 
-            return this.issueGroupResponse(processor.processEnrol(
-                playerColor,
-                playerName,
-            ));
+            const enrolment = processor.processEnrol(playerColor, playerName)
+
+            if (enrolment.err)
+                return this.issueNominalResponse(lib.errorResponse(enrolment.message));
+
+            return this.issueGroupResponse(enrolment.data);
         }
 
         if (!('player' in data)) {
-            return this.issueNominalResponse(lib.issueErrorResponse(
+            return this.issueNominalResponse(lib.errorResponse(
                 `Player [${data.playerColor}] is not enrolled`)
             );
         }
@@ -106,28 +104,30 @@ export class GameSession {
 
         const state = processor.getState();
 
-        switch (action) {
-            case Action.chat:
-                return this.issueGroupResponse(processor.processChat(player, payload));
-            case Action.start_setup: {
-                const { gameId, sessionOwner, players, chat } = state;
+        const enrolUpdate = ((): Probable<StateResponse> => {
+            switch (action) {
+                case Action.chat:
+                    return processor.processChat(player, payload);
+                case Action.start_setup: {
+                    const { gameId, sessionOwner, players, chat } = state;
 
-                if (!sessionOwner || !players.length || !SINGLE_PLAYER && players.length < 2) {
-                    return this.issueNominalResponse(lib.issueErrorResponse(
-                        'Setup data is incomplete',
-                        { enrolmentState: state },
-                    ));
+                    if (!sessionOwner || !players.length || !SINGLE_PLAYER && players.length < 2)
+                        return lib.fail('Setup data is incomplete');
+
+                    this.actionProcessor = new SetupProcessor({ gameId, sessionOwner, players, chat });
+
+                    return lib.pass({ state: this.actionProcessor.getState() });
                 }
-
-                this.actionProcessor = new SetupProcessor({ gameId, sessionOwner, players, chat });
-
-                return this.issueGroupResponse({ state: this.actionProcessor.getState() });
+                default:
+                    return lib.fail('Unsupported enrol action');
             }
-            default:
-                return this.issueNominalResponse(
-                    lib.issueErrorResponse('Unsupported enrol action', { action }),
-                );
-        }
+        })();
+
+        if (enrolUpdate.err)
+            return this.issueNominalResponse(lib.errorResponse(enrolUpdate.message));
+
+        return this.issueGroupResponse(enrolUpdate.data);
+
     }
 
     // MARK: SETUP
@@ -138,44 +138,44 @@ export class GameSession {
         const { action, payload } = message;
 
         if (action === Action.chat) {
-            const result = processor.processChat(player, payload);
+            const chatUpdate = processor.processChat(player, payload);
 
-            if (result.err)
-                return this.issueNominalResponse(lib.issueErrorResponse(result.message));
+            if (chatUpdate.err)
+                return this.issueNominalResponse(lib.errorResponse(chatUpdate.message));
 
-            return this.issueGroupResponse(lib.issueStateResponse(this.actionProcessor.getState()))
+            return this.issueGroupResponse(lib.stateResponse(this.actionProcessor.getState()))
         }
 
         if (!('specialist' in player)) {
             return this.issueNominalResponse(
-                lib.issueErrorResponse('Player entity is unfit', { action, player }),
+                lib.errorResponse('Player entity is unfit', { action, player }),
             );
         }
 
-        // TODO: wrap in an autofunction and have the processor return state or error
-        switch (action) {
-            case Action.pick_specialist: {
-                    return this.issueGroupResponse(processor.processSpecialistSelection((player as PlayerDraft), payload ))
+        const setupUpdate = ((): Probable<StateResponse> => {
+            switch (action) {
+                case Action.pick_specialist:
+                    return processor.processSpecialistSelection((player as PlayerDraft), payload )
+                case Action.start_play: {
+                    const bundleResult = processor.processStart(payload);
+
+                    if (bundleResult.err)
+                        return lib.fail('Cannot start game!');
+
+                    const { privateState, playState } = bundleResult.data;
+                    this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast);
+
+                    return lib.pass({ state: playState.toDto() });
+                }
+                default:
+                    return lib.fail('Unsupported setup action');
             }
-            case Action.start_play: {
-                const bundleResult = processor.processStart(payload);
+        })();
 
-                if (bundleResult.err)
-                    return this.issueGroupResponse(lib.issueErrorResponse(
-                        'Cannot start game!',
-                        {reason: bundleResult.message}
-                    ));
+        if (setupUpdate.err)
+            return this.issueNominalResponse(lib.errorResponse(setupUpdate.message));
 
-                const { privateState, playState } = bundleResult.data;
-                this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast);
-
-                return this.issueGroupResponse({ state: playState.toDto() });
-            }
-        }
-
-        return this.issueNominalResponse(
-            lib.issueErrorResponse('Unsupported setup action', { action }),
-        );
+        return this.issueGroupResponse(setupUpdate.data);
     }
 
     // MARK: PLAY
@@ -187,7 +187,7 @@ export class GameSession {
 
         if (!('timeStamp' in player)) {
             return this.issueNominalResponse(
-                lib.issueErrorResponse('Player entity is unfit', { action, player }),
+                lib.errorResponse('Player entity is not playing', { action, player }),
             );
         }
 
@@ -197,7 +197,7 @@ export class GameSession {
         const digest: DataDigest = { player: playerHandler, payload }
 
         if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action))
-            return this.issueNominalResponse(lib.issueErrorResponse(
+            return this.issueNominalResponse(lib.errorResponse(
                 `It is not [${playerHandler.getIdentity().name}]'s turn!`,
             ));
 
@@ -212,12 +212,12 @@ export class GameSession {
         ];
 
         if (playerHandler.isFrozen() && !actionsWhileFrozen.includes(action)) {
-            return this.issueNominalResponse(lib.issueErrorResponse(
+            return this.issueNominalResponse(lib.errorResponse(
                 `[${playerHandler.getIdentity().name}] is handling rival and cannot act.`,
             ));
         }
 
-        const result = (() => {
+        const playUpdate = ((): Probable<StateResponse> => {
             switch (action) {
                 case Action.chat:
                     return processor.processChat(digest);
@@ -252,14 +252,14 @@ export class GameSession {
                 case Action.drop_item:
                     return processor.processItemDrop(digest);
                 default:
-                    return lib.issueErrorResponse(`Unknown action: ${action}`);
+                    return lib.fail(`Unknown action: ${action}`);
             }
         })();
 
-        if ('error' in result)
-            return this.issueNominalResponse(result);
+        if (playUpdate.err)
+            return this.issueNominalResponse(lib.errorResponse(playUpdate.message));
 
-        return this.issueGroupResponse(result);
+        return this.issueGroupResponse(playUpdate.data);
     }
 
     private issueNominalResponse(message: ServerMessage): WsDigest {
@@ -287,6 +287,9 @@ export class GameSession {
 
         if (!player)
             return lib.fail(`Cannot find player [${playerColor}] in state`);
+
+        if (player.name != playerName)
+            return lib.fail(`[${playerName}]  does not match name [${player.name}] in state`);
 
         return lib.pass({ player, message });
     }

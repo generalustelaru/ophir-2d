@@ -217,7 +217,7 @@ export type EnrolmentState = {
     chat: Array<ChatEntry>,
 }
 
-export type GameState = EnrolmentState | SetupState | PlayState;
+export type State = EnrolmentState | SetupState | PlayState;
 
 export type SetupDigest = {
     gameId: string,
@@ -312,11 +312,11 @@ export type RequestMatch = {
 
 export type ClientIdResponse = { clientId: string }
 
-export type GameStateResponse = { state: GameState }
+export type StateResponse = { state: State }
 
 export type ResetResponse = { resetFrom: string | PlayerColor }
 
 export type ErrorResponse = { error: string }
 
-export type ServerMessage = ClientIdResponse | GameStateResponse | ResetResponse | ErrorResponse;
+export type ServerMessage = ClientIdResponse | StateResponse | ResetResponse | ErrorResponse;
 

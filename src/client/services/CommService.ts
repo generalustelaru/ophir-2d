@@ -1,6 +1,6 @@
 import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, Action,
-    GameStateResponse,
+    StateResponse,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -100,7 +100,7 @@ export const CommunicationService = new class extends Communicator {
         this.socket.send(JSON.stringify(request));
     }
 
-    private isGameStateResponse(data: ServerMessage): data is GameStateResponse {
+    private isGameStateResponse(data: ServerMessage): data is StateResponse {
         return 'state' in data;
     }
 
@@ -116,7 +116,7 @@ export const CommunicationService = new class extends Communicator {
         return 'resetFrom' in data;
     }
 
-    private createStateEvent(data: GameStateResponse) {
+    private createStateEvent(data: StateResponse) {
         const { state } = data;
 
         switch (state.sessionPhase) {

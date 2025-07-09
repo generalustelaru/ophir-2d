@@ -5,6 +5,7 @@ import {
     PlayerSelection,
     SpecialistName,
     PlayerEntity,
+    StateResponse,
 } from '../../shared_types';
 import { DestinationPackage, StateBundle } from '../server_types';
 import serverConstants from '../server_constants';
@@ -89,21 +90,21 @@ export class SetupProcessor {
         return lib.pass(true);
     }
 
-    public processSpecialistSelection(player: PlayerDraft, payload: unknown) {
+    public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateResponse> {
         const specialistPayload = validator.validatePickSpecialistPayload(payload);
 
         if (!specialistPayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const { name } = specialistPayload;
 
         if (this.state.isSpecialistAssignable(name) && !player.specialist) {
             this.state.assignSpecialist(player.color, name)
 
-            return { state: this.state.toDto() }
+            return lib.pass({ state: this.state.toDto() })
         }
 
-        return lib.issueErrorResponse('Specialist already assigned or player has picked')
+        return lib.fail('Specialist already assigned or player has picked')
     }
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
