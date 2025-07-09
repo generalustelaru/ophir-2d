@@ -1,4 +1,4 @@
-import { ErrorResponse, GameState } from "../../shared_types";
+import { ErrorResponse, State, StateResponse } from "../../shared_types";
 
 export type Probable<T> = { err: true, message: string } | { err?: false, data: T };
 
@@ -16,15 +16,15 @@ function checkConditions(arr: Array<boolean>): Probable<true> {
     return pass(true);
 }
 
-function validationErrorResponse(){
-    return issueErrorResponse('Malformed request.');
+function validationErrorMessage(){
+    return 'Malformed request.';
 }
 
-function issueStateResponse(state: GameState) {
+function stateResponse(state: State): StateResponse {
     return { state }
 }
 
-function issueErrorResponse(message: string, params?: object): ErrorResponse {
+function errorResponse(message: string, params?: object): ErrorResponse {
     const error = `ERROR: ${message}`;
     console.error(error, params);
 
@@ -35,9 +35,9 @@ const lib = {
     pass,
     fail,
     checkConditions,
-    issueStateResponse,
-    validationErrorResponse,
-    issueErrorResponse,
+    stateResponse,
+    validationErrorMessage,
+    errorResponse,
 }
 
 export default lib;

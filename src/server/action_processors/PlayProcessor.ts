@@ -1,6 +1,6 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
-    LocationAction, Metal, GameStateResponse,
+    LocationAction, Metal, StateResponse,
     PlayState,
 } from '../../shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -34,13 +34,13 @@ export class PlayProcessor {
     }
 
     // MARK: MOVE
-    public processMove(digest: DataDigest, isRivalShip: boolean = false) {
+    public processMove(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
 
         const movementPayload = validator.validateMovementPayload(payload);
 
         if (!movementPayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const target = movementPayload.zoneId;
         const locationName = this.playState.getLocationName(target);
@@ -48,12 +48,8 @@ export class PlayProcessor {
         if (isRivalShip)
             return this.processRivalMovement(target, locationName, movementPayload.position, player);
 
-        if (!player.isDestinationValid(target) || !player.getMoves() || player.handlesRival()) {
-            return lib.issueErrorResponse(
-                'Movement not alowed.',
-                { target, moves: player.getMoves() },
-            );
-        }
+        if (!player.isDestinationValid(target) || !player.getMoves() || player.handlesRival())
+            return lib.fail('Movement not alowed.',);
 
         const hasSailed = (() => {
             player.spendMove();
@@ -98,7 +94,7 @@ export class PlayProcessor {
                 const nextDestinations = this.privateState.getDestinations(target);
 
                 player.setDestinationOptions(
-                    nextDestinations.filter(zone => zone !== player.getOvernightZone())
+                    nextDestinations.filter(zone => zone !== player.getOvernightZone()),
                 );
             }
 
@@ -112,22 +108,20 @@ export class PlayProcessor {
         } else if (player.getMoves() === 0) {
             player.setAnchoredActions([]);
             this.playState.addServerMessage(
-                `${player.getIdentity().name} also ran out of moves and cannot act further`
+                `${player.getIdentity().name} also ran out of moves and cannot act further`,
             );
         }
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
-    public processRivalMovement(target: ZoneName, locationName: LocationName, position: Coordinates, player: PlayerHandler) {
+    public processRivalMovement(target: ZoneName, locationName: LocationName, position: Coordinates, player: PlayerHandler): Probable<StateResponse> {
         if (lib.checkConditions([
             player.handlesRival(),
             this.playState.rivalHasMoves(),
             this.playState.isRivalDestinationValid(target),
         ]).err)
-            return lib.issueErrorResponse('Rival ship movement is illegal!', {
-                player: player.toDto(), rival: this.playState.getRivalData()
-            });
+            return lib.fail('Rival ship movement is illegal!');
 
         this.playState.moveRivalShip(
             {
@@ -138,16 +132,16 @@ export class PlayProcessor {
             this.privateState.getDestinations(target),
         );
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: REPOSITION
-    public processRepositioning(data: DataDigest, isRivalShip: boolean = false) {
+    public processRepositioning(data: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { payload, player } = data;
         const repositioningPayload = validator.validateRepositioningPayload(payload);
 
         if (!repositioningPayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const position = repositioningPayload.repositioning;
 
@@ -156,38 +150,34 @@ export class PlayProcessor {
         else
             player.setBearings({ ...player.getBearings(), position });
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: FAVOR
-    public processFavorSpending(data: DataDigest) {
+    public processFavorSpending(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
 
-        if (!player.getFavor() || player.isPrivileged()) {
-            return lib.issueErrorResponse(
-                `${player.getIdentity().name} cannot spend favor`,
-                { favor: player.getFavor(), isPrivileged: player.isPrivileged() },
-            );
-        }
+        if (!player.getFavor() || player.isPrivileged())
+            return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
         this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`, player.getIdentity().color);
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: DROP ITEM
-    public processItemDrop(data: DataDigest) {
+    public processItemDrop(data: DataDigest): Probable<StateResponse> {
         const payload = validator.validateDropItemPayload(data.payload);
 
         if (!payload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const player = data.player;
         const result = this.unloadItem(player.getCargo(), payload.item);
 
         if (result.err)
-            return lib.issueErrorResponse(result.message, { cargo: player.getCargo() });
+            return lib.fail(result.message);
 
         player.setCargo(result.data);
         player.setTrades(this.pickFeasibleTrades(result.data));
@@ -197,49 +187,41 @@ export class PlayProcessor {
             player.getIdentity().color,
         );
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: LOAD GOOD
-    public processLoadGood(data: DataDigest) {
+    public processLoadGood(data: DataDigest): Probable<StateResponse> {
         const payload = validator.validateLoadGoodPayload(data.payload);
 
         if (!payload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const player = data.player;
 
-        if (!player.mayLoadGood()) {
-            return lib.issueErrorResponse(
-                `${player.getIdentity().color} Cannot load good`,
-                player.toDto(),
-            );
-        }
+        if (!player.mayLoadGood())
+            return lib.fail(`${player.getIdentity().color} Cannot load good`);
 
         const locationName = this.playState.getLocationName(player.getBearings().seaZone);
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationName))
-            return lib.issueErrorResponse(`Cannot pick up goods from ${locationName}`);
+            return lib.fail(`Cannot pick up goods from ${locationName}`);
 
         const localGood = serverConstants.LOCATION_GOODS[locationName as GoodsLocationName];
 
-        if (localGood !== payload.tradeGood) {
-            return lib.issueErrorResponse(
-                `Cannot load ${payload.tradeGood} here.`,
-                { localGood, payload },
-            );
-        }
+        if (localGood !== payload.tradeGood)
+            return lib.fail(`Cannot load ${payload.tradeGood} here.`);
 
         const loadItem = this.loadItem(player.getCargo(), localGood);
 
         if (loadItem.err)
-            return lib.issueErrorResponse(loadItem.message);
+            return lib.fail(loadItem.message);
 
         const removeAction = this.removeAction(player.getActions(), Action.load_good);
 
         if (removeAction.err)
-            return lib.issueErrorResponse(removeAction.message, player.getActions());
+            return lib.fail(removeAction.message);
 
         player.setCargo(loadItem.data);
         player.clearMoves();
@@ -251,16 +233,16 @@ export class PlayProcessor {
             player.getIdentity().color
         );
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: TRADE
-    public processGoodsTrade(data: DataDigest) {
+    public processGoodsTrade(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const tradePayload = validator.validateTradePayload(payload);
 
         if (!tradePayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const { slot, location } = tradePayload;
         const { color: id, name } = player.getIdentity();
@@ -270,7 +252,7 @@ export class PlayProcessor {
             player.getBearings().location == location,
             player.getTrades().includes(slot),
         ]).err) {
-            return lib.issueErrorResponse(`${name} cannnot trade`);
+            return lib.fail(`${name} cannnot trade`);
         }
 
         const trade = this.playState.getMarketTrade(slot);
@@ -290,17 +272,13 @@ export class PlayProcessor {
             return lib.pass(cargo);
         })();
 
-        if (cargoTransfer.err) {
-            return lib.issueErrorResponse(
-                cargoTransfer.message,
-                { c: player.getCargo(), t: trade.request },
-            );
-        }
+        if (cargoTransfer.err)
+            return lib.fail(cargoTransfer.message);
 
         const actionRemoval = this.removeAction(player.getActions(), Action.make_trade);
 
         if (actionRemoval.err)
-            return lib.issueErrorResponse(actionRemoval.message, player.getActions());
+            return lib.fail(actionRemoval.message);
 
         switch (location) {
             case 'market':
@@ -316,7 +294,7 @@ export class PlayProcessor {
                 console.info(this.privateState.getGameStats());
                 break;
             default:
-                return lib.issueErrorResponse(`Unknown trade location: ${location}`);
+                return lib.fail(`Unknown trade location: ${location}`);
         }
 
         player.setCargo(cargoTransfer.data);
@@ -328,18 +306,18 @@ export class PlayProcessor {
 
     // MARK: BUY METAL
     // TODO: looks like it could be streamlined
-    public processMetalPurchase(data: DataDigest) {
+    public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const { name, color: id } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const {metal, currency} = purchasePayload;
 
         if (!player.mayLoadMetal())
-            return lib.issueErrorResponse(`Player ${name} cannot buy metals`);
+            return lib.fail(`Player ${name} cannot buy metals`);
 
         const metalCost = (() => {
             const costs = this.playState.getMetalCosts();
@@ -359,18 +337,14 @@ export class PlayProcessor {
             }
         })();
 
-        if (!metalCost || !playerAmount) {
-            return lib.issueErrorResponse(
-                `No such cost or player amount found.`,
-                { currency: currency, metalCost, playerAmount }
-            );
-        }
+        if (!metalCost || !playerAmount)
+            return lib.fail(`No such cost or player amount found.`);
 
         const price = metalCost[currency];
         const remainder = playerAmount - price;
 
         if (remainder < 0) {
-            return lib.issueErrorResponse(`Player ${name} cannot afford metal purchase`);
+            return lib.fail(`Player ${name} cannot afford metal purchase`);
         }
 
         switch (currency) {
@@ -381,7 +355,7 @@ export class PlayProcessor {
                 player.spendFavor(price)
                 break;
             default:
-                return lib.issueErrorResponse(`Unknown currency: ${currency}`);
+                return lib.fail(`Unknown currency: ${currency}`);
         }
 
         this.playState.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, id);
@@ -389,25 +363,25 @@ export class PlayProcessor {
         const result = this.loadItem(player.getCargo(), metal);
 
         if (result.err)
-            return lib.issueErrorResponse(result.message);
+            return lib.fail(result.message);
 
         player.setCargo(result.data);
         player.clearMoves()
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: DONATE
-    public processMetalDonation(data: DataDigest) {
+    public processMetalDonation(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const { color: id, name } = player.getIdentity();
         const donationPayload = validator.validateMetalDonationPayload(payload);
 
         if (!donationPayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         if (!player.canDonateMetal(donationPayload.metal))
-            return lib.issueErrorResponse(`${name} cannot donate ${donationPayload.metal}`);
+            return lib.fail(`${name} cannot donate ${donationPayload.metal}`);
 
         const reward = donationPayload.metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(id, reward);
@@ -417,7 +391,7 @@ export class PlayProcessor {
         const result = this.unloadItem(player.getCargo(), donationPayload.metal);
 
         if (result.err)
-            return lib.issueErrorResponse(result.message, { cargo: player.getCargo() });
+            return lib.fail(result.message);
 
         player.setCargo(result.data);
         player.clearMoves();
@@ -430,35 +404,35 @@ export class PlayProcessor {
             const result = this.compileGameResults();
 
             if (result.err)
-                return lib.issueErrorResponse('Could not conclude game session', result);
+                return lib.fail(result.message);
 
             this.playState.addServerMessage('The temple construction is complete! Game has ended.');
             this.playState.addServerMessage(JSON.stringify(result.data));
             this.playState.registerGameEnd(result.data);
 
-            return this.issueStateResponse(player);
+            return lib.pass(this.saveAndReturn(player));
         }
 
         if (isNewLevel) {
             const newPrices = this.privateState.drawMetalPrices();
 
             if (!newPrices)
-                return lib.issueErrorResponse('Donation could not be resolved', { newPrices, isNewLevel });
+                return lib.fail('Donation could not be resolved');
 
             this.playState.setMetalPrices(newPrices);
             this.playState.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: END TURN
-    public processEndTurn(data: DataDigest) {
+    public processEndTurn(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
         const { turnOrder } = player.getIdentity();
 
         if (!player.mayEndTurn())
-            return lib.issueErrorResponse(`Ship is not anchored.`);
+            return lib.fail(`Ship is not anchored.`);
 
         player.deactivate();
         this.playState.savePlayer(player.toDto());
@@ -483,22 +457,22 @@ export class PlayProcessor {
         })();
 
         if (newPlayerResult.err)
-            return lib.issueErrorResponse(newPlayerResult.message);
+            return lib.fail(newPlayerResult.message);
 
         const newPlayer = newPlayerResult.data;
         this.playState.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
 
-        return this.issueStateResponse(newPlayer);
+        return lib.pass(this.saveAndReturn(newPlayer));
     }
 
-    public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false) {
+    public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
         const rival = this.playState.getRivalData();
 
         if (!rival.isIncluded || !rival.isControllable)
-            return lib.issueErrorResponse('Rival is not active!', rival);
+            return lib.fail('Rival is not active!');
 
         if (rival.moves === 2)
-            return lib.issueErrorResponse('Rival cannot act before moving', rival);
+            return lib.fail('Rival cannot act before moving');
 
         this.playState.concludeRivalTurn();
 
@@ -513,27 +487,27 @@ export class PlayProcessor {
         if (isShiftingMarket) {
 
             if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
-                return lib.issueErrorResponse('Cannot shift market from here!', rival);
+                return lib.fail('Cannot shift market from here!');
 
             return this.issueMarketShiftResponse(player);
         }
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
-    public processForcedTurn(digest: DataDigest) {
+    public processForcedTurn(digest: DataDigest): Probable<StateResponse> {
         const { player } = digest;
 
         if (player.isActivePlayer())
-            return lib.issueErrorResponse('Active player cannot force own turn!')
+            return lib.fail('Active player cannot force own turn!')
 
         const activePlayer = this.playState.getActivePlayer();
 
         if (!activePlayer)
-            return lib.issueErrorResponse('Cannot find active player!')
+            return lib.fail('Cannot find active player!')
 
         if (!activePlayer.isIdle)
-            return lib.issueErrorResponse('Cannot force turn on non-idle player')
+            return lib.fail('Cannot force turn on non-idle player')
 
         if (activePlayer.isHandlingRival)
             this.playState.concludeRivalTurn();
@@ -554,14 +528,14 @@ export class PlayProcessor {
     }
 
     // MARK: UPGRADE
-    public processUpgrade(data: DataDigest) {
+    public processUpgrade(data: DataDigest): Probable<StateResponse> {
         const player = data.player;
 
         if (player.mayUpgradeCargo()) {
             const removeAction = this.removeAction(player.getActions(), Action.upgrade_cargo);
 
             if (removeAction.err)
-                return lib.issueErrorResponse(removeAction.message, player.getActions())
+                return lib.fail(removeAction.message);
 
             player.spendCoins(2);
             player.addCargoSpace();
@@ -572,18 +546,18 @@ export class PlayProcessor {
                 player.getIdentity().color,
             );
 
-            return this.issueStateResponse(player);
+            return lib.pass(this.saveAndReturn(player));
         }
 
-        return lib.issueErrorResponse(`Conditions for upgrade not met`, player.toDto());
+        return lib.fail(`Conditions for upgrade not met`);
     }
 
-    public processChat(data: DataDigest) {
+    public processChat(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const chatPayload = validator.validateChatPayload(payload);
 
         if (!chatPayload)
-            return lib.validationErrorResponse();
+            return lib.fail(lib.validationErrorMessage());
 
         const { color: color, name } = player.getIdentity();
 
@@ -593,7 +567,7 @@ export class PlayProcessor {
             message: chatPayload.input,
         });
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: PRIVATE
@@ -723,7 +697,7 @@ export class PlayProcessor {
         return lib.pass(gameStats);
     }
 
-    private issueMarketShiftResponse(player: PlayerHandler) {
+    private issueMarketShiftResponse(player: PlayerHandler): Probable<StateResponse> {
 
         const newTrade = (() => {
             const trade = this.privateState.drawTrade();
@@ -745,12 +719,12 @@ export class PlayProcessor {
             const compilation = this.compileGameResults();
 
             if (compilation.err)
-                return lib.issueErrorResponse(compilation.message);
+                return lib.fail(compilation.message);
 
             this.playState.registerGameEnd(compilation.data);
             this.playState.addServerMessage('Market deck is empty! Game has ended.');
 
-            return this.issueStateResponse(player);
+            return lib.pass(this.saveAndReturn(player));
         }
 
         this.playState.shiftMarketCards(newTrade);
@@ -764,13 +738,13 @@ export class PlayProcessor {
             }
         }
 
-        return this.issueStateResponse(player);
+        return lib.pass(this.saveAndReturn(player));
     }
 
-    private issueStateResponse(player: PlayerHandler): GameStateResponse {
+    private saveAndReturn(player: PlayerHandler): StateResponse {
         this.playState.savePlayer(player.toDto());
 
-        return { state: this.playState.toDto() };
+        return { state: this.playState.toDto()};
     }
 
     private startIdleChecks(): void {
@@ -778,7 +752,7 @@ export class PlayProcessor {
             const activePlayer = this.playState.getActivePlayer();
 
             if (!activePlayer) {
-                lib.issueErrorResponse('No active player found in idle check!')
+                lib.fail('No active player found in idle check!')
                 return;
             }
 
