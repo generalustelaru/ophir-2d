@@ -24,22 +24,22 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
             gameId: this.gameId.get(),
             sessionPhase: this.sessionPhase.get(),
             sessionOwner: this.sessionOwner.get(),
-            availableSlots: this.availableSlots.getAll(),
-            players: this.players.getAll(),
-            chat: this.chat.getAll(),
+            availableSlots: this.availableSlots.get(),
+            players: this.players.get(),
+            chat: this.chat.get(),
         }
     }
 
     public addChatEntry(chat: ChatEntry) {
-        this.chat.add(chat);
+        this.chat.addOne(chat);
     }
 
     public getAllPlayers() {
-        return this.players.getAll();
+        return this.players.get();
     }
 
     public addPlayer(entry: PlayerEntry) {
-        this.players.add(entry);
+        this.players.addOne(entry);
         this.availableSlots.removeOne(entry.color)
     }
 
@@ -52,6 +52,6 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
     }
 
     public isRoomForNewPlayer() {
-        return Boolean(this.availableSlots.getAll().length);
+        return Boolean(this.availableSlots.get().length);
     }
 }

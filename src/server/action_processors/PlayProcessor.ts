@@ -681,10 +681,10 @@ export class PlayProcessor {
 
         for (let i = 0; i < gameStats.length; i++) {
             const playerStat = gameStats[i];
-            const player = players.find(p => p.color === playerStat.id);
+            const player = players.find(p => p.color === playerStat.color);
 
             if (!player) {
-                return lib.fail(`No player found for [${playerStat.id}]`);
+                return lib.fail(`No player found for [${playerStat.color}]`);
             }
 
             playerStat.gold = player.cargo.filter(item => item === 'gold').length;

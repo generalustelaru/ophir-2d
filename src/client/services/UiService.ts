@@ -321,20 +321,20 @@ export const UserInterface = new class extends Communicator {
             const winner = winnerAsArray[0];
             const key = criteria as keyof typeof winner;
 
-            return message.concat(`\nThe winner is ${winner.id} with ${winner[key]} ${criteria}\n`);
+            return message.concat(`\nThe winner is ${winner.color} with ${winner[key]} ${criteria}\n`);
         }
         const addTiedPlayers = (players: Array<PlayerCountables>, criteria: string, message: string) : string => {
             const key = criteria as keyof typeof players[0];
 
             return message.concat(
                 `\n${criteria}-tied players:\n\n${players.map(
-                    player => `${player.id} : ${player[key]} ${criteria}\n`
+                    player => `${player.color} : ${player[key]} ${criteria}\n`
                 ).join('')}`
             );
         }
 
         for (const player of gameResults) {
-            message = message.concat(`${player.id} : ${player.vp} VP\n`);
+            message = message.concat(`${player.color} : ${player.vp} VP\n`);
         }
 
         const vpWinners = getLeaders(gameResults, 'vp');
@@ -360,7 +360,7 @@ export const UserInterface = new class extends Communicator {
         message = message.concat(`\nShared victory:\n`);
 
         for (const player of coinWinners) {
-            message = message.concat(`${player.id} : ${player.vp} VP + ${player.coins} coins\n`);
+            message = message.concat(`${player.color} : ${player.vp} VP + ${player.coins} coins\n`);
         }
 
         alert(message);

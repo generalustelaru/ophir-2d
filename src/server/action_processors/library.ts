@@ -26,7 +26,10 @@ function stateResponse(state: State): StateResponse {
 
 function errorResponse(message: string, params?: object): ErrorResponse {
     const error = `ERROR: ${message}`;
-    console.error(error, params);
+    if (params)
+        console.error(error, params);
+    else
+        console.error(error);
 
     return { error };
 }
