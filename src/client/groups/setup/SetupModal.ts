@@ -1,10 +1,11 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { PlayerDraft, Specialist } from "../../../shared_types";
+import { PlayerColor, PlayerDraft, Specialist } from "../../../shared_types";
 import  clientConstants from "../../client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 
 type ModalDigest = {
+    localPlayerColor: PlayerColor,
     players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
 }
@@ -44,8 +45,6 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
             this.specialistCards.push(card)
             offset += 220;
         });
-
-        console.log({state: digest})
     }
 
     public getElement() {
@@ -59,7 +58,7 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
             if (!specialist)
                 throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
 
-            card.update(specialist)
+            card.update(specialist,)
         })
     }
 
