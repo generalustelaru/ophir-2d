@@ -5,7 +5,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
 import clientConstants from '../../client_constants';
-import { Action, Specialist, SpecialistName } from "../../../shared_types";
+import { Action, PlayerColor, Specialist, SpecialistName } from "../../../shared_types";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
