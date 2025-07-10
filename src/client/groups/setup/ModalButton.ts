@@ -33,6 +33,7 @@ export class ModalButton implements DynamicGroupInterface<string> {
             y: 20,
             fill: 'white',
             scale: {x: scale, y: scale},
+            fontFamily: 'Custom'
         })
         this.group.add(this.background, this.label);
 
