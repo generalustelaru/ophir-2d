@@ -5,7 +5,7 @@
 import Konva from "konva";
 import { DynamicGroupInterface } from "../../client_types";
 import clientConstants from '../../client_constants';
-import { Action, Specialist, SpecialistName } from "../../../shared_types";
+import { Action, PlayerColor, Specialist, SpecialistName } from "../../../shared_types";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
@@ -72,8 +72,8 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         return this.group;
     }
 
-    public update(specialist: Specialist) {
-        this.setEnabled(!specialist.owner)
+    public update(specialist: Specialist, shouldEnable: boolean) {
+        this.setEnabled(shouldEnable)
         this.info.text(this.getCardText(specialist))
     }
 
