@@ -50,17 +50,27 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         return false;
     }
 
-    public assignSpecialist(playerColor: PlayerColor, specialistName: SpecialistName) {
+    public assignSpecialist(player: PlayerDraft, specialistName: SpecialistName) {
+        const { color: currentPlayerColor } = player;
         this.specialists.updateOne(specialistName, (s) => {
             if (s)
-                s.owner = playerColor;
+                s.owner = currentPlayerColor;
             return s;
         })
-        this.players.updateOne(playerColor, (p) => {
+        this.players.updateOne(currentPlayerColor, (p) => {
             const s = this.specialists.getOne(specialistName);
-            if (p && s)
+            if (p && s) {
                 p.specialist = s;
+                p.turnToPick = false;
+            }
             return p;
         });
+        const next = this.players.get().find(p => p.turnOrder === player.turnOrder - 1);
+        if (next) {
+            this.players.updateOne(next.color, (p) => {
+                p.turnToPick = true;
+                return p;
+            });
+        }
     }
 }

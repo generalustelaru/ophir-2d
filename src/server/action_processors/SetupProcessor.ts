@@ -99,7 +99,7 @@ export class SetupProcessor {
         const { name } = specialistPayload;
 
         if (player.turnToPick && !player.specialist && this.state.isSpecialistAssignable(name))  {
-            this.state.assignSpecialist(player.color, name)
+            this.state.assignSpecialist(player, name)
 
             return lib.pass({ state: this.state.toDto() })
         }
