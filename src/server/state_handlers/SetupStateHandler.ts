@@ -39,8 +39,8 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         this.chat.addOne(chat);
     }
 
-    public addServerMessage(message: string) {
-        this.chat.addOne({ color: null, name: this.serverName.get(), message });
+    public addServerMessage(message: string, as: PlayerColor | null = null) {
+        this.chat.addOne({ color: as, name: this.serverName.get(), message });
     }
 
     public isSpecialistAssignable(name: SpecialistName) {
@@ -48,6 +48,10 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         if (s && s.owner === null)
             return true;
         return false;
+    }
+
+    public getSpecialist(name: SpecialistName) {
+        return this.specialists.getOne(name);
     }
 
     public assignSpecialist(player: PlayerDraft, specialistName: SpecialistName) {

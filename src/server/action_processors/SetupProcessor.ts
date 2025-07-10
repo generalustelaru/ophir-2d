@@ -89,7 +89,7 @@ export class SetupProcessor {
 
         return lib.pass(true);
     }
-
+    //#MARK: Specialist
     public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateResponse> {
         const specialistPayload = validator.validatePickSpecialistPayload(payload);
 
@@ -99,13 +99,18 @@ export class SetupProcessor {
         const { name } = specialistPayload;
 
         if (player.turnToPick && !player.specialist && this.state.isSpecialistAssignable(name))  {
-            this.state.assignSpecialist(player, name)
+            this.state.assignSpecialist(player, name);
 
-            return lib.pass({ state: this.state.toDto() })
+            this.state.addServerMessage(
+                `[${player.name}] has picked ${this.state.getSpecialist(name)?.displayName}`, player.color,
+            );
+
+            return lib.pass({ state: this.state.toDto() });
         }
 
         return lib.fail(`Player cannot choose or specialist already assigned`)
     }
+
     /**
      * @param clientSetupPayload Coordinates are required for unified ship token placement acrosss clients.
      * @returns `{playState, privateState}`  Used expressily for a game session instance.
