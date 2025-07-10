@@ -168,7 +168,7 @@ export class SetupProcessor {
                     maxLevel: privateState.getTempleLevelCount(),
                     treasury: privateState.drawMetalPrices()!,
                     levelCompletion: 0,
-                    currentLevel: 0,
+                    currentLevel: SHORT_GAME ? privateState.getTempleLevelCount() - 1 : 0,
                     donations: [],
                 },
                 setup: {
@@ -469,10 +469,6 @@ export class SetupProcessor {
     // MARK: Exchange
     private filterCostTiers(playerCount: number): Array<ExchangeTier> {
         const tiers = tools.getCopy(COST_TIERS);
-
-        if (SHORT_GAME) {
-            return [tiers[0]];
-        }
 
         return tiers.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount)

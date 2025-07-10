@@ -4,6 +4,7 @@ import { DynamicGroupInterface, } from "../../client_types"
 import { TempleLevelDial } from "./TempleLevelDial";
 import clientConstants from "../../client_constants";
 
+const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 const { COLOR } = clientConstants;
 const UNIT = 27;
 const LEVEL_DIAL_DRIFTS = [
@@ -41,10 +42,10 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleState> {
             cornerRadius: 5,
         });
 
-        const displayWidth = UNIT * maxLevel
+        const displayWidth = UNIT * (SINGLE_PLAYER ? 1 : maxLevel)
         this.cargoDisplayGroup = new Konva.Group({
             x: this.group.width() - displayWidth,
-            width: UNIT * maxLevel,
+            width: displayWidth,
             height: UNIT * 3,
         });
 
