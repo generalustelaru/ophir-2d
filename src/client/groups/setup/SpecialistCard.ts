@@ -48,9 +48,11 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         });
 
         this.info = new Konva.Text({
+            x: 10,
             text: this.getCardText(specialist),
             width: 200,
-            fontSize: 20,
+            fontSize: 18,
+            fontFamily: 'Custom',
             wrap: 'word'
         });
 
@@ -78,6 +80,6 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
     private getCardText(specialist: Specialist) {
         const { owner, displayName, description, startingFavor, specialty } = specialist;
 
-        return `${displayName}\n\n${description}\n\nFavor: ${startingFavor}\n\nSpecialty Good: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
+        return `${displayName}\n\n${description}\n\nFavor: ${startingFavor}\n\nSpecialty: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
     }
 }
