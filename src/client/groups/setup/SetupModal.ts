@@ -1,21 +1,23 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { PlayerDraft, Specialist } from "../../../shared_types";
+import { PlayerColor, PlayerDraft, Specialist } from "../../../shared_types";
 import  clientConstants from "../../client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 
-type ModalDigest = {
+type ModalUpdate = {
     players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
 }
 
 const { COLOR } = clientConstants
 
-export class SetupModal implements DynamicGroupInterface<ModalDigest> {
+export class SetupModal implements DynamicGroupInterface<ModalUpdate> {
     private group: Konva.Group
-    private specialistCards:  Array<SpecialistCard> = [];
+    private specialistCards: Array<SpecialistCard> = [];
+    private localPlayerColor: PlayerColor
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, digest: ModalDigest) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, localPlayerColor: PlayerColor, digest: ModalUpdate) {
+        this.localPlayerColor = localPlayerColor;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -44,22 +46,27 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
             this.specialistCards.push(card)
             offset += 220;
         });
-
-        console.log({state: digest})
     }
 
     public getElement() {
         return this.group;
     }
 
-    public update(digest: ModalDigest) {
+    public update(digest: ModalUpdate) {
+        const playerToPick = digest.players.find(p => p.turnToPick);
+        if (!playerToPick)
+            throw new Error("Cannot find player to pick cards");
+
         this.specialistCards.forEach(card => {
             const specialist = digest.specialists.find(s => s.name === card.getCardName())
 
             if (!specialist)
                 throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
 
-            card.update(specialist)
+            card.update({
+                specialist,
+                shouldEnable: !specialist.owner && playerToPick.color === this.localPlayerColor
+            });
         })
     }
 
