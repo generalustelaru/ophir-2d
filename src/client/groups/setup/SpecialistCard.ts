@@ -10,8 +10,11 @@ import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
 
-
-export class SpecialistCard extends ActionButton implements DynamicGroupInterface<Specialist> {
+type SpecialistCardUpdate = {
+    specialist: Specialist,
+    shouldEnable: boolean,
+}
+export class SpecialistCard extends ActionButton implements DynamicGroupInterface<SpecialistCardUpdate> {
 
     // private group: Konva.Group;
     private background: Konva.Rect;
@@ -72,9 +75,9 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         return this.group;
     }
 
-    public update(specialist: Specialist) {
-        this.setEnabled(!specialist.owner)
-        this.info.text(this.getCardText(specialist))
+    public update(data: SpecialistCardUpdate) {
+        this.setEnabled(data.shouldEnable)
+        this.info.text(this.getCardText(data.specialist))
     }
 
     private getCardText(specialist: Specialist) {
