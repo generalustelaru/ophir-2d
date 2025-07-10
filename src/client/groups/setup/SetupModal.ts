@@ -5,6 +5,7 @@ import  clientConstants from "../../client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 
 type ModalUpdate = {
+    localPlayerColor: PlayerColor,
     players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
 }
@@ -63,10 +64,7 @@ export class SetupModal implements DynamicGroupInterface<ModalUpdate> {
             if (!specialist)
                 throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
 
-            card.update({
-                specialist,
-                shouldEnable: !specialist.owner && playerToPick.color === this.localPlayerColor
-            });
+            card.update(specialist,)
         })
     }
 
