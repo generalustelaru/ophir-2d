@@ -76,9 +76,9 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         return this.group;
     }
 
-    public update(update: SpecialistCardUpdate) {
-        this.info.text(this.getCardText(update.specialist))
-        this.setEnabled(update.shouldEnable)
+    public update(data: SpecialistCardUpdate) {
+        this.setEnabled(data.shouldEnable)
+        this.info.text(this.getCardText(data.specialist))
     }
 
     private getCardText(specialist: Specialist) {
