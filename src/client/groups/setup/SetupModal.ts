@@ -5,19 +5,19 @@ import  clientConstants from "../../client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 import localState from '../../state';
 
-type ModalDigest = {
+type ModalUpdate = {
     players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
 }
 
 const { COLOR } = clientConstants
 
-export class SetupModal implements DynamicGroupInterface<ModalDigest> {
+export class SetupModal implements DynamicGroupInterface<ModalUpdate> {
     private group: Konva.Group;
     private specialistCards:  Array<SpecialistCard> = [];
     private localPlayerColor: PlayerColor | null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, digest: ModalDigest) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, specialists: Array<Specialist>) {
         this.localPlayerColor = localState.playerColor
         this.group = new Konva.Group({
             width: layout.width,
@@ -36,8 +36,7 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
         this.group.add(background);
 
         let offset = 20;
-        digest.specialists.forEach( specialist => {
-            // const pickyPlayer = digest.players.find(p => p.turnToPick);
+        specialists.forEach( specialist => {
             const card = new SpecialistCard(
                 stage,
                 specialist,
@@ -54,26 +53,22 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
         return this.group;
     }
 
-    public update(digest: ModalDigest) {
+    public update(update: ModalUpdate) {
         this.specialistCards.forEach(card => {
-            const specialist = digest.specialists.find(s => s.name === card.getCardName())
+            const specialist = update.specialists.find(s => s.name === card.getCardName())
 
             if (!specialist)
                 throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
-            const pickyPlayer = digest.players.find(p => p.turnToPick);
 
+            const pickyPlayer = update.players.find(p => p.turnToPick);
             card.update({
                 specialist,
-                shouldEnable: Boolean(
-                    pickyPlayer && this.localPlayerColor === pickyPlayer.color && !specialist.owner,
-                ),
+                shouldEnable: this.localPlayerColor === pickyPlayer?.color && !specialist.owner,
             });
         })
     }
 
     public switchVisibility() {
-        this.group.visible()
-            ? this.group.hide()
-            : this.group.show()
+        this.group.visible() ? this.group.hide() : this.group.show();
     }
 }
