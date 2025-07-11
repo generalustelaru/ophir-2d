@@ -39,17 +39,17 @@ export class GameSession {
         if (request.message.action === Action.enrol && state.sessionPhase === Phase.enrolment)
             return this.processEnrolmentAction(request);
 
-        const validation = this.confirmPlayer(request);
+        const match = this.matchRequestToPlayer(request);
 
-        if (validation.err) {
+        if (match.err) {
             return this.issueNominalResponse(lib.errorResponse(
                 'Invalid client request!',
-                { reason: validation.message }
+                { reason: match.message }
             ));
         }
 
         if (request.message.action === Action.declare_reset) {
-            const { player } = validation.data;
+            const { player } = match.data;
             const { sessionOwner } = state;
 
             if (player.color != sessionOwner){
@@ -65,11 +65,11 @@ export class GameSession {
 
         switch (state.sessionPhase) {
             case Phase.play:
-                return this.processPlayAction(validation.data);
+                return this.processPlayAction(match.data);
             case Phase.setup:
-                return this.processSetupAction(validation.data);
+                return this.processSetupAction(match.data);
             case Phase.enrolment:
-                return this.processEnrolmentAction(validation.data);
+                return this.processEnrolmentAction(match.data);
             default:
                 return this.issueNominalResponse(lib.errorResponse('Unknown game phase!'));
         }
@@ -114,7 +114,11 @@ export class GameSession {
                     if (!sessionOwner || !players.length || !SINGLE_PLAYER && players.length < 2)
                         return lib.fail('Setup data is incomplete');
 
-                    this.actionProcessor = new SetupProcessor({ gameId, sessionOwner, players, chat });
+                    try {
+                        this.actionProcessor = new SetupProcessor({ gameId, sessionOwner, players, chat });
+                    } catch (error) {
+                        return lib.fail(String(error));
+                    }
 
                     return lib.pass({ state: this.actionProcessor.getState() });
                 }
@@ -148,7 +152,7 @@ export class GameSession {
 
         if (!('specialist' in player)) {
             return this.issueNominalResponse(
-                lib.errorResponse('Player entity is unfit', { action, player }),
+                lib.errorResponse('Player entity is missing properties', { action, player }),
             );
         }
 
@@ -187,7 +191,7 @@ export class GameSession {
 
         if (!('timeStamp' in player)) {
             return this.issueNominalResponse(
-                lib.errorResponse('Player entity is not playing', { action, player }),
+                lib.errorResponse('Player entity is missing properties', { action, player }),
             );
         }
 
@@ -277,7 +281,7 @@ export class GameSession {
         return { ...state, gameId }
     }
 
-    private confirmPlayer(request: ClientRequest): Probable<RequestMatch>  {
+    private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch>  {
         const { gameId, clientId, playerColor, playerName, message } = request;
 
         if (!gameId || !clientId || !playerColor || !playerName)
@@ -289,7 +293,7 @@ export class GameSession {
             return lib.fail(`Cannot find player [${playerColor}] in state`);
 
         if (player.name != playerName)
-            return lib.fail(`[${playerName}]  does not match name [${player.name}] in state`);
+            return lib.fail(`[${playerName}] does not match name [${player.name}] in state`);
 
         return lib.pass({ player, message });
     }

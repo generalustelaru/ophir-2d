@@ -77,4 +77,8 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
             });
         }
     }
+
+    public getNextPlayer() {
+        return this.players.get().find(p => p.turnToPick) || null;
+    }
 }
