@@ -3,8 +3,9 @@ import { Action, Coordinates, Metal } from "../../../shared_types";
 import { DynamicGroupInterface } from "../../client_types";
 import { ActionButton } from "../ActionButton";
 import clientConstants from "../../client_constants";
+import { VictoryPointDial } from "../VictoryPointDial";
 
-const { COLOR, ICON_DATA, CARGO_ITEM_DATA } = clientConstants;
+const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 export class TempleDonationCard extends ActionButton implements DynamicGroupInterface<boolean> {
     private background: Konva.Rect;
 
@@ -38,50 +39,15 @@ export class TempleDonationCard extends ActionButton implements DynamicGroupInte
             scaleY: 2.75,
         });
 
-        const disc = new Konva.Circle({
-            x: this.group.width() / 2,
-            y: this.group.height() / 2 + 15,
-            radius: 26,
-            fill: COLOR.vpGold,
-        });
-
-        const wreathY = this.group.height() / 2 - 6;
-        const wreathX = 6;
-        const leftWreath = new Konva.Path({
-            data: ICON_DATA.half_wreath.shape,
-            fill: ICON_DATA.half_wreath.fill,
-            x: wreathX,
-            y: wreathY,
-            scale: { x: 2, y: 2 },
-        });
-
-        const rightWreath = new Konva.Path({
-            data: ICON_DATA.half_wreath.shape,
-            fill: ICON_DATA.half_wreath.fill,
-            x: wreathX + 27 * 2,
-            y: wreathY,
-            scale: { x: -2, y: 2 },
-        });
-
-        const Xbackdrift = metalType === 'gold' ? 20 : 9
-        const vp = new Konva.Text({
-            x: this.group.width() / 2 - Xbackdrift,
-            y: this.group.height() / 2 - 3,
-            text: metalType === 'gold' ? '10' : '5',
-            fontSize: 40,
-            fill: COLOR.boneWhite,
-            stroke: 'black',
-            strokeWidth: 2,
-            fontFamily: 'Calibri',
-        });
+        const vpDial = new VictoryPointDial(
+            {x: 0, y: 0},
+            metalType === 'gold' ? 10 : 5,
+        );
 
         this.group.add(...[
             this.background,
             metalIcon,
-            disc,
-            leftWreath,
-            rightWreath,
-            vp,
+            vpDial.getElement(),
         ]);
     }
 
