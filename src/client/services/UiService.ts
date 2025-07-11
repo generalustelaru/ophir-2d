@@ -202,7 +202,9 @@ export const UserInterface = new class extends Communicator {
 
         if (localState.playerColor === state.sessionOwner) {
             this.resetButton.enable();
-            this.startButton.enable(); // TODO: should only be enabled provided players have drafted their psecialists.
+
+            if (state.players.every(p => p.specialist))
+                this.startButton.enable();
         }
     }
 
