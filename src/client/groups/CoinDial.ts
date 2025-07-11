@@ -48,7 +48,7 @@ export class CoinDial implements DynamicGroupInterface<number> {
         this.coinCenter = this.group.getClientRect().width / 2;
         this.amount = new Konva.Text({
             x: this.coinCenter - 5,
-            y: this.coinCenter - 10,
+            y: this.coinCenter - 8,
             text: amount.toString(),
             fontSize: 20,
             fill: COLOR.upgradeBoxSilver,
