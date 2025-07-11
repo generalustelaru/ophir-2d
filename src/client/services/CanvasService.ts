@@ -90,40 +90,33 @@ export const CanvasService = new class extends Communicator {
 
         const { sessionPhase } = state;
 
-        if (sessionPhase === Phase.setup) {
+        switch (sessionPhase) {
+            case Phase.setup:
+                if (!this.isSetupDrawn) {
+                    this.mapGroup.drawElements(state);
+                    this.setupGroup.drawElements(state);
+                    this.isSetupDrawn = true;
+                }
+                this.setupGroup.update(state);
+                break;
 
-            if (this.isSetupDrawn)
-                return this.setupGroup.update(state);
-
-            this.mapGroup.drawElements(state);
-            this.setupGroup.drawElements(state);
-            this.isSetupDrawn = true;
-
-            return;
-        }
-
-        if (sessionPhase === Phase.play) {
-            this.setupGroup.disable();
-
-            if (this.isPlayDrawn) {
+            case Phase.play:
+                this.setupGroup.disable();
+                if (!this.isPlayDrawn) {
+                    this.mapGroup.drawElements(state);
+                    this.locationGroup.drawElements(state);
+                    this.playerGroup.drawElements(state);
+                    this.isPlayDrawn = true;
+                }
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
-
                 toDisable && this.disable();
+                break;
 
-                return;
-            }
-
-            this.mapGroup.drawElements(state);
-            this.locationGroup.drawElements(state);
-            this.playerGroup.drawElements(state);
-            this.isPlayDrawn = true;
-
-            return;
+            default:
+                throw new Error("Update case not covered!");
         }
-
-        throw new Error("Update case not covered!");
     }
 
     public disable(): void {
