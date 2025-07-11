@@ -55,13 +55,14 @@ export class SetupProcessor {
             return randomized.slice(0,playerEntries.length + 1);
         })();
 
+        const playerDrafts = this.draftPlayers(playerEntries);
         this.state = new SetupStateHandler(
             SERVER_NAME,
             {
                 gameId: digest.gameId,
                 sessionPhase: Phase.setup,
                 sessionOwner: digest.sessionOwner,
-                players: this.draftPlayers(playerEntries),
+                players: playerDrafts,
                 specialists,
                 setup: {
                     barriers,
@@ -70,7 +71,12 @@ export class SetupProcessor {
                 chat: digest.chat,
             });
 
-        this.state.addServerMessage('Select Specialists.');
+        const firstToPick = playerDrafts.find(p => p.turnToPick);
+
+        if (!firstToPick)
+            throw new Error("No player is set to pick specialist!");
+
+        this.state.addServerMessage(`[${firstToPick.name}] is picking a specialist.`, firstToPick.color);
     };
 
     public getState() {
@@ -104,6 +110,11 @@ export class SetupProcessor {
             this.state.addServerMessage(
                 `[${player.name}] has picked ${this.state.getSpecialist(name)?.displayName}`, player.color,
             );
+
+            const nextPlayer = this.state.getNextPlayer();
+
+            if (nextPlayer)
+                this.state.addServerMessage(`[${nextPlayer.name}] is picking a specialist.`, nextPlayer.color);
 
             return lib.pass({ state: this.state.toDto() });
         }
