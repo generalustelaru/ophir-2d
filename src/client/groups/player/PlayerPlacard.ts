@@ -3,6 +3,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
 import { Player, PlayerColor } from '../../../shared_types';
 import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
+import { VictoryPointDial } from '../VictoryPointDial';
 import clientConstants from '../../client_constants';
 
 const { COLOR } = clientConstants;
@@ -16,6 +17,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
+    private vpDial: VictoryPointDial | null;
     private id: PlayerColor;
     private localPlayerColor: PlayerColor | null;
 
@@ -75,6 +77,13 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             this.coinDial.getElement(),
             this.influenceDial.getElement(),
         );
+
+        this.vpDial = player.color === localColorName ? new VictoryPointDial(
+            { x:100, y: 5 },
+            67,
+        ) : null;
+        this.vpDial && this.group.add(this.vpDial.getElement());
+
     }
 
     public update(player: Player): void {

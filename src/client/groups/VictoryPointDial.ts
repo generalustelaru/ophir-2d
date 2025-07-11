@@ -19,7 +19,7 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
         const disc = new Konva.Circle({
             x: this.group.width() / 2,
             y: this.group.height() / 2 + 15,
-            radius: 26,
+            radius: 22,
             fill: COLOR.vpGold,
         });
 
@@ -41,15 +41,15 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
             scale: { x: -2, y: 2 },
         });
 
-        const backdrift = value && value > 9 ? 20 : 9
+        const backdrift = value && value > 9 ? 10 : 5
         this.vp = new Konva.Text({
             x: this.group.width() / 2 - backdrift,
-            y: this.group.height() / 2 - 3,
+            y: this.group.height() / 2 + 5,
             text: value ? String(value) : '0',
-            fontSize: 40,
-            fill: COLOR.boneWhite,
-            stroke: 'black',
-            strokeWidth: 2,
+            fontSize: 20,
+            fill: COLOR.vpCardPurple,
+            stroke: COLOR.vpCardPurple,
+            // strokeWidth: 2,
             fontFamily: 'Calibri',
         });
 
