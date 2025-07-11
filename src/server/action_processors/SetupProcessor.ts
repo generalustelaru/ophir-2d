@@ -103,23 +103,24 @@ export class SetupProcessor {
             return lib.fail(lib.validationErrorMessage());
 
         const { name } = specialistPayload;
+        const pickedSpecialist = this.state.getSpecialist(name);
 
-        if (player.turnToPick && !player.specialist && this.state.isSpecialistAssignable(name))  {
-            this.state.assignSpecialist(player, name);
+        if (!pickedSpecialist)
+            return lib.fail('Cannot find named specialist!')
 
-            this.state.addServerMessage(
-                `[${player.name}] has picked ${this.state.getSpecialist(name)?.displayName}`, player.color,
-            );
+        if (!player.turnToPick || player.specialist || pickedSpecialist.owner)
+            return lib.fail(`Player cannot choose or specialist already assigned`)
 
-            const nextPlayer = this.state.getNextPlayer();
+        this.state.assignSpecialist(player, name);
+        this.state.addServerMessage(
+            `[${player.name}] has picked the ${pickedSpecialist.displayName}`, player.color,
+        );
+        const nextPlayer = this.state.getNextPlayer();
 
-            if (nextPlayer)
-                this.state.addServerMessage(`[${nextPlayer.name}] is picking a specialist.`, nextPlayer.color);
+        if (nextPlayer)
+            this.state.addServerMessage(`[${nextPlayer.name}] is picking a specialist.`, nextPlayer.color);
 
-            return lib.pass({ state: this.state.toDto() });
-        }
-
-        return lib.fail(`Player cannot choose or specialist already assigned`)
+        return lib.pass({ state: this.state.toDto() });
     }
 
     /**
