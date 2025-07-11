@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { GroupLayoutData, MegaGroupInterface } from "../client_types";
-import { SetupState } from "../../shared_types";
+import {  SetupState } from "../../shared_types";
 import { ModalButton } from "../groups/setup/ModalButton";
 import { SetupModal } from "../groups/setup/SetupModal";
 
@@ -48,7 +48,11 @@ export class SetupGroup implements MegaGroupInterface {
 
     public update(state: SetupState) {
         const {players, specialists} = state;
-        this.modal?.update({players, specialists})
+
+        if (!this.modal)
+            throw new Error("Can't update without initialization");
+
+        this.modal.update({ players, specialists })
     }
 
     public disable() {

@@ -3,9 +3,9 @@ import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
 import { PlayerColor, PlayerDraft, Specialist } from "../../../shared_types";
 import  clientConstants from "../../client_constants"
 import { SpecialistCard } from "./SpecialistCard";
+import localState from '../../state';
 
 type ModalDigest = {
-    localPlayerColor: PlayerColor,
     players: Array<PlayerDraft>,
     specialists: Array<Specialist>,
 }
@@ -13,10 +13,12 @@ type ModalDigest = {
 const { COLOR } = clientConstants
 
 export class SetupModal implements DynamicGroupInterface<ModalDigest> {
-    private group: Konva.Group
+    private group: Konva.Group;
     private specialistCards:  Array<SpecialistCard> = [];
+    private localPlayerColor: PlayerColor | null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, digest: ModalDigest) {
+        this.localPlayerColor = localState.playerColor
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -35,6 +37,7 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
 
         let offset = 20;
         digest.specialists.forEach( specialist => {
+            // const pickyPlayer = digest.players.find(p => p.turnToPick);
             const card = new SpecialistCard(
                 stage,
                 specialist,
@@ -57,8 +60,14 @@ export class SetupModal implements DynamicGroupInterface<ModalDigest> {
 
             if (!specialist)
                 throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
+            const pickyPlayer = digest.players.find(p => p.turnToPick);
 
-            card.update(specialist,)
+            card.update({
+                specialist,
+                shouldEnable: Boolean(
+                    pickyPlayer && this.localPlayerColor === pickyPlayer.color && !specialist.owner,
+                ),
+            });
         })
     }
 
