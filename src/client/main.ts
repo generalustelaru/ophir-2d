@@ -89,7 +89,6 @@ window.addEventListener(EventName.vp_transmission, (event: CustomEventInit<VpTra
         return signalError('VP update failed');
 
     const { vp } = event.detail;
-    console.log('vp_transmission', vp)
     localState.vp = vp;
     sessionStorage.setItem('localState', JSON.stringify(localState));
     CanvasService.updatePlayerVp(localState.playerColor, vp);

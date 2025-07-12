@@ -81,27 +81,23 @@ const rl = readline.createInterface({
 )();
 
 // MARK: WS
-const socketClients: Array<WsClient> = [];
+const socketClients: Map<string, WsClient> = new Map();
 const socketServer = new WebSocketServer({ port: WS_PORT });
 
 const singleSession = new GameSession(broadcastCallback, vpTransmitCallback);
 
 socketServer.on('connection', function connection(socket) {
     const socketId = randomUUID();
+    socketClients.set(socketId, { socketId, gameId: null, socket });
+
     const response: ClientIdResponse = { socketId };
     socket.send(JSON.stringify(response));
-    socketClients.push({ socketId, gameId: null, socket });
 
     socket.on('message', function incoming(req: string) {
         const clientRequest = validator.validateClientRequest(tools.parse(req));
 
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
-
-        // const { action, payload } = clientRequest.message;
-
-        // if (action === Action.waiver_client)
-        //     return waiverClient(socket, payload);
 
         logRequest(clientRequest);
         const response = singleSession.processAction(clientRequest);
@@ -111,11 +107,9 @@ socketServer.on('connection', function connection(socket) {
 
         return broadcast(response.message);
     });
+
     socket.on('close', () => {
-        const deadConnections = socketClients.filter(c => c.socket.readyState === WebSocket.CLOSED);
-        deadConnections.forEach(client => {
-            console.log({dead_client: client.socketId});
-        })
+        socketClients.delete(socketId);
     });
 });
 
@@ -125,11 +119,11 @@ function broadcastCallback(state: PlayState) {
 }
 
 function vpTransmitCallback(vp: number, socketId: string) {
-    const client = socketClients.find(c => c.socketId === socketId);
+    const client = socketClients.get(socketId);
 
     if (!client)
         return console.error('Cannot deliver message: Missing socket client.');
-    console.log(`transmit to: ${socketId}`)
+
     transmit(client.socket, { vp });
 }
 
@@ -155,25 +149,6 @@ function logRequest(request: ClientRequest) {
         payload ? `: ${JSON.stringify(payload)}` : ': { }',
     );
 }
-
-// function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
-//     const waiverPayload = validator.validateRebindClientPayload(payload)
-
-//     if (!waiverPayload) {
-//         transmit(socket, { error: 'Invalid request format.' });
-
-//         return;
-//     }
-
-//     const { waiveredId, myId } = waiverPayload;
-//     const originalClient = socketClients.find(c => c.clientId === myId);
-//     const waiveredClient = socketClients.find(c => c.clientId === waiveredId);
-
-//     if (originalClient && waiveredClient)
-//         waiveredClient.socket.close;
-//     else
-//         transmit(socket, { resetFrom: SERVER_NAME });
-// }
 
 function shutDown() {
     console.log('Shutting down...');
@@ -201,7 +176,5 @@ function broadcast(message: ServerMessage): void {
 }
 
 function transmit(client: WebSocket, message: ServerMessage): void {
-    if ('vp' in message)
-        console.log('transmitting VP');
     client.send(JSON.stringify(message));
 }
