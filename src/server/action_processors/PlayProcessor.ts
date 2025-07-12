@@ -251,7 +251,7 @@ export class PlayProcessor {
             return lib.fail(lib.validationErrorMessage());
 
         const { slot, location } = tradePayload;
-        const { color: id, name } = player.getIdentity();
+        const { color, name, socketId } = player.getIdentity();
 
         if (lib.checkConditions([
             player.canAct(Action.make_trade),
@@ -290,14 +290,16 @@ export class PlayProcessor {
             case 'market':
                 const amount = trade.reward.coins + this.playState.getFluctuation(slot);
                 player.gainCoins(amount);
-                this.playState.addServerMessage(`${name} sold goods for ${amount} coins`, id);
+                this.playState.addServerMessage(`${name} sold goods for ${amount} coins`, color);
                 break;
             case 'temple':
                 const reward = trade.reward.favorAndVp;
                 player.gainFavor(reward);
-                this.privateState.updateVictoryPoints(id, reward);
-                this.playState.addServerMessage(`${name} donated for ${reward} favor and VP`, id);
+                this.privateState.updateVictoryPoints(color, reward);
+                this.playState.addServerMessage(`${name} donated for ${reward} favor and VP`, color);
                 console.info(this.privateState.getGameStats());
+
+                this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
                 break;
             default:
                 return lib.fail(`Unknown trade location: ${location}`);
@@ -314,7 +316,7 @@ export class PlayProcessor {
     // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        const { name, color, socketId} = player.getIdentity();
+        const { name, color } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
@@ -374,30 +376,24 @@ export class PlayProcessor {
         player.setCargo(result.data);
         player.clearMoves();
 
-        this.privateState.updateVictoryPoints(color, metal === 'gold' ? 5 : 3);
-        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
-
         return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: DONATE
     public processMetalDonation(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        const { color: id, name } = player.getIdentity();
+        const { color, name } = player.getIdentity();
         const donationPayload = validator.validateMetalDonationPayload(payload);
 
         if (!donationPayload)
             return lib.fail(lib.validationErrorMessage());
 
-        if (!player.canDonateMetal(donationPayload.metal))
-            return lib.fail(`${name} cannot donate ${donationPayload.metal}`);
+        const { metal } = donationPayload;
 
-        const reward = donationPayload.metal === 'gold' ? 10 : 5;
-        this.privateState.updateVictoryPoints(id, reward);
-        this.playState.addServerMessage(`${name} donated ${donationPayload.metal} for ${reward} VP`, id);
-        console.info(this.privateState.getGameStats());
+        if (!player.canDonateMetal(metal))
+            return lib.fail(`${name} cannot donate ${metal}`);
 
-        const result = this.unloadItem(player.getCargo(), donationPayload.metal);
+        const result = this.unloadItem(player.getCargo(), metal);
 
         if (result.err)
             return lib.fail(result.message);
@@ -405,7 +401,14 @@ export class PlayProcessor {
         player.setCargo(result.data);
         player.clearMoves();
 
-        const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(donationPayload.metal);
+        const reward = metal === 'gold' ? 10 : 5;
+        this.privateState.updateVictoryPoints(color, reward);
+        this.playState.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
+        console.info(this.privateState.getGameStats());
+
+        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
+
+        const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(metal);
 
         if (isTempleComplete) {
             this.killIdleChecks();
