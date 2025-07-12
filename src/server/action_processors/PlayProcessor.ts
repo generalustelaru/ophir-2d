@@ -413,16 +413,18 @@ export class PlayProcessor {
         if (isTempleComplete) {
             this.killIdleChecks();
             player.clearActions();
-            const result = this.compileGameResults();
+            const results = this.compileGameResults();
 
-            if (result.err)
-                return lib.fail(result.message);
+            if (results.err)
+                return lib.fail(results.message);
 
             this.playState.addServerMessage('The temple construction is complete! Game has ended.');
-            this.playState.addServerMessage(JSON.stringify(result.data));
-            this.playState.registerGameEnd(result.data);
+            this.playState.addServerMessage(JSON.stringify(results.data));
 
-            return lib.pass(this.saveAndReturn(player));
+            this.playState.savePlayer(player.toDto());;
+            this.playState.registerGameEnd(results.data);
+
+            return lib.pass({ state: this.playState.toDto() });
         }
 
         if (isNewLevel) {
@@ -728,15 +730,16 @@ export class PlayProcessor {
 
         if (!newTrade) {
             this.killIdleChecks();
-            const compilation = this.compileGameResults();
+            const results = this.compileGameResults();
 
-            if (compilation.err)
-                return lib.fail(compilation.message);
+            if (results.err)
+                return lib.fail(results.message);
 
-            this.playState.registerGameEnd(compilation.data);
+            this.playState.savePlayer(player.toDto());
+            this.playState.registerGameEnd(results.data);
             this.playState.addServerMessage('Market deck is empty! Game has ended.');
 
-            return lib.pass(this.saveAndReturn(player));
+            return lib.pass({ state: this.playState.toDto() });
         }
 
         this.playState.shiftMarketCards(newTrade);
