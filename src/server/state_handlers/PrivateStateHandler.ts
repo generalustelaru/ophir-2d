@@ -53,6 +53,11 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         });
     }
 
+    getPlayerVictoryPoints(color: PlayerColor) {
+        const ps = this.gameStats.getOne(color)
+        return ps ? ps.vp : 0;
+    }
+
     getGameStats() {
         return this.gameStats.get();
     }

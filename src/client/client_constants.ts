@@ -4,10 +4,10 @@ import { ClientConstants } from './client_types';
 const clientConstants: ClientConstants = {
     DEFAULT_LOCAL_STATE: {
         gameId: null,
-        myId: null,
+        clientId: null,
         playerColor: null,
         playerName: null,
-        isBoardDrawn: false,
+        vp: 0,
     },
     COLOR: {
         barrierDefault: '#003C43',

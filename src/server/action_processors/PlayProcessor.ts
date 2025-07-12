@@ -19,11 +19,17 @@ export class PlayProcessor {
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     private autoBroadcast: (state: PlayState) => void;
+    private transmitVp: (vp: number, clientId: string) => void;
 
-    constructor(stateBundle: StateBundle, broadcastCallback: (state: PlayState) => void) {
+    constructor(
+        stateBundle: StateBundle,
+        broadcastCallback: (state: PlayState) => void,
+        transmitVp: (vp: number, clientId: string) => void,
+    ) {
         this.playState = stateBundle.playState;
         this.privateState = stateBundle.privateState;
         this.autoBroadcast = broadcastCallback;
+        this.transmitVp = transmitVp
 
         if (IDLE_CHECKS)
             this.startIdleChecks();
@@ -308,7 +314,7 @@ export class PlayProcessor {
     // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        const { name, color: id } = player.getIdentity();
+        const { name, color, clientId } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
@@ -358,7 +364,7 @@ export class PlayProcessor {
                 return lib.fail(`Unknown currency: ${currency}`);
         }
 
-        this.playState.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, id);
+        this.playState.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, color);
 
         const result = this.loadItem(player.getCargo(), metal);
 
@@ -366,7 +372,10 @@ export class PlayProcessor {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        player.clearMoves()
+        player.clearMoves();
+
+        this.privateState.updateVictoryPoints(color, metal === 'gold' ? 5 : 3);
+        this.transmitVp(this.privateState.getPlayerVictoryPoints(color),clientId);
 
         return lib.pass(this.saveAndReturn(player));
     }

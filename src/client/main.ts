@@ -4,7 +4,7 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
-import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState } from "../shared_types";
+import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse } from "../shared_types";
 
 // Initializations
 const serverAddress = process.env.SERVER_ADDRESS;
@@ -16,16 +16,17 @@ if (!wsPort || !serverAddress)
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
 const savedState = sessionStorage.getItem('localState');
-const { gameId, myId, playerColor, playerName, isBoardDrawn } = savedState
+const { gameId, clientId, playerColor, playerName, vp } = savedState
     ? JSON.parse(savedState) as LocalState
     : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
 
 localState.gameId = gameId;
-localState.myId = myId;
+localState.clientId = clientId;
 localState.playerColor = playerColor;
 localState.playerName = playerName;
-localState.isBoardDrawn = isBoardDrawn;
+localState.vp = vp;
 
+// MARK: LISTENERS
 //Send player action to server
 window.addEventListener(EventName.action, (event: CustomEventInit) => {
     const message = event.detail as ClientMessage;
@@ -74,10 +75,24 @@ window.addEventListener(EventName.close, () => {
     alert('The connection was closed');
 });
 
-window.addEventListener(EventName.identification, (event: CustomEventInit) => {
-    const payload = event.detail;
-    localState.myId = payload.clientId;
+window.addEventListener(EventName.identification, (event: CustomEventInit<ClientIdResponse>) => {
+
+    if (!event.detail)
+        return signalError('Id response has failed');
+
+    localState.clientId = event.detail.clientId;
     sessionStorage.setItem('localState', JSON.stringify(localState));
+});
+
+window.addEventListener(EventName.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
+    if (!event.detail || !localState.playerColor)
+        return signalError('VP update failed');
+
+    const { vp } = event.detail;
+    console.log('vp_transmission', vp)
+    localState.vp = vp;
+    sessionStorage.setItem('localState', JSON.stringify(localState));
+    CanvasService.updatePlayerVp(localState.playerColor, vp);
 });
 
 window.addEventListener(EventName.reset, (event: CustomEventInit) => {

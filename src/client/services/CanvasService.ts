@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupPayload, Phase, PlayState, SetupState } from '../../shared_types';
+import { GameSetupPayload, Phase, PlayerColor, PlayState, SetupState } from '../../shared_types';
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -79,6 +79,12 @@ export const CanvasService = new class extends Communicator {
         return this.mapGroup.createSetupPayload();
     }
 
+    public updatePlayerVp(color: PlayerColor, vp: number) {
+        if (!this.isPlayDrawn)
+            throw new Error("Cannot update. VP element is not instanced.");
+
+        this.playerGroup.updatePlayerVp(color, vp);
+    }
     public drawUpdateElements(state: PlayState | SetupState, toDisable = false): void {
 
         if (!localState.playerColor) {
