@@ -85,6 +85,7 @@ export const CanvasService = new class extends Communicator {
 
         this.playerGroup.updatePlayerVp(color, vp);
     }
+
     public drawUpdateElements(state: PlayState | SetupState, toDisable = false): void {
 
         if (!localState.playerColor) {

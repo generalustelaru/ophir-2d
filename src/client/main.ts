@@ -144,6 +144,9 @@ window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
         playState.hasGameEnded
     );
 
+    if (playerColor)
+        CanvasService.updatePlayerVp(playerColor, vp);
+
     debug(playState);
 });
 
