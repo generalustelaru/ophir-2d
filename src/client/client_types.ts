@@ -3,6 +3,7 @@ import {
     EnrolmentState, Trade, MarketOffer, Player, Metal, MetalPrices, Currency,
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
     SetupState,
+    VpTransmission,
 } from '../shared_types';
 import Konva from 'konva';
 
@@ -22,10 +23,10 @@ export type IslandData = { x: number, y: number, shape: string };
 
 export type LocalState = {
     gameId: string | null,
-    myId: string | null,
+    clientId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
-    isBoardDrawn: boolean,
+    vp: number,
 }
 
 export type ClientConstants = {
@@ -131,6 +132,7 @@ export enum EventName {
     setup_update = 'setup_update',
     enrolment_update = 'enrolment_update',
     identification = 'identification',
+    vp_transmission = 'vp_transmission',
 }
 
 export type LaconicType = EventName.connected | EventName.draft | EventName.start_action | EventName.close | EventName.timeout;
@@ -143,10 +145,11 @@ export type PlayStateUpdateEvent = ClientEventInterface<EventName.play_update, P
 export type SetupStateUpdateEvent = ClientEventInterface<EventName.setup_update, SetupState>;
 export type EnrolmentStateUpdateEvent = ClientEventInterface<EventName.enrolment_update, EnrolmentState>;
 export type IdentificationEvent = ClientEventInterface<EventName.identification, ClientIdResponse>;
+export type VictoryPointEvent = ClientEventInterface<EventName.vp_transmission, VpTransmission>
 
 export type ClientEvent =
-    | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent
-    | ResetEvent | PlayStateUpdateEvent | SetupStateUpdateEvent | EnrolmentStateUpdateEvent;
+    | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent | ResetEvent | PlayStateUpdateEvent
+    | SetupStateUpdateEvent | EnrolmentStateUpdateEvent | VictoryPointEvent;
 
 export type InfoDetail = {
     text: string,

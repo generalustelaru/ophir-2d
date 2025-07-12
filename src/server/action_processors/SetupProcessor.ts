@@ -138,12 +138,12 @@ export class SetupProcessor {
             const selections = [];
 
             for (let i = 0; i < drafts.length; i++) {
-                const { color, name, turnOrder, specialist } = drafts[i];
+                const { clientId, color, name, turnOrder, specialist } = drafts[i];
 
                 if (!specialist)
                     return null;
 
-                selections.push({ color, name, turnOrder, specialist });
+                selections.push({ clientId, color, name, turnOrder, specialist });
             };
 
             return selections;
@@ -302,6 +302,7 @@ export class SetupProcessor {
             const token = orderTokens.shift() || 0;
 
             return {
+                clientId: e.clientId,
                 color: e.color,
                 name: e.name,
                 turnOrder: token,
@@ -312,7 +313,7 @@ export class SetupProcessor {
     }
 
     private hydratePlayers(
-        builds: Array<PlayerSelection>,
+        selections: Array<PlayerSelection>,
         moveRules: Array<DestinationPackage>,
         setupCoordinates: Array<Coordinates>,
         mapPairings: MapPairings,
@@ -323,15 +324,15 @@ export class SetupProcessor {
         const initialRules = tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
 
-        const players: Array<Player> = builds.map(b => {
+        const players: Array<Player> = selections.map(s => {
             const playerDto: Player = {
-                color: b.color,
+                clientId: s.clientId,
+                color: s.color,
                 timeStamp: 0,
                 isIdle: false,
-                name: b.name,
-                turnOrder: b.turnOrder,
-                specialist: b.specialist,
-                specialty: null,
+                name: s.name,
+                turnOrder: s.turnOrder,
+                specialist: s.specialist,
                 isActive: false,
                 bearings: {
                     seaZone: startingZone,
@@ -339,7 +340,7 @@ export class SetupProcessor {
                     location: mapPairings.locationByZone[startingZone].name
                 },
                 overnightZone: startingZone,
-                favor: b.specialist.startingFavor,
+                favor: s.specialist.startingFavor,
                 privilegedSailing: false,
                 influence: 1,
                 moveActions: 0,

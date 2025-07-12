@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData } from '../client_types';
 import { PlayerPlacard } from '../groups/GroupList';
 import localState from '../state';
-import { Player, PlayState } from '../../shared_types';
+import { Player, PlayerColor, PlayState } from '../../shared_types';
 import { RivalPlacard } from '../groups/player/RivalPlacard';
 
 export class PlayerGroup implements MegaGroupInterface {
@@ -74,6 +74,15 @@ export class PlayerGroup implements MegaGroupInterface {
         if (state.rival.isIncluded && this.rivalPlacard) {
             this.rivalPlacard.update(state.rival);
         }
+    }
+
+    public updatePlayerVp(color: PlayerColor, vp: number) {
+        const localPlacard = this.playerPlacards.find(placard => placard.getId() === color);
+
+        if (!localPlacard)
+            throw new Error("Faield to update VP swatch.");
+
+        localPlacard.updateVP(vp);
     }
 
     public disable(): void {

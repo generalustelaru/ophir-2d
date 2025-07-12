@@ -80,7 +80,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
         this.vpDial = player.color === localColorName ? new VictoryPointDial(
             { x:100, y: 5 },
-            67,
+            0,
         ) : null;
         this.vpDial && this.group.add(this.vpDial.getElement());
 
@@ -93,6 +93,13 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update(influence);
+    }
+
+    public updateVP(vp: number) {
+        if (!this.vpDial)
+            throw new Error("Cannot update VP on opponent placards");
+
+        this.vpDial?.update(vp);
     }
 
     public getId(): PlayerColor {

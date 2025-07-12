@@ -84,7 +84,7 @@ const rl = readline.createInterface({
 const socketClients: Array<WsClient> = [];
 const socketServer = new WebSocketServer({ port: WS_PORT });
 
-const singleSession = new GameSession(broadcastCallback);
+const singleSession = new GameSession(broadcastCallback, vpTransmitCallback);
 
 socketServer.on('connection', function connection(socket) {
     const clientId = randomUUID();
@@ -96,7 +96,7 @@ socketServer.on('connection', function connection(socket) {
         const clientRequest = validator.validateClientRequest(tools.parse(req));
 
         if (!clientRequest)
-            return respond(socket, { error: 'Invalid request data.' });
+            return transmit(socket, { error: 'Invalid request data.' });
 
         const { action, payload } = clientRequest.message;
 
@@ -107,17 +107,27 @@ socketServer.on('connection', function connection(socket) {
         const response = singleSession.processAction(clientRequest);
 
         if (response.senderOnly)
-            return respond(socket, response.message);
+            return transmit(socket, response.message);
 
         return broadcast(response.message);
     });
 });
 
-// MARK: FUNCTIONS
-
+// MARK: CALLBACKS
 function broadcastCallback(state: PlayState) {
     broadcast({ state })
 }
+
+function vpTransmitCallback(vp: number, clientId: string) {
+    const client = socketClients.find(c => c.clientId === clientId);
+
+    if (!client)
+        return console.error('Cannot deliver message: Missing socket client.');
+
+    transmit(client.socket, { vp });
+}
+
+// MARK: FUNCTIONS
 
 function logRequest(request: ClientRequest) {
     const { playerColor, playerName, message } = request;
@@ -144,7 +154,7 @@ function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
     const waiverPayload = validator.validateRebindClientPayload(payload)
 
     if (!waiverPayload) {
-        respond(socket, { error: 'Invalid request format.' });
+        transmit(socket, { error: 'Invalid request format.' });
 
         return;
     }
@@ -156,7 +166,7 @@ function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
     if (originalClient && waiveredClient)
         waiveredClient.socket.close;
     else
-        respond(socket, { resetFrom: SERVER_NAME });
+        transmit(socket, { resetFrom: SERVER_NAME });
 }
 
 function shutDown() {
@@ -184,6 +194,8 @@ function broadcast(message: ServerMessage): void {
     });
 }
 
-function respond(client: WebSocket, message: ServerMessage): void {
+function transmit(client: WebSocket, message: ServerMessage): void {
+    if ('vp' in message)
+        console.log('transmitting VP');
     client.send(JSON.stringify(message));
 }

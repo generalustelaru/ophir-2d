@@ -17,7 +17,10 @@ export class EnrolmentProcessor {
         return this.enrolmentState.toDto();
     }
 
-    public processEnrol(color: PlayerColor, name: string): Probable<StateResponse> {
+    public processEnrol(clientId: string | null, color: PlayerColor, name: string): Probable<StateResponse> {
+
+        if (!clientId)
+            return lib.fail('Cannot enrol in session. clientId is missing.');
 
         if (this.isColorTaken(this.enrolmentState.getAllPlayers(), color))
             return lib.fail('Color is is already taken')
@@ -30,7 +33,7 @@ export class EnrolmentProcessor {
             if (!this.enrolmentState.isRoomForNewPlayer())
                 return lib.fail('The game is full!');
 
-            this.enrolmentState.addPlayer({ color, name });
+            this.enrolmentState.addPlayer({ clientId, color, name });
 
             if (this.enrolmentState.getSessionOwner() === null)
                 this.enrolmentState.setSessionOwner(color);

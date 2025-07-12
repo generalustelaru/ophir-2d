@@ -1,6 +1,7 @@
 import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, Action,
     StateResponse,
+    VpTransmission,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -48,7 +49,7 @@ export const CommunicationService = new class extends Communicator {
             console.debug('<-', data);
 
             if (this.isClientIdResponse(data)) {
-                if (localState.myId === null) {
+                if (localState.clientId === null) {
                     this.createEvent({
                         type: EventName.identification,
                         detail: { clientId: data.clientId }
@@ -56,7 +57,7 @@ export const CommunicationService = new class extends Communicator {
                 } else {
                     this.sendMessage({
                         action: Action.waiver_client,
-                        payload: { waiveredId: data.clientId, myId: localState.myId },
+                        payload: { waiveredId: data.clientId, myId: localState.clientId },
                     });
                 }
 
@@ -64,14 +65,17 @@ export const CommunicationService = new class extends Communicator {
             }
 
             switch (true) {
-                case this.isErrorResponse(data):
-                    this.createEvent({ type: EventName.error, detail:{ message: data.error } });
+                case this.isGameStateResponse(data):
+                    this.createStateEvent(data);
+                    break;
+                case this.isVictoryPointsTransmission(data):
+                    this.createEvent({ type: EventName.vp_transmission, detail: data })
                     break;
                 case this.isResetOrder(data):
                     this.createEvent({ type: EventName.reset, detail: data });
                     break;
-                case this.isGameStateResponse(data):
-                    this.createStateEvent(data);
+                case this.isErrorResponse(data):
+                    this.createEvent({ type: EventName.error, detail:{ message: data.error } });
                     break;
                 default:
                     this.createEvent({ type: EventName.error, detail: { message: 'Could not determine message type.' } });
@@ -92,7 +96,7 @@ export const CommunicationService = new class extends Communicator {
             return;
         }
 
-        const { gameId, myId: clientId, playerColor, playerName } = localState;
+        const { gameId, clientId: clientId, playerColor, playerName } = localState;
         const request: ClientRequest = { gameId, clientId, playerColor, playerName, message };
 
         console.debug('->', request);
@@ -102,6 +106,10 @@ export const CommunicationService = new class extends Communicator {
 
     private isGameStateResponse(data: ServerMessage): data is StateResponse {
         return 'state' in data;
+    }
+
+    private isVictoryPointsTransmission(data: ServerMessage): data is VpTransmission {
+        return 'vp' in data;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {

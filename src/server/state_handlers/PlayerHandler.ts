@@ -1,6 +1,5 @@
 import {
-    Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey,
-    Player, PlayerColor, ShipBearings, ZoneName, TradeGood,
+    Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist,
 } from "../../shared_types";
 import { ObjectHandler } from "../server_types";
@@ -9,13 +8,13 @@ import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } 
 const MAX_FAVOR = 6;
 export class PlayerHandler implements ObjectHandler<Player>{
 
+    private clientId: Readable<string>;
     private color: Readable<PlayerColor>;
     private timeStamp: Writable<number>;
     private isIdle: Writable<boolean>;
     private name: Readable<string>;
     private turnOrder: Readable<number>;
     private specialist: Readable<Specialist>;
-    private specialty: Readable<TradeGood|null>;
     private isActive: Writable<boolean>;
     private bearings: Writable<ShipBearings>;
     private overnightZone: Writable<ZoneName>;
@@ -32,13 +31,13 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private coins: Writable<number>;
 
     constructor(player: Player) {
+        this.clientId = readable(player.clientId);
         this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);
         this.isIdle = writable(player.isIdle);
         this.name = readable(player.name);
         this.turnOrder = readable(player.turnOrder);
         this.specialist = readable(player.specialist);
-        this.specialty = readable(player.specialty);
         this.isActive = writable(player.isActive);
         this.bearings = writable(player.bearings);
         this.overnightZone = writable(player.overnightZone);
@@ -57,13 +56,13 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public toDto(): Player {
         return {
+            clientId: this.clientId.get(),
             color: this.color.get(),
             timeStamp: this.timeStamp.get(),
             isIdle: this.isIdle.get(),
             name: this.name.get(),
             turnOrder: this.turnOrder.get(),
             specialist: this.specialist.get(),
-            specialty: this.specialty.get(),
             isActive: this.isActive.get(),
             bearings: this.bearings.get(),
             overnightZone: this.overnightZone.get(),
@@ -90,6 +89,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public getIdentity() {
         return {
+            clientId: this.clientId.get(),
             color: this.color.get(),
             name: this.name.get(),
             turnOrder: this.turnOrder.get()

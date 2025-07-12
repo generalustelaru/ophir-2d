@@ -13,11 +13,16 @@ import { SINGLE_PLAYER } from "./configuration";
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
-    private autoBroadcast: (state: PlayState) => void
+    private autoBroadcast: (state: PlayState) => void;
+    private transmitVp: (vp: number, clientId: string) => void;
 
-    constructor(broadcastCallback: (state: PlayState) => void) {
+    constructor(
+        broadcastCallback: (state: PlayState) => void,
+        vpTransmitCallback: (vp: number, clientId: string) => void,
+    ) {
         this.actionProcessor = new EnrolmentProcessor(this.getNewState());
         this.autoBroadcast = broadcastCallback
+        this.transmitVp = vpTransmitCallback
         console.info('Game session created');
     }
 
@@ -80,12 +85,12 @@ export class GameSession {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
         if (data.message.action === Action.enrol && 'playerColor' in data) {
-            const { playerColor, playerName } = data;
+            const { playerColor, playerName, clientId } = data;
 
             if (!playerColor || !playerName)
                 return this.issueNominalResponse(lib.errorResponse('Missing enrolment data!'));
 
-            const enrolment = processor.processEnrol(playerColor, playerName)
+            const enrolment = processor.processEnrol(clientId, playerColor, playerName)
 
             if (enrolment.err)
                 return this.issueNominalResponse(lib.errorResponse(enrolment.message));
@@ -167,7 +172,7 @@ export class GameSession {
                         return lib.fail('Cannot start game!');
 
                     const { privateState, playState } = bundleResult.data;
-                    this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast);
+                    this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast, this.transmitVp);
 
                     return lib.pass({ state: playState.toDto() });
                 }

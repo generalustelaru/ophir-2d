@@ -50,7 +50,7 @@ export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = "A" | "B";
-export type ChatEntry = { color: PlayerColor|null, name: string|null, message: string };
+export type ChatEntry = { color: PlayerColor | null, name: string | null, message: string };
 
 export type ExchangeTier = {
     templeLevel: number,
@@ -105,14 +105,24 @@ export type Rival = {
     influence: DiceSix,
 } | { isIncluded: false }
 
-export type Player = {
+export type PlayerEntry = {
+    clientId: string,
     color: PlayerColor,
+    name: string,
+}
+
+export type PlayerDraft = PlayerEntry & {
+    turnOrder: number,
+    specialist: Specialist | null
+    turnToPick: boolean, // transient property
+}
+
+export type PlayerSelection = Omit<PlayerDraft, 'turnToPick'> & {
+    specialist: Specialist
+}
+export type Player = PlayerSelection & {
     timeStamp: number,
     isIdle: boolean,
-    name: string,
-    turnOrder: number,
-    specialist: Specialist,
-    specialty: TradeGood | null,
     isActive: boolean,
     bearings: ShipBearings,
     overnightZone: ZoneName,
@@ -128,17 +138,6 @@ export type Player = {
     feasibleTrades: Array<MarketSlotKey>
     coins: number,
 }
-
-export type PlayerSelection = Pick<Player, 'color'|'name'|'turnOrder'> & {
-    specialist: Specialist
-}
-
-export type PlayerDraft = Pick<Player, 'color'|'name'|'turnOrder'> & {
-    turnToPick: boolean,
-    specialist: Specialist | null
-}
-
-export type PlayerEntry = Pick<Player, 'color'|'name'>
 
 export type PlayerEntity = PlayerEntry | PlayerDraft | PlayerSelection | Player;
 
@@ -242,7 +241,7 @@ export type GameSetup = {
     templeTradeSlot: MarketSlotKey,
 }
 
-export type GamePartialSetup = Pick<GameSetup, 'barriers'|'mapPairings'>
+export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 
 // MARK: COMMUNICATION
 
@@ -318,5 +317,7 @@ export type ResetResponse = { resetFrom: string | PlayerColor }
 
 export type ErrorResponse = { error: string }
 
-export type ServerMessage = ClientIdResponse | StateResponse | ResetResponse | ErrorResponse;
+export type VpTransmission = { vp: number }
+
+export type ServerMessage = ClientIdResponse | StateResponse | ResetResponse | ErrorResponse | VpTransmission;
 

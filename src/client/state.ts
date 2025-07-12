@@ -3,10 +3,10 @@ import { LocalState } from './client_types';
 
 const localState: LocalState = {
     gameId: null,
-    myId: null,
+    clientId: null,
     playerColor: null,
     playerName: null,
-    isBoardDrawn: false,
+    vp: 0,
 }
 
 export default localState;
