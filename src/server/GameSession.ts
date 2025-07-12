@@ -300,6 +300,6 @@ export class GameSession {
         if (player.name != playerName)
             return lib.fail(`[${playerName}] does not match name [${player.name}] in state`);
 
-        return lib.pass({ player, message });
+        return lib.pass({ player: {...player, socketId}, message });
     }
 }
