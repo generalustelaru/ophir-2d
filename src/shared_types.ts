@@ -106,7 +106,7 @@ export type Rival = {
 } | { isIncluded: false }
 
 export type PlayerEntry = {
-    clientId: string,
+    socketId: string,
     color: PlayerColor,
     name: string,
 }
@@ -298,7 +298,7 @@ export type ClientMessage =
 
 export type ClientRequest = {
     gameId: string | null,
-    clientId: string | null,
+    socketId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
     message: ClientMessage,
@@ -309,7 +309,7 @@ export type RequestMatch = {
     message: ClientMessage,
 }
 
-export type ClientIdResponse = { clientId: string }
+export type ClientIdResponse = { socketId: string }
 
 export type StateResponse = { state: State }
 

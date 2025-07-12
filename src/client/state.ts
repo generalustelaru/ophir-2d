@@ -3,7 +3,7 @@ import { LocalState } from './client_types';
 
 const localState: LocalState = {
     gameId: null,
-    clientId: null,
+    socketId: null,
     playerColor: null,
     playerName: null,
     vp: 0,

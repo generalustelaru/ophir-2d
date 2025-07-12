@@ -14,11 +14,11 @@ import { SINGLE_PLAYER } from "./configuration";
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private autoBroadcast: (state: PlayState) => void;
-    private transmitVp: (vp: number, clientId: string) => void;
+    private transmitVp: (vp: number, socketId: string) => void;
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
-        vpTransmitCallback: (vp: number, clientId: string) => void,
+        vpTransmitCallback: (vp: number, socketId: string) => void,
     ) {
         this.actionProcessor = new EnrolmentProcessor(this.getNewState());
         this.autoBroadcast = broadcastCallback
@@ -85,12 +85,12 @@ export class GameSession {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
         if (data.message.action === Action.enrol && 'playerColor' in data) {
-            const { playerColor, playerName, clientId } = data;
+            const { playerColor, playerName, socketId } = data;
 
             if (!playerColor || !playerName)
                 return this.issueNominalResponse(lib.errorResponse('Missing enrolment data!'));
 
-            const enrolment = processor.processEnrol(clientId, playerColor, playerName)
+            const enrolment = processor.processEnrol(socketId, playerColor, playerName)
 
             if (enrolment.err)
                 return this.issueNominalResponse(lib.errorResponse(enrolment.message));
@@ -287,9 +287,9 @@ export class GameSession {
     }
 
     private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch>  {
-        const { gameId, clientId, playerColor, playerName, message } = request;
+        const { gameId, socketId, playerColor, playerName, message } = request;
 
-        if (!gameId || !clientId || !playerColor || !playerName)
+        if (!gameId || !socketId || !playerColor || !playerName)
             return lib.fail(`Request data is incomplete`);
 
         const player = this.actionProcessor.getState().players.find(p => p.color === playerColor);

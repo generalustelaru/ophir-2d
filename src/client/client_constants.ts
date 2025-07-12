@@ -4,7 +4,7 @@ import { ClientConstants } from './client_types';
 const clientConstants: ClientConstants = {
     DEFAULT_LOCAL_STATE: {
         gameId: null,
-        clientId: null,
+        socketId: null,
         playerColor: null,
         playerName: null,
         vp: 0,

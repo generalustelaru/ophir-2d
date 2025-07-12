@@ -22,8 +22,8 @@ export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 
 export type LocalState = {
+    socketId: string | null,
     gameId: string | null,
-    clientId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
     vp: number,
