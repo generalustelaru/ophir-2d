@@ -19,12 +19,12 @@ export class PlayProcessor {
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     private autoBroadcast: (state: PlayState) => void;
-    private transmitVp: (vp: number, clientId: string) => void;
+    private transmitVp: (vp: number, socketId: string) => void;
 
     constructor(
         stateBundle: StateBundle,
         broadcastCallback: (state: PlayState) => void,
-        transmitVp: (vp: number, clientId: string) => void,
+        transmitVp: (vp: number, socketId: string) => void,
     ) {
         this.playState = stateBundle.playState;
         this.privateState = stateBundle.privateState;
@@ -314,7 +314,7 @@ export class PlayProcessor {
     // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        const { name, color, clientId } = player.getIdentity();
+        const { name, color, socketId} = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
@@ -375,7 +375,7 @@ export class PlayProcessor {
         player.clearMoves();
 
         this.privateState.updateVictoryPoints(color, metal === 'gold' ? 5 : 3);
-        this.transmitVp(this.privateState.getPlayerVictoryPoints(color),clientId);
+        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
 
         return lib.pass(this.saveAndReturn(player));
     }

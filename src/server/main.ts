@@ -1,7 +1,7 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, Action, ClientRequest, WaiverClientPayload, PlayState } from '../shared_types';
+import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState } from '../shared_types';
 import { WsClient } from './server_types';
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
@@ -87,10 +87,10 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 const singleSession = new GameSession(broadcastCallback, vpTransmitCallback);
 
 socketServer.on('connection', function connection(socket) {
-    const clientId = randomUUID();
-    const response: ClientIdResponse = { clientId };
+    const socketId = randomUUID();
+    const response: ClientIdResponse = { socketId };
     socket.send(JSON.stringify(response));
-    socketClients.push({ clientId, gameId: null, socket });
+    socketClients.push({ socketId, gameId: null, socket });
 
     socket.on('message', function incoming(req: string) {
         const clientRequest = validator.validateClientRequest(tools.parse(req));
@@ -98,10 +98,10 @@ socketServer.on('connection', function connection(socket) {
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
-        const { action, payload } = clientRequest.message;
+        // const { action, payload } = clientRequest.message;
 
-        if (action === Action.waiver_client)
-            return waiverClient(socket, payload);
+        // if (action === Action.waiver_client)
+        //     return waiverClient(socket, payload);
 
         logRequest(clientRequest);
         const response = singleSession.processAction(clientRequest);
@@ -111,6 +111,12 @@ socketServer.on('connection', function connection(socket) {
 
         return broadcast(response.message);
     });
+    socket.on('close', () => {
+        const deadConnections = socketClients.filter(c => c.socket.readyState === WebSocket.CLOSED);
+        deadConnections.forEach(client => {
+            console.log({dead_client: client.socketId});
+        })
+    });
 });
 
 // MARK: CALLBACKS
@@ -118,12 +124,12 @@ function broadcastCallback(state: PlayState) {
     broadcast({ state })
 }
 
-function vpTransmitCallback(vp: number, clientId: string) {
-    const client = socketClients.find(c => c.clientId === clientId);
+function vpTransmitCallback(vp: number, socketId: string) {
+    const client = socketClients.find(c => c.socketId === socketId);
 
     if (!client)
         return console.error('Cannot deliver message: Missing socket client.');
-
+    console.log(`transmit to: ${socketId}`)
     transmit(client.socket, { vp });
 }
 
@@ -150,24 +156,24 @@ function logRequest(request: ClientRequest) {
     );
 }
 
-function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
-    const waiverPayload = validator.validateRebindClientPayload(payload)
+// function waiverClient(socket: WebSocket, payload: WaiverClientPayload) {
+//     const waiverPayload = validator.validateRebindClientPayload(payload)
 
-    if (!waiverPayload) {
-        transmit(socket, { error: 'Invalid request format.' });
+//     if (!waiverPayload) {
+//         transmit(socket, { error: 'Invalid request format.' });
 
-        return;
-    }
+//         return;
+//     }
 
-    const { waiveredId, myId } = waiverPayload;
-    const originalClient = socketClients.find(c => c.clientId === myId);
-    const waiveredClient = socketClients.find(c => c.clientId === waiveredId);
+//     const { waiveredId, myId } = waiverPayload;
+//     const originalClient = socketClients.find(c => c.clientId === myId);
+//     const waiveredClient = socketClients.find(c => c.clientId === waiveredId);
 
-    if (originalClient && waiveredClient)
-        waiveredClient.socket.close;
-    else
-        transmit(socket, { resetFrom: SERVER_NAME });
-}
+//     if (originalClient && waiveredClient)
+//         waiveredClient.socket.close;
+//     else
+//         transmit(socket, { resetFrom: SERVER_NAME });
+// }
 
 function shutDown() {
     console.log('Shutting down...');

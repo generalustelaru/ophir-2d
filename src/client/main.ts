@@ -16,12 +16,12 @@ if (!wsPort || !serverAddress)
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
 const savedState = sessionStorage.getItem('localState');
-const { gameId, clientId, playerColor, playerName, vp } = savedState
+const { gameId, socketId, playerColor, playerName, vp } = savedState
     ? JSON.parse(savedState) as LocalState
     : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
 
 localState.gameId = gameId;
-localState.clientId = clientId;
+localState.socketId = socketId;
 localState.playerColor = playerColor;
 localState.playerName = playerName;
 localState.vp = vp;
@@ -80,7 +80,7 @@ window.addEventListener(EventName.identification, (event: CustomEventInit<Client
     if (!event.detail)
         return signalError('Id response has failed');
 
-    localState.clientId = event.detail.clientId;
+    localState.socketId = event.detail.socketId;
     sessionStorage.setItem('localState', JSON.stringify(localState));
 });
 

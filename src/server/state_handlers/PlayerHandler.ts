@@ -2,13 +2,13 @@ import {
     Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist,
 } from "../../shared_types";
-import { ObjectHandler } from "../server_types";
+import { ObjectHandler, PlayerIdentity } from "../server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
 const MAX_FAVOR = 6;
 export class PlayerHandler implements ObjectHandler<Player>{
 
-    private clientId: Readable<string>;
+    private socketId: Writable<string>;
     private color: Readable<PlayerColor>;
     private timeStamp: Writable<number>;
     private isIdle: Writable<boolean>;
@@ -31,7 +31,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private coins: Writable<number>;
 
     constructor(player: Player) {
-        this.clientId = readable(player.clientId);
+        this.socketId = writable(player.socketId);
         this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);
         this.isIdle = writable(player.isIdle);
@@ -56,7 +56,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public toDto(): Player {
         return {
-            clientId: this.clientId.get(),
+            socketId: this.socketId.get(),
             color: this.color.get(),
             timeStamp: this.timeStamp.get(),
             isIdle: this.isIdle.get(),
@@ -87,9 +87,9 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.timeStamp.set(Date.now());
     }
 
-    public getIdentity() {
+    public getIdentity(): PlayerIdentity {
         return {
-            clientId: this.clientId.get(),
+            socketId: this.socketId.get(),
             color: this.color.get(),
             name: this.name.get(),
             turnOrder: this.turnOrder.get()

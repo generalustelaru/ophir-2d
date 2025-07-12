@@ -23,7 +23,7 @@ class ValidatorService {
             'ClientRequest',
             request,
             [
-                { key: 'clientId', type: 'string', nullable: true },
+                { key: 'socketId', type: 'string', nullable: true },
                 { key: 'gameId', type: 'string', nullable: true },
                 { key: 'playerName', type: 'string', nullable: true },
                 { key: 'playerColor', type: 'string', nullable: true },

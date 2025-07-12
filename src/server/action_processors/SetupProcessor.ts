@@ -138,12 +138,12 @@ export class SetupProcessor {
             const selections = [];
 
             for (let i = 0; i < drafts.length; i++) {
-                const { clientId, color, name, turnOrder, specialist } = drafts[i];
+                const { socketId, color, name, turnOrder, specialist } = drafts[i];
 
                 if (!specialist)
                     return null;
 
-                selections.push({ clientId, color, name, turnOrder, specialist });
+                selections.push({ socketId, color, name, turnOrder, specialist });
             };
 
             return selections;
@@ -282,7 +282,7 @@ export class SetupProcessor {
     }
 
     // MARK: Players
-    private draftPlayers(entries: Array<PlayerEntry>,): Array<PlayerDraft> {
+    private draftPlayers(entries: Array<PlayerEntry>): Array<PlayerDraft> {
         const rearranged = entries
             .map(e => { return { entry: e, order: Math.random() } })
             .sort((a, b) => a.order - b.order)
@@ -302,7 +302,7 @@ export class SetupProcessor {
             const token = orderTokens.shift() || 0;
 
             return {
-                clientId: e.clientId,
+                socketId: e.socketId,
                 color: e.color,
                 name: e.name,
                 turnOrder: token,
@@ -326,7 +326,7 @@ export class SetupProcessor {
 
         const players: Array<Player> = selections.map(s => {
             const playerDto: Player = {
-                clientId: s.clientId,
+                socketId: s.socketId,
                 color: s.color,
                 timeStamp: 0,
                 isIdle: false,

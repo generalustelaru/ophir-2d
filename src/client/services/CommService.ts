@@ -1,6 +1,5 @@
 import {
-    Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, Action,
-    StateResponse,
+    Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission,
 } from '../../shared_types';
 import { Communicator } from './Communicator';
@@ -49,17 +48,17 @@ export const CommunicationService = new class extends Communicator {
             console.debug('<-', data);
 
             if (this.isClientIdResponse(data)) {
-                if (localState.clientId === null) {
-                    this.createEvent({
-                        type: EventName.identification,
-                        detail: { clientId: data.clientId }
-                    });
-                } else {
-                    this.sendMessage({
-                        action: Action.waiver_client,
-                        payload: { waiveredId: data.clientId, myId: localState.clientId },
-                    });
-                }
+                this.createEvent({
+                    type: EventName.identification,
+                    detail: { socketId: data.socketId }
+                });
+                // if (localState.clientId === null) {
+                // } else {
+                //     this.sendMessage({
+                //         action: Action.waiver_client,
+                //         payload: { waiveredId: data.clientId, myId: localState.clientId },
+                //     });
+                // }
 
                 return;
             }
@@ -96,8 +95,8 @@ export const CommunicationService = new class extends Communicator {
             return;
         }
 
-        const { gameId, clientId: clientId, playerColor, playerName } = localState;
-        const request: ClientRequest = { gameId, clientId, playerColor, playerName, message };
+        const { gameId, socketId, playerColor, playerName } = localState;
+        const request: ClientRequest = { gameId, socketId, playerColor, playerName, message };
 
         console.debug('->', request);
 
@@ -113,7 +112,7 @@ export const CommunicationService = new class extends Communicator {
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
-        return 'clientId' in data;
+        return 'socketId' in data;
     }
 
     private isErrorResponse(data: ServerMessage): data is ErrorResponse {

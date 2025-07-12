@@ -8,7 +8,7 @@ import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 
 export type WsClient = {
-    clientId: string,
+    socketId: string,
     gameId: string | null,
     socket: WebSocket
 }
@@ -36,6 +36,13 @@ export type PlayerCountables = {
     silver: number;
     favor: number;
     coins: number;
+}
+
+export type PlayerIdentity = {
+    socketId: string,
+    color: PlayerColor,
+    name: string,
+    turnOrder: number,
 }
 
 /**
