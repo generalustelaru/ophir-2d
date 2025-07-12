@@ -62,7 +62,7 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
     }
 
     public update(value: number) {
-        const backdrift = value > 9 ? 20 : 9;
+        const backdrift = value > 9 ? 10 : 5;
         this.vp.x(this.group.width() / 2 - backdrift)
         this.vp.text(String(value));
     }
