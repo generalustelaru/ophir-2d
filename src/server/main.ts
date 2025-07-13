@@ -109,6 +109,9 @@ socketServer.on('connection', function connection(socket) {
     });
 
     socket.on('close', () => {
+        const deadClient = singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity)  => p.socketId === socketId)
+        if (deadClient)
+            console.log('Removing disconnected client of', deadClient.name)
         socketClients.delete(socketId);
     });
 });
@@ -178,3 +181,12 @@ function broadcast(message: ServerMessage): void {
 function transmit(client: WebSocket, message: ServerMessage): void {
     client.send(JSON.stringify(message));
 }
+
+setInterval(() => {
+    socketClients.forEach((client, socketId) => {
+        if (client.socket.readyState === WebSocket.CLOSED) {
+            socketClients.delete(socketId);
+            console.log('Removing abandoned client:', socketId)
+        }
+    });
+}, 60000); // Every minute

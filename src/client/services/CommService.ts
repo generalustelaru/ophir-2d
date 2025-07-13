@@ -52,13 +52,6 @@ export const CommunicationService = new class extends Communicator {
                     type: EventName.identification,
                     detail: { socketId: data.socketId }
                 });
-                // if (localState.clientId === null) {
-                // } else {
-                //     this.sendMessage({
-                //         action: Action.waiver_client,
-                //         payload: { waiveredId: data.clientId, myId: localState.clientId },
-                //     });
-                // }
 
                 return;
             }
