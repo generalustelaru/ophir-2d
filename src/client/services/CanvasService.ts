@@ -113,6 +113,7 @@ export const CanvasService = new class extends Communicator {
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
+                    this.playerGroup.updatePlayerVp(localState.playerColor!, localState.vp);
                     this.isPlayDrawn = true;
                 }
                 this.locationGroup.update(state);
