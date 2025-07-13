@@ -6,7 +6,8 @@ import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
 import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse } from "../shared_types";
 const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
-// Initializations
+
+// MARK: INIT
 const serverAddress = process.env.SERVER_ADDRESS;
 const wsPort = process.env.WS_PORT;
 
@@ -71,9 +72,6 @@ window.addEventListener('timeout', () => {
 });
 
 window.addEventListener(EventName.close, () => {
-    if (PERSIST_SESSION)
-        localStorage.setItem('persistedState', JSON.stringify(localState));
-
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();
@@ -97,7 +95,9 @@ window.addEventListener(EventName.vp_transmission, (event: CustomEventInit<VpTra
     const { vp } = event.detail;
     localState.vp = vp;
     sessionStorage.setItem('localState', JSON.stringify(localState));
-    CanvasService.updatePlayerVp(localState.playerColor, vp);
+
+    if (PERSIST_SESSION)
+        localStorage.setItem('persistedState', JSON.stringify(localState));
 });
 
 window.addEventListener(EventName.reset, (event: CustomEventInit) => {
@@ -119,6 +119,9 @@ window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => 
     if (!localState.gameId) {
         localState.gameId = enrolmentState.gameId;
         sessionStorage.setItem('localState', JSON.stringify(localState));
+
+        if (PERSIST_SESSION)
+            localStorage.setItem('persistedState', JSON.stringify(localState));
     }
 
     debug(enrolmentState);
@@ -149,9 +152,6 @@ window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
         playState,
         playState.hasGameEnded
     );
-
-    if (playerColor)
-        CanvasService.updatePlayerVp(playerColor, vp);
 
     debug(playState);
 });

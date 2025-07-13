@@ -8,6 +8,7 @@ import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
 import { EventName } from '../client_types';
 
+const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 export const UserInterface = new class extends Communicator {
 
@@ -68,6 +69,9 @@ export const UserInterface = new class extends Communicator {
     private updatePlayerName = (): void => {
         localState.playerName = this.playerNameInput.element.value;
         sessionStorage.setItem('localState', JSON.stringify(localState));
+
+        if (PERSIST_SESSION)
+            localStorage.setItem('persistedState', JSON.stringify(localState));
     }
 
     private sendChatMessage = (): void => {
@@ -135,6 +139,9 @@ export const UserInterface = new class extends Communicator {
             localState.playerColor = selectedId;
             localState.playerName = (/\w/).test(name) ? name : selectedId;
             sessionStorage.setItem('localState', JSON.stringify(localState));
+
+        if (PERSIST_SESSION)
+            localStorage.setItem('persistedState', JSON.stringify(localState));
 
             return this.createEvent({
                 type: EventName.action,
