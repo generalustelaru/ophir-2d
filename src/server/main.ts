@@ -1,15 +1,20 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState } from '../shared_types';
-import { WsClient } from './server_types';
+import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, State, PlayerEntity } from '../shared_types';
+import { PrivateState, SavedSession, WsClient } from './server_types';
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
 import { validator } from "./services/validation/ValidatorService";
 import { randomUUID } from 'crypto';
 import readline from 'readline';
+const fs = require('fs').promises;
+const path = require('path');
+const STATE_FILE = 'game-state.json';
 
-import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, SERVER_NAME } from './configuration';
+import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, SERVER_NAME, PERSIST_SESSION } from './configuration';
+
+
 
 if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT) {
     console.error('Missing environment variables');
@@ -84,7 +89,26 @@ const rl = readline.createInterface({
 const socketClients: Map<string, WsClient> = new Map();
 const socketServer = new WebSocketServer({ port: WS_PORT });
 
-const singleSession = new GameSession(broadcastCallback, vpTransmitCallback);
+// let savedState: SavedSession | null = null;
+// loadGameState().then(s => {
+//     savedState = s;
+// });
+// let savedState;//= await loadGameState();
+let singleSession: GameSession | null;
+
+loadGameState().then(data => {
+    singleSession = new GameSession(
+        broadcastCallback,
+    vpTransmitCallback,
+    PERSIST_SESSION ?  data : null,
+    )
+});
+
+// const singleSession = new GameSession(
+//     broadcastCallback,
+//     vpTransmitCallback,
+//     PERSIST_SESSION ? savedState : null,
+// );
 
 socketServer.on('connection', function connection(socket) {
     const socketId = randomUUID();
@@ -100,7 +124,10 @@ socketServer.on('connection', function connection(socket) {
             return transmit(socket, { error: 'Invalid request data.' });
 
         logRequest(clientRequest);
-        const response = singleSession.processAction(clientRequest);
+        const response = singleSession?.processAction(clientRequest);
+
+        if (!response)
+            return transmit(socket, { error: 'Session has become corrupt.' });
 
         if (response.senderOnly)
             return transmit(socket, response.message);
@@ -154,6 +181,7 @@ function logRequest(request: ClientRequest) {
 }
 
 function shutDown() {
+    PERSIST_SESSION && singleSession && saveGameState(singleSession.getCurrentSession());
     console.log('Shutting down...');
     rl.close();
     socketClients.forEach(client => client.socket.close(1000));
@@ -165,6 +193,9 @@ function shutDown() {
 }
 
 function reset() {
+    if (!singleSession)
+        return broadcast({ error: 'Session has become corrupt.' });
+
     console.log('Session is resetting!');
     singleSession.resetSession();
     const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
@@ -190,3 +221,25 @@ setInterval(() => {
         }
     });
 }, 60000); // Every minute
+
+// DEBUG
+async function saveGameState(statepack: {sharedState: State, privateState: PrivateState|null}) {
+    const fileAddress = path.join(__dirname, '..', STATE_FILE);
+
+    try {
+        await fs.writeFile(fileAddress, JSON.stringify(statepack, null, 2));
+        console.log('Game state saved');
+    } catch (error) {
+        console.error('Failed to save game state:', error);
+    }
+}
+async function loadGameState(): Promise<SavedSession|null> {
+    const fileAddress = path.join(__dirname, '..', STATE_FILE);
+    try {
+        const data = await fs.readFile(fileAddress, 'utf8');
+        return JSON.parse(data) as SavedSession;
+    } catch (error) {
+        return null;
+    }
+}
+

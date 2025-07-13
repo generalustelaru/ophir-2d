@@ -1,11 +1,11 @@
-import { InfoDetail, ErrorDetail, LocalState, EventName } from "./client_types";
+import { InfoDetail, ErrorDetail, EventName } from "./client_types";
 import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterface } from "./services/UiService";
 import clientConstants from "./client_constants";
 import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse } from "../shared_types";
-
+const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 // Initializations
 const serverAddress = process.env.SERVER_ADDRESS;
 const wsPort = process.env.WS_PORT;
@@ -16,9 +16,12 @@ if (!wsPort || !serverAddress)
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
 const savedState = sessionStorage.getItem('localState');
+const persistedState = localStorage.getItem('persistedState');
 const { gameId, socketId, playerColor, playerName, vp } = savedState
-    ? JSON.parse(savedState) as LocalState
-    : clientConstants.DEFAULT_LOCAL_STATE as LocalState;
+    ? JSON.parse(savedState)
+    : PERSIST_SESSION && persistedState
+        ? JSON.parse(persistedState)
+        : clientConstants.DEFAULT_LOCAL_STATE;
 
 localState.gameId = gameId;
 localState.socketId = socketId;
@@ -68,6 +71,9 @@ window.addEventListener('timeout', () => {
 });
 
 window.addEventListener(EventName.close, () => {
+    if (PERSIST_SESSION)
+        localStorage.setItem('persistedState', JSON.stringify(localState));
+
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();

@@ -39,6 +39,10 @@ export class PlayProcessor {
         return this.playState.toDto();
     }
 
+    public getPrivateState() {
+        return this.privateState.toDto();
+    }
+
     // MARK: MOVE
     public processMove(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
