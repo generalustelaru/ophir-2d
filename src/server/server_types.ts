@@ -1,6 +1,7 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Specialist,
     TradeGood, GoodsLocationName, MessagePayload, ExchangeTier, ServerMessage,
+    State,
 } from '../shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -91,4 +92,9 @@ export interface ObjectHandler<T> {
 
 export interface SessionProcessor {
     getState: () => ServerMessage
+}
+
+export type SavedSession = {
+    sharedState: State,
+    privateState: PrivateState | null
 }

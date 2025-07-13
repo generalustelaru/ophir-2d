@@ -1,7 +1,7 @@
-import {WsDigest, DataDigest } from "./server_types";
+import {WsDigest, DataDigest, SavedSession } from "./server_types";
 import { randomUUID } from 'crypto';
 import {
-    ClientRequest, ServerMessage, Action, Phase, PlayState, RequestMatch, PlayerDraft, StateResponse,
+    ClientRequest, ServerMessage, Action, Phase, PlayState, RequestMatch, PlayerDraft, StateResponse, PlayerColor,
 } from "./../shared_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib, { Probable } from './action_processors/library'
@@ -10,6 +10,8 @@ import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from '../server/server_constants';
 import { SINGLE_PLAYER } from "./configuration";
+import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
+import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
@@ -19,11 +21,50 @@ export class GameSession {
     constructor(
         broadcastCallback: (state: PlayState) => void,
         vpTransmitCallback: (vp: number, socketId: string) => void,
+        savedSession: SavedSession | null,
     ) {
-        this.actionProcessor = new EnrolmentProcessor(this.getNewState());
+
         this.autoBroadcast = broadcastCallback
         this.transmitVp = vpTransmitCallback
-        console.info('Game session created');
+
+        if (savedSession) {
+            this.actionProcessor = (()=> {
+                const {sharedState, privateState} = savedSession;
+                const { gameId, sessionOwner, players, chat } = sharedState;
+
+                switch (sharedState.sessionPhase) {
+                    case Phase.play:
+                        return new PlayProcessor(
+                            {
+                                playState: new PlayStateHandler('King Remembrance',sharedState),
+                                privateState: new PrivateStateHandler(privateState!),
+                            },
+                            this.autoBroadcast,
+                            this.transmitVp,
+                        )
+                    case Phase.setup:
+                        return new SetupProcessor({ gameId, sessionOwner:(sessionOwner as PlayerColor), players, chat })
+                    case Phase.enrolment:
+                        return new EnrolmentProcessor(sharedState)
+                    default:
+                        return new EnrolmentProcessor(this.getNewState());
+                }
+            })();
+            console.info('Game session restored');
+        } else {
+            this.actionProcessor = new EnrolmentProcessor(this.getNewState());
+            console.info('Game session created');
+        }
+    }
+
+    public getCurrentSession() {
+        const state = this.actionProcessor.getState();
+        return {
+            sharedState: state,
+            privateState: state.sessionPhase === Phase.play
+                ? (this.actionProcessor as PlayProcessor).getPrivateState()
+                : null,
+        };
     }
 
     public resetSession() {
