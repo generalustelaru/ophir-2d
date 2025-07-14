@@ -171,7 +171,10 @@ export class PlayProcessor {
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
-        this.playState.addServerMessage(`${player.getIdentity().name} has spent favor`, player.getIdentity().color);
+        this.playState.addServerMessage(
+            `${player.getIdentity().name} has spent favor`,
+            player.getIdentity().color,
+        );
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -300,7 +303,7 @@ export class PlayProcessor {
                 const reward = trade.reward.favorAndVp;
                 player.gainFavor(reward);
                 this.privateState.updateVictoryPoints(color, reward);
-                this.playState.addServerMessage(`${name} donated for ${reward} favor and VP`, color);
+                this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
                 console.info(this.privateState.getGameStats());
 
                 this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);

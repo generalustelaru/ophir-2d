@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventName } from "./client_types";
+import { InfoDetail, ErrorDetail, EventName, LocalState } from "./client_types";
 import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
@@ -16,13 +16,18 @@ if (!wsPort || !serverAddress)
 
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
+if (!PERSIST_SESSION)
+    localStorage.removeItem('persistedState');
+
 const savedState = sessionStorage.getItem('localState');
 const persistedState = localStorage.getItem('persistedState');
-const { gameId, socketId, playerColor, playerName, vp } = savedState
-    ? JSON.parse(savedState)
-    : PERSIST_SESSION && persistedState
-        ? JSON.parse(persistedState)
-        : clientConstants.DEFAULT_LOCAL_STATE;
+const { gameId, socketId, playerColor, playerName, vp } = ((): LocalState => {
+    switch (true) {
+        case !!savedState: return JSON.parse(savedState);
+        case PERSIST_SESSION && !!persistedState: return JSON.parse(persistedState)
+        default: return clientConstants.DEFAULT_LOCAL_STATE;
+    }
+})();
 
 localState.gameId = gameId;
 localState.socketId = socketId;
@@ -102,7 +107,12 @@ window.addEventListener(EventName.vp_transmission, (event: CustomEventInit<VpTra
 
 window.addEventListener(EventName.reset, (event: CustomEventInit) => {
     const response: ResetResponse = event.detail;
-    sessionStorage.removeItem('localState');
+    sessionStorage.clear();
+
+    if (PERSIST_SESSION)
+        localStorage.clear();
+
+
     alert(`The game has been reset by ${response.resetFrom}`);
     window.location.reload();
 });
