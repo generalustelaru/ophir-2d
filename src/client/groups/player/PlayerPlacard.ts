@@ -90,7 +90,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             stage,
             player,
             { x: this.vpDial ? 175 : 130, y: 40 },
-            isLocalPlayer ? { action: Action.inquire, payload: null } : null,
+            isLocalPlayer ? { action: Action.sell_good, payload: null } : null,
         );
         this.group.add(this.specialtyGoodButton.getElement());
 
@@ -103,6 +103,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update(influence);
+        this.specialtyGoodButton.update(true);
     }
 
     public updateVP(vp: number) {
