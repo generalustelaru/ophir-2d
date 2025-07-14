@@ -334,6 +334,10 @@ export class PlayProcessor {
             player.gainCoins(1);
             player.setTrades(this.pickFeasibleTrades(unload.data))
             player.clearMoves();
+
+            if (!player.getCargo().includes(specialty))
+                player.removeAction(Action.sell_good);
+
             this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
 
             return lib.pass(this.saveAndReturn(player));
