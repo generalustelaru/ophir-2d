@@ -58,6 +58,6 @@ If the server session gets stuck, input `reset` in the running server's CLI.
 
  On your turn you will move and get to perform available Actions at your destination by clicking on elements. Interactive elements are generally depicted as cards or icons. Your cursor will turn into a pointer when hovering over them if they're available or into a restricted icon if they're not available. When done you will have to end your turn by clicking on the green anchor icon (lower right of the map). The next player will be able to take his or her turn immediately after.
 
- With two players, a third ship is added. Players can move it during their turn when they enter its zone.   
+ With two players, a third ship is added. Players can move it during their turn when they enter its zone.
 
  There's decent amount of rules to Ophir. Refer to the included RULES.md document for details. You can also play by following your intuition (the rules are enforced, you can't cheat).

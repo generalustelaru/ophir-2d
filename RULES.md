@@ -1,6 +1,8 @@
 ### Setup and goal
 
-At game start, unique locations are randomly assigned to each zone. Two natural barriers are also placed as to restrict passage between adjacent zones.
+At game start, unique locations are randomly assigned to each map zone. Two natural barriers are also placed as to restrict passage between adjacent zones. Each player will now have to select a specialist card. The card provides a unique special ability, some starting Favor, and, usually, a Speciality Good.
+
+You can switch between the map and specialist offer by clicking the bottom show/hide button.
 
 The Temple (blue location icon) is under construction and requires donations of precious Metals to progress. After every 3rd donation, Metal prices will increase. Once the Temple is complete, the game ends and scores are tallied. Progress on the Temple can be monitored on the botttom left Temple Placard. The number of donations required varies with the number of players.
 
@@ -43,6 +45,7 @@ A Market Card features an assortment of Trade Goods that Players can exchange fo
 The number on the bottom right of a Market Card shows its potential value in VP and Favor (as a Temple donation). If the Market Card shows an arrow in its bottom left corner, it means that its Coin value has been modified. The upwards green arrow means +1 and the downwards red arrow -1 respectively. These two modifiers are assigned randomly to market slots at game start and only affect Market Cards which are placed on them. Hence, the fluctuation of the Coin reward is constant as Market Cards shift to the right.
 
    - Sell Trade Goods: Once per turn, you may click on an available Market Card to deliver the required Trade Goods from your Cargo for the amount of Coins pictured. Note that the Market Card you picked will drift rightwards and might remain in offer but at a different value.
+   - Sell Specialty Good: You may sell as many goods as you want of the type provided by your Specialist for 1 Coin each. Click on the Specialty Good icon on your Player Placard.
 
 The game can also end if the market deck runs out, meaning players have focused on trading Trade Goods instead of delivering precious metals.
 
