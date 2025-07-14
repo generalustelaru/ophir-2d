@@ -99,9 +99,9 @@ let singleSession: GameSession | null;
 loadGameState().then(data => {
     singleSession = new GameSession(
         broadcastCallback,
-    vpTransmitCallback,
-    PERSIST_SESSION ?  data : null,
-    )
+        vpTransmitCallback,
+        PERSIST_SESSION ?  data : null,
+    );
 });
 
 // const singleSession = new GameSession(
@@ -118,16 +118,22 @@ socketServer.on('connection', function connection(socket) {
     socket.send(JSON.stringify(response));
 
     socket.on('message', function incoming(req: string) {
+        if (!singleSession)
+            return transmit(socket, { error: 'Session is unavailable.' });
+
         const clientRequest = validator.validateClientRequest(tools.parse(req));
 
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
         logRequest(clientRequest);
-        const response = singleSession?.processAction(clientRequest);
+        const response = singleSession.processAction(clientRequest);
 
         if (!response)
             return transmit(socket, { error: 'Session has become corrupt.' });
+
+        if (PERSIST_SESSION)
+            saveGameState(singleSession.getCurrentSession());
 
         if (response.senderOnly)
             return transmit(socket, response.message);
@@ -181,7 +187,6 @@ function logRequest(request: ClientRequest) {
 }
 
 function shutDown() {
-    PERSIST_SESSION && singleSession && saveGameState(singleSession.getCurrentSession());
     console.log('Shutting down...');
     rl.close();
     socketClients.forEach(client => client.socket.close(1000));
@@ -228,7 +233,6 @@ async function saveGameState(statepack: {sharedState: State, privateState: Priva
 
     try {
         await fs.writeFile(fileAddress, JSON.stringify(statepack, null, 2));
-        console.log('Game state saved');
     } catch (error) {
         console.error('Failed to save game state:', error);
     }
