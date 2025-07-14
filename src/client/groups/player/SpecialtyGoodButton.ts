@@ -1,10 +1,16 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { Player, Coordinates, ClientMessage } from '../../../shared_types';
+import { Player, Coordinates, ClientMessage, PlayerColor } from '../../../shared_types';
 import clientConstants from '../../client_constants';
 
+const { CARGO_ITEM_DATA, COLOR } = clientConstants;
+
 export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInterface<boolean> {
+
+    background: Konva.Rect;
+    playerColor: PlayerColor;
+    isLocalPlayer: boolean;
 
     constructor(
         stage: Konva.Stage,
@@ -12,7 +18,6 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
         position: Coordinates,
         message: ClientMessage | null,
     ) {
-        const { CARGO_ITEM_DATA, COLOR } = clientConstants;
 
         const size = { width: 50, height: 50 };
         const layout = { ...position, ...size };
@@ -20,12 +25,16 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
 
         super(stage, layout, specialty ? message : null);
 
-        const background = new Konva.Rect({
+        this.playerColor = player.color;
+        this.isLocalPlayer = !!message;
+        this.background = new Konva.Rect({
             ...size,
             fill: COLOR[`holdDark${player.color}`],
             cornerRadius: 10,
+            stroke: message ? 'white' : undefined,
+            strokeWidth: 2
         });
-        this.group.add(background);
+        this.group.add(this.background);
 
         if (specialty) {
             const iconData = CARGO_ITEM_DATA[specialty];
@@ -47,6 +56,10 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
     }
 
     public update(maySell: boolean): void {
+        this.background.fill(this.isLocalPlayer && maySell
+            ? COLOR.marketOrange
+            : COLOR[`holdDark${this.playerColor}`]
+        )
         this.setEnabled(maySell);
     }
 }

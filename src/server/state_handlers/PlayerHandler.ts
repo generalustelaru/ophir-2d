@@ -125,6 +125,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.locationActions.overwrite(actions);
     }
 
+    public removeAction(action: LocationAction) {
+        this.locationActions.removeOne(action);
+    }
+
     public spendMove() {
         this.moveActions.update(a => --a);
     }
