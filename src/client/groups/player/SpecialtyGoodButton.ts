@@ -1,25 +1,24 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { Player, Coordinates, ClientMessage, Action, LaconicAction } from '../../../shared_types';
+import { Player, Coordinates, ClientMessage } from '../../../shared_types';
 import clientConstants from '../../client_constants';
-
-const { CARGO_ITEM_DATA, COLOR } = clientConstants;
-const size = { width: 50, height: 50 };
 
 export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInterface<boolean> {
 
     constructor(
         stage: Konva.Stage,
-        // message: ClientMessage | null,
         player: Player,
         position: Coordinates,
+        message: ClientMessage | null,
     ) {
-        const layout = { ...position, ...size };
-        const specialty = player.specialist.specialty;
-        // const message = specialty ? { action: Action.inquire, payload: null } : null;
+        const { CARGO_ITEM_DATA, COLOR } = clientConstants;
 
-        super(stage, layout, null);
+        const size = { width: 50, height: 50 };
+        const layout = { ...position, ...size };
+        const { specialty } = player.specialist;
+
+        super(stage, layout, specialty ? message : null);
 
         const background = new Konva.Rect({
             ...size,

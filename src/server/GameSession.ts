@@ -1,8 +1,9 @@
 import {WsDigest, DataDigest, SavedSession } from "./server_types";
 import { randomUUID } from 'crypto';
 import {
-    ClientRequest, ServerMessage, Action, Phase, PlayState, RequestMatch, PlayerDraft, StateResponse, PlayerColor,
+    ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
 } from "./../shared_types";
+import { RequestMatch } from './server_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib, { Probable } from './action_processors/library'
 import { PlayProcessor } from './action_processors/PlayProcessor';

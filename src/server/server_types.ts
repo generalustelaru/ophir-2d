@@ -1,7 +1,8 @@
 import {
-    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Specialist,
-    TradeGood, GoodsLocationName, MessagePayload, ExchangeTier, ServerMessage,
-    State,
+    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Specialist, TradeGood, GoodsLocationName,
+    MessagePayload, ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage,
+    PlayerEntry,
+    ChatEntry,
 } from '../shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -44,6 +45,18 @@ export type PlayerIdentity = {
     color: PlayerColor,
     name: string,
     turnOrder: number,
+}
+
+export type SetupDigest = {
+    gameId: string,
+    sessionOwner: PlayerColor,
+    players: Array<PlayerEntry>,
+    chat: Array<ChatEntry>,
+}
+
+export type RequestMatch = {
+    player: PlayerEntity,
+    message: ClientMessage,
 }
 
 /**
