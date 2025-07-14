@@ -169,16 +169,13 @@ export type ItemSupplies = {
     goods: Record<TradeGood, number>,
 }
 
+// MARK: STATE
 export enum Phase {
     enrolment = "enrolment",
     setup = "setup",
     play = "play",
 }
 
-
-/**
- * @description Shared between players and server in an ongoing session
- */
 export type PlayState = {
     gameId: string,
     sessionPhase: Phase.play,
@@ -193,7 +190,6 @@ export type PlayState = {
     itemSupplies: ItemSupplies,
     rival: Rival,
 }
-
 export type SetupState = {
     gameId: string,
     sessionPhase: Phase.setup,
@@ -203,10 +199,6 @@ export type SetupState = {
     setup: GamePartialSetup,
     chat: Array<ChatEntry>,
 }
-
-/**
- * @description Shared between players and server in a pending session
- */
 export type EnrolmentState = {
     gameId: string,
     sessionPhase: Phase.enrolment,
@@ -215,15 +207,7 @@ export type EnrolmentState = {
     players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,
 }
-
 export type State = EnrolmentState | SetupState | PlayState;
-
-export type SetupDigest = {
-    gameId: string,
-    sessionOwner: PlayerColor,
-    players: Array<PlayerEntry>,
-    chat: Array<ChatEntry>,
-}
 
 export type LocationData = {
     name: LocationName,
@@ -240,11 +224,9 @@ export type GameSetup = {
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
 }
-
 export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 
-// MARK: COMMUNICATION
-
+// MARK: REQUEST
 export type ChatPayload = { input: string }
 export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
@@ -260,24 +242,20 @@ export type MetalDonationPayload = { metal: Metal }
 export type WaiverClientPayload = { waiveredId: string, myId: string }
 export type PickSpecialistPayload = { name: SpecialistName }
 
-export type MessagePayload =
-    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
-    | RepositioningPayload | TradePayload | MetalPurchasePayload | PickSpecialistPayload
-    | MetalDonationPayload | WaiverClientPayload | LoadGoodPayload;
-
-export type MessageAction = LaconicAction | VerboiseAction
-type MessageFormat<A extends MessageAction, P extends MessagePayload> = {
-    action: A,
-    payload: P,
-}
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.make_trade | Action.buy_metals | Action.donate_metals | Action.waiver_client | Action.pick_specialist;
 export type LaconicAction =
     | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
-    | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival
-    | Action.start_setup | Action.force_turn;
+    | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
+    | Action.force_turn;
+export type MessageAction = LaconicAction | VerboiseAction;
+export type MessagePayload =
+    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
+    | RepositioningPayload | TradePayload | MetalPurchasePayload | PickSpecialistPayload
+    | MetalDonationPayload | WaiverClientPayload | LoadGoodPayload;
+type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;
@@ -304,11 +282,7 @@ export type ClientRequest = {
     message: ClientMessage,
 }
 
-export type RequestMatch = {
-    player: PlayerEntity,
-    message: ClientMessage,
-}
-
+// MARK: RESPONSE
 export type ClientIdResponse = { socketId: string }
 
 export type StateResponse = { state: State }

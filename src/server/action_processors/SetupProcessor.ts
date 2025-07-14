@@ -1,13 +1,9 @@
 import {
-    BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey,
-    LocationData, Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, SetupDigest,
-    Specialist, MapPairings, LocationName, ZoneName,
-    PlayerSelection,
-    SpecialistName,
-    PlayerEntity,
-    StateResponse,
+    BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
+    Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, Specialist, MapPairings,
+    LocationName, ZoneName, PlayerSelection, SpecialistName, PlayerEntity, StateResponse,
 } from '../../shared_types';
-import { DestinationPackage, StateBundle } from '../server_types';
+import { DestinationPackage, StateBundle, SetupDigest} from '../server_types';
 import serverConstants from '../server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -21,6 +17,7 @@ import lib, { Probable } from './library';
 
 // @ts-ignore
 const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
+console.log('Active keys:');
 console.log(activeKeys);
 
 const {
