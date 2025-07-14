@@ -168,6 +168,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.cargo.get();
     }
 
+    public getSpecialty() {
+        return this.specialist.get().specialty;
+    }
+
     public mayLoadGood() {
         return (
             this.isAnchored.get()
@@ -190,6 +194,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
             && this.cargo.includes(metal)
             && this.locationActions.includes(Action.donate_metals)
         );
+    }
+
+    public maySellSpecialtyGood() {
+        return (
+            this.isAnchored.get()
+            && this.bearings.get().location === 'market'
+            && this.cargo.includes(this.specialist.get().specialty)
+        )
     }
 
     public mayUpgradeCargo() {

@@ -319,6 +319,29 @@ export class PlayProcessor {
         return this.issueMarketShiftResponse(player);
     }
 
+    public processSpecialtyGoodSale(data: DataDigest): Probable<StateResponse> {
+        const { player } = data;
+        const { name, color} = player.getIdentity();
+        const specialty = player.getSpecialty();
+
+        if (specialty && player.maySellSpecialtyGood()) {
+            const unload = this.unloadItem(player.getCargo(), specialty);
+
+            if (unload.err)
+                return lib.fail(unload.message);
+
+            player.setCargo(unload.data);
+            player.gainCoins(1);
+            player.setTrades(this.pickFeasibleTrades(unload.data))
+            player.clearMoves();
+            this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
+
+            return lib.pass(this.saveAndReturn(player));
+        }
+
+        return lib.fail('Player does not meet conditions for selling specialty good.');
+    }
+
     // MARK: BUY METAL
     // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest): Probable<StateResponse> {

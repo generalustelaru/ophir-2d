@@ -288,6 +288,8 @@ export class GameSession {
                     return processor.processLoadGood(digest);
                 case Action.make_trade:
                     return processor.processGoodsTrade(digest);
+                case Action.sell_good:
+                    return processor.processSpecialtyGoodSale(digest);
                 case Action.buy_metals:
                     return processor.processMetalPurchase(digest);
                 case Action.donate_metals:
