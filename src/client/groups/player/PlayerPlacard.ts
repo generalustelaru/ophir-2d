@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
-import { Player, PlayerColor } from '../../../shared_types';
+import { Action, Player, PlayerColor } from '../../../shared_types';
 import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import { VictoryPointDial } from '../VictoryPointDial';
 import clientConstants from '../../client_constants';
@@ -90,6 +90,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             stage,
             player,
             { x: this.vpDial ? 175 : 130, y: 40 },
+            isLocalPlayer ? { action: Action.inquire, payload: null } : null,
         );
         this.group.add(this.specialtyGoodButton.getElement());
 

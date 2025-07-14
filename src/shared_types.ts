@@ -18,6 +18,7 @@ export enum Action {
     drop_item = 'drop_item',
     reposition = 'reposition',
     make_trade = 'make_trade',
+    sell_good = 'sell_good',
     buy_metals = 'buy_metals',
     donate_metals = 'donate_metals',
     waiver_client = 'waiver_client',
@@ -249,7 +250,7 @@ export type VerboiseAction =
 export type LaconicAction =
     | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
-    | Action.force_turn;
+    | Action.force_turn | Action.sell_good;
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
