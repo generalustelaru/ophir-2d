@@ -5,6 +5,7 @@ import { Player, PlayerColor } from '../../../shared_types';
 import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import { VictoryPointDial } from '../VictoryPointDial';
 import clientConstants from '../../client_constants';
+import { SpecialtyGoodButton } from './SpecialtyGoodButton';
 
 const { COLOR } = clientConstants;
 
@@ -18,6 +19,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
     private vpDial: VictoryPointDial | null;
+    private specialtyGoodButton: SpecialtyGoodButton;
     private id: PlayerColor;
     private localPlayerColor: PlayerColor | null;
 
@@ -83,6 +85,13 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             0,
         ) : null;
         this.vpDial && this.group.add(this.vpDial.getElement());
+
+        this.specialtyGoodButton = new SpecialtyGoodButton(
+            stage,
+            player,
+            { x: this.vpDial ? 175 : 130, y: 40 },
+        );
+        this.group.add(this.specialtyGoodButton.getElement());
 
     }
 
