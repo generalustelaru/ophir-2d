@@ -47,6 +47,6 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
     }
 
     public update(maySell: boolean): void {
-        console.log({maySell})
+        this.setEnabled(maySell);
     }
 }
