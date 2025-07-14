@@ -203,6 +203,7 @@ function reset() {
 
     console.log('Session is resetting!');
     singleSession.resetSession();
+    saveGameState(singleSession.getCurrentSession());
     const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
 
     broadcast(resetMessage);
