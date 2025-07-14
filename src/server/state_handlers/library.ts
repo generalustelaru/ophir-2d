@@ -104,7 +104,7 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
 export type ArrayWritable<T> = {
     count: () => number,
     get: () => Array<T>,
-    includes: (value: string|number) => boolean,
+    includes: (value: string|number|null) => boolean,
     getOne: (value: string|number) => T | null,
     addOne: (element: T) => void,
     updateOne: (value: string|number, fn: (val: T) => T) => void,

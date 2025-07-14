@@ -42,9 +42,8 @@ export type Currency = "coins" | "favor";
 export type GoodsLocationName = "quary" | "forest" | "mines" | "farms";
 export type LocationName = "temple" | "market" | "treasury" | GoodsLocationName;
 export type LocationAction =
-    | Action.upgrade_cargo | Action.make_trade | Action.buy_metals
-    | Action.load_good | Action.donate_metals;
-
+    | Action.upgrade_cargo | Action.make_trade | Action.buy_metals | Action.load_good | Action.donate_metals
+    | Action.sell_good;
 export type ItemName = TradeGood | CargoMetal | "empty";
 export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
 export type Trade = { request: Array<TradeGood>, reward: Reward };
