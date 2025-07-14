@@ -55,6 +55,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             this.stage,
             color,
             { cargo, canDrop: false },
+            isLocalPlayer,
         );
 
         this.favorDial = new FavorDial(
@@ -103,7 +104,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update(influence);
-        this.specialtyGoodButton.update(true);
+        this.specialtyGoodButton.update(isActive);
     }
 
     public updateVP(vp: number) {

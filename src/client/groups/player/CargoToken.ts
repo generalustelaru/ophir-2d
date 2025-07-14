@@ -9,11 +9,11 @@ const { CARGO_ITEM_DATA } = clientConstants;
 export class CargoToken extends ActionButton {
     private path: Konva.Path;
 
-    constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemName) {
+    constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemName, isLocalPlayer: boolean) {
         super(
             stage,
             { width: 0, height: 0, x: position.x, y: position.y },
-            { action: Action.drop_item, payload: { item: itemId } },
+            isLocalPlayer ? { action: Action.drop_item, payload: { item: itemId } }: null,
         );
 
         const tokenData = CARGO_ITEM_DATA[itemId];

@@ -16,8 +16,10 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
     private stage: Konva.Stage;
     private cargoDisplay: Konva.Rect;
     private cargoDrawData: Array<CargoSlot>;
+    private isLocalPlayer: boolean;
 
-    constructor(stage: Konva.Stage, playerColor: PlayerColor, update: CargoBandUpdate) {
+    constructor(stage: Konva.Stage, playerColor: PlayerColor, update: CargoBandUpdate, isLocalPlayer: boolean) {
+        this.isLocalPlayer = isLocalPlayer;
         this.stage = stage;
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
@@ -83,6 +85,7 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
             this.stage,
             { x: cargoSlot.x, y: 4 },
             itemId,
+            this.isLocalPlayer,
         );
 
         cargoSlot.element = token;
