@@ -69,10 +69,11 @@ window.addEventListener(EventName.connected, () => {
     CommunicationService.sendMessage({ action: Action.inquire, payload: null })
 });
 
-window.addEventListener('timeout', () => {
+window.addEventListener(EventName.timeout, () => {
     UserInterface.setInfo('Connection timeout');
     UserInterface.disable();
     CanvasService.disable();
+    UserInterface.setInfo('The server is off or restarting. Try refreshing the page.');
     alert('Please refresh the page');
 });
 
@@ -80,8 +81,8 @@ window.addEventListener(EventName.close, () => {
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();
-    UserInterface.setInfo('Connection closed. Try again later.');
-    alert('The connection was closed');
+    UserInterface.setInfo('The server is off or restarting. Try refreshing the page.');
+    alert('Please refresh the page');
 });
 
 window.addEventListener(EventName.identification, (event: CustomEventInit<ClientIdResponse>) => {
