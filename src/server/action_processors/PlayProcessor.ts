@@ -448,16 +448,16 @@ export class PlayProcessor {
         if (isTempleComplete) {
             this.killIdleChecks();
             player.clearActions();
+            this.playState.savePlayer(player.toDto());
+
             const results = this.compileGameResults();
 
             if (results.err)
                 return lib.fail(results.message);
 
+            this.playState.registerGameEnd(results.data);
             this.playState.addServerMessage('The temple construction is complete! Game has ended.');
             this.playState.addServerMessage(JSON.stringify(results.data));
-
-            this.playState.savePlayer(player.toDto());;
-            this.playState.registerGameEnd(results.data);
 
             return lib.pass({ state: this.playState.toDto() });
         }
