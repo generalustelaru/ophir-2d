@@ -172,6 +172,16 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.cargo.get();
     }
 
+    public getSpecialist() {
+        return this.specialist.get();
+    }
+    public getSpecialistDisplayName() {
+        return this.specialist.get().displayName;
+    }
+
+    public getSpecialistName() {
+        return this.specialist.get().name;
+    }
     public getSpecialty() {
         return this.specialist.get().specialty;
     }
@@ -223,6 +233,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public mayEndTurn(){
         return this.isAnchored.get() && !this.handlesRival();
+    }
+
+    public endsTurnFreely() {
+        return this.getMoves() || this.getActions().length;
     }
 
     public setCargo(cargo: Array<ItemName>) {
