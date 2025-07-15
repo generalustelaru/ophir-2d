@@ -1,5 +1,5 @@
-import { HexCoordinates } from "./client/client_types";
-import { PlayerCountables } from "./server/server_types";
+import { HexCoordinates } from './client/client_types';
+import { PlayerCountables } from './server/server_types';
 
 /**
  * @description Action strings require detailed standardization as they appear in intersecting types.
@@ -21,34 +21,34 @@ export enum Action {
     sell_good = 'sell_good',
     buy_metals = 'buy_metals',
     donate_metals = 'donate_metals',
-    inquire = "inquire",
-    enrol = "enrol",
-    end_turn = "end_turn",
-    force_turn = "force_turn",
-    declare_reset = "declare_reset",
-    spend_favor = "spend_favor",
+    inquire = 'inquire',
+    enrol = 'enrol',
+    end_turn = 'end_turn',
+    force_turn = 'force_turn',
+    declare_reset = 'declare_reset',
+    spend_favor = 'spend_favor',
     upgrade_cargo = 'upgrade_cargo',
 }
 export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type Coordinates = { x: number, y: number };
-export type PlayerColor = "Purple" | "Yellow" | "Red" | "Green";
-export type ZoneName = "center" | "topRight" | "right" | "bottomRight" | "bottomLeft" | "left" | "topLeft";
-export type TradeGood = "gems" | "wood" | "stone" | "cloth";
-export type Metal = "silver" | "gold";
-export type CargoMetal = Metal | "silver_extra" | "gold_extra";
-export type Currency = "coins" | "favor";
-export type GoodsLocationName = "quary" | "forest" | "mines" | "farms";
-export type LocationName = "temple" | "market" | "treasury" | GoodsLocationName;
+export type PlayerColor = 'Purple' | 'Yellow' | 'Red' | 'Green';
+export type ZoneName = 'center' | 'topRight' | 'right' | 'bottomRight' | 'bottomLeft' | 'left' | 'topLeft';
+export type TradeGood = 'gems' | 'wood' | 'stone' | 'cloth';
+export type Metal = 'silver' | 'gold';
+export type CargoMetal = Metal | 'silver_extra' | 'gold_extra';
+export type Currency = 'coins' | 'favor';
+export type GoodsLocationName = 'quary' | 'forest' | 'mines' | 'farms';
+export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
 export type LocationAction =
     | Action.upgrade_cargo | Action.make_trade | Action.buy_metals | Action.load_good | Action.donate_metals
     | Action.sell_good;
-export type ItemName = TradeGood | CargoMetal | "empty";
-export type MarketSlotKey = "slot_1" | "slot_2" | "slot_3";
+export type ItemName = TradeGood | CargoMetal | 'empty';
+export type MarketSlotKey = 'slot_1' | 'slot_2' | 'slot_3';
 export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
-export type MarketDeckKey = "A" | "B";
+export type MarketDeckKey = 'A' | 'B';
 export type ChatEntry = { color: PlayerColor | null, name: string | null, message: string };
 
 export type ExchangeTier = {
@@ -174,9 +174,9 @@ export type ItemSupplies = {
 
 // MARK: STATE
 export enum Phase {
-    enrolment = "enrolment",
-    setup = "setup",
-    play = "play",
+    enrolment = 'enrolment',
+    setup = 'setup',
+    play = 'play',
 }
 
 export type PlayState = {
