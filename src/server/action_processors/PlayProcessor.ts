@@ -2,6 +2,7 @@ import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
     LocationAction, Metal, StateResponse,
     PlayState,
+    SpecialistName,
 } from '../../shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -477,10 +478,19 @@ export class PlayProcessor {
     // MARK: END TURN
     public processEndTurn(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
-        const { turnOrder } = player.getIdentity();
+        const { turnOrder, name, color } = player.getIdentity();
 
         if (!player.mayEndTurn())
             return lib.fail(`Ship is not anchored.`);
+
+        if (
+            player.getBearings().location === 'temple'
+            && player.getSpecialistName() === SpecialistName.priest
+            && player.endsTurnFreely()
+        ) {
+            this.playState.addServerMessage(`${name} gained 1 Favor for stopping at the temple.`, color);
+            player.gainFavor(1);
+        }
 
         player.deactivate();
         this.playState.savePlayer(player.toDto());
