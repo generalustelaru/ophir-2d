@@ -63,7 +63,7 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
     public getElement(): Konva.Group {
         return this.group;
     }
-
+    
     public update(value: number): void {
         this.amount.text(value.toString());
     }

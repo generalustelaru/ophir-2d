@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '../../client_types';
 import { ActionButton } from '../ActionButton';
-import { Player, Coordinates, ClientMessage, PlayerColor } from '../../../shared_types';
+import { Player, Coordinates, PlayerColor, Action } from '../../../shared_types';
 import clientConstants from '../../client_constants';
 
 const { CARGO_ITEM_DATA, COLOR } = clientConstants;
@@ -16,22 +16,22 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
         stage: Konva.Stage,
         player: Player,
         position: Coordinates,
-        message: ClientMessage | null,
+        isLocalPlayer: boolean,
     ) {
 
         const size = { width: 50, height: 50 };
         const layout = { ...position, ...size };
         const { specialty } = player.specialist;
 
-        super(stage, layout, specialty ? message : null);
+        super(stage, layout, isLocalPlayer && specialty ? { action: Action.sell_good, payload: null } :  null);
 
         this.playerColor = player.color;
-        this.isLocalPlayer = !!message;
+        this.isLocalPlayer = isLocalPlayer;
         this.background = new Konva.Rect({
             ...size,
-            fill: COLOR[`holdDark${player.color}`],
-            cornerRadius: 10,
-            stroke: message ? 'white' : undefined,
+            fill: isLocalPlayer ? COLOR[`dark${player.color}`] : undefined,
+            cornerRadius: 5,
+            stroke: isLocalPlayer && specialty ? 'white' : undefined,
             strokeWidth: 2
         });
         this.group.add(this.background);
@@ -56,10 +56,12 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
     }
 
     public update(maySell: boolean): void {
-        this.background.fill(this.isLocalPlayer && maySell
-            ? COLOR.marketOrange
-            : COLOR[`holdDark${this.playerColor}`]
-        )
+        if (this.isLocalPlayer) {
+            this.background.fill( maySell
+                ? COLOR.marketOrange
+                : COLOR[`dark${this.playerColor}`]
+            )
+        }
         this.setEnabled(maySell);
     }
 }
