@@ -34,10 +34,10 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
             { x: SLOT_WIDTH * 3, element: null },
         ];
         const backgroundMapping: Record<PlayerColor, Color> = {
-            Red: COLOR.holdDarkRed,
-            Purple: COLOR.holdDarkPurple,
-            Green: COLOR.holdDarkGreen,
-            Yellow: COLOR.holdDarkYellow,
+            Red: COLOR.darkRed,
+            Purple: COLOR.darkPurple,
+            Green: COLOR.darkGreen,
+            Yellow: COLOR.darkYellow,
         }
         const background = new Konva.Rect({
             width: this.group.width(),

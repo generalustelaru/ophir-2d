@@ -6,6 +6,7 @@ import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
 import { VictoryPointDial } from '../VictoryPointDial';
 import clientConstants from '../../client_constants';
 import { SpecialtyGoodButton } from './SpecialtyGoodButton';
+import { SpecialistBand } from './SpecialistBand';
 
 const { COLOR } = clientConstants;
 
@@ -15,6 +16,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private group: Konva.Group;
     private background: Konva.Rect;
     private cargoBand: CargoBand;
+    private specialistBand: SpecialistBand;
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
@@ -29,34 +31,40 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         localColorName: PlayerColor | null,
         yOffset: number,
     ) {
-        const isLocalPlayer = localColorName === player.color;
+        const { color, cargo, isActive } = player;
+
+        const isLocalPlayer = localColorName === color;
 
         this.stage = stage;
-        this.id = player.color;
+        this.id = color;
         this.localPlayerColor = localColorName;
         this.group = new Konva.Group({
-            width: isLocalPlayer ? 250 : 200,
+            width: 250,
             height: 100,
-            x: isLocalPlayer ? 25 : 50,
+            x: 25,
             y: yOffset,
         });
 
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR[player.color],
-            stroke: 'white',
-            cornerRadius: 15,
-            strokeWidth: player.isActive ? 3 : 0,
+            fill: COLOR[`${isActive ? '' : 'dark'}${color}`],
+            cornerRadius: 5,
         });
 
-        const { color, cargo } = player;
+
         this.cargoBand = new CargoBand(
             this.stage,
             color,
             { cargo, canDrop: false },
             isLocalPlayer,
         );
+
+        this.specialistBand = new SpecialistBand(
+            { x: 120, y: 5 },
+            player,
+            isLocalPlayer
+        )
 
         this.favorDial = new FavorDial(
             { x: 10, y: 42 },
@@ -79,10 +87,11 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             this.favorDial.getElement(),
             this.coinDial.getElement(),
             this.influenceDial.getElement(),
+            this.specialistBand.getElement(),
         );
 
         this.vpDial = player.color === localColorName ? new VictoryPointDial(
-            { x:100, y: 5 },
+            { x:120, y: 3 },
             0,
         ) : null;
         this.vpDial && this.group.add(this.vpDial.getElement());
@@ -90,19 +99,20 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.specialtyGoodButton = new SpecialtyGoodButton(
             stage,
             player,
-            { x: this.vpDial ? 175 : 130, y: 40 },
-            isLocalPlayer ? { action: Action.sell_good, payload: null } : null,
+            { x: 190, y: 40 },
+            isLocalPlayer,
         );
         this.group.add(this.specialtyGoodButton.getElement());
     }
 
     public update(player: Player): void {
         const { cargo, favor, isActive, influence, color, locationActions, isAnchored, specialist } = player;
-        this.background.strokeWidth(isActive ? 3 : 0);
+        this.background.fill(COLOR[`${isActive ? '' : 'dark'}${color}`]);
         this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update(influence);
+        this.specialistBand.update(isActive);
         this.specialtyGoodButton.update(!!(
             isAnchored
             && locationActions.includes(Action.sell_good)
