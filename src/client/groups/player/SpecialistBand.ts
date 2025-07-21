@@ -41,7 +41,7 @@ export class SpecialistBand implements DynamicGroupInterface<boolean> {
             verticalAlign: 'middle',
             fontFamily: 'Custom',
             fill: COLOR[`${player.isActive ? 'dark': ''}${player.color}`],
-        })
+        });
 
         this.group.add(this.background, this.label);
     }
