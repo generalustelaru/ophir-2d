@@ -97,17 +97,17 @@ export class GameSession {
 
         if (request.message.action === Action.declare_reset) {
             const { player } = match.data;
-            const { sessionOwner } = state;
+            const { sessionOwner, sessionPhase } = state;
 
-            if (player.color != sessionOwner){
-                return this.issueNominalResponse(
-                    lib.errorResponse('Only session owner may reset.')
-                );
+            if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
+                this.resetSession();
+
+                return this.issueGroupResponse({ resetFrom: player.name });
             }
 
-            this.resetSession();
-
-            return this.issueGroupResponse({ resetFrom: player.name });
+            return this.issueNominalResponse(
+                lib.errorResponse('Only session owner may reset.')
+            );
         }
 
         switch (state.sessionPhase) {
