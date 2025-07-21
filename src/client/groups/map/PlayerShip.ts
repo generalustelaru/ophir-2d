@@ -188,7 +188,9 @@ export class PlayerShip {
         const rivalInfluence = rival && rival.bearings.seaZone === targetHexId ? rival.influence : 0;
 
         const influencePool = this.players
-            .map(player => { return player.bearings.seaZone === targetHexId ? player.influence : 0 })
+            .map(player => {
+                return player.bearings.seaZone === targetHexId ? player.influence : 0
+            });
 
         const highestInfluence = Math.max(...influencePool, rivalInfluence) as DiceSix;
 
