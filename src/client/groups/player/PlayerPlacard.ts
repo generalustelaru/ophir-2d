@@ -23,7 +23,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private influenceDial: InfluenceDial;
     private vpDial: VictoryPointDial | null;
     private specialtyGoodButton: SpecialtyGoodButton;
-    private id: PlayerColor;
+    private color: PlayerColor;
     private localPlayerColor: PlayerColor | null;
 
     constructor(
@@ -37,7 +37,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         const isLocalPlayer = localColorName === color;
 
         this.stage = stage;
-        this.id = color;
+        this.color = color;
         this.localPlayerColor = localColorName;
         this.group = new Konva.Group({
             width: 250,
@@ -98,20 +98,20 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
         this.group.add(this.specialtyGoodButton.getElement());
 
-        this.specialistBand = new SpecialistBand(
-            stage,
-            { x: 120, y: 5 },
-            player,
-            isLocalPlayer,
-            () => {alert('click')}
-        );
-
         this.specialistCard = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
             fill: COLOR[`dark${color}`],
             visible: false,
         });
+
+        this.specialistBand = new SpecialistBand(
+            stage,
+            { x: 120, y: 5 },
+            player,
+            isLocalPlayer,
+            () => this.switchSpecialistCard(),
+        );
 
         this.group.add(
             this.specialistCard,
@@ -143,7 +143,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     }
 
     public getId(): PlayerColor {
-        return this.id;
+        return this.color;
     }
 
     public getElement() {
@@ -152,5 +152,9 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
     public disable() {
         this.cargoBand.disable();
+    }
+
+    private switchSpecialistCard() {
+        this.specialistCard.isVisible() ? this.specialistCard.hide() : this.specialistCard.show();
     }
 }
