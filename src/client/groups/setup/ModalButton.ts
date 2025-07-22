@@ -1,10 +1,9 @@
 import Konva from "konva";
 import { Color, DynamicGroupInterface } from "../../client_types";
 import { Coordinates } from "../../../shared_types";
+import { InterfaceButton } from "../InterfaceButton";
 
-export class ModalButton implements DynamicGroupInterface<string> {
-    private stage: Konva.Stage;
-    private group: Konva.Group;
+export class ModalButton extends InterfaceButton implements DynamicGroupInterface<string> {
     private background: Konva.Rect;
     private label: Konva.Text;
 
@@ -15,10 +14,7 @@ export class ModalButton implements DynamicGroupInterface<string> {
         text: string,
         callback: Function,
     ) {
-        this.stage = stage;
-        this.group = new Konva.Group({
-            ...position, height: 50, width: 100,
-        });
+        super(stage, {...position, height: 50, width: 100}, callback);
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -36,18 +32,6 @@ export class ModalButton implements DynamicGroupInterface<string> {
             fontFamily: 'Custom'
         })
         this.group.add(this.background, this.label);
-
-        this.group.on('mouseenter', () => {
-            this.stage.container().style.cursor = 'pointer';
-        });
-
-        this.group.on('mouseleave', () => {
-            this.stage.container().style.cursor = 'default';
-        });
-
-        this.group.on('click', () => {
-            callback();
-        });
     }
 
     public getElement() {
