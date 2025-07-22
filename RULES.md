@@ -13,7 +13,7 @@ The game can also end when interacting with the Market (more on that later).
 Your Ship has a Cargo capacity of 2 spaces (top left on your Player Card), which can be expanded to 4. On your turn you can click on any carried Cargo item as a Free Action to drop it overboard. You can drop as many items as you want. Careful you don't drop something valuable. Your Ship Figure can be dragged inside its current zone to reposition it. This NOT an Action or Movement. Releasing the Ship Figure on an adjacent zone however will count as Movement towards that zone. You get two Moves each turn (wave icons on the map top left corner). You lose any remaining Moves after performing an Action (except for dropping Items).
 
 ### Favor
-Favor (depicted as a red seal) is a special resource. You start the game with 2 Favor (the seal with a number on your player card) and may visit the Temple to gain more (up to 6). Favor is a quicker avenue for scoring VP.
+Favor (depicted as a red seal) is a special resource. You start the game with the amount of Favor provided by your selected specialist (the seal with a number on your player card) and may visit the Temple to gain more (up to 6). Favor is a quicker avenue for scoring VP.
 
 ### Detailed Movement
 On your turn, you must first move once or twice into adjacent zones and without backtracking -- you cannot perform actions in your starting zone.
