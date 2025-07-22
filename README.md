@@ -21,9 +21,9 @@ You can set up and run a server on your local network fairly easily.
 1. Install [Node](https://nodejs.org/en/download/package-manager).
  - You may want to also install Make for a better dev-ops experience. First download and install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions). Then open a terminal and run `choco install make`.
 
-2. Download the project (codebase) and enter the root folder (*ophir-2d*).
+2. Download the project (code) and enter its root folder (currently *ophir-2d-specialists*).
 
-3. Create an `.env` file (just '.env') next to `.env.example` and copy its content into it. You should replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). Other browsers on the local network can't access "localhost".
+3. Rename *.env.example* into just *.env*. You might also want to replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). Browsers on other computers need the actual address to connect.
 
 4. Pick a terminal (i.e. Command Prompt) and open it in the project's root folder (*ophir-2d-specialists*) -- all commands should be run there.
 
@@ -34,7 +34,7 @@ You can set up and run a server on your local network fairly easily.
     - Copy the contents of *src/client/layout/* into the newly created *public* folder.
     - Run `npm install && npm run build_server && npm run build_client && node public/server.cjs` in the terminal.
 
-Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close.
+Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close, so two or more tabs on the same browser will mirror the same user.
 
 To shut down the server gracefully, input `shutdown` in the running server's command line interface (CLI).
 You can also shut it down remotely by making a regular http request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<SHUTDOWN_AUTH>". Use the values in your .env file.
