@@ -1,5 +1,5 @@
 Web-based implementation of **Ophir** (Terra Nova Games)
-![3 Player game sample](./3-player-sample-screenshot.png)
+![3 Player game sample](./sample-screenshot.png)
 
 ## Description
 Ophir is a highly-tactical pickup & deliver game for 2-4 players which takes place in a 7 island (zones) archipelago.

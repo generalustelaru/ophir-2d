@@ -98,7 +98,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
         this.group.add(this.specialtyGoodButton.getElement());
 
-        this.specialistCard = new Konva.Rect({
+        this.specialistCard = new Konva.Rect({ //TODO: Convert to class
             width: this.group.width(),
             height: this.group.height(),
             fill: COLOR[`dark${color}`],
