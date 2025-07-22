@@ -17,6 +17,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private background: Konva.Rect;
     private cargoBand: CargoBand;
     private specialistBand: SpecialistBand;
+    private specialistCard: Konva.Rect;
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
@@ -60,14 +61,6 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             isLocalPlayer,
         );
 
-        this.specialistBand = new SpecialistBand(
-            stage,
-            { x: 120, y: 5 },
-            player,
-            isLocalPlayer,
-            () => {alert('click')}
-        )
-
         this.favorDial = new FavorDial(
             { x: 10, y: 42 },
             player.favor,
@@ -89,7 +82,6 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             this.favorDial.getElement(),
             this.coinDial.getElement(),
             this.influenceDial.getElement(),
-            this.specialistBand.getElement(),
         );
 
         this.vpDial = player.color === localColorName ? new VictoryPointDial(
@@ -105,6 +97,26 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             isLocalPlayer,
         );
         this.group.add(this.specialtyGoodButton.getElement());
+
+        this.specialistBand = new SpecialistBand(
+            stage,
+            { x: 120, y: 5 },
+            player,
+            isLocalPlayer,
+            () => {alert('click')}
+        );
+
+        this.specialistCard = new Konva.Rect({
+            width: this.group.width(),
+            height: this.group.height(),
+            fill: COLOR[`dark${color}`],
+            visible: false,
+        });
+
+        this.group.add(
+            this.specialistCard,
+            this.specialistBand.getElement(),
+        )
     }
 
     public update(player: Player): void {
