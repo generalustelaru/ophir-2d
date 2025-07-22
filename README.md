@@ -42,9 +42,9 @@ You can also shut it down remotely by making a regular http request to "http://<
 To start the server again run `make run` or `node public/server.cjs`.
 
 ## Troubleshooting
-If you experience mouseover issues try using an alternative browser.
-If the client tab gets stuck, clear the browser's Session Storage record for the URL or restart the browser.
-If the server session gets stuck, input `reset` in the running server's CLI.
+If you experience misalignments or mouse issues, try using an alternative browser (Chrome and Edge should work).
+If the session gets stuck, refresh the tab.
+If that doesn't work input `reset` in the running server's CLI. This will also force all clients to clear their sessions.
 
 ## How to play
 
