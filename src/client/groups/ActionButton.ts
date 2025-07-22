@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { GroupLayoutData } from '../client_types';
 import { ClientMessage } from '../../shared_types';
-export class ActionButton {
+export abstract class ActionButton {
     protected group: Konva.Group;
     private stage: Konva.Stage;
     private message: ClientMessage | null;
@@ -32,7 +32,7 @@ export class ActionButton {
                         'action',
                         { detail: this.message }
                 ));
-                this.stage.container().style.cursor = 'default';
+                this.stage.container().style.cursor = 'none';
             }
         });
     }
