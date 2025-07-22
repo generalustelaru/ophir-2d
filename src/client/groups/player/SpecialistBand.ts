@@ -2,26 +2,28 @@ import Konva from "konva";
 import { Coordinates, Player, PlayerColor } from "../../../shared_types";
 import { DynamicGroupInterface } from "../../client_types";
 import clientConstants from "../../client_constants";
+import { InterfaceButton } from "../InterfaceButton";
 const { COLOR } = clientConstants;
-export class SpecialistBand implements DynamicGroupInterface<boolean> {
-    private group: Konva.Group;
+
+export class SpecialistBand extends InterfaceButton implements DynamicGroupInterface<boolean> {
     private background: Konva.Rect;
     private label: Konva.Text;
     private playerColor: PlayerColor;
 
     constructor(
+        stage: Konva.Stage,
         position: Coordinates,
         player: Player,
         isLocalPlayer: boolean,
-    ){
+        callback: Function,
+    ) {
         const width = 125;
         const height = 30;
+        const layout = { ...position, width, height };
+
+        super(stage, layout, callback);
+
         this.playerColor = player.color;
-
-        this.group = new Konva.Group({
-            ...position, width, height,
-        });
-
         this.background = new Konva.Rect({
             width,
             height,
@@ -50,7 +52,7 @@ export class SpecialistBand implements DynamicGroupInterface<boolean> {
         return this.group;
     }
 
-    public update(isActive: boolean) {
+    public update(isActive: boolean): void {
         this.background.fill(isActive ? 'white' : 'black');
         this.label.fill(COLOR[`${isActive ? 'dark': ''}${this.playerColor}`])
     }
