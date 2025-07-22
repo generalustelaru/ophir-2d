@@ -61,9 +61,11 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
 
         this.specialistBand = new SpecialistBand(
+            stage,
             { x: 120, y: 5 },
             player,
-            isLocalPlayer
+            isLocalPlayer,
+            () => {alert('click')}
         )
 
         this.favorDial = new FavorDial(
