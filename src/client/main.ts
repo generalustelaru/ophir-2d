@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventName, LocalState } from "./client_types";
+import { InfoDetail, ErrorDetail, EventType, LocalState } from "./client_types";
 import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
@@ -37,20 +37,20 @@ localState.vp = vp;
 
 // MARK: LISTENERS
 //Send player action to server
-window.addEventListener(EventName.action, (event: CustomEventInit) => {
+window.addEventListener(EventType.action, (event: CustomEventInit) => {
     const message = event.detail as ClientMessage;
     CommunicationService.sendMessage(message);
 });
 
 //Send state change message to server
-window.addEventListener(EventName.draft, () => {
+window.addEventListener(EventType.draft, () => {
     const message: ClientMessage = {
         action: Action.start_setup,
         payload: null
     }
     CommunicationService.sendMessage(message);
 });
-window.addEventListener(EventName.start_action, () => {
+window.addEventListener(EventType.start_action, () => {
     const message: ClientMessage = {
         action: Action.start_play,
         payload: CanvasService.getSetupCoordinates(),
@@ -59,17 +59,17 @@ window.addEventListener(EventName.start_action, () => {
 });
 
 //Display errors
-window.addEventListener(EventName.error, (event: CustomEventInit) => {
+window.addEventListener(EventType.error, (event: CustomEventInit) => {
     const detail: ErrorDetail = event.detail;
     signalError(detail.message);
 });
 
 // Get server data on connection
-window.addEventListener(EventName.connected, () => {
+window.addEventListener(EventType.connected, () => {
     CommunicationService.sendMessage({ action: Action.inquire, payload: null })
 });
 
-window.addEventListener(EventName.timeout, () => {
+window.addEventListener(EventType.timeout, () => {
     UserInterface.setInfo('Connection timeout');
     UserInterface.disable();
     CanvasService.disable();
@@ -77,7 +77,7 @@ window.addEventListener(EventName.timeout, () => {
     alert('Please refresh the page');
 });
 
-window.addEventListener(EventName.close, () => {
+window.addEventListener(EventType.close, () => {
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();
@@ -85,7 +85,7 @@ window.addEventListener(EventName.close, () => {
     alert('Please refresh the page');
 });
 
-window.addEventListener(EventName.identification, (event: CustomEventInit<ClientIdResponse>) => {
+window.addEventListener(EventType.identification, (event: CustomEventInit<ClientIdResponse>) => {
 
     if (!event.detail)
         return signalError('Id response has failed');
@@ -94,7 +94,7 @@ window.addEventListener(EventName.identification, (event: CustomEventInit<Client
     sessionStorage.setItem('localState', JSON.stringify(localState));
 });
 
-window.addEventListener(EventName.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
+window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
     if (!event.detail || !localState.playerColor)
         return signalError('VP update failed');
 
@@ -106,7 +106,7 @@ window.addEventListener(EventName.vp_transmission, (event: CustomEventInit<VpTra
         localStorage.setItem('persistedState', JSON.stringify(localState));
 });
 
-window.addEventListener(EventName.reset, (event: CustomEventInit) => {
+window.addEventListener(EventType.reset, (event: CustomEventInit) => {
     const response: ResetResponse = event.detail;
     sessionStorage.clear();
 
@@ -118,7 +118,7 @@ window.addEventListener(EventName.reset, (event: CustomEventInit) => {
     window.location.reload();
 });
 
-window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => {
+window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => {
 
     if (!event.detail)
         return signalError('State is missing!');
@@ -138,7 +138,7 @@ window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => 
     debug(enrolmentState);
 });
 
-window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
+window.addEventListener(EventType.setup_update, (event: CustomEventInit) => {
     if (!event.detail)
         return signalError("State is missing!");
 
@@ -150,7 +150,7 @@ window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
 });
 
 // Update client on server state update
-window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
+window.addEventListener(EventType.play_update, (event: CustomEventInit) => {
 
     if (!event.detail)
         return signalError('State is missing!');
@@ -167,7 +167,7 @@ window.addEventListener(EventName.play_update, (event: CustomEventInit) => {
     debug(playState);
 });
 
-window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
+window.addEventListener(EventType.setup_update, (event: CustomEventInit) => {
     if (!event.detail)
         return signalError('State is missing!');
 
@@ -176,7 +176,7 @@ window.addEventListener(EventName.setup_update, (event: CustomEventInit) => {
     CanvasService.drawUpdateElements(setupState, true);
 });
 
-window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => {
+window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => {
     if (!event.detail)
         return signalError('State is missing!');
 
@@ -186,7 +186,7 @@ window.addEventListener(EventName.enrolment_update, (event: CustomEventInit) => 
 });
 
 window.addEventListener(
-    'info',
+    EventType.info,
     (event: CustomEventInit) => {
         const payload: InfoDetail = event.detail;
         UserInterface.setInfo(payload.text)

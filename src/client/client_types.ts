@@ -113,12 +113,12 @@ export type CargoBandUpdate = {
     canDrop: boolean,
 }
 
-export interface ClientEventInterface<T, D> {
+export type EventFormat<T extends EventType, D> = {
     type: T,
     detail: D,
 }
 
-export enum EventName {
+export enum EventType {
     connected = 'connected',
     draft = 'draft',
     start_action = 'start',
@@ -133,23 +133,35 @@ export enum EventName {
     enrolment_update = 'enrolment_update',
     identification = 'identification',
     vp_transmission = 'vp_transmission',
+    ui_transition = 'ui_transition',
 }
 
-export type LaconicType = EventName.connected | EventName.draft | EventName.start_action | EventName.close | EventName.timeout;
-export type LaconicEvent = ClientEventInterface<LaconicType, null>;
-export type ActionEvent = ClientEventInterface<EventName.action, ClientMessage>;
-export type ErrorEvent = ClientEventInterface<EventName.error, ErrorDetail>;
-export type InfoEvent = ClientEventInterface<EventName.info, InfoDetail>;
-export type ResetEvent = ClientEventInterface<EventName.reset, ResetResponse>;
-export type PlayStateUpdateEvent = ClientEventInterface<EventName.play_update, PlayState>;
-export type SetupStateUpdateEvent = ClientEventInterface<EventName.setup_update, SetupState>;
-export type EnrolmentStateUpdateEvent = ClientEventInterface<EventName.enrolment_update, EnrolmentState>;
-export type IdentificationEvent = ClientEventInterface<EventName.identification, ClientIdResponse>;
-export type VictoryPointEvent = ClientEventInterface<EventName.vp_transmission, VpTransmission>
+export type LaconicType =
+    | EventType.connected
+    | EventType.draft
+    | EventType.start_action
+    | EventType.close
+    | EventType.timeout
+;
 
-export type ClientEvent =
-    | LaconicEvent | ActionEvent | ErrorEvent | InfoEvent | IdentificationEvent | ResetEvent | PlayStateUpdateEvent
-    | SetupStateUpdateEvent | EnrolmentStateUpdateEvent | VictoryPointEvent;
+export type Event =
+    | EventFormat<LaconicType, null>
+    | EventFormat<EventType.action, ClientMessage>
+    | EventFormat<EventType.error, ErrorDetail>
+    | EventFormat<EventType.info, InfoDetail>
+    | EventFormat<EventType.reset, ResetResponse>
+    | EventFormat<EventType.play_update, PlayState>
+    | EventFormat<EventType.setup_update, SetupState>
+    | EventFormat<EventType.enrolment_update, EnrolmentState>
+    | EventFormat<EventType.identification, ClientIdResponse>
+    | EventFormat<EventType.vp_transmission, VpTransmission>
+    | EventFormat<EventType.ui_transition, TransitionDetail>
+;
+
+export type TransitionDetail = {
+    element: InterfaceId,
+    visible: boolean
+}
 
 export type InfoDetail = {
     text: string,
@@ -157,4 +169,8 @@ export type InfoDetail = {
 
 export type ErrorDetail = {
     message: string,
+}
+
+enum InterfaceId {
+    specialistBand = 0,
 }

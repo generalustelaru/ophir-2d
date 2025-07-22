@@ -4,7 +4,7 @@ import {
 } from '../../shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
-import { EventName } from '../client_types';
+import { EventType } from '../client_types';
 
 export const CommunicationService = new class extends Communicator {
 
@@ -19,16 +19,16 @@ export const CommunicationService = new class extends Communicator {
 
         this.socket.onopen = () => {
             console.info('Connection established');
-            this.createEvent({ type: EventName.connected, detail: null });
+            this.createEvent({ type: EventType.connected, detail: null });
         }
 
         this.socket.onclose = (event) => {
             if (event.wasClean) {
                 console.info('Connection terminated');
-                this.createEvent({type: EventName.close, detail: null });
+                this.createEvent({type: EventType.close, detail: null });
             } else {
                 console.info('Connection timeout');
-                this.createEvent({ type: EventName.timeout, detail: null });
+                this.createEvent({ type: EventType.timeout, detail: null });
             }
 
             this.socket?.close();
@@ -38,7 +38,7 @@ export const CommunicationService = new class extends Communicator {
         this.socket.onerror = (error) => {
             console.error(error);
             this.createEvent({
-                type: EventName.error,
+                type: EventType.error,
                 detail: { message: 'The connection encountered an error' }
             });
         }
@@ -49,7 +49,7 @@ export const CommunicationService = new class extends Communicator {
 
             if (this.isClientIdResponse(data)) {
                 this.createEvent({
-                    type: EventName.identification,
+                    type: EventType.identification,
                     detail: { socketId: data.socketId }
                 });
 
@@ -61,16 +61,16 @@ export const CommunicationService = new class extends Communicator {
                     this.createStateEvent(data);
                     break;
                 case this.isVictoryPointsTransmission(data):
-                    this.createEvent({ type: EventName.vp_transmission, detail: data })
+                    this.createEvent({ type: EventType.vp_transmission, detail: data })
                     break;
                 case this.isResetOrder(data):
-                    this.createEvent({ type: EventName.reset, detail: data });
+                    this.createEvent({ type: EventType.reset, detail: data });
                     break;
                 case this.isErrorResponse(data):
-                    this.createEvent({ type: EventName.error, detail:{ message: data.error } });
+                    this.createEvent({ type: EventType.error, detail:{ message: data.error } });
                     break;
                 default:
-                    this.createEvent({ type: EventName.error, detail: { message: 'Could not determine message type.' } });
+                    this.createEvent({ type: EventType.error, detail: { message: 'Could not determine message type.' } });
                     break;
             }
         }
@@ -81,7 +81,7 @@ export const CommunicationService = new class extends Communicator {
         if (!this.socket || !this.socket.readyState) {
             this.socket?.close();
             this.createEvent({
-                type: EventName.error,
+                type: EventType.error,
                 detail: { message: 'The connection is not open' }
             });
 
@@ -121,14 +121,14 @@ export const CommunicationService = new class extends Communicator {
 
         switch (state.sessionPhase) {
             case Phase.enrolment:
-                return this.createEvent({ type: EventName.enrolment_update, detail: state });
+                return this.createEvent({ type: EventType.enrolment_update, detail: state });
             case Phase.setup:
-                return this.createEvent({ type: EventName.setup_update, detail: state });
+                return this.createEvent({ type: EventType.setup_update, detail: state });
             case Phase.play:
-                return this.createEvent({ type: EventName.play_update, detail: state });
+                return this.createEvent({ type: EventType.play_update, detail: state });
             default:
                 return this.createEvent({
-                    type: EventName.error, detail: { message: 'Unknown phase value in state.'}
+                    type: EventType.error, detail: { message: 'Unknown phase value in state.'}
                 });
         }
     }
