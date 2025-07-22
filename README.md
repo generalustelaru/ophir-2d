@@ -9,8 +9,8 @@ During the game, players move their ships across the archipelago, picking up and
 Work in progress.
 
 - The game is playable but has no lobby (a server supports only one session at a time).
-- No db. Nothing is saved, nothing is safe.
-- The game is missing "Specialists" (variable players powers).
+- Barebones persistence. Nothing is saved except the last session.
+- The game is currently getting "Specialists" (variable players powers).
 - The interface language not yet standardized and missing quality of life features (incl. animations, transitions, tooltips, FTUE screens).
 
 Try it out
@@ -52,7 +52,7 @@ If the server session gets stuck, input `reset` in the running server's CLI.
 
  Any page visitor may become the Session Owner by clicking Create Game. Once the game session has been created, the remaining visitors may click on Join Game. All players must first select a player color before creating/joining. The name is optional. Only Players (up to 4) can use the built-in chat. There can be any number of spectators.
 
- Once there are at least 2 players the Session Owner may click the Start Game button to complete the setup and begin playing. The Session Owner also has the ability to Reset the game at any time (revert to a new open session without players).
+ Once there are at least 2 players the Session Owner may click the Start Game button to complete the setup (pick from the available speciliasts) and begin playing. The Session Owner also has the ability to Reset the game at any time (revert to a new open session without players).
 
  On the board, players are identified by their Ship Figure (on the map center zone) and the Player Card (on the right side of the screen), both displayed in their chosen color. Player Cards are arranged from top to bottom, signifying the turn order. Your Player Card appears first and is wider than the rest. The three placards on the left display information and actions available at the Market, Exchange, and Temple locations on the map.
 
