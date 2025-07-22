@@ -6,7 +6,7 @@ import { TextInput } from '../html_behaviors/TextInput';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import { PlayerCountables } from '../../server/server_types';
 import clientConstants from '../client_constants';
-import { EventName } from '../client_types';
+import { EventType } from '../client_types';
 
 const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
@@ -80,7 +80,7 @@ export const UserInterface = new class extends Communicator {
         if (!message || false === !!message.match(/[^\s]/)) return;
 
         return this.createEvent({
-            type: EventName.action,
+            type: EventType.action,
             detail: {
                 action: Action.chat,
                 payload: { input: message },
@@ -111,19 +111,19 @@ export const UserInterface = new class extends Communicator {
     private processDraft = (): void => {
         this.draftButton.disable();
 
-        return this.createEvent({ type: EventName.draft, detail: null });
+        return this.createEvent({ type: EventType.draft, detail: null });
     }
 
     private processStart = (): void => {
         this.startButton.disable();
 
-        return this.createEvent({ type: EventName.start_action, detail: null });
+        return this.createEvent({ type: EventType.start_action, detail: null });
     }
 
     private processReset = (): void => {
 
         return this.createEvent({
-            type: EventName.action,
+            type: EventType.action,
             detail: { action: Action.declare_reset , payload: null }
         });
     }
@@ -144,7 +144,7 @@ export const UserInterface = new class extends Communicator {
             localStorage.setItem('persistedState', JSON.stringify(localState));
 
             return this.createEvent({
-                type: EventName.action,
+                type: EventType.action,
                 detail: { action: Action.enrol, payload: null }
             });
         }
@@ -155,7 +155,7 @@ export const UserInterface = new class extends Communicator {
     private processForceTurn = () => {
 
         return this.createEvent({
-            type: EventName.action,
+            type: EventType.action,
             detail: { action: Action.force_turn, payload: null }
         });
     }

@@ -1,9 +1,9 @@
-import { ClientEvent } from "../client_types";
+import { Event } from "../client_types";
 
 export abstract class Communicator {
 
     protected createEvent(
-        event: ClientEvent
+        event: Event
     ): void {
         const { type, detail } = event;
         const eventInitDict = { detail };
