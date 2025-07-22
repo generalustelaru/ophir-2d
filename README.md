@@ -18,25 +18,23 @@ Try it out
 ## Setup and running
 You can set up and run a server on your local network fairly easily.
 
-1. Install [Node](https://nodejs.org/en/download/package-manager). You may also want to install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) for a better setup experience. If you have it, then open a terminal and run `choco install make`.
+1. Install [Node](https://nodejs.org/en/download/package-manager).
+ - You may want to also install Make for a better dev-ops experience. First download and install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions). Then open a terminal and run `choco install make`.
 
 2. Download the project (codebase) and enter the root folder (*ophir-2d*).
 
-3. Create an `.env` file (just '.env') next to `.env.example` and copy its content into it. You should replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). Other computers on the local network can't access 'localhost'.
+3. Create an `.env` file (just '.env') next to `.env.example` and copy its content into it. You should replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). Other browsers on the local network can't access "localhost".
 
-4. Open a terminal in the root folder -- all commands should be run there.
+4. Pick a terminal (i.e. Command Prompt) and open it in the project's root folder (*ophir-2d-specialists*) -- all commands should be run there.
 
- - Run `make install` to download dependencies, bundle the code and start the server.
+ - If you have Make, run `make install` to download dependencies, bundle the code and start the server.
 
-Alternatively, follow these steps:
- - Create a folder named *public*.
- - Copy `index.html` and `style.css` from *src/client/layout/* into the newly created *public* folder.
- - Run `npm install`.
- - Run `npm run build_server`.
- - Run `npm run build_client`.
- - Run `node public/server.cjs`.
+ - Alternatively, follow these steps:
+    - Create a folder named *public* in the root folder.
+    - Copy the contents of *src/client/layout/* into the newly created *public* folder.
+    - Run `npm install && npm run build_server && npm run build_client && node public/server.cjs` in the terminal.
 
-Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The sessionStorage is being used to identify each client and resume the connection in case of page refresh.
+Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close.
 
 To shut down the server gracefully, input `shutdown` in the running server's command line interface (CLI).
 You can also shut it down remotely by making a regular http request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<SHUTDOWN_AUTH>". Use the values in your .env file.
