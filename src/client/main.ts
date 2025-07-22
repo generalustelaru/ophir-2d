@@ -70,19 +70,22 @@ window.addEventListener(EventType.connected, () => {
 });
 
 window.addEventListener(EventType.timeout, () => {
-    UserInterface.setInfo('Connection timeout');
+    console.warn('Connection timeout');
     UserInterface.disable();
     CanvasService.disable();
-    UserInterface.setInfo('The server is off or restarting. Try refreshing the page.');
-    alert('Please refresh the page');
+    UserInterface.setInfo('The server is off or restarting.');
+    alert('The page will refresh');
+    window.location.reload();
 });
 
 window.addEventListener(EventType.close, () => {
+    console.warn('Connection closed');
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();
-    UserInterface.setInfo('The server is off or restarting. Try refreshing the page.');
-    alert('Please refresh the page');
+    UserInterface.setInfo('The server is off or restarting.');
+    alert('The page will refresh');
+    window.location.reload();
 });
 
 window.addEventListener(EventType.identification, (event: CustomEventInit<ClientIdResponse>) => {
@@ -112,7 +115,6 @@ window.addEventListener(EventType.reset, (event: CustomEventInit) => {
 
     if (PERSIST_SESSION)
         localStorage.clear();
-
 
     alert(`The game has been reset by ${response.resetFrom}`);
     window.location.reload();
