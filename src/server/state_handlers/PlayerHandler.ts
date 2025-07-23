@@ -1,6 +1,6 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
-    Specialist,
+    Specialist, SpecialistName,
 } from "~/shared_types";
 import { ObjectHandler, PlayerIdentity } from "~/server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
@@ -131,6 +131,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public spendMove() {
         this.moveActions.update(a => --a);
+    }
+
+    public isHarbormaster(): boolean {
+        return this.getSpecialistName() === SpecialistName.harbormaster;
     }
 
     public clearMoves() {
