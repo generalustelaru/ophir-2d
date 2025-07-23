@@ -101,7 +101,8 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
         this.specialistCard = new SpecialistCard(
             { width: this.group.width(), height: this.group.height(), x: 0, y: 0 },
-            color
+            color,
+            player.specialist,
         );
 
         this.specialistBand = new SpecialistBand(
