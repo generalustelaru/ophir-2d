@@ -160,12 +160,23 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public rollInfluence() {
-        const roll = Math.ceil(Math.random() * 6);
-        this.influence.set(roll as DiceSix);
+        const roll = this.validateDiceSix(Math.ceil(Math.random() * 6));
+        if (roll)
+            this.influence.set(roll);
+    }
+
+    public validateDiceSix(value: number): DiceSix | null {
+        if (value == 1 || value == 2 || value == 3 || value == 4 || value == 5 || value == 6)
+            return value;
+        return null;
     }
 
     public getInfluence() {
         return this.influence.get();
+    }
+
+    public setInfluence(value: DiceSix) {
+        this.influence.set(value);
     }
 
     public getCargo() {
