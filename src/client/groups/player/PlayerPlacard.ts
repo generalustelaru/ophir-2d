@@ -7,6 +7,7 @@ import { VictoryPointDial } from '../VictoryPointDial';
 import clientConstants from '../../client_constants';
 import { SpecialtyGoodButton } from './SpecialtyGoodButton';
 import { SpecialistBand } from './SpecialistBand';
+import { SpecialistCard } from './SpecialistCard';
 
 const { COLOR } = clientConstants;
 
@@ -17,7 +18,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     private background: Konva.Rect;
     private cargoBand: CargoBand;
     private specialistBand: SpecialistBand;
-    private specialistCard: Konva.Rect;
+    private specialistCard: SpecialistCard;
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
@@ -98,12 +99,10 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
         this.group.add(this.specialtyGoodButton.getElement());
 
-        this.specialistCard = new Konva.Rect({ //TODO: Convert to class
-            width: this.group.width(),
-            height: this.group.height(),
-            fill: COLOR[`dark${color}`],
-            visible: false,
-        });
+        this.specialistCard = new SpecialistCard(
+            { width: this.group.width(), height: this.group.height(), x: 0, y: 0 },
+            color
+        );
 
         this.specialistBand = new SpecialistBand(
             stage,
@@ -114,7 +113,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
 
         this.group.add(
-            this.specialistCard,
+            this.specialistCard.getElement(),
             this.specialistBand.getElement(),
         )
     }
@@ -155,6 +154,6 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     }
 
     private switchSpecialistCard() {
-        this.specialistCard.isVisible() ? this.specialistCard.hide() : this.specialistCard.show();
+        this.specialistCard.update();
     }
 }
