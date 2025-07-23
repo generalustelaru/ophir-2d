@@ -3,6 +3,7 @@ import {
     LocationAction, Metal, StateResponse,
     PlayState,
     SpecialistName,
+    DiceSix,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -47,6 +48,7 @@ export class PlayProcessor {
     // MARK: MOVE
     public processMove(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
+        const { name: playerName, color: playerColor } = player.getIdentity();
 
         const movementPayload = validator.validateMovementPayload(payload);
 
@@ -74,17 +76,46 @@ export class PlayProcessor {
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged())
                 return true;
 
-            player.rollInfluence();
-            const blockingPlayers = playersInZone.filter(
-                p => p.influence > player.getInfluence()
-            );
+            const influenceRoll = ((): Probable<DiceSix> => {
+                player.rollInfluence();
+                const roll = player.getInfluence();
 
-            if (!blockingPlayers.length && player.getInfluence() >= rivalInfluence)
+                if(roll === 6) {
+                    this.playState.addServerMessage(`${playerName} rolled a natural 6!`, playerColor);
+
+                    return lib.pass(roll);
+                }
+
+                if (player.getSpecialistName() === SpecialistName.temple_guard) {
+
+                    const bumpedRoll = player.validateDiceSix(roll + 1);
+
+                    if (!bumpedRoll)
+                        return lib.fail('Failed calculating valid D6.');
+
+                    player.setInfluence(bumpedRoll);
+                    this.playState.addServerMessage(`${playerName} bumped the roll to ${bumpedRoll}.`, playerColor);
+
+                    return lib.pass(bumpedRoll);
+                }
+
+                this.playState.addServerMessage(`${playerName} rolled a ${roll}`, playerColor);
+
+                return lib.pass(roll);
+            })();
+
+            if (influenceRoll.err)
+                return lib.fail(influenceRoll.message);
+
+            const playerInfluence = influenceRoll.data;
+            const blockingPlayers = playersInZone.filter(p => p.influence > playerInfluence);
+
+            if (!blockingPlayers.length && playerInfluence >= rivalInfluence)
                 return true;
 
             this.playState.addServerMessage(
-                `${player.getIdentity().name} was blocked from sailing.`,
-                player.getIdentity().color
+                `${playerName} was blocked from sailing.`,
+                playerColor
             );
             this.playState.trimInfluenceByZone(target, rivalInfluence);
             this.playState.addServerMessage(`Influence at the [${locationName}] was trimmed.`)
@@ -118,9 +149,7 @@ export class PlayProcessor {
 
         } else if (player.getMoves() === 0) {
             player.setAnchoredActions([]);
-            this.playState.addServerMessage(
-                `${player.getIdentity().name} also ran out of moves and cannot act further`,
-            );
+            this.playState.addServerMessage(`${playerName} also ran out of moves and cannot act further`);
         }
 
         return lib.pass(this.saveAndReturn(player));
