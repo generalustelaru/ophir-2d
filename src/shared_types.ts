@@ -89,14 +89,16 @@ export enum SpecialistName {
     peddler = 'peddler',
 }
 
-export type Specialist = {
+export type SpecialistData = {
     name: SpecialistName,
     displayName: string,
     startingFavor: number,
     specialty: TradeGood | null,
     description: string,
-    owner: PlayerColor | null
 }
+export type SelectableSpecialist = SpecialistData & { owner: PlayerColor | null }
+
+export type Specialist = Omit<SpecialistData, 'startingFavor'>
 
 export type Rival = {
     isIncluded: true,
@@ -116,14 +118,15 @@ export type PlayerEntry = {
 
 export type PlayerDraft = PlayerEntry & {
     turnOrder: number,
-    specialist: Specialist | null
+    specialist: SelectableSpecialist | null
     turnToPick: boolean, // transient property
 }
 
 export type PlayerSelection = Omit<PlayerDraft, 'turnToPick'> & {
-    specialist: Specialist
+    specialist: SelectableSpecialist,
 }
-export type Player = PlayerSelection & {
+
+export type Player = Omit<PlayerSelection, 'specialist'> & {
     timeStamp: number,
     isIdle: boolean,
     isActive: boolean,
@@ -131,6 +134,7 @@ export type Player = PlayerSelection & {
     overnightZone: ZoneName,
     favor: number,
     privilegedSailing: boolean,
+    specialist: Specialist,
     influence: DiceSix,
     moveActions: number,
     isHandlingRival: boolean,
@@ -198,7 +202,7 @@ export type SetupState = {
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
     players: Array<PlayerDraft>,
-    specialists: Array<Specialist>,
+    specialists: Array<SelectableSpecialist>,
     setup: GamePartialSetup,
     chat: Array<ChatEntry>,
 }

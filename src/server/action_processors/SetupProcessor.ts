@@ -1,7 +1,7 @@
 import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
-    Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, Specialist, MapPairings,
-    LocationName, ZoneName, PlayerSelection, SpecialistName, PlayerEntity, StateResponse,
+    Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
+    ZoneName, PlayerSelection, SpecialistName, PlayerEntity, StateResponse, SpecialistData, SelectableSpecialist,
 } from "~/shared_types";
 import { DestinationPackage, StateBundle, SetupDigest} from "~/server_types";
 import serverConstants from "~/server_constants";
@@ -38,18 +38,20 @@ export class SetupProcessor {
         const barriers = this.determineBarriers();
         const mapPairings = this.determineLocations();
 
-        const specialists = ((): Array<Specialist> => {
+        const specialists = ((): Array<SelectableSpecialist> => {
             const deck = tools.getCopy(SPECIALISTS);
 
             if (playerEntries.length >= deck.length)
                 throw new Error("Not enough specialist cards!");
 
-            const randomized: Array<Specialist> = deck
+            const randomized: Array<SpecialistData> = deck
                 .map(specialist => {return {key:Math.random(), specialist}})
                 .sort((a, b) => a.key - b.key)
                 .map(s => s.specialist);
 
-            return randomized.slice(0,playerEntries.length + 1);
+            const selection = randomized.slice(0,playerEntries.length + 1);
+
+            return selection.map(s => {return {...s, owner: null}});
         })();
 
         const playerDrafts = this.draftPlayers(playerEntries);
@@ -322,6 +324,12 @@ export class SetupProcessor {
         const startingZone = initialRules.from;
 
         const players: Array<Player> = selections.map(s => {
+            const { startingFavor, owner, ...specialist } = s.specialist;
+            // const specialist = ((): Specialist => {
+
+            //     return specialist;
+            // })();
+
             const playerDto: Player = {
                 socketId: s.socketId,
                 color: s.color,
@@ -329,7 +337,7 @@ export class SetupProcessor {
                 isIdle: false,
                 name: s.name,
                 turnOrder: s.turnOrder,
-                specialist: s.specialist,
+                specialist,
                 isActive: false,
                 bearings: {
                     seaZone: startingZone,
@@ -337,7 +345,7 @@ export class SetupProcessor {
                     location: mapPairings.locationByZone[startingZone].name
                 },
                 overnightZone: startingZone,
-                favor: s.specialist.startingFavor,
+                favor: startingFavor,
                 privilegedSailing: false,
                 influence: 1,
                 moveActions: 0,

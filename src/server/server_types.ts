@@ -1,8 +1,9 @@
 import {
-    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Specialist, TradeGood, GoodsLocationName,
+    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName,
     MessagePayload, ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage,
     PlayerEntry,
     ChatEntry,
+    SpecialistData,
 } from "~/shared_types";
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -87,7 +88,7 @@ export type BarrierCheck = {
 export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 
 export type ServerConstants = {
-    SPECIALISTS: Array<Specialist>
+    SPECIALISTS: Array<SpecialistData>
     LOCATION_ACTIONS: Array<LocationData>,
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
