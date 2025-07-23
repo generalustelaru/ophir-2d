@@ -177,7 +177,7 @@ export class SetupProcessor {
                 chat: setupState.chat,
                 players,
                 market: marketData.marketOffer,
-                itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, cloth: 5, wood: 5, stone: 5 } },
+                itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, linen: 5, ebony: 5, marble: 5 } },
                 temple: {
                     maxLevel: privateState.getTempleLevelCount(),
                     treasury: privateState.drawMetalPrices()!,
@@ -379,7 +379,7 @@ export class SetupProcessor {
                         player.cargo = ['empty', 'empty', 'empty', 'empty'];
                         break;
                     case 2:
-                        player.cargo = ['stone', 'gems', 'wood', 'cloth'];
+                        player.cargo = ['marble', 'gems', 'ebony', 'linen'];
                         break;
                     case 3:
                         player.cargo = ['gold', 'gold_extra', 'silver', 'silver_extra'];
