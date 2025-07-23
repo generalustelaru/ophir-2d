@@ -5,13 +5,13 @@
 import Konva from "konva";
 import { DynamicGroupInterface } from "~/client_types";
 import clientConstants from "~/client_constants";
-import { Action, Specialist, SpecialistName } from "~/shared_types";
+import { Action, SelectableSpecialist, SpecialistName } from "~/shared_types";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
 
 type SpecialistCardUpdate = {
-    specialist: Specialist;
+    specialist: SelectableSpecialist;
     shouldEnable: boolean;
 }
 
@@ -24,7 +24,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
     constructor(
         stage: Konva.Stage,
-        specialist: Specialist,
+        specialist: SelectableSpecialist,
         xOffset: number,
     ) {
         super(
@@ -81,7 +81,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         this.info.text(this.getCardText(data.specialist))
     }
 
-    private getCardText(specialist: Specialist) {
+    private getCardText(specialist: SelectableSpecialist) {
         const { owner, displayName, description, startingFavor, specialty } = specialist;
 
         return `${displayName}\n\n${description}\n\nFavor: ${startingFavor}\n\nSpecialty: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;

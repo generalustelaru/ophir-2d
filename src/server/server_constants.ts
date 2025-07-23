@@ -10,7 +10,6 @@ const serverConstants: ServerConstants = {
             startingFavor: 6,
             specialty: 'gems',
             description: 'No ability',
-            owner: null,
         },
         // {
         //     name: SpecialistName.placeholder_2,
@@ -18,7 +17,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 6,
         //     specialty: 'ebony',
         //     description: 'No ability',
-        //     owner: null,
         // },
         // {
         //     name: SpecialistName.placeholder_3,
@@ -26,7 +24,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 6,
         //     specialty: 'linen',
         //     description: 'No ability',
-        //     owner: null,
         // },
         // {
         //     name: SpecialistName.placeholder_4,
@@ -34,7 +31,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 6,
         //     specialty: 'marble',
         //     description: 'No ability',
-        //     owner: null,
         // },
         // {
         //     name: SpecialistName.advisor,
@@ -42,7 +38,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 1,
         //     specialty: 'linen',
         //     description: 'May complete temple trades using any market slot.',
-        //     owner: null,
         // },
         {
             name: SpecialistName.ambassador,
@@ -50,7 +45,6 @@ const serverConstants: ServerConstants = {
             startingFavor: 0,
             specialty: null,
             description: 'Begins with fully upgraded cargo hold.',
-            owner: null,
         },
         // {
         //     name: SpecialistName.chancellor,
@@ -58,7 +52,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 1,
         //     specialty: 'gems',
         //     description: 'Substitutes missing goods with Favor at Market.',
-        //     owner: null,
         // },
         {
             name: SpecialistName.harbormaster,
@@ -66,7 +59,6 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: 'marble',
             description: 'Can complete actions after first and second move after spending Favor.',
-            owner: null,
         },
         // {
         //     name: SpecialistName.moneychanger,
@@ -74,7 +66,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 2,
         //     specialty: 'linen',
         //     description : 'May perform a market trade instead of the temple trade.',
-        //     owner: null,
         // },
         // {
         //     name: SpecialistName.navigator,
@@ -82,7 +73,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 1,
         //     specialty: 'ebony',
         //     description: 'May cross barriers when moving. When doing so, no influence check is made.',
-        //     owner: null,
         // },
         {
             name: SpecialistName.priest,
@@ -90,7 +80,6 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: 'marble',
             description: 'Gains Favor after voluntarily ending the turn at the Temple.',
-            owner: null,
         },
         {
             name: SpecialistName.temple_guard,
@@ -98,7 +87,6 @@ const serverConstants: ServerConstants = {
             startingFavor: 2,
             specialty: 'ebony',
             description: 'Adds 1 to influence checks (up to 6).',
-            owner: null,
         },
         // {
         //     name: SpecialistName.postmaster,
@@ -106,7 +94,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 1,
         //     specialty: 'gems',
         //     description: 'May donate metals from one zone away from the Temple.',
-        //     owner: null,
         // },
         // {
         //     name: SpecialistName.peddler,
@@ -114,7 +101,6 @@ const serverConstants: ServerConstants = {
         //     startingFavor: 2,
         //     specialty: null,
         //     description: 'Ignores one required trade good when completing a reduced value market trade.',
-        //     owner: null,
         // },
     ],
     TRADE_DECK_A: [
