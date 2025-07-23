@@ -24,9 +24,9 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         const goodToPickup = ((): TradeGood | null => {
             switch (locationId) {
                 case 'mines': return 'gems';
-                case 'quary': return 'stone';
-                case 'forest': return 'wood';
-                case 'farms': return 'cloth';
+                case 'quary': return 'marble';
+                case 'forest': return 'ebony';
+                case 'farms': return 'linen';
                 default: return null;
             }
         })();

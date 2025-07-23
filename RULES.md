@@ -32,7 +32,7 @@ On your turn, as long as you have moves left, you may click once on the Favor Ic
 
 ### Trade Good Locations
 
-Four of the seven zones contain Trade Goods (Gems, Wood, Stone, or Cloth). Location icons depict the Trade Goods themselves.
+Four of the seven zones contain Trade Goods (gems, ebony, marble, or linen). Location icons depict the Trade Goods themselves.
 
   - Load Trade Good: Click on the zone's Trade Good Icon to pick up 1 of that type. The Good is placed in your Cargo.
 
