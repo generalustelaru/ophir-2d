@@ -1,6 +1,6 @@
 import Konva from "konva";
-import { Color, DynamicGroupInterface } from "../../client_types";
-import { Coordinates } from "../../../shared_types";
+import { Color, DynamicGroupInterface } from "~/client_types";
+import { Coordinates } from "~/shared_types";
 import { InterfaceButton } from "../InterfaceButton";
 
 export class ModalButton extends InterfaceButton implements DynamicGroupInterface<string> {

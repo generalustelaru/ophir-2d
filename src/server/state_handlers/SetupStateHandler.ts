@@ -1,5 +1,5 @@
-import { PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, Specialist, SpecialistName } from "../../shared_types";
-import { ObjectHandler } from "../server_types";
+import { PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, Specialist, SpecialistName } from "~/shared_types";
+import { ObjectHandler } from "~/server_types";
 import { Readable, readable, arrayWritable, ArrayWritable } from "./library";
 
 export class SetupStateHandler implements ObjectHandler<SetupState> {

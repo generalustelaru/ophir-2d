@@ -1,7 +1,7 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { PlayerColor, PlayerDraft, Specialist } from "../../../shared_types";
-import  clientConstants from "../../client_constants"
+import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
+import { PlayerColor, PlayerDraft, Specialist } from "~/shared_types";
+import  clientConstants from "~/client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 import localState from '../../state';
 

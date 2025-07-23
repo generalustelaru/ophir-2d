@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from '../../../shared_types';
-import { DynamicGroupInterface } from '../../client_types';
-import clientConstants from '../../client_constants';
+import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from "~/shared_types";
+import { DynamicGroupInterface } from "~/client_types";
+import clientConstants from "~/client_constants";
 import { ShipToken } from './ShipToken';
 import { SeaZone } from './SeaZoneTile';
 

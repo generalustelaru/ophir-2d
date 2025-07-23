@@ -1,8 +1,8 @@
 import Konva from "konva"
-import { Coordinates, TempleState } from "../../../shared_types"
-import { DynamicGroupInterface, } from "../../client_types"
+import { Coordinates, TempleState } from "~/shared_types"
+import { DynamicGroupInterface, } from "~/client_types"
 import { TempleLevelDial } from "./TempleLevelDial";
-import clientConstants from "../../client_constants";
+import clientConstants from "~/client_constants";
 
 const SHORT_GAME = Boolean(Number(process.env.SHORT_GAME));
 const { COLOR } = clientConstants;

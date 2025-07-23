@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '../../client_types';
-import clientConstants from '../../client_constants';
+import { DynamicGroupInterface } from "~/client_types";
+import clientConstants from "~/client_constants";
 
 const { LAYERED_ICONS } = clientConstants;
 

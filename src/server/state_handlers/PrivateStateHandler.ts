@@ -1,5 +1,5 @@
-import { Trade, ExchangeTier, ZoneName, PlayerColor } from "../../shared_types";
-import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage } from "../server_types";
+import { Trade, ExchangeTier, ZoneName, PlayerColor } from "~/shared_types";
+import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage } from "~/server_types";
 import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable } from "./library";
 
 /**

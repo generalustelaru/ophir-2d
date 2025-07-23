@@ -2,15 +2,15 @@ import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, Specialist, MapPairings,
     LocationName, ZoneName, PlayerSelection, SpecialistName, PlayerEntity, StateResponse,
-} from '../../shared_types';
-import { DestinationPackage, StateBundle, SetupDigest} from '../server_types';
-import serverConstants from '../server_constants';
+} from "~/shared_types";
+import { DestinationPackage, StateBundle, SetupDigest} from "~/server_types";
+import serverConstants from "~/server_constants";
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION} from '../configuration';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
-import { HexCoordinates } from '../../client/client_types';
+import { HexCoordinates } from "~/client_types";
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';

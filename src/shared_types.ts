@@ -1,5 +1,5 @@
-import { HexCoordinates } from './client/client_types';
-import { PlayerCountables } from './server/server_types';
+import { HexCoordinates } from "~/client_types";
+import { PlayerCountables } from "~/server_types";
 
 /**
  * @description Action strings require detailed standardization as they appear in intersecting types.

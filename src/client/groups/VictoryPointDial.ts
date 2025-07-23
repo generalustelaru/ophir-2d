@@ -1,7 +1,7 @@
 import Konva from "konva";
-import { DynamicGroupInterface } from "../client_types";
-import { Coordinates } from "../../shared_types";
-import clientConstants from "../client_constants";
+import { DynamicGroupInterface } from "~/client_types";
+import { Coordinates } from "~/shared_types";
+import clientConstants from "~/client_constants";
 
 const { COLOR, ICON_DATA } = clientConstants;
 export class VictoryPointDial implements DynamicGroupInterface<number> {

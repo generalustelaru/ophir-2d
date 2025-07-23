@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import constants from '../../client_constants';
-import { Player, ClientMessage } from '../../../shared_types';
-import { DynamicGroupInterface } from '../../client_types';
+import constants from "~/client_constants";
+import { Player, ClientMessage } from "~/shared_types";
+import { DynamicGroupInterface } from "~/client_types";
 import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;

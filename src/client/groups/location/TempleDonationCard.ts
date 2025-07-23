@@ -1,8 +1,8 @@
 import Konva from "konva";
-import { Action, Coordinates, Metal } from "../../../shared_types";
-import { DynamicGroupInterface } from "../../client_types";
+import { Action, Coordinates, Metal } from "~/shared_types";
+import { DynamicGroupInterface } from "~/client_types";
 import { ActionButton } from "../ActionButton";
-import clientConstants from "../../client_constants";
+import clientConstants from "~/client_constants";
 import { VictoryPointDial } from "../VictoryPointDial";
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;

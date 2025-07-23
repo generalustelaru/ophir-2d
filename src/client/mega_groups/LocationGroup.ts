@@ -1,8 +1,8 @@
 import Konva from "konva";
-import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from "../client_types";
+import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from "~/client_types";
 import { MarketPlacard, TreasuryPlacard, TemplePlacard } from "../groups/GroupList";
 import localState from '../state';
-import { PlayState } from "../../shared_types";
+import { PlayState } from "~/shared_types";
 
 export class LocationGroup implements MegaGroupInterface {
 

@@ -1,7 +1,7 @@
 import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "../../client_types";
-import { PlayerColor, Specialist } from "../../../shared_types";
-import clientConstants from "../../client_constants";
+import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
+import { PlayerColor, Specialist } from "~/shared_types";
+import clientConstants from "~/client_constants";
 
 const { COLOR } = clientConstants;
 export class SpecialistCard implements DynamicGroupInterface<undefined> {

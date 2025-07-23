@@ -1,5 +1,5 @@
 
-import { ClientConstants } from './client_types';
+import { ClientConstants } from "~/client_types";
 
 const clientConstants: ClientConstants = {
     DEFAULT_LOCAL_STATE: {

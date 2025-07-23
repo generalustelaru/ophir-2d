@@ -2,8 +2,8 @@ import {
     ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
     PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates,
     Phase,
-} from "../../shared_types";
-import { PlayerCountables, ObjectHandler } from "../server_types";
+} from "~/shared_types";
+import { PlayerCountables, ObjectHandler } from "~/server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
 export class PlayStateHandler implements ObjectHandler<PlayState>{

@@ -1,15 +1,15 @@
-import {WsDigest, DataDigest, SavedSession } from "./server_types";
+import {WsDigest, DataDigest, SavedSession } from "~/server_types";
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
-} from "./../shared_types";
-import { RequestMatch } from './server_types';
+} from "~/shared_types";
+import { RequestMatch } from "~/server_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib, { Probable } from './action_processors/library'
 import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
-import serverConstants from '../server/server_constants';
+import serverConstants from "~/server_constants";
 import { SINGLE_PLAYER } from "./configuration";
 import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";

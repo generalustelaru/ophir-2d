@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import clientConstants from '../../client_constants';
-import { ItemName, PlayerColor } from '../../../shared_types';
-import { CargoBandUpdate, Color, DynamicGroupInterface } from '../../client_types';
+import clientConstants from "~/client_constants";
+import { ItemName, PlayerColor } from "~/shared_types";
+import { CargoBandUpdate, Color, DynamicGroupInterface } from "~/client_types";
 import { CargoToken } from './CargoToken';
 
 const { COLOR } = clientConstants;

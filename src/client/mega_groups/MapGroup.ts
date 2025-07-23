@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState } from '../../shared_types';
-import { MegaGroupInterface, GroupLayoutData, IconLayer } from '../client_types';
+import { Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState } from "~/shared_types";
+import { MegaGroupInterface, GroupLayoutData, IconLayer } from "~/client_types";
 import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip } from '../groups/GroupList';
 import localState from '../state';
-import clientConstants from '../client_constants';
+import clientConstants from "~/client_constants";
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA } = clientConstants;
 

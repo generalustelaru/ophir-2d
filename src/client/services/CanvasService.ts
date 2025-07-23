@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { GameSetupPayload, Phase, PlayerColor, PlayState, SetupState } from '../../shared_types';
+import { GameSetupPayload, Phase, PlayerColor, PlayState, SetupState } from "~/shared_types";
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { EventType } from '../client_types';
+import { EventType } from "~/client_types";
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;

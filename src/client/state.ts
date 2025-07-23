@@ -1,5 +1,5 @@
 
-import { LocalState } from './client_types';
+import { LocalState } from "~/client_types";
 
 const localState: LocalState = {
     gameId: null,

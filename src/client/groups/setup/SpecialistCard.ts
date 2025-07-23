@@ -3,9 +3,9 @@
 // should contain buttons for shifting the market and endig turn (its turn)
 
 import Konva from "konva";
-import { DynamicGroupInterface } from "../../client_types";
-import clientConstants from '../../client_constants';
-import { Action, Specialist, SpecialistName } from "../../../shared_types";
+import { DynamicGroupInterface } from "~/client_types";
+import clientConstants from "~/client_constants";
+import { Action, Specialist, SpecialistName } from "~/shared_types";
 import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;

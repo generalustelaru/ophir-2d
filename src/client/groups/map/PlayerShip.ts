@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, Rival } from '../../../shared_types';
+import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, Rival } from "~/shared_types";
 import localState from '../../state';
-import clientConstants from '../../client_constants';
+import clientConstants from "~/client_constants";
 import { SeaZone } from '../GroupList';
 import { ShipToken } from './ShipToken';
-import { Color } from '../../client_types';
+import { Color } from "~/client_types";
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
 

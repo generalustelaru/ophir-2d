@@ -1,10 +1,10 @@
-import { InfoDetail, ErrorDetail, EventType, LocalState } from "./client_types";
+import { InfoDetail, ErrorDetail, EventType, LocalState } from "~/client_types";
 import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterface } from "./services/UiService";
-import clientConstants from "./client_constants";
-import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse } from "../shared_types";
+import clientConstants from "~/client_constants";
+import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse } from "~/shared_types";
 const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 
 // MARK: INIT
