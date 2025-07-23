@@ -267,14 +267,19 @@ export class PlayProcessor {
             return lib.fail(removeAction.message);
 
         player.setCargo(loadItem.data);
-        player.clearMoves();
-        player.setActions(removeAction.data);
-        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
         this.playState.addServerMessage(
             `${player.getIdentity().name} picked up ${localGood}`,
             player.getIdentity().color
         );
+
+        if (player.isHarbormaster())
+            this.clearHarbormasterMoves(player);
+        else
+            player.clearMoves();
+
+        player.setActions(removeAction.data);
+        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -344,7 +349,11 @@ export class PlayProcessor {
 
         player.setCargo(cargoTransfer.data);
         player.setActions(actionRemoval.data);
-        player.clearMoves();
+
+        if (player.isHarbormaster())
+            this.clearHarbormasterMoves(player);
+        else
+            player.clearMoves();
 
         return this.issueMarketShiftResponse(player);
     }
@@ -363,12 +372,16 @@ export class PlayProcessor {
             player.setCargo(unload.data);
             player.gainCoins(1);
             player.setTrades(this.pickFeasibleTrades(unload.data))
-            player.clearMoves();
 
             if (!player.getCargo().includes(specialty))
                 player.removeAction(Action.sell_good);
 
             this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
+
+            if (player.isHarbormaster())
+                this.clearHarbormasterMoves(player);
+            else
+                player.clearMoves();
 
             return lib.pass(this.saveAndReturn(player));
         }
@@ -438,7 +451,11 @@ export class PlayProcessor {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        player.clearMoves();
+
+        if (player.isHarbormaster())
+            this.clearHarbormasterMoves(player);
+        else
+            player.clearMoves();
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -463,7 +480,6 @@ export class PlayProcessor {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        player.clearMoves();
 
         const reward = metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(color, reward);
@@ -500,6 +516,11 @@ export class PlayProcessor {
             this.playState.setMetalPrices(newPrices);
             this.playState.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
+
+        if (player.isHarbormaster())
+            this.clearHarbormasterMoves(player);
+        else
+            player.clearMoves();
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -627,11 +648,16 @@ export class PlayProcessor {
             player.spendCoins(2);
             player.addCargoSpace();
             player.setActions(removeAction.data);
-            player.clearMoves();
+
             this.playState.addServerMessage(
                 `${player.getIdentity().name} upgraded their cargo hold.`,
                 player.getIdentity().color,
             );
+
+            if (player.isHarbormaster())
+                this.clearHarbormasterMoves(player);
+            else
+                player.clearMoves();
 
             return lib.pass(this.saveAndReturn(player));
         }
@@ -658,6 +684,21 @@ export class PlayProcessor {
     }
 
     // MARK: PRIVATE
+
+    private clearHarbormasterMoves(harbormaster: PlayerHandler) {
+        const moves = harbormaster.getMoves();
+
+        if(harbormaster.isPrivileged() && moves < 2) {
+            if(moves > 0) {
+                const { name, color } = harbormaster.getIdentity();
+                this.playState.addServerMessage(`${name} can move and act again.`, color)
+            }
+
+            return;
+        }
+
+        harbormaster.clearMoves();
+    }
 
     private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Probable<Array<LocationAction>> {
         const index = actions.indexOf(toRemove);
