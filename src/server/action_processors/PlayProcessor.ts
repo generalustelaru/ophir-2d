@@ -629,7 +629,7 @@ export class PlayProcessor {
             player.setActions(removeAction.data);
             player.clearMoves();
             this.playState.addServerMessage(
-                `${player.getIdentity().name} upgraded their hold`,
+                `${player.getIdentity().name} upgraded their cargo hold.`,
                 player.getIdentity().color,
             );
 
