@@ -1,4 +1,4 @@
-import { HexCoordinates } from "../../../client/client_types";
+import { HexCoordinates } from "~/client_types";
 import {
     ChatPayload,
     ClientRequest,
@@ -12,7 +12,7 @@ import {
     MetalPurchasePayload,
     MetalDonationPayload,
     PickSpecialistPayload,
-} from "../../../shared_types";
+} from "~/shared_types";
 import { lib, ObjectTests } from "./library"
 
 class ValidatorService {

@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { GroupLayoutData } from '../client_types';
-import { ClientMessage } from '../../shared_types';
+import { GroupLayoutData } from "~/client_types";
+import { ClientMessage } from "~/shared_types";
 export abstract class ActionButton {
     protected group: Konva.Group;
     private stage: Konva.Stage;

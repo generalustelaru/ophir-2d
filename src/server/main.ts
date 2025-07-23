@@ -1,8 +1,8 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, State, PlayerEntity } from '../shared_types';
-import { PrivateState, SavedSession, WsClient } from './server_types';
+import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, State, PlayerEntity } from "~/shared_types";
+import { PrivateState, SavedSession, WsClient } from "~/server_types";
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
 import { validator } from "./services/validation/ValidatorService";

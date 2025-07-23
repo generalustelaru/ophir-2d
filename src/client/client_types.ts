@@ -4,7 +4,7 @@ import {
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
     SetupState,
     VpTransmission,
-} from '../shared_types';
+} from "~/shared_types";
 import Konva from 'konva';
 
 export type Color = `#${string}`;

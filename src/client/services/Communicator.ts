@@ -1,4 +1,4 @@
-import { Event } from "../client_types";
+import { Event } from "~/client_types";
 
 export abstract class Communicator {
 

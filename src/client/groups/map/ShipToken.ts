@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import clientConstants from '../../client_constants';
-import { Color, DynamicGroupInterface } from '../../client_types';
+import clientConstants from "~/client_constants";
+import { Color, DynamicGroupInterface } from "~/client_types";
 
 const { COLOR, SHIP_DATA } = clientConstants;
 export class ShipToken implements DynamicGroupInterface<Color> {

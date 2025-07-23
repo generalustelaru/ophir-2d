@@ -1,7 +1,7 @@
 import Konva from "konva";
-import { Coordinates, Metal } from "../../../shared_types";
-import { StaticGroupInterface } from "../../client_types";
-import clientConstants from "../../client_constants";
+import { Coordinates, Metal } from "~/shared_types";
+import { StaticGroupInterface } from "~/client_types";
+import clientConstants from "~/client_constants";
 
 const { CARGO_ITEM_DATA } = clientConstants;
 const UNIT = 27;

@@ -1,12 +1,12 @@
-import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState, SetupState } from '../../shared_types';
+import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState, SetupState } from "~/shared_types";
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { TextInput } from '../html_behaviors/TextInput';
 import { ChatInput } from '../html_behaviors/ChatInput';
-import { PlayerCountables } from '../../server/server_types';
-import clientConstants from '../client_constants';
-import { EventType } from '../client_types';
+import { PlayerCountables } from "~/server_types";
+import clientConstants from "~/client_constants";
+import { EventType } from "~/client_types";
 
 const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));

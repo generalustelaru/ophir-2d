@@ -14,6 +14,17 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "esModuleInterop": true, // To lint express only. Use @ts-ignore if it causes trouble.
+        "baseUrl": ".",
+        "paths": {
+            "~/*": [
+                "src/*"
+            ],
+            "~/shared_types": ["src/shared_types"],
+            "~/client_types": ["src/client/client_types"],
+            "~/server_types": ["src/server/server_types"],
+            "~/client_constants": ["src/client/client_constants"],
+            "~/server_constants": ["src/server/server_constants"],
+        }
     },
     "sourceMaps": true,
     "include": [

@@ -1,7 +1,7 @@
 import Konva from "konva";
 import { ActionButton } from "../ActionButton";
-import { Action, Coordinates, ItemName } from "../../../shared_types";
-import clientConstants from "../../client_constants";
+import { Action, Coordinates, ItemName } from "~/shared_types";
+import clientConstants from "~/client_constants";
 
 
 const { CARGO_ITEM_DATA } = clientConstants;

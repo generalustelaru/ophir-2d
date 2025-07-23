@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '../../client_types';
+import { DynamicGroupInterface } from "~/client_types";
 import { ActionButton } from '../ActionButton';
-import { Player, Coordinates, PlayerColor, Action } from '../../../shared_types';
-import clientConstants from '../../client_constants';
+import { Player, Coordinates, PlayerColor, Action } from "~/shared_types";
+import clientConstants from "~/client_constants";
 
 const { CARGO_ITEM_DATA, COLOR } = clientConstants;
 

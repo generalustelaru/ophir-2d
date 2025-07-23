@@ -1,6 +1,6 @@
 import {
     EnrolmentState, PlayerColor, PlayerEntry, StateResponse,
-} from "../../shared_types";
+} from "~/shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';

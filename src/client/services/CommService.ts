@@ -1,10 +1,10 @@
 import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission,
-} from '../../shared_types';
+} from "~/shared_types";
 import { Communicator } from './Communicator';
 import localState from '../state';
-import { EventType } from '../client_types';
+import { EventType } from "~/client_types";
 
 export const CommunicationService = new class extends Communicator {
 

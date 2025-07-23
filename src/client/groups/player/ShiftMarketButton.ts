@@ -1,8 +1,8 @@
-import { DynamicGroupInterface } from "../../client_types";
+import { DynamicGroupInterface } from "~/client_types";
 import { ActionButton } from "../ActionButton";
-import clientConstants from "../../client_constants";
+import clientConstants from "~/client_constants";
 import Konva from "konva";
-import { Action, Coordinates } from "../../../shared_types";
+import { Action, Coordinates } from "~/shared_types";
 
 const { COLOR } = clientConstants;
 

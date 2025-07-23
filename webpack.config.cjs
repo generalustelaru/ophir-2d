@@ -30,6 +30,14 @@ module.exports = (env, argv) => {
             filename: isServer ? 'server.cjs' : 'client.js',
         },
         resolve: {
+            alias: {
+                '~/shared_types': path.resolve(__dirname, 'src/shared_types'),
+                '~/client_types': path.resolve(__dirname, 'src/client/client_types'),
+                '~/server_types': path.resolve(__dirname, 'src/server/server_types'),
+                '~/client_constants': path.resolve(__dirname, 'src/client/client_constants'),
+                '~/server_constants': path.resolve(__dirname, 'src/server/server_constants'),
+                '~': path.resolve(__dirname, 'src'),
+            },
             extensions: ['.ts', '.js', '.json'],
         },
         devtool: 'source-map', // for development debugging

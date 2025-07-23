@@ -1,4 +1,4 @@
-import { ErrorResponse, State, StateResponse } from "../../shared_types";
+import { ErrorResponse, State, StateResponse } from "~/shared_types";
 
 export type Probable<T> = { err: true, message: string } | { err?: false, data: T };
 

@@ -1,8 +1,8 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist,
-} from "../../shared_types";
-import { ObjectHandler, PlayerIdentity } from "../server_types";
+} from "~/shared_types";
+import { ObjectHandler, PlayerIdentity } from "~/server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
 const MAX_FAVOR = 6;

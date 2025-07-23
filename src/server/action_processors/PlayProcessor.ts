@@ -3,12 +3,12 @@ import {
     LocationAction, Metal, StateResponse,
     PlayState,
     SpecialistName,
-} from '../../shared_types';
+} from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
-import serverConstants from '../server_constants';
-import { DataDigest, PlayerCountables, StateBundle } from '../server_types';
+import serverConstants from "~/server_constants";
+import { DataDigest, PlayerCountables, StateBundle } from "~/server_types";
 import lib, { Probable } from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { IDLE_CHECKS, IDLE_TIMEOUT } from "../configuration";

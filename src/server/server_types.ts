@@ -3,7 +3,7 @@ import {
     MessagePayload, ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage,
     PlayerEntry,
     ChatEntry,
-} from '../shared_types';
+} from "~/shared_types";
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';

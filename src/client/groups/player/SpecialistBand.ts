@@ -1,7 +1,7 @@
 import Konva from "konva";
-import { Coordinates, Player, PlayerColor } from "../../../shared_types";
-import { DynamicGroupInterface } from "../../client_types";
-import clientConstants from "../../client_constants";
+import { Coordinates, Player, PlayerColor } from "~/shared_types";
+import { DynamicGroupInterface } from "~/client_types";
+import clientConstants from "~/client_constants";
 import { InterfaceButton } from "../InterfaceButton";
 const { COLOR } = clientConstants;
 

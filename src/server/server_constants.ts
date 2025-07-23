@@ -1,5 +1,5 @@
-import { Action, Phase, SpecialistName } from "../shared_types";
-import { ServerConstants } from "./server_types"
+import { Action, Phase, SpecialistName } from "~/shared_types";
+import { ServerConstants } from "~/server_types"
 
 const serverConstants: ServerConstants = {
 
