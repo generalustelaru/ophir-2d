@@ -16,6 +16,14 @@ function checkConditions(arr: Array<boolean>): Probable<true> {
     return pass(true);
 }
 
+function randomize<T>(array: Array<T>): Array<T> {
+    return (
+        array.map(element => { return { key: Math.random(), element } })
+        .sort((a, b) => a.key - b.key)
+        .map(object => object.element)
+    );
+}
+
 function validationErrorMessage(){
     return 'Malformed request.';
 }
@@ -38,6 +46,7 @@ const lib = {
     pass,
     fail,
     checkConditions,
+    randomize,
     stateResponse,
     validationErrorMessage,
     errorResponse,
