@@ -11,4 +11,5 @@ export const RICH_PLAYERS = Boolean(Number(process.env.RICH_PLAYERS));
 export const CARGO_BONUS = Number(process.env.CARGO_BONUS);
 export const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 export const SHORT_GAME = Boolean(Number(process.env.SHORT_GAME));
+export const INCLUDE = JSON.parse(String(process.env.INCLUDE));
 export const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION)); //TODO: remove persistence logic after implementing DB solution
