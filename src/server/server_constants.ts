@@ -11,13 +11,13 @@ const serverConstants: ServerConstants = {
         //     specialty: 'linen',
         //     description: 'May complete temple trades using any market slot.',
         // },
-        // {
-        //     name: SpecialistName.ambassador,
-        //     displayName: 'Ambassador',
-        //     startingFavor: 0,
-        //     specialty: null,
-        //     description: 'Begins with fully upgraded cargo hold.',
-        // },
+        {
+            name: SpecialistName.ambassador,
+            displayName: 'Ambassador',
+            startingFavor: 0,
+            specialty: null,
+            description: 'Begins with fully upgraded cargo hold.',
+        },
         // {
         //     name: SpecialistName.chancellor,
         //     displayName: 'Chancellor',
@@ -53,13 +53,13 @@ const serverConstants: ServerConstants = {
             specialty: 'marble',
             description: 'Gains Favor after voluntarily ending the turn at the Temple.',
         },
-        // {
-        //     name: SpecialistName.temple_guard,
-        //     displayName: 'Temple Guard',
-        //     startingFavor: 2,
-        //     specialty: 'ebony',
-        //     description: 'Adds 1 to influence checks (up to 6).',
-        // },
+        {
+            name: SpecialistName.temple_guard,
+            displayName: 'Temple Guard',
+            startingFavor: 2,
+            specialty: 'ebony',
+            description: 'Adds 1 to influence checks (up to 6).',
+        },
         {
             name: SpecialistName.postmaster,
             displayName: 'Postmaster',
