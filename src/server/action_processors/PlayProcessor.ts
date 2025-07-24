@@ -1,6 +1,6 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
-    LocationAction, Metal, StateResponse,
+    LocalActions, Metal, StateResponse,
     PlayState,
     SpecialistName,
     DiceSix,
@@ -80,7 +80,7 @@ export class PlayProcessor {
                 player.rollInfluence();
                 const roll = player.getInfluence();
 
-                if(roll === 6) {
+                if (roll === 6) {
                     this.playState.addServerMessage(`${playerName} rolled a natural 6!`, playerColor);
 
                     return lib.pass(roll);
@@ -130,7 +130,10 @@ export class PlayProcessor {
                 location: this.playState.getLocationName(target),
             });
 
-            player.setAnchoredActions(this.playState.getLocationActions(target));
+            player.setAnchoredActions(player.isPostmaster()
+                ? this.getPostmasterActions(target)
+                : this.playState.getLocalActions(target),
+            );
 
             if (player.getMoves() > 0) {
                 const nextDestinations = this.privateState.getDestinations(target);
@@ -205,6 +208,10 @@ export class PlayProcessor {
             `${player.getIdentity().name} has spent favor`,
             player.getIdentity().color,
         );
+
+        if (player.isPostmaster()) {
+            player.setActions(this.getPostmasterActions(player.getBearings().seaZone));
+        }
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -360,7 +367,7 @@ export class PlayProcessor {
 
     public processSpecialtyGoodSale(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
-        const { name, color} = player.getIdentity();
+        const { name, color } = player.getIdentity();
         const specialty = player.getSpecialty();
 
         if (specialty && player.maySellSpecialtyGood()) {
@@ -399,7 +406,7 @@ export class PlayProcessor {
         if (!purchasePayload)
             return lib.fail(lib.validationErrorMessage());
 
-        const {metal, currency} = purchasePayload;
+        const { metal, currency } = purchasePayload;
 
         if (!player.mayLoadMetal())
             return lib.fail(`Player ${name} cannot buy metals`);
@@ -483,7 +490,13 @@ export class PlayProcessor {
 
         const reward = metal === 'gold' ? 10 : 5;
         this.privateState.updateVictoryPoints(color, reward);
-        this.playState.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
+
+        if (player.isPostmaster() && player.getBearings().location != 'temple') {
+            this.playState.addServerMessage(`${name} mailed one ${metal} for ${reward} VP`, color);
+            player.removeAction(Action.donate_metals);
+        } else {
+            this.playState.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
+        }
         console.info(this.privateState.getGameStats());
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
@@ -556,7 +569,7 @@ export class PlayProcessor {
             const nextPlayer = new PlayerHandler(nextPlayerDto);
             const { seaZone } = nextPlayer.getBearings();
             nextPlayer.activate(
-                this.playState.getLocationActions(seaZone),
+                this.playState.getLocalActions(seaZone),
                 this.privateState.getDestinations(seaZone),
             );
             this.playState.updateRival(nextPlayer.getIdentity().color);
@@ -586,7 +599,7 @@ export class PlayProcessor {
 
         const { player } = digest;
         player.unfreeze(
-            this.playState.getLocationActions(
+            this.playState.getLocalActions(
                 player.getBearings().seaZone,
             ),
             rival.bearings.seaZone,
@@ -700,7 +713,21 @@ export class PlayProcessor {
         harbormaster.clearMoves();
     }
 
-    private removeAction(actions: Array<LocationAction>, toRemove: LocationAction): Probable<Array<LocationAction>> {
+    private getPostmasterActions(seaZone: ZoneName): Array<LocalActions> {
+        const actions = this.playState.getLocalActions(seaZone)
+        const adjacentZones = this.privateState.getDestinations(seaZone);
+
+        for (const zone of adjacentZones) {
+            if (this.playState.getLocalActions(zone).includes(Action.donate_metals)) {
+                actions.push(Action.donate_metals);
+                break;
+            }
+        }
+
+        return actions;
+    }
+
+    private removeAction(actions: Array<LocalActions>, toRemove: LocalActions): Probable<Array<LocalActions>> {
         const index = actions.indexOf(toRemove);
 
         if (index === -1)

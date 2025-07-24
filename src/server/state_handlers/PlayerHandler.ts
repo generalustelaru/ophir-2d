@@ -1,5 +1,5 @@
 import {
-    Action, CargoMetal, DiceSix, ItemName, LocationAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
+    Action, CargoMetal, DiceSix, ItemName, LocalActions, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist, SpecialistName,
 } from "~/shared_types";
 import { ObjectHandler, PlayerIdentity } from "~/server_types";
@@ -24,7 +24,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private moveActions: Writable<number>;
     private isAnchored: Writable<boolean>;
     private isHandlingRival: Writable<boolean>;
-    private locationActions: ArrayWritable<LocationAction>;
+    private locationActions: ArrayWritable<LocalActions>;
     private destinations: ArrayWritable<ZoneName>;
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
@@ -100,7 +100,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isActive.get();
     }
 
-    public canAct(action: LocationAction) {
+    public canAct(action: LocalActions) {
         return this.isAnchored && this.getActions().includes(action);
     }
 
@@ -120,12 +120,12 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.destinations.overwrite(options);
     }
 
-    public setAnchoredActions(actions: Array<LocationAction>) {
+    public setAnchoredActions(actions: Array<LocalActions>) {
         this.isAnchored.set(true);
         this.locationActions.overwrite(actions);
     }
 
-    public removeAction(action: LocationAction) {
+    public removeAction(action: LocalActions) {
         this.locationActions.removeOne(action);
     }
 
@@ -135,6 +135,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public isHarbormaster(): boolean {
         return this.getSpecialistName() === SpecialistName.harbormaster;
+    }
+
+    public isPostmaster(): boolean {
+        return this.getSpecialistName() === SpecialistName.postmaster;
     }
 
     public clearMoves() {
@@ -148,6 +152,9 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.bearings.get();
     }
 
+    public getDestinations() {
+        return this.destinations.get();
+    }
 
     public setBearings(bearings: ShipBearings) {
         this.bearings.set(bearings);
@@ -294,7 +301,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.locationActions.get();
     }
 
-    public setActions(actions: Array<LocationAction>) {
+    public setActions(actions: Array<LocalActions>) {
         this.locationActions.overwrite(actions);
     }
 
@@ -311,7 +318,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.locationActions.clear();
     }
 
-    public unfreeze(actions: Array<LocationAction>, rivalZone: ZoneName) {
+    public unfreeze(actions: Array<LocalActions>, rivalZone: ZoneName) {
         this.isHandlingRival.set(false);
         this.locationActions.overwrite(actions);
         this.destinations.removeOne(rivalZone);
@@ -321,7 +328,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isHandlingRival.get();
     }
 
-    public activate(zoneActions: Array<LocationAction>, destinations: Array<ZoneName>) {
+    public activate(zoneActions: Array<LocalActions>, destinations: Array<ZoneName>) {
         this.isActive.set(true);
         this.isAnchored.set(false);
         this.timeStamp.set(Date.now());
