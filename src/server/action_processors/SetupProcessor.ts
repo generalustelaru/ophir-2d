@@ -7,7 +7,7 @@ import { DestinationPackage, StateBundle, SetupDigest} from "~/server_types";
 import serverConstants from "~/server_constants";
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
-import { SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION} from '../configuration';
+import { SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE} from '../configuration';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from "~/client_types";
@@ -16,7 +16,7 @@ import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
+const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE}).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
 console.log('Active keys:');
 console.log(activeKeys);
 
@@ -31,8 +31,9 @@ export class SetupProcessor {
     constructor(digest: SetupDigest) {
 
         const playerEntries = tools.getCopy(digest.players);
+        const playerCount = playerEntries.length;
 
-        if (playerEntries.length < 2 && !SINGLE_PLAYER)
+        if (playerCount < 2 && !SINGLE_PLAYER)
             throw new Error('Not enough players to start a game.');
 
         const barriers = this.determineBarriers();
@@ -41,15 +42,27 @@ export class SetupProcessor {
         const specialists = ((): Array<SelectableSpecialist> => {
             const deck = tools.getCopy(SPECIALISTS);
 
-            if (playerEntries.length >= deck.length)
+            if (playerCount >= deck.length)
                 throw new Error("Not enough specialist cards!");
 
-            const randomized: Array<SpecialistData> = deck
-                .map(specialist => {return {key:Math.random(), specialist}})
-                .sort((a, b) => a.key - b.key)
-                .map(s => s.specialist);
+            const randomized: Array<SpecialistData> = lib.randomize(deck);
+            const selection = randomized.slice(0,playerCount + 1);
 
-            const selection = randomized.slice(0,playerEntries.length + 1);
+            if (INCLUDE.length) {
+                const toInclude = INCLUDE.reverse();
+                for (const includeeName of toInclude) {
+                    if (selection.find(s => s.name === includeeName))
+                        break;
+
+                    const specialist = deck.find(s => s.name === includeeName);
+
+                    if (specialist)
+                        selection.push(specialist);
+                }
+
+                while(selection.length > playerCount + 1)
+                    selection.shift();
+            }
 
             return selection.map(s => {return {...s, owner: null}});
         })();
@@ -230,10 +243,7 @@ export class SetupProcessor {
     }
 
     private determineLocations(): MapPairings {
-        const locations = LOCATION_ACTIONS
-            .map(location => { return { key: Math.random(), location } })
-            .sort((a, b) => a.key - b.key)
-            .map(item => item.location);
+        const locations = lib.randomize(LOCATION_ACTIONS)
 
         if (locations.length !== 7) {
             throw new Error(`Invalid number of locations! Expected 7, got {${locations.length}}`);
@@ -282,10 +292,7 @@ export class SetupProcessor {
 
     // MARK: Players
     private draftPlayers(entries: Array<PlayerEntry>): Array<PlayerDraft> {
-        const rearranged = entries
-            .map(e => { return { entry: e, order: Math.random() } })
-            .sort((a, b) => a.order - b.order)
-            .map(o => o.entry);
+        const rearranged = lib.randomize(entries);
 
         const orderTokens = (() => {
             const tokens = Array.from(Array(5).keys());
@@ -454,10 +461,7 @@ export class SetupProcessor {
     }
 
     private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
-        const tradeDeck = TRADE_DECK_A
-            .map(t => { return { key: Math.random(), trade: t } })
-            .sort((a, b) => a.key - b.key)
-            .map(s => s.trade);
+        const tradeDeck = lib.randomize(TRADE_DECK_A);
 
         function drawTrade(): Trade {
             return tradeDeck.shift() as Trade;
