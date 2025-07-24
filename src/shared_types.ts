@@ -40,7 +40,7 @@ export type CargoMetal = Metal | 'silver_extra' | 'gold_extra';
 export type Currency = 'coins' | 'favor';
 export type GoodsLocationName = 'quary' | 'forest' | 'mines' | 'farms';
 export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
-export type LocationAction =
+export type LocalActions =
     | Action.upgrade_cargo | Action.make_trade | Action.buy_metals | Action.load_good | Action.donate_metals
     | Action.sell_good;
 export type ItemName = TradeGood | CargoMetal | 'empty';
@@ -139,7 +139,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     moveActions: number,
     isHandlingRival: boolean,
     isAnchored: boolean,
-    locationActions: Array<LocationAction>,
+    locationActions: Array<LocalActions>,
     destinations: Array<ZoneName>,
     cargo: Array<ItemName>,
     feasibleTrades: Array<MarketSlotKey>
@@ -218,7 +218,7 @@ export type State = EnrolmentState | SetupState | PlayState;
 
 export type LocationData = {
     name: LocationName,
-    actions: Array<LocationAction>,
+    actions: Array<LocalActions>,
 }
 
 export type MapPairings = {
