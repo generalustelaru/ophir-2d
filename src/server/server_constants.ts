@@ -4,34 +4,6 @@ import { ServerConstants } from "~/server_types"
 const serverConstants: ServerConstants = {
 
     SPECIALISTS: [
-        {
-            name: SpecialistName.placeholder_1,
-            displayName: 'Placeholder 1',
-            startingFavor: 6,
-            specialty: 'gems',
-            description: 'No ability',
-        },
-        // {
-        //     name: SpecialistName.placeholder_2,
-        //     displayName: 'Placeholder 2',
-        //     startingFavor: 6,
-        //     specialty: 'ebony',
-        //     description: 'No ability',
-        // },
-        // {
-        //     name: SpecialistName.placeholder_3,
-        //     displayName: 'Placeholder 3',
-        //     startingFavor: 6,
-        //     specialty: 'linen',
-        //     description: 'No ability',
-        // },
-        // {
-        //     name: SpecialistName.placeholder_4,
-        //     displayName: 'Placeholder 4',
-        //     startingFavor: 6,
-        //     specialty: 'marble',
-        //     description: 'No ability',
-        // },
         // {
         //     name: SpecialistName.advisor,
         //     displayName: 'Advisor',
@@ -88,13 +60,13 @@ const serverConstants: ServerConstants = {
             specialty: 'ebony',
             description: 'Adds 1 to influence checks (up to 6).',
         },
-        // {
-        //     name: SpecialistName.postmaster,
-        //     displayName: 'Postmaster',
-        //     startingFavor: 1,
-        //     specialty: 'gems',
-        //     description: 'May donate metals from one zone away from the Temple.',
-        // },
+        {
+            name: SpecialistName.postmaster,
+            displayName: 'Postmaster',
+            startingFavor: 1,
+            specialty: 'gems',
+            description: 'May donate metals from one zone away from the Temple.',
+        },
         // {
         //     name: SpecialistName.peddler,
         //     displayName: 'Peddler',

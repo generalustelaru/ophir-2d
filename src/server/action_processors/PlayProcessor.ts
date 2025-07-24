@@ -621,8 +621,8 @@ export class PlayProcessor {
             this.playState.concludeRivalTurn();
 
         const idlerHandler = new PlayerHandler(
-                { ...activePlayer, isIdle: false, isAnchored: true, isHandlingRival: false }
-            );
+            { ...activePlayer, isIdle: false, isAnchored: true, isHandlingRival: false }
+        );
 
         this.playState.addServerMessage(
             `${player.getIdentity().name} forced ${idlerHandler.getIdentity().name} to end the turn.`,
@@ -688,8 +688,8 @@ export class PlayProcessor {
     private clearHarbormasterMoves(harbormaster: PlayerHandler) {
         const moves = harbormaster.getMoves();
 
-        if(harbormaster.isPrivileged() && moves < 2) {
-            if(moves > 0) {
+        if (harbormaster.isPrivileged() && moves < 2) {
+            if (moves > 0) {
                 const { name, color } = harbormaster.getIdentity();
                 this.playState.addServerMessage(`${name} can move and act again.`, color)
             }
@@ -873,7 +873,7 @@ export class PlayProcessor {
     private saveAndReturn(player: PlayerHandler): StateResponse {
         this.playState.savePlayer(player.toDto());
 
-        return { state: this.playState.toDto()};
+        return { state: this.playState.toDto() };
     }
 
     private startIdleChecks(): void {
