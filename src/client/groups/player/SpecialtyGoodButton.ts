@@ -23,7 +23,7 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
         const layout = { ...position, ...size };
         const { specialty } = player.specialist;
 
-        super(stage, layout, isLocalPlayer && specialty ? { action: Action.sell_good, payload: null } :  null);
+        super(stage, layout, isLocalPlayer && specialty ? { action: Action.sell_specialty, payload: null } :  null);
 
         this.playerColor = player.color;
         this.isLocalPlayer = isLocalPlayer;

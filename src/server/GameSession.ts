@@ -286,9 +286,9 @@ export class GameSession {
                     return processor.processRepositioning(digest, true);
                 case Action.load_good:
                     return processor.processLoadGood(digest);
-                case Action.make_trade:
+                case Action.sell_goods:
                     return processor.processGoodsTrade(digest);
-                case Action.sell_good:
+                case Action.sell_specialty:
                     return processor.processSpecialtyGoodSale(digest);
                 case Action.buy_metals:
                     return processor.processMetalPurchase(digest);

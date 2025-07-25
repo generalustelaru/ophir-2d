@@ -129,7 +129,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.specialistBand.update(isActive);
         this.specialtyGoodButton.update(!!(
             isAnchored
-            && locationActions.includes(Action.sell_good)
+            && locationActions.includes(Action.sell_specialty)
             && specialist.specialty
             && cargo.includes(specialist.specialty)
         ));

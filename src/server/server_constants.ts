@@ -32,13 +32,13 @@ const serverConstants: ServerConstants = {
             specialty: 'marble',
             description: 'Can complete actions after first and second move after spending Favor.',
         },
-        // {
-        //     name: SpecialistName.moneychanger,
-        //     displayName: 'Moneychanger',
-        //     startingFavor: 2,
-        //     specialty: 'linen',
-        //     description : 'May perform a market trade instead of the temple trade.',
-        // },
+        {
+            name: SpecialistName.moneychanger,
+            displayName: 'Moneychanger',
+            startingFavor: 2,
+            specialty: 'linen',
+            description : 'May perform a market trade instead of the temple trade.',
+        },
         // {
         //     name: SpecialistName.navigator,
         //     displayName: 'Navigator',
@@ -153,8 +153,8 @@ const serverConstants: ServerConstants = {
         'Green',
     ],
     LOCATION_ACTIONS: [
-        {name: 'temple', actions: [Action.upgrade_cargo, Action.make_trade, Action.donate_metals]},
-        {name: 'market', actions: [Action.make_trade, Action.sell_good]},
+        {name: 'temple', actions: [Action.upgrade_cargo, Action.sell_goods, Action.donate_metals]},
+        {name: 'market', actions: [Action.sell_goods, Action.sell_specialty]},
         {name: 'treasury', actions: [Action.buy_metals]},
         {name: 'quary', actions: [Action.load_good]},
         {name: 'forest', actions: [Action.load_good]},

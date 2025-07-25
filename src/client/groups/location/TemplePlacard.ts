@@ -53,7 +53,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
         this.marketCard = new TempleMarketCard(
             stage,
             { x: this.group.width() - 62 - margin, y: 10 },
-            { action: Action.make_trade, payload: { slot: marketSlot, location: 'temple' } },
+            { action: Action.sell_goods, payload: { slot: marketSlot, location: 'temple' } },
             card,
         );
         this.templeTradeSlot = marketSlot;
@@ -101,7 +101,7 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
                 playerCanAct
                 && localPlayer.bearings.location === 'temple'
                 && localPlayer.feasibleTrades.includes(this.templeTradeSlot)
-                && localPlayer.locationActions.includes(Action.make_trade)
+                && localPlayer.locationActions.includes(Action.sell_goods)
             )
         });
 
