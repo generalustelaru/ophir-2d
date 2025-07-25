@@ -200,8 +200,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         }
     }
 
-    public getLocalActions(zone: ZoneName) {
-        return this.setup.get().mapPairings.locationByZone[zone].actions;
+    public getLocalActions(seaZone: ZoneName) {
+        return this.setup.get().mapPairings.locationByZone[seaZone].actions;
     }
 
     public getItemSupplies() {

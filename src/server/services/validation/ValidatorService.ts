@@ -8,7 +8,7 @@ import {
     RepositioningPayload,
     DropItemPayload,
     LoadGoodPayload,
-    TradePayload,
+    MarketSlotPayload,
     MetalPurchasePayload,
     MetalDonationPayload,
     PickSpecialistPayload,
@@ -147,13 +147,12 @@ class ValidatorService {
         );
     }
 
-    public validateTradePayload(payload: unknown) {
-        return this.validateObject<TradePayload>(
-            'TradePayload',
+    public validateMarketSlotPayload(payload: unknown) {
+        return this.validateObject<MarketSlotPayload>(
+            'MarketSlotPayload',
             payload,
             [
                 { key: 'slot', type: 'string', nullable: false },
-                { key: 'location', type: 'string', nullable: false },
             ],
         );
     }

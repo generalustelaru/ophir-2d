@@ -332,12 +332,17 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isHandlingRival.get();
     }
 
-    public activate(zoneActions: Array<LocalActions>, destinations: Array<ZoneName>) {
+    public activate(
+        zoneActions: Array<LocalActions>,
+        feasibleTrades: Array<MarketSlotKey>,
+        destinations: Array<ZoneName>
+    ) {
         this.isActive.set(true);
         this.isAnchored.set(false);
         this.timeStamp.set(Date.now());
         this.moveActions.set(2);
         this.locationActions.overwrite(zoneActions);
+        this.feasibleTrades.overwrite(feasibleTrades);
         this.destinations.overwrite(destinations);
     }
 

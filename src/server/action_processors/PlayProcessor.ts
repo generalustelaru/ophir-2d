@@ -23,6 +23,7 @@ export class PlayProcessor {
     private autoBroadcast: (state: PlayState) => void;
     private transmitVp: (vp: number, socketId: string) => void;
 
+    /** @throws  */
     constructor(
         stateBundle: StateBundle,
         broadcastCallback: (state: PlayState) => void,
@@ -32,6 +33,22 @@ export class PlayProcessor {
         this.privateState = stateBundle.privateState;
         this.autoBroadcast = broadcastCallback;
         this.transmitVp = transmitVp
+
+        const players = this.playState.getAllPlayers();
+        const firstPlayer = players.find(p => p.turnOrder === 1);
+
+        if (!firstPlayer)
+            throw new Error("Could not find a player to activate!");
+
+        const player = new PlayerHandler(firstPlayer);
+        const { seaZone } = player.getBearings();
+
+        player.activate(
+            this.playState.getLocalActions(seaZone),
+            this.pickFeasibleTrades(player.getCargo()),
+            this.privateState.getDestinations(seaZone),
+        );
+        this.playState.savePlayer(player.toDto());
 
         if (IDLE_CHECKS)
             this.startIdleChecks();
@@ -130,13 +147,7 @@ export class PlayProcessor {
                 location: this.playState.getLocationName(target),
             });
 
-            player.setAnchoredActions((() => {
-                switch(true) {
-                    case player.isPostmaster(): return this.getPostmasterActions(target);
-                    case player.isMoneychanger(): return this.getMoneychangerActions(target);
-                    default: return this.playState.getLocalActions(target);
-                }
-            })());
+            player.setAnchoredActions(this.determinePlayerActions(player, target));
 
             if (player.getMoves() > 0) {
                 const nextDestinations = this.privateState.getDestinations(target);
@@ -212,10 +223,6 @@ export class PlayProcessor {
             player.getIdentity().color,
         );
 
-        if (player.isPostmaster()) {
-            player.setActions(this.getPostmasterActions(player.getBearings().seaZone));
-        }
-
         return lib.pass(this.saveAndReturn(player));
     }
 
@@ -284,7 +291,7 @@ export class PlayProcessor {
         );
 
         if (player.isHarbormaster())
-            this.clearHarbormasterMoves(player);
+            this.clearMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
@@ -294,16 +301,16 @@ export class PlayProcessor {
         return lib.pass(this.saveAndReturn(player));
     }
 
-    // MARK: TRADE
-    public processGoodsTrade(data: DataDigest): Probable<StateResponse> { // TODO: need to refactor this into two separate methods with several common private methods for better trade and donation discrimination.
+    // MARK: SELL GOODS
+    public processSellGoods(data: DataDigest): Probable<StateResponse> { // TODO: need to refactor this into two separate methods with several common private methods for better trade and donation discrimination.
         const { player, payload } = data;
-        const tradePayload = validator.validateTradePayload(payload);
+        const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
-        if (!tradePayload)
+        if (!marketSlotPayload)
             return lib.fail(lib.validationErrorMessage());
 
-        const { slot, location } = tradePayload;
-        const { color, name, socketId } = player.getIdentity();
+        const { slot } = marketSlotPayload;
+        const { color, name } = player.getIdentity();
 
         if (lib.checkConditions([
             player.canAct(Action.sell_goods),
@@ -337,37 +344,43 @@ export class PlayProcessor {
         if (actionRemoval.err)
             return lib.fail(actionRemoval.message);
 
-        switch (location) {
-            case 'market':
-                const amount = trade.reward.coins + this.playState.getFluctuation(slot);
-                player.gainCoins(amount);
-                this.playState.addServerMessage(`${name} sold goods for ${amount} coins`, color);
-                break;
-            case 'temple':
-                const reward = trade.reward.favorAndVp;
-                player.gainFavor(reward);
-                this.privateState.updateVictoryPoints(color, reward);
-                this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
-                console.info(this.privateState.getGameStats());
+        // switch (location) {
+        //     case 'market':
+        const amount = trade.reward.coins + this.playState.getFluctuation(slot);
+        player.gainCoins(amount);
+        this.playState.addServerMessage(`${name} sold goods for ${amount} coins`, color);
+        // break;
+        // case 'temple':
+        //     const reward = trade.reward.favorAndVp;
+        //     player.gainFavor(reward);
+        //     this.privateState.updateVictoryPoints(color, reward);
+        //     this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
+        //     console.info(this.privateState.getGameStats());
 
-                this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
-                break;
-            default:
-                return lib.fail(`Unknown trade location: ${location}`);
-        }
+        //     this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
+        //     break;
+        //     default:
+        //         return lib.fail(`Unknown trade location: ${location}`);
+        // }
 
         player.setCargo(cargoTransfer.data);
         player.setActions(actionRemoval.data);
 
         if (player.isHarbormaster())
-            this.clearHarbormasterMoves(player);
+            this.clearMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
         return this.issueMarketShiftResponse(player);
     }
 
-    public processSpecialtyGoodSale(data: DataDigest): Probable<StateResponse> {
+    // MARK: DONATE GOODS
+    public donateGoods(data: DataDigest): Probable<StateResponse> {
+        return lib.fail('Not implemented');
+    }
+
+    // MARK: SELL SPECIALTY
+    public processSellSpecialty(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
         const { name, color } = player.getIdentity();
         const specialty = player.getSpecialty();
@@ -388,7 +401,7 @@ export class PlayProcessor {
             this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
 
             if (player.isHarbormaster())
-                this.clearHarbormasterMoves(player);
+                this.clearMovesAsHarbormaster(player);
             else
                 player.clearMoves();
 
@@ -462,14 +475,14 @@ export class PlayProcessor {
         player.setCargo(result.data);
 
         if (player.isHarbormaster())
-            this.clearHarbormasterMoves(player);
+            this.clearMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
         return lib.pass(this.saveAndReturn(player));
     }
 
-    // MARK: DONATE
+    // MARK: DONATE METAL
     public processMetalDonation(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const { color, name } = player.getIdentity();
@@ -533,7 +546,7 @@ export class PlayProcessor {
         }
 
         if (player.isHarbormaster())
-            this.clearHarbormasterMoves(player);
+            this.clearMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
@@ -570,8 +583,10 @@ export class PlayProcessor {
 
             const nextPlayer = new PlayerHandler(nextPlayerDto);
             const { seaZone } = nextPlayer.getBearings();
+
             nextPlayer.activate(
-                this.playState.getLocalActions(seaZone),
+                this.determinePlayerActions(nextPlayer, seaZone),
+                this.pickFeasibleTrades(nextPlayer.getCargo()),
                 this.privateState.getDestinations(seaZone),
             );
             this.playState.updateRival(nextPlayer.getIdentity().color);
@@ -670,7 +685,7 @@ export class PlayProcessor {
             );
 
             if (player.isHarbormaster())
-                this.clearHarbormasterMoves(player);
+                this.clearMovesAsHarbormaster(player);
             else
                 player.clearMoves();
 
@@ -700,40 +715,35 @@ export class PlayProcessor {
 
     // MARK: PRIVATE
 
-    private clearHarbormasterMoves(harbormaster: PlayerHandler) {
+    private clearMovesAsHarbormaster(harbormaster: PlayerHandler) {
         const moves = harbormaster.getMoves();
 
-        if (harbormaster.isPrivileged() && moves < 2) {
-            if (moves > 0) {
-                const { name, color } = harbormaster.getIdentity();
-                this.playState.addServerMessage(`${name} can move and act again.`, color)
-            }
-
-            return;
+        if (harbormaster.isPrivileged() && moves === 1) {
+            const { name, color } = harbormaster.getIdentity();
+            this.playState.addServerMessage(`${name} can move and act again.`, color)
+        } else {
+            harbormaster.clearMoves();
         }
-
-        harbormaster.clearMoves();
     }
 
-    private getPostmasterActions(seaZone: ZoneName): Array<LocalActions> {
+    private determinePlayerActions(player: PlayerHandler, seaZone: ZoneName): Array<LocalActions> {
         const actions = this.playState.getLocalActions(seaZone)
-        const adjacentZones = this.privateState.getDestinations(seaZone);
 
-        for (const zone of adjacentZones) {
-            if (this.playState.getLocalActions(zone).includes(Action.donate_metals)) {
-                actions.push(Action.donate_metals);
-                break;
+        if (player.isPostmaster()) {
+            const adjacentZones = this.privateState.getDestinations(seaZone);
+
+            for (const zone of adjacentZones) {
+                if (this.playState.getLocalActions(zone).includes(Action.donate_metals)) {
+                    actions.push(Action.donate_metals);
+                    break;
+                }
             }
         }
 
-        return actions;
-    }
-
-    private getMoneychangerActions(seaZone: ZoneName): Array<LocalActions> {
-        const actions = this.playState.getLocalActions(seaZone);
-
-        if (this.playState.getLocationName(seaZone) === 'temple')
-            actions.push(Action.sell_goods); // TODO: makes no sense if the same actions is used for temple and market. Instead of adding some new property to the request payload, or having the processMove dysambiguate using other things, better to add a donate action and split processTrade into specifics.  
+        if (player.isMoneychanger()) {
+            if (this.playState.getLocationName(seaZone) === 'temple')
+                actions.push(Action.sell_goods);
+        }
 
         return actions;
     }
@@ -895,15 +905,15 @@ export class PlayProcessor {
         }
 
         this.playState.shiftMarketCards(newTrade);
-        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
-        const activePlayerId = player.getIdentity().color;
+        // player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+        // const activePlayerId = player.getIdentity().color;
 
-        for (const player of this.playState.getAllPlayers()) {
-            if (player.color !== activePlayerId) {
-                player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-                this.playState.savePlayer(player);
-            }
-        }
+        // for (const player of this.playState.getAllPlayers()) {
+        //     if (player.color !== activePlayerId) {
+        //         player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
+        //         this.playState.savePlayer(player);
+        //     }
+        // }
 
         return lib.pass(this.saveAndReturn(player));
     }
