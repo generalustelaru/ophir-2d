@@ -14,8 +14,6 @@ const STATE_FILE = 'game-state.json';
 
 import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, SERVER_NAME, PERSIST_SESSION } from './configuration';
 
-
-
 if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT) {
     console.error('Missing environment variables');
     process.exit(1);
@@ -89,11 +87,6 @@ const rl = readline.createInterface({
 const socketClients: Map<string, WsClient> = new Map();
 const socketServer = new WebSocketServer({ port: WS_PORT });
 
-// let savedState: SavedSession | null = null;
-// loadGameState().then(s => {
-//     savedState = s;
-// });
-// let savedState;//= await loadGameState();
 let singleSession: GameSession | null;
 
 loadGameState().then(data => {
@@ -103,12 +96,6 @@ loadGameState().then(data => {
         PERSIST_SESSION ?  data : null,
     );
 });
-
-// const singleSession = new GameSession(
-//     broadcastCallback,
-//     vpTransmitCallback,
-//     PERSIST_SESSION ? savedState : null,
-// );
 
 socketServer.on('connection', function connection(socket) {
     const socketId = randomUUID();
@@ -150,6 +137,7 @@ socketServer.on('connection', function connection(socket) {
 });
 
 // MARK: CALLBACKS
+
 function broadcastCallback(state: PlayState) {
     broadcast({ state })
 }
@@ -229,6 +217,7 @@ setInterval(() => {
 }, 60000); // Every minute
 
 // DEBUG
+
 async function saveGameState(statepack: {sharedState: State, privateState: PrivateState|null}) {
     const fileAddress = path.join(__dirname, '..', STATE_FILE);
 
@@ -247,4 +236,3 @@ async function loadGameState(): Promise<SavedSession|null> {
         return null;
     }
 }
-
