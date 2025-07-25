@@ -42,8 +42,8 @@ export type Currency = 'coins' | 'favor';
 export type GoodsLocationName = 'quary' | 'forest' | 'mines' | 'farms';
 export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
 export type LocalActions =
-    | Action.upgrade_cargo | Action.sell_goods | Action.buy_metals | Action.load_good | Action.donate_metals
-    | Action.sell_specialty;
+    | Action.upgrade_cargo | Action.sell_goods | Action.sell_specialty | Action.donate_goods | Action.donate_metals
+    | Action.buy_metals | Action.load_good;
 export type ItemName = TradeGood | CargoMetal | 'empty';
 export type MarketSlotKey = 'slot_1' | 'slot_2' | 'slot_3';
 export type Trade = { request: Array<TradeGood>, reward: Reward };
@@ -244,23 +244,23 @@ export type GameSetupPayload = {
 }
 export type LoadGoodPayload = { tradeGood: TradeGood }
 export type DropItemPayload = { item: ItemName }
-export type TradePayload = { slot: MarketSlotKey, location: LocationName }
+export type MarketSlotPayload = { slot: MarketSlotKey }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
-    | Action.sell_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist;
+    | Action.sell_goods | Action.donate_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist;
 export type LaconicAction =
     | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
     | Action.force_turn | Action.sell_specialty;
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
-    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload
-    | RepositioningPayload | TradePayload | MetalPurchasePayload | PickSpecialistPayload
-    | MetalDonationPayload | LoadGoodPayload;
+    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
+    | MarketSlotPayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload
+    | LoadGoodPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
@@ -270,14 +270,15 @@ export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, RepositioningPayload>;
-export type TradeMessage = MessageFormat<Action.sell_goods, TradePayload>;
+export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSlotPayload>;
+export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSlotPayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonationPayload>;
 export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;
 export type ClientMessage =
-    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage
-    | RepositionMessage | TradeMessage | BuyMetalsMessage | DonateMetalMessage
-    | ChatMessage | PickSpecialistMessage;
+    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage
+    | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage
+    | PickSpecialistMessage;
 
 export type ClientRequest = {
     gameId: string | null,

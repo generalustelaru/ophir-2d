@@ -214,7 +214,12 @@ export class GameSession {
                         return lib.fail('Cannot start game!');
 
                     const { privateState, playState } = bundleResult.data;
-                    this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast, this.transmitVp);
+
+                    try {
+                        this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast, this.transmitVp);
+                    } catch (error) {
+                        return lib.fail(String(error));
+                    }
 
                     return lib.pass({ state: playState.toDto() });
                 }
@@ -287,9 +292,11 @@ export class GameSession {
                 case Action.load_good:
                     return processor.processLoadGood(digest);
                 case Action.sell_goods:
-                    return processor.processGoodsTrade(digest);
+                    return processor.processSellGoods(digest);
+                case Action.donate_goods:
+                    return processor.donateGoods(digest);
                 case Action.sell_specialty:
-                    return processor.processSpecialtyGoodSale(digest);
+                    return processor.processSellSpecialty(digest);
                 case Action.buy_metals:
                     return processor.processMetalPurchase(digest);
                 case Action.donate_metals:

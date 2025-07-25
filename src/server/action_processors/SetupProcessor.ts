@@ -8,7 +8,6 @@ import serverConstants from "~/server_constants";
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE} from '../configuration';
-import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { HexCoordinates } from "~/client_types";
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
@@ -368,15 +367,16 @@ export class SetupProcessor {
             if (playerDto.specialist.name === SpecialistName.ambassador)
                 playerDto.cargo.push('empty', 'empty');
 
-            if (playerDto.turnOrder == 1) {
-                const player = new PlayerHandler(playerDto);
-                player.activate(
-                    mapPairings.locationByZone[startingZone].actions,
-                    initialRules.allowed
-                );
+            // if (playerDto.turnOrder == 1) {
+            //     const player = new PlayerHandler(playerDto);
+            //     player.activate(
+            //         mapPairings.locationByZone[startingZone].actions,
+            //         player.get
+            //         initialRules.allowed
+            //     );
 
-                return player.toDto();
-            }
+            //     return player.toDto();
+            // }
 
             return playerDto;
         });
