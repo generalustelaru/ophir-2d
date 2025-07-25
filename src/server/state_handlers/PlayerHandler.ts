@@ -141,6 +141,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.getSpecialistName() === SpecialistName.postmaster;
     }
 
+    public isMoneychanger(): boolean {
+        return this.getSpecialistName() === SpecialistName.moneychanger;
+    }
+
     public clearMoves() {
         this.moveActions.set(0);
     }

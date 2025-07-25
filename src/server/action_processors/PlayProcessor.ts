@@ -130,10 +130,13 @@ export class PlayProcessor {
                 location: this.playState.getLocationName(target),
             });
 
-            player.setAnchoredActions(player.isPostmaster()
-                ? this.getPostmasterActions(target)
-                : this.playState.getLocalActions(target),
-            );
+            player.setAnchoredActions((() => {
+                switch(true) {
+                    case player.isPostmaster(): return this.getPostmasterActions(target);
+                    case player.isMoneychanger(): return this.getMoneychangerActions(target);
+                    default: return this.playState.getLocalActions(target);
+                }
+            })());
 
             if (player.getMoves() > 0) {
                 const nextDestinations = this.privateState.getDestinations(target);
@@ -268,7 +271,7 @@ export class PlayProcessor {
         if (loadItem.err)
             return lib.fail(loadItem.message);
 
-        const removeAction = this.removeAction(player.getActions(), Action.load_good);
+        const removeAction = this.removeAction(player.getActions(), Action.load_good); // TODO: replace with PlayerHandler.removeAction()
 
         if (removeAction.err)
             return lib.fail(removeAction.message);
@@ -292,7 +295,7 @@ export class PlayProcessor {
     }
 
     // MARK: TRADE
-    public processGoodsTrade(data: DataDigest): Probable<StateResponse> {
+    public processGoodsTrade(data: DataDigest): Probable<StateResponse> { // TODO: need to refactor this into two separate methods with several common private methods for better trade and donation discrimination.
         const { player, payload } = data;
         const tradePayload = validator.validateTradePayload(payload);
 
@@ -303,8 +306,7 @@ export class PlayProcessor {
         const { color, name, socketId } = player.getIdentity();
 
         if (lib.checkConditions([
-            player.canAct(Action.make_trade),
-            player.getBearings().location == location,
+            player.canAct(Action.sell_goods),
             player.getTrades().includes(slot),
         ]).err) {
             return lib.fail(`${name} cannnot trade`);
@@ -330,7 +332,7 @@ export class PlayProcessor {
         if (cargoTransfer.err)
             return lib.fail(cargoTransfer.message);
 
-        const actionRemoval = this.removeAction(player.getActions(), Action.make_trade);
+        const actionRemoval = this.removeAction(player.getActions(), Action.sell_goods);
 
         if (actionRemoval.err)
             return lib.fail(actionRemoval.message);
@@ -381,7 +383,7 @@ export class PlayProcessor {
             player.setTrades(this.pickFeasibleTrades(unload.data))
 
             if (!player.getCargo().includes(specialty))
-                player.removeAction(Action.sell_good);
+                player.removeAction(Action.sell_specialty);
 
             this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
 
@@ -723,6 +725,15 @@ export class PlayProcessor {
                 break;
             }
         }
+
+        return actions;
+    }
+
+    private getMoneychangerActions(seaZone: ZoneName): Array<LocalActions> {
+        const actions = this.playState.getLocalActions(seaZone);
+
+        if (this.playState.getLocationName(seaZone) === 'temple')
+            actions.push(Action.sell_goods); // TODO: makes no sense if the same actions is used for temple and market. Instead of adding some new property to the request payload, or having the processMove dysambiguate using other things, better to add a donate action and split processTrade into specifics.  
 
         return actions;
     }
