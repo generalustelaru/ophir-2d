@@ -1,10 +1,6 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
-    LocalActions, Metal, StateResponse,
-    PlayState,
-    SpecialistName,
-    DiceSix,
-    Trade,
+    LocalActions, Metal, StateResponse, PlayState, SpecialistName, DiceSix, Trade,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -279,11 +275,6 @@ export class PlayProcessor {
         if (loadItem.err)
             return lib.fail(loadItem.message);
 
-        const removeAction = this.removeAction(player.getActions(), Action.load_good); // TODO: replace with PlayerHandler.removeAction()
-
-        if (removeAction.err)
-            return lib.fail(removeAction.message);
-
         player.setCargo(loadItem.data);
 
         this.playState.addServerMessage(
@@ -291,12 +282,13 @@ export class PlayProcessor {
             player.getIdentity().color
         );
 
+        player.removeAction(Action.load_good);
+
         if (player.isHarbormaster())
             this.clearMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
-        player.setActions(removeAction.data);
         player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
         return lib.pass(this.saveAndReturn(player));
@@ -332,20 +324,9 @@ export class PlayProcessor {
 
         // other updates
         const actions = player.getActions();
-        const actionExhausted = this.removeAction(actions, Action.sell_goods);
-
-        if (actionExhausted.err)
-            return lib.fail(actionExhausted.message);
-
-        player.setActions(actionExhausted.data);
 
         if (player.isMoneychanger() && actions.includes(Action.donate_goods)) {
-            const donationExhausted = this.removeAction(actionExhausted.data, Action.donate_goods);
-
-            if (donationExhausted.err)
-                return lib.fail(donationExhausted.message);
-
-            player.setActions(donationExhausted.data);
+            player.removeAction(Action.donate_goods);
             this.playState.addServerMessage(`${name} accessed the market and sold goods for ${coinReward} coins`, color);
         } else {
             this.playState.addServerMessage(`${name} sold goods for ${coinReward} coins`, color);
@@ -394,22 +375,10 @@ export class PlayProcessor {
         console.info(this.privateState.getGameStats());
 
         // Other updates
-        const actions = player.getActions();
-        const actionExhausted = this.removeAction(actions, Action.donate_goods);
+        player.removeAction( Action.donate_goods);
 
-        if (actionExhausted.err)
-            return lib.fail(actionExhausted.message);
-
-        player.setActions(actionExhausted.data);
-
-        if (player.isMoneychanger()) {
-            const sellExhausted = this.removeAction(actionExhausted.data, Action.sell_goods);
-
-            if (sellExhausted.err)
-                return lib.fail(sellExhausted.message);
-
-            player.setActions(sellExhausted.data);
-        }
+        if (player.isMoneychanger())
+            player.removeAction(Action.sell_goods);
 
         this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
 
@@ -687,14 +656,9 @@ export class PlayProcessor {
         const player = data.player;
 
         if (player.mayUpgradeCargo()) {
-            const removeAction = this.removeAction(player.getActions(), Action.upgrade_cargo);
-
-            if (removeAction.err)
-                return lib.fail(removeAction.message);
-
+            player.removeAction( Action.upgrade_cargo);
             player.spendCoins(2);
             player.addCargoSpace();
-            player.setActions(removeAction.data);
 
             this.playState.addServerMessage(
                 `${player.getIdentity().name} upgraded their cargo hold.`,
@@ -763,17 +727,6 @@ export class PlayProcessor {
         }
 
         return actions;
-    }
-
-    private removeAction(actions: Array<LocalActions>, toRemove: LocalActions): Probable<Array<LocalActions>> {
-        const index = actions.indexOf(toRemove);
-
-        if (index === -1)
-            return lib.fail(`Action ${toRemove} does not exist in selection`);
-
-        actions.splice(index, 1);
-
-        return lib.pass(actions);
     }
 
     private loadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
@@ -937,15 +890,6 @@ export class PlayProcessor {
         }
 
         this.playState.shiftMarketCards(newTrade);
-        // player.setTrades(this.pickFeasibleTrades(player.getCargo()));
-        // const activePlayerId = player.getIdentity().color;
-
-        // for (const player of this.playState.getAllPlayers()) {
-        //     if (player.color !== activePlayerId) {
-        //         player.feasibleTrades = this.pickFeasibleTrades(player.cargo);
-        //         this.playState.savePlayer(player);
-        //     }
-        // }
 
         return lib.pass(this.saveAndReturn(player));
     }
