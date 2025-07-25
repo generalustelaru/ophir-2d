@@ -249,6 +249,10 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         return this.setup.get().marketFluctuations[slot];
     }
 
+    public getTempleTradeSlot(): MarketSlotKey {
+        return this.setup.get().templeTradeSlot;
+    }
+
     /**
      * @description Shifts slot contents to the right and reduces deckSize count.
      * @example (future) -> slot_1 -> slot_2 -> slot_3 -> out

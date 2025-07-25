@@ -4,6 +4,7 @@ import {
     PlayState,
     SpecialistName,
     DiceSix,
+    Trade,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -302,7 +303,7 @@ export class PlayProcessor {
     }
 
     // MARK: SELL GOODS
-    public processSellGoods(data: DataDigest): Probable<StateResponse> { // TODO: need to refactor this into two separate methods with several common private methods for better trade and donation discrimination.
+    public processSellGoods(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
@@ -316,55 +317,39 @@ export class PlayProcessor {
             player.canAct(Action.sell_goods),
             player.getTrades().includes(slot),
         ]).err) {
-            return lib.fail(`${name} cannnot trade`);
+            return lib.fail(`${name} cannnot sell goods`);
         }
 
+        // Transaction
         const trade = this.playState.getMarketTrade(slot);
+        const unloadResult = this.unloadGoodsForPlayer(player, trade);
 
-        const cargoTransfer = ((): Probable<Array<ItemName>> => {
-            let cargo = player.getCargo()
+        if (unloadResult.err)
+            return lib.fail(unloadResult.message);
 
-            for (const tradeGood of trade.request) {
-                const result = this.unloadItem(cargo, tradeGood);
+        const coinReward = trade.reward.coins + this.playState.getFluctuation(slot);
+        player.gainCoins(coinReward);
 
-                if (result.err)
-                    return result;
+        // other updates
+        const actions = player.getActions();
+        const actionExhausted = this.removeAction(actions, Action.sell_goods);
 
-                cargo = result.data;
-            }
+        if (actionExhausted.err)
+            return lib.fail(actionExhausted.message);
 
-            return lib.pass(cargo);
-        })();
+        player.setActions(actionExhausted.data);
 
-        if (cargoTransfer.err)
-            return lib.fail(cargoTransfer.message);
+        if (player.isMoneychanger() && actions.includes(Action.donate_goods)) {
+            const donationExhausted = this.removeAction(actionExhausted.data, Action.donate_goods);
 
-        const actionRemoval = this.removeAction(player.getActions(), Action.sell_goods);
+            if (donationExhausted.err)
+                return lib.fail(donationExhausted.message);
 
-        if (actionRemoval.err)
-            return lib.fail(actionRemoval.message);
-
-        // switch (location) {
-        //     case 'market':
-        const amount = trade.reward.coins + this.playState.getFluctuation(slot);
-        player.gainCoins(amount);
-        this.playState.addServerMessage(`${name} sold goods for ${amount} coins`, color);
-        // break;
-        // case 'temple':
-        //     const reward = trade.reward.favorAndVp;
-        //     player.gainFavor(reward);
-        //     this.privateState.updateVictoryPoints(color, reward);
-        //     this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
-        //     console.info(this.privateState.getGameStats());
-
-        //     this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
-        //     break;
-        //     default:
-        //         return lib.fail(`Unknown trade location: ${location}`);
-        // }
-
-        player.setCargo(cargoTransfer.data);
-        player.setActions(actionRemoval.data);
+            player.setActions(donationExhausted.data);
+            this.playState.addServerMessage(`${name} accessed the market and sold goods for ${coinReward} coins`, color);
+        } else {
+            this.playState.addServerMessage(`${name} sold goods for ${coinReward} coins`, color);
+        }
 
         if (player.isHarbormaster())
             this.clearMovesAsHarbormaster(player);
@@ -376,7 +361,64 @@ export class PlayProcessor {
 
     // MARK: DONATE GOODS
     public donateGoods(data: DataDigest): Probable<StateResponse> {
-        return lib.fail('Not implemented');
+        const { player, payload } = data;
+        const marketSlotPayload = validator.validateMarketSlotPayload(payload);
+
+        if (!marketSlotPayload)
+            return lib.fail(lib.validationErrorMessage());
+
+        const { name, color, socketId } = player.getIdentity();
+        const { slot } = marketSlotPayload;
+
+        const conditions = lib.checkConditions([
+            player.canAct(Action.donate_goods),
+            this.playState.getTempleTradeSlot() === slot,
+            player.getTrades().includes(slot),
+        ]);
+
+        if (conditions.err)
+            return lib.fail(`${name} cannnot donate goods`);
+
+        // Transaction
+        const trade = this.playState.getMarketTrade(slot);
+        const unloadResult = this.unloadGoodsForPlayer(player, trade);
+
+        if (unloadResult.err)
+            return lib.fail(unloadResult.message);
+
+        const reward = trade.reward.favorAndVp;
+        player.gainFavor(reward);
+
+        this.privateState.updateVictoryPoints(color, reward);
+        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
+        console.info(this.privateState.getGameStats());
+
+        // Other updates
+        const actions = player.getActions();
+        const actionExhausted = this.removeAction(actions, Action.donate_goods);
+
+        if (actionExhausted.err)
+            return lib.fail(actionExhausted.message);
+
+        player.setActions(actionExhausted.data);
+
+        if (player.isMoneychanger()) {
+            const sellExhausted = this.removeAction(actionExhausted.data, Action.sell_goods);
+
+            if (sellExhausted.err)
+                return lib.fail(sellExhausted.message);
+
+            player.setActions(sellExhausted.data);
+        }
+
+        this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
+
+        if (player.isHarbormaster())
+            this.clearMovesAsHarbormaster(player);
+        else
+            player.clearMoves();
+
+        return this.issueMarketShiftResponse(player);
     }
 
     // MARK: SELL SPECIALTY
@@ -817,6 +859,21 @@ export class PlayProcessor {
         }
 
         return lib.pass(cargo);
+    }
+
+    private unloadGoodsForPlayer(player: PlayerHandler, trade: Trade): Probable<true> {
+        const cargo = player.getCargo();
+
+        for (const tradeGood of trade.request) {
+            const unloadResult = this.unloadItem(cargo, tradeGood);
+
+            if (unloadResult.err)
+                return unloadResult;
+        }
+
+        player.setCargo(cargo);
+
+        return lib.pass(true);
     }
 
     private pickFeasibleTrades(cargo: Array<ItemName>): Array<MarketSlotKey> {
