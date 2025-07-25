@@ -454,7 +454,6 @@ export class PlayProcessor {
     }
 
     // MARK: BUY METAL
-    // TODO: looks like it could be streamlined
     public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const { name, color } = player.getIdentity();
@@ -468,26 +467,8 @@ export class PlayProcessor {
         if (!player.mayLoadMetal())
             return lib.fail(`Player ${name} cannot buy metals`);
 
-        const metalCost = (() => {
-            const costs = this.playState.getMetalCosts();
-
-            switch (metal) {
-                case 'gold': return costs.gold;
-                case 'silver': return costs.silver;
-                default: return null;
-            }
-        })();
-
-        const playerAmount = (() => {
-            switch (currency) {
-                case 'coins': return player.getCoinAmount()
-                case 'favor': return player.getFavorAmount();
-                default: return null;
-            }
-        })();
-
-        if (!metalCost || !playerAmount)
-            return lib.fail(`No such cost or player amount found.`);
+        const metalCost = this.playState.getMetalCosts()[metal];
+        const playerAmount = currency === 'coins' ? player.getCoinAmount() : player.getFavorAmount();
 
         const price = metalCost[currency];
         const remainder = playerAmount - price;
@@ -496,25 +477,19 @@ export class PlayProcessor {
             return lib.fail(`Player ${name} cannot afford metal purchase`);
         }
 
-        switch (currency) {
-            case 'coins':
-                player.spendCoins(price);
-                break;
-            case 'favor':
-                player.spendFavor(price)
-                break;
-            default:
-                return lib.fail(`Unknown currency: ${currency}`);
-        }
+        if (currency === 'coins')
+            player.spendCoins(price);
+        else
+            player.spendFavor(price);
 
         this.playState.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, color);
 
-        const result = this.loadItem(player.getCargo(), metal);
+        const metalLoad = this.loadItem(player.getCargo(), metal);
 
-        if (result.err)
-            return lib.fail(result.message);
+        if (metalLoad.err)
+            return lib.fail(metalLoad.message);
 
-        player.setCargo(result.data);
+        player.setCargo(metalLoad.data);
 
         if (player.isHarbormaster())
             this.clearMovesAsHarbormaster(player);
