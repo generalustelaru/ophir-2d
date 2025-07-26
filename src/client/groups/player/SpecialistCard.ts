@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { PlayerColor, Specialist } from "~/shared_types";
+import { Player } from "~/shared_types";
 import clientConstants from "~/client_constants";
 
 const { COLOR } = clientConstants;
@@ -9,8 +9,8 @@ export class SpecialistCard implements DynamicGroupInterface<undefined> {
 
     constructor(
         layout: GroupLayoutData,
-        playerColor: PlayerColor,
-        specialist: Specialist,
+        player: Player,
+        isLocalPlayer: boolean,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -21,16 +21,17 @@ export class SpecialistCard implements DynamicGroupInterface<undefined> {
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR[`dark${playerColor}`],
+            fill: COLOR[`dark${player.color}`],
             cornerRadius: 5,
         });
 
+        const { specialist } = player;
         const name = new Konva.Text({
             x: 0,
             y: 14,
             width: this.group.width() / 2,
             height: this.group.height(),
-            text: specialist.displayName,
+            text: isLocalPlayer ? specialist.displayName : player.name,
             fontSize: 14,
             fontStyle: 'bold',
             ellipsis: true,
