@@ -352,7 +352,7 @@ export class PlayProcessor {
         const { slot } = marketSlotPayload;
 
         const conditions = lib.checkConditions([
-            player.canAct(Action.donate_goods),
+            player.mayAct(Action.donate_goods),
             this.playState.getTempleTradeSlot() === slot,
             player.getTrades().includes(slot),
         ]);
@@ -433,7 +433,7 @@ export class PlayProcessor {
 
         const { metal, currency } = purchasePayload;
 
-        if (!player.mayLoadMetal())
+        if (!player.mayBuyMetal())
             return lib.fail(`Player ${name} cannot buy metals`);
 
         const metalCost = this.playState.getMetalCosts()[metal];
