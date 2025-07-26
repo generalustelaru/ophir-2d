@@ -306,7 +306,7 @@ export class PlayProcessor {
         const { color, name } = player.getIdentity();
 
         if (lib.checkConditions([
-            player.canAct(Action.sell_goods),
+            player.mayAct(Action.sell_goods),
             player.getTrades().includes(slot),
         ]).err) {
             return lib.fail(`${name} cannnot sell goods`);
@@ -323,9 +323,9 @@ export class PlayProcessor {
         player.gainCoins(coinReward);
 
         // other updates
-        const actions = player.getActions();
+        player.removeAction(Action.sell_goods);
 
-        if (player.isMoneychanger() && actions.includes(Action.donate_goods)) {
+        if (player.isMoneychanger() && player.getBearings().location === 'temple') {
             player.removeAction(Action.donate_goods);
             this.playState.addServerMessage(`${name} accessed the market and sold goods for ${coinReward} coins`, color);
         } else {
@@ -723,7 +723,7 @@ export class PlayProcessor {
 
         if (player.isMoneychanger()) {
             if (this.playState.getLocationName(seaZone) === 'temple')
-                actions.push(Action.sell_goods);
+                actions.push(Action.sell_goods, Action.sell_specialty);
         }
 
         return actions;
