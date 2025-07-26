@@ -1,77 +1,194 @@
-### Setup and goal
+## Setup and Goal
 
-At game start, unique locations are randomly assigned to each map zone. Two natural barriers are also placed as to restrict passage between adjacent zones. Each player will now have to select a specialist card. The card provides a unique special ability, some starting Favor, and, usually, a Speciality Good.
+At game start, the map layout is revealed. Each player will now have to select a **specialist**. The specialist provides a unique special ability, some starting **favor** (alternate currency) and, usually, a **specialty** trade good.
 
-You can switch between the map and specialist offer by clicking the bottom show/hide button.
+Each player will be controling a single **ship** and will begin playing from the center **zone**.
 
-The Temple (blue location icon) is under construction and requires donations of precious Metals to progress. After every 3rd donation, Metal prices will increase. Once the Temple is complete, the game ends and scores are tallied. Progress on the Temple can be monitored on the botttom left Temple Placard. The number of donations required varies with the number of players.
+You can switch between the map and specialist offer by clicking the bottom **show/hide** button.
 
-The game can also end when interacting with the Market (more on that later).
+The map is split between 7 sea zones, each containing a randomly-placed **location**. Locations enable specific **actions** to players who **move** into their respective sea zones.
+- The four **trade good** locations (the mines, quary, farms, and forest) are sources for **gems**, **marble**, **linen**, and **ebony**, which players can gather, carry, sell, or donate.
+- The orange house icon is the **market**. There players can sell their trade goods for **coins**.
+- The yellow gold ingot icon is the **exchange**. There players can purchase **gold** and **silver**.
+- The blue structure icon is the **temple**. The temple receives donations of gold, silver, and trade goods, awarding **victory points** (VP) and **favor** in return.
 
-### The Ship
+The two grey **barriers** are blocking access between adjacent sea zones. The separated zones are generally not considered to be adjacent. Player ships have a reach of two zones, but barriers can alter access between important locations, so take that into account when chosing your specialist.
 
-Your Ship has a Cargo capacity of 2 spaces (top left on your Player Card), which can be expanded to 4. On your turn you can click on any carried Cargo item as a Free Action to drop it overboard. You can drop as many items as you want. Careful you don't drop something valuable. Your Ship Figure can be dragged inside its current zone to reposition it. This NOT an Action or Movement. Releasing the Ship Figure on an adjacent zone however will count as Movement towards that zone. You get two Moves each turn (wave icons on the map top left corner). You lose any remaining Moves after performing an Action (except for dropping Items).
+When all players have selected a specialist. The owner can start the game. When the game starts, new information is revealed:
 
-### Favor
-Favor (depicted as a red seal) is a special resource. You start the game with the amount of Favor provided by your selected specialist (the seal with a number on your player card) and may visit the Temple to gain more (up to 6). Favor is a quicker avenue for scoring VP.
+## Play Space Anatomy
+   Zone Button Areas: Left of the map you have, from top to bottom, action buttons pertaining to the market, the exchangee, and the temple.
+      - The market area consists of a **market deck** and three **market cards**
 
-### Detailed Movement
-On your turn, you must first move once or twice into adjacent zones and without backtracking -- you cannot perform actions in your starting zone.
+   Map Area: Around the map, from top left going clockwise you have turn information relevant to you:
+      - the **moves** counter (two blueish wave icons which get discolored as you move)
+      - the **favor button** (a red seal icon which changes status when clicked)
+      - the **end turn** button (a slanted red anchor icon which becomes straight bright green when clickable)
+      - the sun/moon icon (which does absolutely nothing and is misleading at best)
 
-The two natural barriers are the only elements blocking access. However, opponet ships can also become obstacles. Moving towards a zone where opponents are anchored will require an influence check (roll on a D6) to be succesful.
+   Player Area: Right of the map you have the **player cards**. Each card displays:
+      - the player's **influence** swatch (a die face situated left of the card itself)
+      - the player's **cargo** capacity and contents (a dark band with a thin red border)
+      - the player's name button (a clickable white/black band that switches to a description of the chosen specialist)
+      - the player's favor and coins swatches (red seal and silver coin icons depicting how much the player has of each)
+      - the VP swatch (a victory icon showing your accumulated VP; Appears on your card only)
+      - the specialty icon/button (displays the specialty associated with the player's chosen specialist; Clickable on your card only)
 
-The roll is performed automatically when you signal intent by releasing your Ship Figure over the destination zone.
+Following is a detailed explanation of the rules and gameplay.
 
-   - A roll result of at least equal to the highest influence between the ships there will complete the move succesfully.
-   - Rolling lower than the highest influence prevents entry and loses you the move (returning your Ship Figure to its original spot).
+## Turns
 
-If you lost your second move in this manner you also lose your Actions this turn. Wage your chances carefully. Viceversa, your last rolled influence value is retained and might become the threshold for other players wishing to enter your zone. If your influence level prevented an opponent's movement, it will drop by one point.
+Starting with the last player who picked a specialist, players will take turns moving and taking actions around the map until the end of the game.
 
-#### Favor and Movement
-On your turn, as long as you have moves left, you may click once on the Favor Icon  (the top-right corner of the map) to spend 1 Favor and either, perform actions at your location even if you have not yet moved (forfeiting movement), or move without making influence checks (ignore opponent ships). This is a powerful ability that can get you out of a tight spot or speed you up in your endeavors.
+To end your turn you must voluntarily click on the end turn button. The button becomes available as soon as you move or spend favor.
 
-### Trade Good Locations
+## Game End
+The game can end in two ways:
+   - The temple receives enough gold and silver donations to complete construction.
+   - The market deck empties and can no longer supply a full set of trades.
 
-Four of the seven zones contain Trade Goods (gems, ebony, marble, or linen). Location icons depict the Trade Goods themselves.
+## Coins
 
-  - Load Trade Good: Click on the zone's Trade Good Icon to pick up 1 of that type. The Good is placed in your Cargo.
+Coins (silver coin) are the standard currency in the game and are involved in most transactional actions.
 
-### The Market
+## Favor
 
-The Market (orange house icon location) consists of 3 available Market Cards which shift right after each Market Trade (The Market Placard is displayed in the top left). The deck of Market Cards has the "A" cards sitting on top of the "B" cards. "B" cards contain generally better deals. The leftmost Market Card sits on top of the deck and is not accessbile.
+Favor (red seal) is a special resource. You can spend it to enable actions and facilitate movement among other things. It comes in short supply compared to coins.
 
-A Market Card features an assortment of Trade Goods that Players can exchange for Coins. When a Player performs a Market Trade Action, the Trade Goods are discarded, the Player receives the Coin amount (pictured in the Coin swatch on the Player Card). Finally all Market Cards will shift rightwards. The first Market Card from the right is discarded, and a new Market Card appears on top of the deck.
+## Zone Actions
 
-The number on the bottom right of a Market Card shows its potential value in VP and Favor (as a Temple donation). If the Market Card shows an arrow in its bottom left corner, it means that its Coin value has been modified. The upwards green arrow means +1 and the downwards red arrow -1 respectively. These two modifiers are assigned randomly to market slots at game start and only affect Market Cards which are placed on them. Hence, the fluctuation of the Coin reward is constant as Market Cards shift to the right.
+Each of the seven zones features specific actions that players can take when visiting them. While some are repeatable, most are expendable (can only be taken once). By default, players cannot take the actions of the zone in which they begin their turn.
 
-   - Sell Trade Goods: Once per turn, you may click on an available Market Card to deliver the required Trade Goods from your Cargo for the amount of Coins pictured. Note that the Market Card you picked will drift rightwards and might remain in offer but at a different value.
-   - Sell Specialty Good: You may sell as many goods as you want of the type provided by your Specialist for 1 Coin each. Click on the Specialty Good icon on your Player Placard.
+### Favor and Actions
+ At the start of your turn, you may click once on the favor button to spend 1 favor and gain access to the zone's actions.
 
-The game can also end if the market deck runs out, meaning players have focused on trading Trade Goods instead of delivering precious metals.
+## Moves
 
-### The Exchange
+You always get 2 moves at the beginning of your turn. You spend them by moving into adjacent zones.
 
-The Exchange (gold ingot icon location) is the only source of precious metals (Gold and Silver). The Exchange Placard sits on the left, between the Market and Temple Placards. Here you may perform Exchange Actions to trade Coins or Favor for Gold or Silver. The indicated Coin prices will increase progressively as the Temple levels are added -- Gold increases roughly twice as fast as Silver.
+## Moving the Ship
 
-   - Buy Metals: Click on an Exchange Card to trade Coins or Favor for Gold or Silver. You may load two metals if you have the space.  Metal takes up 2 Cargo spaces. Note that you can free up Cargo space by throwing unwanted items overboard.
+On your turn, you may move once or twice or fail doing so.
 
-#### Favor and Metals
-The Favor cost of Gold (5) and Silver (3) might look steep. However, as opposed to Coin costs, Favor costs remain constant.
+You move by dragging and releasing the ship figure:
+   - Dragging it inside its current zone does not count as moving. You can do that to simply reposition it.
+   - Dragging it over into a different zone will:
+      a. highlight the zone as restricted if it's not adjacent, if you're trying to backtrack, or if you're out of moves.
+      b. highlight it as valid and, if other ships are present, display a die face showing the influence threshold you'd need to match to enter it.
 
-### The Temple
+When you release your ship over a restricted zone, it will simply move back to where it was displaced. This is not considered movement.
 
-The Temple (blue construction icon) a source of VP and Favor. On the Temple Placard (bottom left) you may perform several Actions:
+When you release your ship over a valid zone, your move counter will decrease by 1, then:
+   - If the zone is vacant, your ship rests where you dropped it, your movement is succesful, and the zone's actions become available.
+   - If the zone is occupied you'll first roll your influence *die* (automatically), then:
+      - If your new influence value is at least equal to the highest influence between the ships present there, again, your ship succesfully moves and you gain access to the new zone's actions.
+      - If your new influence is lower than the highest, then your ship will return to its departure zone and all players that had threshold-level influence in the destination zone will decrease it by 1. Also, if this attempt has expended your second move, you'll lose access to actions you might have gained after your first move attempt.
 
-   - Upgrade Cargo: Once per turn, you may click on the Upgrade Button (bottom right on the Temple Placard) to increase your Cargo capacity by 1 space.
-   - Donate Trade Goods: Once per turn you may donate Trade Goods to the temple to get Favor and VP in equal amounts. This donation does not contribute to the construction. The blue Market Card is mirroring a regular Market Card on the Market Placard. The small blue Temple Icon on the upper edge of the Market Placard indicates the slot that's always mirrored on the Temple Placard. Donating Trade Goods will also shift the Market Cards,
-   - Donate Metal: Donation Cards are fixed and award 10 VP for Gold and 5 VP for Silver. If you're carrying 2 Metal, you may donate both. The Temple Donations Swatch keeps track of every delivered Metal. The metals stack upwards to 3. When a third Metal is donated, the Coin prices of metals at the exchange increase. Gold price increases roughly by 1 Coin for every completed stack. Silver price increases only half as often. When the swatch fills, the game ends.
+What to consider before before committing to a move:
+   - If the destination's influence threshold is too high, you might want to take another approach, both in terms of movement and actions, especially if you risk losing access to currently available actions (i.e.: your first move was succesful).
+   - If a zone has a low influence threshhold, then moving into it might be beneficial, as it's a chance for you to increase your influence value if low. Remember, your influence value can also be a threshold for other players wishing to enter your zone.
 
-### Two player games
+You can always examine everyone influence by looking at the die face next to each player card.
+
+### Favor and Movement
+On your turn, ++as long as you have moves left++, you may click once on the favor button to spend 1 favor and ignore all other ships during movement. With favor spent, you can move into occupied zones succesfully, without making influence checks.
+
+### Actions and Movement
+Whenever you perform a zone action, <u>you lose all your remaining moves</u>. This means that actions never precede movement, even after spending favor.
+
+## The Cargo
+
+Your ship has a **cargo** capacity of 2 spaces (displayed as a horizontal band on your player card) which can hold a single metal or up to two trade goods. Players can expand the capacity twice, when visiting the temple. On your turn you can click on any item displayed on your cargo band to drop it overboard. You can drop as many items as you want and whenever you want.
+
+ While you wouldn't want to drop anything generally, sometimes the contextual value of trade goods can change. Also, action buttons whose effect would bring a new item onboard are disabled if there isn't enough room. Remember, gold and silver take up two spaces.
+
+## Zone Actions
+
+### Trade Good Zones
+Four of the seven zones contain trade goods (gems, ebony, marble, or linen). Each one enables the following un-repeatable action:
+
+**Action: Load Trade Good**: Click on the zone's trade good icon to pick up 1 of that type. The item is placed in your cargo hold and is reflected on your cargo band.
+
+In rare occasions a zone may become deplete of goods (showing a red X). That occurs when a fifth good of that type has been picked up. However, the action becomes available again as soon as one of that good is returned to the 'bank' (through selling or dropping).
+
+### The Market Zone
+The market (orange house icon) provides 1 expendable action (Sell Trade Goods) and 1 repeatable action (Sell Specialty Good).
+
+The location provides access to the **market cards** (buttons), featured in the top left of the map are splayed right from the **market deck** which shows a future market card.
+
+#### Market Card Anatomy
+An assortment of trade goods and a coin value is displayed in the center. These depict the transaction that a player can make.
+
+The small icon with a number on the bottom right shows the card potential value in VP and Favor as a temple donation.
+
+A small arrow in the bottom left corner signifies that the standard coin value has been modified. The upwards green arrow means +1 value and the downwards red arrow -1 value respectively. These two modifiers are assigned randomly to the three **market slots** at the start of the game and are not linked to the market cards themselves.
+
+#### Market Zone Actions
+**Action: Sell Trade Goods**: Once per turn, you may click on an available market card to remove the required trade goods from your cargo and receive the amount of coins depicted. After the transaction completes, the market cards will **shift** rightwards like so:
+ - The rightmost card is discarded.
+ - The other two cards shift one slot to the right, losing and/or taking on a new coin value modifier.
+ - The top card of the market deck becomes available in the first slot.
+ - A new card is revealed on top of the market deck.
+
+**Action: Sell Specialty Good**: Click on the specialty icon located on your player card to sell one good of that type from your cargo and receive 1 coin. You may repeat this as long you have a good of that type in your cargo.
+
+Important to note:
+   - A market card is only discarded if it's the rightmost one during the Sell Trade Goods market shift, not because a player clicked on it.
+   - The market deck has the letter "A" displayed near the bottom left. The means that market deck is topped with "A" cards. When enough cards have been drawn, the "A" will change to a "B". This means that better deals will start become avaliable.
+   - A consistent market shift due to the Sell Trade Goods action will eventually drain the deck, which will end the game.
+
+### The Exchange Zone
+
+The exchange (gold ingot icon) provides one repeatable action in several 'flavors'.
+
+The location enables the four exchange cards (buttons), featured in a row just under the market deck and cards. Here players can trade coins or favor for gold or silver.
+
+#### Exchange Zone Action
+
+**Action: Buy Metals**: Click on an exchange card to deduct the depicted coin or favor amount and load the depicted metal.
+
+Important to note:
+   - While this is a repeatable action, you can generally perform it up to twice, since metals take two cargo spaces and you can have, at most, four spaces free in your cargo.
+   - The coin for metal cards tend to get more expensive as the game progresses, so even if the favor for metal seems unreasonable by comparison, it might eventually become a viable option.
+
+### The Temple Zone
+
+The temple (dark blue edifice icon) is the focal point of the game. Here players can donate metals for points and goods for variable amounts of points and favor.
+
+The location enables the actions depicted on the bottom left area. Threre are two buttons for donating metal, a button for donating trade goods, one for upgrading the cargo, and rectangular donations reference area which tracks all the donated metals in the game.
+
+#### Temple Zone Actions
+
+**Action: Upgrade Cargo**: Click on the bottom coin for cargo button to spend 2 coins and increase your cargo capacity by 1. This action is expendable, and can be perfomed twice in the entire game (you can only increase cargo to 4).
+
+**Action: Donate Trade Goods**: Click to remove the required trade goods from your cargo and receive the amount of VP and favor depicted. Clicking will also shift the market cards.
+
+**Action: Donate Metal**: Click on either, gold for VP or silver for VP, button to remove the appropriate metal from your cargo and gain the associated VP. The action is repeatable but two conditions are checked each time:
+   - if the donation completed a colum (3 metals) in the donations reference area but hasn't filled it, the prices of metal in coins will increase by 0-2 coins.
+   - if the donation filled the donations reference area, the temple construction is complete and the game ends immediately.
+
+
+Important to note:
+   - The trade good donation card in the temple area is a direct reference to a market card. One of the three market slots features a small blue temple icon (above the market card). That is the card being mirrored in the temple area. Whenever the market shifts, the card that ends up under the temple icon will immediately be referenced in the temple area.
+   - Even with the metal price increase, silver will always remain cheaper that gold, at roughly half the cost.
+
+
+## Specialists
+
+Some of the specialists players can select at the beginning of the game can break the rules in some way or another.
+
+## Two player games
 
 When starting a game with two players, a third ship (white) will spawn in the market's sea zone. This ship also has an influence die, and may block your movement like any other player ship (trimming its value on failed attempts).
 
-When a player manages to enter the neutral ship's zone, his turn is paused while he gets in control of the neutral ship.
+When a player manages to enter the neutral ship's zone, his/her turn is paused and gain control of the neutral ship.
 
-While controlling the neutral ship the player must move it once or twice according to the regular movement rules, as if it's using favor. After movement, the player must conclude its turn by either: clicking the anchor icon next to its card or -- if the ship ended its movement at the market zone -- clicking the market card icon found on its card to shift the market as if a trade was performed. In either case, the neutral ship will conclude its turn by rolling its influence die.
+While controlling the neutral ship the player must move it once or twice according to the regular movement rules, as if has spent favor. After movement, the player must conclude its turn by either:
+   a. clicking the bespoke anchor icon next to its card or
+   b. if the ship ended its movement at the market zone -- clicking the market card button on the rival card to shift the market as if a sale or donation took place
+   then, In either case:
+   - the neutral ship will roll its influence die.
+   - the player will re-gain regular control of their turn.
 
-After concluding the neutral ship's turn, the player resumes his turn. Note that a player cannot enter the zone containing the nutral ship a second time.
+Important to note:
+   - A player cannot enter the zone containing the nutral ship again, after having controlled it on the same turn. It will appear as restricted.
