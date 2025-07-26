@@ -37,7 +37,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Moneychanger',
             startingFavor: 2,
             specialty: 'linen',
-            description : 'May perform a market trade instead of the temple trade.',
+            description : 'May perform market actions at the temple by foregoing trade goods donation.',
         },
         // {
         //     name: SpecialistName.navigator,
