@@ -100,7 +100,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isActive.get();
     }
 
-    public canAct(action: LocalActions) {
+    public mayAct(action: LocalActions) {
         return this.isAnchored && this.getActions().includes(action);
     }
 
@@ -213,43 +213,29 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public mayLoadGood() {
-        return (
-            this.isAnchored.get()
-            && this.hasCargoRoom(1)
-            && this.localActions.includes(Action.load_good)
-        );
+        return (this.mayAct(Action.load_good) && this.hasCargoRoom(1));
     }
 
-    public mayLoadMetal() {
-        return (
-            this.isAnchored.get()
-            && this.hasCargoRoom(2)
-            && this.localActions.includes(Action.buy_metals)
-        );
+    public mayBuyMetal() {
+        return (this.mayAct(Action.buy_metals) && this.hasCargoRoom(2));
     }
 
     public canDonateMetal(metal: CargoMetal) {
-        return (
-            this.isAnchored.get()
-            && this.cargo.includes(metal)
-            && this.localActions.includes(Action.donate_metals)
-        );
+        return (this.mayAct(Action.donate_metals) && this.cargo.includes(metal));
     }
 
     public maySellSpecialtyGood() {
         return (
-            this.isAnchored.get()
-            && this.localActions.includes(Action.sell_specialty)
+            this.mayAct(Action.sell_specialty)
             && this.cargo.includes(this.specialist.get().specialty)
-        )
+        );
     }
 
     public mayUpgradeCargo() {
         return (
-            this.isAnchored.get()
+            this.mayAct(Action.upgrade_cargo)
             && this.getCoinAmount() >= 2
             && this.getCargo().length < 4
-            && this.getActions().includes(Action.upgrade_cargo)
         );
     }
 
