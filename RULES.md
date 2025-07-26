@@ -73,8 +73,8 @@ On your turn, you may move once or twice or fail doing so.
 You move by dragging and releasing the ship figure:
    - Dragging it inside its current zone does not count as moving. You can do that to simply reposition it.
    - Dragging it over into a different zone will:
-      a. highlight the zone as restricted if it's not adjacent, if you're trying to backtrack, or if you're out of moves.
-      b. highlight it as valid and, if other ships are present, display a die face showing the influence threshold you'd need to match to enter it.
+      - a. highlight the zone as restricted if it's not adjacent, if you're trying to backtrack, or if you're out of moves.
+      - b. highlight it as valid and, if other ships are present, display a die face showing the influence threshold you'd need to match to enter it.
 
 When you release your ship over a restricted zone, it will simply move back to where it was displaced. This is not considered movement.
 
@@ -91,10 +91,10 @@ What to consider before before committing to a move:
 You can always examine everyone influence by looking at the die face next to each player card.
 
 ### Favor and Movement
-On your turn, ++as long as you have moves left++, you may click once on the favor button to spend 1 favor and ignore all other ships during movement. With favor spent, you can move into occupied zones succesfully, without making influence checks.
+On your turn, as long as you have moves left, you may click once on the favor button to spend 1 favor and ignore all other ships during movement. With favor spent, you can move into occupied zones succesfully, without making influence checks.
 
 ### Actions and Movement
-Whenever you perform a zone action, <u>you lose all your remaining moves</u>. This means that actions never precede movement, even after spending favor.
+Whenever you perform a zone action, you lose all your remaining moves. This means that actions never precede movement, even after spending favor.
 
 ## The Cargo
 
@@ -184,8 +184,8 @@ When starting a game with two players, a third ship (white) will spawn in the ma
 When a player manages to enter the neutral ship's zone, his/her turn is paused and gain control of the neutral ship.
 
 While controlling the neutral ship the player must move it once or twice according to the regular movement rules, as if has spent favor. After movement, the player must conclude its turn by either:
-   a. clicking the bespoke anchor icon next to its card or
-   b. if the ship ended its movement at the market zone -- clicking the market card button on the rival card to shift the market as if a sale or donation took place
+   - a. clicking the bespoke anchor icon next to its card or
+   - b. if the ship ended its movement at the market zone -- clicking the market card button on the rival card to shift the market as if a sale or donation took place
    then, In either case:
    - the neutral ship will roll its influence die.
    - the player will re-gain regular control of their turn.
