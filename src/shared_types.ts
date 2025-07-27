@@ -39,7 +39,7 @@ export type TradeGood = 'gems' | 'ebony' | 'marble' | 'linen';
 export type Metal = 'silver' | 'gold';
 export type CargoMetal = Metal | 'silver_extra' | 'gold_extra';
 export type Currency = 'coins' | 'favor';
-export type GoodsLocationName = 'quary' | 'forest' | 'mines' | 'farms';
+export type GoodsLocationName = 'quarry' | 'forest' | 'mines' | 'farms';
 export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
 export type LocalActions =
     | Action.upgrade_cargo | Action.sell_goods | Action.sell_specialty | Action.donate_goods | Action.donate_metals
