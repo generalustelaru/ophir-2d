@@ -36,6 +36,11 @@ localState.playerName = playerName;
 localState.vp = vp;
 
 // MARK: LISTENERS
+window.addEventListener('resize', () => {
+    console.log('Caught resize event!!')
+    CanvasService.fitStageIntoParentContainer();
+});
+
 //Send player action to server
 window.addEventListener(EventType.action, (event: CustomEventInit) => {
     const message = event.detail as ClientMessage;
