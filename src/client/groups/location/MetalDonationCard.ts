@@ -6,7 +6,7 @@ import clientConstants from "~/client_constants";
 import { VictoryPointDial } from "../VictoryPointDial";
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
-export class TempleDonationCard extends ActionButton implements DynamicGroupInterface<boolean> {
+export class MetalDonationCard extends ActionButton implements DynamicGroupInterface<boolean> {
     private background: Konva.Rect;
 
     constructor(

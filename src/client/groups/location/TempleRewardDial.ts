@@ -16,13 +16,14 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
         this.group = new Konva.Group({
             x: position.x,
             y: position.y,
+            // width: 66, height: 96,
         });
 
-        const favorIcon = new FavorIcon({ x: -25, y: -25, width: 0, height: 0 });
+        const favorIcon = new FavorIcon({ x: -20, y: -23, width: 0, height: 0 }, 1.8);
 
         const semiDisc = new Konva.Wedge({
             y: -1,
-            radius: 26,
+            radius: 22,
             angle: 180,
             fill: COLOR.vpGold,
             rotation: 90,
@@ -41,10 +42,10 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
             x: coinCenter - 9,
             y: coinCenter - 20,
             text: amount.toString(),
-            fontSize: 40,
-            fill: COLOR.boneWhite,
-            stroke: 'black',
-            strokeWidth: 2,
+            fontSize: 20,
+            fill: COLOR.modalBlue,
+            stroke: COLOR.modalBlue,
+            // strokeWidth: 2,
             fontFamily: 'Calibri',
         });
 
