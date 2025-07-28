@@ -14,6 +14,7 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
 
     constructor(
         layout: GroupLayoutData,
+        scale: number = 2,
     ) {
         this.group = new Konva.Group({
             x: layout.x,
@@ -27,7 +28,7 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
             fill: ICON_DATA.favor_stamp_outer.fill,
             stroke: COLOR.stampEdge,
             strokeWidth: 2,
-            scale: { x: 2, y: 2 },
+            scale: { x: scale, y: scale },
         });
 
         this.innerStamp = new Konva.Path({
@@ -35,13 +36,13 @@ export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
             fill: ICON_DATA.favor_stamp_inner.fill,
             stroke: COLOR.stampEdge,
             strokeWidth: 1,
-            scale: { x: 2, y: 2 },
+            scale: { x: scale, y: scale },
         });
 
         this.templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: COLOR.stampEdge,
-            scale: { x: 2.3, y: 1.5 },
+            scale: { x: scale + 1/6 * scale, y: 3/4 * scale },
             x: 13,
             y: 14,
         });
