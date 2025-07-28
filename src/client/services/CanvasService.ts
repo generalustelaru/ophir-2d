@@ -19,9 +19,10 @@ export const CanvasService = new class extends Communicator {
 
     public constructor() {
         super();
+
         this.stage = new Konva.Stage({
             container: 'canvas',
-            visible: true,
+            visible: false,
             opacity: 1,
             width: 1200,
             height: 500,
@@ -72,7 +73,7 @@ export const CanvasService = new class extends Communicator {
                 x: 0,
                 y: 0,
             },
-        )
+        );
     }
 
     public getSetupCoordinates(): GameSetupPayload {
@@ -100,8 +101,10 @@ export const CanvasService = new class extends Communicator {
         switch (sessionPhase) {
             case Phase.setup:
                 if (!this.isSetupDrawn) {
+                    this.stage.visible(true);
                     this.mapGroup.drawElements(state);
                     this.setupGroup.drawElements(state);
+                    this.fitStageIntoParentContainer();
                     this.isSetupDrawn = true;
                 }
                 this.setupGroup.update(state);
@@ -110,9 +113,11 @@ export const CanvasService = new class extends Communicator {
             case Phase.play:
                 this.setupGroup.disable();
                 if (!this.isPlayDrawn) {
+                    this.stage.visible(true);
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
+                    this.fitStageIntoParentContainer();
                     this.isPlayDrawn = true;
                 }
                 this.locationGroup.update(state);
@@ -131,5 +136,24 @@ export const CanvasService = new class extends Communicator {
         this.locationGroup.disable();
         this.mapGroup.disable();
         this.playerGroup.disable();
+    }
+
+    public fitStageIntoParentContainer() {
+
+        const container = document.getElementById('canvas')?.getBoundingClientRect();
+
+        if (!container)
+            throw new Error("Cannot find canvas container!");
+
+        const elementWidth = container.width;
+
+        const sceneWidth = 1200;
+        const sceneHeight = 500;
+
+        const scale = elementWidth / sceneWidth;
+
+        this.stage.width(sceneWidth * scale);
+        this.stage.height(sceneHeight * scale);
+        this.stage.scale({ x: scale, y: scale });
     }
 }
