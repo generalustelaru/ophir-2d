@@ -82,7 +82,7 @@ When you release your ship over a valid zone, your move counter will decrease by
 - If the zone is vacant, your ship rests where you dropped it, your movement is successful, and the zone's actions become available.
 - If the zone is occupied, you'll first roll your influence *die* (automatically), then:
   - a) If your new influence value is at least equal to the highest influence between the ships present there, again, your ship successfully moves and you gain access to the new zone's actions.
-  - b) If your new influence is lower than the highest, then your ship will return to its departure zone. All players with threshold-level influence in the destination zone will lose 1 influence. Also, if this attempt has expended your second move, you'll lose access to actions you might have gained after your first move attempt.
+  - b) If your new influence is lower than the highest, then your ship will return to its departure zone. All players with threshold-level influence in the destination zone will lose 1 influence. Also, if this attempt has expended your second move, you'll lose access to actions you might have gained after your first move attempt.
 
 What to consider before committing to a move:
 - If the destination's influence threshold is too high, you might want to take another approach, both in terms of movement and actions, especially if you risk losing access to currently available actions (i.e., your first move was successful).
