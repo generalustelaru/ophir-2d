@@ -7,10 +7,10 @@ Each player will control a single **ship** that will appear in the center **zone
 You can switch between the map and the specialist offer by clicking the bottom **show/hide** button.
 
 The map consists of seven sea zones, each containing a unique **location**. During the game, locations enable specific **actions** for players who **move** into their respective sea zones on their turn.
-   - The four **trade good** locations (the mines, quarry, farms, and forest) provide **gems**, **marble**, **linen**, or **ebony**, which players can gather, sell,  donate, or hoard.
-   - The orange house icon is the **market**. There, players can sell their trade goods for **coins**.
-   - The yellow gold ingot icon is the **treasury**. There, players can purchase **gold** and **silver**.
-   - The blue dome and obelisks icon is the **temple**. The temple receives donations of gold, silver, and trade goods, awarding **victory points** (VP) and **favor** in return.
+- The four **trade good** locations (the mines, quarry, farms, and forest) provide **gems**, **marble**, **linen**, or **ebony**, which players can gather, sell,  donate, or hoard.
+- The orange house icon is the **market**. There, players can sell their trade goods for **coins**.
+- The yellow gold ingot icon is the **treasury**. There, players can purchase **gold** and **silver**.
+- The blue dome and obelisks icon is the **temple**. The temple receives donations of gold, silver, and trade goods, awarding **victory points** (VP) and **favor** in return.
 
 The two grey **barriers** are blocking access between adjacent sea zones. The separated zones are not considered to be adjacent. Player ships have a reach of two zones. However, barriers can considerably hinder zone access. So take that into account when choosing your specialist.
 
@@ -18,21 +18,21 @@ The session owner may start the game when all players have selected a specialist
 
 ## The Play Space
 Zone Button Areas: To the left of the map, you have, from top to bottom, action buttons for the market, the treasury, and the temple.
-   - The market area consists of a **market deck** and three **market cards**
+- The market area consists of a **market deck** and three **market cards**
 
 Map Area: Around the map, from top left going clockwise, you have information relevant to you on your turn:
-   - the **moves** counter (two blueish wave icons which get discolored as you move)
-   - the **favor button** (a red seal icon button for spending favor)
-   - the **end turn button** (a red/green anchor icon button for ending your turn)
-   - the sun/moon icon (which does absolutely nothing and is confusing at best -- will be replaced with an undo button)
+- the **moves** counter (two blueish wave icons which get discolored as you move)
+- the **favor button** (a red seal icon button for spending favor)
+- the **end turn button** (a red/green anchor icon button for ending your turn)
+- the sun/moon icon (which does absolutely nothing and is confusing at best -- will be replaced with an undo button)
 
 Player Area: To the right of the map, you have the **player cards**. Each card displays:
-   - the player's **influence** swatch (a die face situated left of the card itself)
-   - the player's **cargo** capacity and contents (a dark band with a thin red border)
-   - the player's specialist info button (a clickable white/black band that switches to a description of the chosen specialist)
-   - the player's favor and coins swatches (red seal and silver coin icons depicting how much the player has of each)
-   - the VP swatch (a victory icon showing your accumulated VP; Appears on your card only)
-   - the specialty icon/button (displays the specialty associated with the player's chosen specialist; Clickable on your card only)
+- the player's **influence** swatch (a die face situated left of the card itself)
+- the player's **cargo** capacity and contents (a dark band with a thin red border)
+- the player's specialist info button (a clickable white/black band that switches to a description of the chosen specialist)
+- the player's favor and coins swatches (red seal and silver coin icons depicting how much the player has of each)
+- the VP swatch (a victory icon showing your accumulated VP; Appears on your card only)
+- the specialty icon/button (displays the specialty associated with the player's chosen specialist; Clickable on your card only)
 
 The following is a detailed explanation of the rules and gameplay.
 
@@ -44,8 +44,8 @@ To end your turn, you must voluntarily click the end turn button. The button bec
 
 ## Game End
 The game can end in two ways:
-   - The temple receives enough gold and silver donations to complete construction.
-   - The market deck empties and can no longer supply a full set of trades.
+- The temple receives enough gold and silver donations to complete construction.
+- The market deck empties and can no longer supply a full set of trades.
 
 ## Coins
 
@@ -71,22 +71,22 @@ You always get 2 moves at the beginning of your turn. You spend them by moving i
 On your turn, you may move once or twice or fail to do so.
 
 You move by dragging and releasing the ship figure:
-   - Dragging it inside its current zone does not count as moving. You can do that to reposition it.
-   - Dragging it over into a different zone will:
-      - a. highlight the zone as restricted if it's not adjacent, if you're trying to backtrack, or if you're out of moves.
-      - b. highlight it as valid and, if other ships are present, display a die face showing the influence threshold you'd need to match to enter it.
+- Dragging it inside its current zone does not count as moving. You can do that to reposition it.
+- Dragging it over into a different zone will:
+  - a) highlight the zone as restricted if it's not adjacent, if you're trying to backtrack, or if you're out of moves.
+  - b) highlight it as valid and, if other ships are present, display a die face showing the influence threshold you'd need to match to enter it.
 
 When you release your ship over a restricted zone, it will only move back to where you picked it. This is not considered movement.
 
 When you release your ship over a valid zone, your move counter will decrease by 1, then:
-   - If the zone is vacant, your ship rests where you dropped it, your movement is successful, and the zone's actions become available.
-   - If the zone is occupied, you'll first roll your influence *die* (automatically), then:
-      - a. If your new influence value is at least equal to the highest influence between the ships present there, again, your ship successfully moves and you gain access to the new zone's actions.
-      - b. If your new influence is lower than the highest, then your ship will return to its departure zone. All players with threshold-level influence in the destination zone will lose 1 influence. Also, if this attempt has expended your second move, you'll lose access to actions you might have gained after your first move attempt.
+- If the zone is vacant, your ship rests where you dropped it, your movement is successful, and the zone's actions become available.
+- If the zone is occupied, you'll first roll your influence *die* (automatically), then:
+  - a) If your new influence value is at least equal to the highest influence between the ships present there, again, your ship successfully moves and you gain access to the new zone's actions.
+  - b) If your new influence is lower than the highest, then your ship will return to its departure zone. All players with threshold-level influence in the destination zone will lose 1 influence. Also, if this attempt has expended your second move, you'll lose access to actions you might have gained after your first move attempt.
 
 What to consider before committing to a move:
-   - If the destination's influence threshold is too high, you might want to take another approach, both in terms of movement and actions, especially if you risk losing access to currently available actions (i.e., your first move was successful).
-   - If a zone has a low influence threshold, then moving into it might be beneficial, as it's a chance for you to increase your influence value if it's low. Remember, your influence value can also be a threshold for other players wishing to enter your zone.
+- If the destination's influence threshold is too high, you might want to take another approach, both in terms of movement and actions, especially if you risk losing access to currently available actions (i.e., your first move was successful).
+- If a zone has a low influence threshold, then moving into it might be beneficial, as it's a chance for you to increase your influence value if it's low. Remember, your influence value can also be a threshold for other players wishing to enter your zone.
 
 You can always examine everyone's influence by looking at the die face next to their player card.
 
@@ -125,17 +125,17 @@ A small arrow in the bottom left corner signifies that the standard coin value h
 
 #### Market Zone Actions
 **Action: Sell Trade Goods**: Once per turn, you may click on an available market card to remove the required trade goods from your cargo and receive the amount of coins depicted. After the transaction completes, the market cards will **shift** rightwards like so:
- - The rightmost card is discarded.
- - The other two cards shift one slot to the right, losing and/or taking on a new coin value modifier.
- - The top card of the market deck becomes available in the first slot.
- - A new card is revealed on top of the market deck.
+- The rightmost card is discarded.
+- The other two cards shift one slot to the right, losing and/or taking on a new coin value modifier.
+- The top card of the market deck becomes available in the first slot.
+- A new card is revealed on top of the market deck.
 
 **Action: Sell Specialty Good**: Click on the specialty icon located on your player card to sell one good of that type from your cargo and receive 1 coin. You may repeat this as long as you have goods of that type in your cargo.
 
 Important to note:
-   - A market card is only discarded if it's the rightmost one during the market shift, not because a player clicked on it.
-   - The market deck has the letter "A" displayed near the bottom left. This means that it's topped with "A" cards. When enough cards have been drawn, the "A" will change to a "B". This means that better deals will start popping up.
-   - A consistent market shift due to the Sell Trade Goods action will eventually drain the deck, which will end the game.
+- A market card is only discarded if it's the rightmost one during the market shift, not because a player clicked on it.
+- The market deck has the letter "A" displayed near the bottom left. This means that it's topped with "A" cards. When enough cards have been drawn, the "A" will change to a "B". This means that better deals will start popping up.
+- A consistent market shift due to the Sell Trade Goods action will eventually drain the deck, which will end the game.
 
 ### The Treasury Zone
 
@@ -148,8 +148,8 @@ The location enables the four treasury cards (buttons), featured in a row just u
 **Action: Buy Metals**: Click on a treasury card to deduct the depicted coin or favor amount and load the depicted metal.
 
 Important to note:
-   - While this is a repeatable action, you can generally perform it up to twice, since metals take two cargo spaces, and you can have, at most, four spaces free in your cargo.
-   - The coins for metal cards tend to get more expensive as the game progresses, so even if the favor for metal seems unreasonable by comparison, it might eventually become a viable option.
+- While this is a repeatable action, you can generally perform it up to twice, since metals take two cargo spaces, and you can have, at most, four spaces free in your cargo.
+- The coins for metal cards tend to get more expensive as the game progresses, so even if the favor for metal seems unreasonable by comparison, it might eventually become a viable option.
 
 ### The Temple Zone
 
@@ -164,12 +164,12 @@ The location enables the actions depicted in the bottom left area. There are two
 **Action: Donate Trade Goods**: Click to remove the required trade goods from your cargo and receive the amount of VP and favor depicted. Clicking will also shift the market cards.
 
 **Action: Donate Metal**: Click on the gold for VP or silver for VP button to remove the appropriate metal from your cargo and gain the associated VP. This action is repeatable, but two conditions are checked each time:
-   - If the donation completed a column (3 metals) in the donations reference area but hasn't filled it, the prices of metal in coins will increase by 0-2 coins.
-   - If the donation has filled the donations reference area, the temple construction is complete, and the game ends immediately.
+- If the donation completed a column (3 metals) in the donations reference area but hasn't filled it, the prices of metal in coins will increase by 0-2 coins.
+- If the donation has filled the donations reference area, the temple construction is complete, and the game ends immediately.
 
 Important to note:
-   - The trade good donation card in the temple area is a direct reference to a market card. One of the three market slots features a small blue temple icon (above the market card). That is the card being mirrored in the temple area. Whenever the market shifts, the card that ends up under the temple icon will immediately be referenced in the temple area.
-   - Even with the metal price increase, silver will always remain cheaper than gold, at roughly half the cost.
+- The trade good donation card in the temple area is a direct reference to a market card. One of the three market slots features a small blue temple icon (above the market card). That is the card being mirrored in the temple area. Whenever the market shifts, the card that ends up under the temple icon will immediately be referenced in the temple area.
+- Even with the metal price increase, silver will always remain cheaper than gold, at roughly half the cost.
 
 
 ## Specialists
@@ -183,10 +183,10 @@ When starting a game with two players, a third ship (white) will spawn in the ma
 When a player manages to enter the neutral ship's zone, his/her turn is paused, gaining control of the neutral ship figure.
 
 While controlling the neutral ship, the player must move it once or twice according to the regular movement rules, as if it had spent favor. After movement, the player must conclude the rival's turn by either:
-   - a. clicking the bespoke anchor icon next to its card or,
-   - b. if the ship ended movement at the market zone -- clicking the market card button on the rival card to shift the market; Then, in either case:
-   - The neutral ship will roll its influence die
-   - The player will regain control of their turn
+- a. clicking the bespoke anchor icon next to its card or,
+- b. if the ship ended movement at the market zone -- clicking the market card button on the rival card to shift the market; Then, in either case:
+- The neutral ship will roll its influence die
+- The player will regain control of their turn
 
 Important to note:
-   - A player cannot enter the zone containing the nutral ship again, after having controlled it on the same turn. It will appear as restricted.
+- A player cannot enter the zone containing the nutral ship again, after having controlled it on the same turn. It will appear as restricted.
