@@ -409,7 +409,12 @@ export class PlayProcessor {
             if (!player.getCargo().includes(specialty))
                 player.removeAction(Action.sell_specialty);
 
-            this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
+            if (player.isMoneychanger() && player.getBearings().location === 'temple') {
+                player.removeAction(Action.donate_goods);
+                this.playState.addServerMessage(`${name} accessed the market and sold ${specialty} for 1 coin`, color);
+            } else {
+                this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
+            }
 
             if (player.isHarbormaster())
                 this.clearMovesAsHarbormaster(player);
