@@ -183,8 +183,8 @@ When starting a game with two players, a third ship (white) will spawn in the ma
 When a player manages to enter the neutral ship's zone, his/her turn is paused, gaining control of the neutral ship figure.
 
 While controlling the neutral ship, the player must move it once or twice according to the regular movement rules, as if it had spent favor. After movement, the player must conclude the rival's turn by either:
-- a. clicking the bespoke anchor icon next to its card or,
-- b. if the ship ended movement at the market zone -- clicking the market card button on the rival card to shift the market; Then, in either case:
+- a) clicking the bespoke anchor icon next to its card or,
+- b) if the ship ended movement at the market zone -- clicking the market card button on the rival card to shift the market; Then, in either case:
 - The neutral ship will roll its influence die
 - The player will regain control of their turn
 
