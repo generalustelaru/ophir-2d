@@ -3,7 +3,7 @@ import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Pla
 import localState from '../../state';
 import clientConstants from "~/client_constants";
 import { SeaZone } from '../GroupList';
-import { ShipToken } from './ShipToken';
+import { ShipToken } from '../ShipToken';
 import { Color } from "~/client_types";
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
@@ -62,7 +62,7 @@ export class PlayerShip {
 
         this.ship = new ShipToken(
             fill,
-            isActivePlayer && COLOR.activeShipBorder || COLOR.shipBorder,
+            { stroke: isActivePlayer && COLOR.activeShipBorder || COLOR.shipBorder },
         );
 
         this.group.on('mouseenter', () => {
