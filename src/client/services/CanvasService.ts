@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupPayload, Phase, PlayerColor, PlayState, SetupState } from "~/shared_types";
+import { GameSetupPayload, Phase, PlayerColor, State } from "~/shared_types";
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -7,6 +7,7 @@ import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
 import { EventType } from "~/client_types";
+import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -14,6 +15,8 @@ export const CanvasService = new class extends Communicator {
     private mapGroup: MapGroup;
     private playerGroup: PlayerGroup;
     private setupGroup: SetupGroup;
+    private enrolmentGroup: EnrolmentGroup;
+    private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false
     private isPlayDrawn: boolean = false;
 
@@ -74,6 +77,16 @@ export const CanvasService = new class extends Communicator {
                 y: 0,
             },
         );
+
+        this.enrolmentGroup = new EnrolmentGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: this.stage.width(),
+                x: 0,
+                y: 0,
+            },
+        );
     }
 
     public getSetupCoordinates(): GameSetupPayload {
@@ -87,7 +100,7 @@ export const CanvasService = new class extends Communicator {
         this.playerGroup.updatePlayerVp(color, vp);
     }
 
-    public drawUpdateElements(state: PlayState | SetupState, toDisable = false): void {
+    public drawUpdateElements(state: State, toDisable = false): void {
 
         if (!localState.playerColor) {
             this.createEvent({
@@ -99,7 +112,17 @@ export const CanvasService = new class extends Communicator {
         const { sessionPhase } = state;
 
         switch (sessionPhase) {
+            case Phase.enrolment:
+                if(!this.isEnrolmentDrawn) {
+                    this.stage.visible(true);
+                    this.enrolmentGroup.drawElements(state)
+                    this.fitStageIntoParentContainer();
+                    this.isEnrolmentDrawn = true;
+                }
+                this.enrolmentGroup.update(state)
+                break;
             case Phase.setup:
+                this.enrolmentGroup.disable();
                 if (!this.isSetupDrawn) {
                     this.stage.visible(true);
                     this.mapGroup.drawElements(state);

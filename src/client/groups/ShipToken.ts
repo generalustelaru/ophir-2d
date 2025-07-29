@@ -1,6 +1,7 @@
 import Konva from 'konva';
 import clientConstants from "~/client_constants";
 import { Color, DynamicGroupInterface } from "~/client_types";
+import { Coordinates } from '~/shared_types';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 export class ShipToken implements DynamicGroupInterface<Color> {
@@ -9,7 +10,10 @@ export class ShipToken implements DynamicGroupInterface<Color> {
 
     constructor(
         fill: Color,
-        stroke?: Color
+        options?: {
+            stroke?: Color
+            scale?: Coordinates
+        }
     ) {
         this.group = new Konva.Group();
 
@@ -19,7 +23,7 @@ export class ShipToken implements DynamicGroupInterface<Color> {
             data: SHIP_DATA.shape,
             fill,
             scale: {x: 1.5, y: 1.5},
-            stroke: stroke || COLOR.shipBorder,
+            stroke: options?.stroke || COLOR.shipBorder,
             strokeWidth: 2,
         });
         this.group.add(this.token)
