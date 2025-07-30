@@ -12,17 +12,19 @@ export class ShipToken implements DynamicGroupInterface<Color> {
         fill: Color,
         options?: {
             stroke?: Color
-            scale?: Coordinates
+            position?: Coordinates,
+            scale?: number
         }
     ) {
         this.group = new Konva.Group();
 
+        const scale = options?.scale || 1.5;
         this.token = new Konva.Path({
-            x: -15,
-            y: -5,
+            x: options?.position?.x || -15,
+            y: options?.position?.y || -5,
             data: SHIP_DATA.shape,
             fill,
-            scale: {x: 1.5, y: 1.5},
+            scale: {x: scale, y: scale},
             stroke: options?.stroke || COLOR.shipBorder,
             strokeWidth: 2,
         });
