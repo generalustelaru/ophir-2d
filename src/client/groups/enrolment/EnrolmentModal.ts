@@ -14,7 +14,9 @@ export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdat
     private group: Konva.Group;
     // private localPlayerColor: PlayerColor | null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, localPlayerColor: PlayerColor|null, state: EnrolmentState) {
+    constructor(
+        stage: Konva.Stage, layout: GroupLayoutData, localPlayerColor: PlayerColor | null, state: EnrolmentState
+    ) {
         // this.localPlayerColor = localPlayerColor;
         this.group = new Konva.Group({
             width: layout.width,
