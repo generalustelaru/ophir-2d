@@ -36,7 +36,7 @@ export class ColorCard extends InterfaceButton implements DynamicGroupInterface<
             cornerRadius: 15,
         });
 
-        this.shipToken = new ShipToken(COLOR[color]);
+        this.shipToken = new ShipToken(COLOR[color], { scale: 4, position: { x: 40, y: 50 }});
         this.group.add(this.background, this.shipToken.getElement());
     }
 
