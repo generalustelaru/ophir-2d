@@ -319,18 +319,21 @@ export class PlayProcessor {
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
 
-        const coinReward = trade.reward.coins + this.playState.getFluctuation(slot);
-        player.gainCoins(coinReward);
+        const reward = trade.reward.coins + this.playState.getFluctuation(slot);
+        player.gainCoins(reward);
 
         // other updates
         player.removeAction(Action.sell_goods);
+        const coinForm = reward === 1 ? 'coin' : 'coins';
+        const isRemote = player.isMoneychanger() && player.getBearings().location === 'temple'
 
-        if (player.isMoneychanger() && player.getBearings().location === 'temple') {
+        if (isRemote)
             player.removeAction(Action.donate_goods);
-            this.playState.addServerMessage(`${name} accessed the market and sold goods for ${coinReward} coins`, color);
-        } else {
-            this.playState.addServerMessage(`${name} sold goods for ${coinReward} coins`, color);
-        }
+
+        this.playState.addServerMessage(
+            `${name} ${isRemote ? 'accessed the market and' : ''} traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)': ''}`,
+            color,
+        );
 
         if (player.isHarbormaster())
             this.clearMovesAsHarbormaster(player);
