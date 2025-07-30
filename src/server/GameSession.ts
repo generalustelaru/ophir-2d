@@ -13,7 +13,7 @@ import serverConstants from "~/server_constants";
 import { SINGLE_PLAYER } from "./configuration";
 import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
-
+import { SERVER_NAME } from "./configuration"
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private autoBroadcast: (state: PlayState) => void;
@@ -37,7 +37,7 @@ export class GameSession {
                     case Phase.play:
                         return new PlayProcessor(
                             {
-                                playState: new PlayStateHandler('King Remembrance',sharedState),
+                                playState: new PlayStateHandler(SERVER_NAME, sharedState),
                                 privateState: new PrivateStateHandler(privateState!),
                             },
                             this.autoBroadcast,
