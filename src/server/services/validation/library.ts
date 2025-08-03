@@ -1,10 +1,23 @@
 
-export type Test = {
+
+type TypeReference = Array<string | number> | null;
+
+type TestBase = {
     key: string,
-    type: 'string' | 'object' | 'array' | 'number',
     nullable: boolean,
-    // values: Array<string|Test>
 }
+
+type ScalarTest = TestBase & {
+    type: 'string' | 'number',
+    ref?: TypeReference,
+}
+
+type ObjectTest = TestBase & {
+    type: 'object' | 'array',
+}
+
+export type Test = ScalarTest | ObjectTest
+
 export type ObjectTests = Array<Test>
 
 export type ValidationResult = { passed: true } | { passed: false, error: string }
@@ -38,15 +51,21 @@ function isString(name: string, value: unknown, nullable: boolean = false): Vali
 
     return fail(`${name} property is not a valid string: ${value}`)
 }
-function hasString(parent: object, key: string, nullable: boolean = false): ValidationResult {
+function hasString(parent: object, key: string, nullable: boolean, reference: TypeReference = null): ValidationResult {
     const keyTest = hasKey(parent, key);
 
     if (keyTest.passed) {
         const value = parent[key as keyof object] as unknown;
         const stringTest = isString(key, value, nullable);
 
-        if (stringTest.passed)
-            return pass();
+        if (stringTest.passed) {
+            const referenceTest = isOfUnion(key, value as string, nullable, reference)
+
+            if (referenceTest.passed)
+                return pass();
+
+            return fail(referenceTest.error);
+        }
 
         return fail(stringTest.error);
     }
@@ -61,15 +80,21 @@ function isNumber(name: string, value: unknown, nullable: boolean = false): Vali
 
     return fail(`${name} property is not a valid number: ${value}`)
 }
-function hasNumber(parent: object, key: string, nullable: boolean = false): ValidationResult {
+function hasNumber(parent: object, key: string, nullable: boolean = false, reference: TypeReference = null): ValidationResult {
     const keyTest = hasKey(parent, key);
 
     if (keyTest.passed) {
         const value = parent[key as keyof object] as unknown;
         const numberTest = isNumber(key, value, nullable);
 
-        if (numberTest.passed)
+        if (numberTest.passed) {
+
+            const referenceTest = isOfUnion(key, value as number, nullable, reference)
+
+            if (referenceTest.passed)
+                return pass();
             return pass();
+        }
 
         return fail(numberTest.error);
     }
@@ -109,10 +134,7 @@ function hasObject(parent: object | null, key: string, nullable: boolean = false
 
 function isArray(name: string, value: unknown, nullable: boolean = false): ValidationResult {
 
-    if (nullable && value === null)
-        return pass();
-
-    if (Array.isArray(value) && value !== null && Object.keys(value).length)
+    if (nullable && value === null || Array.isArray(value))
         return pass();
 
     return fail(`${name} is not a valid array: ${value}`);
@@ -151,10 +173,10 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
             const { key, type, nullable } = test;
 
             switch (type) {
-                case 'string': return hasString(object, key, nullable);
-                case 'number': return hasNumber(object, key, nullable);
-                case 'object': return hasObject(object, key, nullable);
+                case 'string': return hasString(object, key, nullable, test.ref);
+                case 'number': return hasNumber(object, key, nullable, test.ref);
                 case 'array': return hasArray(object, key, nullable);
+                case 'object': return hasObject(object, key, nullable);
                 default: return fail(`${key} is of unknown type: ${type}`);
             }
         });
@@ -163,6 +185,13 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
     }
 
     return [objectTest.error];
+}
+
+function isOfUnion(name: string, value: string | number, nullable: boolean, reference: TypeReference): ValidationResult {
+    if(nullable && value === null || reference === null || reference.includes(value))
+        return { passed: true };
+
+    return { passed: false, error: `"${value}" is not a valid "${name}"` };
 }
 
 export const lib = {

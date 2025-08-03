@@ -18,7 +18,7 @@ export class ColorCard extends InterfaceButton implements DynamicGroupInterface<
         stage: Konva.Stage,
         position: Coordinates,
         color: PlayerColor,
-        state: ColorCardUpdate,
+        _state: ColorCardUpdate,
     ) {
         const layout = {
             x: position.x,

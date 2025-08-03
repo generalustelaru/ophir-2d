@@ -187,14 +187,14 @@ export enum Phase {
 export type PlayState = {
     gameId: string,
     sessionPhase: Phase.play,
-    hasGameEnded: boolean,
-    gameResults: Array<PlayerCountables>,
     sessionOwner: PlayerColor,
     players: Array<Player>,
+    chat: Array<ChatEntry>,
+    setup: GameSetup,
+    hasGameEnded: boolean,
+    gameResults: Array<PlayerCountables>,
     market: MarketOffer,
     temple: TempleState,
-    setup: GameSetup,
-    chat: Array<ChatEntry>,
     itemSupplies: ItemSupplies,
     rival: Rival,
 }
@@ -203,17 +203,17 @@ export type SetupState = {
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
     players: Array<PlayerDraft>,
-    specialists: Array<SelectableSpecialist>,
-    setup: GamePartialSetup,
     chat: Array<ChatEntry>,
+    setup: GamePartialSetup,
+    specialists: Array<SelectableSpecialist>,
 }
 export type EnrolmentState = {
     gameId: string,
     sessionPhase: Phase.enrolment,
     sessionOwner: PlayerColor | null,
-    availableSlots: Array<PlayerColor>,
     players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,
+    availableSlots: Array<PlayerColor>,
 }
 export type State = EnrolmentState | SetupState | PlayState;
 
