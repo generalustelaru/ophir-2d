@@ -1,21 +1,73 @@
 import { HexCoordinates } from "~/client_types";
 import {
-    ChatPayload,
-    ClientRequest,
-    GameSetupPayload,
-    MovementPayload,
-    Coordinates,
-    RepositioningPayload,
-    DropItemPayload,
-    LoadGoodPayload,
-    MarketSlotPayload,
-    MetalPurchasePayload,
-    MetalDonationPayload,
-    PickSpecialistPayload,
+    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
+    LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
+    Action, SpecialistName, Phase,
 } from "~/shared_types";
 import { lib, ObjectTests } from "./library"
+import { PrivateState, SavedSession } from "~/server_types";
 
+const refs = {
+    sessionPhase: ['play', 'setup', 'enrolment'],
+    playerColor: ["Purple", "Yellow", "Red", "Green"],
+    actions: Object.values(Action),
+    zoneName: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
+    specialistName: Object.values(SpecialistName),
+    tradeGood: ['gems', 'ebony', 'marble', 'linen'],
+    marketSlotKey: ['slot_1', 'slot_2', 'slot_3'],
+    metal: ['silver', 'gold'],
+    currency: ['coins', 'favor'],
+    itemName: ['gems', 'ebony', 'marble', 'linen', 'silver', 'gold', 'silver_extra', 'gold_extra', 'empty']
+}
 class ValidatorService {
+
+    public validateStateFile(fileContent: unknown) {
+        const savedSession = this.validateObject<SavedSession>(
+            'SavedSession',
+            fileContent,
+            [
+                { key: 'sharedState', type: 'object', nullable: false },
+                { key: 'privateState', type: 'object', nullable: true },
+            ],
+        );
+
+        if (!savedSession)
+            return null;
+
+        const sharedState = this.validateObject<State>(
+            'State',
+            savedSession.sharedState,
+            [
+                { key: 'gameId', type: 'string', nullable: false },
+                { key: 'sessionPhase', type: 'string', nullable: false, ref: refs.sessionPhase },
+                { key: 'sessionOwner', type: 'string', nullable: true, ref: refs.playerColor },
+                { key: 'players', type: 'array', nullable: false },
+                { key: 'chat', type: 'array', nullable: false },
+            ]
+        );
+
+        if (!sharedState)
+            return null;
+
+        if (sharedState.sessionPhase === Phase.play) {
+
+            const privateState = this.validateObject<PrivateState>(
+                'PrivateState',
+                savedSession.privateState,
+                [
+                    { key: 'destinationPackages', type: 'array', nullable: false }, // Array<DestinationPackage>;
+                    { key: 'tradeDeck', type: 'array', nullable: false }, // Array<Trade>;
+                    { key: 'costTiers', type: 'array', nullable: false }, // Array<ExchangeTier>;
+                    { key: 'gameStats', type: 'array', nullable: false }, // Array<PlayerCountables>;
+                ]
+            );
+
+            if (!privateState)
+                return null;
+        }
+
+        return savedSession
+    }
 
     public validateClientRequest(request: unknown) {
         const clientRequest = this.validateObject<ClientRequest>(
@@ -25,7 +77,7 @@ class ValidatorService {
                 { key: 'socketId', type: 'string', nullable: true },
                 { key: 'gameId', type: 'string', nullable: true },
                 { key: 'playerName', type: 'string', nullable: true },
-                { key: 'playerColor', type: 'string', nullable: true },
+                { key: 'playerColor', type: 'string', nullable: true, ref: refs.playerColor },
                 { key: 'message', type: 'object', nullable: false },
             ]
         );
@@ -37,7 +89,7 @@ class ValidatorService {
             'ClientMessage',
             clientRequest.message,
             [
-                { key: 'action', type: 'string', nullable: false },
+                { key: 'action', type: 'string', nullable: false, ref: Object.values(Action) },
                 { key: 'payload', type: 'object', nullable: true },
             ]
         );
@@ -60,7 +112,7 @@ class ValidatorService {
         return this.validateObject<PickSpecialistPayload>(
             'PickSpecialistayload',
             payload,
-            [{ key: 'name', type: 'string', nullable: false }],
+            [{ key: 'name', type: 'string', nullable: false, ref: refs.specialistName }],
         )
     }
 
@@ -69,7 +121,7 @@ class ValidatorService {
             'MovementPayload',
             payload,
             [
-                { key: 'zoneId', type: 'string', nullable: false },
+                { key: 'zoneId', type: 'string', nullable: false, ref: refs.zoneName },
                 { key: 'position', type: 'object', nullable: false },
             ],
         );
@@ -120,9 +172,9 @@ class ValidatorService {
                 'HexCoordinates',
                 value,
                 [
-                    {key: 'id', type: 'string', nullable: false},
-                    {key: 'x', type: 'number', nullable: false},
-                    {key: 'y', type: 'number', nullable: false},
+                    { key: 'id', type: 'string', nullable: false, ref: refs.zoneName },
+                    { key: 'x', type: 'number', nullable: false },
+                    { key: 'y', type: 'number', nullable: false },
                 ],
             )
         );
@@ -143,7 +195,7 @@ class ValidatorService {
         return this.validateObject<LoadGoodPayload>(
             'LoadGoodPayload',
             payload,
-            [{ key: 'tradeGood', type: 'string', nullable: false }],
+            [{ key: 'tradeGood', type: 'string', nullable: false, ref: refs.tradeGood }],
         );
     }
 
@@ -152,7 +204,7 @@ class ValidatorService {
             'MarketSlotPayload',
             payload,
             [
-                { key: 'slot', type: 'string', nullable: false },
+                { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
             ],
         );
     }
@@ -162,8 +214,8 @@ class ValidatorService {
             'MetalPurchasePayload',
             payload,
             [
-                { key: 'metal', type: 'string', nullable: false },
-                { key: 'currency', type: 'string', nullable: false },
+                { key: 'metal', type: 'string', nullable: false, ref: refs.metal },
+                { key: 'currency', type: 'string', nullable: false, ref: refs.currency },
             ],
         );
     }
@@ -172,7 +224,7 @@ class ValidatorService {
         return this.validateObject<MetalDonationPayload>(
             'MetalDonationPayload',
             payload,
-            [{ key: 'metal', type: 'string', nullable: false }],
+            [{ key: 'metal', type: 'string', nullable: false, ref: refs.metal }],
         );
     }
 
@@ -180,7 +232,7 @@ class ValidatorService {
         return this.validateObject<DropItemPayload>(
             'DropItemPayload',
             payload,
-            [{ key: 'item', type: 'string', nullable: false }],
+            [{ key: 'item', type: 'string', nullable: false, ref: refs.itemName }],
         );
     }
 

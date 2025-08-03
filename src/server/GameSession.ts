@@ -14,6 +14,7 @@ import { SINGLE_PLAYER } from "./configuration";
 import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
 import { SERVER_NAME } from "./configuration"
+
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private autoBroadcast: (state: PlayState) => void;
@@ -28,34 +29,40 @@ export class GameSession {
         this.autoBroadcast = broadcastCallback
         this.transmitVp = vpTransmitCallback
 
-        if (savedSession) {
-            this.actionProcessor = (()=> {
-                const {sharedState, privateState} = savedSession;
-                const { gameId, sessionOwner, players, chat } = sharedState;
-
-                switch (sharedState.sessionPhase) {
-                    case Phase.play:
-                        return new PlayProcessor(
-                            {
-                                playState: new PlayStateHandler(SERVER_NAME, sharedState),
-                                privateState: new PrivateStateHandler(privateState!),
-                            },
-                            this.autoBroadcast,
-                            this.transmitVp,
-                        )
-                    case Phase.setup:
-                        return new SetupProcessor({ gameId, sessionOwner:(sessionOwner as PlayerColor), players, chat })
-                    case Phase.enrolment:
-                        return new EnrolmentProcessor(sharedState)
-                    default:
-                        return new EnrolmentProcessor(this.getNewState());
-                }
-            })();
-            console.info('Game session restored');
-        } else {
+        if (!savedSession) {
             this.actionProcessor = new EnrolmentProcessor(this.getNewState());
-            console.info('Game session created');
+            console.info('New game session created');
+
+            return;
         }
+
+        const { sharedState, privateState } = savedSession;
+        const { gameId, sessionOwner, players, chat } = sharedState;
+
+        this.actionProcessor = (() => {
+            switch (sharedState.sessionPhase) {
+                case Phase.play:
+                    return new PlayProcessor(
+                        {
+                            playState: new PlayStateHandler(SERVER_NAME, sharedState),
+                            privateState: new PrivateStateHandler(privateState!),
+                        },
+                        this.autoBroadcast,
+                        this.transmitVp,
+                    );
+
+                case Phase.setup:
+                    return new SetupProcessor(
+                        { gameId, sessionOwner:(sessionOwner as PlayerColor), players, chat },
+                    );
+
+                case Phase.enrolment:
+                    return new EnrolmentProcessor(sharedState);
+
+                default:
+                    throw new Error('Cannot determine session phase');
+            }
+        })();
     }
 
     public getCurrentSession() {
@@ -89,10 +96,9 @@ export class GameSession {
         const match = this.matchRequestToPlayer(request);
 
         if (match.err) {
-            return this.issueNominalResponse(lib.errorResponse(
-                'Invalid client request!',
-                { reason: match.message }
-            ));
+            console.info('Resetting client;',match.message);
+
+            return this.issueNominalResponse({ resetFrom: SERVER_NAME })
         }
 
         if (request.message.action === Action.declare_reset) {
