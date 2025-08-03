@@ -235,6 +235,7 @@ export type GameSetup = {
 export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 
 // MARK: REQUEST
+export type EnrolmentPayload = { color: PlayerColor, name: string | null }
 export type ChatPayload = { input: string }
 export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
@@ -251,18 +252,20 @@ export type PickSpecialistPayload = { name: SpecialistName }
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
-    | Action.sell_goods | Action.donate_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist;
+    | Action.sell_goods | Action.donate_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist
+    | Action.enrol;
 export type LaconicAction =
-    | Action.inquire | Action.enrol | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
+    | Action.inquire | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
     | Action.force_turn | Action.sell_specialty;
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
-    | MarketSlotPayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload
+    | MarketSlotPayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload | EnrolmentPayload
     | LoadGoodPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
+export type EnrolMessage = MessageFormat<Action.enrol, EnrolmentPayload>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;
 export type MoveMessage = MessageFormat<Action.move | Action.move_rival, MovementPayload>;
@@ -277,7 +280,7 @@ export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonati
 export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage
-    | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage
+    | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage | EnrolMessage
     | PickSpecialistMessage;
 
 export type ClientRequest = {
@@ -290,7 +293,7 @@ export type ClientRequest = {
 
 // MARK: RESPONSE
 export type ClientIdResponse = { socketId: string }
-
+export type EnrolmentResponse = { color: PlayerColor } // TODO: server must return this on Action.enrol
 export type StateResponse = { state: State }
 
 export type ResetResponse = { resetFrom: string | PlayerColor }

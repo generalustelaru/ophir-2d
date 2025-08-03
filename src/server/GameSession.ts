@@ -132,13 +132,14 @@ export class GameSession {
     private processEnrolmentAction(data: RequestMatch | ClientRequest): WsDigest {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
-        if (data.message.action === Action.enrol && 'playerColor' in data) {
-            const { playerColor, playerName, socketId } = data;
+        if (data.message.action === Action.enrol) {
 
-            if (!playerColor || !playerName)
-                return this.issueNominalResponse(lib.errorResponse('Missing enrolment data!'));
+            if (!('socketId' in data))
+                return this.issueNominalResponse(lib.errorResponse('socketId missing!'));
 
-            const enrolment = processor.processEnrol(socketId, playerColor, playerName)
+            const { socketId, message } = data;
+
+            const enrolment = processor.processEnrol(socketId, message.payload);
 
             if (enrolment.err)
                 return this.issueNominalResponse(lib.errorResponse(enrolment.message));
