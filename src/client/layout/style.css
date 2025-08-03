@@ -15,16 +15,14 @@ html, body {
 
 #canvas {
     border: 1px solid white;
-    width: auto;
-    height: auto;
+    width: 100%;
+    max-width: 1200px;
 }
 
 .control-row {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 45px;
-    width: 900px;
+    height: auto;
+    width: auto;
 }
 
 button, select {
@@ -42,7 +40,8 @@ input {
 }
 
 #chatRoom {
-    width: 1200px;
+    width: 100%;
+    max-width: 1200px;
     max-height: 500px;
     background-color: rgb(22, 9, 9);
     color: rgb(216, 254, 255);

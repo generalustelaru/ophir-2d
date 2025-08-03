@@ -2,7 +2,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, State, PlayerEntity } from "~/shared_types";
-import { PrivateState, SavedSession, WsClient } from "~/server_types";
+import { PrivateState, WsClient } from "~/server_types";
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
 import { validator } from "./services/validation/ValidatorService";
@@ -90,10 +90,12 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 let singleSession: GameSession | null;
 
 loadGameState().then(data => {
+    const savedState = validator.validateStateFile(data);
+
     singleSession = new GameSession(
         broadcastCallback,
         vpTransmitCallback,
-        PERSIST_SESSION ?  data : null,
+        PERSIST_SESSION ?  savedState : null,
     );
 });
 
@@ -129,7 +131,7 @@ socketServer.on('connection', function connection(socket) {
     });
 
     socket.on('close', () => {
-        const deadClient = singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity)  => p.socketId === socketId)
+        const deadClient = singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity) => p.socketId === socketId)
         if (deadClient)
             console.log('Removing disconnected client of', deadClient.name)
         socketClients.delete(socketId);
@@ -218,7 +220,7 @@ setInterval(() => {
 
 // DEBUG
 
-async function saveGameState(statepack: {sharedState: State, privateState: PrivateState|null}) {
+async function saveGameState(statepack: { sharedState: State, privateState: PrivateState | null }) {
     const fileAddress = path.join(__dirname, '..', STATE_FILE);
 
     try {
@@ -227,11 +229,18 @@ async function saveGameState(statepack: {sharedState: State, privateState: Priva
         console.error('Failed to save game state:', error);
     }
 }
-async function loadGameState(): Promise<SavedSession|null> {
+async function loadGameState(): Promise<object | null> {
     const fileAddress = path.join(__dirname, '..', STATE_FILE);
     try {
         const data = await fs.readFile(fileAddress, 'utf8');
-        return JSON.parse(data) as SavedSession;
+
+        try {
+            return JSON.parse(data);
+        } catch (error) {
+            console.log('Save file is corrupted', { error });
+            return null;
+        }
+
     } catch (error) {
         return null;
     }

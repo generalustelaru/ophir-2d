@@ -36,6 +36,11 @@ localState.playerName = playerName;
 localState.vp = vp;
 
 // MARK: LISTENERS
+window.addEventListener('resize', () => {
+    console.log('Caught resize event!!')
+    CanvasService.fitStageIntoParentContainer();
+});
+
 //Send player action to server
 window.addEventListener(EventType.action, (event: CustomEventInit) => {
     const message = event.detail as ClientMessage;
@@ -120,14 +125,15 @@ window.addEventListener(EventType.reset, (event: CustomEventInit) => {
     window.location.reload();
 });
 
+// MARK: State
 window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => {
-
     if (!event.detail)
         return signalError('State is missing!');
 
     const enrolmentState = event.detail as EnrolmentState;
 
     UserInterface.updateAsEnrolment(enrolmentState);
+    CanvasService.drawUpdateElements(enrolmentState, true);
 
     if (!localState.gameId) {
         localState.gameId = enrolmentState.gameId;
@@ -142,49 +148,25 @@ window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => 
 
 window.addEventListener(EventType.setup_update, (event: CustomEventInit) => {
     if (!event.detail)
-        return signalError("State is missing!");
+        return signalError('State is missing!');
 
     const setupState = event.detail as SetupState;
-
     UserInterface.updateAsSetup(setupState);
+    CanvasService.drawUpdateElements(setupState, true);
 
     debug(setupState);
 });
 
-// Update client on server state update
 window.addEventListener(EventType.play_update, (event: CustomEventInit) => {
 
     if (!event.detail)
         return signalError('State is missing!');
 
     const playState = event.detail as PlayState;
-
     UserInterface.updateAsPlay(playState);
-
-    CanvasService.drawUpdateElements(
-        playState,
-        playState.hasGameEnded
-    );
+    CanvasService.drawUpdateElements(playState, playState.hasGameEnded);
 
     debug(playState);
-});
-
-window.addEventListener(EventType.setup_update, (event: CustomEventInit) => {
-    if (!event.detail)
-        return signalError('State is missing!');
-
-    const setupState = event.detail as SetupState;
-    // TODO: an update AsSetup needed to enable specific buttons during setup phase (state).
-    CanvasService.drawUpdateElements(setupState, true);
-});
-
-window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => {
-    if (!event.detail)
-        return signalError('State is missing!');
-
-    const enrolmentState = event.detail as EnrolmentState;
-
-    UserInterface.updateAsEnrolment(enrolmentState);
 });
 
 window.addEventListener(

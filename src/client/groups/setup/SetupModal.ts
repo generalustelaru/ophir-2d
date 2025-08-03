@@ -5,14 +5,14 @@ import  clientConstants from "~/client_constants"
 import { SpecialistCard } from "./SpecialistCard";
 import localState from '../../state';
 
-type ModalUpdate = {
+type SetupModalUpdate = {
     players: Array<PlayerDraft>,
     specialists: Array<SelectableSpecialist>,
 }
 
 const { COLOR } = clientConstants
 
-export class SetupModal implements DynamicGroupInterface<ModalUpdate> {
+export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
     private group: Konva.Group;
     private specialistCards:  Array<SpecialistCard> = [];
     private localPlayerColor: PlayerColor | null;
@@ -26,8 +26,6 @@ export class SetupModal implements DynamicGroupInterface<ModalUpdate> {
             y: layout.y,
         });
         const background = new Konva.Rect({
-            // x: 50,
-            // y: 50,
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
@@ -53,7 +51,7 @@ export class SetupModal implements DynamicGroupInterface<ModalUpdate> {
         return this.group;
     }
 
-    public update(update: ModalUpdate) {
+    public update(update: SetupModalUpdate) {
         this.specialistCards.forEach(card => {
             const specialist = update.specialists.find(s => s.name === card.getCardName())
 

@@ -24,7 +24,7 @@ import { FavorIcon } from './FavorIcon';
 import { UpgradeButton } from './location/UpgradeButton';
 import { TempleMarketCard } from './location/TempleMarketCard';
 import { TempleRewardDial } from './location/TempleRewardDial';
-import { TempleDonationCard } from './location/TempleDonationCard';
+import { MetalDonationCard } from './location/MetalDonationCard';
 import { MetalDonationsBand } from './location/MetalDonationsBand';
 import { RivalShip } from './map/RivalShip';
 // import { ShiftMarketButton }
@@ -32,6 +32,6 @@ import { RivalShip } from './map/RivalShip';
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, EmptyLocationToken, SeaZone, ActionDial, PlayerShip,
     RivalShip, RemoteShip, PlayerPlacard, FavorDial, CargoBand, MarketPlacard, CoinDial, TreasuryPlacard,
-    TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, TempleDonationCard,
+    TemplePlacard, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, MetalDonationCard as TempleDonationCard,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
 }; //TODO: might want to ditch this for performance sake.

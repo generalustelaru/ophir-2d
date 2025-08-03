@@ -4,6 +4,7 @@ import {
     TempleState, ClientMessage, ResetResponse, ClientIdResponse,
     SetupState,
     VpTransmission,
+    State,
 } from "~/shared_types";
 import Konva from 'konva';
 
@@ -54,8 +55,8 @@ export interface HTMLHandlerInterface {
 }
 
 export interface MegaGroupInterface {
-    drawElements(state: PlayState | SetupState): void,
-    update(state: PlayState | SetupState): void,
+    drawElements(state: State): void,
+    update(state: State): void,
     disable(): void,
 }
 

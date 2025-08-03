@@ -8,7 +8,8 @@ const { ICON_DATA, COLOR } = clientConstants;
 
 export class TempleRewardDial implements DynamicGroupInterface<number> {
     private group: Konva.Group;
-    private amount: Konva.Text;
+    private vpAmount: Konva.Text;
+    private favorAmount: Konva.Text;
     constructor(
         position: Coordinates,
         amount: number,
@@ -16,13 +17,14 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
         this.group = new Konva.Group({
             x: position.x,
             y: position.y,
+            // width: 66, height: 96,
         });
 
-        const favorIcon = new FavorIcon({ x: -25, y: -25, width: 0, height: 0 });
+        const favorIcon = new FavorIcon({ x: -20, y: -23, width: 0, height: 0 }, 1.8);
 
         const semiDisc = new Konva.Wedge({
             y: -1,
-            radius: 26,
+            radius: 22,
             angle: 180,
             fill: COLOR.vpGold,
             rotation: 90,
@@ -37,22 +39,36 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
         });
 
         const coinCenter = this.group.getClientRect().width / 2;
-        this.amount = new Konva.Text({
-            x: coinCenter - 9,
-            y: coinCenter - 20,
-            text: amount.toString(),
-            fontSize: 40,
-            fill: COLOR.boneWhite,
-            stroke: 'black',
-            strokeWidth: 2,
+
+        this.vpAmount = new Konva.Text({
+            x: coinCenter - 12,
+            y: coinCenter - 10,
+            text: String(amount),
+            fontSize: 20,
+            fill: COLOR.vpCardPurple,
+            stroke: COLOR.vpCardPurple,
+            // strokeWidth: 2,
             fontFamily: 'Calibri',
         });
+
+        this.favorAmount = new Konva.Text({
+            x: coinCenter + 5,
+            y: coinCenter - 10,
+            text: String(amount),
+            fontSize: 20,
+            fill: COLOR.boneWhite,
+            stroke: COLOR.boneWhite,
+            // strokeWidth: 2,
+            fontFamily: 'Calibri',
+
+        })
 
         this.group.add(...[
             favorIcon.getElement(),
             semiDisc,
             semiWreath,
-            this.amount
+            this.vpAmount,
+            this.favorAmount,
         ]);
     }
 
@@ -63,8 +79,9 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
     public getElement(): Konva.Group {
         return this.group;
     }
-    
+
     public update(value: number): void {
-        this.amount.text(value.toString());
+        this.vpAmount.text(String(value));
+        this.favorAmount.text(String(value));
     }
 }

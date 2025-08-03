@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { Player, PlayerColor } from "~/shared_types";
 import { Color, DynamicGroupInterface } from "~/client_types";
 import clientConstants from "~/client_constants";
-import { ShipToken } from './ShipToken';
+import { ShipToken } from '../ShipToken';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 
@@ -28,7 +28,7 @@ export class RemoteShip implements DynamicGroupInterface<Player> {
 
         this.ship = new ShipToken(
             fill,
-            isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder,
+            { stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder },
         );
 
         this.group.add(this.ship.getElement());
