@@ -35,7 +35,7 @@ export class SpecialistBand extends InterfaceButton implements DynamicGroupInter
             y: 1,
             width,
             height,
-            text: isLocalPlayer ? 'You' : player.name,
+            text: isLocalPlayer ? 'You' : player.specialist.displayName,
             fontSize: 14,
             fontStyle: 'bold',
             ellipsis: true,
