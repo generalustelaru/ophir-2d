@@ -3,14 +3,15 @@ import { DynamicGroupInterface } from "~/client_types";
 import { InterfaceButton } from "../InterfaceButton";
 import { ShipToken } from "../ShipToken";
 import clientConstants from "~/client_constants";
-import { Coordinates, PlayerColor, PlayerEntry } from "~/shared_types";
+import { Action, Coordinates, PlayerColor, PlayerEntry } from "~/shared_types";
+import { ActionButton } from "../ActionButton";
 
 const { COLOR } = clientConstants;
 
 type ColorCardUpdate = {
     player: PlayerEntry | null
 }
-export class ColorCard extends InterfaceButton implements DynamicGroupInterface<ColorCardUpdate> {
+export class ColorCard extends ActionButton implements DynamicGroupInterface<ColorCardUpdate> {
 
     private background: Konva.Rect;
     private shipToken: ShipToken;
@@ -27,7 +28,8 @@ export class ColorCard extends InterfaceButton implements DynamicGroupInterface<
             height: 300,
         }
 
-        super(stage, layout, ()=>{});
+        super(stage, layout, { action: Action.enrol, payload: { color, name: null } });
+        this.setEnabled(true);
 
         this.background = new Konva.Rect({
             width: layout.width,

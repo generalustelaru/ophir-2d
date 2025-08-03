@@ -145,7 +145,7 @@ export const UserInterface = new class extends Communicator {
 
             return this.createEvent({
                 type: EventType.action,
-                detail: { action: Action.enrol, payload: null }
+                detail: { action: Action.enrol, payload: {color: localState.playerColor, name: null} }
             });
         }
 

@@ -3,6 +3,7 @@ import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
     LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
     Action, SpecialistName, Phase,
+    EnrolmentPayload,
 } from "~/shared_types";
 import { lib, ObjectTests } from "./library"
 import { PrivateState, SavedSession } from "~/server_types";
@@ -98,6 +99,17 @@ class ValidatorService {
             return null;
 
         return clientRequest;
+    }
+
+    public validateEnrolmentPayload(payload: unknown) {
+        return this.validateObject<EnrolmentPayload>(
+            'EnrolmentPayload',
+            payload,
+            [
+                { key: 'color', type: 'string', nullable: false, ref: refs.playerColor },
+                { key: 'name', type: 'string', nullable: true },
+            ],
+        );
     }
 
     public validateChatPayload(payload: unknown) {

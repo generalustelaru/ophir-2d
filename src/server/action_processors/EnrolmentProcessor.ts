@@ -1,5 +1,5 @@
 import {
-    EnrolmentState, PlayerColor, PlayerEntry, StateResponse,
+    EnrolmentState, MessagePayload, PlayerColor, PlayerEntry, StateResponse,
 } from "~/shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
@@ -17,7 +17,14 @@ export class EnrolmentProcessor {
         return this.enrolmentState.toDto();
     }
 
-    public processEnrol(socketId: string | null, color: PlayerColor, name: string): Probable<StateResponse> {
+    public processEnrol(socketId: string | null, payload: MessagePayload): Probable<StateResponse> {
+        const enrolmentPayload = validator.validateEnrolmentPayload(payload);
+
+        if(!enrolmentPayload)
+            return lib.fail('Cannot enrol in session.');
+
+        const { color, name: nameInput } = enrolmentPayload;
+        const name = nameInput || color;
 
         if (!socketId)
             return lib.fail('Cannot enrol in session. socketId is missing.');
@@ -33,7 +40,7 @@ export class EnrolmentProcessor {
             if (!this.enrolmentState.isRoomForNewPlayer())
                 return lib.fail('The game is full!');
 
-            this.enrolmentState.addPlayer({ socketId, color, name });
+            this.enrolmentState.addPlayer({ socketId, color, name: name || color });
 
             if (this.enrolmentState.getSessionOwner() === null)
                 this.enrolmentState.setSessionOwner(color);
