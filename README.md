@@ -48,7 +48,7 @@ If that doesn't work input `reset` in the running server's CLI. This will also f
 
 ## How to play
 
- Any page visitor may become the Session Owner by clicking **Create**. Once the game session has been created, the remaining visitors may click on **Join**. All players must first select a player color before creating/joining. The name is optional. Only Players (up to 4) can use the built-in chat. There can be any number of spectators.
+ Any page visitor may become the Session Owner by being the first to select a color card.Visitors who've selected a color (up to 4) can begin using the built-in chat. There can be any number of spectators.
 
  Once there are at least 2 players the Session Owner may click the **Draft** button to initiate the setup (pick from the available specialists), then on **Start** to begin playing. The Session Owner also has the ability to Reset the game at any time (revert to a new open session without players).
 
