@@ -2,23 +2,17 @@ import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState, SetupState }
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
-import { TextInput } from '../html_behaviors/TextInput';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import { PlayerCountables } from "~/server_types";
 import clientConstants from "~/client_constants";
 import { EventType } from "~/client_types";
 
-const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
 export const UserInterface = new class extends Communicator {
 
-    private createButton: Button;
-    private joinButton: Button;
     private draftButton: Button;
     private startButton: Button;
     private resetButton: Button;
-    private playerNameInput: TextInput;
-    private playerColorSelect;
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
     private chatSendButton: Button;
@@ -27,51 +21,17 @@ export const UserInterface = new class extends Communicator {
 
     constructor() {
         super();
-        this.createButton = new Button('createButton', this.processEnroll);
-        this.joinButton = new Button('joinButton', this.processEnroll);
         this.draftButton =  new Button('draftButton', this.processDraft);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
         this.forceTurnButton = new Button('forceTurnButton', this.processForceTurn);
-        this.playerNameInput = new TextInput('playerNameInput', this.updatePlayerName);
-        this.playerColorSelect = {
-            element: document.getElementById('playerColorSelect') as HTMLSelectElement,
-            enable: () => {
-                this.playerColorSelect.element.disabled = false;
-                Array.from(this.playerColorSelect.element.options).forEach(option => {
-                    option.disabled = !this.availableSlots.includes(option.value as PlayerColor);
-                });
-            },
-
-            setValue: (color: PlayerColor | null) => {
-                if (color) this.playerColorSelect.element.value = color;
-            },
-
-            disable: () => this.playerColorSelect.element.disabled = true,
-        }
         this.chatMessages = document.getElementById('chatMessages') as HTMLDivElement;
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
-
-        this.playerNameInput.setValue(localState.playerName);
-        this.playerColorSelect.setValue(localState.playerColor);
-
-        this.playerColorSelect.element.addEventListener('change', () => {
-            this.playerColorSelect.element.value && this.updateEnrolButtons();
-        });
     }
 
     public disable(): void {
         this.disableButtons();
-        this.disableElements(this.chatInput, this.chatSendButton, this.playerColorSelect, this.playerNameInput);
-    }
-
-    private updatePlayerName = (): void => {
-        localState.playerName = this.playerNameInput.element.value;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
-
-        if (PERSIST_SESSION)
-            localStorage.setItem('persistedState', JSON.stringify(localState));
     }
 
     private sendChatMessage = (): void => {
@@ -88,18 +48,6 @@ export const UserInterface = new class extends Communicator {
         });
     }
 
-    private updateEnrolButtons = () => {
-        switch (true) {
-            case this.availableSlots.length === 4:
-                this.createButton.enable();
-                break;
-            case this.availableSlots.length > 0:
-                this.joinButton.enable();
-                break;
-            default:
-                break;
-        }
-    }
     private handleKeyInput  = (toSubmit: boolean): void => {
         toSubmit && this.sendChatMessage();
 
@@ -128,30 +76,6 @@ export const UserInterface = new class extends Communicator {
         });
     }
 
-    private processEnroll = (): void => {
-        const selectedId = this.playerColorSelect.element.value as PlayerColor;
-        const name = this.playerNameInput.element.value;
-
-        if (!selectedId)
-            return alert('Select your player color first.');
-
-        if (this.availableSlots.includes(selectedId)) {
-            localState.playerColor = selectedId;
-            localState.playerName = (/\w/).test(name) ? name : selectedId;
-            sessionStorage.setItem('localState', JSON.stringify(localState));
-
-        if (PERSIST_SESSION)
-            localStorage.setItem('persistedState', JSON.stringify(localState));
-
-            return this.createEvent({
-                type: EventType.action,
-                detail: { action: Action.enrol, payload: {color: localState.playerColor, name: null} }
-            });
-        }
-
-        return this.setInfo('This color has just been taken :(');
-    }
-
     private processForceTurn = () => {
 
         return this.createEvent({
@@ -169,13 +93,7 @@ export const UserInterface = new class extends Communicator {
         handlers.forEach(handler => handler.enable());
     }
 
-    private disableElements(...handlers: Array<{ disable(): void }>): void {
-        handlers.forEach(handler => handler.disable());
-    }
-
     private disableButtons(): void {
-        this.createButton.disable();
-        this.joinButton.disable();
         this.draftButton.disable();
         this.startButton.disable();
         this.resetButton.disable();
@@ -202,7 +120,6 @@ export const UserInterface = new class extends Communicator {
     public updateAsSetup(state: SetupState): void {
         this.updateChat(state.chat);
         this.disableButtons();
-        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
         if(localState.playerColor)
             this.enableElements(this.chatInput, this.chatSendButton);
@@ -218,7 +135,6 @@ export const UserInterface = new class extends Communicator {
     public updateAsPlay(state: PlayState): void {
         this.updateChat(state.chat);
         this.disableButtons();
-        this.disableElements(this.playerColorSelect, this.playerNameInput);
 
         const activePlayer = state.players.find(p => p.isActive);
 
@@ -237,18 +153,9 @@ export const UserInterface = new class extends Communicator {
 
     private handleCreatedState(state: EnrolmentState): void {
 
-        // guest/anon/spectator
-        if (!localState.playerColor) {
-            this.enableElements(this.playerColorSelect, this.playerNameInput);
-            this.playerColorSelect.element.value && this.joinButton.enable();
-
+        if (!localState.playerColor)
             return this.setInfo('A game is waiting for you');
-        }
 
-        // enrolled player
-        this.disableElements(this.playerNameInput, this.playerColorSelect)
-
-        // session owner
         if (state.sessionOwner === localState.playerColor) {
 
             if (state.players.length > 1 || SINGLE_PLAYER) {
@@ -264,20 +171,13 @@ export const UserInterface = new class extends Communicator {
     }
 
     private handleEmptyState(): void {
-        this.enableElements(this.playerColorSelect, this.playerNameInput);
-        this.playerColorSelect.element.value && this.createButton.enable();
-
         return this.setInfo('You may create the game');
     }
 
     private handleFullState(state: EnrolmentState): void {
 
-        this.disableElements(this.playerColorSelect, this.playerNameInput);
-
-        if (!localState.playerColor) {
-
+        if (!localState.playerColor)
             return this.setInfo('The game is full, sorry :(');
-        }
 
         if (localState.playerColor === state.sessionOwner) {
             this.enableElements(this.draftButton, this.resetButton);
@@ -348,29 +248,25 @@ export const UserInterface = new class extends Communicator {
 
         const vpWinners = getLeaders(gameResults, 'vp');
 
-        if (vpWinners.length == 1){
+        if (vpWinners.length == 1)
             return alert(addWinner(vpWinners, 'vp', message));
-        }
 
         message = addTiedPlayers(vpWinners, 'favor', message);
         const favorWinners = getLeaders(vpWinners, 'favor');
 
-        if (favorWinners.length == 1){
+        if (favorWinners.length == 1)
             return alert(addWinner(favorWinners, 'favor', message));
-        }
 
         message = addTiedPlayers(favorWinners, 'coins', message);
         const coinWinners = getLeaders(favorWinners, 'coins');
 
-        if (coinWinners.length == 1) {
+        if (coinWinners.length == 1)
             return alert(addWinner(coinWinners, 'coins', message));
-        }
 
         message = message.concat(`\nShared victory:\n`);
 
-        for (const player of coinWinners) {
+        for (const player of coinWinners)
             message = message.concat(`${player.color} : ${player.vp} VP + ${player.coins} coins\n`);
-        }
 
         alert(message);
     }

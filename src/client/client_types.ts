@@ -1,10 +1,7 @@
 import {
-    ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName,
-    EnrolmentState, Trade, MarketOffer, Player, Metal, MetalPrices, Currency,
-    TempleState, ClientMessage, ResetResponse, ClientIdResponse,
-    SetupState,
-    VpTransmission,
-    State,
+    ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
+    Metal, MetalPrices, Currency, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState,
+    VpTransmission, State, EnrolmentResponse,
 } from "~/shared_types";
 import Konva from 'konva';
 
@@ -121,6 +118,7 @@ export type EventFormat<T extends EventType, D> = {
 
 export enum EventType {
     connected = 'connected',
+    enrolment_approval = 'enrolment_approval',
     draft = 'draft',
     start_action = 'start',
     close = 'close',
@@ -153,6 +151,7 @@ export type Event =
     | EventFormat<EventType.reset, ResetResponse>
     | EventFormat<EventType.play_update, PlayState>
     | EventFormat<EventType.setup_update, SetupState>
+    | EventFormat<EventType.enrolment_approval, EnrolmentResponse>
     | EventFormat<EventType.enrolment_update, EnrolmentState>
     | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>

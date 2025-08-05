@@ -1,6 +1,6 @@
 import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
-    VpTransmission,
+    VpTransmission, EnrolmentResponse,
 } from "~/shared_types";
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -63,6 +63,9 @@ export const CommunicationService = new class extends Communicator {
                 case this.isVictoryPointsTransmission(data):
                     this.createEvent({ type: EventType.vp_transmission, detail: data })
                     break;
+                case this.isEnrolmentApprovalTransmission(data):
+                    this.createEvent({ type: EventType.enrolment_approval, detail: data })
+                    break;
                 case this.isResetOrder(data):
                     this.createEvent({ type: EventType.reset, detail: data });
                     break;
@@ -98,6 +101,10 @@ export const CommunicationService = new class extends Communicator {
 
     private isGameStateResponse(data: ServerMessage): data is StateResponse {
         return 'state' in data;
+    }
+
+    private isEnrolmentApprovalTransmission(data: ServerMessage): data is EnrolmentResponse {
+        return 'approvedColor' in data;
     }
 
     private isVictoryPointsTransmission(data: ServerMessage): data is VpTransmission {

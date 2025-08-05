@@ -6,18 +6,19 @@ import { ColorCard } from "./ColorCard";
 
 type EnrolmentModalUpdate = {
     players: Array<PlayerEntry>,
+    localPlayerColor: PlayerColor | null,
 }
 
 const { COLOR } = clientConstants
 
 export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdate> {
     private group: Konva.Group;
-    // private localPlayerColor: PlayerColor | null;
+    private cards: Array<ColorCard> = [];
 
     constructor(
-        stage: Konva.Stage, layout: GroupLayoutData, localPlayerColor: PlayerColor | null, state: EnrolmentState
+        stage: Konva.Stage,
+        layout: GroupLayoutData,
     ) {
-        // this.localPlayerColor = localPlayerColor;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -37,15 +38,11 @@ export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdat
         const margin = 60;
         const offset = 200;
         let drift = margin;
+
         playerColors.forEach(color => {
-            const optionCard = new ColorCard(
-                stage,
-                {x:drift, y:50},
-                color,
-                {
-                    player: state.players.find(p => p.color === localPlayerColor) || null
-                },
-            );
+            const optionCard = new ColorCard(stage, { x:drift, y:50 }, color);
+
+            this.cards.push(optionCard);
             this.group.add(optionCard.getElement());
             drift += margin + offset;
         });
@@ -57,6 +54,11 @@ export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdat
     }
 
     public update(data: EnrolmentModalUpdate) {
-        console.log({players: data.players});
+        const { players, localPlayerColor } = data;
+        const localPlayer = players.find(p => p.color === localPlayerColor);
+
+        this.cards.forEach(colorCard => {
+            colorCard.update({ localPlayer: localPlayer || null, players });
+        });
     }
 }

@@ -94,7 +94,7 @@ loadGameState().then(data => {
 
     singleSession = new GameSession(
         broadcastCallback,
-        vpTransmitCallback,
+        transmitCallback,
         PERSIST_SESSION ?  savedState : null,
     );
 });
@@ -144,13 +144,13 @@ function broadcastCallback(state: PlayState) {
     broadcast({ state })
 }
 
-function vpTransmitCallback(vp: number, socketId: string) {
+function transmitCallback(socketId: string, message: ServerMessage) {
     const client = socketClients.get(socketId);
 
     if (!client)
         return console.error('Cannot deliver message: Missing socket client.');
 
-    transmit(client.socket, { vp });
+    transmit(client.socket, message);
 }
 
 // MARK: FUNCTIONS
@@ -205,8 +205,8 @@ function broadcast(message: ServerMessage): void {
     });
 }
 
-function transmit(client: WebSocket, message: ServerMessage): void {
-    client.send(JSON.stringify(message));
+function transmit(socket: WebSocket, message: ServerMessage): void {
+    socket.send(JSON.stringify(message));
 }
 
 setInterval(() => {
@@ -229,6 +229,7 @@ async function saveGameState(statepack: { sharedState: State, privateState: Priv
         console.error('Failed to save game state:', error);
     }
 }
+
 async function loadGameState(): Promise<object | null> {
     const fileAddress = path.join(__dirname, '..', STATE_FILE);
     try {

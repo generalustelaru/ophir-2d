@@ -4,7 +4,10 @@ import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
 import { UserInterface } from "./services/UiService";
 import clientConstants from "~/client_constants";
-import { Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse } from "~/shared_types";
+import {
+    Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
+    EnrolmentResponse,
+} from "~/shared_types";
 const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 
 // MARK: INIT
@@ -100,6 +103,20 @@ window.addEventListener(EventType.identification, (event: CustomEventInit<Client
 
     localState.socketId = event.detail.socketId;
     sessionStorage.setItem('localState', JSON.stringify(localState));
+});
+
+window.addEventListener(EventType.enrolment_approval, (event: CustomEventInit<EnrolmentResponse>) => {
+    if (!event.detail)
+        return signalError('Player registration has failed')
+
+    const { approvedColor } = event.detail;
+
+    localState.playerColor = approvedColor;
+    localState.playerName = approvedColor;
+    sessionStorage.setItem('localState', JSON.stringify(localState));
+
+    if (PERSIST_SESSION)
+        localStorage.setItem('persistedState', JSON.stringify(localState));
 });
 
 window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
