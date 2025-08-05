@@ -115,7 +115,7 @@ export const CanvasService = new class extends Communicator {
             case Phase.enrolment:
                 if(!this.isEnrolmentDrawn) {
                     this.stage.visible(true);
-                    this.enrolmentGroup.drawElements(state)
+                    this.enrolmentGroup.drawElements();
                     this.fitStageIntoParentContainer();
                     this.isEnrolmentDrawn = true;
                 }

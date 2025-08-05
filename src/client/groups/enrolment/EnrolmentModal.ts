@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { EnrolmentState, PlayerColor, PlayerEntry } from "~/shared_types";
+import { PlayerColor, PlayerEntry } from "~/shared_types";
 import  clientConstants from "~/client_constants"
 import { ColorCard } from "./ColorCard";
 
