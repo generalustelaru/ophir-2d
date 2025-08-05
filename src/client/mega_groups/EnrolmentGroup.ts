@@ -2,6 +2,7 @@ import Konva from "konva";
 import { GroupLayoutData, MegaGroupInterface } from "~/client_types";
 import { EnrolmentState } from "~/shared_types";
 import { EnrolmentModal } from "../groups/enrolment/EnrolmentModal";
+import localState from '../state';
 
 export class EnrolmentGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
@@ -19,7 +20,7 @@ export class EnrolmentGroup implements MegaGroupInterface {
         this.stage = stage;
     }
 
-    public drawElements(state: EnrolmentState) {
+    public drawElements() {
         this.modal = new EnrolmentModal(
             this.stage,
             {
@@ -28,8 +29,6 @@ export class EnrolmentGroup implements MegaGroupInterface {
                 width: this.group.width() - 100,
                 height: this.group.height() - 100,
             },
-            null,
-            state
         );
 
         this.group.add(this.modal.getElement());
@@ -40,7 +39,7 @@ export class EnrolmentGroup implements MegaGroupInterface {
         if (!this.modal)
             throw new Error("Can't update what ain't there");
 
-        this.modal.update(state);
+        this.modal.update({ players: state.players, localPlayerColor: localState.playerColor });
     }
 
     public disable() {

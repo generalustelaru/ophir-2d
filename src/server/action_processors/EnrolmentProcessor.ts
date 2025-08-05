@@ -9,8 +9,11 @@ const serverName = String(process.env.SERVER_NAME);
 
 export class EnrolmentProcessor {
     enrolmentState: EnrolmentStateHandler;
-    constructor(state: EnrolmentState) {
+    transmitEnrolment: (color:PlayerColor, socketId: string) => void;
+
+    constructor(state: EnrolmentState, transmitEnrolment: (color:PlayerColor, socketId: string) => void) {
         this.enrolmentState = new EnrolmentStateHandler(state);
+        this.transmitEnrolment = transmitEnrolment;
     }
 
     public getState(): EnrolmentState {
@@ -50,6 +53,8 @@ export class EnrolmentProcessor {
 
         if (result.err)
             return result;
+
+        this.transmitEnrolment(color, socketId);
 
         this.enrolmentState.addChatEntry({ color: color, name: serverName, message: `${name} has joined the game` });
 

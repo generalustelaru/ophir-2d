@@ -293,7 +293,7 @@ export type ClientRequest = {
 
 // MARK: RESPONSE
 export type ClientIdResponse = { socketId: string }
-export type EnrolmentResponse = { color: PlayerColor } // TODO: server must return this on Action.enrol
+export type EnrolmentResponse = { approvedColor: PlayerColor }
 export type StateResponse = { state: State }
 
 export type ResetResponse = { resetFrom: string | PlayerColor }
@@ -302,5 +302,12 @@ export type ErrorResponse = { error: string }
 
 export type VpTransmission = { vp: number }
 
-export type ServerMessage = ClientIdResponse | StateResponse | ResetResponse | ErrorResponse | VpTransmission;
+export type ServerMessage =
+    | ClientIdResponse
+    | StateResponse
+    | ResetResponse
+    | ErrorResponse
+    | EnrolmentResponse
+    | VpTransmission
+;
 

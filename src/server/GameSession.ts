@@ -18,19 +18,25 @@ import { SERVER_NAME } from "./configuration"
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private autoBroadcast: (state: PlayState) => void;
-    private transmitVp: (vp: number, socketId: string) => void;
+    private transmitVp: (vp: number, socketId: string ) => void;
+    private transmitEnrolment: (approvedColor: PlayerColor, socketId: string ) => void;
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
-        vpTransmitCallback: (vp: number, socketId: string) => void,
+        transmitCallback: (socketId: string, message: ServerMessage) => void,
         savedSession: SavedSession | null,
     ) {
 
-        this.autoBroadcast = broadcastCallback
-        this.transmitVp = vpTransmitCallback
+        this.autoBroadcast = broadcastCallback;
+        this.transmitVp = (vp, socketId) => {
+            transmitCallback(socketId, { vp });
+        }
+        this.transmitEnrolment = (approvedColor, socketId) => {
+            transmitCallback(socketId, { approvedColor });
+        }
 
         if (!savedSession) {
-            this.actionProcessor = new EnrolmentProcessor(this.getNewState());
+            this.actionProcessor = new EnrolmentProcessor(this.getNewState(), this.transmitEnrolment);
             console.info('New game session created');
 
             return;
@@ -48,7 +54,7 @@ export class GameSession {
                             privateState: new PrivateStateHandler(privateState!),
                         },
                         this.autoBroadcast,
-                        this.transmitVp,
+                        this.transmitVp
                     );
 
                 case Phase.setup:
@@ -57,7 +63,7 @@ export class GameSession {
                     );
 
                 case Phase.enrolment:
-                    return new EnrolmentProcessor(sharedState);
+                    return new EnrolmentProcessor(sharedState, this.transmitEnrolment);
 
                 default:
                     throw new Error('Cannot determine session phase');
@@ -80,7 +86,7 @@ export class GameSession {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
-        this.actionProcessor = new EnrolmentProcessor(this.getNewState());
+        this.actionProcessor = new EnrolmentProcessor(this.getNewState(), this.transmitEnrolment);
         console.log('Session was reset')
     }
 
@@ -223,7 +229,11 @@ export class GameSession {
                     const { privateState, playState } = bundleResult.data;
 
                     try {
-                        this.actionProcessor = new PlayProcessor({ privateState, playState }, this.autoBroadcast, this.transmitVp);
+                        this.actionProcessor = new PlayProcessor(
+                            { privateState, playState },
+                            this.autoBroadcast,
+                            this.transmitVp,
+                        );
                     } catch (error) {
                         return lib.fail(String(error));
                     }
