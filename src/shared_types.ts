@@ -301,6 +301,7 @@ export type ResetResponse = { resetFrom: string | PlayerColor }
 export type ErrorResponse = { error: string }
 
 export type VpTransmission = { vp: number }
+export type NewNameTransmission = { newName: string }
 
 export type ServerMessage =
     | ClientIdResponse
@@ -309,5 +310,6 @@ export type ServerMessage =
     | ErrorResponse
     | EnrolmentResponse
     | VpTransmission
+    | NewNameTransmission
 ;
 

@@ -4,6 +4,7 @@ import {
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist,
     ChatEntry,
     ServerMessage,
+    PlayerEntity,
 } from "~/shared_types";
 import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor} from "~/server_types";
 import serverConstants from "~/server_constants";
@@ -109,9 +110,10 @@ export class SetupProcessor implements SessionProcessor {
         return { state: this.getState() };
     }
 
-    public updatePlayerName(color: PlayerColor, newName: string): StateResponse {
-            this.setupState.updateName(color, newName);
-    
+    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+            this.setupState.updateName(player.color, newName);
+            this.addChat
+
             return { state: this.getState() }
     };
     //#MARK: Specialist

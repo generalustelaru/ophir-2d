@@ -4,6 +4,7 @@ import {
     PlayerEntry,
     ChatEntry,
     SpecialistData,
+    StateResponse,
 } from "~/shared_types";
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -107,7 +108,7 @@ export interface ObjectHandler<T> {
 export interface SessionProcessor {
     getState: () => State;
     addChat: (entry: ChatEntry) => ServerMessage;
-    updatePlayerName: (player: PlayerEntity, newName: string) => ServerMessage;
+    updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
 }
 
 export type SavedSession = {

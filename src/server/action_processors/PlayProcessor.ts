@@ -4,6 +4,8 @@ import {
     ChatEntry,
     PlayerColor,
     ServerMessage,
+    PlayerEntity,
+    Player,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -701,8 +703,8 @@ export class PlayProcessor implements SessionProcessor {
         return  { state: this.getState() };
     }
 
-        public updatePlayerName(color: PlayerColor, newName: string): StateResponse {
-            this.playState.updateName(color, newName);
+        public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+            this.playState.updateName(player.color, newName);
 
             return { state: this.getState() }
         };

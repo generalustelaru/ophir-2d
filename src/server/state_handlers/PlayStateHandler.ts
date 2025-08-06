@@ -73,11 +73,13 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.chat.addOne(chat);
     }
 
-    public updateName(player: Player, newName: string) {
-        this.players.updateOne(player.color, () => {
-            player.name === newName;
-            return player;
-        } )
+    public updateName(color: PlayerColor, newName: string) {
+        const player = this.getPlayer(color);
+        if (!player)
+            return;
+
+        player.name = newName;
+        this.savePlayer(player);
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
