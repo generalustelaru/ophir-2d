@@ -15,7 +15,7 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
         this.sessionPhase = readable(state.sessionPhase);
         this.sessionOwner = writable(state.sessionOwner);
         this.availableSlots = arrayWritable(state.availableSlots);
-        this.players = arrayWritable(state.players);
+        this.players = arrayWritable(state.players, 'color');
         this.chat = arrayWritable(state.chat);
     }
 
@@ -56,9 +56,14 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
     }
 
     public updateName(color: PlayerColor, newName: string) {
-        this.players.updateOne(color, (player) => {
-            player.name === newName;
+        const player = this.players.getOne(color);
+
+        if (!player)
+            return;
+
+        player.name = newName;
+        this.players.updateOne(player.color, () => {
             return player;
-        } )
+        });
     }
 }

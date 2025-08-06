@@ -40,10 +40,15 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
     }
 
     public updateName(color: PlayerColor, newName: string) {
-        this.players.updateOne(color, (player) => {
-            player.name === newName;
+        const player = this.players.getOne(color);
+
+        if (!player)
+            return;
+
+        player.name = newName;
+        this.players.updateOne(player.color, () => {
             return player;
-        } )
+        });
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {

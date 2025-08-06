@@ -2,6 +2,7 @@ import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
     Metal, MetalPrices, Currency, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState,
     VpTransmission, State, EnrolmentResponse,
+    NewNameTransmission,
 } from "~/shared_types";
 import Konva from 'konva';
 
@@ -132,6 +133,7 @@ export enum EventType {
     enrolment_update = 'enrolment_update',
     identification = 'identification',
     vp_transmission = 'vp_transmission',
+    name_transmission = 'name_transmission',
     ui_transition = 'ui_transition',
 }
 
@@ -156,6 +158,7 @@ export type Event =
     | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>
     | EventFormat<EventType.ui_transition, TransitionDetail>
+    | EventFormat<EventType.name_transmission, NewNameTransmission>
 ;
 
 export type TransitionDetail = {

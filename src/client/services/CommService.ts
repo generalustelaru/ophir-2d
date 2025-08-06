@@ -1,6 +1,7 @@
 import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission, EnrolmentResponse,
+    NewNameTransmission,
 } from "~/shared_types";
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -63,6 +64,9 @@ export const CommunicationService = new class extends Communicator {
                 case this.isVictoryPointsTransmission(data):
                     this.createEvent({ type: EventType.vp_transmission, detail: data })
                     break;
+                case this.isNewNameTransmission(data):
+                    this.createEvent({ type: EventType.name_transmission, detail: data})
+                    break;
                 case this.isEnrolmentApprovalTransmission(data):
                     this.createEvent({ type: EventType.enrolment_approval, detail: data })
                     break;
@@ -109,6 +113,10 @@ export const CommunicationService = new class extends Communicator {
 
     private isVictoryPointsTransmission(data: ServerMessage): data is VpTransmission {
         return 'vp' in data;
+    }
+
+    private isNewNameTransmission(data: ServerMessage): data is NewNameTransmission {
+        return 'newName' in data;
     }
 
     private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {

@@ -1,6 +1,6 @@
 import {
     ChatEntry,
-    EnrolmentState, MessagePayload, PlayerColor, PlayerEntry, ServerMessage, StateResponse,
+    EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
 } from "~/shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
@@ -89,8 +89,8 @@ export class EnrolmentProcessor implements SessionProcessor {
         return { state: this.getState() };
     }
 
-    public updatePlayerName(color: PlayerColor, newName: string): StateResponse {
-        this.enrolmentState.updateName(color, newName);
+    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+        this.enrolmentState.updateName(player.color, newName);
 
         return { state: this.getState() }
     };

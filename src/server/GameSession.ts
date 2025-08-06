@@ -2,6 +2,7 @@ import {WsDigest, DataDigest, SavedSession } from "~/server_types";
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
+    PlayerEntity,
 } from "~/shared_types";
 import { RequestMatch } from "~/server_types";
 import { PlayerHandler } from './state_handlers/PlayerHandler';
@@ -21,6 +22,8 @@ export class GameSession {
     private autoBroadcast: (state: PlayState) => void;
     private transmitVp: (vp: number, socketId: string ) => void;
     private transmitEnrolment: (approvedColor: PlayerColor, socketId: string ) => void;
+    private transmitNameUpdate: (newName: string, socketId: string) => void;
+    // TODO: need to transmit new name approval to update client state and then add canvas update across clients
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
@@ -34,6 +37,9 @@ export class GameSession {
         }
         this.transmitEnrolment = (approvedColor, socketId) => {
             transmitCallback(socketId, { approvedColor });
+        }
+        this.transmitNameUpdate = (newName: string, socketId: string) => {
+            transmitCallback(socketId, { newName });
         }
 
         if (!savedSession) {
@@ -125,10 +131,11 @@ export class GameSession {
                 const newName = nameMatch[0];
 
                 if (!state.players.some(p => p.name === newName)) {
-                    // this.actionProcessor.addChat()
                     const response = this.actionProcessor.updatePlayerName(player, newName);
 
-                    return this.issueGroupResponse(response)
+                    this.transmitNameUpdate(newName, player.socketId);
+
+                    return this.issueGroupResponse(response);
                 }
             }
 

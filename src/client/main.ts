@@ -7,6 +7,7 @@ import clientConstants from "~/client_constants";
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
     EnrolmentResponse,
+    NewNameTransmission,
 } from "~/shared_types";
 const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
 
@@ -130,6 +131,15 @@ window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTra
     if (PERSIST_SESSION)
         localStorage.setItem('persistedState', JSON.stringify(localState));
 });
+
+window.addEventListener(EventType.name_transmission, (event: CustomEventInit<NewNameTransmission>) => {
+    if (!event.detail || !localState.playerColor)
+        return signalError('Name update failed');
+
+    const { newName } = event.detail;
+    localState.playerName = newName;
+    sessionStorage.setItem('localState', JSON.stringify(localState));
+})
 
 window.addEventListener(EventType.reset, (event: CustomEventInit) => {
     const response: ResetResponse = event.detail;
