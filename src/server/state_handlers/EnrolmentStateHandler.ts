@@ -3,6 +3,7 @@ import { ObjectHandler } from "~/server_types";
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
 
 export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
+    private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.enrolment>;
     private sessionOwner: Writable<PlayerColor | null>;
@@ -10,7 +11,8 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
     private players: ArrayWritable<PlayerEntry>
     private chat: ArrayWritable<ChatEntry>
 
-    constructor(state: EnrolmentState) {
+    constructor(serverName: string, state: EnrolmentState) {
+        this.serverName = readable(serverName);
         this.gameId = readable(state.gameId);
         this.sessionPhase = readable(state.sessionPhase);
         this.sessionOwner = writable(state.sessionOwner);
@@ -55,6 +57,9 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
         return Boolean(this.availableSlots.get().length);
     }
 
+    public addServerMessage(message: string, as: PlayerColor | null = null) {
+        this.chat.addOne({ color: as, name: this.serverName.get(), message });
+    }
     public updateName(color: PlayerColor, newName: string) {
         const player = this.players.getOne(color);
 

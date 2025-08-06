@@ -98,21 +98,14 @@ export class SetupProcessor implements SessionProcessor {
     }
 
     public addChat(entry: ChatEntry): StateResponse {
-        // const chatPayload = validator.validateChatPayload(payload);
-
-        // if (!chatPayload)
-        //     return lib.fail('Invalid chat payload');
-
-        // const { color, name } = player;
-
         this.setupState.addChatEntry(entry);
 
         return { state: this.getState() };
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+            this.setupState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
             this.setupState.updateName(player.color, newName);
-            this.addChat
 
             return { state: this.getState() }
     };

@@ -14,7 +14,7 @@ export class EnrolmentProcessor implements SessionProcessor {
     transmitEnrolment: (color:PlayerColor, socketId: string) => void;
 
     constructor(state: EnrolmentState, transmitEnrolment: (color:PlayerColor, socketId: string) => void) {
-        this.enrolmentState = new EnrolmentStateHandler(state);
+        this.enrolmentState = new EnrolmentStateHandler(serverName, state);
         this.transmitEnrolment = transmitEnrolment;
     }
 
@@ -76,20 +76,13 @@ export class EnrolmentProcessor implements SessionProcessor {
     }
 
     public addChat(entry:ChatEntry): StateResponse {
-
-        // const chatPayload = validator.validateChatPayload(payload);
-
-        // if (!chatPayload)
-        //     return lib.fail(lib.validationErrorMessage());
-
-        // const { color, name } = player;
-
         this.enrolmentState.addChatEntry(entry);
 
         return { state: this.getState() };
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+        this.enrolmentState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.enrolmentState.updateName(player.color, newName);
 
         return { state: this.getState() }

@@ -336,7 +336,7 @@ export class PlayProcessor implements SessionProcessor {
             player.removeAction(Action.donate_goods);
 
         this.playState.addServerMessage(
-            `${name} ${isRemote ? 'accessed the market and' : ''} traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)': ''}`,
+            `${name} ${isRemote ? 'accessed the market and' : ''} traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)' : ''}`,
             color,
         );
 
@@ -383,7 +383,7 @@ export class PlayProcessor implements SessionProcessor {
         console.info(this.privateState.getGameStats());
 
         // Other updates
-        player.removeAction( Action.donate_goods);
+        player.removeAction(Action.donate_goods);
 
         if (player.isMoneychanger())
             player.removeAction(Action.sell_goods);
@@ -669,7 +669,7 @@ export class PlayProcessor implements SessionProcessor {
         const player = data.player;
 
         if (player.mayUpgradeCargo()) {
-            player.removeAction( Action.upgrade_cargo);
+            player.removeAction(Action.upgrade_cargo);
             player.spendCoins(2);
             player.addCargoSpace();
 
@@ -690,24 +690,17 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     public addChat(entry: ChatEntry): StateResponse {
-        // const { player, payload } = data;
-        // const chatPayload = validator.validateChatPayload(payload);
-
-        // if (!chatPayload)
-        //     return lib.fail(lib.validationErrorMessage());
-
-        // const { color, name } = player.getIdentity();
-
         this.playState.addChatEntry(entry);
 
-        return  { state: this.getState() };
+        return { state: this.getState() };
     }
 
-        public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
-            this.playState.updateName(player.color, newName);
+    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+        this.playState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
+        this.playState.updateName(player.color, newName);
 
-            return { state: this.getState() }
-        };
+        return { state: this.getState() }
+    };
 
     // MARK: PRIVATE
 
