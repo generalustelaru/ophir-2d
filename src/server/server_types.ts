@@ -105,7 +105,9 @@ export interface ObjectHandler<T> {
 }
 
 export interface SessionProcessor {
-    getState: () => ServerMessage
+    getState: () => State;
+    addChat: (entry: ChatEntry) => ServerMessage;
+    updatePlayerName: (player: PlayerEntity, newName: string) => ServerMessage;
 }
 
 export type SavedSession = {

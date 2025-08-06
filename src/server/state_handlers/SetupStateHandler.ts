@@ -39,6 +39,13 @@ export class SetupStateHandler implements ObjectHandler<SetupState> {
         this.chat.addOne(chat);
     }
 
+    public updateName(color: PlayerColor, newName: string) {
+        this.players.updateOne(color, (player) => {
+            player.name === newName;
+            return player;
+        } )
+    }
+
     public addServerMessage(message: string, as: PlayerColor | null = null) {
         this.chat.addOne({ color: as, name: this.serverName.get(), message });
     }

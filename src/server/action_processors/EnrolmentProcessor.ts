@@ -1,13 +1,15 @@
 import {
-    EnrolmentState, MessagePayload, PlayerColor, PlayerEntry, StateResponse,
+    ChatEntry,
+    EnrolmentState, MessagePayload, PlayerColor, PlayerEntry, ServerMessage, StateResponse,
 } from "~/shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
+import { SessionProcessor } from "~/server_types";
 
 const serverName = String(process.env.SERVER_NAME);
 
-export class EnrolmentProcessor {
+export class EnrolmentProcessor implements SessionProcessor {
     enrolmentState: EnrolmentStateHandler;
     transmitEnrolment: (color:PlayerColor, socketId: string) => void;
 
@@ -73,21 +75,23 @@ export class EnrolmentProcessor {
         return players.some(player => player.name === name);
     }
 
-    public processChat(player: PlayerEntry, payload: unknown): Probable<StateResponse> {
-        if (!player)
-            return lib.fail('Visitors cannot use the chat!')
+    public addChat(entry:ChatEntry): StateResponse {
 
-        const chatPayload = validator.validateChatPayload(payload);
+        // const chatPayload = validator.validateChatPayload(payload);
 
-        if (!chatPayload)
-            return lib.fail(lib.validationErrorMessage());
+        // if (!chatPayload)
+        //     return lib.fail(lib.validationErrorMessage());
 
-        const { color, name } = player;
+        // const { color, name } = player;
 
-        this.enrolmentState.addChatEntry({ color, name, message: chatPayload.input });
+        this.enrolmentState.addChatEntry(entry);
 
-        return lib.pass({ state: this.enrolmentState.toDto() });
+        return { state: this.getState() };
     }
 
+    public updatePlayerName(color: PlayerColor, newName: string): StateResponse {
+        this.enrolmentState.updateName(color, newName);
 
+        return { state: this.getState() }
+    };
 }

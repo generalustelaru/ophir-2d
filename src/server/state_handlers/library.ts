@@ -104,11 +104,11 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
 export type ArrayWritable<T> = {
     count: () => number,
     get: () => Array<T>,
-    includes: (value: string|number|null) => boolean,
-    getOne: (value: string|number) => T | null,
+    includes: (reference: string|number|null) => boolean,
+    getOne: (reference: string|number) => T | null,
     addOne: (element: T) => void,
-    updateOne: (value: string|number, fn: (val: T) => T) => void,
-    removeOne: (value: string|number) => void,
+    updateOne: (reference: string|number, fn: (val: T) => T) => void,
+    removeOne: (reference: string|number) => void,
     drawFirst: () => T | null,
     // drawLast: () => T,
     overwrite: (array: Array<T>) => void,
@@ -144,14 +144,14 @@ export function arrayWritable<T>(initialArray: Array<T>, key?: keyof T): ArrayWr
                 return arr;
             });
         },
-        updateOne: (value, fn: (e: T) => T) => {
+        updateOne: (reference, fn: (e: T) => T) => {
             array.update(arr => {
                 const len = arr.length;
                 for (let i = 0; i < len; i++) {
                     const e = deepCopy(arr[i]);
                     if (
-                        key && e[key as keyof T] === value
-                        || !key && e === value
+                        key && e[key as keyof T] === reference
+                        || !key && e === reference
                     ) {
                         arr[i] = deepCopy(fn((e)))
                         break;
