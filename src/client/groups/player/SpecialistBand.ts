@@ -14,7 +14,7 @@ export class SpecialistBand extends InterfaceButton implements DynamicGroupInter
         stage: Konva.Stage,
         position: Coordinates,
         player: Player,
-        isLocalPlayer: boolean,
+        // isLocalPlayer: boolean,
         callback: Function,
     ) {
         const width = 125;
@@ -35,7 +35,8 @@ export class SpecialistBand extends InterfaceButton implements DynamicGroupInter
             y: 1,
             width,
             height,
-            text: isLocalPlayer ? 'You' : player.specialist.displayName,
+            // text: isLocalPlayer ? 'You' : player.specialist.displayName,
+            text: player.specialist.displayName,
             fontSize: 14,
             fontStyle: 'bold',
             ellipsis: true,
