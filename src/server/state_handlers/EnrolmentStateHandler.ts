@@ -54,4 +54,11 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
     public isRoomForNewPlayer() {
         return Boolean(this.availableSlots.get().length);
     }
+
+    public updateName(color: PlayerColor, newName: string) {
+        this.players.updateOne(color, (player) => {
+            player.name === newName;
+            return player;
+        } )
+    }
 }

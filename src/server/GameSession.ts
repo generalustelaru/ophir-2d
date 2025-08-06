@@ -14,6 +14,7 @@ import { SINGLE_PLAYER } from "./configuration";
 import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
 import { SERVER_NAME } from "./configuration"
+import { validator } from "./services/validation/ValidatorService";
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
@@ -92,11 +93,13 @@ export class GameSession {
 
     public processAction(request: ClientRequest): WsDigest {
         const state = this.actionProcessor.getState();
+        const { message  }= request;
+        const { action, payload } = message;
 
-        if (request.message.action === Action.inquire)
+        if (action === Action.inquire)
             return this.issueNominalResponse({ state });
 
-        if (request.message.action === Action.enrol && state.sessionPhase === Phase.enrolment)
+        if (action === Action.enrol && state.sessionPhase === Phase.enrolment)
             return this.processEnrolmentAction(request);
 
         const match = this.matchRequestToPlayer(request);
@@ -107,8 +110,37 @@ export class GameSession {
             return this.issueNominalResponse({ resetFrom: SERVER_NAME })
         }
 
-        if (request.message.action === Action.declare_reset) {
-            const { player } = match.data;
+        const { player } = match.data;
+
+        if (action === Action.chat) {
+
+            const message = validator.validateChatPayload(payload);
+
+            if(!message)
+                return this.issueNominalResponse(lib.errorResponse('Malformed chat message'));
+
+            const nameMatch = message.input.match(/(?<=#name ).*/);
+
+            if (nameMatch) {
+                const newName = nameMatch[0];
+
+                if (!state.players.some(p => p.name === newName)) {
+                    // this.actionProcessor.addChat()
+                    const response = this.actionProcessor.updatePlayerName(player, newName);
+
+                    return this.issueGroupResponse(response)
+                }
+            }
+
+            return this.issueGroupResponse(this.actionProcessor.addChat({
+                color: player.color,
+                name: player.name,
+                message: message.input
+            }));
+        }
+
+        if (action === Action.declare_reset) {
+
             const { sessionOwner, sessionPhase } = state;
 
             if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
@@ -166,8 +198,6 @@ export class GameSession {
 
         const enrolUpdate = ((): Probable<StateResponse> => {
             switch (action) {
-                case Action.chat:
-                    return processor.processChat(player, payload);
                 case Action.start_setup: {
                     const { gameId, sessionOwner, players, chat } = state;
 
@@ -200,15 +230,6 @@ export class GameSession {
 
         const { message, player } = match;
         const { action, payload } = message;
-
-        if (action === Action.chat) {
-            const chatUpdate = processor.processChat(player, payload);
-
-            if (chatUpdate.err)
-                return this.issueNominalResponse(lib.errorResponse(chatUpdate.message));
-
-            return this.issueGroupResponse(lib.stateResponse(this.actionProcessor.getState()))
-        }
 
         if (!('specialist' in player)) {
             return this.issueNominalResponse(
@@ -281,7 +302,6 @@ export class GameSession {
             Action.move_rival,
             Action.end_rival_turn,
             Action.shift_market,
-            Action.chat,
         ];
 
         if (playerHandler.isFrozen() && !actionsWhileFrozen.includes(action)) {
@@ -292,8 +312,6 @@ export class GameSession {
 
         const playUpdate = ((): Probable<StateResponse> => {
             switch (action) {
-                case Action.chat:
-                    return processor.processChat(digest);
                 case Action.force_turn:
                     return processor.processForcedTurn(digest);
                 case Action.spend_favor:

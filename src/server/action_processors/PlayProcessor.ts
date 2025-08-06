@@ -1,19 +1,22 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
     LocalActions, Metal, StateResponse, PlayState, SpecialistName, DiceSix, Trade,
+    ChatEntry,
+    PlayerColor,
+    ServerMessage,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from "~/server_constants";
-import { DataDigest, PlayerCountables, StateBundle } from "~/server_types";
+import { DataDigest, PlayerCountables, SessionProcessor, StateBundle } from "~/server_types";
 import lib, { Probable } from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { IDLE_CHECKS, IDLE_TIMEOUT } from "../configuration";
 
 const { TRADE_DECK_B } = serverConstants;
 
-export class PlayProcessor {
+export class PlayProcessor implements SessionProcessor {
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
@@ -684,23 +687,25 @@ export class PlayProcessor {
         return lib.fail(`Conditions for upgrade not met`);
     }
 
-    public processChat(data: DataDigest): Probable<StateResponse> {
-        const { player, payload } = data;
-        const chatPayload = validator.validateChatPayload(payload);
+    public addChat(entry: ChatEntry): StateResponse {
+        // const { player, payload } = data;
+        // const chatPayload = validator.validateChatPayload(payload);
 
-        if (!chatPayload)
-            return lib.fail(lib.validationErrorMessage());
+        // if (!chatPayload)
+        //     return lib.fail(lib.validationErrorMessage());
 
-        const { color: color, name } = player.getIdentity();
+        // const { color, name } = player.getIdentity();
 
-        this.playState.addChatEntry({
-            color,
-            name,
-            message: chatPayload.input,
-        });
+        this.playState.addChatEntry(entry);
 
-        return lib.pass(this.saveAndReturn(player));
+        return  { state: this.getState() };
     }
+
+        public updatePlayerName(color: PlayerColor, newName: string): StateResponse {
+            this.playState.updateName(color, newName);
+
+            return { state: this.getState() }
+        };
 
     // MARK: PRIVATE
 

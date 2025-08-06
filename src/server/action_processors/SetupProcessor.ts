@@ -1,9 +1,11 @@
 import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
-    ZoneName, PlayerSelection, SpecialistName, PlayerEntity, StateResponse, SpecialistData, SelectableSpecialist,
+    ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist,
+    ChatEntry,
+    ServerMessage,
 } from "~/shared_types";
-import { DestinationPackage, StateBundle, SetupDigest} from "~/server_types";
+import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor} from "~/server_types";
 import serverConstants from "~/server_constants";
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -23,9 +25,9 @@ const {
     BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS, SPECIALISTS,
 } = serverConstants;
 
-export class SetupProcessor {
+export class SetupProcessor implements SessionProcessor {
 
-    private state: SetupStateHandler;
+    private setupState: SetupStateHandler;
 
     constructor(digest: SetupDigest) {
 
@@ -67,7 +69,7 @@ export class SetupProcessor {
         })();
 
         const playerDrafts = this.draftPlayers(playerEntries);
-        this.state = new SetupStateHandler(
+        this.setupState = new SetupStateHandler(
             SERVER_NAME,
             {
                 gameId: digest.gameId,
@@ -87,25 +89,31 @@ export class SetupProcessor {
         if (!firstToPick)
             throw new Error("No player is set to pick specialist!");
 
-        this.state.addServerMessage(`[${firstToPick.name}] is picking a specialist.`, firstToPick.color);
+        this.setupState.addServerMessage(`[${firstToPick.name}] is picking a specialist.`, firstToPick.color);
     };
 
     public getState() {
-        return this.state.toDto();
+        return this.setupState.toDto();
     }
 
-    public processChat(player: PlayerEntity, payload: unknown): Probable<true> {
-        const chatPayload = validator.validateChatPayload(payload);
+    public addChat(entry: ChatEntry): StateResponse {
+        // const chatPayload = validator.validateChatPayload(payload);
 
-        if (!chatPayload)
-            return lib.fail('Invalid chat payload');
+        // if (!chatPayload)
+        //     return lib.fail('Invalid chat payload');
 
-        const { color, name } = player;
+        // const { color, name } = player;
 
-        this.state.addChatEntry({ color, name, message: chatPayload.input });
+        this.setupState.addChatEntry(entry);
 
-        return lib.pass(true);
+        return { state: this.getState() };
     }
+
+    public updatePlayerName(color: PlayerColor, newName: string): StateResponse {
+            this.setupState.updateName(color, newName);
+    
+            return { state: this.getState() }
+    };
     //#MARK: Specialist
     public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateResponse> {
         const specialistPayload = validator.validatePickSpecialistPayload(payload);
@@ -114,7 +122,7 @@ export class SetupProcessor {
             return lib.fail(lib.validationErrorMessage());
 
         const { name } = specialistPayload;
-        const pickedSpecialist = this.state.getSpecialist(name);
+        const pickedSpecialist = this.setupState.getSpecialist(name);
 
         if (!pickedSpecialist)
             return lib.fail('Cannot find named specialist!')
@@ -122,16 +130,16 @@ export class SetupProcessor {
         if (!player.turnToPick || player.specialist || pickedSpecialist.owner)
             return lib.fail(`Player cannot choose or specialist already assigned`)
 
-        this.state.assignSpecialist(player, name);
-        this.state.addServerMessage(
+        this.setupState.assignSpecialist(player, name);
+        this.setupState.addServerMessage(
             `[${player.name}] has picked the ${pickedSpecialist.displayName}`, player.color,
         );
-        const nextPlayer = this.state.getNextPlayer();
+        const nextPlayer = this.setupState.getNextPlayer();
 
         if (nextPlayer)
-            this.state.addServerMessage(`[${nextPlayer.name}] is picking a specialist.`, nextPlayer.color);
+            this.setupState.addServerMessage(`[${nextPlayer.name}] is picking a specialist.`, nextPlayer.color);
 
-        return lib.pass({ state: this.state.toDto() });
+        return lib.pass({ state: this.setupState.toDto() });
     }
 
     /**
@@ -142,7 +150,7 @@ export class SetupProcessor {
         clientSetupPayload: GameSetupPayload,
     ): Probable<StateBundle> {
 
-        const setupState = this.state.toDto();
+        const setupState = this.setupState.toDto();
 
         const playerSelections = ((): Array<PlayerSelection> | null => {
             const drafts = setupState.players;
