@@ -109,8 +109,8 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
             stage,
             { x: 120, y: 5 },
             player,
-            isLocalPlayer,
-            () => this.switchSpecialistCard(),
+            // isLocalPlayer,
+            () => this.toggleSpecialistCard(),
         );
 
         this.group.add(
@@ -120,13 +120,14 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
     }
 
     public update(player: Player): void {
-        const { cargo, favor, isActive, influence, color, locationActions, isAnchored, specialist } = player;
+        const { cargo, favor, isActive, influence, color, locationActions, isAnchored, specialist, name } = player;
         this.background.fill(COLOR[`${isActive ? '' : 'dark'}${color}`]);
         this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update(influence);
         this.specialistBand.update(isActive);
+        this.specialistCard.update(name);
         this.specialtyGoodButton.update(!!(
             isAnchored
             && locationActions.includes(Action.sell_specialty)
@@ -154,7 +155,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.cargoBand.disable();
     }
 
-    private switchSpecialistCard() {
-        this.specialistCard.update();
+    private toggleSpecialistCard() {
+        this.specialistCard.toggle();
     }
 }

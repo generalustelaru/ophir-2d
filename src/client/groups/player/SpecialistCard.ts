@@ -4,14 +4,18 @@ import { Player } from "~/shared_types";
 import clientConstants from "~/client_constants";
 
 const { COLOR } = clientConstants;
-export class SpecialistCard implements DynamicGroupInterface<undefined> {
+
+export class SpecialistCard implements DynamicGroupInterface<string> {
     private group: Konva.Group;
+    private isLocalPlayer: boolean;
+    private name: Konva.Text;
 
     constructor(
         layout: GroupLayoutData,
         player: Player,
         isLocalPlayer: boolean,
     ) {
+        this.isLocalPlayer = isLocalPlayer;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -26,12 +30,12 @@ export class SpecialistCard implements DynamicGroupInterface<undefined> {
         });
 
         const { specialist } = player;
-        const name = new Konva.Text({
+        this.name = new Konva.Text({
             x: 0,
             y: 14,
             width: this.group.width() / 2,
             height: this.group.height(),
-            text: isLocalPlayer ? specialist.displayName : player.name,
+            text: isLocalPlayer ? 'You' : player.name,
             fontSize: 14,
             fontStyle: 'bold',
             ellipsis: true,
@@ -56,14 +60,19 @@ export class SpecialistCard implements DynamicGroupInterface<undefined> {
             fill: 'white',
         });
 
-        this.group.add(background, name, description);
+        this.group.add(background, this.name, description);
     }
 
     public getElement(): Konva.Group {
         return this.group;
     }
 
-    public update(): void {
+    public toggle(): void {
         this.group.visible() ? this.group.hide(): this.group.show();
+    }
+
+    public update(playerName: string): void {
+            this.name.text(this.isLocalPlayer ? 'You' : playerName);
+
     }
 }

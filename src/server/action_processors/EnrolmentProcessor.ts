@@ -58,7 +58,8 @@ export class EnrolmentProcessor implements SessionProcessor {
 
         this.transmitEnrolment(color, socketId);
 
-        this.enrolmentState.addChatEntry({ color: color, name: serverName, message: `${name} has joined the game` });
+        this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
+        this.enrolmentState.addServerMessage('Pick/change your name by typing #name &ltyour new name&gt in the chat');
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }
