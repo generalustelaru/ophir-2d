@@ -19,7 +19,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
     // private group: Konva.Group;
     private background: Konva.Rect;
-    private info: Konva.Text;
+    // private info: Konva.Text;
     private cardName: SpecialistName;
 
     constructor(
@@ -27,14 +27,15 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         specialist: SelectableSpecialist,
         xOffset: number,
     ) {
+        const layout = {
+            width: 200,
+            height: 300,
+            x: xOffset,
+            y: 50,
+        }
         super(
             stage,
-            {
-                width: 200,
-                height: 300,
-                x: xOffset,
-                y: 50,
-            },
+            layout,
             {
                 action: Action.pick_specialist,
                 payload: { name: specialist.name }
@@ -51,18 +52,43 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             strokeWidth: 0,
         });
 
-        this.info = new Konva.Text({
-            x: 10,
-            text: this.getCardText(specialist),
-            width: 200,
-            fontSize: 18,
-            fontFamily: 'Custom',
-            wrap: 'word'
+        const { owner, displayName, description, startingFavor, specialty } = specialist;
+        const nameElement = new Konva.Text({
+            text: displayName,
+            fontSize: 26,
+            fontStyle: 'bold',
+            width: layout.width,
+            height: layout.height,
+            align: 'center',
+            y: 10,
+            // verticalAlign: 'middle',
         });
+
+        const descriptionElement = new Konva.Text({
+            text: description,
+            fontSize: 22,
+            fontStyle: 'bold',
+            width: layout.width,
+            height: layout.height,
+            // align: 'center',
+            verticalAlign: 'middle',
+            x: 5,
+
+        })
+
+        // this.info = new Konva.Text({
+        //     x: 10,
+        //     text: this.getCardText(specialist),
+        //     width: 200,
+        //     fontSize: 18,
+        //     fontFamily: 'Custom',
+        //     wrap: 'word'
+        // });
 
         this.group.add(...[
             this.background,
-            this.info,
+            nameElement,
+            descriptionElement,
         ]);
 
         this.setEnabled(!specialist.owner);
@@ -78,12 +104,17 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
     public update(data: SpecialistCardUpdate) {
         this.setEnabled(data.shouldEnable)
-        this.info.text(this.getCardText(data.specialist))
+        // this.info.text(this.getCardText(data.specialist))
     }
 
     private getCardText(specialist: SelectableSpecialist) {
         const { owner, displayName, description, startingFavor, specialty } = specialist;
 
-        return `${displayName}\n\n${description}\n\nFavor: ${startingFavor}\n\nSpecialty: ${specialty || 'none'}\n\n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
+        return `
+        ${displayName}\n
+        \n${description}\n
+        \nFavor: ${startingFavor}\n
+        \nSpecialty: ${specialty || 'none'}\n
+        \n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
     }
 }
