@@ -26,6 +26,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private isHandlingRival: Writable<boolean>;
     private localActions: ArrayWritable<LocalActions>;
     private destinations: ArrayWritable<ZoneName>;
+    private navigatorAccess: ArrayWritable<ZoneName>;
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
     private coins: Writable<number>;
@@ -49,6 +50,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.isHandlingRival = writable(player.isHandlingRival);
         this.localActions = arrayWritable(player.locationActions);
         this.destinations = arrayWritable(player.destinations);
+        this.navigatorAccess = arrayWritable(player.destinations);
         this.cargo = arrayWritable(player.cargo);
         this.feasibleTrades = arrayWritable(player.feasibleTrades);
         this.coins = writable(player.coins);
@@ -74,6 +76,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             isHandlingRival: this.isHandlingRival.get(),
             locationActions: this.localActions.get(),
             destinations: this.destinations.get(),
+            navigatorAccess: this.navigatorAccess.get(),
             cargo: this.cargo.get(),
             feasibleTrades: this.feasibleTrades.get(),
             coins: this.coins.get(),
@@ -116,8 +119,16 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return Boolean(this.destinations.getOne(destination))
     }
 
+    public isBarrierCrossing(destination: ZoneName) {
+        return Boolean(this.navigatorAccess.getOne(destination));
+    }
+
     public setDestinationOptions(options: Array<ZoneName>) {
         this.destinations.overwrite(options);
+    }
+
+    public setNavigatorAccess(options: Array<ZoneName>) {
+        this.navigatorAccess.overwrite(options);
     }
 
     public setAnchoredActions(actions: Array<LocalActions>) {
@@ -143,6 +154,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public isMoneychanger(): boolean {
         return this.getSpecialistName() === SpecialistName.moneychanger;
+    }
+
+    public isNavigator() {
+        return this.getSpecialistName() === SpecialistName.navigator;
     }
 
     public clearMoves() {
@@ -321,7 +336,8 @@ export class PlayerHandler implements ObjectHandler<Player>{
     public activate(
         zoneActions: Array<LocalActions>,
         feasibleTrades: Array<MarketSlotKey>,
-        destinations: Array<ZoneName>
+        destinations: Array<ZoneName>,
+        navigatorAccess: Array<ZoneName>,
     ) {
         this.isActive.set(true);
         this.isAnchored.set(false);
@@ -330,6 +346,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.localActions.overwrite(zoneActions);
         this.feasibleTrades.overwrite(feasibleTrades);
         this.destinations.overwrite(destinations);
+        this.navigatorAccess.overwrite(navigatorAccess);
     }
 
     public deactivate() {

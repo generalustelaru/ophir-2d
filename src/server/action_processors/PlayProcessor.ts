@@ -49,6 +49,7 @@ export class PlayProcessor implements SessionProcessor {
             this.playState.getLocalActions(seaZone),
             this.pickFeasibleTrades(player.getCargo()),
             this.privateState.getDestinations(seaZone),
+            player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
         );
         this.playState.savePlayer(player.toDto());
 
@@ -152,11 +153,20 @@ export class PlayProcessor implements SessionProcessor {
             player.setAnchoredActions(this.determinePlayerActions(player, target));
 
             if (player.getMoves() > 0) {
-                const nextDestinations = this.privateState.getDestinations(target);
-
                 player.setDestinationOptions(
-                    nextDestinations.filter(zone => zone !== player.getOvernightZone()),
+                    this.privateState.getDestinations(target)
+                        .filter(zone => zone != player.getOvernightZone()),
                 );
+
+                if (player.isNavigator()) {
+                    player.setNavigatorAccess(
+                        this.privateState.getNavigatorAccess(target)
+                            .filter(zone => zone != player.getOvernightZone()),
+                    );
+                }
+            } else {
+                player.setDestinationOptions([]);
+                player.setNavigatorAccess([]);
             }
 
             if (this.playState.isRivalIncluded()) {
@@ -587,6 +597,7 @@ export class PlayProcessor implements SessionProcessor {
                 this.determinePlayerActions(nextPlayer, seaZone),
                 this.pickFeasibleTrades(nextPlayer.getCargo()),
                 this.privateState.getDestinations(seaZone),
+                nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
             this.playState.updateRival(nextPlayer.getIdentity().color);
 
