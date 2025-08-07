@@ -39,13 +39,13 @@ const serverConstants: ServerConstants = {
             specialty: 'linen',
             description : 'May perform market actions at the temple by foregoing trade goods donation.',
         },
-        // {
-        //     name: SpecialistName.navigator,
-        //     displayName: 'Navigator',
-        //     startingFavor: 1,
-        //     specialty: 'ebony',
-        //     description: 'May cross barriers when moving. When doing so, no influence check is made.',
-        // },
+        {
+            name: SpecialistName.navigator,
+            displayName: 'Navigator',
+            startingFavor: 1,
+            specialty: 'ebony',
+            description: 'May cross barriers when moving. When doing so, no influence check is made.',
+        },
         {
             name: SpecialistName.priest,
             displayName: 'Priest',

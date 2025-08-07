@@ -276,19 +276,23 @@ export class SetupProcessor implements SessionProcessor {
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<DestinationPackage> {
 
         return tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
+            const navigatorAccess: Array<ZoneName> = [];
 
             barrierIds.forEach(barrierId => {
 
                 if (moveRule.blockedBy.find(id => id === barrierId)) {
-                    const neighborHex = BARRIER_CHECKS[barrierId].between
-                        .filter(hexId => hexId !== moveRule.from).shift();
+                    const neighborZone = BARRIER_CHECKS[barrierId].between
+                        .filter(zoneName => zoneName !== moveRule.from).shift();
 
                     moveRule.allowed = moveRule.allowed
-                        .filter(hexId => hexId !== neighborHex);
+                        .filter(hexId => hexId !== neighborZone);
+
+                    if(neighborZone)
+                        navigatorAccess.push(neighborZone);
                 }
             });
 
-            return moveRule;
+            return {...moveRule, navigatorAccess};
         });
     }
 
@@ -362,6 +366,7 @@ export class SetupProcessor implements SessionProcessor {
                 isHandlingRival: false,
                 locationActions: [],
                 destinations: [],
+                navigatorAccess: [],
                 cargo: ['empty', 'empty'],
                 feasibleTrades: [],
                 coins: 0,
