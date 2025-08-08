@@ -1,6 +1,5 @@
 import {
-    ChatEntry,
-    EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
+    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, StateResponse,
 } from "~/shared_types";
 import { validator } from "../services/validation/ValidatorService";
 import lib, { Probable } from './library';

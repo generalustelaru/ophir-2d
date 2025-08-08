@@ -1,9 +1,7 @@
 import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
-    ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist,
-    ChatEntry,
-    ServerMessage,
+    ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity,
 } from "~/shared_types";
 import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor} from "~/server_types";
@@ -352,6 +350,7 @@ export class SetupProcessor implements SessionProcessor {
                 turnOrder: s.turnOrder,
                 specialist,
                 isActive: false,
+                mayUndo: false,
                 bearings: {
                     seaZone: startingZone,
                     position: setupCoordinates.pop() as Coordinates,
