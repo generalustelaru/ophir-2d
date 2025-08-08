@@ -62,6 +62,7 @@ export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
             card.update({
                 specialist,
                 shouldEnable: this.localPlayerColor === pickyPlayer?.color && !specialist.owner,
+                localPlayerColor: this.localPlayerColor
             });
         })
     }

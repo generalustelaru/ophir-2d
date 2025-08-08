@@ -46,7 +46,7 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
                 scale: { x: 3, y: 3 },
                 x: 7,
                 y: 7,
-            })
+            });
             this.group.add(tradeGoodIcon);
         }
     }
