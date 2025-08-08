@@ -5,21 +5,30 @@
 import Konva from "konva";
 import { DynamicGroupInterface } from "~/client_types";
 import clientConstants from "~/client_constants";
-import { Action, SelectableSpecialist, SpecialistName } from "~/shared_types";
+import { Action, PlayerColor, SelectableSpecialist, SpecialistName } from "~/shared_types";
 import { ActionButton } from "../ActionButton";
+import { FavorDial } from "../FavorDial";
 
-const { COLOR } = clientConstants;
+const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
 type SpecialistCardUpdate = {
+    localPlayerColor: PlayerColor | null
     specialist: SelectableSpecialist;
     shouldEnable: boolean;
 }
 
+        const styles = {
+            disabled: {
+                fill: COLOR.templeDarkBlue,
+            },
+            enabled: {
+                fill: COLOR.templeBlue,
+            },
+        }
+
 export class SpecialistCard extends ActionButton implements DynamicGroupInterface<SpecialistCardUpdate> {
 
-    // private group: Konva.Group;
     private background: Konva.Rect;
-    // private info: Konva.Text;
     private cardName: SpecialistName;
 
     constructor(
@@ -47,34 +56,38 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             width: this.group.width(),
             height: this.group.height(),
             // stroke: COLOR.boneWhite,
-            fill: COLOR.boneWhite,
+            fill: COLOR.templeBlue,
             cornerRadius: 15,
             strokeWidth: 0,
         });
 
-        const { owner, displayName, description, startingFavor, specialty } = specialist;
-        const nameElement = new Konva.Text({
-            text: displayName,
-            fontSize: 26,
-            fontStyle: 'bold',
+        const textCommon = {
+            fontFamily: 'Custom',
             width: layout.width,
             height: layout.height,
+        }
+
+        const { owner, displayName, description, startingFavor, specialty } = specialist;
+        const nameElement = new Konva.Text({
+            ...textCommon,
+            text: displayName,
+            fontStyle: 'bold',
+            fontSize: 26,
             align: 'center',
             y: 10,
-            // verticalAlign: 'middle',
         });
 
         const descriptionElement = new Konva.Text({
+            ...textCommon,
+            width: layout.width - 5,
             text: description,
             fontSize: 22,
-            fontStyle: 'bold',
-            width: layout.width,
-            height: layout.height,
-            // align: 'center',
-            verticalAlign: 'middle',
+            y: 70,
             x: 5,
+        });
 
-        })
+        const favorDial = new FavorDial({ x: 5, y: 240 }, startingFavor);
+
 
         // this.info = new Konva.Text({
         //     x: 10,
@@ -89,7 +102,22 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             this.background,
             nameElement,
             descriptionElement,
+            favorDial.getElement(),
         ]);
+
+        if (specialty) {
+            const iconData = CARGO_ITEM_DATA[specialty];
+            const tradeGoodIcon = new Konva.Path({
+                data: iconData.shape,
+                fill: iconData.fill,
+                stroke: 'white',
+                strokeWidth: .75,
+                scale: { x: 3, y: 3 },
+                x: 155,
+                y: 248,
+            });
+            this.group.add(tradeGoodIcon);
+        }
 
         this.setEnabled(!specialist.owner);
     }
@@ -103,18 +131,39 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
     }
 
     public update(data: SpecialistCardUpdate) {
-        this.setEnabled(data.shouldEnable)
+        const { localPlayerColor, shouldEnable, specialist } = data;
+
+        switch (true) {
+            case shouldEnable:
+                this.background.fill(styles.enabled.fill);
+                break;
+            case !!localPlayerColor && localPlayerColor === specialist.owner:
+                this.background.fill(COLOR[localPlayerColor]);
+                break;
+            case Boolean(specialist.owner):
+                this.background.fill(COLOR[`dark${specialist.owner}`]);
+                // this.background.fill('black');
+                break;
+            default:
+                this.background.fill(styles.disabled.fill);
+                break;
+        }
+        if (shouldEnable) {
+        } else {
+            this.background.fill( specialist.owner ? COLOR[specialist.owner] : styles.disabled.fill)
+        }
+        this.setEnabled(shouldEnable);
         // this.info.text(this.getCardText(data.specialist))
     }
 
-    private getCardText(specialist: SelectableSpecialist) {
-        const { owner, displayName, description, startingFavor, specialty } = specialist;
+    // private getCardText(specialist: SelectableSpecialist) {
+    //     const { owner, displayName, description, startingFavor, specialty } = specialist;
 
-        return `
-        ${displayName}\n
-        \n${description}\n
-        \nFavor: ${startingFavor}\n
-        \nSpecialty: ${specialty || 'none'}\n
-        \n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
-    }
+    //     return `
+    //     ${displayName}\n
+    //     \n${description}\n
+    //     \nFavor: ${startingFavor}\n
+    //     \nSpecialty: ${specialty || 'none'}\n
+    //     \n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
+    // }
 }
