@@ -50,7 +50,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.isHandlingRival = writable(player.isHandlingRival);
         this.localActions = arrayWritable(player.locationActions);
         this.destinations = arrayWritable(player.destinations);
-        this.navigatorAccess = arrayWritable(player.destinations);
+        this.navigatorAccess = arrayWritable(player.navigatorAccess);
         this.cargo = arrayWritable(player.cargo);
         this.feasibleTrades = arrayWritable(player.feasibleTrades);
         this.coins = writable(player.coins);
