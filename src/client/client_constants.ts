@@ -11,7 +11,7 @@ const clientConstants: ClientConstants = {
     },
     COLOR: {
         barrierDefault: '#003C43',
-        barrierNavigator: '#FFFDD7',
+        navigatorAccess: '#FFFDD7',
         activeShipBorder: '#FFFFFF',
         shipBorder: '#000000',
         Purple: '#A55A9A',

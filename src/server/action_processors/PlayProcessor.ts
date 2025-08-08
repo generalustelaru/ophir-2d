@@ -81,11 +81,29 @@ export class PlayProcessor implements SessionProcessor {
         if (isRivalShip)
             return this.processRivalMovement(target, locationName, movementPayload.position, player);
 
-        if (!player.isDestinationValid(target) || !player.getMoves() || player.handlesRival())
-            return lib.fail('Movement not alowed.',);
+        const playerMovementLegal = player.isDestinationValid(target)
+        const navigatorMevementLegal = player.isNavigator() && player.isBarrierCrossing(target)
+
+        if (
+            !player.getMoves()
+            || player.handlesRival()
+            || (!playerMovementLegal && !navigatorMevementLegal)
+        ) {
+            return lib.fail('Movement not alowed.');
+        }
 
         const hasSailed = (() => {
             player.spendMove();
+
+            if (player.isBarrierCrossing(target)) {
+                this.playState.addServerMessage(
+                    `${playerName} used a hidden passage to cross a barrier.`,
+                    playerColor,
+                );
+
+                return true;
+            }
+
             const playersInZone = this.playState.getPlayersByZone(target);
 
             const rival = this.playState.getRivalData()

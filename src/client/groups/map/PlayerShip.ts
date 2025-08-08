@@ -107,9 +107,14 @@ export class PlayerShip {
                     targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
                     targetZone.setToHitValue(player.privilegedSailing
-                            ? false
-                            : this.calculateToSailValue(targetZone.getId())
+                        ? false
+                        : this.calculateToSailValue(targetZone.getId())
                     );
+                    break;
+                case player.moveActions && player.navigatorAccess.includes(targetZone.getId()):
+                    targetZone.setFill(COLOR.navigatorAccess);
+                    this.isDestinationValid = true;
+                    targetZone.setToHitValue(false);
                     break;
                 default:
                     targetZone.setRestricted(true);
