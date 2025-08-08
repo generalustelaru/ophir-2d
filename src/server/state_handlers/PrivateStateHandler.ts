@@ -38,6 +38,10 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         return this.destinationPackages.findOne(from)!.allowed;
     }
 
+    public getNavigatorAccess(from: ZoneName) {
+        return this.destinationPackages.findOne(from)!.navigatorAccess;
+    }
+
     getTempleLevelCount() {
         return this.gameTempleLevels;
     }
