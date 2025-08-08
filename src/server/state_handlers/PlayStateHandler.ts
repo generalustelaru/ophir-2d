@@ -61,8 +61,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         }
     }
 
-    public getLocationName(hexId: ZoneName) {
-        return this.setup.get().mapPairings.locationByZone[hexId].name;
+    public getLocationName(zoneName: ZoneName) {
+        return this.setup.get().mapPairings.locationByZone[zoneName].name;
     }
 
     public getSessionOwner() {
