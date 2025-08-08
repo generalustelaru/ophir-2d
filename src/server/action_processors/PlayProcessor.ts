@@ -6,10 +6,11 @@ import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from "~/server_constants";
-import { DataDigest, PlayerCountables, SessionProcessor, StateBundle } from "~/server_types";
+import { BackupState, DataDigest, PlayerCountables, SessionProcessor, StateBundle } from "~/server_types";
 import lib, { Probable } from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { IDLE_CHECKS, IDLE_TIMEOUT } from "../configuration";
+import { BackupStateHandler } from "../state_handlers/BackupStateHandler";
 
 const { TRADE_DECK_B } = serverConstants;
 
@@ -17,6 +18,7 @@ export class PlayProcessor implements SessionProcessor {
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
+    private backupState: BackupStateHandler;
     private autoBroadcast: (state: PlayState) => void;
     private transmitVp: (vp: number, socketId: string) => void;
 
@@ -28,6 +30,7 @@ export class PlayProcessor implements SessionProcessor {
     ) {
         this.playState = stateBundle.playState;
         this.privateState = stateBundle.privateState;
+        this.backupState = new BackupStateHandler(null); // TODO: add backup state to persisted state to be used here
         this.autoBroadcast = broadcastCallback;
         this.transmitVp = transmitVp
 
@@ -35,7 +38,7 @@ export class PlayProcessor implements SessionProcessor {
         const firstPlayer = players.find(p => p.turnOrder === 1);
 
         if (!firstPlayer)
-            throw new Error("Could not find a player to activate!");
+            throw new Error("Could not find the first player!");
 
         const player = new PlayerHandler(firstPlayer);
         const { seaZone } = player.getBearings();
@@ -58,6 +61,19 @@ export class PlayProcessor implements SessionProcessor {
 
     public getPrivateState() {
         return this.privateState.toDto();
+    }
+
+    private enableUndo(player: PlayerHandler) {
+        this.backupState.saveCopy({
+            playState: this.getState(),
+            privateState: this.getPrivateState(),
+        });
+        player.enableUndo();
+    }
+
+    private disableUndo(player: PlayerHandler) {
+        this.backupState.wipeBackup();
+        player.disableUndo();
     }
 
     // MARK: MOVE
@@ -91,6 +107,7 @@ export class PlayProcessor implements SessionProcessor {
             player.spendMove();
 
             if (player.isBarrierCrossing(target)) {
+                this.enableUndo(player);
                 this.playState.addServerMessage(
                     `${playerName} used a hidden passage to cross a barrier.`,
                     playerColor,
@@ -106,8 +123,13 @@ export class PlayProcessor implements SessionProcessor {
                 ? rival.influence
                 : 0;
 
-            if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged())
+            if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
+                this.enableUndo(player);
+
                 return true;
+            }
+
+            this.disableUndo(player);
 
             const influenceRoll = ((): Probable<DiceSix> => {
                 player.rollInfluence();
@@ -582,6 +604,8 @@ export class PlayProcessor implements SessionProcessor {
 
         if (!player.mayEndTurn())
             return lib.fail(`Ship is not anchored.`);
+
+        this.disableUndo(player);
 
         if (
             player.getBearings().location === 'temple'

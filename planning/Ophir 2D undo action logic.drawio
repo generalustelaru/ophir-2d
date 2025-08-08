@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36" version="28.0.7">
+  <diagram name="Page-1" id="Z3r7JCzDqSA760FcK4Q6">
+    <mxGraphModel dx="1202" dy="637" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="beqpOt442BzMGVJJEKWA-1" value="CLIENT REQUEST" style="shape=callout;whiteSpace=wrap;html=1;perimeter=calloutPerimeter;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-2" value="&lt;div&gt;&lt;div&gt;is game action&lt;/div&gt;&lt;/div&gt;" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="323" y="140" width="115" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-3" value="NO" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="beqpOt442BzMGVJJEKWA-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="330" as="sourcePoint" />
+            <mxPoint x="520" y="270" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="520" y="198" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-4" value="YES" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="beqpOt442BzMGVJJEKWA-2" target="beqpOt442BzMGVJJEKWA-13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="400" y="330" as="sourcePoint" />
+            <mxPoint x="330" y="270" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="236" y="198" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-5" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0;exitDx=60;exitDy=80;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="beqpOt442BzMGVJJEKWA-1" target="beqpOt442BzMGVJJEKWA-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="355" y="370" as="sourcePoint" />
+            <mxPoint x="405" y="320" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-7" value="COPY STATE TO BACKUP" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="88" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-8" value="MUTATE STATE" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="88" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-9" value="is undo" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="270" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-10" value="NO" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.473;entryY=-0.015;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="beqpOt442BzMGVJJEKWA-21">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="310" as="sourcePoint" />
+            <mxPoint x="597" y="382" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="597" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-11" value="REPLACE STATE W/ BACKUP" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-12" value="WIPE BACKUP" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="390" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-13" value="is undoable" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="196" y="280" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-15" value="YES" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="beqpOt442BzMGVJJEKWA-13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="428" y="400" as="sourcePoint" />
+            <mxPoint x="148" y="400" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="148" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-16" value="NO" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="278" y="320" as="sourcePoint" />
+            <mxPoint x="308" y="400" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="308" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-17" value="MUTATE STATE" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="248" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-18" value="WIPE BACKUP" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="248" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-19" value="YES" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.417;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="beqpOt442BzMGVJJEKWA-9" target="beqpOt442BzMGVJJEKWA-11">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="290" y="360" as="sourcePoint" />
+            <mxPoint x="340" y="310" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="440" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-21" value="MUTATE BACKUP" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-22" value="MUTATE STATE" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" vertex="1" parent="1">
+          <mxGeometry x="540" y="460" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="beqpOt442BzMGVJJEKWA-23" value="chat, repositioning, name change&lt;div&gt;etc.&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="650" y="305" width="60" height="30" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

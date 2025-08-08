@@ -5,6 +5,7 @@ import {
     ChatEntry,
     SpecialistData,
     StateResponse,
+    PlayState,
 } from "~/shared_types";
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -75,6 +76,11 @@ export type PrivateState = {
 export type StateBundle = {
     playState: PlayStateHandler,
     privateState: PrivateStateHandler,
+}
+
+export type BackupState = {
+    playState: PlayState,
+    privateState: PrivateState,
 }
 
 export type DataDigest = {
