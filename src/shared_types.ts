@@ -74,10 +74,6 @@ export type ShipBearings = {
 }
 
 export enum SpecialistName {
-    placeholder_1 = 'placeholder_1',
-    placeholder_2 = 'placeholder_2',
-    placeholder_3 = 'placeholder_3',
-    placeholder_4 = 'placeholder_4',
     advisor = 'advisor',
     ambassador = 'ambassador',
     chancellor = 'chancellor',
