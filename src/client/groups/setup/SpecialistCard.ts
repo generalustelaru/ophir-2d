@@ -17,15 +17,6 @@ type SpecialistCardUpdate = {
     shouldEnable: boolean;
 }
 
-        const styles = {
-            disabled: {
-                fill: COLOR.templeDarkBlue,
-            },
-            enabled: {
-                fill: COLOR.templeBlue,
-            },
-        }
-
 export class SpecialistCard extends ActionButton implements DynamicGroupInterface<SpecialistCardUpdate> {
 
     private background: Konva.Rect;
@@ -55,7 +46,6 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            // stroke: COLOR.boneWhite,
             fill: COLOR.templeBlue,
             cornerRadius: 15,
             strokeWidth: 0,
@@ -67,10 +57,9 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             height: layout.height,
         }
 
-        const { owner, displayName, description, startingFavor, specialty } = specialist;
         const nameElement = new Konva.Text({
             ...textCommon,
-            text: displayName,
+            text: specialist.displayName,
             fontStyle: 'bold',
             fontSize: 26,
             align: 'center',
@@ -80,23 +69,13 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         const descriptionElement = new Konva.Text({
             ...textCommon,
             width: layout.width - 5,
-            text: description,
+            text: specialist.description,
             fontSize: 22,
             y: 70,
             x: 5,
         });
 
-        const favorDial = new FavorDial({ x: 5, y: 240 }, startingFavor);
-
-
-        // this.info = new Konva.Text({
-        //     x: 10,
-        //     text: this.getCardText(specialist),
-        //     width: 200,
-        //     fontSize: 18,
-        //     fontFamily: 'Custom',
-        //     wrap: 'word'
-        // });
+        const favorDial = new FavorDial({ x: 5, y: 240 }, specialist.startingFavor);
 
         this.group.add(...[
             this.background,
@@ -105,8 +84,8 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             favorDial.getElement(),
         ]);
 
-        if (specialty) {
-            const iconData = CARGO_ITEM_DATA[specialty];
+        if (specialist.specialty) {
+            const iconData = CARGO_ITEM_DATA[specialist.specialty];
             const tradeGoodIcon = new Konva.Path({
                 data: iconData.shape,
                 fill: iconData.fill,
@@ -135,35 +114,18 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
         switch (true) {
             case shouldEnable:
-                this.background.fill(styles.enabled.fill);
+                this.background.fill(COLOR.templeBlue);
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
                 this.background.fill(COLOR[localPlayerColor]);
                 break;
-            case Boolean(specialist.owner):
+            case !!specialist.owner:
                 this.background.fill(COLOR[`dark${specialist.owner}`]);
-                // this.background.fill('black');
                 break;
             default:
-                this.background.fill(styles.disabled.fill);
+                this.background.fill(COLOR.templeDarkBlue);
                 break;
         }
-        if (shouldEnable) {
-        } else {
-            this.background.fill( specialist.owner ? COLOR[specialist.owner] : styles.disabled.fill)
-        }
         this.setEnabled(shouldEnable);
-        // this.info.text(this.getCardText(data.specialist))
     }
-
-    // private getCardText(specialist: SelectableSpecialist) {
-    //     const { owner, displayName, description, startingFavor, specialty } = specialist;
-
-    //     return `
-    //     ${displayName}\n
-    //     \n${description}\n
-    //     \nFavor: ${startingFavor}\n
-    //     \nSpecialty: ${specialty || 'none'}\n
-    //     \n${owner ? 'Picked by: ' + owner : 'Not Picked'}`;
-    // }
 }
