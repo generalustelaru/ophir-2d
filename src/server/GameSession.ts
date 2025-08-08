@@ -199,7 +199,7 @@ export class GameSession {
         }
 
         const { message, player } = data;
-        const { action, payload } = message;
+        const { action } = message;
 
         const state = processor.getState();
 
@@ -207,6 +207,9 @@ export class GameSession {
             switch (action) {
                 case Action.start_setup: {
                     const { gameId, sessionOwner, players, chat } = state;
+
+                    if (sessionOwner !== player.color)
+                        return lib.fail('Only the session owner may continue.');
 
                     if (!sessionOwner || !players.length || !SINGLE_PLAYER && players.length < 2)
                         return lib.fail('Setup data is incomplete');

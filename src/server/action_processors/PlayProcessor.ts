@@ -1,11 +1,6 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
-    LocalActions, Metal, StateResponse, PlayState, SpecialistName, DiceSix, Trade,
-    ChatEntry,
-    PlayerColor,
-    ServerMessage,
-    PlayerEntity,
-    Player,
+    LocalActions, Metal, StateResponse, PlayState, SpecialistName, DiceSix, Trade, ChatEntry, PlayerEntity,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -25,7 +20,7 @@ export class PlayProcessor implements SessionProcessor {
     private autoBroadcast: (state: PlayState) => void;
     private transmitVp: (vp: number, socketId: string) => void;
 
-    /** @throws  */
+    /** @throws */
     constructor(
         stateBundle: StateBundle,
         broadcastCallback: (state: PlayState) => void,

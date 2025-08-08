@@ -1,6 +1,7 @@
 update:
 	git pull
-	npm update
+	npm install
+	make build
 
 build:
 	make layout
