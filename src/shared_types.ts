@@ -142,6 +142,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     isAnchored: boolean,
     locationActions: Array<LocalActions>,
     destinations: Array<ZoneName>,
+    navigatorAccess: Array<ZoneName>,
     cargo: Array<ItemName>,
     feasibleTrades: Array<MarketSlotKey>
     coins: number,

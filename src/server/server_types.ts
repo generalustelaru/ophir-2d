@@ -31,6 +31,7 @@ export type DestinationSetupReference = {
 export type DestinationPackage = {
     from: ZoneName;
     allowed: Array<ZoneName>;
+    navigatorAccess: Array<ZoneName>
 }
 
 export type PlayerCountables = {
