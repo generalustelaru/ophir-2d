@@ -2,15 +2,22 @@ import Konva from "konva";
 import constants from "~/client_constants";
 import { Player } from "~/shared_types";
 import { DynamicGroupInterface } from "~/client_types";
+import { ActionButton } from "../ActionButton";
 
 const { ICON_DATA, COLOR } = constants;
-export class ActionDial implements DynamicGroupInterface<Player> {
+export class ActionDial extends ActionButton implements DynamicGroupInterface<Player> {
 
-    private group: Konva.Group;
+    // private group: Konva.Group;
     private luminary: Konva.Path;
 
-    constructor(parent: Konva.Group, isActivePlayer: boolean) {
-        this.group = new Konva.Group();
+    constructor(stage: Konva.Stage, parent: Konva.Group, isActivePlayer: boolean) {
+
+        super(
+            stage,
+            {width: 100, height: 100, x:0, y:0},
+            null,
+        )
+
         const data = isActivePlayer ? ICON_DATA.sun : ICON_DATA.moon;
         this.luminary = new Konva.Path({
             x: 50,
@@ -27,10 +34,7 @@ export class ActionDial implements DynamicGroupInterface<Player> {
     }
 
     public update(player: Player): void {
-
-        const pendingAction = player.isActive && (player.locationActions.length || player.moveActions === 2);
-
-        this.luminary.data(ICON_DATA[pendingAction ? 'sun' : 'moon'].shape);
-        this.luminary.fill(ICON_DATA[pendingAction ? 'sun' : 'moon'].fill);
+        this.luminary.data(ICON_DATA[player.mayUndo ? 'sun' : 'moon'].shape);
+        this.luminary.fill(ICON_DATA[player.mayUndo ? 'sun' : 'moon'].fill);
     }
 }

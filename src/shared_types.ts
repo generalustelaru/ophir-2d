@@ -127,6 +127,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     timeStamp: number,
     isIdle: boolean,
     isActive: boolean,
+    mayUndo: boolean,
     bearings: ShipBearings,
     overnightZone: ZoneName,
     favor: number,
@@ -246,6 +247,33 @@ export type MarketSlotPayload = { slot: MarketSlotKey }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
+
+/*
+undoable
+    load_good
+    drop_item
+    buy_metal
+    donate_metals
+    spend_favor
+    move_rival
+    sell_specialty
+
+not undoable
+    sell_goods
+    donate_goods
+
+it depends
+    move (on rolling or not)
+    end_rival_turn (on having shifted market)
+
+should persist
+    reposition
+    reposition_rival
+    chat
+
+    singleState; action
+
+*/
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition

@@ -16,6 +16,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private turnOrder: Readable<number>;
     private specialist: Readable<Specialist>;
     private isActive: Writable<boolean>;
+    private _mayUndo: Writable<boolean>;
     private bearings: Writable<ShipBearings>;
     private overnightZone: Writable<ZoneName>;
     private favor: Writable<number>;
@@ -40,6 +41,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.turnOrder = readable(player.turnOrder);
         this.specialist = readable(player.specialist);
         this.isActive = writable(player.isActive);
+        this._mayUndo = writable(player.mayUndo);
         this.bearings = writable(player.bearings);
         this.overnightZone = writable(player.overnightZone);
         this.favor = writable(player.favor);
@@ -66,6 +68,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             turnOrder: this.turnOrder.get(),
             specialist: this.specialist.get(),
             isActive: this.isActive.get(),
+            mayUndo: this._mayUndo.get(),
             bearings: this.bearings.get(),
             overnightZone: this.overnightZone.get(),
             favor: this.favor.get(),
@@ -316,6 +319,18 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public handlesRival() {
         return this.isHandlingRival.get();
+    }
+
+    public enableUndo() {
+        this._mayUndo.set(true);
+    }
+
+    public disableUndo() {
+        this._mayUndo.set(false);
+    }
+
+    public mayUndo() {
+        return this._mayUndo.get();
     }
 
     public freeze() {

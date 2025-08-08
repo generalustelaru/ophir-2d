@@ -91,7 +91,7 @@ export class MapGroup implements MegaGroupInterface {
             { width: 50, height: 50, x: 500, y: 70 },
         );
 
-        this.actionDial = new ActionDial(this.group, isActivePlayer);
+        this.actionDial = new ActionDial(this.stage, this.group, isActivePlayer);
 
         this.group.add(...[
             this.movesDial.getElement(),
