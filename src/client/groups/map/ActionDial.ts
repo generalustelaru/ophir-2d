@@ -1,6 +1,6 @@
 import Konva from "konva";
 import constants from "~/client_constants";
-import { Player } from "~/shared_types";
+import { Action, Player } from "~/shared_types";
 import { DynamicGroupInterface } from "~/client_types";
 import { ActionButton } from "../ActionButton";
 
@@ -15,7 +15,7 @@ export class ActionDial extends ActionButton implements DynamicGroupInterface<Pl
         super(
             stage,
             {width: 100, height: 100, x:0, y:0},
-            null,
+            { action: Action.undo, payload: null },
         )
 
         const data = isActivePlayer ? ICON_DATA.sun : ICON_DATA.moon;
@@ -36,5 +36,6 @@ export class ActionDial extends ActionButton implements DynamicGroupInterface<Pl
     public update(player: Player): void {
         this.luminary.data(ICON_DATA[player.mayUndo ? 'sun' : 'moon'].shape);
         this.luminary.fill(ICON_DATA[player.mayUndo ? 'sun' : 'moon'].fill);
+        this.setEnabled(player.mayUndo);
     }
 }

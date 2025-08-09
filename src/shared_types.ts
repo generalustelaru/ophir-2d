@@ -24,6 +24,7 @@ export enum Action {
     donate_metals = 'donate_metals',
     inquire = 'inquire',
     enrol = 'enrol',
+    undo = 'undo',
     end_turn = 'end_turn',
     force_turn = 'force_turn',
     declare_reset = 'declare_reset',
@@ -280,7 +281,7 @@ export type VerboiseAction =
     | Action.sell_goods | Action.donate_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist
     | Action.enrol;
 export type LaconicAction =
-    | Action.inquire | Action.end_turn | Action.declare_reset | Action.spend_favor | Action.move_rival
+    | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
     | Action.force_turn | Action.sell_specialty;
 export type MessageAction = LaconicAction | VerboiseAction;
