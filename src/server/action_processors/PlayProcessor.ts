@@ -1,16 +1,18 @@
 import {
     ZoneName, LocationName, Coordinates, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal,
     LocalActions, Metal, StateResponse, PlayState, SpecialistName, DiceSix, Trade, ChatEntry, PlayerEntity,
+    PlayerColor,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from "~/server_constants";
-import { BackupState, DataDigest, PlayerCountables, SessionProcessor, StateBundle } from "~/server_types";
+import { DataDigest, PlayerCountables, SessionProcessor, StateBundle } from "~/server_types";
 import lib, { Probable } from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { IDLE_CHECKS, IDLE_TIMEOUT } from "../configuration";
 import { BackupStateHandler } from "../state_handlers/BackupStateHandler";
+import { SERVER_NAME } from '../configuration'
 
 const { TRADE_DECK_B } = serverConstants;
 
@@ -30,7 +32,7 @@ export class PlayProcessor implements SessionProcessor {
     ) {
         this.playState = stateBundle.playState;
         this.privateState = stateBundle.privateState;
-        this.backupState = new BackupStateHandler(null); // TODO: add backup state to persisted state to be used here
+        this.backupState = new BackupStateHandler(SERVER_NAME, null); // TODO: add backup state to persisted state to be used here
         this.autoBroadcast = broadcastCallback;
         this.transmitVp = transmitVp
 
@@ -63,7 +65,7 @@ export class PlayProcessor implements SessionProcessor {
         return this.privateState.toDto();
     }
 
-    private enableUndo(player: PlayerHandler) {
+    private saveState(player: PlayerHandler) {
         this.backupState.saveCopy({
             playState: this.getState(),
             privateState: this.getPrivateState(),
@@ -71,7 +73,7 @@ export class PlayProcessor implements SessionProcessor {
         player.enableUndo();
     }
 
-    private disableUndo(player: PlayerHandler) {
+    private wipeState(player: PlayerHandler) {
         this.backupState.wipeBackup();
         player.disableUndo();
     }
@@ -107,8 +109,8 @@ export class PlayProcessor implements SessionProcessor {
             player.spendMove();
 
             if (player.isBarrierCrossing(target)) {
-                this.enableUndo(player);
-                this.playState.addServerMessage(
+                this.saveState(player);
+                this.addServerMessage(
                     `${playerName} used a hidden passage to cross a barrier.`,
                     playerColor,
                 );
@@ -124,19 +126,19 @@ export class PlayProcessor implements SessionProcessor {
                 : 0;
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
-                this.enableUndo(player);
+                this.saveState(player);
 
                 return true;
             }
 
-            this.disableUndo(player);
+            this.wipeState(player);
 
             const influenceRoll = ((): Probable<DiceSix> => {
                 player.rollInfluence();
                 const roll = player.getInfluence();
 
                 if (roll === 6) {
-                    this.playState.addServerMessage(`${playerName} rolled a natural 6!`, playerColor);
+                    this.addServerMessage(`${playerName} rolled a natural 6!`, playerColor);
 
                     return lib.pass(roll);
                 }
@@ -149,12 +151,12 @@ export class PlayProcessor implements SessionProcessor {
                         return lib.fail('Failed calculating valid D6.');
 
                     player.setInfluence(bumpedRoll);
-                    this.playState.addServerMessage(`${playerName} bumped the roll to ${bumpedRoll}.`, playerColor);
+                    this.addServerMessage(`${playerName} bumped the roll to ${bumpedRoll}.`, playerColor);
 
                     return lib.pass(bumpedRoll);
                 }
 
-                this.playState.addServerMessage(`${playerName} rolled a ${roll}`, playerColor);
+                this.addServerMessage(`${playerName} rolled a ${roll}`, playerColor);
 
                 return lib.pass(roll);
             })();
@@ -168,12 +170,12 @@ export class PlayProcessor implements SessionProcessor {
             if (!blockingPlayers.length && playerInfluence >= rivalInfluence)
                 return true;
 
-            this.playState.addServerMessage(
+            this.addServerMessage(
                 `${playerName} was blocked from sailing.`,
                 playerColor
             );
             this.playState.trimInfluenceByZone(target, rivalInfluence);
-            this.playState.addServerMessage(`Influence at the [${locationName}] was trimmed.`)
+            this.addServerMessage(`Influence at the [${locationName}] was trimmed.`)
 
             return false;
         })();
@@ -213,7 +215,7 @@ export class PlayProcessor implements SessionProcessor {
 
         } else if (player.getMoves() === 0) {
             player.setAnchoredActions([]);
-            this.playState.addServerMessage(`${playerName} also ran out of moves and cannot act further`);
+            this.addServerMessage(`${playerName} also ran out of moves and cannot act further`);
         }
 
         return lib.pass(this.saveAndReturn(player));
@@ -227,6 +229,7 @@ export class PlayProcessor implements SessionProcessor {
         ]).err)
             return lib.fail('Rival ship movement is illegal!');
 
+        this.saveState(player);
         this.playState.moveRivalShip(
             {
                 seaZone: target,
@@ -265,7 +268,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
-        this.playState.addServerMessage(
+        this.addServerMessage(
             `${player.getIdentity().name} has spent favor`,
             player.getIdentity().color,
         );
@@ -289,7 +292,7 @@ export class PlayProcessor implements SessionProcessor {
         player.setCargo(result.data);
         player.setTrades(this.pickFeasibleTrades(result.data));
 
-        this.playState.addServerMessage(
+        this.addServerMessage(
             `${player.getIdentity().name} ditched one ${payload.item}`,
             player.getIdentity().color,
         );
@@ -327,7 +330,7 @@ export class PlayProcessor implements SessionProcessor {
 
         player.setCargo(loadItem.data);
 
-        this.playState.addServerMessage(
+        this.addServerMessage(
             `${player.getIdentity().name} picked up ${localGood}`,
             player.getIdentity().color
         );
@@ -380,7 +383,7 @@ export class PlayProcessor implements SessionProcessor {
         if (isRemote)
             player.removeAction(Action.donate_goods);
 
-        this.playState.addServerMessage(
+        this.addServerMessage(
             `${name} ${isRemote ? 'accessed the market and' : ''} traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)' : ''}`,
             color,
         );
@@ -433,7 +436,7 @@ export class PlayProcessor implements SessionProcessor {
         if (player.isMoneychanger())
             player.removeAction(Action.sell_goods);
 
-        this.playState.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
+        this.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
 
         if (player.isHarbormaster())
             this.clearMovesAsHarbormaster(player);
@@ -464,9 +467,9 @@ export class PlayProcessor implements SessionProcessor {
 
             if (player.isMoneychanger() && player.getBearings().location === 'temple') {
                 player.removeAction(Action.donate_goods);
-                this.playState.addServerMessage(`${name} accessed the market and sold ${specialty} for 1 coin`, color);
+                this.addServerMessage(`${name} accessed the market and sold ${specialty} for 1 coin`, color);
             } else {
-                this.playState.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
+                this.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
             }
 
             if (player.isHarbormaster())
@@ -509,7 +512,7 @@ export class PlayProcessor implements SessionProcessor {
         else
             player.spendFavor(price);
 
-        this.playState.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, color);
+        this.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, color);
 
         const metalLoad = this.loadItem(player.getCargo(), metal);
 
@@ -551,10 +554,10 @@ export class PlayProcessor implements SessionProcessor {
         this.privateState.updateVictoryPoints(color, reward);
 
         if (player.isPostmaster() && player.getBearings().location != 'temple') {
-            this.playState.addServerMessage(`${name} mailed one ${metal} for ${reward} VP`, color);
+            this.addServerMessage(`${name} mailed one ${metal} for ${reward} VP`, color);
             player.removeAction(Action.donate_metals);
         } else {
-            this.playState.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
+            this.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
         }
         console.info(this.privateState.getGameStats());
 
@@ -573,8 +576,8 @@ export class PlayProcessor implements SessionProcessor {
                 return lib.fail(results.message);
 
             this.playState.registerGameEnd(results.data);
-            this.playState.addServerMessage('The temple construction is complete! Game has ended.');
-            this.playState.addServerMessage(JSON.stringify(results.data));
+            this.addServerMessage('The temple construction is complete! Game has ended.');
+            this.addServerMessage(JSON.stringify(results.data));
 
             return lib.pass({ state: this.playState.toDto() });
         }
@@ -586,7 +589,7 @@ export class PlayProcessor implements SessionProcessor {
                 return lib.fail('Donation could not be resolved');
 
             this.playState.setMetalPrices(newPrices);
-            this.playState.addServerMessage('Current temple level is complete. Metal costs increase.');
+            this.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
 
         if (player.isHarbormaster())
@@ -605,14 +608,14 @@ export class PlayProcessor implements SessionProcessor {
         if (!player.mayEndTurn())
             return lib.fail(`Ship is not anchored.`);
 
-        this.disableUndo(player);
+        this.wipeState(player);
 
         if (
             player.getBearings().location === 'temple'
             && player.getSpecialistName() === SpecialistName.priest
             && player.endsTurnFreely()
         ) {
-            this.playState.addServerMessage(`${name} gained 1 Favor for stopping at the temple.`, color);
+            this.addServerMessage(`${name} gained 1 Favor for stopping at the temple.`, color);
             player.gainFavor(1);
         }
 
@@ -645,7 +648,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(newPlayerResult.message);
 
         const newPlayer = newPlayerResult.data;
-        this.playState.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
+        this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
 
         return lib.pass(this.saveAndReturn(newPlayer));
     }
@@ -659,9 +662,11 @@ export class PlayProcessor implements SessionProcessor {
         if (rival.moves === 2)
             return lib.fail('Rival cannot act before moving');
 
+        const { player } = digest;
+
+        this.saveState(player);
         this.playState.concludeRivalTurn();
 
-        const { player } = digest;
         player.unfreeze(
             this.playState.getLocalActions(
                 player.getBearings().seaZone,
@@ -674,6 +679,7 @@ export class PlayProcessor implements SessionProcessor {
             if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
                 return lib.fail('Cannot shift market from here!');
 
+            this.wipeState(player);
             return this.issueMarketShiftResponse(player);
         }
 
@@ -701,7 +707,7 @@ export class PlayProcessor implements SessionProcessor {
             { ...activePlayer, isIdle: false, isAnchored: true, isHandlingRival: false }
         );
 
-        this.playState.addServerMessage(
+        this.addServerMessage(
             `${player.getIdentity().name} forced ${idlerHandler.getIdentity().name} to end the turn.`,
             player.getIdentity().color,
         );
@@ -710,6 +716,33 @@ export class PlayProcessor implements SessionProcessor {
             player: idlerHandler,
             payload: null
         })
+    }
+
+    public processUndo(digest: DataDigest): Probable<StateResponse> {
+        const { player } = digest;
+
+        if (!player.mayUndo)
+            return lib.fail('Previous action cannot be undone.');
+
+        const backupOperation = this.backupState.retrieveBackup();
+
+        if (backupOperation.err)
+            return lib.fail(backupOperation.message);
+
+        const { playState, privateState } = backupOperation.data;
+
+        this.playState = new PlayStateHandler('PLACEHOLDER', playState);
+        this.privateState = new PrivateStateHandler(privateState);
+
+        const revertedPlayer = playState.players.find(p => p.color === player.getIdentity().color);
+
+        if (!revertedPlayer)
+            return lib.fail('Could not find active player in backup');
+
+        const playerHandler = new PlayerHandler(revertedPlayer);
+        playerHandler.disableUndo();
+
+        return lib.pass(this.saveAndReturn(playerHandler));
     }
 
     // MARK: UPGRADE
@@ -721,7 +754,7 @@ export class PlayProcessor implements SessionProcessor {
             player.spendCoins(2);
             player.addCargoSpace();
 
-            this.playState.addServerMessage(
+            this.addServerMessage(
                 `${player.getIdentity().name} upgraded their cargo hold.`,
                 player.getIdentity().color,
             );
@@ -739,12 +772,13 @@ export class PlayProcessor implements SessionProcessor {
 
     public addChat(entry: ChatEntry): StateResponse {
         this.playState.addChatEntry(entry);
+        this.backupState.addChat(entry);
 
         return { state: this.getState() };
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
-        this.playState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
+        this.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.playState.updateName(player.color, newName);
 
         return { state: this.getState() }
@@ -757,7 +791,7 @@ export class PlayProcessor implements SessionProcessor {
 
         if (harbormaster.isPrivileged() && moves === 1) {
             const { name, color } = harbormaster.getIdentity();
-            this.playState.addServerMessage(`${name} can move and act again.`, color)
+            this.addServerMessage(`${name} can move and act again.`, color)
         } else {
             harbormaster.clearMoves();
         }
@@ -925,7 +959,7 @@ export class PlayProcessor implements SessionProcessor {
             if (this.playState.isDeckA()) {
                 this.playState.setLabelB();
                 this.privateState.loadTradeDeck(TRADE_DECK_B);
-                this.playState.addServerMessage('Market deck B is now in play');
+                this.addServerMessage('Market deck B is now in play');
             }
 
             return this.privateState.drawTrade();
@@ -940,7 +974,7 @@ export class PlayProcessor implements SessionProcessor {
 
             this.playState.savePlayer(player.toDto());
             this.playState.registerGameEnd(results.data);
-            this.playState.addServerMessage('Market deck is empty! Game has ended.');
+            this.addServerMessage('Market deck is empty! Game has ended.');
 
             return lib.pass({ state: this.playState.toDto() });
         }
@@ -969,7 +1003,7 @@ export class PlayProcessor implements SessionProcessor {
 
             if (timeNow - activePlayer.timeStamp > IDLE_TIMEOUT && !activePlayer.isIdle) {
                 activePlayer.isIdle = true;
-                this.playState.addServerMessage(`${activePlayer.name} is idle`);
+                this.addServerMessage(`${activePlayer.name} is idle`);
                 this.playState.savePlayer(activePlayer);
 
                 this.autoBroadcast(this.playState.toDto());
@@ -980,5 +1014,10 @@ export class PlayProcessor implements SessionProcessor {
 
     public killIdleChecks() {
         this.idleCheckInterval && clearInterval(this.idleCheckInterval);
+    }
+
+    private addServerMessage(message: string, as: PlayerColor | null = null) {
+        this.playState.addServerMessage(message, as);
+        this.backupState.addServerMessage(message, as);
     }
 }

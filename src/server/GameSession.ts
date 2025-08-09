@@ -311,6 +311,7 @@ export class GameSession {
             Action.move_rival,
             Action.end_rival_turn,
             Action.shift_market,
+            Action.undo,
         ];
 
         if (playerHandler.isFrozen() && !actionsWhileFrozen.includes(action)) {
@@ -349,6 +350,8 @@ export class GameSession {
                     return processor.processEndTurn(digest);
                 case Action.end_rival_turn:
                     return processor.processRivalTurn(digest);
+                case Action.undo:
+                    return processor.processUndo(digest);
                 case Action.shift_market:
                     return processor.processRivalTurn(digest, true);
                 case Action.upgrade_cargo:
