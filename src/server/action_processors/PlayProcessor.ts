@@ -230,8 +230,8 @@ export class PlayProcessor implements SessionProcessor {
             }
 
         } else if (player.getMoves() === 0) {
-            player.setAnchoredActions([]);
             this.addServerMessage(`${playerName} also ran out of moves and cannot act further`);
+            this.processEndTurn(digest, false);
         }
 
         return lib.pass(this.saveAndReturn(player));
@@ -604,18 +604,18 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: END TURN
-    public processEndTurn(data: DataDigest): Probable<StateResponse> {
+    public processEndTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
         const { player } = data;
         this.disableUndo(player);
         const { turnOrder, name, color } = player.getIdentity();
 
-        if (!player.mayEndTurn())
+        if (isVoluntary && !player.mayEndTurn())
             return lib.fail(`Ship is not anchored.`);
 
         if (
             player.getBearings().location === 'temple'
             && player.getSpecialistName() === SpecialistName.priest
-            && player.endsTurnFreely()
+            && isVoluntary
         ) {
             this.addServerMessage(`${name} gained 1 Favor for stopping at the temple.`, color);
             player.gainFavor(1);
@@ -657,8 +657,7 @@ export class PlayProcessor implements SessionProcessor {
 
     public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
         const { player } = digest;
-        this.enableUndo(player);
-
+        this.disableUndo(player);
 
         const rival = this.playState.getRivalData();
 
@@ -678,8 +677,6 @@ export class PlayProcessor implements SessionProcessor {
         );
 
         if (isShiftingMarket) {
-            this.disableUndo(player);
-
             if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
                 return lib.fail('Cannot shift market from here!');
 
@@ -707,7 +704,7 @@ export class PlayProcessor implements SessionProcessor {
             this.playState.concludeRivalTurn();
 
         const idlerHandler = new PlayerHandler(
-            { ...activePlayer, isIdle: false, isAnchored: true, isHandlingRival: false }
+            { ...activePlayer, locationActions: [], isIdle: false, isAnchored: true, isHandlingRival: false }
         );
 
         this.addServerMessage(
@@ -715,10 +712,7 @@ export class PlayProcessor implements SessionProcessor {
             player.getIdentity().color,
         );
 
-        return this.processEndTurn({
-            player: idlerHandler,
-            payload: null
-        })
+        return this.processEndTurn({ player: idlerHandler, payload: null }, false);
     }
 
     public processUndo(digest: DataDigest): Probable<StateResponse> {

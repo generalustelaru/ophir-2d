@@ -265,10 +265,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isAnchored.get() && !this.handlesRival();
     }
 
-    public endsTurnFreely() {
-        return this.getMoves() || this.getActions().length;
-    }
-
     public setCargo(cargo: Array<ItemName>) {
         this.cargo.overwrite(cargo);
     }
