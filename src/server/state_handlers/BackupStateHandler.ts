@@ -43,6 +43,8 @@ export class BackupStateHandler {
 
     public updatePlayerName(color: PlayerColor, name: string ) {
         const player = this.backupState?.playState.players.find(p => p.color === color)
-        player!.name = name;
+
+        if (player)
+            player.name = name;
     }
 }
