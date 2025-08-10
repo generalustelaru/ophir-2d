@@ -1,5 +1,4 @@
 ## Setup and Goal
-
 At game start, the map layout is revealed. Each player will now have to select a **specialist**. The specialist provides a unique special ability, some starting **favor** (an alternate currency), and, usually, a **specialty** trade good.
 
 Each player will control a single **ship** that will appear in the center **zone**.
@@ -24,7 +23,7 @@ Map Area: Around the map, from top left going clockwise, you have information re
 - the **moves** counter (two blueish wave icons which get discolored as you move)
 - the **favor button** (a red seal icon button for spending favor)
 - the **end turn button** (a red/green anchor icon button for ending your turn)
-- the sun/moon icon (which does absolutely nothing and is confusing at best -- will be replaced with an undo button)
+- the **undo button** (a sun/moon icon for undoing the last acton)
 
 Player Area: To the right of the map, you have the **player cards**. Each card displays:
 - the player's **influence** swatch (a die face situated left of the card itself)
@@ -37,10 +36,11 @@ Player Area: To the right of the map, you have the **player cards**. Each card d
 The following is a detailed explanation of the rules and gameplay.
 
 ## Turns
-
 Starting with the last player who picked a specialist, players will take turns moving and taking actions around the map until the end of the game.
 
-To end your turn, you must voluntarily click the end turn button. The button becomes available as soon as you move or spend favor.
+To pass the turn, you must click the end turn button. The button becomes available as soon as you move or spend favor. Your turn may also end abruptly after losing access to actions or if opponents force it due to idleness. 
+
+You can revert your last movement or action as long as it did not reveal a new market card or involved an influence roll.
 
 ## Game End
 The game can end in two ways:
@@ -82,7 +82,7 @@ When you release your ship over a valid zone, your move counter will decrease by
 - If the zone is vacant, your ship rests where you dropped it, your movement is successful, and the zone's actions become available.
 - If the zone is occupied, you'll first roll your influence *die* (automatically), then:
   - a) If your new influence value is at least equal to the highest influence between the ships present there, again, your ship successfully moves and you gain access to the new zone's actions.
-  - b) If your new influence is lower than the highest, then your ship will return to its departure zone. All players with threshold-level influence in the destination zone will lose 1 influence. Also, if this attempt has expended your second move, you'll lose access to actions you might have gained after your first move attempt.
+  - b) If your new influence is lower than the highest, then your ship will return to its departure zone. All players with threshold-level influence in the destination zone will lose 1 influence. Also, if this attempt has expended your second move, your turn will end automcagically. When attempting your second move, always consider if it's worth the risk of losing access to your current actions.
 
 What to consider before committing to a move:
 - If the destination's influence threshold is too high, you might want to take another approach, both in terms of movement and actions, especially if you risk losing access to currently available actions (i.e., your first move was successful).
