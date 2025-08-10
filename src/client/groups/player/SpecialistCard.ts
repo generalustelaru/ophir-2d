@@ -47,11 +47,12 @@ export class SpecialistCard implements DynamicGroupInterface<string> {
 
         const description = new Konva.Text({
             x: 0,
-            y: 14,
-            width: this.group.width(),
+            y: 20,
+            width: this.group.width() - 5,
             height: this.group.height(),
             text: specialist.description,
             fontSize: 14,
+            lineHeight: 1.3,
             fontStyle: 'bold',
             ellipsis: true,
             align: 'center',
