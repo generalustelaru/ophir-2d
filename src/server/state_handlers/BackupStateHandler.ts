@@ -1,8 +1,7 @@
-import { ChatEntry, Coordinates, PlayerColor, PlayState } from "~/shared_types";
-import { PrivateState, BackupState } from "../server_types";
+import { ChatEntry, PlayerColor } from "~/shared_types";
+import { BackupState } from "../server_types";
 import tools from "../services/ToolService";
 import lib, { Probable } from "../action_processors/library";
-
 
 export class BackupStateHandler {
     private backupState: BackupState | null;
@@ -42,15 +41,8 @@ export class BackupStateHandler {
         this.backupState?.playState.chat.push({ color: as, name: this.serverName, message });
     }
 
-    public updateRepositioning(_color: PlayerColor, _coordinates: Coordinates) {
-        console.log('not implemented');
-    }
-
-    public updatePlayerName(_color: PlayerColor, _name: string ) {
-        console.log('not implemented');
-    }
-
-    public updatePlayerSocket(_color: PlayerColor, _socketId: string) {
-        console.log('not implemented');
+    public updatePlayerName(color: PlayerColor, name: string ) {
+        const player = this.backupState?.playState.players.find(p => p.color === color)
+        player!.name = name;
     }
 }
