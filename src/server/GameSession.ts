@@ -124,17 +124,24 @@ export class GameSession {
             if(!message)
                 return this.issueNominalResponse(lib.errorResponse('Malformed chat message'));
 
-            const nameMatch = message.input.match(/(?<=#name ).*/);
+            const commandMatch = message.input.match(/^#\w*(?=\s)/);
 
-            if (nameMatch) {
-                const newName = nameMatch[0];
+            if (commandMatch) {
+                // future switch if more commands are added
+                const nameMatch = message.input.match(/(?<=#name ).*/);
 
-                if (!state.players.some(p => p.name === newName)) {
-                    const response = this.actionProcessor.updatePlayerName(player, newName);
+                if (nameMatch) {
+                    const newName = nameMatch[0];
 
-                    this.transmitNameUpdate(newName, player.socketId);
+                    if (!state.players.some(p => p.name === newName)) {
+                        const response = this.actionProcessor.updatePlayerName(player, newName);
 
-                    return this.issueGroupResponse(response);
+                        this.transmitNameUpdate(newName, player.socketId);
+
+                        return this.issueGroupResponse(response);
+                    }
+                } else {
+                    return this.issueNominalResponse(lib.errorResponse(`Command ${commandMatch[0]} does not exist`))
                 }
             }
 
