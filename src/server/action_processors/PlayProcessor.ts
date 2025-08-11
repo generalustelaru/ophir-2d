@@ -203,7 +203,7 @@ export class PlayProcessor implements SessionProcessor {
                 location: this.playState.getLocationName(target),
             });
 
-            player.setAnchoredActions(this.determinePlayerActions(player, target));
+            player.setActions(this.determinePlayerActions(player, target));
 
             if (player.getMoves() > 0) {
                 player.setDestinationOptions(
