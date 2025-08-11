@@ -64,19 +64,6 @@ export class PlayProcessor implements SessionProcessor {
         return this.privateState.toDto();
     }
 
-    private enableUndo(player: PlayerHandler) {
-        this.backupState.saveCopy({
-            playState: this.getState(),
-            privateState: this.getPrivateState(),
-        });
-        player.enableUndo();
-    }
-
-    private disableUndo(player: PlayerHandler) {
-        this.backupState.wipeBackup();
-        player.disableUndo();
-    }
-
     // MARK: MOVE
     public processMove(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
@@ -1020,5 +1007,18 @@ export class PlayProcessor implements SessionProcessor {
     private addServerMessage(message: string, as: PlayerColor | null = null) {
         this.playState.addServerMessage(message, as);
         this.backupState.addServerMessage(message, as);
+    }
+
+    private enableUndo(player: PlayerHandler) {
+        this.backupState.saveCopy({
+            playState: this.getState(),
+            privateState: this.getPrivateState(),
+        });
+        player.enableUndo();
+    }
+
+    private disableUndo(player: PlayerHandler) {
+        this.backupState.wipeBackup();
+        player.disableUndo();
     }
 }
