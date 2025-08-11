@@ -134,7 +134,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.navigatorAccess.overwrite(options);
     }
 
-    public setAnchoredActions(actions: Array<LocalActions>) {
+    public setActions(actions: Array<LocalActions>) {
         this.isAnchored.set(true);
         this.localActions.overwrite(actions);
     }
@@ -303,10 +303,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public getActions() {
         return this.localActions.get();
-    }
-
-    public setActions(actions: Array<LocalActions>) {
-        this.localActions.overwrite(actions);
     }
 
     public clearActions() {
