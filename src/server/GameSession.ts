@@ -10,10 +10,9 @@ import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from "~/server_constants";
-import { SINGLE_PLAYER } from "./configuration";
 import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
-import { SERVER_NAME } from "./configuration"
+import { SERVER_NAME, SINGLE_PLAYER  } from "../server/configuration"
 import { validator } from "./services/validation/ValidatorService";
 
 export class GameSession {
