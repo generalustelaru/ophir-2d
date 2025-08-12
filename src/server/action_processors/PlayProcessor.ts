@@ -45,8 +45,6 @@ export class PlayProcessor implements SessionProcessor {
         const { seaZone } = player.getBearings();
 
         player.activate(
-            this.playState.getLocalActions(seaZone),
-            this.pickFeasibleTrades(player.getCargo()),
             this.privateState.getDestinations(seaZone),
             player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
         );
@@ -190,7 +188,7 @@ export class PlayProcessor implements SessionProcessor {
                 location: this.playState.getLocationName(target),
             });
 
-            player.setActions(this.determinePlayerActions(player, target));
+            this.determinePlayerActions(player);
 
             if (player.getMoves() > 0) {
                 player.setDestinationOptions(
@@ -251,6 +249,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
+        this.determinePlayerActions(player)
         this.addServerMessage(
             `${player.getIdentity().name} has spent favor`,
             player.getIdentity().color,
@@ -276,7 +275,8 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        player.setTrades(this.pickFeasibleTrades(result.data));
+        this.determinePlayerActions(player);
+        // player.setTrades(this.pickFeasibleTrades(result.data));
 
         const { name, color } = player.getIdentity();
         this.addServerMessage(`${name} ditched one ${item}`, color);
@@ -326,7 +326,8 @@ export class PlayProcessor implements SessionProcessor {
         else
             player.clearMoves();
 
-        player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+        this.determinePlayerActions(player);
+        // player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -344,7 +345,7 @@ export class PlayProcessor implements SessionProcessor {
         const { color, name } = player.getIdentity();
 
         if (lib.checkConditions([
-            player.mayAct(Action.sell_goods),
+            player.hasAction(Action.sell_goods),
             player.getTrades().includes(slot),
         ]).err) {
             return lib.fail(`${name} cannnot sell goods`);
@@ -394,7 +395,7 @@ export class PlayProcessor implements SessionProcessor {
         const { slot } = marketSlotPayload;
 
         const conditions = lib.checkConditions([
-            player.mayAct(Action.donate_goods),
+            player.hasAction(Action.donate_goods),
             this.playState.getTempleTradeSlot() === slot,
             player.getTrades().includes(slot),
         ]);
@@ -596,7 +597,7 @@ export class PlayProcessor implements SessionProcessor {
         this.disableUndo(player);
         const { turnOrder, name, color } = player.getIdentity();
 
-        if (isVoluntary && !player.mayEndTurn())
+        if (isVoluntary && !player.isAnchored())
             return lib.fail(`Ship is not anchored.`);
 
         if (
@@ -623,8 +624,6 @@ export class PlayProcessor implements SessionProcessor {
             const { seaZone } = nextPlayer.getBearings();
 
             nextPlayer.activate(
-                this.determinePlayerActions(nextPlayer, seaZone),
-                this.pickFeasibleTrades(nextPlayer.getCargo()),
                 this.privateState.getDestinations(seaZone),
                 nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
@@ -785,8 +784,12 @@ export class PlayProcessor implements SessionProcessor {
         }
     }
 
-    private determinePlayerActions(player: PlayerHandler, seaZone: ZoneName): Array<LocalActions> {
-        const actions = this.playState.getLocalActions(seaZone)
+    /**
+     * @description Mutates PlayerHandler
+     */
+    private determinePlayerActions(player: PlayerHandler) {
+        const seaZone = player.getBearings().seaZone;
+        const actions = this.playState.getLocalActions(seaZone);
 
         if (player.isPostmaster()) {
             const adjacentZones = this.privateState.getDestinations(seaZone);
@@ -804,7 +807,10 @@ export class PlayProcessor implements SessionProcessor {
                 actions.push(Action.sell_goods, Action.sell_specialty);
         }
 
-        return actions;
+        if (actions.filter(a => a === Action.sell_goods || a === Action.donate_goods).length)
+            player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+
+        player.setActions(actions);
     }
 
     private loadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
@@ -883,6 +889,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     private pickFeasibleTrades(cargo: Array<ItemName>): Array<MarketSlotKey> {
+        // TODO: hinge on actions
         const market = this.playState.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
