@@ -4,7 +4,7 @@ import { DynamicGroupInterface, } from "~/client_types"
 import { TempleLevelDial } from "./TempleLevelDial";
 import clientConstants from "~/client_constants";
 
-const SHORT_GAME = Boolean(Number(process.env.SHORT_GAME));
+const SHORT_GAME = Boolean(process.env.SHORT_GAME === 'true');
 const { COLOR } = clientConstants;
 const UNIT = 27;
 const LEVEL_DIAL_DRIFTS = [

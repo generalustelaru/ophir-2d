@@ -7,7 +7,7 @@ import { PlayerCountables } from "~/server_types";
 import clientConstants from "~/client_constants";
 import { EventType } from "~/client_types";
 
-const SINGLE_PLAYER = Boolean(Number(process.env.SINGLE_PLAYER));
+const SINGLE_PLAYER = Boolean(process.env.SINGLE_PLAYER === 'true');
 export const UserInterface = new class extends Communicator {
 
     private draftButton: Button;
