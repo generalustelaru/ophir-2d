@@ -128,7 +128,7 @@ export class GameSession {
 
             if (commandMatch) {
                 // future switch if more commands are added
-                const nameMatch = message.input.match(/(?<=#name ).*/);
+                const nameMatch = message.input.match(/(?<=#name )\w.{2},*/);
 
                 if (nameMatch) {
                     const newName = nameMatch[0];
@@ -141,7 +141,7 @@ export class GameSession {
                         return this.issueGroupResponse(response);
                     }
                 } else {
-                    return this.issueNominalResponse(lib.errorResponse(`Command ${commandMatch[0]} does not exist`))
+                    return this.issueNominalResponse(lib.errorResponse(`${commandMatch[0]} parameter must start with a non-space character and must contain 3 or more characters`))
                 }
             }
 
