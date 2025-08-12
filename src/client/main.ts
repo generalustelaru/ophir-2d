@@ -9,7 +9,8 @@ import {
     EnrolmentResponse,
     NewNameTransmission,
 } from "~/shared_types";
-const PERSIST_SESSION = Boolean(Number(process.env.PERSIST_SESSION));
+
+const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
 
 // MARK: INIT
 const serverAddress = process.env.SERVER_ADDRESS;
