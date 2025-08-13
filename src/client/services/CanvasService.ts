@@ -8,6 +8,7 @@ import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
 import { EventType } from "~/client_types";
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
+import { ActionModal } from '../groups/ActionModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -19,6 +20,7 @@ export const CanvasService = new class extends Communicator {
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false
     private isPlayDrawn: boolean = false;
+    private actionModal: ActionModal;
 
     public constructor() {
         super();
@@ -67,6 +69,8 @@ export const CanvasService = new class extends Communicator {
                 y: 0,
             },
         ); // mapGroup covers half the canvas (2 segments), sitting in the middle
+
+        this.actionModal = new ActionModal(this.stage);
 
         this.setupGroup = new SetupGroup(
             this.stage,
@@ -140,12 +144,14 @@ export const CanvasService = new class extends Communicator {
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
+                    this.actionModal.open();
                     this.fitStageIntoParentContainer();
                     this.isPlayDrawn = true;
                 }
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
+                this.actionModal.open();
                 this.playerGroup.updatePlayerVp(localState.playerColor, localState.vp);
                 toDisable && this.disable();
                 break;

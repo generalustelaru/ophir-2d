@@ -4,13 +4,13 @@ import { ServerConstants } from "~/server_types"
 const serverConstants: ServerConstants = {
 
     SPECIALISTS: [
-        // {
-        //     name: SpecialistName.advisor,
-        //     displayName: 'Advisor',
-        //     startingFavor: 1,
-        //     specialty: 'linen',
-        //     description: 'May complete temple trades using any market slot.',
-        // },
+        {
+            name: SpecialistName.advisor,
+            displayName: 'Advisor',
+            startingFavor: 1,
+            specialty: 'linen',
+            description: 'May complete temple trades using any market slot.',
+        },
         {
             name: SpecialistName.ambassador,
             displayName: 'Ambassador',
@@ -18,13 +18,13 @@ const serverConstants: ServerConstants = {
             specialty: null,
             description: 'Begins with fully upgraded cargo hold.',
         },
-        // {
-        //     name: SpecialistName.chancellor,
-        //     displayName: 'Chancellor',
-        //     startingFavor: 1,
-        //     specialty: 'gems',
-        //     description: 'Substitutes missing goods with Favor at Market.',
-        // },
+        {
+            name: SpecialistName.chancellor,
+            displayName: 'Chancellor',
+            startingFavor: 1,
+            specialty: 'gems',
+            description: 'Substitutes missing goods with Favor at Market.',
+        },
         {
             name: SpecialistName.harbormaster,
             displayName: 'Harbormaster',
@@ -67,13 +67,13 @@ const serverConstants: ServerConstants = {
             specialty: 'gems',
             description: 'May donate exactly 1 metal to the Temple from an adjacent sea zone.',
         },
-        // {
-        //     name: SpecialistName.peddler,
-        //     displayName: 'Peddler',
-        //     startingFavor: 2,
-        //     specialty: null,
-        //     description: 'Ignores one required trade good when completing a reduced value market trade.',
-        // },
+        {
+            name: SpecialistName.peddler,
+            displayName: 'Peddler',
+            startingFavor: 2,
+            specialty: null,
+            description: 'Ignores one required trade good when completing a reduced value market trade.',
+        },
     ],
     TRADE_DECK_A: [
         { request: ['ebony'], reward: { coins: 1, favorAndVp: 1 } },
