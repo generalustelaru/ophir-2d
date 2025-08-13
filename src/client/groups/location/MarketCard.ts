@@ -8,7 +8,7 @@ import { MiniTempleRewardDial } from "./MiniTempleRewardDial";
 
 const { COLOR } = clientConstants;
 export class MarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
-
+    // TODO: Might need to change parent to InterfaceButton, and maybe both classes' names need to be changed
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
