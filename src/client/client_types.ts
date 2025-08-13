@@ -112,6 +112,12 @@ export type CargoBandUpdate = {
     canDrop: boolean,
 }
 
+export enum ActionModalContext {
+    advisor_at_temple = 'advisor_at_temple',
+    chancellor_at_market = 'chancellor_at_market',
+    peddler_at_market = 'peddler_at_market',
+}
+
 export type EventFormat<T extends EventType, D> = {
     type: T,
     detail: D,
@@ -135,6 +141,7 @@ export enum EventType {
     vp_transmission = 'vp_transmission',
     name_transmission = 'name_transmission',
     ui_transition = 'ui_transition',
+    open_action_modal = 'open_action_modal',
 }
 
 export type LaconicType =
@@ -168,6 +175,10 @@ export type TransitionDetail = {
 
 export type InfoDetail = {
     text: string,
+}
+
+export type ActionButtonData = {
+    context: string,
 }
 
 export type ErrorDetail = {
