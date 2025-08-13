@@ -447,7 +447,7 @@ export class PlayProcessor implements SessionProcessor {
 
             player.setCargo(unload.data);
             player.gainCoins(1);
-            player.setTrades(this.pickFeasibleTrades(unload.data))
+            player.setTrades(this.pickFeasibleTrades(player));
 
             if (!player.getCargo().includes(specialty))
                 player.removeAction(Action.sell_specialty);
@@ -807,7 +807,7 @@ export class PlayProcessor implements SessionProcessor {
         }
 
         if (actions.filter(a => a === Action.sell_goods || a === Action.donate_goods).length)
-            player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+            player.setTrades(this.pickFeasibleTrades(player));
 
         player.setActions(actions);
     }
@@ -887,8 +887,8 @@ export class PlayProcessor implements SessionProcessor {
         return lib.pass(true);
     }
 
-    private pickFeasibleTrades(cargo: Array<ItemName>): Array<MarketSlotKey> {
-        // TODO: hinge on actions
+    private pickFeasibleTrades(player: PlayerHandler): Array<MarketSlotKey> {
+        const cargo = player.getCargo();
         const market = this.playState.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
@@ -912,7 +912,11 @@ export class PlayProcessor implements SessionProcessor {
                 }
             }
 
-            if (unfilledGoods.length === 0) {
+            if (player.isChancellor()) {
+                if (player.getFavor() - unfilledGoods.length >= 0) {
+                    feasible.push(key);
+                }
+            } else if (unfilledGoods.length === 0) {
                 feasible.push(key);
             }
         });

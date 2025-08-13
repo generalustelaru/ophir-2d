@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventType, LocalState } from "~/client_types";
+import { InfoDetail, ErrorDetail, EventType, LocalState, ActionButtonData } from "~/client_types";
 import localState from "./state";
 import { CommunicationService } from "./services/CommService";
 import { CanvasService } from "./services/CanvasService";
@@ -54,6 +54,16 @@ window.addEventListener(EventType.action, (event: CustomEventInit<ClientMessage>
         return signalError('Action message is missing!');
 
     CommunicationService.sendMessage(message);
+});
+
+window.addEventListener(EventType.open_action_modal, (event: CustomEventInit<ActionButtonData>) => {
+    const actionButtonData = event.detail;
+
+    if (!actionButtonData)
+        return signalError('Action button data is missing!');
+
+    console.log("Opening action modal with data:", actionButtonData);
+    // CanvasService.showActionModal(actionButtonData);
 });
 
 //Send state change message to server

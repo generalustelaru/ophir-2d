@@ -163,6 +163,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.getSpecialistName() === SpecialistName.navigator;
     }
 
+    public isChancellor() {
+        return this.getSpecialistName() === SpecialistName.chancellor;
+    }
+
     public clearMoves() {
         this.moveActions.set(0);
     }

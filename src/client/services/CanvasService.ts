@@ -144,14 +144,12 @@ export const CanvasService = new class extends Communicator {
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
-                    this.actionModal.open();
                     this.fitStageIntoParentContainer();
                     this.isPlayDrawn = true;
                 }
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
-                this.actionModal.open();
                 this.playerGroup.updatePlayerVp(localState.playerColor, localState.vp);
                 toDisable && this.disable();
                 break;

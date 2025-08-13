@@ -166,6 +166,7 @@ export type Event =
     | EventFormat<EventType.vp_transmission, VpTransmission>
     // | EventFormat<EventType.ui_transition, TransitionDetail>
     | EventFormat<EventType.name_transmission, NewNameTransmission>
+    | EventFormat<EventType.open_action_modal, ActionButtonData>
 ;
 
 // export type TransitionDetail = {
@@ -178,7 +179,7 @@ export type InfoDetail = {
 }
 
 export type ActionButtonData = {
-    context: string,
+    context: ActionModalContext,
 }
 
 export type ErrorDetail = {
