@@ -47,8 +47,12 @@ window.addEventListener('resize', () => {
 });
 
 //Send player action to server
-window.addEventListener(EventType.action, (event: CustomEventInit) => {
-    const message = event.detail as ClientMessage;
+window.addEventListener(EventType.action, (event: CustomEventInit<ClientMessage>) => {
+    const message = event.detail;
+
+    if (!message)
+        return signalError('Action message is missing!');
+
     CommunicationService.sendMessage(message);
 });
 

@@ -27,7 +27,6 @@ export class ActionModal implements DynamicGroupInterface<Array<ActionButton>> {
 
         this.group.add(background);
         stage.getLayers()[1].add(this.group);
-        // this.group.hide(); // Initially hide the modal
     }
 
     public getElement(): Konva.Group {
