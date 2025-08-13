@@ -140,7 +140,7 @@ export enum EventType {
     identification = 'identification',
     vp_transmission = 'vp_transmission',
     name_transmission = 'name_transmission',
-    ui_transition = 'ui_transition',
+    // ui_transition = 'ui_transition',
     open_action_modal = 'open_action_modal',
 }
 
@@ -164,14 +164,14 @@ export type Event =
     | EventFormat<EventType.enrolment_update, EnrolmentState>
     | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>
-    | EventFormat<EventType.ui_transition, TransitionDetail>
+    // | EventFormat<EventType.ui_transition, TransitionDetail>
     | EventFormat<EventType.name_transmission, NewNameTransmission>
 ;
 
-export type TransitionDetail = {
-    element: InterfaceId,
-    visible: boolean
-}
+// export type TransitionDetail = {
+//     element: InterfaceId,
+//     visible: boolean
+// }
 
 export type InfoDetail = {
     text: string,
@@ -185,6 +185,6 @@ export type ErrorDetail = {
     message: string,
 }
 
-enum InterfaceId {
-    specialistBand = 0,
-}
+// enum InterfaceId {
+//     specialistBand = 0,
+// }
