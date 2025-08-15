@@ -5,6 +5,7 @@ import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "~/client_constants";
 import { ActionButton } from "../ActionButton";
 import { MiniTempleRewardDial } from "./MiniTempleRewardDial";
+import { Button } from "../Button";
 
 const { COLOR } = clientConstants;
 export class MarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
@@ -18,6 +19,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         stage: Konva.Stage,
         position: Coordinates,
         message: ClientMessage | null,
+        // callback: Function,
         trade: Trade,
         fluctuation: Fluctuation | null = null,
     ) {
@@ -29,7 +31,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
                 x: position.x,
                 y: position.y,
             },
-            message
+            message,
         );
 
         this.fluctuation = fluctuation;
@@ -80,7 +82,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
         this.goodsAssortment.update(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.marketDarkOrange);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
-        this.setEnabled(data.isFeasible);
+        data.isFeasible ? this.enable() : this.disable();
     }
 
     public getElement(): Konva.Group {
