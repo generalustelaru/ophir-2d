@@ -1,9 +1,8 @@
 import Konva from "konva";
 import { MarketCardUpdate, DynamicGroupInterface } from "~/client_types";
-import { Coordinates, Fluctuation, Trade, ClientMessage } from "~/shared_types";
+import { Coordinates, Fluctuation, Trade } from "~/shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "~/client_constants";
-// import { ActionButton } from "../ActionButton";
 import { MiniTempleRewardDial } from "./MiniTempleRewardDial";
 import { Button } from "../Button";
 
@@ -17,7 +16,6 @@ export class MarketCard extends Button implements DynamicGroupInterface<MarketCa
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        // message: ClientMessage | null,
         callback: Function,
         trade: Trade,
         fluctuation: Fluctuation | null = null,
