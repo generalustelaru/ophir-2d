@@ -2,10 +2,10 @@ import Konva from "konva";
 import { Coordinates, Player, PlayerColor } from "~/shared_types";
 import { DynamicGroupInterface } from "~/client_types";
 import clientConstants from "~/client_constants";
-import { InterfaceButton } from "../InterfaceButton";
+import { Button } from "../Button";
 const { COLOR } = clientConstants;
 
-export class SpecialistBand extends InterfaceButton implements DynamicGroupInterface<boolean> {
+export class SpecialistBand extends Button implements DynamicGroupInterface<boolean> {
     private background: Konva.Rect;
     private label: Konva.Text;
     private playerColor: PlayerColor;
