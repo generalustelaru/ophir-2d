@@ -12,7 +12,13 @@ export class LocationGroup implements MegaGroupInterface {
     private treasuryPlacard: TreasuryPlacard | null = null;
     private templePlacard: TemplePlacard | null = null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData) {
+    private sellGoodsCallback: Function;
+    constructor(
+        stage: Konva.Stage,
+        layout: GroupLayoutData,
+        sellGoodsCallback: Function,
+    ) {
+        this.sellGoodsCallback = sellGoodsCallback;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height - 20,
@@ -43,7 +49,8 @@ export class LocationGroup implements MegaGroupInterface {
                 height: heightSegment * 3,
                 x: 0,
                 y: 0,
-            }
+            },
+            this.sellGoodsCallback,
         );
 
         this.treasuryPlacard = new TreasuryPlacard(

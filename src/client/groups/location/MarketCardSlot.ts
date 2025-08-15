@@ -16,6 +16,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         marketKey: MarketSlotKey,
         trade: Trade,
         fluctuation: Fluctuation,
+        modalCallback: Function
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -28,8 +29,8 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         this.marketCard = new MarketCard(
             stage,
             { x: 0, y: segmentHeight },
-            { action: Action.sell_goods, payload: { slot: marketKey } },
-            // () => console.log('clicked market card slot', marketKey),
+            () => modalCallback(marketKey),
+            // { action: Action.sell_goods, payload: { slot: marketKey } },
             trade,
             fluctuation
         );

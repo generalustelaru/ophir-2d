@@ -9,6 +9,7 @@ import localState from '../state';
 import { EventType } from "~/client_types";
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import { ActionModal } from '../groups/ActionModal';
+import { MarketCardSlot } from '../groups/GroupList';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -40,6 +41,13 @@ export const CanvasService = new class extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
+        this.actionModal = new ActionModal(this.stage);
+
+        const openSellGoodsModal = (slot: MarketCardSlot) => {
+            console.log('open modal for',slot)
+            this.actionModal.open();
+        }
+
         this.locationGroup = new LocationGroup(
             this.stage,
             {
@@ -48,6 +56,7 @@ export const CanvasService = new class extends Communicator {
                 x: 0,
                 y: 0,
             },
+            openSellGoodsModal,
         ); // locationGroup covers 1 segment, sitting on the left
 
         this.playerGroup = new PlayerGroup(
@@ -69,8 +78,6 @@ export const CanvasService = new class extends Communicator {
                 y: 0,
             },
         ); // mapGroup covers half the canvas (2 segments), sitting in the middle
-
-        this.actionModal = new ActionModal(this.stage);
 
         this.setupGroup = new SetupGroup(
             this.stage,
@@ -183,4 +190,6 @@ export const CanvasService = new class extends Communicator {
         this.stage.height(sceneHeight * scale);
         this.stage.scale({ x: scale, y: scale });
     }
+
+    
 }

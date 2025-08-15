@@ -21,6 +21,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
         templeTradeSlot: MarketSlotKey,
         market: MarketOffer,
         layout: GroupLayoutData,
+        sellGoodsCallback: Function,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -64,6 +65,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             'slot_1',
             market.slot_1,
             marketFluctuations.slot_1,
+            sellGoodsCallback,
         );
 
         this.slot_2 = new MarketCardSlot(
@@ -77,6 +79,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             'slot_2',
             market.slot_2,
             marketFluctuations.slot_2,
+            sellGoodsCallback,
         );
 
         this.slot_3 = new MarketCardSlot(
@@ -90,6 +93,7 @@ export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
             'slot_3',
             market.slot_3,
             marketFluctuations.slot_3,
+            sellGoodsCallback,
         );
 
         const templeIcon = new Konva.Path({

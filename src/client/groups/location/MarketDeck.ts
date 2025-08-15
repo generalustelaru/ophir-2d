@@ -27,7 +27,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
         this.marketCard = new MarketCard(
             stage,
             { x: 0, y: this.cardY - offer.deckSize },
-            null,
+            () => {},
             offer.future,
         );
 
