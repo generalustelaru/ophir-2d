@@ -9,8 +9,8 @@ export class ActionModal implements DynamicGroupInterface<Array<ActionButton>> {
 
     constructor(stage: Konva.Stage) {
         this.group = new Konva.Group({
-            x: 0,
-            y: 0,
+            x: stage.width() / 2 - 300,
+            y: stage.height() / 2 - 150,
             width: 600,
             height: 300,
             visible: false,
