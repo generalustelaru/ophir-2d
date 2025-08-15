@@ -33,14 +33,10 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
             fluctuation
         );
 
+        this.group.add(this.marketCard.getElement());
 
-        this.group.add(
-            this.marketCard.getElement(),
-        );
-
-        if (!!fluctuation) {
+        if (!!fluctuation)
             this.group.add(this.getFluctuationSymbol(fluctuation));
-        }
     }
 
     public getElement(): Konva.Group {
