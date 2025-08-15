@@ -3,13 +3,12 @@ import { MarketCardUpdate, DynamicGroupInterface } from "~/client_types";
 import { Coordinates, Fluctuation, Trade, ClientMessage } from "~/shared_types";
 import { CoinDial, GoodsAssortment } from "../GroupList";
 import clientConstants from "~/client_constants";
-import { ActionButton } from "../ActionButton";
+// import { ActionButton } from "../ActionButton";
 import { MiniTempleRewardDial } from "./MiniTempleRewardDial";
 import { Button } from "../Button";
 
 const { COLOR } = clientConstants;
-export class MarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
-    // TODO: Might need to change parent to InterfaceButton, and maybe both classes' names need to be changed
+export class MarketCard extends Button implements DynamicGroupInterface<MarketCardUpdate> {
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
@@ -18,8 +17,8 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        message: ClientMessage | null,
-        // callback: Function,
+        // message: ClientMessage | null,
+        callback: Function,
         trade: Trade,
         fluctuation: Fluctuation | null = null,
     ) {
@@ -31,7 +30,7 @@ export class MarketCard extends ActionButton implements DynamicGroupInterface<Ma
                 x: position.x,
                 y: position.y,
             },
-            message,
+            callback,
         );
 
         this.fluctuation = fluctuation;

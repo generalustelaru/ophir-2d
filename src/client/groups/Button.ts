@@ -23,7 +23,8 @@ export abstract class Button {
         });
 
         this.group.on('click', () => {
-            this.isActive && callback();
+            if (this.isActive)
+                callback();
         });
     }
 

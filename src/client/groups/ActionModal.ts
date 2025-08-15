@@ -41,6 +41,10 @@ export class ActionModal implements DynamicGroupInterface<Array<ActionButton>> {
         this.group.hide();
     }
 
+    public test() {
+        console.log('action modal accessed');
+    }
+
     update(actions: Array<ActionButton>) {
         console.log("Setting actions in the modal:", actions);
         // Logic to set actions in the modal
