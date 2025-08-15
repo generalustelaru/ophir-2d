@@ -1,9 +1,9 @@
 import Konva from "konva";
 import { Color, DynamicGroupInterface } from "~/client_types";
 import { Coordinates } from "~/shared_types";
-import { InterfaceButton } from "../InterfaceButton";
+import { Button } from "../Button";
 
-export class ModalButton extends InterfaceButton implements DynamicGroupInterface<string> {
+export class ModalButton extends Button implements DynamicGroupInterface<string> {
     private background: Konva.Rect;
     private label: Konva.Text;
 
