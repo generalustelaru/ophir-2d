@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupPayload, Phase, PlayerColor, State } from "~/shared_types";
+import { GameSetupPayload, MarketSlotKey, Phase, PlayerColor, State } from "~/shared_types";
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -8,8 +8,7 @@ import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
 import { EventType } from "~/client_types";
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
-import { ActionModal } from '../groups/ActionModal';
-import { MarketCardSlot } from '../groups/GroupList';
+import { SellGoodsModal } from '../groups/modals/SellGodsModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -21,7 +20,7 @@ export const CanvasService = new class extends Communicator {
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false
     private isPlayDrawn: boolean = false;
-    private actionModal: ActionModal;
+    private sellGoodsModal: SellGoodsModal;
 
     public constructor() {
         super();
@@ -41,11 +40,14 @@ export const CanvasService = new class extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
-        this.actionModal = new ActionModal(this.stage);
+        this.sellGoodsModal = new SellGoodsModal(this.stage);
 
-        const openSellGoodsModal = (slot: MarketCardSlot) => {
+        const openSellGoodsModal = (slot: MarketSlotKey) => {
             console.log('open modal for',slot)
-            this.actionModal.open();
+            this.sellGoodsModal.show(slot);
+            setTimeout(() => {
+                this.sellGoodsModal.close();
+            },5000);
         }
 
         this.locationGroup = new LocationGroup(
@@ -190,6 +192,5 @@ export const CanvasService = new class extends Communicator {
         this.stage.height(sceneHeight * scale);
         this.stage.scale({ x: scale, y: scale });
     }
-
-    
 }
+

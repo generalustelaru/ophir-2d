@@ -11,23 +11,26 @@ export abstract class ModalBase {
         const height = 300;
 
         this.group = new Konva.Group({
+            width: stage.width(),
+            height: stage.height(),
+            visible: false,
+        });
+
+        const lockLayer = new Konva.Rect({
+            width: stage.width(),
+            height: stage.height(),
+        })
+
+        const background = new Konva.Rect({
             x: stage.width() / 2 - width / 2,
             y: stage.height() / 2 - height / 2,
             width,
             height,
-            visible: false,
-        });
-
-        const background = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: this.group.width(),
-            height: this.group.height(),
             fill: COLOR.modalBlue,
             cornerRadius: 10,
         });
 
-        this.group.add(background);
+        this.group.add(lockLayer, background);
         stage.getLayers()[1].add(this.group);
     }
 
