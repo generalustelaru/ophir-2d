@@ -1,18 +1,20 @@
 import Konva from "konva";
-import clientConstants from "../client_constants";
-import { ActionButton } from "./ActionButton";
-import { DynamicGroupInterface } from "../client_types";
+import clientConstants from "../../client_constants";
 
 const { COLOR } = clientConstants;
-export class ActionModal implements DynamicGroupInterface<Array<ActionButton>> {
-    private group: Konva.Group;
+
+export abstract class ModalBase {
+    protected group: Konva.Group;
 
     constructor(stage: Konva.Stage) {
+        const width= 600;
+        const height = 300;
+
         this.group = new Konva.Group({
-            x: stage.width() / 2 - 300,
-            y: stage.height() / 2 - 150,
-            width: 600,
-            height: 300,
+            x: stage.width() / 2 - width / 2,
+            y: stage.height() / 2 - height / 2,
+            width,
+            height,
             visible: false,
         });
 
@@ -39,14 +41,5 @@ export class ActionModal implements DynamicGroupInterface<Array<ActionButton>> {
 
     public close() {
         this.group.hide();
-    }
-
-    public test() {
-        console.log('action modal accessed');
-    }
-
-    update(actions: Array<ActionButton>) {
-        console.log("Setting actions in the modal:", actions);
-        // Logic to set actions in the modal
     }
 }
