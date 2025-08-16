@@ -6,7 +6,7 @@ import {
     EnrolmentPayload,
 } from "~/shared_types";
 import { lib, ObjectTests } from "./library"
-import { PrivateState, SavedSession } from "~/server_types";
+import { BackupState, PrivateState, SavedSession } from "~/server_types";
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
@@ -29,6 +29,7 @@ class ValidatorService {
             [
                 { key: 'sharedState', type: 'object', nullable: false },
                 { key: 'privateState', type: 'object', nullable: true },
+                { key: 'backupState', type: 'object', nullable: true },
             ],
         );
 
@@ -65,9 +66,23 @@ class ValidatorService {
 
             if (!privateState)
                 return null;
+
+            if (savedSession.backupState != null) {
+                const backupState = this.validateObject<BackupState>(
+                    'BackupState',
+                    savedSession.backupState,
+                    [
+                        { key: 'playState', type: 'object', nullable: false },
+                        { key: 'privateState', type: 'object', nullable: false },
+                    ],
+                );
+
+                if(!backupState)
+                    return null;
+            }
         }
 
-        return savedSession
+        return savedSession;
     }
 
     public validateClientRequest(request: unknown) {

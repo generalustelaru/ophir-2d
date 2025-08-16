@@ -12,8 +12,9 @@ import {
     SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE,
 } from '../configuration';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
-import { HexCoordinates } from "~/client_types";
+import { BackupStateHandler } from "../state_handlers/BackupStateHandler";
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
+import { HexCoordinates } from "~/client_types";
 import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 
@@ -167,7 +168,7 @@ export class SetupProcessor implements SessionProcessor {
             return lib.fail('Specialist selection is incomplete')
 
         const marketData = this.prepareDeckAndGetOffer();
-        const privateState = new PrivateStateHandler({
+        const privateStateHandler = new PrivateStateHandler({
             destinationPackages: this.produceMoveRules(setupState.setup.barriers),
             tradeDeck: marketData.tradeDeck,
             costTiers: this.filterCostTiers(playerSelections.length),
@@ -178,12 +179,12 @@ export class SetupProcessor implements SessionProcessor {
 
         const { players, startingPlayerColor } = this.hydratePlayers(
             playerSelections,
-            privateState.getDestinationPackages(),
+            privateStateHandler.getDestinationPackages(),
             clientSetupPayload.startingPositions,
             setupState.setup.mapPairings,
         );
 
-        const playState = new PlayStateHandler(
+        const playStateHandler = new PlayStateHandler(
             SERVER_NAME,
             {
                 gameId: setupState.gameId,
@@ -196,10 +197,10 @@ export class SetupProcessor implements SessionProcessor {
                 market: marketData.marketOffer,
                 itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, linen: 5, ebony: 5, marble: 5 } },
                 temple: {
-                    maxLevel: privateState.getTempleLevelCount(),
-                    treasury: privateState.drawMetalPrices()!,
+                    maxLevel: privateStateHandler.getTempleLevelCount(),
+                    treasury: privateStateHandler.drawMetalPrices()!,
                     levelCompletion: 0,
-                    currentLevel: SHORT_GAME ? privateState.getTempleLevelCount() - 1 : 0,
+                    currentLevel: SHORT_GAME ? privateStateHandler.getTempleLevelCount() - 1 : 0,
                     donations: [],
                 },
                 setup: {
@@ -213,12 +214,16 @@ export class SetupProcessor implements SessionProcessor {
                     clientSetupPayload.hexPositions,
                     setupState.setup.mapPairings,
                     startingPlayerColor,
-                    privateState.getDestinationPackages(),
+                    privateStateHandler.getDestinationPackages(),
                 ),
             });
-        playState.addServerMessage('Game started!');
+        playStateHandler.addServerMessage('Game started!');
 
-        return lib.pass({ playState: playState, privateState });
+        return lib.pass({
+            playState: playStateHandler,
+            privateState: privateStateHandler,
+            backupState: new BackupStateHandler(SERVER_NAME, null),
+        });
     };
 
     // MARK: Map

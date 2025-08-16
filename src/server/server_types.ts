@@ -11,6 +11,7 @@ import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
+import { BackupStateHandler } from "./state_handlers/BackupStateHandler";
 
 export type WsClient = {
     socketId: string,
@@ -76,6 +77,7 @@ export type PrivateState = {
 export type StateBundle = {
     playState: PlayStateHandler,
     privateState: PrivateStateHandler,
+    backupState: BackupStateHandler,
 }
 
 export type BackupState = {
@@ -121,4 +123,5 @@ export interface SessionProcessor {
 export type SavedSession = {
     sharedState: State,
     privateState: PrivateState | null
+    backupState: BackupState | null,
 }

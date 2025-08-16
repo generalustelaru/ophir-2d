@@ -1,8 +1,8 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, State, PlayerEntity } from "~/shared_types";
-import { PrivateState, WsClient } from "~/server_types";
+import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, PlayerEntity } from "~/shared_types";
+import { WsClient, SavedSession } from "~/server_types";
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
 import { validator } from "./services/validation/ValidatorService";
@@ -220,7 +220,7 @@ setInterval(() => {
 
 // DEBUG
 
-async function saveGameState(statepack: { sharedState: State, privateState: PrivateState | null }) {
+async function saveGameState(statepack: SavedSession) {
     const fileAddress = path.join(__dirname, '..', STATE_FILE);
 
     try {

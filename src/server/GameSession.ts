@@ -14,6 +14,7 @@ import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
 import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
 import { SERVER_NAME, SINGLE_PLAYER  } from "../server/configuration"
 import { validator } from "./services/validation/ValidatorService";
+import { BackupStateHandler } from "./state_handlers/BackupStateHandler";
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
@@ -47,7 +48,7 @@ export class GameSession {
             return;
         }
 
-        const { sharedState, privateState } = savedSession;
+        const { sharedState, privateState, backupState } = savedSession;
         const { gameId, sessionOwner, players, chat } = sharedState;
 
         this.actionProcessor = (() => {
@@ -57,6 +58,7 @@ export class GameSession {
                         {
                             playState: new PlayStateHandler(SERVER_NAME, sharedState),
                             privateState: new PrivateStateHandler(privateState!),
+                            backupState: new BackupStateHandler(SERVER_NAME, backupState),
                         },
                         this.autoBroadcast,
                         this.transmitVp
@@ -76,13 +78,13 @@ export class GameSession {
         })();
     }
 
-    public getCurrentSession() {
+    public getCurrentSession(): SavedSession {
         const state = this.actionProcessor.getState();
+        const isPlay = state.sessionPhase === Phase.play;
         return {
             sharedState: state,
-            privateState: state.sessionPhase === Phase.play
-                ? (this.actionProcessor as PlayProcessor).getPrivateState()
-                : null,
+            backupState: isPlay ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
+            privateState: isPlay ? (this.actionProcessor as PlayProcessor).getPrivateState() : null,
         };
     }
 
@@ -262,17 +264,17 @@ export class GameSession {
                     if (bundleResult.err)
                         return lib.fail('Cannot start game!');
 
-                    const { privateState, playState } = bundleResult.data;
-
                     try {
                         this.actionProcessor = new PlayProcessor(
-                            { privateState, playState },
+                            bundleResult.data,
                             this.autoBroadcast,
                             this.transmitVp,
                         );
                     } catch (error) {
                         return lib.fail(String(error));
                     }
+
+                    const { playState } = bundleResult.data;
 
                     return lib.pass({ state: playState.toDto() });
                 }
