@@ -64,7 +64,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: MOVE
     public processMove(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
-        this.enableUndo(player);
+        this.preserveState(player);
         const { name: playerName, color: playerColor } = player.getIdentity();
 
         const movementPayload = validator.validateMovementPayload(payload);
@@ -131,7 +131,7 @@ export class PlayProcessor implements SessionProcessor {
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged())
                 return true;
 
-            this.disableUndo(player);
+            this.wipeState(player);
 
             const influenceRoll = ((): Probable<DiceSix> => {
                 player.rollInfluence();
@@ -242,7 +242,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: FAVOR
     public processFavorSpending(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
-        this.enableUndo(player);
+        this.preserveState(player);
 
         if (!player.getFavor() || player.isPrivileged())
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
@@ -260,7 +260,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: DROP ITEM
     public processItemDrop(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        this.enableUndo(player);
+        this.preserveState(player);
 
         const dropPayload = validator.validateDropItemPayload(payload);
 
@@ -287,7 +287,7 @@ export class PlayProcessor implements SessionProcessor {
     public processLoadGood(data: DataDigest): Probable<StateResponse> {
         const { payload, player } = data;
         const { color, name } = player.getIdentity();
-        this.enableUndo(player);
+        this.preserveState(player);
 
         const loadGoodPayload = validator.validateLoadGoodPayload(payload);
 
@@ -384,7 +384,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: DONATE GOODS
     public donateGoods(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        this.disableUndo(player);
+        this.wipeState(player);
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
         if (!marketSlotPayload)
@@ -435,7 +435,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: SELL SPECIALTY
     public processSellSpecialty(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
-        this.enableUndo(player);
+        this.preserveState(player);
         const { name, color } = player.getIdentity();
         const specialty = player.getSpecialty();
 
@@ -473,7 +473,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: BUY METAL
     public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        this.enableUndo(player);
+        this.preserveState(player);
         const { name, color } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
@@ -521,7 +521,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: DONATE METAL
     public processMetalDonation(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
-        this.enableUndo(player);
+        this.preserveState(player);
         const { color, name } = player.getIdentity();
         const donationPayload = validator.validateMetalDonationPayload(payload);
 
@@ -593,7 +593,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: END TURN
     public processEndTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
         const { player } = data;
-        this.disableUndo(player);
+        this.wipeState(player);
         const { turnOrder, name, color } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
@@ -642,7 +642,7 @@ export class PlayProcessor implements SessionProcessor {
 
     public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
         const { player } = digest;
-        this.disableUndo(player);
+        this.preserveState(player);
 
         const rival = this.playState.getRivalData();
 
@@ -662,6 +662,7 @@ export class PlayProcessor implements SessionProcessor {
         );
 
         if (isShiftingMarket) {
+            this.wipeState(player);
             if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
                 return lib.fail('Cannot shift market from here!');
 
@@ -732,7 +733,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: UPGRADE
     public processUpgrade(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
-        this.enableUndo(player);
+        this.preserveState(player);
 
         if (player.mayUpgradeCargo()) {
             player.removeAction(Action.upgrade_cargo);
@@ -1019,7 +1020,7 @@ export class PlayProcessor implements SessionProcessor {
         this.backupState.addServerMessage(message, as);
     }
 
-    private enableUndo(player: PlayerHandler) {
+    private preserveState(player: PlayerHandler) {
         this.backupState.saveCopy({
             playState: this.getState(),
             privateState: this.getPrivateState(),
@@ -1027,7 +1028,7 @@ export class PlayProcessor implements SessionProcessor {
         player.enableUndo();
     }
 
-    private disableUndo(player: PlayerHandler) {
+    private wipeState(player: PlayerHandler) {
         this.backupState.wipeBackup();
         player.disableUndo();
     }
