@@ -147,12 +147,17 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         return this.color;
     }
 
+    public isLocal() {
+        return Boolean(this.localPlayerColor);
+    }
+
     public getElement() {
         return this.group;
     }
 
     public disable() {
         this.cargoBand.disable();
+        this.specialtyGoodButton.disable();
     }
 
     private toggleSpecialistCard() {

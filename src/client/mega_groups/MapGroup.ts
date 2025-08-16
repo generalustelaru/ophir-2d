@@ -213,8 +213,8 @@ export class MapGroup implements MegaGroupInterface {
 
     public disable(): void {
         this.localShip?.switchControl(false);
-        this.endTurnButton?.disableAction();
-        this.favorButton?.disableAction();
+        this.endTurnButton?.disable();
+        this.favorButton?.disable();
     }
 
     public createSetupPayload(): GameSetupPayload {

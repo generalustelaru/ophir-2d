@@ -86,6 +86,8 @@ export class PlayerGroup implements MegaGroupInterface {
     }
 
     public disable(): void {
-        this.playerPlacards.forEach(placard => placard.disable());
+        this.playerPlacards.forEach(placard => {
+            placard.isLocal() && placard.disable()
+        });
     }
 }
