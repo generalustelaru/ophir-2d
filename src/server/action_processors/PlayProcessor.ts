@@ -28,9 +28,11 @@ export class PlayProcessor implements SessionProcessor {
         broadcastCallback: (state: PlayState) => void,
         transmitVp: (vp: number, socketId: string) => void,
     ) {
-        this.playState = stateBundle.playState;
-        this.privateState = stateBundle.privateState;
-        this.backupState = new BackupStateHandler(SERVER_NAME, null); // TODO: add backup state to persisted state to be used here
+        const { playState, privateState, backupState } = stateBundle;
+
+        this.playState = playState;
+        this.privateState = privateState;
+        this.backupState = backupState;
         this.autoBroadcast = broadcastCallback;
         this.transmitVp = transmitVp;
 
@@ -59,6 +61,10 @@ export class PlayProcessor implements SessionProcessor {
 
     public getPrivateState() {
         return this.privateState.toDto();
+    }
+
+    public getBackupState() {
+        return this.backupState.getState();
     }
 
     // MARK: MOVE

@@ -12,6 +12,10 @@ export class BackupStateHandler {
         this.backupState = initialState;
     }
 
+    getState() {
+        return this.backupState;
+    }
+
     public saveCopy(bundle: BackupState) {
         this.backupState = bundle;
     }
