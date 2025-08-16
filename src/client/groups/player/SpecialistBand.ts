@@ -47,6 +47,7 @@ export class SpecialistBand extends Button implements DynamicGroupInterface<bool
         });
 
         this.group.add(this.background, this.label);
+        this.enable();
     }
 
     public getElement(): Konva.Group {

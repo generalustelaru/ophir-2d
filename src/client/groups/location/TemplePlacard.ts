@@ -133,9 +133,9 @@ export class TemplePlacard implements DynamicGroupInterface<TempleUpdate> {
     }
 
     public disable(): void {
-        this.marketCard.disableAction();
-        this.upgradeButton.disableAction();
-        this.goldDonationCard.disableAction();
-        this.silverDonationCard.disableAction();
+        this.marketCard.disable();
+        this.upgradeButton.disable();
+        this.goldDonationCard.disable();
+        this.silverDonationCard.disable();
     }
 }

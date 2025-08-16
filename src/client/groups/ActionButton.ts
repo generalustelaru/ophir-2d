@@ -18,8 +18,4 @@ export abstract class ActionButton extends Button {
     public setEnabled(shouldEnable: boolean) {
         shouldEnable ? this.enable() : this.disable();
     }
-
-    public disableAction(): void {
-        this.disable();
-    }
 }

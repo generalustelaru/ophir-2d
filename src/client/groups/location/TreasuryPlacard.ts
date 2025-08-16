@@ -170,9 +170,9 @@ export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
     }
 
     public disable(): void {
-        this.goldForFavorCard.disableAction();
-        this.silverForFavorCard.disableAction();
-        this.goldForCoinsCard.disableAction();
-        this.silverForCoinsCard.disableAction();
+        this.goldForFavorCard.disable();
+        this.silverForFavorCard.disable();
+        this.goldForCoinsCard.disable();
+        this.silverForCoinsCard.disable();
     }
 }

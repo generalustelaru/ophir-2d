@@ -98,7 +98,7 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
 
     public disable() {
         this.cargoDrawData.forEach(slot => {
-            slot.element?.disableAction();
+            slot.element?.disable();
         });
     }
 }
