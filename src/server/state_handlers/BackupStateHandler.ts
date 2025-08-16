@@ -14,12 +14,10 @@ export class BackupStateHandler {
 
     public saveCopy(bundle: BackupState) {
         this.backupState = bundle;
-        console.log('state copied')
     }
 
     public wipeBackup() {
         this.backupState = null;
-        console.log('state wiped')
     }
 
     public retrieveBackup(): Probable<BackupState> {
@@ -28,7 +26,6 @@ export class BackupStateHandler {
 
         const bundle = tools.getCopy(this.backupState) ;
         this.backupState = null;
-        console.log('state returned, then wiped')
         return lib.pass(bundle);
     }
 
