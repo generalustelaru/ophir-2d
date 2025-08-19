@@ -5,14 +5,13 @@ import localState from '../state';
 import { PlayState } from "~/shared_types";
 
 export class LocationGroup implements MegaGroupInterface {
-
     private stage: Konva.Stage;
     private group: Konva.Group;
     private marketPlacard: MarketPlacard | null = null;
     private treasuryPlacard: TreasuryPlacard | null = null;
     private templePlacard: TemplePlacard | null = null;
-
     private sellGoodsCallback: Function;
+
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
