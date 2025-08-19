@@ -43,11 +43,7 @@ export const CanvasService = new class extends Communicator {
         this.sellGoodsModal = new SellGoodsModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
-            console.log('open modal for',slot)
             this.sellGoodsModal.show(slot);
-            setTimeout(() => {
-                this.sellGoodsModal.close();
-            },5000);
         }
 
         this.locationGroup = new LocationGroup(
