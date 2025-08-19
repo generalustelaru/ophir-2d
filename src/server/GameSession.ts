@@ -129,9 +129,9 @@ export class GameSession {
 
             if (commandMatch) {
                 // future switch if more commands are added
-                const nameMatch = message.input.match(/(?<=#name )\w.{2},*/);
+                const nameMatch = message.input.match(/(?<=#name )\w.*,*/);
 
-                if (nameMatch) {
+                if (nameMatch && nameMatch[0].length > 2) {
                     const newName = nameMatch[0];
 
                     if (!state.players.some(p => p.name === newName)) {
