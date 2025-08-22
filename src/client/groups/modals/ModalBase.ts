@@ -11,7 +11,7 @@ export abstract class ModalBase {
     protected group: Konva.Group;
     private cancelButton: CancelButton;
     private acceptButtonPosition: Coordinates;
-    private acceptButtonElement: Konva.Group | null = null;
+    private acceptButton: AcceptButton | null = null;
 
     constructor(stage: Konva.Stage) {
         this.stage = stage;
@@ -62,16 +62,15 @@ export abstract class ModalBase {
     }
 
     protected open(actionMessage: ClientMessage) {
-        this.acceptButtonElement && this.acceptButtonElement.destroy();
+        this.acceptButton && this.acceptButton.getElement().destroy();
 
-        const acceptButton = new AcceptButton(
+        this.acceptButton = new AcceptButton(
             this.stage,
             this.acceptButtonPosition,
             actionMessage,
         );
-        this.acceptButtonElement = acceptButton.getElement();
-        this.group.add(this.acceptButtonElement);
-        acceptButton.enable();
+        this.group.add(this.acceptButton.getElement());
+        this.acceptButton.enable();
         this.group.show();
     }
 }
