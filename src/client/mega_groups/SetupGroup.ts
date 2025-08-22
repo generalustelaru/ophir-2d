@@ -41,7 +41,8 @@ export class SetupGroup implements MegaGroupInterface {
             () => {
                 this.modal && this.modal.switchVisibility();
             },
-        )
+        );
+        this.showHideButton.enable();
         this.group.add(this.modal.getElement(), this.showHideButton.getElement())
     }
 
