@@ -7,8 +7,9 @@ import { ClientMessage, Coordinates } from "~/shared_types";
 const { COLOR } = clientConstants;
 
 export abstract class ModalBase {
-    private stage: Konva.Stage;
+    protected stage: Konva.Stage;
     protected group: Konva.Group;
+    protected background: Konva.Rect;
     private cancelButton: CancelButton;
     private acceptButtonPosition: Coordinates;
     private acceptButton: AcceptButton | null = null;
@@ -29,7 +30,7 @@ export abstract class ModalBase {
             height: stage.height(),
         })
 
-        const background = new Konva.Rect({
+        this.background = new Konva.Rect({
             x: stage.width() / 2 - width / 2,
             y: stage.height() / 2 - height / 2,
             width,
@@ -43,19 +44,19 @@ export abstract class ModalBase {
             () => { this.group.hide() },
             {
                 x: stage.width() / 2 - 75,
-                y: (stage.height() / 2 - 30 / 2) + background.height() / 2 - 40,
+                y: (stage.height() / 2 - 30 / 2) + this.background.height() / 2 - 40,
             }
         );
         this.cancelButton.enable();
 
         this.acceptButtonPosition = {
             x: stage.width() / 2 + 25,
-            y: (stage.height() / 2 - 30 / 2) + background.height() / 2 - 40,
+            y: (stage.height() / 2 - 30 / 2) + this.background.height() / 2 - 40,
         },
 
         this.group.add(...[
             lockLayer,
-            background,
+            this.background,
             this.cancelButton.getElement(),
         ]);
         stage.getLayers()[1].add(this.group);
