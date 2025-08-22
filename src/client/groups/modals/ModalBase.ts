@@ -1,16 +1,20 @@
 import Konva from "konva";
 import clientConstants from "../../client_constants";
 import { CancelButton } from "./CancelButton";
+import { AcceptButton } from "./AcceptButton";
+import { ClientMessage, Coordinates } from "~/shared_types";
 
 const { COLOR } = clientConstants;
 
 export abstract class ModalBase {
+    private stage: Konva.Stage;
     protected group: Konva.Group;
     private cancelButton: CancelButton;
-    private submitActionCallback: Function;
+    private acceptButtonPosition: Coordinates;
+    private acceptButtonElement: Konva.Group | null = null;
 
-    constructor(stage: Konva.Stage, submitActionCallback: Function) {
-        this.submitActionCallback = submitActionCallback;
+    constructor(stage: Konva.Stage) {
+        this.stage = stage;
         const width= 600;
         const height = 300;
 
@@ -38,22 +42,36 @@ export abstract class ModalBase {
             stage,
             () => { this.group.hide() },
             {
-                x: stage.width() / 2 - 50 / 2,
+                x: stage.width() / 2 - 75,
                 y: (stage.height() / 2 - 30 / 2) + background.height() / 2 - 40,
             }
         );
         this.cancelButton.enable();
 
-        this.group.add(lockLayer, background, this.cancelButton.getElement());
+        this.acceptButtonPosition = {
+            x: stage.width() / 2 + 25,
+            y: (stage.height() / 2 - 30 / 2) + background.height() / 2 - 40,
+        },
+
+        this.group.add(...[
+            lockLayer,
+            background,
+            this.cancelButton.getElement(),
+        ]);
         stage.getLayers()[1].add(this.group);
     }
 
-    protected open() {
-        this.group.show();
-    }
+    protected open(actionMessage: ClientMessage) {
+        this.acceptButtonElement && this.acceptButtonElement.destroy();
 
-    protected submitAction() {
-        this.submitActionCallback();
-        this.group.hide();
+        const acceptButton = new AcceptButton(
+            this.stage,
+            this.acceptButtonPosition,
+            actionMessage,
+        );
+        this.acceptButtonElement = acceptButton.getElement();
+        this.group.add(this.acceptButtonElement);
+        acceptButton.enable();
+        this.group.show();
     }
 }
