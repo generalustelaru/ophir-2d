@@ -16,7 +16,7 @@ export class MarketCard extends Button implements DynamicGroupInterface<MarketCa
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        callback: Function,
+        callback: Function | null,
         trade: Trade,
         fluctuation: Fluctuation | null = null,
     ) {

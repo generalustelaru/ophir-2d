@@ -58,9 +58,14 @@ export interface MegaGroupInterface {
     disable(): void,
 }
 
-export interface DynamicGroupInterface<S> {
+export interface DynamicGroupInterface<U> {
     getElement(): Konva.Group,
-    update(state: S): void,
+    update(update: U): void,
+}
+
+export interface ModalInterface<U,S> {
+    update(u: U): void,
+    show(s: S): void,
 }
 
 export interface StaticGroupInterface {
