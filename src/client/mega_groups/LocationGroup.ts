@@ -1,15 +1,15 @@
 import Konva from "konva";
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from "~/client_types";
-import { MarketPlacard, TreasuryPlacard, TemplePlacard } from "../groups/GroupList";
+import { MarketArea, TreasuryArea, TempleArea } from "../groups/GroupList";
 import localState from '../state';
 import { PlayState } from "~/shared_types";
 
 export class LocationGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
-    private marketPlacard: MarketPlacard | null = null;
-    private treasuryPlacard: TreasuryPlacard | null = null;
-    private templePlacard: TemplePlacard | null = null;
+    private marketArea: MarketArea | null = null;
+    private treasuryArea: TreasuryArea | null = null;
+    private templeArea: TempleArea | null = null;
     private sellGoodsCallback: Function;
 
     constructor(
@@ -38,7 +38,7 @@ export class LocationGroup implements MegaGroupInterface {
 
         const heightSegment = this.group.height() / 9;
 
-        this.marketPlacard = new MarketPlacard(
+        this.marketArea = new MarketArea(
             this.stage,
             state.setup.marketFluctuations,
             state.setup.templeTradeSlot,
@@ -52,18 +52,18 @@ export class LocationGroup implements MegaGroupInterface {
             this.sellGoodsCallback,
         );
 
-        this.treasuryPlacard = new TreasuryPlacard(
+        this.treasuryArea = new TreasuryArea(
             this.stage,
             {
                 width: this.group.width(),
                 height: heightSegment * 2,
                 x: 0,
-                y: this.marketPlacard.getElement().height(),
+                y: this.marketArea.getElement().height(),
             },
             { localPlayer: localPlayer, tier: state.temple.treasury, metalSupplies: state.itemSupplies.metals }
         );
 
-        this.templePlacard = new TemplePlacard(
+        this.templeArea = new TempleArea(
             this.stage,
             state.setup.templeTradeSlot,
             state.market,
@@ -71,15 +71,15 @@ export class LocationGroup implements MegaGroupInterface {
                 width: this.group.width(),
                 height: heightSegment * 4,
                 x: 0,
-                y: this.marketPlacard.getElement().height() + this.treasuryPlacard.getElement().height(),
+                y: this.marketArea.getElement().height() + this.treasuryArea.getElement().height(),
             },
             state.temple.maxLevel
         );
 
         this.group.add(
-            this.marketPlacard.getElement(),
-            this.treasuryPlacard.getElement(),
-            this.templePlacard.getElement(),
+            this.marketArea.getElement(),
+            this.treasuryArea.getElement(),
+            this.templeArea.getElement(),
         );
     }
 
@@ -102,19 +102,19 @@ export class LocationGroup implements MegaGroupInterface {
             trade: state.market[state.setup.templeTradeSlot],
         }
 
-        this.marketPlacard?.update(marketUpdate);
-        this.treasuryPlacard?.update({
+        this.marketArea?.update(marketUpdate);
+        this.treasuryArea?.update({
             localPlayer: localPlayer ?? null,
             tier: state.temple.treasury,
             metalSupplies: state.itemSupplies.metals,
         });
-        this.templePlacard?.update(templeUpdate);
+        this.templeArea?.update(templeUpdate);
     }
 
     public disable(): void {
-        this.marketPlacard?.disable();
-        this.treasuryPlacard?.disable();
-        this.templePlacard?.disable();
+        this.marketArea?.disable();
+        this.treasuryArea?.disable();
+        this.templeArea?.disable();
     }
 
 }

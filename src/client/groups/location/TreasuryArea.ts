@@ -6,7 +6,7 @@ import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
 
-export class TreasuryPlacard implements DynamicGroupInterface<TreasuryUpdate> {
+export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
