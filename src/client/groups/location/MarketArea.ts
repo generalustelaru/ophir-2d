@@ -6,7 +6,7 @@ import { MarketDeck, MarketCardSlot } from "../GroupList";
 
 const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
 
-export class MarketPlacard implements DynamicGroupInterface<MarketUpdate> {
+export class MarketArea implements DynamicGroupInterface<MarketUpdate> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
