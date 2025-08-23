@@ -69,6 +69,7 @@ export abstract class ModalBase {
             this.stage,
             this.acceptButtonPosition,
             actionMessage,
+            () => { this.group.hide() },
         );
         this.group.add(this.acceptButton.getElement());
         this.acceptButton.enable();

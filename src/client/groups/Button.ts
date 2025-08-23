@@ -3,7 +3,7 @@ import { GroupLayoutData } from "~/client_types";
 export abstract class Button {
     protected group: Konva.Group;
     private stage: Konva.Stage;
-    private isActive: boolean = false;
+    protected isActive: boolean = false;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, callback: Function | null) {
         this.stage = stage;
