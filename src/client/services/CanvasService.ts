@@ -149,10 +149,10 @@ export const CanvasService = new class extends Communicator {
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
-                    this.sellGoodsModal.update(state);
                     this.fitStageIntoParentContainer();
                     this.isPlayDrawn = true;
                 }
+                this.sellGoodsModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
