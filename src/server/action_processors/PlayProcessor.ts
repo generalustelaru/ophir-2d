@@ -729,6 +729,8 @@ export class PlayProcessor implements SessionProcessor {
         if (!revertedPlayer)
             return lib.fail('Could not find active player in backup');
 
+        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
+
         this.addServerMessage(`${name} has reconsidered last action`, color)
         const playerHandler = new PlayerHandler(revertedPlayer);
         playerHandler.disableUndo();
