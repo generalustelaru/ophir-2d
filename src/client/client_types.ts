@@ -63,7 +63,7 @@ export interface DynamicGroupInterface<U> {
     update(update: U): void,
 }
 
-export interface ModalInterface<U,S> {
+export interface ModalInterface<U, S> {
     update(u: U): void,
     show(s: S): void,
 }
