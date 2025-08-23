@@ -4,7 +4,7 @@ import { ActionButton } from "../ActionButton";
 
 export class AcceptButton extends ActionButton {
 
-    constructor(stage: Konva.Stage, position: Coordinates, actionMessage: ClientMessage) {
+    constructor(stage: Konva.Stage, position: Coordinates, actionMessage: ClientMessage, dismissCallback: Function) {
         const layout = {
             x: position.x,
             y: position.y,
@@ -31,6 +31,11 @@ export class AcceptButton extends ActionButton {
         });
 
         this.group.add(buttonBackground, buttonLabel);
+
+        this.group.on('click', () => {
+            if (this.isActive)
+                dismissCallback();
+        });
     }
 
     public getElement() {
