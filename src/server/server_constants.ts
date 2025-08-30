@@ -18,13 +18,13 @@ const serverConstants: ServerConstants = {
             specialty: null,
             description: 'Begins with fully upgraded cargo hold.',
         },
-        {
-            name: SpecialistName.chancellor,
-            displayName: 'Chancellor',
-            startingFavor: 1,
-            specialty: 'gems',
-            description: 'May substitute goods with Favor when trading.', // TODO: implement this
-        },
+        // {
+        //     name: SpecialistName.chancellor,
+        //     displayName: 'Chancellor',
+        //     startingFavor: 1,
+        //     specialty: 'gems',
+        //     description: 'May substitute goods with Favor when trading.', // TODO: implement this
+        // },
         {
             name: SpecialistName.harbormaster,
             displayName: 'Harbormaster',
