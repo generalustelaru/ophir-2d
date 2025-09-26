@@ -324,14 +324,13 @@ export class PlayProcessor implements SessionProcessor {
 
         this.addServerMessage(`${name} picked up ${localGood}`, color);
 
-        player.removeAction(Action.load_good);
-
         if (player.isHarbormaster())
             this.clearMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
         this.determinePlayerActions(player);
+        player.removeAction(Action.load_good);
         // player.setTrades(this.pickFeasibleTrades(player.getCargo()));
 
         return lib.pass(this.saveAndReturn(player));
