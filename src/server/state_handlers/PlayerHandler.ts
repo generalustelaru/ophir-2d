@@ -1,5 +1,5 @@
 import {
-    Action, CargoMetal, DiceSix, ItemName, LocalActions, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
+    Action, CargoMetal, DiceSix, ItemName, LocalAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist, SpecialistName,
 } from "~/shared_types";
 import { ObjectHandler, PlayerIdentity } from "~/server_types";
@@ -25,7 +25,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private moveActions: Writable<number>;
     private _isAnchored: Writable<boolean>;
     private isHandlingRival: Writable<boolean>;
-    private localActions: ArrayWritable<LocalActions>;
+    private localActions: ArrayWritable<LocalAction>;
     private destinations: ArrayWritable<ZoneName>;
     private navigatorAccess: ArrayWritable<ZoneName>;
     private cargo: ArrayWritable<ItemName>;
@@ -106,7 +106,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isActive.get();
     }
 
-    public hasAction(action: LocalActions) {
+    public hasAction(action: LocalAction) {
         return this._isAnchored && this.getActions().includes(action);
     }
 
@@ -134,12 +134,18 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.navigatorAccess.overwrite(options);
     }
 
-    public setActions(actions: Array<LocalActions>) {
+    public setActions(actions: Array<LocalAction>) {
         this._isAnchored.set(true);
         this.localActions.overwrite(actions);
     }
 
-    public removeAction(action: LocalActions) {
+    public appendActions(actions: Array<LocalAction>) {
+        for(const action of actions) {
+            this.localActions.addOne(action);
+        }
+    }
+
+    public removeAction(action: LocalAction) {
         this.localActions.removeOne(action);
     }
 
@@ -334,7 +340,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.localActions.clear();
     }
 
-    public unfreeze(actions: Array<LocalActions>, rivalZone: ZoneName) {
+    public unfreeze(actions: Array<LocalAction>, rivalZone: ZoneName) {
         this.isHandlingRival.set(false);
         this.localActions.overwrite(actions);
         this.destinations.removeOne(rivalZone);

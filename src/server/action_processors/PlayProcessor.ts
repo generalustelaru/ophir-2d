@@ -1,6 +1,8 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor,
     Metal, StateResponse, PlayState, SpecialistName, DiceSix, Trade, ChatEntry, PlayerEntity,
+    LocalAction,
+    ZoneName,
 } from "~/shared_types";
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -115,7 +117,7 @@ export class PlayProcessor implements SessionProcessor {
         if (playerMovementAllowed.err)
             return lib.fail('Movement not alowed.');
 
-        const hasSailed = (() => {
+        const hasSailed = ((): boolean => {
             player.spendMove();
 
             if (player.isBarrierCrossing(target)) {
@@ -139,41 +141,34 @@ export class PlayProcessor implements SessionProcessor {
 
             this.wipeState(player);
 
-            const influenceRoll = ((): Probable<DiceSix> => {
+            const influenceRoll = ((): DiceSix => {
                 player.rollInfluence();
                 const roll = player.getInfluence();
 
                 if (roll === 6) {
                     this.addServerMessage(`${playerName} rolled a natural 6!`, playerColor);
 
-                    return lib.pass(roll);
+                    return roll;
                 }
 
                 if (player.getSpecialistName() === SpecialistName.temple_guard) {
 
-                    const bumpedRoll = player.validateDiceSix(roll + 1);
-
-                    if (!bumpedRoll)
-                        return lib.fail('Failed calculating valid D6.');
+                    const bumpedRoll = roll + 1 as DiceSix;
 
                     player.setInfluence(bumpedRoll);
                     this.addServerMessage(`${playerName} bumped the roll to ${bumpedRoll}.`, playerColor);
 
-                    return lib.pass(bumpedRoll);
+                    return bumpedRoll;
                 }
 
                 this.addServerMessage(`${playerName} rolled a ${roll}`, playerColor);
 
-                return lib.pass(roll);
+                return roll;
             })();
 
-            if (influenceRoll.err)
-                return lib.fail(influenceRoll.message);
+            const blockingPlayers = playersInZone.filter(p => p.influence > influenceRoll);
 
-            const playerInfluence = influenceRoll.data;
-            const blockingPlayers = playersInZone.filter(p => p.influence > playerInfluence);
-
-            if (!blockingPlayers.length && playerInfluence >= rivalInfluence)
+            if (!blockingPlayers.length && influenceRoll >= rivalInfluence)
                 return true;
 
             this.addServerMessage(
@@ -193,7 +188,9 @@ export class PlayProcessor implements SessionProcessor {
                 location: this.playState.getLocationName(target),
             });
 
-            this.determinePlayerActions(player);
+            player.setActions(this.getDefaultActions(player));
+            player.appendActions(this.getSpecialistActions(player));
+            player.setTrades(this.getTrades(player));
 
             if (player.getMoves() > 0) {
                 player.setDestinationOptions(
@@ -254,7 +251,10 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
-        this.determinePlayerActions(player)
+        player.setActions(this.getDefaultActions(player));
+        player.appendActions(this.getSpecialistActions(player));
+        player.setTrades(this.getTrades(player));
+
         this.addServerMessage(
             `${player.getIdentity().name} has spent favor`,
             player.getIdentity().color,
@@ -280,8 +280,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        this.determinePlayerActions(player);
-        // player.setTrades(this.pickFeasibleTrades(result.data));
+        player.appendActions(this.getSpecialistActions(player))
 
         const { name, color } = player.getIdentity();
         this.addServerMessage(`${name} ditched one ${item}`, color);
@@ -325,13 +324,12 @@ export class PlayProcessor implements SessionProcessor {
         this.addServerMessage(`${name} picked up ${localGood}`, color);
 
         if (player.isHarbormaster())
-            this.clearMovesAsHarbormaster(player);
+            this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
-        this.determinePlayerActions(player);
         player.removeAction(Action.load_good);
-        // player.setTrades(this.pickFeasibleTrades(player.getCargo()));
+        player.appendActions(this.getSpecialistActions(player));
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -379,7 +377,7 @@ export class PlayProcessor implements SessionProcessor {
         );
 
         if (player.isHarbormaster())
-            this.clearMovesAsHarbormaster(player);
+            this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
@@ -430,7 +428,7 @@ export class PlayProcessor implements SessionProcessor {
         this.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
 
         if (player.isHarbormaster())
-            this.clearMovesAsHarbormaster(player);
+            this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
@@ -465,7 +463,7 @@ export class PlayProcessor implements SessionProcessor {
             }
 
             if (player.isHarbormaster())
-                this.clearMovesAsHarbormaster(player);
+                this.updateMovesAsHarbormaster(player);
             else
                 player.clearMoves();
 
@@ -514,9 +512,10 @@ export class PlayProcessor implements SessionProcessor {
 
 
         player.setCargo(metalLoad.data);
+        player.appendActions(this.getSpecialistActions(player))
 
         if (player.isHarbormaster())
-            this.clearMovesAsHarbormaster(player);
+            this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
@@ -588,7 +587,7 @@ export class PlayProcessor implements SessionProcessor {
         }
 
         if (player.isHarbormaster())
-            this.clearMovesAsHarbormaster(player);
+            this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
@@ -753,7 +752,7 @@ export class PlayProcessor implements SessionProcessor {
             );
 
             if (player.isHarbormaster())
-                this.clearMovesAsHarbormaster(player);
+                this.updateMovesAsHarbormaster(player);
             else
                 player.clearMoves();
 
@@ -780,7 +779,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: PRIVATE
 
-    private clearMovesAsHarbormaster(harbormaster: PlayerHandler) {
+    private updateMovesAsHarbormaster(harbormaster: PlayerHandler) {
         const moves = harbormaster.getMoves();
 
         if (harbormaster.isPrivileged() && moves === 1) {
@@ -791,33 +790,37 @@ export class PlayProcessor implements SessionProcessor {
         }
     }
 
-    /**
-     * @description Mutates PlayerHandler
-     */
-    private determinePlayerActions(player: PlayerHandler) {
-        const seaZone = player.getBearings().seaZone;
-        const actions = this.playState.getLocalActions(seaZone);
+    private getDefaultActions(player: PlayerHandler): LocalAction[] {
+        return this.playState.getLocalActions(player.getBearings().seaZone);
+    }
+
+    private getTrades(player: PlayerHandler): MarketSlotKey[] {
+        const actions = player.getActions();
+
+        if (actions.filter(a => a === Action.sell_goods || a === Action.donate_goods).length)
+            return this.pickFeasibleTrades(player);
+
+        return [];
+    }
+
+    private getSpecialistActions(player: PlayerHandler): LocalAction[] {
+        const currentZone = player.getBearings().seaZone;
 
         if (player.isPostmaster()) {
-            const adjacentZones = this.privateState.getDestinations(seaZone);
+            const adjacentZones = this.privateState.getDestinations(currentZone);
 
             for (const zone of adjacentZones) {
-                if (this.playState.getLocalActions(zone).includes(Action.donate_metals)) {
-                    actions.push(Action.donate_metals);
-                    break;
-                }
+                if (this.playState.getLocationName(zone) === 'temple') // TODO: fix unlimited remote donation bug
+                    return [Action.donate_metals];
             }
         }
 
         if (player.isMoneychanger()) {
-            if (this.playState.getLocationName(seaZone) === 'temple')
-                actions.push(Action.sell_goods, Action.sell_specialty);
+            if (this.playState.getLocationName(currentZone) === 'temple')
+                return [Action.sell_goods, Action.sell_specialty];
         }
 
-        if (actions.filter(a => a === Action.sell_goods || a === Action.donate_goods).length)
-            player.setTrades(this.pickFeasibleTrades(player));
-
-        player.setActions(actions);
+        return [];
     }
 
     private loadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
@@ -827,16 +830,16 @@ export class PlayProcessor implements SessionProcessor {
 
         const emptyIndex = orderedCargo.indexOf('empty');
 
-        if (emptyIndex === -1) {
+        if (emptyIndex === -1)
             return lib.fail('Could not find an empty slot to load item');
-        }
 
-        const metalNames: Array<ItemName> = ['gold', 'silver'];
+        const metals: Array<ItemName> = ['gold', 'silver'];
         const supplies = this.playState.getItemSupplies();
 
-        if (metalNames.includes(item)) {
+        if (metals.includes(item)) {
+            const metal = item as Metal
 
-            if (supplies.metals[item as Metal] < 1)
+            if (supplies.metals[metal] < 1)
                 return lib.fail(`No ${item} available for loading`);
 
             if (orderedCargo[emptyIndex + 1] !== 'empty')
@@ -844,7 +847,7 @@ export class PlayProcessor implements SessionProcessor {
 
             orderedCargo[emptyIndex] = item;
             orderedCargo[emptyIndex + 1] = `${item}_extra` as CargoMetal;
-            this.playState.removeMetal(item as Metal);
+            this.playState.removeMetal(metal);
 
             return lib.pass(orderedCargo);
         }
