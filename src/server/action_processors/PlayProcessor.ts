@@ -729,7 +729,7 @@ export class PlayProcessor implements SessionProcessor {
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
 
-        this.addServerMessage(`${name} has reconsidered last action`, color)
+        this.addServerMessage(`${name} has reconsidered last action/move`, color)
         const playerHandler = new PlayerHandler(revertedPlayer);
         playerHandler.disableUndo();
 
@@ -747,7 +747,7 @@ export class PlayProcessor implements SessionProcessor {
             player.addCargoSpace();
 
             this.addServerMessage(
-                `${player.getIdentity().name} upgraded their cargo hold.`,
+                `${player.getIdentity().name} bought a cargo slot.`,
                 player.getIdentity().color,
             );
 
@@ -759,7 +759,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.pass(this.saveAndReturn(player));
         }
 
-        return lib.fail(`Conditions for upgrade not met`);
+        return lib.fail(`Conditions for upgrade not met.`);
     }
 
     public addChat(entry: ChatEntry): StateResponse {
