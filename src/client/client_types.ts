@@ -147,6 +147,7 @@ export enum EventType {
     name_transmission = 'name_transmission',
     // ui_transition = 'ui_transition',
     open_action_modal = 'open_action_modal',
+    start_turn = 'start_turn',
 }
 
 export type LaconicType =
@@ -155,6 +156,7 @@ export type LaconicType =
     | EventType.start_action
     | EventType.close
     | EventType.timeout
+    | EventType.start_turn
 ;
 
 export type Event =

@@ -2,6 +2,7 @@ import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission, EnrolmentResponse,
     NewNameTransmission,
+    TurnNotificationTransmission,
 } from "~/shared_types";
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -61,6 +62,9 @@ export const CommunicationService = new class extends Communicator {
                 case this.isGameStateResponse(data):
                     this.createStateEvent(data);
                     break;
+                case this.isTurnNotification(data):
+                    this.createEvent({ type: EventType.start_turn, detail: null });
+                    break;
                 case this.isVictoryPointsTransmission(data):
                     this.createEvent({ type: EventType.vp_transmission, detail: data })
                     break;
@@ -105,6 +109,10 @@ export const CommunicationService = new class extends Communicator {
 
     private isGameStateResponse(data: ServerMessage): data is StateResponse {
         return 'state' in data;
+    }
+
+    private isTurnNotification(data: ServerMessage): data is TurnNotificationTransmission {
+        return 'turnStart' in data;
     }
 
     private isEnrolmentApprovalTransmission(data: ServerMessage): data is EnrolmentResponse {

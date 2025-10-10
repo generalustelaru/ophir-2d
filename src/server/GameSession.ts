@@ -22,7 +22,7 @@ export class GameSession {
     private transmitVp: (vp: number, socketId: string ) => void;
     private transmitEnrolment: (approvedColor: PlayerColor, socketId: string ) => void;
     private transmitNameUpdate: (newName: string, socketId: string) => void;
-    // TODO: need to transmit new name approval to update client state and then add canvas update across clients
+    private transmitTurnNotification: (socketId: string) => void;
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
@@ -39,6 +39,9 @@ export class GameSession {
         }
         this.transmitNameUpdate = (newName: string, socketId: string) => {
             transmitCallback(socketId, { newName });
+        }
+        this.transmitTurnNotification = (socketId: string) => {
+            transmitCallback(socketId, { turnStart: null });
         }
 
         if (!savedSession) {
@@ -61,6 +64,7 @@ export class GameSession {
                             backupState: new BackupStateHandler(SERVER_NAME, backupState),
                         },
                         this.autoBroadcast,
+                        this.transmitTurnNotification,
                         this.transmitVp
                     );
 
@@ -268,6 +272,7 @@ export class GameSession {
                         this.actionProcessor = new PlayProcessor(
                             bundleResult.data,
                             this.autoBroadcast,
+                            this.transmitTurnNotification,
                             this.transmitVp,
                         );
                     } catch (error) {

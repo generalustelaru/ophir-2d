@@ -22,12 +22,14 @@ export class PlayProcessor implements SessionProcessor {
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
     private autoBroadcast: (state: PlayState) => void;
+    private transmitTurnNotification: (socketId: string) => void;
     private transmitVp: (vp: number, socketId: string) => void;
 
     /** @throws */
     constructor(
         stateBundle: StateBundle,
         broadcastCallback: (state: PlayState) => void,
+        transmitTurnNotification: (socketId: string) => void,
         transmitVp: (vp: number, socketId: string) => void,
     ) {
         const { playState, privateState, backupState } = stateBundle;
@@ -36,6 +38,7 @@ export class PlayProcessor implements SessionProcessor {
         this.privateState = privateState;
         this.backupState = backupState;
         this.autoBroadcast = broadcastCallback;
+        this.transmitTurnNotification = transmitTurnNotification;
         this.transmitVp = transmitVp;
 
         const players = this.playState.getAllPlayers();
@@ -630,7 +633,11 @@ export class PlayProcessor implements SessionProcessor {
                 this.privateState.getDestinations(seaZone),
                 nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
-            this.playState.updateRival(nextPlayer.getIdentity().color);
+
+            const { color, socketId } = nextPlayer.getIdentity();
+            this.playState.updateRival(color);
+
+            this.transmitTurnNotification(socketId);
 
             return lib.pass(nextPlayer);
         })();
@@ -1015,6 +1022,7 @@ export class PlayProcessor implements SessionProcessor {
                 this.addServerMessage(`${activePlayer.name} is idle`);
                 this.playState.savePlayer(activePlayer);
 
+                this.transmitTurnNotification(activePlayer.socketId);
                 this.autoBroadcast(this.playState.toDto());
             }
 

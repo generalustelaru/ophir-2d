@@ -22,19 +22,19 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
         this.marketCardLayout = {
             width: 66,
             height: 108,
-            x: this.background.x(),
-            y: this.background.y(),
+            x: this.contentGroup.x(),
+            y: this.contentGroup.y(),
         }
 
         this.coinDial = new CoinDial(
             {
-                x: this.background.x() + 300,
-                y: this.background.y() + 150,
+                x: this.contentGroup.x() + 300,
+                y: this.contentGroup.y() + 150,
             },
             0,
         );
-        const driftX = this.background.x();
-        const driftY = this.background.y();
+        const driftX = this.contentGroup.x();
+        const driftY = this.contentGroup.y();
         this.cargoItemLayout = [
             { x: 0, y: 0 },
             { x: 20, y: 0 },
@@ -47,22 +47,22 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
             }
         });
 
-        this.group.add(this.coinDial.getElement())
+        this.contentGroup.add(this.coinDial.getElement())
     }
 
     public update(state: PlayState) {
         this.market = state.market
         this.fluctuations = state.setup.marketFluctuations;
         this.playerCargo = state.players.find(p => p.isActive)?.cargo || [];
-        console.log('UPDATED');
-        console.log({cargo: this.playerCargo})
+        console.debug('UPDATED');
+        console.debug({cargo: this.playerCargo})
     }
 
     public show(slot: MarketSlotKey) {
         if (!this.market || !this.fluctuations)
             throw new Error("Cannot render modal! Update data is missing.");
-        console.log('SHOW')
-        console.log({cargo: this.playerCargo});
+        console.debug('SHOW')
+        console.debug({cargo: this.playerCargo});
         // this.marketCard?.getElement().destroy();
         // this.marketCard = new MarketCard(
         //     this.stage,
@@ -71,6 +71,10 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
         //     this.market[slot],
         //     this.fluctuations[slot],
         // );
+        // cargo goods remain fixed because they're not removed during update
+        // Solution would be to either include them in a group for easy removal,
+        // or reimplement the logic found on the player placard, maybe replacing it as well with a parameter for behavior differentiation.
+        // this.group.destroyChildren();
         const goodTypes: Array<ItemName> = ['gems', 'ebony', 'marble', 'linen'];
         const playerGoods = this.playerCargo.filter(i => goodTypes.includes(i));
         playerGoods.forEach((good, index) => {
@@ -85,7 +89,7 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
                 strokeWidth: 1,
                 scale: { x: 2, y: 2 },
             });
-            this.group.add(icon);
+            this.contentGroup.add(icon);
         })
 
         // this.group.add(this.marketCard.getElement());

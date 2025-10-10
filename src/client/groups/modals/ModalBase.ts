@@ -1,6 +1,6 @@
 import Konva from "konva";
 import clientConstants from "../../client_constants";
-import { CancelButton } from "./CancelButton";
+import { DismissButton } from "./DismissButton";
 import { AcceptButton } from "./AcceptButton";
 import { ClientMessage, Coordinates } from "~/shared_types";
 
@@ -8,71 +8,99 @@ const { COLOR } = clientConstants;
 
 export abstract class ModalBase {
     protected stage: Konva.Stage;
-    protected group: Konva.Group;
-    protected background: Konva.Rect;
-    private cancelButton: CancelButton;
+    private screenGroup: Konva.Group;
+    // protected contentLayout: GroupLayoutData;
+    private modalGroup: Konva.Group;
+    protected contentGroup: Konva.Group;
+    private dismissButton: DismissButton;
     private acceptButtonPosition: Coordinates;
     private acceptButton: AcceptButton | null = null;
 
-    constructor(stage: Konva.Stage) {
+    constructor(
+        stage: Konva.Stage,
+        dimensions: { width: number, height: number } = { width: 600, height: 300 },
+    ) {
         this.stage = stage;
-        const width= 600;
-        const height = 300;
+        const { width, height } = dimensions;
 
-        this.group = new Konva.Group({
+        this.screenGroup = new Konva.Group({
             width: stage.width(),
             height: stage.height(),
             visible: false,
         });
 
-        const lockLayer = new Konva.Rect({
-            width: stage.width(),
-            height: stage.height(),
-        })
+        // lock layer
+        this.screenGroup.add(...[
+            new Konva.Rect({
+                width: stage.width(),
+                height: stage.height(),
+            }),
+        ]);
 
-        this.background = new Konva.Rect({
+        this.modalGroup = new Konva.Group({
             x: stage.width() / 2 - width / 2,
             y: stage.height() / 2 - height / 2,
             width,
             height,
-            fill: COLOR.modalBlue,
-            cornerRadius: 10,
         });
 
-        this.cancelButton = new CancelButton(
+        this.modalGroup.add(...[
+            new Konva.Rect({
+                width,
+                height,
+                fill: COLOR.modalBlue,
+                cornerRadius: 10,
+                stroke: COLOR.boneWhite,
+                strokeWidth: 4,
+            }),
+        ]);
+
+        const buttonLevel = height - 50;
+
+        this.contentGroup = new Konva.Group({ width, height: buttonLevel,});
+
+        this.dismissButton = new DismissButton(
             stage,
-            () => { this.group.hide() },
+            () => { this.screenGroup.hide() },
             {
-                x: stage.width() / 2 - 75,
-                y: (stage.height() / 2 - 30 / 2) + this.background.height() / 2 - 40,
+                x: this.modalGroup.width() / 2 - 75,
+                y: buttonLevel,
             }
         );
-        this.cancelButton.enable();
+        this.dismissButton.enable();
 
         this.acceptButtonPosition = {
             x: stage.width() / 2 + 25,
-            y: (stage.height() / 2 - 30 / 2) + this.background.height() / 2 - 40,
+            y: buttonLevel + 10,
         },
 
-        this.group.add(...[
-            lockLayer,
-            this.background,
-            this.cancelButton.getElement(),
+        this.modalGroup.add(...[
+            this.contentGroup,
+            this.dismissButton.getElement(),
         ]);
-        stage.getLayers()[1].add(this.group);
+
+        this.screenGroup.add(...[
+            this.modalGroup
+        ]);
+        stage.getLayers()[1].add(this.screenGroup);
     }
 
-    protected open(actionMessage: ClientMessage) {
+    protected open(actionMessage: ClientMessage | null = null) {
         this.acceptButton && this.acceptButton.getElement().destroy();
 
-        this.acceptButton = new AcceptButton(
-            this.stage,
-            this.acceptButtonPosition,
-            actionMessage,
-            () => { this.group.hide() },
-        );
-        this.group.add(this.acceptButton.getElement());
-        this.acceptButton.enable();
-        this.group.show();
+        if (actionMessage) {
+            this.acceptButton = new AcceptButton(
+                this.stage,
+                this.acceptButtonPosition,
+                actionMessage,
+                () => { this.screenGroup.hide() },
+            );
+            this.screenGroup.add(this.acceptButton.getElement());
+            this.acceptButton.enable();
+        } else {
+            // stage.width() / 2
+        }
+
+        this.screenGroup.show();
     }
 }

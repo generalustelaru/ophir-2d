@@ -9,6 +9,7 @@ import localState from '../state';
 import { EventType } from "~/client_types";
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import { SellGoodsModal } from '../groups/modals/SellGodsModal';
+import { StartTurnModal } from '../groups/modals/StartTurnModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -20,6 +21,7 @@ export const CanvasService = new class extends Communicator {
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false
     private isPlayDrawn: boolean = false;
+    private startTurnModal: StartTurnModal;
     private sellGoodsModal: SellGoodsModal;
 
     public constructor() {
@@ -41,6 +43,7 @@ export const CanvasService = new class extends Communicator {
         const segmentWidth = this.stage.width() / 4;
 
         this.sellGoodsModal = new SellGoodsModal(this.stage);
+        this.startTurnModal = new StartTurnModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
             this.sellGoodsModal.show(slot);
@@ -102,11 +105,8 @@ export const CanvasService = new class extends Communicator {
         return this.mapGroup.createSetupPayload();
     }
 
-    public updatePlayerVp(color: PlayerColor, vp: number) {
-        if (!this.isPlayDrawn)
-            throw new Error("Cannot update. VP element is not instanced.");
-
-        this.playerGroup.updatePlayerVp(color, vp);
+    public notifyForTurn(): void {
+        this.startTurnModal.show();
     }
 
     public drawUpdateElements(state: State, toDisable = false): void {

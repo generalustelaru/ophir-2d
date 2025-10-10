@@ -211,6 +211,10 @@ window.addEventListener(EventType.play_update, (event: CustomEventInit) => {
     debug(playState);
 });
 
+window.addEventListener(EventType.start_turn, ()=> {
+    CanvasService.notifyForTurn();
+});
+
 window.addEventListener(
     EventType.info,
     (event: CustomEventInit) => {
