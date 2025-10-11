@@ -70,8 +70,8 @@ export abstract class ModalBase {
         this.dismissButton.enable();
 
         this.acceptButtonPosition = {
-            x: stage.width() / 2 + 25,
-            y: buttonLevel + 10,
+            x: this.modalGroup.width() / 2 + 25,
+            y: buttonLevel,
         },
 
         this.modalGroup.add(...[
@@ -95,7 +95,7 @@ export abstract class ModalBase {
                 actionMessage,
                 () => { this.screenGroup.hide() },
             );
-            this.screenGroup.add(this.acceptButton.getElement());
+            this.modalGroup.add(this.acceptButton.getElement());
             this.acceptButton.enable();
         } else {
             // stage.width() / 2
