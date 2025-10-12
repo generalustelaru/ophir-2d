@@ -9,14 +9,25 @@ export abstract class ActionButton extends Button {
         super(
             stage,
             layout,
-            () => window.dispatchEvent(new CustomEvent(
-                'action',
-                { detail: actionMessage }
-            )),
+            (
+                actionMessage ? () => window.dispatchEvent(new CustomEvent(
+                    'action',
+                    { detail: actionMessage }
+                )): null
+            ),
         );
     }
 
     public setEnabled(shouldEnable: boolean) {
         shouldEnable ? this.enable() : this.disable();
+    }
+
+    public updateActionMessage(actionMessage: ClientMessage) {
+        this.updateFunction(
+            () => window.dispatchEvent(new CustomEvent(
+                'action',
+                { detail: actionMessage }
+            ))
+        )
     }
 }

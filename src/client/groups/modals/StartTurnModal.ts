@@ -5,6 +5,7 @@ export class StartTurnModal extends ModalBase {
     constructor(stage: Konva.Stage) {
         super(
             stage,
+            null,
             { width: 300, height: 150 },
         );
 

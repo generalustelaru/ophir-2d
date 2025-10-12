@@ -18,7 +18,7 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
     private cargoItemLayout: Array<Coordinates>;
 
     constructor(stage: Konva.Stage) {
-        super(stage);
+        super(stage,{ action: Action.sell_goods, payload: { slot } });
         this.marketCardLayout = {
             width: 66,
             height: 108,
@@ -96,6 +96,6 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
 
         const coinValue = this.market[slot].reward.coins  + this.fluctuations[slot];
         this.coinDial.update(coinValue);
-        this.open({ action: Action.sell_goods, payload: { slot } });
+        this.open();
     }
 }

@@ -13,11 +13,11 @@ export abstract class ModalBase {
     private modalGroup: Konva.Group;
     protected contentGroup: Konva.Group;
     private dismissButton: DismissButton;
-    private acceptButtonPosition: Coordinates;
     private acceptButton: AcceptButton | null = null;
 
     constructor(
         stage: Konva.Stage,
+        actionMessage: ClientMessage | null = null,
         dimensions: { width: number, height: number } = { width: 600, height: 300 },
     ) {
         this.stage = stage;
@@ -69,10 +69,19 @@ export abstract class ModalBase {
         );
         this.dismissButton.enable();
 
-        this.acceptButtonPosition = {
-            x: this.modalGroup.width() / 2 + 25,
-            y: buttonLevel,
-        },
+        if (actionMessage) {
+            this.acceptButton = new AcceptButton(
+                this.stage,
+                {
+                    x: this.modalGroup.width() / 2 + 25,
+                    y: buttonLevel,
+                },
+                actionMessage,
+                () => { this.screenGroup.hide() },
+            );
+            this.modalGroup.add(this.acceptButton.getElement());
+            this.acceptButton.enable();
+        }
 
         this.modalGroup.add(...[
             this.contentGroup,
@@ -85,22 +94,7 @@ export abstract class ModalBase {
         stage.getLayers()[1].add(this.screenGroup);
     }
 
-    protected open(actionMessage: ClientMessage | null = null) {
-        this.acceptButton && this.acceptButton.getElement().destroy();
-
-        if (actionMessage) {
-            this.acceptButton = new AcceptButton(
-                this.stage,
-                this.acceptButtonPosition,
-                actionMessage,
-                () => { this.screenGroup.hide() },
-            );
-            this.modalGroup.add(this.acceptButton.getElement());
-            this.acceptButton.enable();
-        } else {
-            // stage.width() / 2
-        }
-
+    protected open() {
         this.screenGroup.show();
     }
 }
