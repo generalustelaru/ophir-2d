@@ -2,7 +2,7 @@ import Konva from "konva";
 import clientConstants from "../../client_constants";
 import { DismissButton } from "./DismissButton";
 import { AcceptButton } from "./AcceptButton";
-import { ClientMessage, Coordinates } from "~/shared_types";
+import { ClientMessage } from "~/shared_types";
 
 type SubmitBehavior = {
     hasSubmit: true,
@@ -70,7 +70,7 @@ export abstract class ModalBase {
             stage,
             () => { this.screenGroup.hide() },
             {
-                x: this.modalGroup.width() / 2 - 75,
+                x: this.modalGroup.width() / 2 - (behavior.hasSubmit ? 75 : 25),
                 y: buttonLevel,
             }
         );
