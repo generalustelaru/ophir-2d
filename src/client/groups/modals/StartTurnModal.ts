@@ -6,7 +6,6 @@ export class StartTurnModal extends ModalBase {
         super(
             stage,
             { hasSubmit: false },
-            { width: 300, height: 150 },
         );
 
         const text = new Konva.Text({

@@ -25,7 +25,7 @@ export abstract class ModalBase {
     constructor(
         stage: Konva.Stage,
         behavior: SubmitBehavior,
-        dimensions: { width: number, height: number } = { width: 600, height: 300 },
+        dimensions: { width: number, height: number } = { width: 300, height: 150 },
     ) {
         this.stage = stage;
         const { width, height } = dimensions;
