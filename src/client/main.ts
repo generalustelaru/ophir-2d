@@ -243,7 +243,7 @@ function debug(state: PlayState|SetupState|EnrolmentState) {
     if ('rival' in state)
         localStorage.setItem('rival', JSON.stringify(state.rival));
 
-    ['Red', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
+    ['Blue', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
         localStorage.removeItem(playerColor);
     });
 

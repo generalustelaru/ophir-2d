@@ -10,7 +10,7 @@ import { BackupState, PrivateState, SavedSession } from "~/server_types";
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
-    playerColor: ["Purple", "Yellow", "Red", "Green"],
+    playerColor: ["Purple", "Yellow", "Blue", "Green"],
     actions: Object.values(Action),
     zoneName: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
     specialistName: Object.values(SpecialistName),

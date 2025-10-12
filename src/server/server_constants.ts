@@ -149,7 +149,7 @@ const serverConstants: ServerConstants = {
     PLAYER_IDS: [
         'Purple',
         'Yellow',
-        'Red',
+        'Blue',
         'Green',
     ],
     LOCATION_ACTIONS: [
@@ -175,7 +175,7 @@ const serverConstants: ServerConstants = {
         availableSlots: [
             'Purple',
             'Yellow',
-            'Red',
+            'Blue',
             'Green',
         ],
         players: [],

@@ -34,7 +34,7 @@ export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdat
         });
         this.group.add(background);
 
-        const playerColors: Array<PlayerColor> = ['Purple' , 'Yellow' , 'Red' , 'Green'];
+        const playerColors: Array<PlayerColor> = ['Purple' , 'Yellow' , 'Blue' , 'Green'];
         const margin = 60;
         const offset = 200;
         let drift = margin;

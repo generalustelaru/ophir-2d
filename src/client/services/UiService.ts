@@ -17,7 +17,7 @@ export const UserInterface = new class extends Communicator {
     private chatInput: ChatInput;
     private chatSendButton: Button;
     private forceTurnButton: Button;
-    private availableSlots: Array<PlayerColor> = ['Green', 'Purple', 'Red', 'Yellow'];
+    private availableSlots: Array<PlayerColor> = ['Green', 'Purple', 'Blue', 'Yellow'];
 
     constructor() {
         super();
