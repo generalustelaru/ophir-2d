@@ -65,7 +65,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Postmaster',
             startingFavor: 1,
             specialty: 'gems',
-            description: 'May donate exactly 1 metal to the Temple from an adjacent sea zone.',
+            description: 'May donate metals to the Temple from an adjacent sea zone.',
         },
         // {
         //     name: SpecialistName.peddler,

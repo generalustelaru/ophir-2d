@@ -376,6 +376,7 @@ export class SetupProcessor implements SessionProcessor {
                 cargo: ['empty', 'empty'],
                 feasibleTrades: [],
                 coins: 0,
+                turnPurchases: 0,
             }
 
             if (playerDto.specialist.name === SpecialistName.ambassador)

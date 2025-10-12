@@ -109,16 +109,17 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
     }
 
     public update(update: TreasuryUpdate): void {
-
+        const { localPlayer } = update;
         const playerCanAct = (
-            update.localPlayer?.locationActions.includes(Action.buy_metals)
-            && update.localPlayer.isAnchored
-            && this.hasCargoRoom(update.localPlayer.cargo)
+            localPlayer?.locationActions.includes(Action.buy_metals)
+            && localPlayer.turnPurchases < 2
+            && localPlayer.isAnchored
+            && this.hasCargoRoom(localPlayer.cargo)
         );
 
         const playerAmounts = playerCanAct ? {
-            coins: update.localPlayer!.coins,
-            favor: update.localPlayer!.favor,
+            coins: localPlayer!.coins,
+            favor: localPlayer!.favor,
         } : null;
 
         this.goldForFavorCard.update({

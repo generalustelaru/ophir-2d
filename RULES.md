@@ -148,7 +148,7 @@ The location enables the four treasury cards (buttons), featured in a row just u
 **Action: Buy Metals**: Click on a treasury card to deduct the depicted coin or favor amount and load the depicted metal.
 
 Important to note:
-- While this is a repeatable action, you can generally perform it up to twice, since metals take two cargo spaces, and you can have, at most, four spaces free in your cargo.
+- This action is repeatable but can only be performed twice per turn. While this limitation might seem superfluous given the cargo capacity, it is to prevent a specialist ability exploit.
 - The coins for metal cards tend to get more expensive as the game progresses, so even if the favor for metal seems unreasonable by comparison, it might eventually become a viable option.
 
 ### The Temple Zone

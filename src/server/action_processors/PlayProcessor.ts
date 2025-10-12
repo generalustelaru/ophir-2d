@@ -517,6 +517,7 @@ export class PlayProcessor implements SessionProcessor {
 
 
         player.setCargo(metalLoad.data);
+        player.registerMetalPurchase();
         player.appendActions(this.getSpecialistActions(player))
 
         if (player.isHarbormaster())
@@ -554,7 +555,6 @@ export class PlayProcessor implements SessionProcessor {
 
         if (player.isPostmaster() && player.getBearings().location != 'temple') {
             this.addServerMessage(`${name} mailed one ${metal} for ${reward} VP`, color);
-            player.removeAction(Action.donate_metals);
         } else {
             this.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
         }
@@ -819,7 +819,7 @@ export class PlayProcessor implements SessionProcessor {
             const adjacentZones = this.privateState.getDestinations(currentZone);
 
             for (const zone of adjacentZones) {
-                if (this.playState.getLocationName(zone) === 'temple') // TODO: fix unlimited remote donation bug
+                if (this.playState.getLocationName(zone) === 'temple')
                     return [Action.donate_metals];
             }
         }

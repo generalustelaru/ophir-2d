@@ -31,6 +31,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
     private coins: Writable<number>;
+    private turnPurchases: Writable<number>;
 
     constructor(player: Player) {
         this.socketId = writable(player.socketId);
@@ -56,6 +57,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.cargo = arrayWritable(player.cargo);
         this.feasibleTrades = arrayWritable(player.feasibleTrades);
         this.coins = writable(player.coins);
+        this.turnPurchases = writable(player.turnPurchases);
     }
 
     public toDto(): Player {
@@ -83,6 +85,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             cargo: this.cargo.get(),
             feasibleTrades: this.feasibleTrades.get(),
             coins: this.coins.get(),
+            turnPurchases: this.turnPurchases.get(),
         }
     }
 
@@ -244,8 +247,11 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return (this.hasAction(Action.load_good) && this.hasCargoRoom(1));
     }
 
+    public registerMetalPurchase() {
+        this.turnPurchases.update(count => ++count);
+    }
     public mayBuyMetal() {
-        return (this.hasAction(Action.buy_metals) && this.hasCargoRoom(2));
+        return (this.hasAction(Action.buy_metals) && this.hasCargoRoom(2) && this.turnPurchases.get() < 2);
     }
 
     public canDonateMetal(metal: CargoMetal) {
@@ -360,6 +366,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.moveActions.set(2);
         this.destinations.overwrite(destinations);
         this.navigatorAccess.overwrite(navigatorAccess);
+        this.turnPurchases.set(0);
     }
 
     public deactivate() {

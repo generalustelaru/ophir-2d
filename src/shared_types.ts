@@ -142,8 +142,9 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     destinations: Array<ZoneName>,
     navigatorAccess: Array<ZoneName>,
     cargo: Array<ItemName>,
-    feasibleTrades: Array<MarketSlotKey>
+    feasibleTrades: Array<MarketSlotKey>,
     coins: number,
+    turnPurchases: number,
 }
 
 export type PlayerEntity = PlayerEntry | PlayerDraft | PlayerSelection | Player;
