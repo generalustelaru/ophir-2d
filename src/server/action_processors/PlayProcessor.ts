@@ -56,6 +56,8 @@ export class PlayProcessor implements SessionProcessor {
         );
         this.playState.savePlayer(player.toDto());
 
+        this.transmitTurnNotification(player.getIdentity().socketId);
+
         if (IDLE_CHECKS)
             this.startIdleChecks();
     }
