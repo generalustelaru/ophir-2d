@@ -4,6 +4,13 @@ import { DismissButton } from "./DismissButton";
 import { AcceptButton } from "./AcceptButton";
 import { ClientMessage, Coordinates } from "~/shared_types";
 
+type SubmitBehavior = {
+    hasSubmit: true,
+    actionMessage: ClientMessage | null,
+} | {
+    hasSubmit: false,
+}
+
 const { COLOR } = clientConstants;
 
 export abstract class ModalBase {
@@ -13,11 +20,11 @@ export abstract class ModalBase {
     private modalGroup: Konva.Group;
     protected contentGroup: Konva.Group;
     private dismissButton: DismissButton;
-    private acceptButtonPosition: Coordinates;
     private acceptButton: AcceptButton | null = null;
 
     constructor(
         stage: Konva.Stage,
+        behavior: SubmitBehavior,
         dimensions: { width: number, height: number } = { width: 600, height: 300 },
     ) {
         this.stage = stage;
@@ -69,10 +76,19 @@ export abstract class ModalBase {
         );
         this.dismissButton.enable();
 
-        this.acceptButtonPosition = {
-            x: this.modalGroup.width() / 2 + 25,
-            y: buttonLevel,
-        },
+        if (behavior.hasSubmit) {
+            this.acceptButton = new AcceptButton(
+                this.stage,
+                {
+                    x: this.modalGroup.width() / 2 + 25,
+                    y: buttonLevel,
+                },
+                behavior.actionMessage,
+                () => { this.screenGroup.hide() },
+            );
+            this.modalGroup.add(this.acceptButton.getElement());
+            this.acceptButton.enable();
+        }
 
         this.modalGroup.add(...[
             this.contentGroup,
@@ -85,22 +101,13 @@ export abstract class ModalBase {
         stage.getLayers()[1].add(this.screenGroup);
     }
 
-    protected open(actionMessage: ClientMessage | null = null) {
-        this.acceptButton && this.acceptButton.getElement().destroy();
+    protected open(message: ClientMessage|null = null) {
+        if (message) {
+            if (!this.acceptButton)
+                throw new Error("Cannot assign message. Accept button not initialized!");
 
-        if (actionMessage) {
-            this.acceptButton = new AcceptButton(
-                this.stage,
-                this.acceptButtonPosition,
-                actionMessage,
-                () => { this.screenGroup.hide() },
-            );
-            this.modalGroup.add(this.acceptButton.getElement());
-            this.acceptButton.enable();
-        } else {
-            // stage.width() / 2
+            this.acceptButton.updateActionMessage(message);
         }
-
         this.screenGroup.show();
     }
 }

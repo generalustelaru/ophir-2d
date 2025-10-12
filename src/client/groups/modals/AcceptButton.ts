@@ -4,7 +4,12 @@ import { ActionButton } from "../ActionButton";
 
 export class AcceptButton extends ActionButton {
 
-    constructor(stage: Konva.Stage, position: Coordinates, actionMessage: ClientMessage, dismissCallback: Function) {
+    constructor(
+        stage: Konva.Stage,
+        position: Coordinates,
+        actionMessage: ClientMessage | null,
+        dismissCallback: Function
+    ) {
         const layout = {
             x: position.x,
             y: position.y,
