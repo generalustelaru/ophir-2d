@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { ModalBase } from "./ModalBase";
-import { Action, Coordinates, ItemName, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, TradeGood } from "~/shared_types";
+import { Action, ClientMessage, Coordinates, ItemName, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, TradeGood } from "~/shared_types";
 import { MarketCard, CoinDial } from "../GroupList";
 import {GroupLayoutData, ModalInterface } from "~/client_types";
 import clientConstants from "~/client_constants";
@@ -18,7 +18,8 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
     private cargoItemLayout: Array<Coordinates>;
 
     constructor(stage: Konva.Stage) {
-        super(stage,{ action: Action.sell_goods, payload: { slot } });
+        super(stage, { hasSubmit: true, actionMessage: null });
+
         this.marketCardLayout = {
             width: 66,
             height: 108,
@@ -33,8 +34,10 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
             },
             0,
         );
+
         const driftX = this.contentGroup.x();
         const driftY = this.contentGroup.y();
+
         this.cargoItemLayout = [
             { x: 0, y: 0 },
             { x: 20, y: 0 },
@@ -91,11 +94,8 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
             });
             this.contentGroup.add(icon);
         })
-
         // this.group.add(this.marketCard.getElement());
-
-        const coinValue = this.market[slot].reward.coins  + this.fluctuations[slot];
-        this.coinDial.update(coinValue);
-        this.open();
+        this.coinDial.update(this.market[slot].reward.coins  + this.fluctuations[slot]);
+        this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }

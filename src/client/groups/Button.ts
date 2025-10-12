@@ -11,10 +11,6 @@ export abstract class Button {
 
         this.group = new Konva.Group(layout);
 
-        // if (!callback) {
-        //     return;
-        // }
-
         this.callback = callback;
 
         this.group.on('mouseenter', () => {

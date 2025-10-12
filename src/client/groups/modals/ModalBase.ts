@@ -2,7 +2,14 @@ import Konva from "konva";
 import clientConstants from "../../client_constants";
 import { DismissButton } from "./DismissButton";
 import { AcceptButton } from "./AcceptButton";
-import { ClientMessage, Coordinates } from "~/shared_types";
+import { ClientMessage } from "~/shared_types";
+
+type SubmitBehavior = {
+    hasSubmit: true,
+    actionMessage: ClientMessage | null,
+} | {
+    hasSubmit: false,
+}
 
 const { COLOR } = clientConstants;
 
@@ -17,7 +24,7 @@ export abstract class ModalBase {
 
     constructor(
         stage: Konva.Stage,
-        actionMessage: ClientMessage | null = null,
+        behavior: SubmitBehavior,
         dimensions: { width: number, height: number } = { width: 600, height: 300 },
     ) {
         this.stage = stage;
@@ -63,20 +70,20 @@ export abstract class ModalBase {
             stage,
             () => { this.screenGroup.hide() },
             {
-                x: this.modalGroup.width() / 2 - 75,
+                x: this.modalGroup.width() / 2 - (behavior.hasSubmit ? 75 : 25),
                 y: buttonLevel,
             }
         );
         this.dismissButton.enable();
 
-        if (actionMessage) {
+        if (behavior.hasSubmit) {
             this.acceptButton = new AcceptButton(
                 this.stage,
                 {
                     x: this.modalGroup.width() / 2 + 25,
                     y: buttonLevel,
                 },
-                actionMessage,
+                behavior.actionMessage,
                 () => { this.screenGroup.hide() },
             );
             this.modalGroup.add(this.acceptButton.getElement());
@@ -94,7 +101,13 @@ export abstract class ModalBase {
         stage.getLayers()[1].add(this.screenGroup);
     }
 
-    protected open() {
+    protected open(message: ClientMessage|null = null) {
+        if (message) {
+            if (!this.acceptButton)
+                throw new Error("Cannot assign message. Accept button not initialized!");
+
+            this.acceptButton.updateActionMessage(message);
+        }
         this.screenGroup.show();
     }
 }
