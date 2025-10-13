@@ -23,6 +23,7 @@ export class DismissButton extends Button {
             width: layout.width,
             height: layout.height,
             fontSize: 14,
+            fontStyle: 'bold',
             align: 'center',
             verticalAlign: 'middle',
             text: 'Close',

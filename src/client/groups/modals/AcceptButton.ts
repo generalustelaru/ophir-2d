@@ -29,9 +29,11 @@ export class AcceptButton extends ActionButton {
             width: layout.width,
             height: layout.height,
             fontSize: 14,
+            fontStyle: 'bold',
+            fill: 'white',
             align: 'center',
             verticalAlign: 'middle',
-            text: 'Accept',
+            text: 'Okay',
             fontFamily: 'Custom',
         });
 
