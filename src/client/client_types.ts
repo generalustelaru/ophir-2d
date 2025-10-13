@@ -123,8 +123,8 @@ export enum ActionModalContext {
     peddler_at_market = 'peddler_at_market',
 }
 
-export type EventFormat<T extends EventType, D> = {
-    type: T,
+export type EventFormat<EventType, D> = {
+    type: EventType,
     detail: D,
 }
 
