@@ -88,11 +88,6 @@ window.addEventListener(EventType.error, (event: CustomEventInit) => {
     signalError(detail.message);
 });
 
-// Get server data on connection
-window.addEventListener(EventType.connected, () => {
-    CommunicationService.sendMessage({ action: Action.inquire, payload: null })
-});
-
 window.addEventListener(EventType.timeout, () => {
     console.warn('Connection timeout');
     UserInterface.disable();
@@ -119,6 +114,7 @@ window.addEventListener(EventType.identification, (event: CustomEventInit<Client
 
     localState.socketId = event.detail.socketId;
     sessionStorage.setItem('localState', JSON.stringify(localState));
+    CommunicationService.sendMessage({ action: Action.inquire, payload: null });
 });
 
 window.addEventListener(EventType.enrolment_approval, (event: CustomEventInit<EnrolmentResponse>) => {

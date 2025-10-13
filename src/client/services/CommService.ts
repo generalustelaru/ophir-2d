@@ -20,8 +20,7 @@ export const CommunicationService = new class extends Communicator {
         this.socket = new WebSocket(url);
 
         this.socket.onopen = () => {
-            console.info('Connection established');
-            this.createEvent({ type: EventType.connected, detail: null });
+            console.info('Connection established.');
         }
 
         this.socket.onclose = (event) => {

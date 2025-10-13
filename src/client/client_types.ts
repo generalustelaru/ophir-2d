@@ -129,7 +129,6 @@ export type EventFormat<T extends EventType, D> = {
 }
 
 export enum EventType {
-    connected = 'connected',
     enrolment_approval = 'enrolment_approval',
     draft = 'draft',
     start_action = 'start',
@@ -151,7 +150,6 @@ export enum EventType {
 }
 
 export type LaconicType =
-    | EventType.connected
     | EventType.draft
     | EventType.start_action
     | EventType.close
