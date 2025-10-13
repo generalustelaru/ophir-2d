@@ -4,7 +4,7 @@ import {
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity,
 } from "~/shared_types";
-import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor} from "~/server_types";
+import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor } from "~/server_types";
 import serverConstants from "~/server_constants";
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -19,7 +19,7 @@ import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE}).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
+const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
 console.log('Active keys:');
 console.log(activeKeys);
 
@@ -49,7 +49,7 @@ export class SetupProcessor implements SessionProcessor {
                 throw new Error("Not enough specialist cards!");
 
             const randomized: Array<SpecialistData> = lib.randomize(deck);
-            const selection = randomized.slice(0,playerCount + 1);
+            const selection = randomized.slice(0, playerCount + 1);
 
             if (INCLUDE.length) {
                 const toInclude = INCLUDE.reverse();
@@ -63,11 +63,11 @@ export class SetupProcessor implements SessionProcessor {
                         selection.push(specialist);
                 }
 
-                while(selection.length > playerCount + 1)
+                while (selection.length > playerCount + 1)
                     selection.shift();
             }
 
-            return selection.map(s => {return {...s, owner: null}});
+            return selection.map(s => { return { ...s, owner: null } });
         })();
 
         const playerDrafts = this.draftPlayers(playerEntries);
@@ -105,10 +105,10 @@ export class SetupProcessor implements SessionProcessor {
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
-            this.setupState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
-            this.setupState.updateName(player.color, newName);
+        this.setupState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
+        this.setupState.updateName(player.color, newName);
 
-            return { state: this.getState() }
+        return { state: this.getState() }
     };
     //#MARK: Specialist
     public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateResponse> {
@@ -195,7 +195,7 @@ export class SetupProcessor implements SessionProcessor {
                 chat: setupState.chat,
                 players,
                 market: marketData.marketOffer,
-                itemSupplies: { metals: { gold: 5, silver: 5 }, goods: { gems: 5, linen: 5, ebony: 5, marble: 5 } },
+                itemSupplies: this.getItemSupplies(players),
                 temple: {
                     maxLevel: privateStateHandler.getTempleLevelCount(),
                     treasury: privateStateHandler.drawMetalPrices()!,
@@ -272,7 +272,7 @@ export class SetupProcessor implements SessionProcessor {
 
         const zoneByLocation = Object.fromEntries(
             Object.entries(locationByZone)
-            .map(([zoneName, locationData]) => [locationData.name, zoneName])
+                .map(([zoneName, locationData]) => [locationData.name, zoneName])
         ) as Record<LocationName, ZoneName>;
 
         return { locationByZone, zoneByLocation }
@@ -292,12 +292,12 @@ export class SetupProcessor implements SessionProcessor {
                     moveRule.allowed = moveRule.allowed
                         .filter(hexId => hexId !== neighborZone);
 
-                    if(neighborZone)
+                    if (neighborZone)
                         navigatorAccess.push(neighborZone);
                 }
             });
 
-            return {...moveRule, navigatorAccess};
+            return { ...moveRule, navigatorAccess };
         });
     }
 
@@ -309,7 +309,7 @@ export class SetupProcessor implements SessionProcessor {
             const tokens = Array.from(Array(5).keys());
             tokens.shift();
 
-            while(tokens.length > rearranged.length)
+            while (tokens.length > rearranged.length)
                 tokens.pop();
 
             return tokens;
@@ -343,10 +343,6 @@ export class SetupProcessor implements SessionProcessor {
 
         const players: Array<Player> = selections.map(s => {
             const { startingFavor, owner, ...specialist } = s.specialist;
-            // const specialist = ((): Specialist => {
-
-            //     return specialist;
-            // })();
 
             const playerDto: Player = {
                 socketId: s.socketId,
@@ -382,17 +378,6 @@ export class SetupProcessor implements SessionProcessor {
             if (playerDto.specialist.name === SpecialistName.ambassador)
                 playerDto.cargo.push('empty', 'empty');
 
-            // if (playerDto.turnOrder == 1) {
-            //     const player = new PlayerHandler(playerDto);
-            //     player.activate(
-            //         mapPairings.locationByZone[startingZone].actions,
-            //         player.get
-            //         initialRules.allowed
-            //     );
-
-            //     return player.toDto();
-            // }
-
             return playerDto;
         });
 
@@ -407,7 +392,7 @@ export class SetupProcessor implements SessionProcessor {
                 if (FAVORED_PLAYERS)
                     player.favor = 6;
 
-                switch(CARGO_BONUS) {
+                switch (CARGO_BONUS) {
                     case 1:
                         player.cargo = ['empty', 'empty', 'empty', 'empty'];
                         break;
@@ -458,6 +443,16 @@ export class SetupProcessor implements SessionProcessor {
                 location: 'market',
             },
             influence: 1,
+        }
+    }
+
+    // MARK: Supplies
+    private getItemSupplies(players: Array<Player>) {
+        const supplyCount = players.length + 1;
+
+        return {
+            metals: { gold: supplyCount, silver: supplyCount },
+            goods: { gems: supplyCount, linen: supplyCount, ebony: supplyCount, marble: supplyCount },
         }
     }
 

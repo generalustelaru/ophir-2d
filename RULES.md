@@ -109,7 +109,9 @@ Four of the seven zones contain trade goods (gems, ebony, marble, or linen). Eac
 
 **Action: Load Trade Good**: Click on the zone's trade good icon to pick up 1 of that type. The item is placed in your cargo hold and is reflected on your cargo band.
 
-On rare occasions, a zone may become depleted of goods (showing a red X). That occurs when a fifth good of that type has been picked up. However, the action becomes available again as soon as one of those goods is returned to the 'bank' (through selling or dropping).
+Occasionally, a zone may become depleted of goods (showing a red X). This occurs when all goods of that type have been picked up. However, the action becomes available again as soon as one of those goods is returned to the 'bank' (through selling or dropping).
+
+The supply of each good is equivalent to the number of players plus one.
 
 ### The Market Zone
 The market (orange house icon) provides you with an expendable action (Sell Trade Goods) and one repeatable action (Sell Specialty Good).
@@ -150,6 +152,7 @@ The location enables the four treasury cards (buttons), featured in a row just u
 Important to note:
 - This action is repeatable but can only be performed twice per turn. While this limitation might seem superfluous given the cargo capacity, it is to prevent a specialist ability exploit.
 - The coins for metal cards tend to get more expensive as the game progresses, so even if the favor for metal seems unreasonable by comparison, it might eventually become a viable option.
+- Metal supplies are limited as well (available up to the player count plus one). The appropriate action may also become unavailable if all metals of that type are currently in players' cargo holds.
 
 ### The Temple Zone
 
