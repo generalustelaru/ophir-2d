@@ -17,7 +17,7 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
         super(stage, { hasSubmit: true, actionMessage: null });
 
         this.goodsAssortment = new GoodsAssortment(
-            { x: 50, y: 20 },
+            { x: 60, y: 20 },
             null,
         );
 
@@ -32,7 +32,7 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
 
         this.coinDial = new CoinDial(
             {
-                x: this.contentGroup.width() - 75,
+                x: this.contentGroup.width() - 90,
                 y: this.contentGroup.height() / 2,
             },
             0,
