@@ -46,7 +46,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeBlue,
+            fill: COLOR.templeRed,
             cornerRadius: 15,
             strokeWidth: 0,
         });
@@ -114,7 +114,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
         switch (true) {
             case shouldEnable:
-                this.background.fill(COLOR.templeBlue);
+                this.background.fill(COLOR.templeRed);
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
                 this.background.fill(COLOR[localPlayerColor]);
@@ -123,7 +123,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
                 this.background.fill(COLOR[`dark${specialist.owner}`]);
                 break;
             default:
-                this.background.fill(COLOR.templeDarkBlue);
+                this.background.fill(COLOR.templeDarkRed);
                 break;
         }
         this.setEnabled(shouldEnable);

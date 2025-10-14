@@ -31,7 +31,7 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkBlue,
+            fill: COLOR.templeDarkRed,
             cornerRadius: 15,
             stroke: COLOR.boneWhite,
             strokeWidth: 2,
@@ -64,7 +64,7 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
     public update(data: MarketCardUpdate): void {
         this.rewardDial.update(data.trade.reward.favorAndVp);
         this.goodsAssortment.update(data.trade.request);
-        this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
+        this.background.fill(data.isFeasible ? COLOR.templeRed : COLOR.templeDarkRed);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         this.setEnabled(data.isFeasible);
     }

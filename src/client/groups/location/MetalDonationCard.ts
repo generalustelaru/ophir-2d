@@ -24,7 +24,7 @@ export class MetalDonationCard extends ActionButton implements DynamicGroupInter
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: isEnabled ? COLOR.templeBlue : COLOR.templeDarkBlue,
+            fill: isEnabled ? COLOR.templeRed : COLOR.templeDarkRed,
             stroke: isEnabled ? COLOR.treasuryGold : COLOR.boneWhite,
             strokeWidth: 2,
             cornerRadius: 15,
@@ -57,6 +57,6 @@ export class MetalDonationCard extends ActionButton implements DynamicGroupInter
 
     public update(canDonate: boolean): void {
         this.setEnabled(canDonate);
-        this.background.fill(canDonate ? COLOR.templeBlue : COLOR.templeDarkBlue);
+        this.background.fill(canDonate ? COLOR.templeRed : COLOR.templeDarkRed);
     }
 }

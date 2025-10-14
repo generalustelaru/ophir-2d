@@ -34,7 +34,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
         this.background = new Konva.Rect({
             width: layout.width,
             height: layout.height,
-            fill: COLOR.templeDarkBlue,
+            fill: COLOR.templeDarkRed,
             cornerRadius: 15,
         });
 
@@ -75,7 +75,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
 
         this.setEnabled(!Boolean(localPlayer || colorOwner));
 
-        this.background.fill(colorOwner ? COLOR[`dark${colorOwner.color}`] : COLOR.templeDarkBlue)
+        this.background.fill(colorOwner ? COLOR[`dark${colorOwner.color}`] : COLOR.templeDarkRed)
         this.ownerName.text(text);
         this.ownerName.fill(colorOwner ? COLOR[colorOwner.color] : 'white');
         this.shipToken.update(isLocalPlayerColor ? COLOR.activeShipBorder : COLOR.shipBorder);

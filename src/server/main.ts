@@ -168,7 +168,7 @@ function logRequest(request: ClientRequest) {
     const colorized = {
         Purple: `\x1b[95m${name}\x1b[0m`,
         Yellow: `\x1b[93m${name}\x1b[0m`,
-        Blue: `\x1b[91m${name}\x1b[0m`,
+        Red: `\x1b[91m${name}\x1b[0m`,
         Green: `\x1b[92m${name}\x1b[0m`,
     }
     const clientName = playerColor ? colorized[playerColor] : 'anon';

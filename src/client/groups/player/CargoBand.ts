@@ -34,7 +34,7 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
             { x: SLOT_WIDTH * 3, element: null },
         ];
         const backgroundMapping: Record<PlayerColor, Color> = {
-            Blue: COLOR.darkRed,
+            Red: COLOR.darkRed,
             Purple: COLOR.darkPurple,
             Green: COLOR.darkGreen,
             Yellow: COLOR.darkYellow,

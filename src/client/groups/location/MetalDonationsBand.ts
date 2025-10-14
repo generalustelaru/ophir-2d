@@ -37,7 +37,7 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleState> {
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkBlue,
+            fill: COLOR.templeDarkRed,
             stroke: COLOR.stampEdge,
             cornerRadius: 5,
         });
