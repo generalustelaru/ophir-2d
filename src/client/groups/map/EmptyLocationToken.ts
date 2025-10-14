@@ -12,8 +12,8 @@ export class EmptyLocationToken implements DynamicGroupInterface<boolean> {
         this.group = new Konva.Group();
 
         const iconData = LAYERED_ICONS.empty_location;
-        const scale = 2;
-        const drift = { x: -14, y: -14 }
+        const scale = 3;
+        const drift = { x: -21, y: -21 }
 
         const backgroundData = iconData.layer_1;
         const background = new Konva.Path({
