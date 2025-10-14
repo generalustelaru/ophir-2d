@@ -92,7 +92,21 @@ window.addEventListener(EventType.timeout, () => {
     console.warn('Connection timeout');
     UserInterface.disable();
     CanvasService.disable();
-    UserInterface.setInfo('The server is down.');
+    UserInterface.setInfo('Trying to reconnect...');
+    setInterval(() => {
+        fetch(
+            '/probe',
+        ).then(
+            (res) => {
+                if (res.status === 200) {
+                    alert('Connection restored.');
+                    window.location.reload();
+                }
+            }
+        ).catch(
+            err => console.log('Failed to reconnect',{err})
+        );
+    },5000);
 });
 
 window.addEventListener(EventType.close, () => {

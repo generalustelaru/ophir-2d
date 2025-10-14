@@ -46,8 +46,13 @@ app.get('/shutdown', (req: Request, res: Response) => {
     }
 
     console.warn('Remote server shutdown!');
-    res.status(200).send('OK');
+    res.status(200).send('SHUTDOWN OK');
     shutDown();
+});
+
+app.get('/probe', (req: Request, res: Response) => {
+    console.info('Server probed', {ip: req.ip})
+    res.status(200).send('SERVER OK');
 });
 
 app.listen(HTTP_PORT, () => {
