@@ -165,7 +165,7 @@ export type MarketFluctuations = {
 }
 
 export type TempleState = {
-    treasury: MetalPrices, // TODO: what if we get treasury outside of here?
+    treasury: MetalPrices, // TODO: Extract treasury from TempleState
     currentLevel: number,
     maxLevel: number,
     levelCompletion: number,

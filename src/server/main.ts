@@ -89,7 +89,7 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 
 let singleSession: GameSession | null;
 
-loadGameState().then(data => { // TODO: examine and fix: active player's state resets (except for bearings) when server is restarted
+loadGameState().then(data => { // BUG: Active player's state resets partially when server is restarted.
     const savedState = validator.validateStateFile(data);
 
     singleSession = new GameSession(

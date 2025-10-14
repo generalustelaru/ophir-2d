@@ -196,8 +196,8 @@ export class MapGroup implements MegaGroupInterface {
                 ship.update(player);
             } else {
                 ship.destroy();
-                // TODO: remove ship element from layer
-                // TODO: implement a forfeit action to update the server state
+                // TODO: implement a forfeit action for abandoning a session.
+                // TODO: Remove player elements when client leaves the game.
             }
         });
 

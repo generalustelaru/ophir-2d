@@ -9,7 +9,7 @@ const serverConstants: ServerConstants = {
         //     displayName: 'Advisor',
         //     startingFavor: 1,
         //     specialty: 'linen',
-        //     description: 'May complete temple trades using any market slot.', // TODO: implement this
+        //     description: 'May complete temple trades using any market slot.', // TODO: implement Advisor
         // },
         {
             name: SpecialistName.ambassador,
@@ -23,7 +23,7 @@ const serverConstants: ServerConstants = {
         //     displayName: 'Chancellor',
         //     startingFavor: 1,
         //     specialty: 'gems',
-        //     description: 'May substitute goods with Favor when trading.', // TODO: implement this
+        //     description: 'May substitute goods with Favor when trading.', // TODO: implement Chancellor
         // },
         {
             name: SpecialistName.harbormaster,
@@ -72,7 +72,7 @@ const serverConstants: ServerConstants = {
         //     displayName: 'Peddler',
         //     startingFavor: 2,
         //     specialty: null,
-        //     description: 'Ignores one required trade good when completing a reduced value market trade.', // TODO: implement this
+        //     description: 'Ignores one required trade good when completing a reduced value market trade.', // TODO: implement Peddler
         // },
     ],
     TRADE_DECK_A: [

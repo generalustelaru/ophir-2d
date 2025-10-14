@@ -100,7 +100,7 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
     }
 }
 
-// TODO: transfomr this to take an index and (modyifying the internals into a record).
+// TODO: Refactor ArrayWritable to take an index and turn the internal structure into a record.
 export type ArrayWritable<T> = {
     count: () => number,
     get: () => Array<T>,
