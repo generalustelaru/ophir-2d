@@ -51,12 +51,7 @@ export class MarketCard extends Button implements DynamicGroupInterface<MarketCa
         );
 
         this.goodsAssortment = new GoodsAssortment(
-            {
-                width: this.background.width(),
-                height: this.background.width(),
-                x: 0,
-                y: -3,
-            },
+            { x: 0, y: -3 },
             trade.request
         );
 

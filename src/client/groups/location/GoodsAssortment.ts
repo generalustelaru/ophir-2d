@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates, TradeGood } from "~/shared_types";
-import { DynamicGroupInterface, GroupLayoutData} from "~/client_types";
+import { DynamicGroupInterface } from "~/client_types";
 import clientConstants from "~/client_constants";
 
 const { CARGO_ITEM_DATA } = clientConstants;
@@ -9,17 +9,17 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
 {
     private group: Konva.Group;
     constructor(
-        layout: GroupLayoutData,
-        goods: Array<TradeGood>,
+        position: Coordinates,
+        goods: Array<TradeGood> | null,
     ) {
         this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            x: layout.x,
-            y: layout.y,
+            width: 66,
+            height: 66,
+            x: position.x,
+            y: position.y,
         });
 
-        this.group.add( this.getGoodsGroup(goods));
+        goods && this.group.add( this.getGoodsGroup(goods));
     }
 
     public getElement(): Konva.Group {

@@ -1,46 +1,50 @@
 import Konva from "konva";
 import { ModalBase } from "./ModalBase";
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState } from "~/shared_types";
-import { CoinDial } from "../GroupList";
+import { CoinDial, GoodsAssortment } from "../GroupList";
 import { ModalInterface } from "~/client_types";
-// import clientConstants from "~/client_constants";
+import clientConstants from "~/client_constants";
 
-// const { CARGO_ITEM_DATA } = clientConstants;
+const { ICON_DATA } = clientConstants;
 
 export class SellGoodsModal extends ModalBase implements ModalInterface<PlayState, MarketSlotKey>{
     // private playerCargo: Array<ItemName> = [];
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
     private coinDial: CoinDial;
+    private goodsAssortment: GoodsAssortment;
     // private cargoItemLayout: Array<Coordinates>;
 
     constructor(stage: Konva.Stage) {
         super(stage, { hasSubmit: true, actionMessage: null });
 
+        this.goodsAssortment = new GoodsAssortment(
+            { x: 50, y: 20 },
+            null,
+        );
+
+        const {shape, fill} = ICON_DATA['conversion_arrow'];
+        const conversionArrow = new Konva.Path({
+            data: shape,
+            fill: fill,
+            scale: {x: 3, y:3},
+            x: this.contentGroup.width() / 2 - 25,
+            y: this.contentGroup.height() / 2 - 5,
+        });
+
         this.coinDial = new CoinDial(
             {
-                x: this.contentGroup.width() / 2,
+                x: this.contentGroup.width() - 75,
                 y: this.contentGroup.height() / 2,
             },
             0,
         );
 
-        // const driftX = this.contentGroup.x();
-        // const driftY = this.contentGroup.y();
-
-        // this.cargoItemLayout = [
-        //     { x: 0, y: 0 },
-        //     { x: 20, y: 0 },
-        //     { x: 40, y: 0 },
-        //     { x: 60, y: 0 },
-        // ].map(c => {
-        //     return {
-        //         x: driftX + c.x,
-        //         y: driftY + c.y,
-        //     }
-        // });
-
-        this.contentGroup.add(this.coinDial.getElement())
+        this.contentGroup.add(...[
+            this.goodsAssortment.getElement(),
+            conversionArrow,
+            this.coinDial.getElement()]
+        );
     }
 
     public update(state: PlayState) {
@@ -53,6 +57,7 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
             throw new Error("Cannot render modal! Update data is missing.");
 
         this.coinDial.update(this.market[slot].reward.coins  + this.fluctuations[slot]);
+        this.goodsAssortment.update(this.market[slot].request);
         this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }
