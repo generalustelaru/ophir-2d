@@ -92,9 +92,7 @@ window.addEventListener(EventType.timeout, () => {
     console.warn('Connection timeout');
     UserInterface.disable();
     CanvasService.disable();
-    UserInterface.setInfo('The server is off or restarting.');
-    alert('The page will refresh');
-    window.location.reload();
+    UserInterface.setInfo('The server is down.');
 });
 
 window.addEventListener(EventType.close, () => {
@@ -102,9 +100,7 @@ window.addEventListener(EventType.close, () => {
     sessionStorage.removeItem('localState');
     UserInterface.disable();
     CanvasService.disable();
-    UserInterface.setInfo('The server is off or restarting.');
-    alert('The page will refresh');
-    window.location.reload();
+    UserInterface.setInfo('The server has entered maintenance.');
 });
 
 window.addEventListener(EventType.identification, (event: CustomEventInit<ClientIdResponse>) => {

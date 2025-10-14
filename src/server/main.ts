@@ -21,9 +21,9 @@ if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT) {
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
-    broadcast({ error: 'The server is shutting down :(' });
+    broadcast({ error: 'The server encountered an issue and is shutting down :(' });
     socketServer.close();
-    console.log('Shutting down...');
+    console.log('Exiting...');
     process.exit(0);
 });
 
@@ -177,6 +177,7 @@ function logRequest(request: ClientRequest) {
 }
 
 function shutDown() {
+    broadcast({ error: 'The server is entering maintenance.' });
     console.log('Shutting down...');
     rl.close();
     socketClients.forEach(client => client.socket.close(1000));
