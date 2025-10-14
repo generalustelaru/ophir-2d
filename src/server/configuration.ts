@@ -4,7 +4,7 @@ export const SERVER_ADDRESS = String(process.env.SERVER_ADDRESS);
 export const HTTP_PORT = String(process.env.HTTP_PORT);
 export const WS_PORT = Number(process.env.WS_PORT);
 export const SERVER_NAME = String(process.env.SERVER_NAME);
-export const SHUTDOWN_AUTH = String(process.env.SHUTDOWN_AUTH);
+export const ADMIN_AUTH = String(process.env.ADMIN_AUTH);
 export const IDLE_CHECKS = Boolean(process.env.IDLE_CHECKS === 'true');
 export const IDLE_TIMEOUT = (60 * 1000) * Number(process.env.IDLE_TIMEOUT);
 export const RICH_PLAYERS = Boolean(process.env.RICH_PLAYERS === 'true');

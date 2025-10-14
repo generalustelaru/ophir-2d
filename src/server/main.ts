@@ -38,7 +38,7 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.get('/shutdown', (req: Request, res: Response) => {
-    if (req.query.auth !== process.env.SHUTDOWN_AUTH) {
+    if (req.query.auth !== process.env.ADMIN_AUTH) {
         console.error('Unauthorized shutdown attempt');
         res.status(401).send('Unauthorized');
 
@@ -48,6 +48,19 @@ app.get('/shutdown', (req: Request, res: Response) => {
     console.warn('Remote server shutdown!');
     res.status(200).send('SHUTDOWN OK');
     shutDown();
+});
+
+app.get('/reset', (req: Request, res: Response) => {
+    if (req.query.auth !== process.env.ADMIN_AUTH) {
+        console.error('Unauthorized shutdown attempt');
+        res.status(401).send('Unauthorized');
+
+        return;
+    }
+
+    console.warn('Remote server shutdown!');
+    res.status(200).send(' OK');
+    reset();
 });
 
 app.get('/probe', (req: Request, res: Response) => {
