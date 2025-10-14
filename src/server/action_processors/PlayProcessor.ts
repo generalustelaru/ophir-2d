@@ -42,15 +42,16 @@ export class PlayProcessor implements SessionProcessor {
         this.transmitVp = transmitVp;
 
         const players = this.playState.getAllPlayers();
+        const activePlayer = players.find(p => p.isActive === true);
         const firstPlayer = players.find(p => p.turnOrder === 1);
 
         if (!firstPlayer)
             throw new Error("Could not find the first player!");
 
-        const player = new PlayerHandler(firstPlayer);
+        const player = new PlayerHandler(activePlayer || firstPlayer);
         const { seaZone } = player.getBearings();
 
-        player.activate(
+        !activePlayer && player.activate(
             this.privateState.getDestinations(seaZone),
             player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
         );
