@@ -8,12 +8,10 @@ import clientConstants from "~/client_constants";
 const { ICON_DATA } = clientConstants;
 
 export class SellGoodsModal extends ModalBase implements ModalInterface<PlayState, MarketSlotKey>{
-    // private playerCargo: Array<ItemName> = [];
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
-    // private cargoItemLayout: Array<Coordinates>;
 
     constructor(stage: Konva.Stage) {
         super(stage, { hasSubmit: true, actionMessage: null });
