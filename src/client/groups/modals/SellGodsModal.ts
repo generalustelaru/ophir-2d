@@ -41,8 +41,8 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
         this.contentGroup.add(...[
             this.goodsAssortment.getElement(),
             conversionArrow,
-            this.coinDial.getElement()]
-        );
+            this.coinDial.getElement(),
+        ]);
     }
 
     public update(state: PlayState) {
