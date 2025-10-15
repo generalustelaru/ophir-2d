@@ -23,8 +23,8 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
         market: MarketOffer,
         layout: GroupLayoutData,
         maxLevel: number,
+        donateGoodsCallback: Function,
     ) {
-
         this.group = new Konva.Group(layout);
 
         this.background = new Konva.Rect({
@@ -53,8 +53,8 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
         this.marketCard = new TempleMarketCard(
             stage,
             { x: this.group.width() - 62 - margin, y: 10 },
-            { action: Action.donate_goods, payload: { slot: marketSlot } },
             card,
+            () => donateGoodsCallback(marketSlot),
         );
         this.templeTradeSlot = marketSlot;
 
@@ -101,7 +101,7 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
                 playerCanAct
                 && localPlayer.locationActions.includes(Action.donate_goods)
                 && localPlayer.feasibleTrades.includes(this.templeTradeSlot)
-            )
+            ),
         });
 
         this.upgradeButton.update((

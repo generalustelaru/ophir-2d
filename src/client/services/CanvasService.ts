@@ -10,6 +10,7 @@ import { EventType } from "~/client_types";
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import { SellGoodsModal } from '../groups/modals/SellGodsModal';
 import { StartTurnModal } from '../groups/modals/StartTurnModal';
+import { DonateGoodsModal } from '../groups/modals/DonateGoodsModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -23,6 +24,7 @@ export const CanvasService = new class extends Communicator {
     private isPlayDrawn: boolean = false;
     private startTurnModal: StartTurnModal;
     private sellGoodsModal: SellGoodsModal;
+    private donateGoodsModal: DonateGoodsModal;
 
     public constructor() {
         super();
@@ -42,11 +44,16 @@ export const CanvasService = new class extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
+        this.donateGoodsModal= new DonateGoodsModal(this.stage);
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.startTurnModal = new StartTurnModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
             this.sellGoodsModal.show(slot);
+        }
+
+        const openDonateGoodsModal = (slot: MarketSlotKey) => {
+            this.donateGoodsModal.show(slot);
         }
 
         this.locationGroup = new LocationGroup(
@@ -58,6 +65,7 @@ export const CanvasService = new class extends Communicator {
                 y: 0,
             },
             openSellGoodsModal,
+            openDonateGoodsModal,
         ); // locationGroup covers 1 segment, sitting on the left
 
         this.playerGroup = new PlayerGroup(
@@ -153,6 +161,7 @@ export const CanvasService = new class extends Communicator {
                     this.isPlayDrawn = true;
                 }
                 this.sellGoodsModal.update(state);
+                this.donateGoodsModal.update(state)
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);

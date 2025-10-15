@@ -11,13 +11,16 @@ export class LocationGroup implements MegaGroupInterface {
     private treasuryArea: TreasuryArea | null = null;
     private templeArea: TempleArea | null = null;
     private sellGoodsCallback: Function;
+    private donateGoodsCallback: Function;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         sellGoodsCallback: Function,
+        donateGoodsCallback: Function,
     ) {
         this.sellGoodsCallback = sellGoodsCallback;
+        this.donateGoodsCallback = donateGoodsCallback;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height - 20,
@@ -73,7 +76,8 @@ export class LocationGroup implements MegaGroupInterface {
                 x: 0,
                 y: this.marketArea.getElement().height() + this.treasuryArea.getElement().height(),
             },
-            state.temple.maxLevel
+            state.temple.maxLevel,
+            this.donateGoodsCallback,
         );
 
         this.group.add(

@@ -3,10 +3,10 @@ import { MarketCardUpdate, DynamicGroupInterface } from "~/client_types";
 import { Coordinates, Trade, ClientMessage } from "~/shared_types";
 import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "~/client_constants";
-import { ActionButton } from "../ActionButton";
+import { Button } from "../Button";
 
 const { COLOR } = clientConstants;
-export class TempleMarketCard extends ActionButton implements DynamicGroupInterface<MarketCardUpdate> {
+export class TempleMarketCard extends Button implements DynamicGroupInterface<MarketCardUpdate> {
 
     private rewardDial: TempleRewardDial;
     private goodsAssortment: GoodsAssortment;
@@ -14,8 +14,8 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        message: ClientMessage | null,
         trade: Trade,
+        callback: Function,
     ) {
         super(
             stage,
@@ -25,7 +25,7 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
                 x: position.x,
                 y: position.y,
             },
-            message
+            callback,
         );
 
         this.background = new Konva.Rect({
@@ -64,7 +64,7 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
         this.goodsAssortment.update(data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.templeRed : COLOR.templeDarkRed);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
-        this.setEnabled(data.isFeasible);
+        data.isFeasible ? this.enable() : this.disable();
     }
 
     public getElement(): Konva.Group {
