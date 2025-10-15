@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupPayload, MarketSlotKey, Phase, PlayerColor, State } from "~/shared_types";
+import { GameSetupPayload, MarketSlotKey, Phase, State } from "~/shared_types";
 import { Communicator } from "./Communicator";
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';

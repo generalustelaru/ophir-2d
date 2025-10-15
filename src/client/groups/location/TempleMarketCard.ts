@@ -46,8 +46,6 @@ export class TempleMarketCard extends ActionButton implements DynamicGroupInterf
 
         this.goodsAssortment = new GoodsAssortment(
             {
-                width: this.group.width(),
-                height: this.group.width(),
                 x: 0,
                 y: 0,
             },
