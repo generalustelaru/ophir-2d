@@ -1,6 +1,6 @@
 import Konva from "konva";
 import { MarketCardUpdate, DynamicGroupInterface } from "~/client_types";
-import { Coordinates, Trade, ClientMessage } from "~/shared_types";
+import { Coordinates, Trade } from "~/shared_types";
 import { GoodsAssortment, TempleRewardDial } from "../GroupList";
 import clientConstants from "~/client_constants";
 import { Button } from "../Button";
