@@ -341,4 +341,3 @@ export type ServerMessage =
     | NewNameTransmission
     | TurnNotificationTransmission
 ;
-
