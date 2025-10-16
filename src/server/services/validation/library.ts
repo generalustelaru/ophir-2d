@@ -80,7 +80,9 @@ function isNumber(name: string, value: unknown, nullable: boolean = false): Vali
 
     return fail(`${name} property is not a valid number: ${value}`);
 }
-function hasNumber(parent: object, key: string, nullable: boolean = false, reference: TypeReference = null): ValidationResult {
+function hasNumber(
+    parent: object, key: string, nullable: boolean = false, reference: TypeReference = null,
+): ValidationResult {
     const keyTest = hasKey(parent, key);
 
     if (keyTest.passed) {

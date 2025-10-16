@@ -9,7 +9,8 @@ import serverConstants from '~/server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import {
-    SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE,
+    SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION,
+    INCLUDE,
 } from '../configuration';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
@@ -19,7 +20,7 @@ import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {});
+const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {}); // eslint-disable-line max-len
 console.log('Active keys:');
 console.log(activeKeys);
 

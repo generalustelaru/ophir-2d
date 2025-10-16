@@ -133,7 +133,8 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     public setFill(color: Color): void {
         this.hexagon.fill(color);
     }
-    public setRestricted(how: boolean): void { //TODO: implement multiple states and control the details from here (icon and fill)
+    public setRestricted(how: boolean): void {
+        //TODO: implement multiple states and control the details from here (icon and fill)
         this.restrictedIcon.visible(how);
         this.setFill(how ? COLOR.emptyHex : COLOR.emptyHex);
     }

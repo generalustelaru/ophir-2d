@@ -39,12 +39,12 @@ export type Writable<T> = {
 }
 /**
  * @description
- * Creates a writable store primitive which can be used as is or wrapped in a store object to improve readability, customize methods, and enforce typing.
- * The parameter is copied, not referenced. **The store value is mutable**, but only through the methods provided and it can only be retrieved as a copy.
- * @method exists() returns true if the store has a value. Returns false on null, undefined, empty string, and empty array. True on empty object.
+ * Creates a writable store primitive which can be used as is or wrapped in a more customized store object to enforce typing.
+ * The parameter is copied, not referenced. **The store value is mutable**, but only through the methods provided.
+ * @method exists() returns true if the store has a value, including {}. Returns false on null, undefined, '', and [].
  * @method set() sets the store value to the input.
  * @method get() returns a copy of the store value.
- * @method update() sets the store value to the result of the input function, which takes the current store value as a parameter.
+ * @method update() provides the value to the passed callback and saves its return value.
  * @method reset() sets the store value to the initial value.
 */
 export function writable<T>(initialValue: T): Writable<T> {
@@ -65,9 +65,9 @@ export type Readable<T> = {
 }
 /**
  * @description
- * Creates a readable store primitive which can be used as is or wrapped in a store object to improve readability, customize methods, and enforce typing.
+ * Creates a readable store primitive which can be used as is or wrapped in a more customized store object to enforce typing.
  * The parameter is copied, not referenced. **The store value is immutable** and can only be retrieved as a copy.
- * @method exists() returns true if the store has a value. Returns false on null, undefined, empty string, and empty array. True on empty object.
+ * @method exists() returns true if the store has a value, including {}. Returns false on null, undefined, '', and [].
  * @method get() returns a copy of the store value.
 */
 export function readable<T>(initialValue: T): Readable<T> {

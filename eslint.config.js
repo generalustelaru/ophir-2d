@@ -1,7 +1,11 @@
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import tsParser from '@typescript-eslint/parser';
 
-export default [{
+export default [
+{
+    ignores: ['public/**', '**/*_constants.ts', '*.config.js'],
+},
+{
     languageOptions: {
         ecmaVersion: 'latest',
         sourceType: 'module',

@@ -1,4 +1,6 @@
-import { PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, SpecialistName, SelectableSpecialist } from '~/shared_types';
+import {
+    PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, SpecialistName, SelectableSpecialist,
+} from '~/shared_types';
 import { ObjectHandler } from '~/server_types';
 import { Readable, readable, arrayWritable, ArrayWritable } from './library';
 

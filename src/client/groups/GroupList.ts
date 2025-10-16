@@ -31,7 +31,7 @@ import { RivalShip } from './map/RivalShip';
 
 export {
     EndTurnButton, BarrierToken, InfluenceDial, LocationToken, EmptyLocationToken, SeaZone, ActionDial, PlayerShip,
-    RivalShip, RemoteShip, PlayerPlacard, FavorDial, CargoBand, MarketArea as MarketArea, CoinDial, TreasuryArea as TreasuryArea,
-    TempleArea as TempleArea, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, MetalDonationCard as MetalDonationCard,
+    RivalShip, RemoteShip, PlayerPlacard, FavorDial, CargoBand, MarketArea as MarketArea, CoinDial, TreasuryArea,
+    TempleArea as TempleArea, MarketDeck, MarketCard, MarketCardSlot, TempleRewardDial, MetalDonationCard,
     GoodsAssortment, MovesDial, FavorButton, FavorIcon, UpgradeButton, TempleMarketCard, MetalDonationsBand,
 }; //TODO: might want to ditch this for performance sake.

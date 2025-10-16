@@ -1,7 +1,11 @@
 import Konva from 'konva';
-import { Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState } from '~/shared_types';
+import {
+    Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState,
+} from '~/shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer } from '~/client_types';
-import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip } from '../groups/GroupList';
+import {
+    SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip,
+} from '../groups/GroupList';
 import localState from '../state';
 import clientConstants from '~/client_constants';
 

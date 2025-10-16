@@ -149,9 +149,12 @@ socketServer.on('connection', function connection(socket) {
     });
 
     socket.on('close', () => {
-        const deadClient = singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity) => p.socketId === socketId);
-        if (deadClient)
-            console.log('Removing disconnected client of', deadClient.name);
+        const deadClient = (
+            singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity) => p.socketId === socketId)
+        );
+
+        deadClient && console.log('Removing disconnected client of', deadClient.name);
+
         socketClients.delete(socketId);
     });
 });

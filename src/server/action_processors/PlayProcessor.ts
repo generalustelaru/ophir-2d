@@ -376,7 +376,8 @@ export class PlayProcessor implements SessionProcessor {
             player.removeAction(Action.donate_goods);
 
         this.addServerMessage(
-            `${name} ${isRemote ? 'accessed the market and' : ''} traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)' : ''}`,
+            `${name} ${isRemote ? 'accessed the market and' : ''}`
+            + ` traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)' : ''}`,
             color,
         );
 

@@ -146,7 +146,10 @@ export class GameSession {
                         return this.issueGroupResponse(response);
                     }
                 } else {
-                    return this.issueNominalResponse(lib.errorResponse(`${commandMatch[0]} parameter must start with a non-space character and must contain 3 or more characters`));
+                    return this.issueNominalResponse(lib.errorResponse(
+                        `${commandMatch[0]} parameter must start with a non-space `
+                        + 'character and must contain 3 or more characters',
+                    ));
                 }
             }
 
