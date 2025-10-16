@@ -34,6 +34,8 @@ You can set up and run a server on your local network fairly easily.
     - Copy the contents of *src/client/layout/* into the newly created *public* folder.
     - Run `npm install && npm run build_server && npm run build_client && node public/server.cjs` in the terminal.
 
+ - Finally, you may run `npm run postinstall` to remove maintenance commits from blame history.
+
 Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close, so two or more tabs on the same browser will mirror the same user.
 
 To shut down the server gracefully, input `shutdown` in the running server's command line interface (CLI).

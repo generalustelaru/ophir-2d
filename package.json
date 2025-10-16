@@ -5,6 +5,7 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
+    "postinstall": "git config blame.ignoreRevsFile .git-blame-ignore-revs || true",
     "build_client": "webpack --config webpack.config.cjs --env isServer=false",
     "build_server": "webpack --config webpack.config.cjs --env isServer=true",
     "test": "echo \"Error: no test specified\" && exit 1"
