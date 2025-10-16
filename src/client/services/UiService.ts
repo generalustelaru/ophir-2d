@@ -1,11 +1,11 @@
-import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState, SetupState } from "~/shared_types";
+import { PlayerColor, EnrolmentState, ChatEntry, Action, PlayState, SetupState } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
-import { PlayerCountables } from "~/server_types";
-import clientConstants from "~/client_constants";
-import { EventType } from "~/client_types";
+import { PlayerCountables } from '~/server_types';
+import clientConstants from '~/client_constants';
+import { EventType } from '~/client_types';
 
 const SINGLE_PLAYER = Boolean(process.env.SINGLE_PLAYER === 'true');
 export const UserInterface = new class extends Communicator {
@@ -46,7 +46,7 @@ export const UserInterface = new class extends Communicator {
                 payload: { input: message },
             },
         });
-    }
+    };
 
     private handleKeyInput  = (toSubmit: boolean): void => {
         toSubmit && this.sendChatMessage();
@@ -54,35 +54,35 @@ export const UserInterface = new class extends Communicator {
         setTimeout(() => {
             this.chatInput.element.focus();
         }, 5);
-    }
+    };
 
     private processDraft = (): void => {
         this.draftButton.disable();
 
         return this.createEvent({ type: EventType.draft, detail: null });
-    }
+    };
 
     private processStart = (): void => {
         this.startButton.disable();
 
         return this.createEvent({ type: EventType.start_action, detail: null });
-    }
+    };
 
     private processReset = (): void => {
 
         return this.createEvent({
             type: EventType.action,
-            detail: { action: Action.declare_reset , payload: null }
+            detail: { action: Action.declare_reset , payload: null },
         });
-    }
+    };
 
     private processForceTurn = () => {
 
         return this.createEvent({
             type: EventType.action,
-            detail: { action: Action.force_turn, payload: null }
+            detail: { action: Action.force_turn, payload: null },
         });
-    }
+    };
 
     public setInfo(text: string): void {
         const info = document.getElementById('info') as HTMLDivElement;
@@ -220,27 +220,27 @@ export const UserInterface = new class extends Communicator {
             const topValue = tiedPlayers.reduce((acc, player) => {
                 const value = player[key] as number;
 
-                return value > acc ? value : acc
+                return value > acc ? value : acc;
             }, 0);
 
             return tiedPlayers.filter(player => player[key] === topValue);
-        }
+        };
 
         const addWinner = (winnerAsArray: Array<PlayerCountables>, criteria: string, message: string) : string => {
             const winner = winnerAsArray[0];
             const key = criteria as keyof typeof winner;
 
             return message.concat(`\nThe winner is ${winner.color} with ${winner[key]} ${criteria}\n`);
-        }
+        };
         const addTiedPlayers = (players: Array<PlayerCountables>, criteria: string, message: string) : string => {
             const key = criteria as keyof typeof players[0];
 
             return message.concat(
                 `\n${criteria}-tied players:\n\n${players.map(
-                    player => `${player.color} : ${player[key]} ${criteria}\n`
-                ).join('')}`
+                    player => `${player.color} : ${player[key]} ${criteria}\n`,
+                ).join('')}`,
             );
-        }
+        };
 
         for (const player of gameResults) {
             message = message.concat(`${player.color} : ${player.vp} VP\n`);
@@ -263,7 +263,7 @@ export const UserInterface = new class extends Communicator {
         if (coinWinners.length == 1)
             return alert(addWinner(coinWinners, 'coins', message));
 
-        message = message.concat(`\nShared victory:\n`);
+        message = message.concat('\nShared victory:\n');
 
         for (const player of coinWinners)
             message = message.concat(`${player.color} : ${player.vp} VP + ${player.coins} coins\n`);
@@ -280,4 +280,4 @@ export const UserInterface = new class extends Communicator {
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
-}
+};

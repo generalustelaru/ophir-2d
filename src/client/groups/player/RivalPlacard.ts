@@ -2,13 +2,13 @@
 // stroke should become of the player color when ship is controllable
 // should contain buttons for shifting the market and endig turn (its turn)
 
-import Konva from "konva";
-import { DynamicGroupInterface } from "~/client_types";
-import { PlayerColor, Rival } from "~/shared_types";
-import { InfluenceDial } from "../GroupList";
-import { ShiftMarketButton } from "./ShiftMarketButton";
-import clientConstants from "~/client_constants";
-import { ConcludeButton } from "./ConcludeButton";
+import Konva from 'konva';
+import { DynamicGroupInterface } from '~/client_types';
+import { PlayerColor, Rival } from '~/shared_types';
+import { InfluenceDial } from '../GroupList';
+import { ShiftMarketButton } from './ShiftMarketButton';
+import clientConstants from '~/client_constants';
+import { ConcludeButton } from './ConcludeButton';
 
 const { COLOR } = clientConstants;
 
@@ -49,8 +49,8 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
             COLOR.boneWhite,
         );
 
-        this.shiftMarketButton = new ShiftMarketButton(stage, {x: 25, y: 10});
-        this.concludeButton = new ConcludeButton(stage, {x: this.group.width() + 25, y: 25});
+        this.shiftMarketButton = new ShiftMarketButton(stage, { x: 25, y: 10 });
+        this.concludeButton = new ConcludeButton(stage, { x: this.group.width() + 25, y: 25 });
 
         this.group.add(...[
             this.background,

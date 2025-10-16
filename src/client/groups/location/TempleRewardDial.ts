@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from "~/client_types";
-import { Coordinates } from "~/shared_types";
+import { DynamicGroupInterface } from '~/client_types';
+import { Coordinates } from '~/shared_types';
 import { FavorIcon } from '../FavorIcon';
-import clientConstants from "~/client_constants";
+import clientConstants from '~/client_constants';
 
 const { ICON_DATA, COLOR } = clientConstants;
 
@@ -61,7 +61,7 @@ export class TempleRewardDial implements DynamicGroupInterface<number> {
             // strokeWidth: 2,
             fontFamily: 'Calibri',
 
-        })
+        });
 
         this.group.add(...[
             favorIcon.getElement(),

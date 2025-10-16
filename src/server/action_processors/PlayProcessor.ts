@@ -1,16 +1,16 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, Trade, ChatEntry, PlayerEntity, LocalAction,
-} from "~/shared_types";
+} from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
-import serverConstants from "~/server_constants";
-import { DataDigest, PlayerCountables, SessionProcessor, StateBundle } from "~/server_types";
+import serverConstants from '~/server_constants';
+import { DataDigest, PlayerCountables, SessionProcessor, StateBundle } from '~/server_types';
 import lib, { Probable } from './library';
 import { validator } from '../services/validation/ValidatorService';
-import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from "../configuration";
-import { BackupStateHandler } from "../state_handlers/BackupStateHandler";
+import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
+import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B } = serverConstants;
 
@@ -44,7 +44,7 @@ export class PlayProcessor implements SessionProcessor {
         const firstPlayer = players.find(p => p.turnOrder === 1);
 
         if (!firstPlayer)
-            throw new Error("Could not find the first player!");
+            throw new Error('Could not find the first player!');
 
         const player = new PlayerHandler(activePlayer || firstPlayer);
         const { seaZone } = player.getBearings();
@@ -101,7 +101,7 @@ export class PlayProcessor implements SessionProcessor {
                 {
                     seaZone: target,
                     location: locationName,
-                    position
+                    position,
                 },
                 this.privateState.getDestinations(target),
             );
@@ -109,8 +109,8 @@ export class PlayProcessor implements SessionProcessor {
             return lib.pass(this.saveAndReturn(player));
         }
 
-        const playerMovementLegal = player.isDestinationValid(target)
-        const navigatorMevementLegal = player.isNavigator() && player.isBarrierCrossing(target)
+        const playerMovementLegal = player.isDestinationValid(target);
+        const navigatorMevementLegal = player.isNavigator() && player.isBarrierCrossing(target);
 
         const playerMovementAllowed = lib.checkConditions([
             player.getMoves() > 0,
@@ -135,7 +135,7 @@ export class PlayProcessor implements SessionProcessor {
 
             const playersInZone = this.playState.getPlayersByZone(target);
 
-            const rival = this.playState.getRivalData()
+            const rival = this.playState.getRivalData();
             const rivalInfluence = rival.isIncluded && rival.bearings.seaZone === target
                 ? rival.influence
                 : 0;
@@ -177,10 +177,10 @@ export class PlayProcessor implements SessionProcessor {
 
             this.addServerMessage(
                 `${playerName} was blocked from sailing.`,
-                playerColor
+                playerColor,
             );
             this.playState.trimInfluenceByZone(target, rivalInfluence);
-            this.addServerMessage(`Influence at the [${locationName}] was trimmed.`)
+            this.addServerMessage(`Influence at the [${locationName}] was trimmed.`);
 
             return false;
         })();
@@ -284,7 +284,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        player.appendActions(this.getSpecialistActions(player))
+        player.appendActions(this.getSpecialistActions(player));
 
         const { name, color } = player.getIdentity();
         this.addServerMessage(`${name} ditched one ${item}`, color);
@@ -370,7 +370,7 @@ export class PlayProcessor implements SessionProcessor {
         // other updates
         player.removeAction(Action.sell_goods);
         const coinForm = reward === 1 ? 'coin' : 'coins';
-        const isRemote = player.isMoneychanger() && player.getBearings().location === 'temple'
+        const isRemote = player.isMoneychanger() && player.getBearings().location === 'temple';
 
         if (isRemote)
             player.removeAction(Action.donate_goods);
@@ -517,7 +517,7 @@ export class PlayProcessor implements SessionProcessor {
 
         player.setCargo(metalLoad.data);
         player.registerMetalPurchase();
-        player.appendActions(this.getSpecialistActions(player))
+        player.appendActions(this.getSpecialistActions(player));
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -605,7 +605,7 @@ export class PlayProcessor implements SessionProcessor {
         const { turnOrder, name, color } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
-            return lib.fail(`Ship is not anchored.`);
+            return lib.fail('Ship is not anchored.');
 
         if (
             player.getBearings().location === 'temple'
@@ -688,21 +688,21 @@ export class PlayProcessor implements SessionProcessor {
         const { player } = digest;
 
         if (player.isActivePlayer())
-            return lib.fail('Active player cannot force own turn!')
+            return lib.fail('Active player cannot force own turn!');
 
         const activePlayer = this.playState.getActivePlayer();
 
         if (!activePlayer)
-            return lib.fail('Cannot find active player!')
+            return lib.fail('Cannot find active player!');
 
         if (!activePlayer.isIdle)
-            return lib.fail('Cannot force turn on non-idle player')
+            return lib.fail('Cannot force turn on non-idle player');
 
         if (activePlayer.isHandlingRival)
             this.playState.concludeRivalTurn();
 
         const idlerHandler = new PlayerHandler(
-            { ...activePlayer, locationActions: [], isIdle: false, isAnchored: true, isHandlingRival: false }
+            { ...activePlayer, locationActions: [], isIdle: false, isAnchored: true, isHandlingRival: false },
         );
 
         this.addServerMessage(
@@ -737,7 +737,7 @@ export class PlayProcessor implements SessionProcessor {
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
 
-        this.addServerMessage(`${name} has reconsidered last action/move`, color)
+        this.addServerMessage(`${name} has reconsidered last action/move`, color);
         const playerHandler = new PlayerHandler(revertedPlayer);
         playerHandler.disableUndo();
 
@@ -767,7 +767,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.pass(this.saveAndReturn(player));
         }
 
-        return lib.fail(`Conditions for upgrade not met.`);
+        return lib.fail('Conditions for upgrade not met.');
     }
 
     public addChat(entry: ChatEntry): StateResponse {
@@ -782,7 +782,7 @@ export class PlayProcessor implements SessionProcessor {
         this.playState.updateName(player.color, newName);
         this.backupState.updatePlayerName(player.color, newName);
 
-        return { state: this.getState() }
+        return { state: this.getState() };
     };
 
     // MARK: PRIVATE
@@ -792,7 +792,7 @@ export class PlayProcessor implements SessionProcessor {
 
         if (harbormaster.isPrivileged() && moves === 1) {
             const { name, color } = harbormaster.getIdentity();
-            this.addServerMessage(`${name} can move and act again.`, color)
+            this.addServerMessage(`${name} can move and act again.`, color);
         } else {
             harbormaster.clearMoves();
         }
@@ -845,13 +845,13 @@ export class PlayProcessor implements SessionProcessor {
         const supplies = this.playState.getItemSupplies();
 
         if (metals.includes(item)) {
-            const metal = item as Metal
+            const metal = item as Metal;
 
             if (supplies.metals[metal] < 1)
                 return lib.fail(`No ${item} available for loading`);
 
             if (orderedCargo[emptyIndex + 1] !== 'empty')
-                return lib.fail(`Not enough empty slots for storing metal`);
+                return lib.fail('Not enough empty slots for storing metal');
 
             orderedCargo[emptyIndex] = item;
             orderedCargo[emptyIndex + 1] = `${item}_extra` as CargoMetal;
@@ -1012,7 +1012,7 @@ export class PlayProcessor implements SessionProcessor {
             const activePlayer = this.playState.getActivePlayer();
 
             if (!activePlayer) {
-                lib.fail('No active player found in idle check!')
+                lib.fail('No active player found in idle check!');
                 return;
             }
 

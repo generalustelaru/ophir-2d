@@ -13,7 +13,7 @@ function deepCopy<T>(input: T): T {
     }
 
     return Object.fromEntries(Object.entries(input).map(
-        ([k, val]: [string, unknown]): [string, unknown] => [k, deepCopy(val)]
+        ([k, val]: [string, unknown]): [string, unknown] => [k, deepCopy(val)],
     )) as T;
 }
 
@@ -56,7 +56,7 @@ export function writable<T>(initialValue: T): Writable<T> {
         get: () => deepCopy(value),
         update: (fn: Function): void => value = deepCopy(fn(deepCopy(value))),
         reset: () => value = deepCopy(initialValue),
-    }
+    };
 }
 
 export type Readable<T> = {
@@ -76,7 +76,7 @@ export function readable<T>(initialValue: T): Readable<T> {
     return {
         exists: () => valueExists(value),
         get: () => deepCopy(value),
-    }
+    };
 }
 
 // MARK: WRAPPERS
@@ -97,7 +97,7 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
                 ? array.get().find(e => e[keyName] === value) || null
                 : array.get().find(e => e === value) || null;
         },
-    }
+    };
 }
 
 // TODO: Refactor ArrayWritable to take an index and turn the internal structure into a record.
@@ -153,7 +153,7 @@ export function arrayWritable<T>(initialArray: Array<T>, key?: keyof T): ArrayWr
                         key && e[key as keyof T] === reference
                         || !key && e === reference
                     ) {
-                        arr[i] = deepCopy(fn((e)))
+                        arr[i] = deepCopy(fn((e)));
                         break;
                     }
                 }
@@ -181,5 +181,5 @@ export function arrayWritable<T>(initialArray: Array<T>, key?: keyof T): ArrayWr
         },
         clear: () => array.set([]),
         reset: () => array.reset(),
-    }
+    };
 }

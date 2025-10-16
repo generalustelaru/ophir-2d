@@ -1,8 +1,8 @@
-import Konva from "konva";
-import constants from "~/client_constants";
-import { Action, Player } from "~/shared_types";
-import { DynamicGroupInterface } from "~/client_types";
-import { ActionButton } from "../ActionButton";
+import Konva from 'konva';
+import constants from '~/client_constants';
+import { Action, Player } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
 export class ActionDial extends ActionButton implements DynamicGroupInterface<Player> {
@@ -14,9 +14,9 @@ export class ActionDial extends ActionButton implements DynamicGroupInterface<Pl
 
         super(
             stage,
-            {width: 100, height: 100, x:0, y:0},
+            { width: 100, height: 100, x:0, y:0 },
             { action: Action.undo, payload: null },
-        )
+        );
 
         const data = isActivePlayer ? ICON_DATA.sun : ICON_DATA.moon;
         this.luminary = new Konva.Path({

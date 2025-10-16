@@ -1,7 +1,7 @@
-import Konva from "konva";
-import { Color, DynamicGroupInterface } from "~/client_types";
-import { Coordinates } from "~/shared_types";
-import { Button } from "../Button";
+import Konva from 'konva';
+import { Color, DynamicGroupInterface } from '~/client_types';
+import { Coordinates } from '~/shared_types';
+import { Button } from '../Button';
 
 export class ModalButton extends Button implements DynamicGroupInterface<string> {
     private background: Konva.Rect;
@@ -14,7 +14,7 @@ export class ModalButton extends Button implements DynamicGroupInterface<string>
         text: string,
         callback: Function,
     ) {
-        super(stage, {...position, height: 50, width: 100}, callback);
+        super(stage, { ...position, height: 50, width: 100 }, callback);
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -22,15 +22,15 @@ export class ModalButton extends Button implements DynamicGroupInterface<string>
             fill: color,
             cornerRadius: 15,
         });
-        const scale = 1.4
+        const scale = 1.4;
         this.label = new Konva.Text({
             text: text,
             x: 5,
             y: 20,
             fill: 'white',
-            scale: {x: scale, y: scale},
-            fontFamily: 'Custom'
-        })
+            scale: { x: scale, y: scale },
+            fontFamily: 'Custom',
+        });
         this.group.add(this.background, this.label);
     }
 

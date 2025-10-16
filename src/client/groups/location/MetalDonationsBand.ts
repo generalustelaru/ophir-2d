@@ -1,20 +1,20 @@
-import Konva from "konva"
-import { Coordinates, TempleState } from "~/shared_types"
-import { DynamicGroupInterface, } from "~/client_types"
-import { TempleLevelDial } from "./TempleLevelDial";
-import clientConstants from "~/client_constants";
+import Konva from 'konva';
+import { Coordinates, TempleState } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import { TempleLevelDial } from './TempleLevelDial';
+import clientConstants from '~/client_constants';
 
 const SHORT_GAME = Boolean(process.env.SHORT_GAME === 'true');
 const { COLOR } = clientConstants;
 const UNIT = 27;
 const LEVEL_DIAL_DRIFTS = [
-    {id: 0, x: 0},
-    {id: 1, x: UNIT},
-    {id: 2, x: UNIT * 2},
-    {id: 3, x: UNIT * 3},
-    {id: 4, x: UNIT * 4},
-    {id: 5, x: UNIT * 5},
-    {id: 6, x: UNIT * 6},
+    { id: 0, x: 0 },
+    { id: 1, x: UNIT },
+    { id: 2, x: UNIT * 2 },
+    { id: 3, x: UNIT * 3 },
+    { id: 4, x: UNIT * 4 },
+    { id: 5, x: UNIT * 5 },
+    { id: 6, x: UNIT * 6 },
 ];
 export class MetalDonationsBand implements DynamicGroupInterface<TempleState> {
 
@@ -42,7 +42,7 @@ export class MetalDonationsBand implements DynamicGroupInterface<TempleState> {
             cornerRadius: 5,
         });
 
-        const displayWidth = UNIT * (SHORT_GAME ? 1 : maxLevel)
+        const displayWidth = UNIT * (SHORT_GAME ? 1 : maxLevel);
         this.cargoDisplayGroup = new Konva.Group({
             x: this.group.width() - displayWidth,
             width: displayWidth,

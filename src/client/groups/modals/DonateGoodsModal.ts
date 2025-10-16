@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { ModalBase } from "./ModalBase";
-import { MarketOffer, PlayState, MarketSlotKey, Action } from "~/shared_types";
-import { GoodsAssortment } from "../GroupList";
-import clientConstants from "~/client_constants";
+import Konva from 'konva';
+import { ModalBase } from './ModalBase';
+import { MarketOffer, PlayState, MarketSlotKey, Action } from '~/shared_types';
+import { GoodsAssortment } from '../GroupList';
+import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;
 
@@ -40,7 +40,7 @@ export class DonateGoodsModal extends ModalBase {
 
     public show(slot: MarketSlotKey) {
         if (!this.market)
-            throw new Error("Cannot render modal! Update data is missing.");
+            throw new Error('Cannot render modal! Update data is missing.');
 
         // this.coinDial.update(this.market[slot].reward.coins);
         this.goodsAssortment.update(this.market[slot].request);

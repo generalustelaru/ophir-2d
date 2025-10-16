@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { MarketCard } from "../GroupList";
-import { Trade, Fluctuation, MarketSlotKey } from "~/shared_types";
-import clientConstants from "~/client_constants";
+import Konva from 'konva';
+import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { MarketCard } from '../GroupList';
+import { Trade, Fluctuation, MarketSlotKey } from '~/shared_types';
+import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;
 
@@ -16,7 +16,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
         marketKey: MarketSlotKey,
         trade: Trade,
         fluctuation: Fluctuation,
-        modalCallback: Function
+        modalCallback: Function,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -32,7 +32,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
             () => modalCallback(marketKey),
             // { action: Action.sell_goods, payload: { slot: marketKey } },
             trade,
-            fluctuation
+            fluctuation,
         );
 
         this.group.add(this.marketCard.getElement());
@@ -60,7 +60,7 @@ export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
                 case 0:
                     return ICON_DATA.no_fluctuation_dash;
             }
-        }
+        };
 
         return new Konva.Path({
             data: data().shape,

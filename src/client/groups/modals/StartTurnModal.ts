@@ -1,5 +1,5 @@
-import Konva from "konva";
-import { ModalBase } from "./ModalBase";
+import Konva from 'konva';
+import { ModalBase } from './ModalBase';
 
 export class StartTurnModal extends ModalBase {
     constructor(stage: Konva.Stage) {

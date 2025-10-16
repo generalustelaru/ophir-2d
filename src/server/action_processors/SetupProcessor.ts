@@ -3,23 +3,23 @@ import {
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity,
-} from "~/shared_types";
-import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor } from "~/server_types";
-import serverConstants from "~/server_constants";
+} from '~/shared_types';
+import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor } from '~/server_types';
+import serverConstants from '~/server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import {
     SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE,
 } from '../configuration';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
-import { BackupStateHandler } from "../state_handlers/BackupStateHandler";
+import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
-import { HexCoordinates } from "~/client_types";
+import { HexCoordinates } from '~/client_types';
 import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc }, {})
+const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {});
 console.log('Active keys:');
 console.log(activeKeys);
 
@@ -46,7 +46,7 @@ export class SetupProcessor implements SessionProcessor {
             const deck = tools.getCopy(SPECIALISTS);
 
             if (playerCount >= deck.length)
-                throw new Error("Not enough specialist cards!");
+                throw new Error('Not enough specialist cards!');
 
             const randomized: Array<SpecialistData> = lib.randomize(deck);
             const selection = randomized.slice(0, playerCount + 1);
@@ -67,7 +67,7 @@ export class SetupProcessor implements SessionProcessor {
                     selection.shift();
             }
 
-            return selection.map(s => { return { ...s, owner: null } });
+            return selection.map(s => { return { ...s, owner: null }; });
         })();
 
         const playerDrafts = this.draftPlayers(playerEntries);
@@ -89,7 +89,7 @@ export class SetupProcessor implements SessionProcessor {
         const firstToPick = playerDrafts.find(p => p.turnToPick);
 
         if (!firstToPick)
-            throw new Error("No player is set to pick specialist!");
+            throw new Error('No player is set to pick specialist!');
 
         this.setupState.addServerMessage(`[${firstToPick.name}] is picking a specialist.`, firstToPick.color);
     };
@@ -108,7 +108,7 @@ export class SetupProcessor implements SessionProcessor {
         this.setupState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.setupState.updateName(player.color, newName);
 
-        return { state: this.getState() }
+        return { state: this.getState() };
     };
     //#MARK: Specialist
     public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateResponse> {
@@ -121,10 +121,10 @@ export class SetupProcessor implements SessionProcessor {
         const pickedSpecialist = this.setupState.getSpecialist(name);
 
         if (!pickedSpecialist)
-            return lib.fail('Cannot find named specialist!')
+            return lib.fail('Cannot find named specialist!');
 
         if (!player.turnToPick || player.specialist || pickedSpecialist.owner)
-            return lib.fail(`Player cannot choose or specialist already assigned`)
+            return lib.fail('Player cannot choose or specialist already assigned');
 
         this.setupState.assignSpecialist(player, name);
         this.setupState.addServerMessage(
@@ -165,7 +165,7 @@ export class SetupProcessor implements SessionProcessor {
         })();
 
         if (!playerSelections)
-            return lib.fail('Specialist selection is incomplete')
+            return lib.fail('Specialist selection is incomplete');
 
         const marketData = this.prepareDeckAndGetOffer();
         const privateStateHandler = new PrivateStateHandler({
@@ -250,7 +250,7 @@ export class SetupProcessor implements SessionProcessor {
     }
 
     private determineLocations(): MapPairings {
-        const locations = lib.randomize(LOCATION_ACTIONS)
+        const locations = lib.randomize(LOCATION_ACTIONS);
 
         if (locations.length !== 7) {
             throw new Error(`Invalid number of locations! Expected 7, got {${locations.length}}`);
@@ -268,14 +268,14 @@ export class SetupProcessor implements SessionProcessor {
             bottomLeft: drawLocation(),
             left: drawLocation(),
             topLeft: drawLocation(),
-        }
+        };
 
         const zoneByLocation = Object.fromEntries(
             Object.entries(locationByZone)
-                .map(([zoneName, locationData]) => [locationData.name, zoneName])
+                .map(([zoneName, locationData]) => [locationData.name, zoneName]),
         ) as Record<LocationName, ZoneName>;
 
-        return { locationByZone, zoneByLocation }
+        return { locationByZone, zoneByLocation };
     }
 
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<DestinationPackage> {
@@ -325,7 +325,7 @@ export class SetupProcessor implements SessionProcessor {
                 turnOrder: token,
                 specialist: null,
                 turnToPick: !orderTokens.length,
-            }
+            };
         });
     }
 
@@ -357,7 +357,7 @@ export class SetupProcessor implements SessionProcessor {
                 bearings: {
                     seaZone: startingZone,
                     position: setupCoordinates.pop() as Coordinates,
-                    location: mapPairings.locationByZone[startingZone].name
+                    location: mapPairings.locationByZone[startingZone].name,
                 },
                 overnightZone: startingZone,
                 favor: startingFavor,
@@ -373,7 +373,7 @@ export class SetupProcessor implements SessionProcessor {
                 feasibleTrades: [],
                 coins: 0,
                 turnPurchases: 0,
-            }
+            };
 
             if (playerDto.specialist.name === SpecialistName.ambassador)
                 playerDto.cargo.push('empty', 'empty');
@@ -421,15 +421,15 @@ export class SetupProcessor implements SessionProcessor {
     ): Rival {
 
         if (!isIncluded)
-            return { isIncluded: false }
+            return { isIncluded: false };
 
-        const marketZone = mapPairings.zoneByLocation['market']
+        const marketZone = mapPairings.zoneByLocation['market'];
 
         const hexPosition = hexCoordinates.find(c => c.id === marketZone)!;
         const shipPosition = {
             x: hexPosition.x + 25,
             y: hexPosition.y + 25,
-        }
+        };
 
         return {
             isIncluded: true,
@@ -443,7 +443,7 @@ export class SetupProcessor implements SessionProcessor {
                 location: 'market',
             },
             influence: 1,
-        }
+        };
     }
 
     // MARK: Supplies
@@ -453,7 +453,7 @@ export class SetupProcessor implements SessionProcessor {
         return {
             metals: { gold: supplyCount, silver: supplyCount },
             goods: { gems: supplyCount, linen: supplyCount, ebony: supplyCount, marble: supplyCount },
-        }
+        };
     }
 
     // MARK: Market
@@ -511,7 +511,7 @@ export class SetupProcessor implements SessionProcessor {
         const tiers = tools.getCopy(COST_TIERS);
 
         return tiers.filter(
-            level => !level.skipOnPlayerCounts.includes(playerCount)
+            level => !level.skipOnPlayerCounts.includes(playerCount),
         );
     }
 }

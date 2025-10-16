@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from "~/client_types";
+import { DynamicGroupInterface } from '~/client_types';
 import { ActionButton } from '../ActionButton';
-import { Player, Coordinates, PlayerColor, Action } from "~/shared_types";
-import clientConstants from "~/client_constants";
+import { Player, Coordinates, PlayerColor, Action } from '~/shared_types';
+import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA, COLOR } = clientConstants;
 
@@ -32,7 +32,7 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
             fill: isLocalPlayer ? COLOR[`dark${player.color}`] : undefined,
             cornerRadius: 5,
             stroke: isLocalPlayer && specialty ? 'white' : undefined,
-            strokeWidth: 2
+            strokeWidth: 2,
         });
         this.group.add(this.background);
 
@@ -59,8 +59,8 @@ export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInt
         if (this.isLocalPlayer) {
             this.background.fill( maySell
                 ? COLOR.marketOrange
-                : COLOR[`dark${this.playerColor}`]
-            )
+                : COLOR[`dark${this.playerColor}`],
+            );
         }
         this.setEnabled(maySell);
     }

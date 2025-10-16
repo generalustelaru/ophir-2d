@@ -1,5 +1,5 @@
 
-import { LocalState } from "~/client_types";
+import { LocalState } from '~/client_types';
 
 const localState: LocalState = {
     gameId: null,
@@ -7,6 +7,6 @@ const localState: LocalState = {
     playerColor: null,
     playerName: null,
     vp: 0,
-}
+};
 
 export default localState;

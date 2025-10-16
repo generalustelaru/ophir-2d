@@ -3,10 +3,10 @@ import {
     VpTransmission, EnrolmentResponse,
     NewNameTransmission,
     TurnNotificationTransmission,
-} from "~/shared_types";
+} from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
-import { EventType } from "~/client_types";
+import { EventType } from '~/client_types';
 
 export const CommunicationService = new class extends Communicator {
 
@@ -21,12 +21,12 @@ export const CommunicationService = new class extends Communicator {
 
         this.socket.onopen = () => {
             console.info('Connection established.');
-        }
+        };
 
         this.socket.onclose = (event) => {
             if (event.wasClean) {
                 console.info('Connection terminated');
-                this.createEvent({type: EventType.close, detail: null });
+                this.createEvent({ type: EventType.close, detail: null });
             } else {
                 console.info('Connection timeout');
                 this.createEvent({ type: EventType.timeout, detail: null });
@@ -34,15 +34,15 @@ export const CommunicationService = new class extends Communicator {
 
             this.socket?.close();
             this.socket = null;
-        }
+        };
 
         this.socket.onerror = (error) => {
             console.error(error);
             this.createEvent({
                 type: EventType.error,
-                detail: { message: 'The connection encountered an error' }
+                detail: { message: 'The connection encountered an error' },
             });
-        }
+        };
 
         this.socket.onmessage = (event) => {
             const data: ServerMessage = JSON.parse(event.data);
@@ -51,7 +51,7 @@ export const CommunicationService = new class extends Communicator {
             if (this.isClientIdResponse(data)) {
                 this.createEvent({
                     type: EventType.identification,
-                    detail: { socketId: data.socketId }
+                    detail: { socketId: data.socketId },
                 });
 
                 return;
@@ -65,13 +65,13 @@ export const CommunicationService = new class extends Communicator {
                     this.createEvent({ type: EventType.start_turn, detail: null });
                     break;
                 case this.isVictoryPointsTransmission(data):
-                    this.createEvent({ type: EventType.vp_transmission, detail: data })
+                    this.createEvent({ type: EventType.vp_transmission, detail: data });
                     break;
                 case this.isNewNameTransmission(data):
-                    this.createEvent({ type: EventType.name_transmission, detail: data})
+                    this.createEvent({ type: EventType.name_transmission, detail: data });
                     break;
                 case this.isEnrolmentApprovalTransmission(data):
-                    this.createEvent({ type: EventType.enrolment_approval, detail: data })
+                    this.createEvent({ type: EventType.enrolment_approval, detail: data });
                     break;
                 case this.isResetOrder(data):
                     this.createEvent({ type: EventType.reset, detail: data });
@@ -83,7 +83,7 @@ export const CommunicationService = new class extends Communicator {
                     this.createEvent({ type: EventType.error, detail: { message: 'Could not determine message type.' } });
                     break;
             }
-        }
+        };
     }
 
     public sendMessage(message: ClientMessage) {
@@ -92,7 +92,7 @@ export const CommunicationService = new class extends Communicator {
             this.socket?.close();
             this.createEvent({
                 type: EventType.error,
-                detail: { message: 'The connection is not open' }
+                detail: { message: 'The connection is not open' },
             });
 
             return;
@@ -150,8 +150,8 @@ export const CommunicationService = new class extends Communicator {
                 return this.createEvent({ type: EventType.play_update, detail: state });
             default:
                 return this.createEvent({
-                    type: EventType.error, detail: { message: 'Unknown phase value in state.'}
+                    type: EventType.error, detail: { message: 'Unknown phase value in state.' },
                 });
         }
     }
-}
+};

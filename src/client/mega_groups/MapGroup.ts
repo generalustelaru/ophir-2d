@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState } from "~/shared_types";
-import { MegaGroupInterface, GroupLayoutData, IconLayer } from "~/client_types";
+import { Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState } from '~/shared_types';
+import { MegaGroupInterface, GroupLayoutData, IconLayer } from '~/client_types';
 import { SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip } from '../groups/GroupList';
 import localState from '../state';
-import clientConstants from "~/client_constants";
+import clientConstants from '~/client_constants';
 
 const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA } = clientConstants;
 
@@ -53,7 +53,7 @@ export class MapGroup implements MegaGroupInterface {
                 this.group.add(seaZone.getElement());
             });
             // MARK: barriers
-            const barriersIds = state.setup.barriers
+            const barriersIds = state.setup.barriers;
             const barrier_1 = new BarrierToken(centerPoint, barriersIds[0]);
             const barrier_2 = new BarrierToken(centerPoint, barriersIds[1]);
             this.group.add(barrier_1.getElement(), barrier_2.getElement());
@@ -107,7 +107,7 @@ export class MapGroup implements MegaGroupInterface {
                 this.stage,
                 this.seaZones,
                 state.rival,
-                localState.playerColor
+                localState.playerColor,
             );
             this.group.add(this.rivalShip.getElement());
         }
@@ -121,7 +121,7 @@ export class MapGroup implements MegaGroupInterface {
                     position.y,
                     COLOR[player.color],
                     player.isActive,
-                    player.color
+                    player.color,
                 );
                 this.opponentShips.push(ship);
                 this.group.add(ship.getElement());
@@ -233,8 +233,8 @@ export class MapGroup implements MegaGroupInterface {
                 id: h.id,
                 x: centerPoint.x - h.x,
                 y: centerPoint.y - h.y,
-            }
-        })
+            };
+        });
 
         return {
             hexPositions,
@@ -257,7 +257,7 @@ export class MapGroup implements MegaGroupInterface {
         })();
         const currentLevel = state.temple.currentLevel || 0;
         const templeData = TEMPLE_CONSTRUCTION_DATA.find(
-            item => item.shapeId == currentLevel + skipCount
+            item => item.shapeId == currentLevel + skipCount,
         );
 
         if (templeData)

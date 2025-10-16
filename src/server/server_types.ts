@@ -6,12 +6,12 @@ import {
     SpecialistData,
     StateResponse,
     PlayState,
-} from "~/shared_types";
+} from '~/shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
-import { BackupStateHandler } from "./state_handlers/BackupStateHandler";
+import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 export type WsClient = {
     socketId: string,

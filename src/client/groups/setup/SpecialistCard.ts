@@ -2,12 +2,12 @@
 // stroke should become of the player color when ship is controllable
 // should contain buttons for shifting the market and endig turn (its turn)
 
-import Konva from "konva";
-import { DynamicGroupInterface } from "~/client_types";
-import clientConstants from "~/client_constants";
-import { Action, PlayerColor, SelectableSpecialist, SpecialistName } from "~/shared_types";
-import { ActionButton } from "../ActionButton";
-import { FavorDial } from "../FavorDial";
+import Konva from 'konva';
+import { DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client_constants';
+import { Action, PlayerColor, SelectableSpecialist, SpecialistName } from '~/shared_types';
+import { ActionButton } from '../ActionButton';
+import { FavorDial } from '../FavorDial';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
@@ -32,14 +32,14 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             height: 300,
             x: xOffset,
             y: 50,
-        }
+        };
         super(
             stage,
             layout,
             {
                 action: Action.pick_specialist,
-                payload: { name: specialist.name }
-            }
+                payload: { name: specialist.name },
+            },
         );
         this.cardName = specialist.name;
 
@@ -55,7 +55,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             fontFamily: 'Custom',
             width: layout.width,
             height: layout.height,
-        }
+        };
 
         const nameElement = new Konva.Text({
             ...textCommon,

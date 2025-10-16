@@ -1,4 +1,4 @@
-import { HTMLHandlerInterface } from "~/client_types";
+import { HTMLHandlerInterface } from '~/client_types';
 
 export class TextInput implements HTMLHandlerInterface {
 
@@ -13,14 +13,14 @@ export class TextInput implements HTMLHandlerInterface {
     enable = () => {
         this.element.disabled = false;
         this.element.addEventListener('input', this.inputCallback);
-    }
+    };
 
     disable = () => {
         this.element.disabled = true;
         this.element.removeEventListener('input', this.inputCallback);
-    }
+    };
 
     setValue = (value: string | null) => {
         this.element.value = value ?? '';
-    }
+    };
 }

@@ -1,8 +1,8 @@
-import Konva from "konva";
-import clientConstants from "../../client_constants";
-import { DismissButton } from "./DismissButton";
-import { AcceptButton } from "./AcceptButton";
-import { ClientMessage } from "~/shared_types";
+import Konva from 'konva';
+import clientConstants from '../../client_constants';
+import { DismissButton } from './DismissButton';
+import { AcceptButton } from './AcceptButton';
+import { ClientMessage } from '~/shared_types';
 
 type SubmitBehavior = {
     hasSubmit: true,
@@ -64,15 +64,15 @@ export abstract class ModalBase {
 
         const buttonLevel = height - 50;
 
-        this.contentGroup = new Konva.Group({ width, height: buttonLevel,});
+        this.contentGroup = new Konva.Group({ width, height: buttonLevel });
 
         this.dismissButton = new DismissButton(
             stage,
-            () => { this.screenGroup.hide() },
+            () => { this.screenGroup.hide(); },
             {
                 x: this.modalGroup.width() / 2 - (behavior.hasSubmit ? 75 : 25),
                 y: buttonLevel,
-            }
+            },
         );
         this.dismissButton.enable();
 
@@ -84,7 +84,7 @@ export abstract class ModalBase {
                     y: buttonLevel,
                 },
                 behavior.actionMessage,
-                () => { this.screenGroup.hide() },
+                () => { this.screenGroup.hide(); },
             );
             this.modalGroup.add(this.acceptButton.getElement());
             this.acceptButton.enable();
@@ -96,7 +96,7 @@ export abstract class ModalBase {
         ]);
 
         this.screenGroup.add(...[
-            this.modalGroup
+            this.modalGroup,
         ]);
         stage.getLayers()[1].add(this.screenGroup);
     }
@@ -104,7 +104,7 @@ export abstract class ModalBase {
     protected open(message: ClientMessage|null = null) {
         if (message) {
             if (!this.acceptButton)
-                throw new Error("Cannot assign message. Accept button not initialized!");
+                throw new Error('Cannot assign message. Accept button not initialized!');
 
             this.acceptButton.updateActionMessage(message);
         }

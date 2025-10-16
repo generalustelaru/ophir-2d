@@ -1,7 +1,7 @@
-import { ChatEntry, PlayerColor } from "~/shared_types";
-import { BackupState } from "../server_types";
-import tools from "../services/ToolService";
-import lib, { Probable } from "../action_processors/library";
+import { ChatEntry, PlayerColor } from '~/shared_types';
+import { BackupState } from '../server_types';
+import tools from '../services/ToolService';
+import lib, { Probable } from '../action_processors/library';
 
 export class BackupStateHandler {
     private backupState: BackupState | null;
@@ -43,7 +43,7 @@ export class BackupStateHandler {
     }
 
     public updatePlayerName(color: PlayerColor, name: string ) {
-        const player = this.backupState?.playState.players.find(p => p.color === color)
+        const player = this.backupState?.playState.players.find(p => p.color === color);
 
         if (player)
             player.name = name;

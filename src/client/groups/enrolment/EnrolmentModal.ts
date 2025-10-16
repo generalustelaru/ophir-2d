@@ -1,15 +1,15 @@
-import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { PlayerColor, PlayerEntry } from "~/shared_types";
-import  clientConstants from "~/client_constants"
-import { ColorCard } from "./ColorCard";
+import Konva from 'konva';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { PlayerColor, PlayerEntry } from '~/shared_types';
+import  clientConstants from '~/client_constants';
+import { ColorCard } from './ColorCard';
 
 type EnrolmentModalUpdate = {
     players: Array<PlayerEntry>,
     localPlayerColor: PlayerColor | null,
 }
 
-const { COLOR } = clientConstants
+const { COLOR } = clientConstants;
 
 export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdate> {
     private group: Konva.Group;

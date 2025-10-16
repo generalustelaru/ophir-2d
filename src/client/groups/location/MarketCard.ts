@@ -1,10 +1,10 @@
-import Konva from "konva";
-import { MarketCardUpdate, DynamicGroupInterface } from "~/client_types";
-import { Coordinates, Fluctuation, Trade } from "~/shared_types";
-import { CoinDial, GoodsAssortment } from "../GroupList";
-import clientConstants from "~/client_constants";
-import { MiniTempleRewardDial } from "./MiniTempleRewardDial";
-import { Button } from "../Button";
+import Konva from 'konva';
+import { MarketCardUpdate, DynamicGroupInterface } from '~/client_types';
+import { Coordinates, Fluctuation, Trade } from '~/shared_types';
+import { CoinDial, GoodsAssortment } from '../GroupList';
+import clientConstants from '~/client_constants';
+import { MiniTempleRewardDial } from './MiniTempleRewardDial';
+import { Button } from '../Button';
 
 const { COLOR } = clientConstants;
 export class MarketCard extends Button implements DynamicGroupInterface<MarketCardUpdate> {
@@ -12,7 +12,7 @@ export class MarketCard extends Button implements DynamicGroupInterface<MarketCa
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
     private fluctuation: Fluctuation | null = null;
-    private miniRewardDial: MiniTempleRewardDial
+    private miniRewardDial: MiniTempleRewardDial;
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
@@ -47,18 +47,18 @@ export class MarketCard extends Button implements DynamicGroupInterface<MarketCa
                 x: this.background.width() / 2,
                 y: this.background.height() / 2 + 27,
             },
-            trade.reward.coins + (fluctuation ?? 0)
+            trade.reward.coins + (fluctuation ?? 0),
         );
 
         this.goodsAssortment = new GoodsAssortment(
             { x: 0, y: -3 },
-            trade.request
+            trade.request,
         );
 
         this.miniRewardDial = new MiniTempleRewardDial(
             { x: this.group.width() - 13, y: this.group.height() - 13 },
             trade.reward.favorAndVp,
-        )
+        );
 
         this.group.add(...[
             this.background,

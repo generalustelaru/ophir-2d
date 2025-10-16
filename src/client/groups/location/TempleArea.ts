@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from "~/client_types";
-import clientConstants from "~/client_constants";
-import { MarketSlotKey, MarketOffer, Action } from "~/shared_types";
-import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from "../GroupList";
+import Konva from 'konva';
+import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from '~/client_types';
+import clientConstants from '~/client_constants';
+import { MarketSlotKey, MarketOffer, Action } from '~/shared_types';
+import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from '../GroupList';
 
 const { COLOR } = clientConstants;
 
@@ -42,7 +42,7 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
                 height: 30 + 10,
                 x: layout.width - 85,
                 y: layout.height - 51,
-            }
+            },
         );
 
         const card = market[marketSlot];

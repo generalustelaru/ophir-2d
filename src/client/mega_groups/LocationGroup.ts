@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from "~/client_types";
-import { MarketArea, TreasuryArea, TempleArea } from "../groups/GroupList";
+import Konva from 'konva';
+import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from '~/client_types';
+import { MarketArea, TreasuryArea, TempleArea } from '../groups/GroupList';
 import localState from '../state';
-import { PlayState } from "~/shared_types";
+import { PlayState } from '~/shared_types';
 
 export class LocationGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
@@ -63,7 +63,7 @@ export class LocationGroup implements MegaGroupInterface {
                 x: 0,
                 y: this.marketArea.getElement().height(),
             },
-            { localPlayer: localPlayer, tier: state.temple.treasury, metalSupplies: state.itemSupplies.metals }
+            { localPlayer: localPlayer, tier: state.temple.treasury, metalSupplies: state.itemSupplies.metals },
         );
 
         this.templeArea = new TempleArea(
@@ -90,7 +90,7 @@ export class LocationGroup implements MegaGroupInterface {
     public update(state: PlayState): void {
 
         const activePlayer = state.players.find(player => player.isActive);
-        const marketOffer = state.market
+        const marketOffer = state.market;
         if (!activePlayer || !marketOffer) {
             throw new Error(`Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`);
         }
@@ -99,12 +99,12 @@ export class LocationGroup implements MegaGroupInterface {
         const marketUpdate: MarketUpdate = {
             localPlayer: localPlayer ?? null,
             marketOffer: marketOffer,
-        }
+        };
         const templeUpdate: TempleUpdate = {
             localPlayer: localPlayer ?? null,
             templeStatus: state.temple,
             trade: state.market[state.setup.templeTradeSlot],
-        }
+        };
 
         this.marketArea?.update(marketUpdate);
         this.treasuryArea?.update({

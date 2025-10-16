@@ -1,9 +1,9 @@
-import Konva from "konva";
-import { DynamicGroupInterface, TreasuryCardUpdate } from "~/client_types";
-import { ActionButton } from "../ActionButton";
-import { CoinDial, FavorDial } from "../GroupList";
-import clientConstants from "~/client_constants";
-import { Coordinates, Action } from "~/shared_types";
+import Konva from 'konva';
+import { DynamicGroupInterface, TreasuryCardUpdate } from '~/client_types';
+import { ActionButton } from '../ActionButton';
+import { CoinDial, FavorDial } from '../GroupList';
+import clientConstants from '~/client_constants';
+import { Coordinates, Action } from '~/shared_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
@@ -14,14 +14,14 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        update: TreasuryCardUpdate
+        update: TreasuryCardUpdate,
     ) {
         super(
             stage,
             { width: 66, height: 96, x: position.x, y: position.y },
             {
                 action: Action.buy_metals,
-                payload: { metal: update.treasury.metal, currency: update.treasury.currency }
+                payload: { metal: update.treasury.metal, currency: update.treasury.currency },
             });
 
         this.background = new Konva.Rect({
@@ -50,7 +50,7 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
             this.background,
             metalIcon,
             this.currencyDial.getElement(),
-        ])
+        ]);
     }
 
     public getElement(): Konva.Group {

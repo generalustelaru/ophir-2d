@@ -1,9 +1,9 @@
-import Konva from "konva";
-import { MarketCardUpdate, DynamicGroupInterface } from "~/client_types";
-import { Coordinates, Trade } from "~/shared_types";
-import { GoodsAssortment, TempleRewardDial } from "../GroupList";
-import clientConstants from "~/client_constants";
-import { Button } from "../Button";
+import Konva from 'konva';
+import { MarketCardUpdate, DynamicGroupInterface } from '~/client_types';
+import { Coordinates, Trade } from '~/shared_types';
+import { GoodsAssortment, TempleRewardDial } from '../GroupList';
+import clientConstants from '~/client_constants';
+import { Button } from '../Button';
 
 const { COLOR } = clientConstants;
 export class TempleMarketCard extends Button implements DynamicGroupInterface<MarketCardUpdate> {
@@ -39,7 +39,7 @@ export class TempleMarketCard extends Button implements DynamicGroupInterface<Ma
 
         this.rewardDial = new TempleRewardDial(
             { x: 0, y: 0 },
-            trade.reward.favorAndVp
+            trade.reward.favorAndVp,
         );
         this.rewardDial.getElement().x((this.background.width() - this.rewardDial.getDiameter()) / 2);
         this.rewardDial.getElement().y(this.background.height() - this.rewardDial.getDiameter() - 30);
@@ -49,7 +49,7 @@ export class TempleMarketCard extends Button implements DynamicGroupInterface<Ma
                 x: 0,
                 y: 0,
             },
-            trade.request
+            trade.request,
         );
 
         this.group.add(...[

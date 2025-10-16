@@ -1,9 +1,9 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocalAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist, SpecialistName,
-} from "~/shared_types";
-import { ObjectHandler, PlayerIdentity } from "~/server_types";
-import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
+} from '~/shared_types';
+import { ObjectHandler, PlayerIdentity } from '~/server_types';
+import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 const MAX_FAVOR = 6;
 export class PlayerHandler implements ObjectHandler<Player>{
@@ -86,7 +86,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             feasibleTrades: this.feasibleTrades.get(),
             coins: this.coins.get(),
             turnPurchases: this.turnPurchases.get(),
-        }
+        };
     }
 
     // MARK: PUBLIC
@@ -101,8 +101,8 @@ export class PlayerHandler implements ObjectHandler<Player>{
             socketId: this.socketId.get(),
             color: this.color.get(),
             name: this.name.get(),
-            turnOrder: this.turnOrder.get()
-        }
+            turnOrder: this.turnOrder.get(),
+        };
     }
 
     public isActivePlayer() {
@@ -122,7 +122,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public isDestinationValid(destination: ZoneName) {
-        return Boolean(this.destinations.getOne(destination))
+        return Boolean(this.destinations.getOne(destination));
     }
 
     public isBarrierCrossing(destination: ZoneName) {
@@ -314,7 +314,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public spendFavor(cost: number) {
-        this.favor.update(f => f -= cost)
+        this.favor.update(f => f -= cost);
     }
 
     public getActions() {

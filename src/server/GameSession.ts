@@ -1,20 +1,20 @@
-import {WsDigest, DataDigest, SavedSession } from "~/server_types";
+import { WsDigest, DataDigest, SavedSession } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
-} from "~/shared_types";
-import { RequestMatch } from "~/server_types";
+} from '~/shared_types';
+import { RequestMatch } from '~/server_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
-import lib, { Probable } from './action_processors/library'
+import lib, { Probable } from './action_processors/library';
 import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
-import serverConstants from "~/server_constants";
-import { PrivateStateHandler } from "./state_handlers/PrivateStateHandler";
-import { PlayStateHandler } from "./state_handlers/PlayStateHandler";
-import { SERVER_NAME, SINGLE_PLAYER  } from "../server/configuration"
-import { validator } from "./services/validation/ValidatorService";
-import { BackupStateHandler } from "./state_handlers/BackupStateHandler";
+import serverConstants from '~/server_constants';
+import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
+import { PlayStateHandler } from './state_handlers/PlayStateHandler';
+import { SERVER_NAME, SINGLE_PLAYER  } from '../server/configuration';
+import { validator } from './services/validation/ValidatorService';
+import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
@@ -33,16 +33,16 @@ export class GameSession {
         this.autoBroadcast = broadcastCallback;
         this.transmitVp = (vp, socketId) => {
             transmitCallback(socketId, { vp });
-        }
+        };
         this.transmitEnrolment = (approvedColor, socketId) => {
             transmitCallback(socketId, { approvedColor });
-        }
+        };
         this.transmitNameUpdate = (newName: string, socketId: string) => {
             transmitCallback(socketId, { newName });
-        }
+        };
         this.transmitTurnNotification = (socketId: string) => {
             transmitCallback(socketId, { turnStart: null });
-        }
+        };
 
         if (!savedSession) {
             this.actionProcessor = new EnrolmentProcessor(this.getNewState(), this.transmitEnrolment);
@@ -65,7 +65,7 @@ export class GameSession {
                         },
                         this.autoBroadcast,
                         this.transmitTurnNotification,
-                        this.transmitVp
+                        this.transmitVp,
                     );
 
                 case Phase.setup:
@@ -98,7 +98,7 @@ export class GameSession {
         }
 
         this.actionProcessor = new EnrolmentProcessor(this.getNewState(), this.transmitEnrolment);
-        console.log('Session was reset')
+        console.log('Session was reset');
     }
 
     public processAction(request: ClientRequest): WsDigest {
@@ -117,7 +117,7 @@ export class GameSession {
         if (match.err) {
             console.info('Resetting client;',match.message);
 
-            return this.issueNominalResponse({ resetFrom: SERVER_NAME })
+            return this.issueNominalResponse({ resetFrom: SERVER_NAME });
         }
 
         const { player } = match.data;
@@ -146,14 +146,14 @@ export class GameSession {
                         return this.issueGroupResponse(response);
                     }
                 } else {
-                    return this.issueNominalResponse(lib.errorResponse(`${commandMatch[0]} parameter must start with a non-space character and must contain 3 or more characters`))
+                    return this.issueNominalResponse(lib.errorResponse(`${commandMatch[0]} parameter must start with a non-space character and must contain 3 or more characters`));
                 }
             }
 
             return this.issueGroupResponse(this.actionProcessor.addChat({
                 color: player.color,
                 name: player.name,
-                message: message.input
+                message: message.input,
             }));
         }
 
@@ -168,7 +168,7 @@ export class GameSession {
             }
 
             return this.issueNominalResponse(
-                lib.errorResponse('Only session owner may reset.')
+                lib.errorResponse('Only session owner may reset.'),
             );
         }
 
@@ -205,7 +205,7 @@ export class GameSession {
 
         if (!('player' in data)) {
             return this.issueNominalResponse(lib.errorResponse(
-                `Player [${data.playerColor}] is not enrolled`)
+                `Player [${data.playerColor}] is not enrolled`),
             );
         }
 
@@ -261,7 +261,7 @@ export class GameSession {
         const setupUpdate = ((): Probable<StateResponse> => {
             switch (action) {
                 case Action.pick_specialist:
-                    return processor.processSpecialistSelection((player as PlayerDraft), payload )
+                    return processor.processSpecialistSelection((player as PlayerDraft), payload );
                 case Action.start_play: {
                     const bundleResult = processor.processStart(payload);
 
@@ -310,7 +310,7 @@ export class GameSession {
         const playerHandler = new PlayerHandler(player);
         playerHandler.refreshTimeStamp();
 
-        const digest: DataDigest = { player: playerHandler, payload }
+        const digest: DataDigest = { player: playerHandler, payload };
 
         if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action))
             return this.issueNominalResponse(lib.errorResponse(
@@ -383,25 +383,25 @@ export class GameSession {
     }
 
     private issueNominalResponse(message: ServerMessage): WsDigest {
-        return { senderOnly: true, message }
+        return { senderOnly: true, message };
     }
 
     private issueGroupResponse(message: ServerMessage): WsDigest {
-        return { senderOnly: false, message }
+        return { senderOnly: false, message };
     }
 
     private getNewState() {
         const state = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE));
         const gameId = randomUUID();
 
-        return { ...state, gameId }
+        return { ...state, gameId };
     }
 
     private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch>  {
         const { gameId, socketId, playerColor, playerName, message } = request;
 
         if (!gameId || !socketId || !playerColor || !playerName)
-            return lib.fail(`Request data is incomplete`);
+            return lib.fail('Request data is incomplete');
 
         const player = this.actionProcessor.getState().players.find(p => p.color === playerColor);
 
@@ -411,6 +411,6 @@ export class GameSession {
         if (player.name != playerName)
             return lib.fail(`[${playerName}] does not match name [${player.name}] in state`);
 
-        return lib.pass({ player: {...player, socketId}, message });
+        return lib.pass({ player: { ...player, socketId }, message });
     }
 }

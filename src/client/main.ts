@@ -1,14 +1,14 @@
-import { InfoDetail, ErrorDetail, EventType, LocalState, ActionButtonData } from "~/client_types";
-import localState from "./state";
-import { CommunicationService } from "./services/CommService";
-import { CanvasService } from "./services/CanvasService";
-import { UserInterface } from "./services/UiService";
-import clientConstants from "~/client_constants";
+import { InfoDetail, ErrorDetail, EventType, LocalState, ActionButtonData } from '~/client_types';
+import localState from './state';
+import { CommunicationService } from './services/CommService';
+import { CanvasService } from './services/CanvasService';
+import { UserInterface } from './services/UiService';
+import clientConstants from '~/client_constants';
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
     EnrolmentResponse,
     NewNameTransmission,
-} from "~/shared_types";
+} from '~/shared_types';
 
 const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
 
@@ -29,7 +29,7 @@ const persistedState = localStorage.getItem('persistedState');
 const { gameId, socketId, playerColor, playerName, vp } = ((): LocalState => {
     switch (true) {
         case !!savedState: return JSON.parse(savedState);
-        case PERSIST_SESSION && !!persistedState: return JSON.parse(persistedState)
+        case PERSIST_SESSION && !!persistedState: return JSON.parse(persistedState);
         default: return clientConstants.DEFAULT_LOCAL_STATE;
     }
 })();
@@ -42,7 +42,7 @@ localState.vp = vp;
 
 // MARK: LISTENERS
 window.addEventListener('resize', () => {
-    console.log('Caught resize event!!')
+    console.log('Caught resize event!!');
     CanvasService.fitStageIntoParentContainer();
 });
 
@@ -62,7 +62,7 @@ window.addEventListener(EventType.open_action_modal, (event: CustomEventInit<Act
     if (!actionButtonData)
         return signalError('Action button data is missing!');
 
-    console.log("Opening action modal with data:", actionButtonData);
+    console.log('Opening action modal with data:', actionButtonData);
     // CanvasService.showActionModal(actionButtonData);
 });
 
@@ -70,15 +70,15 @@ window.addEventListener(EventType.open_action_modal, (event: CustomEventInit<Act
 window.addEventListener(EventType.draft, () => {
     const message: ClientMessage = {
         action: Action.start_setup,
-        payload: null
-    }
+        payload: null,
+    };
     CommunicationService.sendMessage(message);
 });
 window.addEventListener(EventType.start_action, () => {
     const message: ClientMessage = {
         action: Action.start_play,
         payload: CanvasService.getSetupCoordinates(),
-    }
+    };
     CommunicationService.sendMessage(message);
 });
 
@@ -102,9 +102,9 @@ window.addEventListener(EventType.timeout, () => {
                     alert('Connection restored.');
                     window.location.reload();
                 }
-            }
+            },
         ).catch(
-            err => console.log('Failed to reconnect',{err})
+            err => console.log('Failed to reconnect',{ err }),
         );
     },5000);
 });
@@ -129,7 +129,7 @@ window.addEventListener(EventType.identification, (event: CustomEventInit<Client
 
 window.addEventListener(EventType.enrolment_approval, (event: CustomEventInit<EnrolmentResponse>) => {
     if (!event.detail)
-        return signalError('Player registration has failed')
+        return signalError('Player registration has failed');
 
     const { approvedColor } = event.detail;
 
@@ -160,7 +160,7 @@ window.addEventListener(EventType.name_transmission, (event: CustomEventInit<New
     const { newName } = event.detail;
     localState.playerName = newName;
     sessionStorage.setItem('localState', JSON.stringify(localState));
-})
+});
 
 window.addEventListener(EventType.reset, (event: CustomEventInit) => {
     const response: ResetResponse = event.detail;
@@ -225,8 +225,8 @@ window.addEventListener(
     EventType.info,
     (event: CustomEventInit) => {
         const payload: InfoDetail = event.detail;
-        UserInterface.setInfo(payload.text)
-    }
+        UserInterface.setInfo(payload.text);
+    },
 );
 
 // MARK: CONNECTION

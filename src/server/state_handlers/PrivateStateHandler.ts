@@ -1,6 +1,6 @@
-import { Trade, ExchangeTier, ZoneName, PlayerColor } from "~/shared_types";
-import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage } from "~/server_types";
-import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable } from "./library";
+import { Trade, ExchangeTier, ZoneName, PlayerColor } from '~/shared_types';
+import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage } from '~/server_types';
+import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable } from './library';
 
 /**
  * @description Contains game session reference data for the server.
@@ -27,7 +27,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
             tradeDeck: this.tradeDeck.get(),
             costTiers: this.costTiers.get(),
             gameStats: this.gameStats.get(),
-        }
+        };
     }
 
     public getDestinationPackages() {
@@ -58,7 +58,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
     }
 
     getPlayerVictoryPoints(color: PlayerColor) {
-        const ps = this.gameStats.getOne(color)
+        const ps = this.gameStats.getOne(color);
         return ps ? ps.vp : 0;
     }
 
@@ -72,9 +72,9 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
 
     loadTradeDeck(deck: Array<Trade>) {
         this.tradeDeck.overwrite(deck
-            .map(t => { return { key: Math.random(), trade: t } })
+            .map(t => { return { key: Math.random(), trade: t }; })
             .sort((a,b) => a.key - b.key)
-            .map(s => s.trade)
+            .map(s => s.trade),
         );
     }
 

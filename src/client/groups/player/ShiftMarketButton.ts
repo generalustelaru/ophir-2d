@@ -1,8 +1,8 @@
-import { DynamicGroupInterface } from "~/client_types";
-import { ActionButton } from "../ActionButton";
-import clientConstants from "~/client_constants";
-import Konva from "konva";
-import { Action, Coordinates } from "~/shared_types";
+import { DynamicGroupInterface } from '~/client_types';
+import { ActionButton } from '../ActionButton';
+import clientConstants from '~/client_constants';
+import Konva from 'konva';
+import { Action, Coordinates } from '~/shared_types';
 
 const { COLOR } = clientConstants;
 
@@ -49,7 +49,7 @@ export class ShiftMarketButton extends ActionButton implements DynamicGroupInter
     }
 
     update(mayShift: boolean) {
-        this.card.fill(mayShift ? COLOR.marketOrange : COLOR.marketDarkOrange)
+        this.card.fill(mayShift ? COLOR.marketOrange : COLOR.marketDarkOrange);
         this.setEnabled(mayShift);
     }
 }

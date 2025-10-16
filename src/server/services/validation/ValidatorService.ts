@@ -1,16 +1,16 @@
-import { HexCoordinates } from "~/client_types";
+import { HexCoordinates } from '~/client_types';
 import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
     LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
     Action, SpecialistName, Phase,
     EnrolmentPayload,
-} from "~/shared_types";
-import { lib, ObjectTests } from "./library"
-import { BackupState, PrivateState, SavedSession } from "~/server_types";
+} from '~/shared_types';
+import { lib, ObjectTests } from './library';
+import { BackupState, PrivateState, SavedSession } from '~/server_types';
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
-    playerColor: ["Purple", "Yellow", "Red", "Green"],
+    playerColor: ['Purple', 'Yellow', 'Red', 'Green'],
     actions: Object.values(Action),
     zoneName: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
     specialistName: Object.values(SpecialistName),
@@ -18,8 +18,8 @@ const refs = {
     marketSlotKey: ['slot_1', 'slot_2', 'slot_3'],
     metal: ['silver', 'gold'],
     currency: ['coins', 'favor'],
-    itemName: ['gems', 'ebony', 'marble', 'linen', 'silver', 'gold', 'silver_extra', 'gold_extra', 'empty']
-}
+    itemName: ['gems', 'ebony', 'marble', 'linen', 'silver', 'gold', 'silver_extra', 'gold_extra', 'empty'],
+};
 class ValidatorService {
 
     public validateStateFile(fileContent: unknown) {
@@ -45,7 +45,7 @@ class ValidatorService {
                 { key: 'sessionOwner', type: 'string', nullable: true, ref: refs.playerColor },
                 { key: 'players', type: 'array', nullable: false },
                 { key: 'chat', type: 'array', nullable: false },
-            ]
+            ],
         );
 
         if (!sharedState)
@@ -61,7 +61,7 @@ class ValidatorService {
                     { key: 'tradeDeck', type: 'array', nullable: false }, // Array<Trade>;
                     { key: 'costTiers', type: 'array', nullable: false }, // Array<ExchangeTier>;
                     { key: 'gameStats', type: 'array', nullable: false }, // Array<PlayerCountables>;
-                ]
+                ],
             );
 
             if (!privateState)
@@ -95,7 +95,7 @@ class ValidatorService {
                 { key: 'playerName', type: 'string', nullable: true },
                 { key: 'playerColor', type: 'string', nullable: true, ref: refs.playerColor },
                 { key: 'message', type: 'object', nullable: false },
-            ]
+            ],
         );
 
         if (!clientRequest)
@@ -107,7 +107,7 @@ class ValidatorService {
             [
                 { key: 'action', type: 'string', nullable: false, ref: Object.values(Action) },
                 { key: 'payload', type: 'object', nullable: true },
-            ]
+            ],
         );
 
         if (!message)
@@ -140,7 +140,7 @@ class ValidatorService {
             'PickSpecialistayload',
             payload,
             [{ key: 'name', type: 'string', nullable: false, ref: refs.specialistName }],
-        )
+        );
     }
 
     public validateMovementPayload(payload: unknown) {
@@ -187,7 +187,7 @@ class ValidatorService {
                 { key: 'hexPositions', type: 'array', nullable: false },
                 { key: 'startingPositions', type: 'array', nullable: false },
             ],
-        )
+        );
 
         if (!gameSetupPayload) {
             return null;
@@ -203,7 +203,7 @@ class ValidatorService {
                     { key: 'x', type: 'number', nullable: false },
                     { key: 'y', type: 'number', nullable: false },
                 ],
-            )
+            ),
         );
 
         const startingPositionsAreValid = gameSetupPayload.startingPositions
@@ -277,7 +277,7 @@ class ValidatorService {
 
     // MARK: UTILITY
     private logErrors(objectType: string, errors: Array<string>) {
-        console.error(`[${objectType}] Validation Errors:`)
+        console.error(`[${objectType}] Validation Errors:`);
         errors.forEach(error => {
             console.error(error);
         });

@@ -1,7 +1,7 @@
-import Konva from "konva";
-import { DynamicGroupInterface } from "~/client_types";
-import { Coordinates } from "~/shared_types";
-import clientConstants from "~/client_constants";
+import Konva from 'konva';
+import { DynamicGroupInterface } from '~/client_types';
+import { Coordinates } from '~/shared_types';
+import clientConstants from '~/client_constants';
 
 const { COLOR, ICON_DATA } = clientConstants;
 export class VictoryPointDial implements DynamicGroupInterface<number> {
@@ -13,7 +13,7 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
         value?: number,
     ) {
         this.group = new Konva.Group({
-            x: position.x, y: position.y, width: 66, height: 96
+            x: position.x, y: position.y, width: 66, height: 96,
         });
 
         const disc = new Konva.Circle({
@@ -41,7 +41,7 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
             scale: { x: -2, y: 2 },
         });
 
-        const backdrift = value && value > 9 ? 10 : 5
+        const backdrift = value && value > 9 ? 10 : 5;
         this.vp = new Konva.Text({
             x: this.group.width() / 2 - backdrift,
             y: this.group.height() / 2 + 5,
@@ -63,7 +63,7 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
 
     public update(value: number) {
         const backdrift = value > 9 ? 10 : 5;
-        this.vp.x(this.group.width() / 2 - backdrift)
+        this.vp.x(this.group.width() / 2 - backdrift);
         this.vp.text(String(value));
     }
 

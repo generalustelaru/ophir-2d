@@ -1,19 +1,19 @@
 import Konva from 'konva';
-import constants from "~/client_constants";
-import { Player, ClientMessage } from "~/shared_types";
-import { DynamicGroupInterface } from "~/client_types";
+import constants from '~/client_constants';
+import { Player, ClientMessage } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
 import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
 
 export class EndTurnButton extends ActionButton implements DynamicGroupInterface<Player> {
-    private anchor: Konva.Path
+    private anchor: Konva.Path;
 
     constructor(
         stage: Konva.Stage,
         parent: Konva.Group,
         message: ClientMessage,
-        isActivePlayer: boolean
+        isActivePlayer: boolean,
     ) {
 
         const layout = {
@@ -21,7 +21,7 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
             height: 50,
             x: parent.width() - 100,
             y: parent.height() - 130,
-        }
+        };
 
         super(stage, layout, message);
 
@@ -47,9 +47,9 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
     }
 
     public update(player: Player): void {
-            const icon = player.isAnchored && !player.isHandlingRival ? ICON_DATA.anchored : ICON_DATA.not_anchored;
-            this.anchor.data(icon.shape);
-            this.anchor.fill(player.isActive ? icon.fill : COLOR.disabled);
-            this.setEnabled(player.isActive && player.isAnchored && !player.isHandlingRival);
+        const icon = player.isAnchored && !player.isHandlingRival ? ICON_DATA.anchored : ICON_DATA.not_anchored;
+        this.anchor.data(icon.shape);
+        this.anchor.fill(player.isActive ? icon.fill : COLOR.disabled);
+        this.setEnabled(player.isActive && player.isAnchored && !player.isHandlingRival);
     }
 }

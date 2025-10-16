@@ -1,7 +1,7 @@
-import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { MarketCard } from "../GroupList";
-import { MarketDeckKey, MarketOffer } from "~/shared_types";
+import Konva from 'konva';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { MarketCard } from '../GroupList';
+import { MarketDeckKey, MarketOffer } from '~/shared_types';
 
 export class MarketDeck implements DynamicGroupInterface<MarketOffer>
 {
@@ -40,7 +40,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
             stroke: 'gray',
             strokeWidth: 2,
             cornerRadius: 15,
-        })
+        });
 
         this.deckInUse = new Konva.Text({
             x: deckEffect.x() + 5,
@@ -63,7 +63,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
     }
 
     public update(offer: MarketOffer): void {
-        this.marketCard.update({trade: offer.future, isFeasible: false});
+        this.marketCard.update({ trade: offer.future, isFeasible: false });
         this.deckInUse.text(offer.deckId);
         this.marketCard.getElement().y(this.cardY - offer.deckSize);
     }

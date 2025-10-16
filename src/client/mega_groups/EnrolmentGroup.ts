@@ -1,7 +1,7 @@
-import Konva from "konva";
-import { GroupLayoutData, MegaGroupInterface } from "~/client_types";
-import { EnrolmentState } from "~/shared_types";
-import { EnrolmentModal } from "../groups/enrolment/EnrolmentModal";
+import Konva from 'konva';
+import { GroupLayoutData, MegaGroupInterface } from '~/client_types';
+import { EnrolmentState } from '~/shared_types';
+import { EnrolmentModal } from '../groups/enrolment/EnrolmentModal';
 import localState from '../state';
 
 export class EnrolmentGroup implements MegaGroupInterface {
@@ -37,7 +37,7 @@ export class EnrolmentGroup implements MegaGroupInterface {
     public update(state: EnrolmentState) {
 
         if (!this.modal)
-            throw new Error("Can't update what ain't there");
+            throw new Error('Can\'t update what ain\'t there');
 
         this.modal.update({ players: state.players, localPlayerColor: localState.playerColor });
     }

@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { PlayerColor, PlayerDraft, SelectableSpecialist } from "~/shared_types";
-import  clientConstants from "~/client_constants"
-import { SpecialistCard } from "./SpecialistCard";
+import Konva from 'konva';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { PlayerColor, PlayerDraft, SelectableSpecialist } from '~/shared_types';
+import  clientConstants from '~/client_constants';
+import { SpecialistCard } from './SpecialistCard';
 import localState from '../../state';
 
 type SetupModalUpdate = {
@@ -10,7 +10,7 @@ type SetupModalUpdate = {
     specialists: Array<SelectableSpecialist>,
 }
 
-const { COLOR } = clientConstants
+const { COLOR } = clientConstants;
 
 export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
     private group: Konva.Group;
@@ -18,7 +18,7 @@ export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
     private localPlayerColor: PlayerColor | null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, specialists: Array<SelectableSpecialist>) {
-        this.localPlayerColor = localState.playerColor
+        this.localPlayerColor = localState.playerColor;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -42,7 +42,7 @@ export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
             );
             this.group.add(card.getElement());
 
-            this.specialistCards.push(card)
+            this.specialistCards.push(card);
             offset += 220;
         });
     }
@@ -53,7 +53,7 @@ export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
 
     public update(update: SetupModalUpdate) {
         this.specialistCards.forEach(card => {
-            const specialist = update.specialists.find(s => s.name === card.getCardName())
+            const specialist = update.specialists.find(s => s.name === card.getCardName());
 
             if (!specialist)
                 throw new Error(`Specialist [${card.getCardName()}] is missing from state`);
@@ -62,9 +62,9 @@ export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
             card.update({
                 specialist,
                 shouldEnable: this.localPlayerColor === pickyPlayer?.color && !specialist.owner,
-                localPlayerColor: this.localPlayerColor
+                localPlayerColor: this.localPlayerColor,
             });
-        })
+        });
     }
 
     public switchVisibility() {

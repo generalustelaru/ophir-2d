@@ -2,9 +2,9 @@ import {
     ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
     PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates,
     Phase,
-} from "~/shared_types";
-import { PlayerCountables, ObjectHandler } from "~/server_types";
-import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
+} from '~/shared_types';
+import { PlayerCountables, ObjectHandler } from '~/server_types';
+import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 export class PlayStateHandler implements ObjectHandler<PlayState>{
     private serverName: Readable<string>;
@@ -58,7 +58,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             chat: this.chat.get(),
             itemSupplies: this.itemSupplies.get(),
             rival: this.rival.get(),
-        }
+        };
     }
 
     public getLocationName(zoneName: ZoneName) {
@@ -137,7 +137,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
                 r.moves = 2;
             }
             return r;
-        })
+        });
     }
 
     public isRivalDestinationValid(target: ZoneName) {
@@ -164,7 +164,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     public moveRivalShip(newBearings: ShipBearings, newDestinations: Array<ZoneName>) {
         this.rival.update(r => {
             if (r.isIncluded) {
-                r.destinations = newDestinations.filter(d => d != r.bearings.seaZone)
+                r.destinations = newDestinations.filter(d => d != r.bearings.seaZone);
                 r.bearings = newBearings;
                 r.moves -= 1;
             }
@@ -183,7 +183,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {
         return this.players.get()
-            .filter(p => p.bearings.seaZone === zone)
+            .filter(p => p.bearings.seaZone === zone);
     }
 
     public trimInfluenceByZone(zone: ZoneName, rivalInfluence: number) {
@@ -191,13 +191,13 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             (a, b) => b.influence - a.influence,
         );
         const playerThreshold = players.length ? players[0].influence : 0;
-        const threshold = playerThreshold || rivalInfluence
+        const threshold = playerThreshold || rivalInfluence;
 
         const affectedPlayers = players.filter(p => p.influence == threshold);
         const trimmedInfluence = threshold - 1 as DiceSix;
 
         for (const player of affectedPlayers) {
-            this.savePlayer({...player, influence: trimmedInfluence})
+            this.savePlayer({ ...player, influence: trimmedInfluence });
         }
 
         if (rivalInfluence === threshold) {
@@ -268,13 +268,13 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
      */
     public shiftMarketCards(trade: Trade) {
         this.market.update(m => {
-            m.slot_3 = m.slot_2
+            m.slot_3 = m.slot_2;
             m.slot_2 = m.slot_1;
             m.slot_1 = m.future;
             m.future = trade;
             m.deckSize -= 1;
             return m;
-        })
+        });
     }
 
     public isDeckA() {
@@ -285,7 +285,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.market.update(m => {
             m.deckId = 'B';
             return m;
-        })
+        });
     }
 
     public getTemple() {

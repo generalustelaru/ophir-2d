@@ -1,11 +1,11 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, PlayerEntity } from "~/shared_types";
-import { WsClient, SavedSession } from "~/server_types";
+import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, PlayerEntity } from '~/shared_types';
+import { WsClient, SavedSession } from '~/server_types';
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
-import { validator } from "./services/validation/ValidatorService";
+import { validator } from './services/validation/ValidatorService';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
 const fs = require('fs').promises;
@@ -64,7 +64,7 @@ app.get('/reset', (req: Request, res: Response) => {
 });
 
 app.get('/probe', (req: Request, res: Response) => {
-    console.info('Server probed', {ip: req.ip})
+    console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
 });
 
@@ -75,7 +75,7 @@ app.listen(HTTP_PORT, () => {
 // MARK: CLI
 const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
 });
 
 (
@@ -149,9 +149,9 @@ socketServer.on('connection', function connection(socket) {
     });
 
     socket.on('close', () => {
-        const deadClient = singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity) => p.socketId === socketId)
+        const deadClient = singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity) => p.socketId === socketId);
         if (deadClient)
-            console.log('Removing disconnected client of', deadClient.name)
+            console.log('Removing disconnected client of', deadClient.name);
         socketClients.delete(socketId);
     });
 });
@@ -159,7 +159,7 @@ socketServer.on('connection', function connection(socket) {
 // MARK: CALLBACKS
 
 function broadcastCallback(state: PlayState) {
-    broadcast({ state })
+    broadcast({ state });
 }
 
 function transmitCallback(socketId: string, message: ServerMessage) {
@@ -183,7 +183,7 @@ function logRequest(request: ClientRequest) {
         Yellow: `\x1b[93m${name}\x1b[0m`,
         Red: `\x1b[91m${name}\x1b[0m`,
         Green: `\x1b[92m${name}\x1b[0m`,
-    }
+    };
     const clientName = playerColor ? colorized[playerColor] : 'anon';
 
     console.info(
@@ -232,7 +232,7 @@ setInterval(() => {
     socketClients.forEach((client, socketId) => {
         if (client.socket.readyState === WebSocket.CLOSED) {
             socketClients.delete(socketId);
-            console.log('Removing abandoned client:', socketId)
+            console.log('Removing abandoned client:', socketId);
         }
     });
 }, 60000); // Every minute

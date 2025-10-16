@@ -1,10 +1,10 @@
 
 import Konva from 'konva';
-import { DynamicGroupInterface } from "~/client_types";
-import { Action, Player, PlayerColor } from "~/shared_types";
-import { FavorDial, CargoBand, CoinDial, InfluenceDial} from '../GroupList';
+import { DynamicGroupInterface } from '~/client_types';
+import { Action, Player, PlayerColor } from '~/shared_types';
+import { FavorDial, CargoBand, CoinDial, InfluenceDial } from '../GroupList';
 import { VictoryPointDial } from '../VictoryPointDial';
-import clientConstants from "~/client_constants";
+import clientConstants from '~/client_constants';
 import { SpecialtyGoodButton } from './SpecialtyGoodButton';
 import { SpecialistBand } from './SpecialistBand';
 import { SpecialistCard } from './SpecialistCard';
@@ -69,7 +69,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
         this.coinDial = new CoinDial(
             { x: 85, y: 65 },
-            player.coins
+            player.coins,
         );
 
         this.influenceDial = new InfluenceDial(
@@ -116,7 +116,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.group.add(
             this.specialistCard.getElement(),
             this.specialistBand.getElement(),
-        )
+        );
     }
 
     public update(player: Player): void {
@@ -138,7 +138,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
     public updateVP(vp: number) {
         if (!this.vpDial)
-            throw new Error("Cannot update VP on opponent placards");
+            throw new Error('Cannot update VP on opponent placards');
 
         this.vpDial?.update(vp);
     }

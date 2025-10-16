@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { GroupLayoutData } from "~/client_types";
-import { ClientMessage } from "~/shared_types";
+import { GroupLayoutData } from '~/client_types';
+import { ClientMessage } from '~/shared_types';
 import { Button } from './Button';
 
 export abstract class ActionButton extends Button {
@@ -12,7 +12,7 @@ export abstract class ActionButton extends Button {
             (
                 actionMessage ? () => window.dispatchEvent(new CustomEvent(
                     'action',
-                    { detail: actionMessage }
+                    { detail: actionMessage },
                 )): null
             ),
         );
@@ -26,8 +26,8 @@ export abstract class ActionButton extends Button {
         this.updateFunction(
             () => window.dispatchEvent(new CustomEvent(
                 'action',
-                { detail: actionMessage }
-            ))
-        )
+                { detail: actionMessage },
+            )),
+        );
     }
 }

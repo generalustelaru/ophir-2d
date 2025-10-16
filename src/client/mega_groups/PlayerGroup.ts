@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData } from "~/client_types";
+import { MegaGroupInterface, GroupLayoutData } from '~/client_types';
 import { PlayerPlacard } from '../groups/GroupList';
 import localState from '../state';
-import { Player, PlayerColor, PlayState } from "~/shared_types";
+import { Player, PlayerColor, PlayState } from '~/shared_types';
 import { RivalPlacard } from '../groups/player/RivalPlacard';
 
 export class PlayerGroup implements MegaGroupInterface {
@@ -41,7 +41,7 @@ export class PlayerGroup implements MegaGroupInterface {
                 this.stage,
                 player,
                 localState.playerColor,
-                verticalOffsets.shift() as number
+                verticalOffsets.shift() as number,
             );
             this.group.add(placard.getElement());
             this.playerPlacards.push(placard);
@@ -80,14 +80,14 @@ export class PlayerGroup implements MegaGroupInterface {
         const localPlacard = this.playerPlacards.find(placard => placard.getId() === color);
 
         if (!localPlacard || !color)
-            throw new Error("Faield to update VP swatch.");
+            throw new Error('Faield to update VP swatch.');
 
         localPlacard.updateVP(vp);
     }
 
     public disable(): void {
         this.playerPlacards.forEach(placard => {
-            placard.isLocal() && placard.disable()
+            placard.isLocal() && placard.disable();
         });
     }
 }

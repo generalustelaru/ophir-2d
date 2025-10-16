@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData } from "~/client_types";
+import { GroupLayoutData } from '~/client_types';
 export abstract class Button {
     protected group: Konva.Group;
     private stage: Konva.Stage;

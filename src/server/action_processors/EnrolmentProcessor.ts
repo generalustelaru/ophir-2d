@@ -1,10 +1,10 @@
 import {
     ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, StateResponse,
-} from "~/shared_types";
-import { validator } from "../services/validation/ValidatorService";
+} from '~/shared_types';
+import { validator } from '../services/validation/ValidatorService';
 import lib, { Probable } from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
-import { SessionProcessor } from "~/server_types";
+import { SessionProcessor } from '~/server_types';
 
 const serverName = String(process.env.SERVER_NAME);
 
@@ -34,10 +34,10 @@ export class EnrolmentProcessor implements SessionProcessor {
             return lib.fail('Cannot enrol in session. socketId is missing.');
 
         if (this.isColorTaken(this.enrolmentState.getAllPlayers(), color))
-            return lib.fail('Color is is already taken')
+            return lib.fail('Color is is already taken');
 
         if (this.isNameTaken(this.enrolmentState.getAllPlayers(), name))
-            return lib.fail('This name is already taken')
+            return lib.fail('This name is already taken');
 
         const result = ((): Probable<true> => {
 
@@ -85,6 +85,6 @@ export class EnrolmentProcessor implements SessionProcessor {
         this.enrolmentState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.enrolmentState.updateName(player.color, newName);
 
-        return { state: this.getState() }
+        return { state: this.getState() };
     };
 }

@@ -1,5 +1,5 @@
-import { Action, Phase, SpecialistName } from "~/shared_types";
-import { ServerConstants } from "~/server_types"
+import { Action, Phase, SpecialistName } from '~/shared_types';
+import { ServerConstants } from '~/server_types';
 
 const serverConstants: ServerConstants = {
 
@@ -72,8 +72,9 @@ const serverConstants: ServerConstants = {
         //     displayName: 'Peddler',
         //     startingFavor: 2,
         //     specialty: null,
-        //     description: 'Ignores one required trade good when completing a reduced value market trade.', // TODO: implement Peddler
-        // },
+        //     description: 'Ignores one required trade good when completing a reduced value market trade.',
+        //
+        // }, // TODO: implement Peddler
     ],
     TRADE_DECK_A: [
         { request: ['ebony'], reward: { coins: 1, favorAndVp: 1 } },
@@ -153,13 +154,13 @@ const serverConstants: ServerConstants = {
         'Green',
     ],
     LOCATION_ACTIONS: [
-        {name: 'temple', actions: [Action.upgrade_cargo, Action.donate_goods, Action.donate_metals]},
-        {name: 'market', actions: [Action.sell_goods, Action.sell_specialty]},
-        {name: 'treasury', actions: [Action.buy_metals]},
-        {name: 'quarry', actions: [Action.load_good]},
-        {name: 'forest', actions: [Action.load_good]},
-        {name: 'mines', actions: [Action.load_good]},
-        {name: 'farms', actions: [Action.load_good]},
+        { name: 'temple', actions: [Action.upgrade_cargo, Action.donate_goods, Action.donate_metals] },
+        { name: 'market', actions: [Action.sell_goods, Action.sell_specialty] },
+        { name: 'treasury', actions: [Action.buy_metals] },
+        { name: 'quarry', actions: [Action.load_good] },
+        { name: 'forest', actions: [Action.load_good] },
+        { name: 'mines', actions: [Action.load_good] },
+        { name: 'farms', actions: [Action.load_good] },
     ],
     LOCATION_GOODS: {
         quarry: 'marble',
@@ -184,34 +185,34 @@ const serverConstants: ServerConstants = {
         {
             templeLevel: 0,
             skipOnPlayerCounts: [2, 3],
-            costs: { goldCost: {coins: 2, favor: 5}, silverCost: {coins: 1, favor: 3} },
+            costs: { goldCost: { coins: 2, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
         },
         {
             templeLevel: 1,
             skipOnPlayerCounts: [],
-            costs: { goldCost: {coins: 3, favor: 5}, silverCost: {coins: 1, favor: 3} },
+            costs: { goldCost: { coins: 3, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
         },
         {
             templeLevel: 2,
             skipOnPlayerCounts: [],
-            costs: { goldCost: {coins: 4, favor: 5}, silverCost: {coins: 2, favor: 3} },
+            costs: { goldCost: { coins: 4, favor: 5 }, silverCost: { coins: 2, favor: 3 } },
         },
         {
             templeLevel: 3,
             skipOnPlayerCounts: [],
-            costs: { goldCost: {coins: 5, favor: 5}, silverCost: {coins: 2, favor: 3} },
+            costs: { goldCost: { coins: 5, favor: 5 }, silverCost: { coins: 2, favor: 3 } },
         },
         {
             templeLevel: 4,
             skipOnPlayerCounts: [],
-            costs: { goldCost: {coins: 6, favor: 5}, silverCost: {coins: 3, favor: 3} },
+            costs: { goldCost: { coins: 6, favor: 5 }, silverCost: { coins: 3, favor: 3 } },
         },
         {
             templeLevel: 5,
             skipOnPlayerCounts: [2],
-            costs: { goldCost: {coins: 7, favor: 5}, silverCost: {coins: 4, favor: 3} },
+            costs: { goldCost: { coins: 7, favor: 5 }, silverCost: { coins: 4, favor: 3 } },
         },
     ],
-}
+};
 
 export default serverConstants;

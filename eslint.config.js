@@ -11,13 +11,13 @@ export default [{
         },
     },
     plugins: {
-        '@typescript-eslint': tsPlugin
+        '@typescript-eslint': tsPlugin,
     },
     rules: {
         'indent': ['error', 4],
         'quotes': ['error', 'single'],
         'semi': ['error', 'always'],
-        'max-len': ['error', { code: 125 }],
+        'max-len': ['warn', { code: 125 }],
         'object-curly-spacing': ['error', 'always'],
         'array-bracket-spacing': ['error', 'never'],
         'comma-dangle': ['error', 'always-multiline'],
@@ -27,12 +27,12 @@ export default [{
 {
     files: ['src/client/**/*.ts'],
     languageOptions: {
-        globals: { window: 'readonly', document: 'readonly' }
+        globals: { window: 'readonly', document: 'readonly' },
     },
 },
 {
     files: ['src/server/**/*.ts'],
     languageOptions: {
-        globals: { process: 'readonly', __dirname: 'readonly' }
+        globals: { process: 'readonly', __dirname: 'readonly' },
     },
 }];

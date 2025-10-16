@@ -1,4 +1,4 @@
-import { HTMLHandlerInterface } from "~/client_types";
+import { HTMLHandlerInterface } from '~/client_types';
 
 export class Button implements HTMLHandlerInterface {
 
@@ -13,10 +13,10 @@ export class Button implements HTMLHandlerInterface {
     enable = () => {
         this.element.disabled = false;
         this.element.addEventListener('click', this.callback);
-    }
+    };
 
     disable = () => {
         this.element.disabled = true;
         this.element.removeEventListener('click', this.callback);
-    }
+    };
 }

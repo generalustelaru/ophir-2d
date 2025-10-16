@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from "~/shared_types";
-import { DynamicGroupInterface } from "~/client_types";
-import clientConstants from "~/client_constants";
+import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client_constants';
 import { ShipToken } from '../ShipToken';
 import { SeaZone } from './SeaZoneTile';
 
@@ -31,7 +31,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         stage: Konva.Stage,
         seaZones: Array<SeaZone>,
         data: RivalShipUpdate,
-        localPlayerColor: PlayerColor | null
+        localPlayerColor: PlayerColor | null,
     ) {
         // this.stage = stage;
         this.seaZones = seaZones;
@@ -57,7 +57,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
         // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
-            this.initialPosition = { x: this.group.x(), y: this.group.y() }
+            this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
         this.group.on('dragmove', () => {
@@ -74,7 +74,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                 seaZone.setToHitValue(false);
                 seaZone.setFill(this.currentZone === seaZone.getId()
                     ? COLOR.activeHex
-                    : COLOR.defaultHex
+                    : COLOR.defaultHex,
                 );
             }
 
@@ -90,7 +90,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                     targetZone.setRestricted(true);
                     targetZone.setFill(COLOR.illegal);
             }
-        })
+        });
 
         this.group.on('dragend', () => {
 
@@ -115,16 +115,16 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                         action: Action.move_rival,
                         payload: {
                             zoneId: targetZone.getId(),
-                            position: { x: this.group.x(), y: this.group.y() }
-                        }
+                            position: { x: this.group.x(), y: this.group.y() },
+                        },
                     });
                     break;
                 case departureZone === targetZone:
                     this.broadcastAction({
                         action: Action.reposition_rival,
                         payload: {
-                            repositioning: { x: this.group.x(), y: this.group.y() }
-                        }
+                            repositioning: { x: this.group.x(), y: this.group.y() },
+                        },
                     });
                     departureZone.setFill( COLOR.activeHex);
                     break;
@@ -140,7 +140,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     }
 
     public getElement(): Konva.Group {
-        return this.group
+        return this.group;
     }
 
     public update(data: RivalShipUpdate): void {
@@ -156,7 +156,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     private broadcastAction(detail: ClientMessage): void {
         window.dispatchEvent(new CustomEvent(
             'action',
-            { detail: detail }
+            { detail: detail },
         ));
     }
 }

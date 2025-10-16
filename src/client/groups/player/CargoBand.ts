@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import clientConstants from "~/client_constants";
-import { ItemName, PlayerColor } from "~/shared_types";
-import { CargoBandUpdate, Color, DynamicGroupInterface } from "~/client_types";
+import clientConstants from '~/client_constants';
+import { ItemName, PlayerColor } from '~/shared_types';
+import { CargoBandUpdate, Color, DynamicGroupInterface } from '~/client_types';
 import { CargoToken } from './CargoToken';
 
 const { COLOR } = clientConstants;
@@ -38,7 +38,7 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
             Purple: COLOR.darkPurple,
             Green: COLOR.darkGreen,
             Yellow: COLOR.darkYellow,
-        }
+        };
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
@@ -55,7 +55,7 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
         });
         this.group.add(...[
             background,
-            this.cargoDisplay
+            this.cargoDisplay,
         ]);
         this.update(update);
     }

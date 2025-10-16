@@ -1,6 +1,6 @@
-import Konva from "konva";
-import { ClientMessage, Coordinates } from "~/shared_types";
-import { ActionButton } from "../ActionButton";
+import Konva from 'konva';
+import { ClientMessage, Coordinates } from '~/shared_types';
+import { ActionButton } from '../ActionButton';
 
 export class AcceptButton extends ActionButton {
 
@@ -8,14 +8,14 @@ export class AcceptButton extends ActionButton {
         stage: Konva.Stage,
         position: Coordinates,
         actionMessage: ClientMessage | null,
-        dismissCallback: Function
+        dismissCallback: Function,
     ) {
         const layout = {
             x: position.x,
             y: position.y,
             width: 50,
             height: 30,
-        }
+        };
 
         super(stage, layout, actionMessage);
 

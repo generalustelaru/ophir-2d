@@ -1,9 +1,9 @@
 
 import Konva from 'konva';
-import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival } from "~/shared_types";
-import { Color, DynamicGroupInterface, IslandData, IconLayer } from "~/client_types";
+import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival } from '~/shared_types';
+import { Color, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
 import { Vector2d } from 'konva/lib/types';
-import clientConstants from "~/client_constants";
+import clientConstants from '~/client_constants';
 import { InfluenceDial, LocationToken } from '../GroupList';
 
 const { COLOR, ICON_DATA } = clientConstants;
@@ -33,7 +33,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         island: IslandData,
         locationId: LocationName,
         iconData: IconLayer,
-        fill: Color
+        fill: Color,
     ) {
 
         this.group = new Konva.Group({
@@ -60,7 +60,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
             y: island.y,
             data: island.shape,
             fill: COLOR.islandGreen,
-            scale: {x: 7.5, y: 7.5},
+            scale: { x: 7.5, y: 7.5 },
             strokeWidth: 1,
         });
         this.group.add(this.island);
@@ -73,7 +73,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
             y: -75,
             data: ICON_DATA.restricted.shape,
             fill: ICON_DATA.restricted.fill,
-            scale: {x: 2, y: 2},
+            scale: { x: 2, y: 2 },
             visible: false,
         });
         this.group.add(this.restrictedIcon);
@@ -85,7 +85,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
                 x: 25,
                 y: 25,
             },
-            COLOR.boneWhite
+            COLOR.boneWhite,
         );
         this.group.add(this.influenceDial.getElement());
     }

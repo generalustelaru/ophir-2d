@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Coordinates, TradeGood } from "~/shared_types";
-import { DynamicGroupInterface } from "~/client_types";
-import clientConstants from "~/client_constants";
+import { Coordinates, TradeGood } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
@@ -60,11 +60,11 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
             fill: goodData.fill,
             stroke: 'white',
             strokeWidth: 1,
-            scale: {x: 1.5, y: 1.5},
+            scale: { x: 1.5, y: 1.5 },
         });
 
         group.add(
-            goodShape
+            goodShape,
         );
 
         return group;
@@ -77,9 +77,9 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
         });
 
         const doubleLayout: Array<Coordinates> = [
-            {x: this.group.width()/2 - 9, y: this.group.height()/2 - 21},
-            {x: this.group.width()/2 - 9, y: this.group.height()/2 + 6},
-        ]
+            { x: this.group.width()/2 - 9, y: this.group.height()/2 - 21 },
+            { x: this.group.width()/2 - 9, y: this.group.height()/2 + 6 },
+        ];
 
         goods.forEach((tradeGood, index) => {
             const goodData = CARGO_ITEM_DATA[tradeGood];
@@ -91,11 +91,11 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
                 fill: goodData.fill,
                 stroke: 'white',
                 strokeWidth: 1,
-                scale: {x: 1.5, y: 1.5},
+                scale: { x: 1.5, y: 1.5 },
             });
 
             group.add(
-                goodShape
+                goodShape,
             );
         });
 
@@ -109,10 +109,10 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
         });
 
         const tripleLayout: Array<Coordinates> = [
-            {x: this.group.width()/2 - 24, y: this.group.height()/2 - 21},
-            {x: this.group.width()/2 + 6, y: this.group.height()/2 - 21},
-            {x: this.group.width()/2 - 9, y: this.group.height()/2 + 6},
-        ]
+            { x: this.group.width()/2 - 24, y: this.group.height()/2 - 21 },
+            { x: this.group.width()/2 + 6, y: this.group.height()/2 - 21 },
+            { x: this.group.width()/2 - 9, y: this.group.height()/2 + 6 },
+        ];
 
         goods.forEach((tradeGood, index) => {
             const goodData = CARGO_ITEM_DATA[tradeGood];
@@ -124,11 +124,11 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
                 fill: goodData.fill,
                 stroke: 'white',
                 strokeWidth: 1,
-                scale: {x: 1.5, y: 1.5},
+                scale: { x: 1.5, y: 1.5 },
             });
 
             group.add(
-                goodShape
+                goodShape,
             );
         });
 

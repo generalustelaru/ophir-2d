@@ -47,7 +47,7 @@ module.exports = (env, argv) => {
                 test: /\.ts$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/,
-            }]
+            }],
         },
-    }
+    };
 };

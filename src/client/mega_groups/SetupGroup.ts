@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { GroupLayoutData, MegaGroupInterface } from "~/client_types";
-import { SetupState } from "~/shared_types";
-import { ModalButton } from "../groups/setup/ModalButton";
-import { SetupModal } from "../groups/setup/SetupModal";
+import Konva from 'konva';
+import { GroupLayoutData, MegaGroupInterface } from '~/client_types';
+import { SetupState } from '~/shared_types';
+import { ModalButton } from '../groups/setup/ModalButton';
+import { SetupModal } from '../groups/setup/SetupModal';
 
 export class SetupGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
@@ -43,16 +43,16 @@ export class SetupGroup implements MegaGroupInterface {
             },
         );
         this.showHideButton.enable();
-        this.group.add(this.modal.getElement(), this.showHideButton.getElement())
+        this.group.add(this.modal.getElement(), this.showHideButton.getElement());
     }
 
     public update(state: SetupState) {
         const { players, specialists } = state;
 
         if (!this.modal)
-            throw new Error("Can't update without initialization");
+            throw new Error('Can\'t update without initialization');
 
-        this.modal.update({ players, specialists })
+        this.modal.update({ players, specialists });
     }
 
     public disable() {

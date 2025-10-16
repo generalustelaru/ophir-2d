@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { GameSetupPayload, MarketSlotKey, Phase, State } from "~/shared_types";
-import { Communicator } from "./Communicator";
+import { GameSetupPayload, MarketSlotKey, Phase, State } from '~/shared_types';
+import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { EventType } from "~/client_types";
+import { EventType } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import { SellGoodsModal } from '../groups/modals/SellGodsModal';
 import { StartTurnModal } from '../groups/modals/StartTurnModal';
@@ -20,7 +20,7 @@ export const CanvasService = new class extends Communicator {
     private setupGroup: SetupGroup;
     private enrolmentGroup: EnrolmentGroup;
     private isEnrolmentDrawn: boolean = false;
-    private isSetupDrawn: boolean = false
+    private isSetupDrawn: boolean = false;
     private isPlayDrawn: boolean = false;
     private startTurnModal: StartTurnModal;
     private sellGoodsModal: SellGoodsModal;
@@ -50,11 +50,11 @@ export const CanvasService = new class extends Communicator {
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
             this.sellGoodsModal.show(slot);
-        }
+        };
 
         const openDonateGoodsModal = (slot: MarketSlotKey) => {
             this.donateGoodsModal.show(slot);
-        }
+        };
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -122,7 +122,7 @@ export const CanvasService = new class extends Communicator {
         if (!localState.playerColor) {
             this.createEvent({
                 type: EventType.info,
-                detail: { text: 'You are a spectator' }
+                detail: { text: 'You are a spectator' },
             });
         }
 
@@ -136,7 +136,7 @@ export const CanvasService = new class extends Communicator {
                     this.fitStageIntoParentContainer();
                     this.isEnrolmentDrawn = true;
                 }
-                this.enrolmentGroup.update(state)
+                this.enrolmentGroup.update(state);
                 break;
             case Phase.setup:
                 this.enrolmentGroup.disable();
@@ -161,7 +161,7 @@ export const CanvasService = new class extends Communicator {
                     this.isPlayDrawn = true;
                 }
                 this.sellGoodsModal.update(state);
-                this.donateGoodsModal.update(state)
+                this.donateGoodsModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
@@ -170,7 +170,7 @@ export const CanvasService = new class extends Communicator {
                 break;
 
             default:
-                throw new Error("Update case not covered!");
+                throw new Error('Update case not covered!');
         }
     }
 
@@ -185,7 +185,7 @@ export const CanvasService = new class extends Communicator {
         const container = document.getElementById('canvas')?.getBoundingClientRect();
 
         if (!container)
-            throw new Error("Cannot find canvas container!");
+            throw new Error('Cannot find canvas container!');
 
         const elementWidth = container.width;
 
@@ -198,5 +198,5 @@ export const CanvasService = new class extends Communicator {
         this.stage.height(sceneHeight * scale);
         this.stage.scale({ x: scale, y: scale });
     }
-}
+};
 

@@ -1,7 +1,7 @@
-import Konva from "konva";
-import { DiceSix } from "~/shared_types";
-import { Coordinates } from "~/shared_types";
-import { Color, DynamicGroupInterface, GroupLayoutData } from "~/client_types";
+import Konva from 'konva';
+import { DiceSix } from '~/shared_types';
+import { Coordinates } from '~/shared_types';
+import { Color, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 
 type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
 type PipData = Array<PipDataElement>
@@ -30,13 +30,13 @@ export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
         this.group.add(this.body);
 
         const pipData: PipData = [
-            { position: {x: 10, y: 10}, included: [2,3,4,5,6], element: null },
-            { position: {x: 10, y: 25}, included: [6], element: null },
-            { position: {x: 10, y: 40}, included: [4,5,6], element: null },
-            { position: {x: 40, y: 10}, included: [4,5,6], element: null },
-            { position: {x: 40, y: 25}, included: [6], element: null },
-            { position: {x: 40, y: 40}, included: [2,3,4,5,6], element: null },
-            { position: {x: 25, y: 25}, included: [1,3,5], element: null },
+            { position: { x: 10, y: 10 }, included: [2,3,4,5,6], element: null },
+            { position: { x: 10, y: 25 }, included: [6], element: null },
+            { position: { x: 10, y: 40 }, included: [4,5,6], element: null },
+            { position: { x: 40, y: 10 }, included: [4,5,6], element: null },
+            { position: { x: 40, y: 25 }, included: [6], element: null },
+            { position: { x: 40, y: 40 }, included: [2,3,4,5,6], element: null },
+            { position: { x: 25, y: 25 }, included: [1,3,5], element: null },
         ];
         // const length = pipData.length;
 

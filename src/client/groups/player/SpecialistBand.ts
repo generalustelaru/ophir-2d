@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { Coordinates, Player, PlayerColor } from "~/shared_types";
-import { DynamicGroupInterface } from "~/client_types";
-import clientConstants from "~/client_constants";
-import { Button } from "../Button";
+import Konva from 'konva';
+import { Coordinates, Player, PlayerColor } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client_constants';
+import { Button } from '../Button';
 const { COLOR } = clientConstants;
 
 export class SpecialistBand extends Button implements DynamicGroupInterface<boolean> {
@@ -56,6 +56,6 @@ export class SpecialistBand extends Button implements DynamicGroupInterface<bool
 
     public update(isActive: boolean): void {
         this.background.fill(isActive ? 'white' : 'black');
-        this.label.fill(COLOR[`${isActive ? 'dark': ''}${this.playerColor}`])
+        this.label.fill(COLOR[`${isActive ? 'dark': ''}${this.playerColor}`]);
     }
 }

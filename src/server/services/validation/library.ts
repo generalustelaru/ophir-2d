@@ -23,11 +23,11 @@ export type ObjectTests = Array<Test>
 export type ValidationResult = { passed: true } | { passed: false, error: string }
 
 function pass(): ValidationResult {
-    return { passed: true }
+    return { passed: true };
 }
 
 function fail(error: string): ValidationResult {
-    return { passed: false, error }
+    return { passed: false, error };
 }
 
 function getErrors(results: Array<ValidationResult>): Array<string> {
@@ -49,7 +49,7 @@ function isString(name: string, value: unknown, nullable: boolean = false): Vali
     if ((nullable && value === null) || (typeof value === 'string' && value.length))
         return pass();
 
-    return fail(`${name} property is not a valid string: ${value}`)
+    return fail(`${name} property is not a valid string: ${value}`);
 }
 function hasString(parent: object, key: string, nullable: boolean, reference: TypeReference = null): ValidationResult {
     const keyTest = hasKey(parent, key);
@@ -59,7 +59,7 @@ function hasString(parent: object, key: string, nullable: boolean, reference: Ty
         const stringTest = isString(key, value, nullable);
 
         if (stringTest.passed) {
-            const referenceTest = isOfUnion(key, value as string, nullable, reference)
+            const referenceTest = isOfUnion(key, value as string, nullable, reference);
 
             if (referenceTest.passed)
                 return pass();
@@ -78,7 +78,7 @@ function isNumber(name: string, value: unknown, nullable: boolean = false): Vali
     if ((nullable && value === null) || typeof value === 'number')
         return pass();
 
-    return fail(`${name} property is not a valid number: ${value}`)
+    return fail(`${name} property is not a valid number: ${value}`);
 }
 function hasNumber(parent: object, key: string, nullable: boolean = false, reference: TypeReference = null): ValidationResult {
     const keyTest = hasKey(parent, key);
@@ -89,7 +89,7 @@ function hasNumber(parent: object, key: string, nullable: boolean = false, refer
 
         if (numberTest.passed) {
 
-            const referenceTest = isOfUnion(key, value as number, nullable, reference)
+            const referenceTest = isOfUnion(key, value as number, nullable, reference);
 
             if (referenceTest.passed)
                 return pass();
@@ -197,4 +197,4 @@ function isOfUnion(name: string, value: string | number, nullable: boolean, refe
 export const lib = {
     isObject,
     evaluateObject,
-}
+};

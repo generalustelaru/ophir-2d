@@ -1,9 +1,9 @@
-import Konva from "konva";
-import { DynamicGroupInterface } from "~/client_types";
-import { ShipToken } from "../ShipToken";
-import clientConstants from "~/client_constants";
-import { Action, Coordinates, PlayerColor, PlayerEntry } from "~/shared_types";
-import { ActionButton } from "../ActionButton";
+import Konva from 'konva';
+import { DynamicGroupInterface } from '~/client_types';
+import { ShipToken } from '../ShipToken';
+import clientConstants from '~/client_constants';
+import { Action, Coordinates, PlayerColor, PlayerEntry } from '~/shared_types';
+import { ActionButton } from '../ActionButton';
 
 const { COLOR } = clientConstants;
 
@@ -27,7 +27,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
             y: position.y,
             width: 200,
             height: 300,
-        }
+        };
         super(stage, layout, { action: Action.enrol, payload: { color, name: null } });
 
         this.color = color;
@@ -38,7 +38,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
             cornerRadius: 15,
         });
 
-        this.shipToken = new ShipToken(COLOR[color], { scale: 4, position: { x: 40, y: 50 }});
+        this.shipToken = new ShipToken(COLOR[color], { scale: 4, position: { x: 40, y: 50 } });
 
         this.ownerName = new Konva.Text({
             width: layout.width,
@@ -50,7 +50,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
             verticalAlign: 'middle',
             y: 50,
             fontFamily: 'Custom',
-            text: 'available'
+            text: 'available',
         });
 
         this.group.add(this.background, this.shipToken.getElement(), this.ownerName);
@@ -63,8 +63,8 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
     public update(update: ColorCardUpdate): void {
         const { localPlayer, players } = update;
 
-        const colorOwner = players.find(p => p.color == this.color)
-        const isLocalPlayerColor = localPlayer && localPlayer.name === colorOwner?.name
+        const colorOwner = players.find(p => p.color == this.color);
+        const isLocalPlayerColor = localPlayer && localPlayer.name === colorOwner?.name;
         const text = isLocalPlayerColor
             ? 'You'
             : (
@@ -75,7 +75,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
 
         this.setEnabled(!Boolean(localPlayer || colorOwner));
 
-        this.background.fill(colorOwner ? COLOR[`dark${colorOwner.color}`] : COLOR.templeDarkRed)
+        this.background.fill(colorOwner ? COLOR[`dark${colorOwner.color}`] : COLOR.templeDarkRed);
         this.ownerName.text(text);
         this.ownerName.fill(colorOwner ? COLOR[colorOwner.color] : 'white');
         this.shipToken.update(isLocalPlayerColor ? COLOR.activeShipBorder : COLOR.shipBorder);

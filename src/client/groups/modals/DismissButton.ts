@@ -1,6 +1,6 @@
-import Konva from "konva";
-import { Button } from "../Button";
-import { Coordinates } from "~/shared_types";
+import Konva from 'konva';
+import { Button } from '../Button';
+import { Coordinates } from '~/shared_types';
 
 export class DismissButton extends Button {
     constructor(stage: Konva.Stage, callback: Function, position:  Coordinates) {
@@ -9,7 +9,7 @@ export class DismissButton extends Button {
             y: position.y,
             width: 50,
             height: 30,
-        }
+        };
 
         super(stage, layout, callback);
 

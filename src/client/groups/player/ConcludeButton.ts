@@ -1,8 +1,8 @@
-import Konva from "konva";
-import { Action, Coordinates } from "~/shared_types";
-import constants from "~/client_constants";
-import { DynamicGroupInterface } from "~/client_types";
-import { ActionButton } from "../ActionButton";
+import Konva from 'konva';
+import { Action, Coordinates } from '~/shared_types';
+import constants from '~/client_constants';
+import { DynamicGroupInterface } from '~/client_types';
+import { ActionButton } from '../ActionButton';
 
 const { ICON_DATA, COLOR } = constants;
 
@@ -41,7 +41,7 @@ export class ConcludeButton extends ActionButton implements DynamicGroupInterfac
     }
 
     public update(update: ConcludeButtonUpdate) {
-        const {mayConclude, isControllable } = update;
+        const { mayConclude, isControllable } = update;
         const icon = !isControllable || (isControllable && mayConclude) ? ICON_DATA.anchored : ICON_DATA.not_anchored;
         this.anchor.data(icon.shape);
         this.anchor.fill(isControllable ? icon.fill : COLOR.disabled);

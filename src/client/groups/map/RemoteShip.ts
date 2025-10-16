@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Player, PlayerColor } from "~/shared_types";
-import { Color, DynamicGroupInterface } from "~/client_types";
-import clientConstants from "~/client_constants";
+import { Player, PlayerColor } from '~/shared_types';
+import { Color, DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client_constants';
 import { ShipToken } from '../ShipToken';
 
 const { COLOR, SHIP_DATA } = clientConstants;
@@ -35,11 +35,11 @@ export class RemoteShip implements DynamicGroupInterface<Player> {
     }
 
     public getElement(): Konva.Group {
-        return this.group
+        return this.group;
     }
 
     public getId(): PlayerColor {
-        return this.group.attrs.id as PlayerColor
+        return this.group.attrs.id as PlayerColor;
     }
 
     public update(player: Player): void {
@@ -49,6 +49,6 @@ export class RemoteShip implements DynamicGroupInterface<Player> {
     };
 
     public destroy(): void {
-        this.group.destroy()
+        this.group.destroy();
     }
 }

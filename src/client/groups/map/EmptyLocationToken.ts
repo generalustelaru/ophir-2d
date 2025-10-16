@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from "~/client_types";
-import clientConstants from "~/client_constants";
+import { DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client_constants';
 
 const { LAYERED_ICONS } = clientConstants;
 
@@ -13,7 +13,7 @@ export class EmptyLocationToken implements DynamicGroupInterface<boolean> {
 
         const iconData = LAYERED_ICONS.empty_location;
         const scale = 3;
-        const drift = { x: -21, y: -21 }
+        const drift = { x: -21, y: -21 };
 
         const backgroundData = iconData.layer_1;
         const background = new Konva.Path({
@@ -38,7 +38,7 @@ export class EmptyLocationToken implements DynamicGroupInterface<boolean> {
     }
 
     public getElement(): Konva.Group {
-        return this.group
+        return this.group;
     }
 
     public update(mayPickup: boolean) {

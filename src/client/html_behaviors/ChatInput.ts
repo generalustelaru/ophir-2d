@@ -1,4 +1,4 @@
-import { HTMLHandlerInterface } from "~/client_types";
+import { HTMLHandlerInterface } from '~/client_types';
 
 export class ChatInput implements HTMLHandlerInterface {
 
@@ -13,21 +13,21 @@ export class ChatInput implements HTMLHandlerInterface {
     enable = () => {
         this.element.disabled = false;
         this.element.addEventListener('keyup', event => this.inputCallback(event.key === 'Enter'));
-    }
+    };
 
     disable = () => {
         this.element.disabled = true;
         this.element.removeEventListener('keyup', event => this.inputCallback(event.key === 'Enter'));
-    }
+    };
 
     setValue = (value: string | null) => {
         this.element.value = value ?? '';
-    }
+    };
 
     public flushValue = () => {
         const value = this.element.value;
         this.element.value = '';
 
         return value;
-    }
+    };
 }

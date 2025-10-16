@@ -1,7 +1,7 @@
-import Konva from "konva";
-import { DynamicGroupInterface, GroupLayoutData } from "~/client_types";
-import { Player } from "~/shared_types";
-import clientConstants from "~/client_constants";
+import Konva from 'konva';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { Player } from '~/shared_types';
+import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
@@ -73,7 +73,7 @@ export class SpecialistCard implements DynamicGroupInterface<string> {
     }
 
     public update(playerName: string): void {
-            this.name.text(this.isLocalPlayer ? 'You' : playerName);
+        this.name.text(this.isLocalPlayer ? 'You' : playerName);
 
     }
 }

@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, Rival } from "~/shared_types";
+import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, Rival } from '~/shared_types';
 import localState from '../../state';
-import clientConstants from "~/client_constants";
+import clientConstants from '~/client_constants';
 import { SeaZone } from '../GroupList';
 import { ShipToken } from '../ShipToken';
-import { Color } from "~/client_types";
+import { Color } from '~/client_types';
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
 
@@ -23,7 +23,7 @@ export class PlayerShip {
     }
 
     public getElement() {
-        return this.group
+        return this.group;
     };
 
     public update(coordinates: Coordinates, players: Array<Player>, rival: Rival) {
@@ -75,7 +75,7 @@ export class PlayerShip {
 
         // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
-            this.initialPosition = { x: this.group.x(), y: this.group.y() }
+            this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
         // MARK: - Dragging (move)
@@ -95,7 +95,7 @@ export class PlayerShip {
                 seaZone.setToHitValue(false);
                 seaZone.setFill(player.bearings.seaZone === seaZone.getId() && player.locationActions
                     ? COLOR.activeHex
-                    : COLOR.defaultHex
+                    : COLOR.defaultHex,
                 );
             }
 
@@ -108,7 +108,7 @@ export class PlayerShip {
                     this.isDestinationValid = true;
                     targetZone.setToHitValue(player.privilegedSailing
                         ? false
-                        : this.calculateToSailValue(targetZone.getId())
+                        : this.calculateToSailValue(targetZone.getId()),
                     );
                     break;
                 case player.moveActions && player.navigatorAccess.includes(targetZone.getId()):
@@ -148,16 +148,16 @@ export class PlayerShip {
                         action: Action.move,
                         payload: {
                             zoneId: targetZone.getId(),
-                            position: { x: this.group.x(), y: this.group.y() }
-                        }
+                            position: { x: this.group.x(), y: this.group.y() },
+                        },
                     });
                     break;
                 case departureZone === targetZone:
                     this.broadcastAction({
                         action: Action.reposition,
                         payload: {
-                            repositioning: { x: this.group.x(), y: this.group.y() }
-                        }
+                            repositioning: { x: this.group.x(), y: this.group.y() },
+                        },
                     });
                     departureZone.setFill(player?.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
@@ -175,7 +175,7 @@ export class PlayerShip {
     }
 
     public destroy(): void {
-        this.group.destroy()
+        this.group.destroy();
     }
 
     public switchHighlight(isHighlighted: boolean): void {
@@ -185,7 +185,7 @@ export class PlayerShip {
     private broadcastAction(detail: ClientMessage): void {
         window.dispatchEvent(new CustomEvent(
             'action',
-            { detail: detail }
+            { detail: detail },
         ));
     }
     private calculateToSailValue(targetHexId: ZoneName): DiceSix | false {
@@ -194,7 +194,7 @@ export class PlayerShip {
 
         const influencePool = this.players
             .map(player => {
-                return player.bearings.seaZone === targetHexId ? player.influence : 0
+                return player.bearings.seaZone === targetHexId ? player.influence : 0;
             });
 
         const highestInfluence = Math.max(...influencePool, rivalInfluence) as DiceSix;

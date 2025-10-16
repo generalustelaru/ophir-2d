@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import constants from "~/client_constants";
-import { BarrierId } from "~/shared_types";
-import { StaticGroupInterface } from "~/client_types";
+import constants from '~/client_constants';
+import { BarrierId } from '~/shared_types';
+import { StaticGroupInterface } from '~/client_types';
 
 const { COLOR } = constants;
 
@@ -20,7 +20,7 @@ const barrierOffsets: Record <BarrierId, OffsetData> = {
     10: { x: -98, y: -50, rotation: 0 },
     11: { x: -179, y: -89, rotation: -60 },
     12: { x: -6, y: -111, rotation: 60 },
-}
+};
 
 export class BarrierToken implements StaticGroupInterface {
 
@@ -28,7 +28,7 @@ export class BarrierToken implements StaticGroupInterface {
     constructor(
         center: {x: number, y: number},
         barrierId: BarrierId,
-        fill: string = COLOR.barrierDefault
+        fill: string = COLOR.barrierDefault,
     ) {
         this.group = new Konva.Group({});
         const rect = new Konva.Rect({
@@ -46,5 +46,5 @@ export class BarrierToken implements StaticGroupInterface {
 
     public getElement = () => {
         return this.group;
-    }
+    };
 }

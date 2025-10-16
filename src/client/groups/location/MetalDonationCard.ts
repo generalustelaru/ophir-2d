@@ -1,9 +1,9 @@
-import Konva from "konva";
-import { Action, Coordinates, Metal } from "~/shared_types";
-import { DynamicGroupInterface } from "~/client_types";
-import { ActionButton } from "../ActionButton";
-import clientConstants from "~/client_constants";
-import { VictoryPointDial } from "../VictoryPointDial";
+import Konva from 'konva';
+import { Action, Coordinates, Metal } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import { ActionButton } from '../ActionButton';
+import clientConstants from '~/client_constants';
+import { VictoryPointDial } from '../VictoryPointDial';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 export class MetalDonationCard extends ActionButton implements DynamicGroupInterface<boolean> {
@@ -40,7 +40,7 @@ export class MetalDonationCard extends ActionButton implements DynamicGroupInter
         });
 
         const vpDial = new VictoryPointDial(
-            {x: 0, y: 0},
+            { x: 0, y: 0 },
             metalType === 'gold' ? 10 : 5,
         );
 

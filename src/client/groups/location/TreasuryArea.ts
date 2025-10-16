@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from "~/client_types";
-import clientConstants from "~/client_constants";
-import { Action, ItemName } from "~/shared_types";
+import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '~/client_types';
+import clientConstants from '~/client_constants';
+import { Action, ItemName } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
@@ -38,7 +38,7 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
         const playerAmounts = update.localPlayer && {
             coins: update.localPlayer.coins,
             favor: update.localPlayer.favor,
-        }
+        };
 
         const leftmargin = 10;
         const cardWidth = 66;
@@ -53,8 +53,8 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                     price: update.tier.goldCost.favor,
                     metal: 'gold',
                     supply: update.metalSupplies.gold,
-                }
-            }
+                },
+            },
         );
 
         this.silverForFavorCard = new TreasuryCard(
@@ -67,8 +67,8 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                     price: update.tier.silverCost.favor,
                     metal: 'silver',
                     supply: update.metalSupplies.silver,
-                }
-            }
+                },
+            },
         );
 
         this.goldForCoinsCard = new TreasuryCard(
@@ -81,8 +81,8 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                     price: update.tier.goldCost.coins,
                     metal: 'gold',
                     supply: update.metalSupplies.gold,
-                }
-            }
+                },
+            },
         );
 
         this.silverForCoinsCard = new TreasuryCard(
@@ -95,8 +95,8 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                     price: update.tier.silverCost.coins,
                     metal: 'silver',
                     supply: update.metalSupplies.silver,
-                }
-            }
+                },
+            },
         );
 
         this.group.add(
@@ -129,7 +129,7 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                 price: update.tier.goldCost.favor,
                 metal: 'gold',
                 supply: update.metalSupplies.gold,
-            }
+            },
         });
         this.silverForFavorCard.update({
             playerAmounts,
@@ -138,7 +138,7 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                 price: update.tier.silverCost.favor,
                 metal: 'silver',
                 supply: update.metalSupplies.silver,
-            }
+            },
         });
         this.goldForCoinsCard.update({
             playerAmounts,
@@ -147,7 +147,7 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                 price: update.tier.goldCost.coins,
                 metal: 'gold',
                 supply: update.metalSupplies.gold,
-            }
+            },
         });
         this.silverForCoinsCard.update({
             playerAmounts,
@@ -156,7 +156,7 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
                 price: update.tier.silverCost.coins,
                 metal: 'silver',
                 supply: update.metalSupplies.silver,
-            }
+            },
         });
     }
 

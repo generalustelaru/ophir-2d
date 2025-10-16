@@ -1,15 +1,15 @@
-import { ChatEntry, EnrolmentState, Phase, PlayerColor, PlayerEntry } from "~/shared_types";
-import { ObjectHandler } from "~/server_types";
-import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from "./library";
+import { ChatEntry, EnrolmentState, Phase, PlayerColor, PlayerEntry } from '~/shared_types';
+import { ObjectHandler } from '~/server_types';
+import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
     private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.enrolment>;
     private sessionOwner: Writable<PlayerColor | null>;
-    private availableSlots: ArrayWritable<PlayerColor>
-    private players: ArrayWritable<PlayerEntry>
-    private chat: ArrayWritable<ChatEntry>
+    private availableSlots: ArrayWritable<PlayerColor>;
+    private players: ArrayWritable<PlayerEntry>;
+    private chat: ArrayWritable<ChatEntry>;
 
     constructor(serverName: string, state: EnrolmentState) {
         this.serverName = readable(serverName);
@@ -29,7 +29,7 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
             availableSlots: this.availableSlots.get(),
             players: this.players.get(),
             chat: this.chat.get(),
-        }
+        };
     }
 
     public addChatEntry(chat: ChatEntry) {
@@ -42,7 +42,7 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
 
     public addPlayer(entry: PlayerEntry) {
         this.players.addOne(entry);
-        this.availableSlots.removeOne(entry.color)
+        this.availableSlots.removeOne(entry.color);
     }
 
     public getSessionOwner() {

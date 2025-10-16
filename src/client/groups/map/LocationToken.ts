@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { IconLayer, DynamicGroupInterface } from "~/client_types";
+import { IconLayer, DynamicGroupInterface } from '~/client_types';
 import { ActionButton } from '../ActionButton';
-import { Action, LocationName, TradeGood } from "~/shared_types";
+import { Action, LocationName, TradeGood } from '~/shared_types';
 import { EmptyLocationToken } from './EmptyLocationToken';
 
 type LocationTokenUpdate = {
@@ -19,7 +19,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
     constructor(
         stage: Konva.Stage,
         locationId: LocationName,
-        iconData: IconLayer
+        iconData: IconLayer,
     ) {
         const goodToPickup = ((): TradeGood | null => {
             switch (locationId) {
@@ -87,13 +87,13 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
 
     public update(update: LocationTokenUpdate): void {
         if (this.tradeGood) {
-            const supply = update.tradeGoodSupplies[this.tradeGood]
+            const supply = update.tradeGoodSupplies[this.tradeGood];
 
             this.setEnabled(supply > 0 && update.mayPickup);
             this.emptyLocation.update(supply > 0);
         }
 
-        if (update.templeIcon && this.id === "temple") {
+        if (update.templeIcon && this.id === 'temple') {
             this.icon.data(update.templeIcon.shape);
             this.icon.fill(update.templeIcon.fill);
             this.icon.x(-36);
