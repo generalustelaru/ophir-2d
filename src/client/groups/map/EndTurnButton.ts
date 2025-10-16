@@ -1,18 +1,18 @@
 import Konva from 'konva';
 import constants from '~/client_constants';
-import { Player, ClientMessage } from '~/shared_types';
+import { Player  } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../ActionButton';
+import { Button } from '../Button';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class EndTurnButton extends ActionButton implements DynamicGroupInterface<Player> {
+export class EndTurnButton extends Button implements DynamicGroupInterface<Player> {
     private anchor: Konva.Path;
 
     constructor(
         stage: Konva.Stage,
         parent: Konva.Group,
-        message: ClientMessage,
+        callback: Function,
         isActivePlayer: boolean,
     ) {
 
@@ -23,7 +23,7 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
             y: parent.height() - 130,
         };
 
-        super(stage, layout, message);
+        super(stage, layout, callback);
 
         const hoverZone = new Konva.Rect({
             width: this.group.width(),
@@ -50,6 +50,6 @@ export class EndTurnButton extends ActionButton implements DynamicGroupInterface
         const icon = player.isAnchored && !player.isHandlingRival ? ICON_DATA.anchored : ICON_DATA.not_anchored;
         this.anchor.data(icon.shape);
         this.anchor.fill(player.isActive ? icon.fill : COLOR.disabled);
-        this.setEnabled(player.isActive && player.isAnchored && !player.isHandlingRival);
+        (player.isActive && player.isAnchored && !player.isHandlingRival) ? this.enable() : this.disable();
     }
 }

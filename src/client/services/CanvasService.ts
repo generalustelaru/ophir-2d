@@ -11,6 +11,7 @@ import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import { SellGoodsModal } from '../groups/modals/SellGodsModal';
 import { StartTurnModal } from '../groups/modals/StartTurnModal';
 import { DonateGoodsModal } from '../groups/modals/DonateGoodsModal';
+import { EndTurnModal } from '../groups/modals/EndTurnModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -23,6 +24,7 @@ export const CanvasService = new class extends Communicator {
     private isSetupDrawn: boolean = false;
     private isPlayDrawn: boolean = false;
     private startTurnModal: StartTurnModal;
+    private endTurnModal: EndTurnModal;
     private sellGoodsModal: SellGoodsModal;
     private donateGoodsModal: DonateGoodsModal;
 
@@ -46,6 +48,7 @@ export const CanvasService = new class extends Communicator {
 
         this.donateGoodsModal= new DonateGoodsModal(this.stage);
         this.sellGoodsModal = new SellGoodsModal(this.stage);
+        this.endTurnModal = new EndTurnModal(this.stage);
         this.startTurnModal = new StartTurnModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
@@ -54,6 +57,10 @@ export const CanvasService = new class extends Communicator {
 
         const openDonateGoodsModal = (slot: MarketSlotKey) => {
             this.donateGoodsModal.show(slot);
+        };
+
+        const openEndTurnModal = () => {
+            this.endTurnModal.show();
         };
 
         this.locationGroup = new LocationGroup(
@@ -86,6 +93,7 @@ export const CanvasService = new class extends Communicator {
                 x: segmentWidth,
                 y: 0,
             },
+            openEndTurnModal,
         ); // mapGroup covers half the canvas (2 segments), sitting in the middle
 
         this.setupGroup = new SetupGroup(

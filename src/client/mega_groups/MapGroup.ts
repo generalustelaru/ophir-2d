@@ -16,6 +16,7 @@ export class MapGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private movesDial: MovesDial | null = null;
     private endTurnButton: EndTurnButton | null = null;
+    private endTurnCallback: Function;
     private actionDial: ActionDial | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
@@ -23,7 +24,8 @@ export class MapGroup implements MegaGroupInterface {
     private localShip: PlayerShip | null = null;
     private rivalShip: RivalShip | null = null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, endTurnCallback: Function) {
+        this.endTurnCallback = endTurnCallback;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -84,7 +86,7 @@ export class MapGroup implements MegaGroupInterface {
         this.endTurnButton = new EndTurnButton(
             this.stage,
             this.group,
-            { action: Action.end_turn, payload: null },
+            () => this.endTurnCallback(),
             isActivePlayer,
         );
 
