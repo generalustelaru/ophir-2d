@@ -17,7 +17,8 @@ export class SellGoodsModal extends ModalBase implements ModalInterface<PlayStat
         super(stage, { hasSubmit: true, actionMessage: null });
 
         this.goodsAssortment = new GoodsAssortment(
-            { x: 60, y: 20 },
+            { x: 60, y: 15 },
+            'modal',
             null,
         );
 

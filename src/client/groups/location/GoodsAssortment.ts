@@ -5,13 +5,22 @@ import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
+type Scale = 'card' | 'modal'
 export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
 {
     private group: Konva.Group;
+    private scale: number;
     constructor(
         position: Coordinates,
+        scale: Scale,
         goods: Array<TradeGood> | null,
     ) {
+        this.scale = (() => { switch (scale) {
+            case 'modal': return 2;
+            case 'card': return 1.5;
+            default:  throw new Error('Cannot determine Scale value.');
+        }})();
+
         this.group = new Konva.Group({
             width: 66,
             height: 66,
@@ -60,7 +69,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
             fill: goodData.fill,
             stroke: 'white',
             strokeWidth: 1,
-            scale: { x: 1.5, y: 1.5 },
+            scale: { x: this.scale, y: this.scale },
         });
 
         group.add(
@@ -91,7 +100,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
                 fill: goodData.fill,
                 stroke: 'white',
                 strokeWidth: 1,
-                scale: { x: 1.5, y: 1.5 },
+                scale: { x: this.scale, y: this.scale },
             });
 
             group.add(
@@ -124,7 +133,7 @@ export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
                 fill: goodData.fill,
                 stroke: 'white',
                 strokeWidth: 1,
-                scale: { x: 1.5, y: 1.5 },
+                scale: { x: this.scale, y: this.scale },
             });
 
             group.add(

@@ -49,6 +49,7 @@ export class TempleMarketCard extends Button implements DynamicGroupInterface<Ma
                 x: 0,
                 y: 0,
             },
+            'card',
             trade.request,
         );
 
