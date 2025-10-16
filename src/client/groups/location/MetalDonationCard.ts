@@ -40,7 +40,7 @@ export class MetalDonationCard extends ActionButton implements DynamicGroupInter
         });
 
         const vpDial = new VictoryPointDial(
-            { x: 0, y: 0 },
+            { x: 0, y: 30 },
             metalType === 'gold' ? 10 : 5,
         );
 

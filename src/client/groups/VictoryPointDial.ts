@@ -12,19 +12,18 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
         position: Coordinates,
         value?: number,
     ) {
-        this.group = new Konva.Group({
-            x: position.x, y: position.y, width: 66, height: 96,
-        });
+        this.group = new Konva.Group({ x: position.x, y: position.y, width: 66, height: 66 });
 
         const disc = new Konva.Circle({
             x: this.group.width() / 2,
-            y: this.group.height() / 2 + 15,
+            y: this.group.height() / 2,
             radius: 22,
             fill: COLOR.vpGold,
         });
 
-        const wreathY = this.group.height() / 2 - 6;
+        const wreathY = 12;
         const wreathX = 6;
+
         const leftWreath = new Konva.Path({
             data: ICON_DATA.half_wreath.shape,
             fill: ICON_DATA.half_wreath.fill,
@@ -41,15 +40,15 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
             scale: { x: -2, y: 2 },
         });
 
-        const backdrift = value && value > 9 ? 10 : 5;
         this.vp = new Konva.Text({
-            x: this.group.width() / 2 - backdrift,
-            y: this.group.height() / 2 + 5,
+            width: this.group.width(),
+            height: this.group.height(),
+            align: 'center',
+            verticalAlign: 'middle',
             text: value ? String(value) : '0',
             fontSize: 20,
             fill: COLOR.vpCardPurple,
             stroke: COLOR.vpCardPurple,
-            // strokeWidth: 2,
             fontFamily: 'Calibri',
         });
 
@@ -62,8 +61,6 @@ export class VictoryPointDial implements DynamicGroupInterface<number> {
     }
 
     public update(value: number) {
-        const backdrift = value > 9 ? 10 : 5;
-        this.vp.x(this.group.width() / 2 - backdrift);
         this.vp.text(String(value));
     }
 

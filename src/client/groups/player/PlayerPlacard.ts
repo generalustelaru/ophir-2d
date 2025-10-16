@@ -86,7 +86,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
 
         this.vpDial = player.color === localColorName ? new VictoryPointDial(
-            { x:120, y: 3 },
+            { x:120, y: 33 },
             0,
         ) : null;
         this.vpDial && this.group.add(this.vpDial.getElement());
