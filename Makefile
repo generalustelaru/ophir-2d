@@ -36,3 +36,4 @@ run:
 
 check:
 	npx tsc --noEmit
+	npx eslint .
