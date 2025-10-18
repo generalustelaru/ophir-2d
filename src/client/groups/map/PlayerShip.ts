@@ -135,8 +135,12 @@ export class PlayerShip extends Communicator {
             }
 
             const player = this.players.find(player => player.color === playerColor);
+
+            if (!player)
+                throw new Error('Cannot determine local player');
+
             const position = stage.getPointerPosition();
-            const departureZone = this.seaZones.find(hex => hex.getId() === player?.bearings.seaZone);
+            const departureZone = this.seaZones.find(hex => hex.getId() === player.bearings.seaZone);
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
             if (!departureZone) {
@@ -151,6 +155,8 @@ export class PlayerShip extends Communicator {
                         this.createEvent({
                             type: EventType.sail_attempt,
                             detail: {
+                                playerColor,
+                                moveActions: player.moveActions,
                                 origin: this.initialPosition,
                                 destination: {
                                     zoneId: targetZone.getId(),

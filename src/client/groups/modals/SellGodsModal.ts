@@ -2,19 +2,27 @@ import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState } from '~/shared_types';
 import { CoinDial, GoodsAssortment } from '../GroupList';
-import { ModalInterface } from '~/client_types';
+import { DynamicModalInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;
 
-export class SellGoodsModal extends ModalBase implements ModalInterface<PlayState, MarketSlotKey>{
+export class SellGoodsModal extends ModalBase implements DynamicModalInterface<PlayState, MarketSlotKey>{
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
 
     constructor(stage: Konva.Stage) {
-        super(stage, { hasSubmit: true, actionMessage: null });
+        super(
+            stage,
+            {
+                hasSubmit: true,
+                actionMessage: null,
+                submitLabel: 'Sell',
+                cancelLabel: 'Cancel',
+            },
+        );
 
         this.goodsAssortment = new GoodsAssortment(
             { x: 60, y: 15 },

@@ -62,9 +62,12 @@ export interface DynamicGroupInterface<U> {
     update(update: U): void,
 }
 
-export interface ModalInterface<U, S> {
+export interface DynamicModalInterface<U, S> {
     update(u: U): void,
     show(s: S): void,
+}
+export interface StaticModalInterface {
+    show(): void,
 }
 
 export interface StaticGroupInterface {
@@ -117,6 +120,8 @@ export type CargoBandUpdate = {
 }
 
 export type SailAttemptArgs = {
+    playerColor: PlayerColor,
+    moveActions: number,
     origin: Coordinates,
     destination: MovementPayload,
     toSail: DiceSix,

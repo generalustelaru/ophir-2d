@@ -7,8 +7,11 @@ import { ClientMessage } from '~/shared_types';
 type SubmitBehavior = {
     hasSubmit: true,
     actionMessage: ClientMessage | null,
+    submitLabel: string,
+    cancelLabel: string,
 } | {
     hasSubmit: false,
+    cancelLabel: string,
 }
 
 const { COLOR } = clientConstants;
@@ -73,7 +76,7 @@ export abstract class ModalBase {
                 x: this.modalGroup.width() / 2 - (behavior.hasSubmit ? 75 : 25),
                 y: buttonLevel,
             },
-            behavior.hasSubmit ? 'Cancel' : 'Okay',
+            behavior.cancelLabel,
         );
         this.dismissButton.enable();
 
@@ -85,6 +88,7 @@ export abstract class ModalBase {
                     y: buttonLevel,
                 },
                 behavior.actionMessage,
+                behavior.submitLabel,
                 () => { this.screenGroup.hide(); },
             );
             this.modalGroup.add(this.acceptButton.getElement());

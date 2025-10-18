@@ -3,28 +3,83 @@ import { ModalBase } from './ModalBase';
 import { Action } from '~/shared_types';
 import { InfluenceDial } from '../InfluenceDial';
 import clientConstants from '~/client/client_constants';
-import { SailAttemptArgs } from '~/client/client_types';
+import { DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
 
 const { COLOR } = clientConstants;
 
-export class SailAttemptModal extends ModalBase {
+export class SailAttemptModal extends ModalBase implements DynamicModalInterface<undefined, SailAttemptArgs> {
+    private ownerDieFace: Konva.Rect;
     private toSailDial: InfluenceDial;
+    private dieSymbol: Konva.Text;
     constructor(stage: Konva.Stage) {
         super(
             stage,
-            { hasSubmit: true, actionMessage: null },
+            {
+                hasSubmit: true,
+                actionMessage: null,
+                submitLabel: 'Roll',
+                cancelLabel: 'Cancel',
+            },
         );
+
+        const iconRow = new Konva.Group({
+            width: 150,
+            height: 50,
+            x: 76,
+            y: 24,
+        });
+        this.ownerDieFace = new Konva.Rect({
+            width: 50,
+            height: 50,
+            cornerRadius: 10,
+        });
+        this.dieSymbol = new Konva.Text({
+            text: '?',
+            width: this.ownerDieFace.width(),
+            height: this.ownerDieFace.height(),
+            align: 'center',
+            verticalAlign: 'middle',
+            y: 5,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+        });
+        const greaterEqual = new Konva.Text({
+            text: '≥',
+            width: iconRow.width(),
+            height: iconRow.height(),
+            align: 'center',
+            verticalAlign: 'middle',
+            y: 5,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+            fill: COLOR.boneWhite,
+        });
         this.toSailDial = new InfluenceDial(
             {
-                x: this.contentGroup.width() / 2 - 25,
-                y: 25,
+                x: 100,
+                y: 0,
             },
-            COLOR.boneWhite);
+            COLOR.boneWhite,
+        );
+        iconRow.add(...[
+            this.ownerDieFace,
+            this.dieSymbol,
+            greaterEqual,
+            this.toSailDial.getElement(),
+        ]);
 
-        this.contentGroup.add(this.toSailDial.getElement());
+        this.contentGroup.add(...[
+            iconRow,
+        ]);
     }
 
+    public update() {}
+
     public show(data: SailAttemptArgs) {
+        this.dieSymbol.text(data.moveActions === 1 ? '!': '?') ;
+        this.ownerDieFace.fill(COLOR[data.playerColor]);
         this.toSailDial.update(data.toSail);
 
         this.open({ action: Action.move, payload: data.destination });

@@ -5,10 +5,11 @@ import { FavorDial, GoodsAssortment } from '../GroupList';
 import clientConstants from '~/client_constants';
 import { VictoryPointDial } from '../VictoryPointDial';
 import localState from '~/client/state';
+import { DynamicModalInterface } from '~/client/client_types';
 
 const { ICON_DATA } = clientConstants;
 
-export class DonateGoodsModal extends ModalBase {
+export class DonateGoodsModal extends ModalBase implements DynamicModalInterface<PlayState, MarketSlotKey> {
     private market: MarketOffer | null = null;
     private goodsAssortment: GoodsAssortment;
     private victoryPointDial: VictoryPointDial;
@@ -16,7 +17,15 @@ export class DonateGoodsModal extends ModalBase {
     private playerFavor: number = 0;
 
     constructor(stage: Konva.Stage) {
-        super(stage, { hasSubmit: true, actionMessage: null });
+        super(
+            stage,
+            {
+                hasSubmit: true,
+                actionMessage: null,
+                submitLabel: 'Donate',
+                cancelLabel: 'Cancel',
+            },
+        );
 
         this.goodsAssortment = new GoodsAssortment(
             { x: 40, y: 15 },

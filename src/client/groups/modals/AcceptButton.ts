@@ -8,6 +8,7 @@ export class AcceptButton extends ActionButton {
         stage: Konva.Stage,
         position: Coordinates,
         actionMessage: ClientMessage | null,
+        label: string,
         dismissCallback: Function,
     ) {
         const layout = {
@@ -33,7 +34,7 @@ export class AcceptButton extends ActionButton {
             fill: 'white',
             align: 'center',
             verticalAlign: 'middle',
-            text: 'Okay',
+            text: label,
             fontFamily: 'Custom',
         });
 
