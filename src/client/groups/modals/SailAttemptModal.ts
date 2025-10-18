@@ -16,8 +16,8 @@ export class SailAttemptModal extends ModalBase {
         );
         this.toSailDial = new InfluenceDial(
             {
-                x: this.contentGroup.width() / 2  * -1 + 25,
-                y: -25,
+                x: this.contentGroup.width() / 2 - 25,
+                y: 25,
             },
             COLOR.boneWhite);
 

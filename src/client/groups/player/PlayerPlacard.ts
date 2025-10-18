@@ -73,7 +73,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         );
 
         this.influenceDial = new InfluenceDial(
-            { x: 60, y: -25 },
+            { x: -55, y: 25 },
             COLOR[player.color]);
         this.influenceDial.update(player.influence);
 
