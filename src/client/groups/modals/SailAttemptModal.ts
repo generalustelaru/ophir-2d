@@ -18,7 +18,6 @@ export class SailAttemptModal extends ModalBase {
             {
                 x: this.contentGroup.width() / 2  * -1 + 25,
                 y: -25,
-                width: 50, height: 50,
             },
             COLOR.boneWhite);
 

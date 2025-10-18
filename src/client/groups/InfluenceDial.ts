@@ -1,9 +1,9 @@
 import Konva from 'konva';
 import { DiceSix } from '~/shared_types';
 import { Coordinates } from '~/shared_types';
-import { Color, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { Color, DynamicGroupInterface } from '~/client_types';
 
-type PipDataElement = {position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null}
+type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null }
 type PipData = Array<PipDataElement>
 export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
     private group: Konva.Group;
@@ -11,14 +11,14 @@ export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
     private dotMatrix: PipData;
 
     constructor(
-        layout: GroupLayoutData,
+        position: Coordinates,
         color: Color,
     ) {
         this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            offsetX: layout.x,
-            offsetY: layout.y,
+            width: 50,
+            height:50,
+            offsetX: position.x,
+            offsetY: position.y,
             //TODO: refactor this to set own dimenstions and use coordinates intuitively
         });
 

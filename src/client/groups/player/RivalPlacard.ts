@@ -45,7 +45,7 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
         });
 
         this.influenceDial = new InfluenceDial(
-            { width: 50, height: 50, x: 60, y: -25 },
+            { x: 60, y: -25 },
             COLOR.boneWhite,
         );
 

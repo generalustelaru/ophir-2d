@@ -79,12 +79,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         this.group.add(this.restrictedIcon);
 
         this.influenceDial = new InfluenceDial(
-            {
-                width: 50,
-                height: 50,
-                x: 25,
-                y: 25,
-            },
+            { x: 25, y: 25 },
             COLOR.boneWhite,
         );
         this.group.add(this.influenceDial.getElement());
