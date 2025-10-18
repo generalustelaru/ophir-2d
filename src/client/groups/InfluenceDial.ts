@@ -19,6 +19,7 @@ export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
             height: layout.height,
             offsetX: layout.x,
             offsetY: layout.y,
+            //TODO: refactor this to set own dimenstions and use coordinates intuitively
         });
 
         this.body = new Konva.Rect({

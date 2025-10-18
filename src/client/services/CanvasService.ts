@@ -6,12 +6,13 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { EventType } from '~/client_types';
+import { EventType, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import { SellGoodsModal } from '../groups/modals/SellGodsModal';
 import { StartTurnModal } from '../groups/modals/StartTurnModal';
 import { DonateGoodsModal } from '../groups/modals/DonateGoodsModal';
 import { EndTurnModal } from '../groups/modals/EndTurnModal';
+import { SailAttemptModal } from '../groups/modals/SailAttemptModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -27,6 +28,7 @@ export const CanvasService = new class extends Communicator {
     private endTurnModal: EndTurnModal;
     private sellGoodsModal: SellGoodsModal;
     private donateGoodsModal: DonateGoodsModal;
+    private sailAttemptModal: SailAttemptModal;
 
     public constructor() {
         super();
@@ -50,6 +52,7 @@ export const CanvasService = new class extends Communicator {
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.endTurnModal = new EndTurnModal(this.stage);
         this.startTurnModal = new StartTurnModal(this.stage);
+        this.sailAttemptModal = new SailAttemptModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
             this.sellGoodsModal.show(slot);
@@ -120,6 +123,10 @@ export const CanvasService = new class extends Communicator {
     public getSetupCoordinates(): GameSetupPayload {
         return this.mapGroup.createSetupPayload();
     }
+
+    public openSailAttemptModal(data: SailAttemptArgs) {
+        this.sailAttemptModal.show(data);
+    };
 
     public notifyForTurn(): void {
         this.startTurnModal.show();

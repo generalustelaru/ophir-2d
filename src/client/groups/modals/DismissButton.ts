@@ -3,7 +3,7 @@ import { Button } from '../Button';
 import { Coordinates } from '~/shared_types';
 
 export class DismissButton extends Button {
-    constructor(stage: Konva.Stage, callback: Function, position:  Coordinates) {
+    constructor(stage: Konva.Stage, callback: Function, position:  Coordinates, label: string) {
         const layout = {
             x: position.x,
             y: position.y,
@@ -26,7 +26,7 @@ export class DismissButton extends Button {
             fontStyle: 'bold',
             align: 'center',
             verticalAlign: 'middle',
-            text: 'Close',
+            text: label,
             fontFamily: 'Custom',
         });
 

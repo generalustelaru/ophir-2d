@@ -1,8 +1,7 @@
 import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
     Metal, MetalPrices, Currency, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState,
-    VpTransmission, State, EnrolmentResponse,
-    NewNameTransmission,
+    VpTransmission, State, EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -117,10 +116,10 @@ export type CargoBandUpdate = {
     canDrop: boolean,
 }
 
-export enum ActionModalContext {
-    advisor_at_temple = 'advisor_at_temple',
-    chancellor_at_market = 'chancellor_at_market',
-    peddler_at_market = 'peddler_at_market',
+export type SailAttemptArgs = {
+    origin: Coordinates,
+    destination: MovementPayload,
+    toSail: DiceSix,
 }
 
 export type EventFormat<EventType, D> = {
@@ -135,6 +134,7 @@ export enum EventType {
     close = 'close',
     timeout = 'timeout',
     action = 'action',
+    sail_attempt = 'sail_attempt',
     error = 'error',
     info = 'info',
     reset = 'reset',
@@ -144,8 +144,6 @@ export enum EventType {
     identification = 'identification',
     vp_transmission = 'vp_transmission',
     name_transmission = 'name_transmission',
-    // ui_transition = 'ui_transition',
-    open_action_modal = 'open_action_modal',
     start_turn = 'start_turn',
 }
 
@@ -160,6 +158,7 @@ export type LaconicType =
 export type Event =
     | EventFormat<LaconicType, null>
     | EventFormat<EventType.action, ClientMessage>
+    | EventFormat<EventType.sail_attempt, SailAttemptArgs>
     | EventFormat<EventType.error, ErrorDetail>
     | EventFormat<EventType.info, InfoDetail>
     | EventFormat<EventType.reset, ResetResponse>
@@ -169,28 +168,13 @@ export type Event =
     | EventFormat<EventType.enrolment_update, EnrolmentState>
     | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>
-    // | EventFormat<EventType.ui_transition, TransitionDetail>
     | EventFormat<EventType.name_transmission, NewNameTransmission>
-    | EventFormat<EventType.open_action_modal, ActionButtonData>
 ;
-
-// export type TransitionDetail = {
-//     element: InterfaceId,
-//     visible: boolean
-// }
 
 export type InfoDetail = {
     text: string,
 }
 
-export type ActionButtonData = {
-    context: ActionModalContext,
-}
-
 export type ErrorDetail = {
     message: string,
 }
-
-// enum InterfaceId {
-//     specialistBand = 0,
-// }

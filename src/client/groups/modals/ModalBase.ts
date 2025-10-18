@@ -73,6 +73,7 @@ export abstract class ModalBase {
                 x: this.modalGroup.width() / 2 - (behavior.hasSubmit ? 75 : 25),
                 y: buttonLevel,
             },
+            behavior.hasSubmit ? 'Cancel' : 'Okay',
         );
         this.dismissButton.enable();
 

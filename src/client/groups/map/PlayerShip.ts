@@ -1,14 +1,15 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, ClientMessage, Action, Player, Rival } from '~/shared_types';
+import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival } from '~/shared_types';
 import localState from '../../state';
 import clientConstants from '~/client_constants';
 import { SeaZone } from '../GroupList';
 import { ShipToken } from '../ShipToken';
-import { Color } from '~/client_types';
+import { Color, EventType } from '~/client_types';
+import { Communicator } from '~/client/services/Communicator';
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
 
-export class PlayerShip {
+export class PlayerShip extends Communicator {
 
     private ship: ShipToken;
     private group: Konva.Group;
@@ -17,6 +18,7 @@ export class PlayerShip {
     private seaZones: Array<SeaZone> = [];
     private players: Array<Player>;
     private rival: Rival;
+    private toSailValue: DiceSix|false = false;
 
     public switchControl(isDraggable: boolean) {
         this.group.draggable(isDraggable);
@@ -44,6 +46,8 @@ export class PlayerShip {
         players: Array<Player>,
         rival: Rival,
     ) {
+        super();
+
         this.seaZones = seaZones;
         this.players = players;
         this.rival = rival;
@@ -106,10 +110,8 @@ export class PlayerShip {
                 case player.moveActions && player.destinations.includes(targetZone.getId()):
                     targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
-                    targetZone.setToHitValue(player.privilegedSailing
-                        ? false
-                        : this.calculateToSailValue(targetZone.getId()),
-                    );
+                    this.toSailValue = this.calculateToSailValue(targetZone.getId());
+                    targetZone.setToHitValue(player.privilegedSailing ? false : this.toSailValue );
                     break;
                 case player.moveActions && player.navigatorAccess.includes(targetZone.getId()):
                     targetZone.setFill(COLOR.navigatorAccess);
@@ -144,19 +146,44 @@ export class PlayerShip {
             switch (true) {
                 case targetZone && this.isDestinationValid:
                     targetZone.setFill(COLOR.activeHex);
-                    this.broadcastAction({
-                        action: Action.move,
-                        payload: {
-                            zoneId: targetZone.getId(),
-                            position: { x: this.group.x(), y: this.group.y() },
-                        },
-                    });
+
+                    if (this.toSailValue) {
+                        this.createEvent({
+                            type: EventType.sail_attempt,
+                            detail: {
+                                origin: this.initialPosition,
+                                destination: {
+                                    zoneId: targetZone.getId(),
+                                    position: { x: this.group.x(), y: this.group.y() },
+                                },
+                                toSail: this.toSailValue,
+                            },
+                        });
+                        // TODO: Make coords-reset actionable from modal (when canceling attempt)
+                        this.group.x(this.initialPosition.x);
+                        this.group.y(this.initialPosition.y);
+                    } else {
+                        this.createEvent({
+                            type: EventType.action,
+                            detail: {
+                                action: Action.move,
+                                payload: {
+                                    zoneId: targetZone.getId(),
+                                    position: { x: this.group.x(), y: this.group.y() },
+                                },
+                            },
+                        });
+                    }
+
                     break;
                 case departureZone === targetZone:
-                    this.broadcastAction({
-                        action: Action.reposition,
-                        payload: {
-                            repositioning: { x: this.group.x(), y: this.group.y() },
+                    this.createEvent({
+                        type: EventType.action,
+                        detail: {
+                            action: Action.reposition,
+                            payload: {
+                                repositioning: { x: this.group.x(), y: this.group.y() },
+                            },
                         },
                     });
                     departureZone.setFill(player?.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
@@ -182,12 +209,6 @@ export class PlayerShip {
         this.ship.update(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
     }
 
-    private broadcastAction(detail: ClientMessage): void {
-        window.dispatchEvent(new CustomEvent(
-            'action',
-            { detail: detail },
-        ));
-    }
     private calculateToSailValue(targetHexId: ZoneName): DiceSix | false {
         const rival = this.rival.isIncluded ? this.rival : null;
         const rivalInfluence = rival && rival.bearings.seaZone === targetHexId ? rival.influence : 0;
