@@ -7,7 +7,7 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
 {
     private group: Konva.Group;
     private marketCard: MarketCard;
-    private deckInUse: Konva.Text;
+    private deckInfo: Konva.Text;
     private cardY: number;
 
     constructor(
@@ -42,19 +42,19 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
             cornerRadius: 15,
         });
 
-        this.deckInUse = new Konva.Text({
+        this.deckInfo = new Konva.Text({
             x: deckEffect.x() + 5,
             y: deckEffect.y() + deckEffect.height() + 2,
             text: deckId,
-            fontSize: 20,
-            fontFamily: 'Calibri',
+            fontSize: 14,
+            fontFamily: 'Custom',
             fill: 'white',
         });
 
         this.group.add(
             deckEffect,
             this.marketCard.getElement(),
-            this.deckInUse,
+            this.deckInfo,
         );
     }
 
@@ -63,8 +63,9 @@ export class MarketDeck implements DynamicGroupInterface<MarketOffer>
     }
 
     public update(offer: MarketOffer): void {
-        this.marketCard.update({ trade: offer.future, isFeasible: false });
-        this.deckInUse.text(offer.deckId);
-        this.marketCard.getElement().y(this.cardY - offer.deckSize);
+        const { future, deckId, deckSize } = offer;
+        this.marketCard.update({ trade: future, isFeasible: false });
+        this.deckInfo.text(`${deckSize}(${deckId})`);
+        this.marketCard.getElement().y(this.cardY - deckSize);
     }
 }
