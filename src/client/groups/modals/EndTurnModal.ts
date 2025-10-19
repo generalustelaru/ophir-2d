@@ -47,7 +47,8 @@ export class EndTurnModal extends ModalBase implements DynamicModalInterface<Pla
             p =>
                 p.specialist.name === SpecialistName.priest
                 && p.bearings.location === 'temple'
-                && p.color === localState.playerColor,
+                && p.color === localState.playerColor
+                && p.favor < 6,
         ))) {
             const iconSpan = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
             this.text.text(`End turn and gain${iconSpan}?`);
