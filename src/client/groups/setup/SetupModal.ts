@@ -29,7 +29,7 @@ export class SetupModal implements DynamicGroupInterface<SetupModalUpdate> {
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
-            fill: COLOR.modalRed,
+            fill: COLOR.modalBlue,
         });
         this.group.add(background);
 

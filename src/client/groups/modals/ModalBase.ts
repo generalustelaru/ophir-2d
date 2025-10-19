@@ -58,7 +58,7 @@ export abstract class ModalBase {
             new Konva.Rect({
                 width,
                 height,
-                fill: COLOR.modalRed,
+                fill: COLOR.modalBlue,
                 cornerRadius: 10,
                 stroke: COLOR.boneWhite,
                 strokeWidth: 4,

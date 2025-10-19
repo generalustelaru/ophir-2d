@@ -66,7 +66,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
         const colorOwner = players.find(p => p.color == this.color);
         const isLocalPlayerColor = localPlayer && localPlayer.name === colorOwner?.name;
         const text = isLocalPlayerColor
-            ? 'You'
+            ? `${localPlayer.name} (you)`
             : (
                 colorOwner
                     ? colorOwner?.name || 'picked'

@@ -257,7 +257,7 @@ function debug(state: PlayState|SetupState|EnrolmentState) {
         localStorage.removeItem(playerColor);
     });
     localStorage.removeItem('_sessionPhase');
-    localStorage.removeItem('_received');
+    localStorage.removeItem('_sharedState');
     localStorage.removeItem('_client');
     localStorage.removeItem('_rival');
 
@@ -265,7 +265,7 @@ function debug(state: PlayState|SetupState|EnrolmentState) {
         return;
 
     localStorage.setItem('_sessionPhase', state.sessionPhase);
-    localStorage.setItem('_received', JSON.stringify(state));
+    localStorage.setItem('_sharedState', JSON.stringify(state));
     localStorage.setItem('_client', JSON.stringify(localState));
 
     if ('rival' in state)
