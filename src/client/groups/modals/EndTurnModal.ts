@@ -1,9 +1,13 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { Action } from '~/shared_types';
-import { StaticModalInterface } from '~/client/client_types';
+import { Action, PlayState, SpecialistName } from '~/shared_types';
+import { DynamicModalInterface } from '~/client/client_types';
+import localState from '~/client/state';
+import { FavorDial } from '../FavorDial';
 
-export class EndTurnModal extends ModalBase implements StaticModalInterface {
+export class EndTurnModal extends ModalBase implements DynamicModalInterface<PlayState, undefined> {
+    private text: Konva.Text;
+    private favorDial: FavorDial;
     constructor(stage: Konva.Stage) {
         super(
             stage,
@@ -15,7 +19,7 @@ export class EndTurnModal extends ModalBase implements StaticModalInterface {
             },
         );
 
-        const text = new Konva.Text({
+        this.text = new Konva.Text({
             text: 'End your turn?',
             fill: 'white',
             fontSize: 18,
@@ -26,7 +30,32 @@ export class EndTurnModal extends ModalBase implements StaticModalInterface {
             fontFamily: 'Custom',
         });
 
-        this.contentGroup.add(text);
+        this.favorDial = new FavorDial(
+            {
+                x:this.contentGroup.width()/2 + 46,
+                y:this.contentGroup.height()/2 - 28,
+            },
+            1,
+        );
+        this.favorDial.hide();
+
+        this.contentGroup.add(this.text, this.favorDial.getElement());
+    }
+
+    public update(state: PlayState) {
+        if (Boolean(state.players.find(
+            p =>
+                p.specialist.name === SpecialistName.priest
+                && p.bearings.location === 'temple'
+                && p.color === localState.playerColor,
+        ))) {
+            const iconSpan = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
+            this.text.text(`End turn and gain${iconSpan}?`);
+            this.favorDial.show();
+        } else {
+            this.text.text('End your turn?');
+            this.favorDial.hide();
+        }
     }
 
     public show() {

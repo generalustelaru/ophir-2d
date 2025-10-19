@@ -177,6 +177,7 @@ export const CanvasService = new class extends Communicator {
                 }
                 this.sellGoodsModal.update(state);
                 this.donateGoodsModal.update(state);
+                this.endTurnModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
