@@ -11,6 +11,7 @@ import {
 } from '~/shared_types';
 
 const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
+const CLIENT_DEBUG = Boolean(process.env.CLIENT_DEBUG === 'true');
 
 // MARK: INIT
 const serverAddress = process.env.SERVER_ADDRESS;
@@ -22,10 +23,10 @@ if (!wsPort || !serverAddress)
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
 if (!PERSIST_SESSION)
-    localStorage.removeItem('persistedState');
+    localStorage.removeItem('localStateCopy');
 
 const savedState = sessionStorage.getItem('localState');
-const persistedState = localStorage.getItem('persistedState');
+const persistedState = localStorage.getItem('localStateCopy');
 const { gameId, socketId, playerColor, playerName, vp } = ((): LocalState => {
     switch (true) {
         case !!savedState: return JSON.parse(savedState);
@@ -125,7 +126,7 @@ window.addEventListener(EventType.enrolment_approval, (event: CustomEventInit<En
     sessionStorage.setItem('localState', JSON.stringify(localState));
 
     if (PERSIST_SESSION)
-        localStorage.setItem('persistedState', JSON.stringify(localState));
+        localStorage.setItem('localStateCopy', JSON.stringify(localState));
 });
 
 window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
@@ -137,7 +138,7 @@ window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTra
     sessionStorage.setItem('localState', JSON.stringify(localState));
 
     if (PERSIST_SESSION)
-        localStorage.setItem('persistedState', JSON.stringify(localState));
+        localStorage.setItem('localStateCopy', JSON.stringify(localState));
 });
 
 window.addEventListener(EventType.name_transmission, (event: CustomEventInit<NewNameTransmission>) => {
@@ -147,6 +148,9 @@ window.addEventListener(EventType.name_transmission, (event: CustomEventInit<New
     const { newName } = event.detail;
     localState.playerName = newName;
     sessionStorage.setItem('localState', JSON.stringify(localState));
+
+    if (PERSIST_SESSION)
+        localStorage.setItem('localState', JSON.stringify(localState));
 });
 
 window.addEventListener(EventType.reset, (event: CustomEventInit) => {
@@ -175,7 +179,7 @@ window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => 
         sessionStorage.setItem('localState', JSON.stringify(localState));
 
         if (PERSIST_SESSION)
-            localStorage.setItem('persistedState', JSON.stringify(localState));
+            localStorage.setItem('localStateCopy', JSON.stringify(localState));
     }
 
     debug(enrolmentState);
@@ -249,18 +253,25 @@ function debug(state: PlayState|SetupState|EnrolmentState) {
     if ('isStatusResponse' in state && state.isStatusResponse)
         return;
 
-    localStorage.setItem('sessionPhase', state.sessionPhase);
-    localStorage.setItem('received', JSON.stringify(state));
-    localStorage.setItem('client', JSON.stringify(localState));
-
-    if ('rival' in state)
-        localStorage.setItem('rival', JSON.stringify(state.rival));
-
-    ['Red', 'Green', 'Purple', 'Yellow'].forEach((playerColor) => {
+    ['_Red', '_Green', '_Purple', '_Yellow'].forEach((playerColor) => {
         localStorage.removeItem(playerColor);
     });
+    localStorage.removeItem('_sessionPhase');
+    localStorage.removeItem('_received');
+    localStorage.removeItem('_client');
+    localStorage.removeItem('_rival');
+
+    if(!CLIENT_DEBUG)
+        return;
+
+    localStorage.setItem('_sessionPhase', state.sessionPhase);
+    localStorage.setItem('_received', JSON.stringify(state));
+    localStorage.setItem('_client', JSON.stringify(localState));
+
+    if ('rival' in state)
+        localStorage.setItem('_rival', JSON.stringify(state.rival));
 
     for (const player of state.players) {
-        localStorage.setItem(player.color, JSON.stringify(player));
+        localStorage.setItem(`_${player.color}`, JSON.stringify(player));
     }
 }

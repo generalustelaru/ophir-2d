@@ -406,7 +406,12 @@ export class GameSession {
         if (!gameId || !socketId || !playerColor || !playerName)
             return lib.fail('Request data is incomplete');
 
-        const player = this.actionProcessor.getState().players.find(p => p.color === playerColor);
+        const state = this.actionProcessor.getState();
+
+        if (state.gameId != gameId)
+            return lib.fail('Game Id does not match in state');
+
+        const player = state.players.find(p => p.color === playerColor);
 
         if (!player)
             return lib.fail(`Cannot find player [${playerColor}] in state`);
