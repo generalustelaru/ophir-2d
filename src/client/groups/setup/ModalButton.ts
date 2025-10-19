@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Color, DynamicGroupInterface } from '~/client_types';
 import { Coordinates } from '~/shared_types';
-import { Button } from '../Button';
+import { Button } from '../popular';
 
 export class ModalButton extends Button implements DynamicGroupInterface<string> {
     private background: Konva.Rect;

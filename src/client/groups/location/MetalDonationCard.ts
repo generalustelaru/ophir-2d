@@ -1,9 +1,8 @@
 import Konva from 'konva';
 import { Action, Coordinates, Metal } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../ActionButton';
+import { ActionButton, VictoryPointDial } from '../popular';
 import clientConstants from '~/client_constants';
-import { VictoryPointDial } from '../VictoryPointDial';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 export class MetalDonationCard extends ActionButton implements DynamicGroupInterface<boolean> {

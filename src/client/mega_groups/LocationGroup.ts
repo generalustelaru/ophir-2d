@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from '~/client_types';
-import { MarketArea, TreasuryArea, TempleArea } from '../groups/GroupList';
+import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
 import { PlayState } from '~/shared_types';
 

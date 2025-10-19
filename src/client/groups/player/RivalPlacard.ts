@@ -5,10 +5,9 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { PlayerColor, Rival } from '~/shared_types';
-import { InfluenceDial } from '../GroupList';
-import { ShiftMarketButton } from './ShiftMarketButton';
+import { InfluenceDial } from '../popular';
+import { ShiftMarketButton, ConcludeButton } from '.';
 import clientConstants from '~/client_constants';
-import { ConcludeButton } from './ConcludeButton';
 
 const { COLOR } = clientConstants;
 

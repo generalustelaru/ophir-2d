@@ -1,8 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import { ActionButton } from '../ActionButton';
 import { Player, ClientMessage } from '~/shared_types';
-import { FavorIcon } from '../FavorIcon';
+import { ActionButton, FavorIcon } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { COLOR_PROFILES, ICON_DATA } = clientConstants;

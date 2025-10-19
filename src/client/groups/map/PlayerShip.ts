@@ -1,11 +1,11 @@
 import Konva from 'konva';
+import { Color, EventType } from '~/client_types';
 import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName } from '~/shared_types';
+import { ShipToken } from '../popular';
+import { SeaZone } from '.';
+import { Communicator } from '~/client/services/Communicator';
 import localState from '../../state';
 import clientConstants from '~/client_constants';
-import { SeaZone } from '../GroupList';
-import { ShipToken } from '../ShipToken';
-import { Color, EventType } from '~/client_types';
-import { Communicator } from '~/client/services/Communicator';
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
 

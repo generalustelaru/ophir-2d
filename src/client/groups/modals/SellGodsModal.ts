@@ -1,8 +1,9 @@
 import Konva from 'konva';
-import { ModalBase } from './ModalBase';
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState } from '~/shared_types';
-import { CoinDial, GoodsAssortment } from '../GroupList';
 import { DynamicModalInterface } from '~/client_types';
+import { CoinDial } from '../popular';
+import { GoodsAssortment } from '../location';
+import { ModalBase } from './ModalBase';
 import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;

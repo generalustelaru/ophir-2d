@@ -1,11 +1,11 @@
 import Konva from 'konva';
-import { ModalBase } from './ModalBase';
 import { MarketOffer, PlayState, MarketSlotKey, Action } from '~/shared_types';
-import { FavorDial, GoodsAssortment } from '../GroupList';
-import clientConstants from '~/client_constants';
-import { VictoryPointDial } from '../VictoryPointDial';
-import localState from '~/client/state';
 import { DynamicModalInterface } from '~/client/client_types';
+import { FavorDial, VictoryPointDial } from '../popular';
+import { GoodsAssortment } from '../location';
+import { ModalBase } from './ModalBase';
+import clientConstants from '~/client_constants';
+import localState from '~/client/state';
 
 const { ICON_DATA } = clientConstants;
 

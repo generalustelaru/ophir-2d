@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import constants from '~/client_constants';
 import { Action, Player } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../ActionButton';
+import { ActionButton } from '../popular';
+import constants from '~/client_constants';
 
 const { ICON_DATA, COLOR } = constants;
 export class ActionDial extends ActionButton implements DynamicGroupInterface<Player> {

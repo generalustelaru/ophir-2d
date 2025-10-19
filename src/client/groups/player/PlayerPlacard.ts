@@ -2,12 +2,9 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { Action, Player, PlayerColor } from '~/shared_types';
-import { FavorDial, CargoBand, CoinDial, InfluenceDial } from '../GroupList';
-import { VictoryPointDial } from '../VictoryPointDial';
+import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
+import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyGoodButton } from '.';
 import clientConstants from '~/client_constants';
-import { SpecialtyGoodButton } from './SpecialtyGoodButton';
-import { SpecialistBand } from './SpecialistBand';
-import { SpecialistCard } from './SpecialistCard';
 
 const { COLOR } = clientConstants;
 

@@ -1,9 +1,8 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import clientConstants from '~/client_constants';
-import { ActionButton } from '../ActionButton';
-import { CoinDial } from '../CoinDial';
 import { Action } from '~/shared_types';
+import { ActionButton, CoinDial } from '../popular';
+import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 

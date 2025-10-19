@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { IconLayer, DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../ActionButton';
 import { Action, LocationName, TradeGood } from '~/shared_types';
-import { EmptyLocationToken } from './EmptyLocationToken';
+import { ActionButton } from '../popular';
+import { EmptyLocationToken } from '.';
 
 type LocationTokenUpdate = {
     tradeGoodSupplies: Record<TradeGood, number>

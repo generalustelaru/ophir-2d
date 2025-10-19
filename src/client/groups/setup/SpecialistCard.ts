@@ -6,8 +6,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { Action, PlayerColor, SelectableSpecialist, SpecialistName } from '~/shared_types';
-import { ActionButton } from '../ActionButton';
-import { FavorDial } from '../FavorDial';
+import { ActionButton, FavorDial } from '../popular';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 

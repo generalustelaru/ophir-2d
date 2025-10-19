@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { ModalBase } from './ModalBase';
 import { Action } from '~/shared_types';
-import { InfluenceDial } from '../InfluenceDial';
-import clientConstants from '~/client/client_constants';
 import { DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
+import { InfluenceDial } from '../popular';
+import { ModalBase } from './ModalBase';
+import clientConstants from '~/client/client_constants';
 
 const { COLOR } = clientConstants;
 

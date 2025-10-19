@@ -1,10 +1,11 @@
 
 import Konva from 'konva';
+import { Vector2d } from 'konva/lib/types';
 import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival } from '~/shared_types';
 import { Color, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
-import { Vector2d } from 'konva/lib/types';
+import { InfluenceDial } from '../popular';
+import { LocationToken } from '.';
 import clientConstants from '~/client_constants';
-import { InfluenceDial, LocationToken } from '../GroupList';
 
 const { COLOR, ICON_DATA } = clientConstants;
 

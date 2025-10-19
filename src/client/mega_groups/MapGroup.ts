@@ -5,7 +5,7 @@ import {
 import { MegaGroupInterface, GroupLayoutData, IconLayer } from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip,
-} from '../groups/GroupList';
+} from '../groups/map';
 import localState from '../state';
 import clientConstants from '~/client_constants';
 

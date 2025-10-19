@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { Action, Coordinates } from '~/shared_types';
-import constants from '~/client_constants';
 import { DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../ActionButton';
+import { ActionButton } from '../popular';
+import constants from '~/client_constants';
 
 const { ICON_DATA, COLOR } = constants;
 

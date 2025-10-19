@@ -1,9 +1,8 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { ShipToken } from '../ShipToken';
+import { ShipToken, ActionButton } from '../popular';
 import clientConstants from '~/client_constants';
 import { Action, Coordinates, PlayerColor, PlayerEntry } from '~/shared_types';
-import { ActionButton } from '../ActionButton';
 
 const { COLOR } = clientConstants;
 

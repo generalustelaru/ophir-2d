@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { ActionButton } from '../ActionButton';
 import { Action, Coordinates, ItemName } from '~/shared_types';
+import { ActionButton } from '../popular';
 import clientConstants from '~/client_constants';
 
 

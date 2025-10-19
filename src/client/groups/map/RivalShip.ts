@@ -1,9 +1,9 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
+import { ShipToken } from '../popular';
+import { SeaZone } from '.';
 import clientConstants from '~/client_constants';
-import { ShipToken } from '../ShipToken';
-import { SeaZone } from './SeaZoneTile';
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
 

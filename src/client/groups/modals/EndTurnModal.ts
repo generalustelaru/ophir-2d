@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { ModalBase } from './ModalBase';
 import { Action, PlayState, SpecialistName } from '~/shared_types';
 import { DynamicModalInterface } from '~/client/client_types';
+import { FavorDial } from '../popular';
+import { ModalBase } from './ModalBase';
 import localState from '~/client/state';
-import { FavorDial } from '../FavorDial';
 
 export class EndTurnModal extends ModalBase implements DynamicModalInterface<PlayState, undefined> {
     private text: Konva.Text;

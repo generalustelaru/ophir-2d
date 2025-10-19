@@ -1,8 +1,9 @@
 import Konva from 'konva';
 import { Coordinates, Player } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
+import { Button } from '../popular';
 import clientConstants from '~/client_constants';
-import { Button } from '../Button';
+
 const { COLOR } = clientConstants;
 
 export class SpecialistBand extends Button implements DynamicGroupInterface<boolean> {

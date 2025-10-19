@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ClientMessage, Coordinates } from '~/shared_types';
-import { ActionButton } from '../ActionButton';
+import { ActionButton } from '../popular';
 
 export class AcceptButton extends ActionButton {
 

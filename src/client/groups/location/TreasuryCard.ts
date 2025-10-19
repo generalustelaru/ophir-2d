@@ -1,7 +1,6 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryCardUpdate } from '~/client_types';
-import { ActionButton } from '../ActionButton';
-import { CoinDial, FavorDial } from '../GroupList';
+import { ActionButton, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
 import { Coordinates, Action } from '~/shared_types';
 
