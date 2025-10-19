@@ -125,6 +125,7 @@ export type SailAttemptArgs = {
     origin: Coordinates,
     destination: MovementPayload,
     toSail: DiceSix,
+    isTempleGuard: boolean,
 }
 
 export type EventFormat<EventType, D> = {

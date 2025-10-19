@@ -78,7 +78,15 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
     public update() {}
 
     public show(data: SailAttemptArgs) {
-        this.dieSymbol.text(data.moveActions === 1 ? '!': '?') ;
+        const symbol = (()=> {
+            const guaranteeThreshold = data.isTempleGuard ? 2 : 1;
+            switch (true) {
+                case data.toSail === guaranteeThreshold : return '✓';
+                case data.moveActions === 1: return '!';
+                default: return '?';
+            }
+        })();
+        this.dieSymbol.text(symbol) ;
         this.ownerDieFace.fill(COLOR[data.playerColor]);
         this.toSailDial.update(data.toSail);
 

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival } from '~/shared_types';
+import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName } from '~/shared_types';
 import localState from '../../state';
 import clientConstants from '~/client_constants';
 import { SeaZone } from '../GroupList';
@@ -164,6 +164,7 @@ export class PlayerShip extends Communicator {
                                     position: { x: this.group.x(), y: this.group.y() },
                                 },
                                 toSail: this.toSailValue,
+                                isTempleGuard: player.specialist.name === SpecialistName.temple_guard,
                             },
                         });
                         // TODO: Make coords-reset actionable from modal (when canceling attempt)
