@@ -99,6 +99,7 @@ export const UserInterface = new class extends Communicator {
         this.resetButton.disable();
         this.forceTurnButton.disable();
         this.chatSendButton.disable();
+        this.chatInput.disable();
     }
 
     public updateAsEnrolment(state: EnrolmentState): void {
