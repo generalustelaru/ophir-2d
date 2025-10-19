@@ -92,20 +92,7 @@ window.addEventListener(EventType.timeout, () => {
     UserInterface.disable();
     CanvasService.disable();
     UserInterface.setInfo('Trying to reconnect...');
-    setInterval(() => {
-        fetch(
-            '/probe',
-        ).then(
-            (res) => {
-                if (res.status === 200) {
-                    alert('Connection restored.');
-                    window.location.reload();
-                }
-            },
-        ).catch(
-            err => console.log('Failed to reconnect',{ err }),
-        );
-    },5000);
+    probe(5);
 });
 
 window.addEventListener(EventType.close, () => {
@@ -114,6 +101,7 @@ window.addEventListener(EventType.close, () => {
     UserInterface.disable();
     CanvasService.disable();
     UserInterface.setInfo('The server has entered maintenance.');
+    probe(60);
 });
 
 window.addEventListener(EventType.identification, (event: CustomEventInit<ClientIdResponse>) => {
@@ -234,6 +222,26 @@ CommunicationService.createConnection(wsAddress);
 function signalError(message?: string) {
     console.error(message || 'An error occurred');
     alert(message || 'An error occurred');
+}
+
+function probe(intervalSeconds: number) {
+    const milliseconds = intervalSeconds * 1000;
+
+    setInterval(() => {
+        fetch(
+            '/probe',
+        ).then(
+            (res) => {
+                if (res.status === 200) {
+                    alert('Connection restored.');
+                    window.location.reload();
+                }
+            },
+        ).catch(
+            err => console.log('Failed to reconnect',{ err }),
+        );
+    },
+    milliseconds);
 }
 
 // Debugging
