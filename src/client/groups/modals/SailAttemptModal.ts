@@ -79,10 +79,9 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
 
     public show(data: SailAttemptArgs) {
         const symbol = (()=> {
-            const guaranteeThreshold = data.isTempleGuard ? 2 : 1;
             switch (true) {
-                case data.toSail <= guaranteeThreshold : return '✓';
-                case data.moveActions === 1: return '!';
+                case data.toSail <= (data.isTempleGuard ? 2 : 1) : return '✓';
+                case data.moveActions === 1: return (data.toSail > 4 ? '!!' : '!');
                 default: return '?';
             }
         })();
