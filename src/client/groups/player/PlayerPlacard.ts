@@ -74,8 +74,8 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
 
         this.influenceDial = new InfluenceDial(
             { x: -55, y: 25 },
-            COLOR[player.color]);
-        this.influenceDial.update(player.influence);
+            COLOR[`dark${player.color}`]);
+        this.influenceDial.update({ value: player.influence, color: COLOR[`dark${player.color}`] });
 
         this.group.add(
             this.background,
@@ -125,7 +125,7 @@ export class PlayerPlacard implements DynamicGroupInterface<Player> {
         this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
-        this.influenceDial.update(influence);
+        this.influenceDial.update({ value: influence, color: COLOR[`${isActive ? '' : 'dark'}${color}`] });
         this.specialistBand.update(isActive);
         this.specialistCard.update(name);
         this.specialtyGoodButton.update(!!(

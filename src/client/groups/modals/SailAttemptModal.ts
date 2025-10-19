@@ -87,7 +87,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
         })();
         this.dieSymbol.text(symbol) ;
         this.ownerDieFace.fill(COLOR[data.playerColor]);
-        this.toSailDial.update(data.toSail);
+        this.toSailDial.update({ value: data.toSail, color: null });
 
         this.open({ action: Action.move, payload: data.destination });
     }

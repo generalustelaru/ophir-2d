@@ -135,7 +135,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     }
 
     public setToHitValue(value: DiceSix|false): void {
-        this.influenceDial.update(value);
+        this.influenceDial.update({ value, color: null });
     }
 
     public isIntersecting(vector: Vector2d|null): boolean {

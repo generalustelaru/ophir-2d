@@ -5,7 +5,11 @@ import { Color, DynamicGroupInterface } from '~/client_types';
 
 type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null }
 type PipData = Array<PipDataElement>
-export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
+type InfluenceDialUpdate = {
+    value: DiceSix|false,
+    color: Color|null
+}
+export class InfluenceDial implements DynamicGroupInterface<InfluenceDialUpdate> {
     private group: Konva.Group;
     private body: Konva.Rect;
     private dotMatrix: PipData;
@@ -55,14 +59,15 @@ export class InfluenceDial implements DynamicGroupInterface<DiceSix|false> {
         this.group.hide();
     }
 
-    public update(value: DiceSix|false): void {
+    public update(data: InfluenceDialUpdate): void {
+        const { value, color } = data;
 
         if (value === false) {
             this.group.hide();
         } else {
-            const length = this.dotMatrix.length;
+            color && this.body.fill(color);
 
-            for (let i = 0; i < length; i++) {
+            for (let i = 0; i < this.dotMatrix.length; i++) {
                 const dot = this.dotMatrix[i];
 
                 if (dot.included.includes(value)) {
