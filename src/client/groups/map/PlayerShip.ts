@@ -85,6 +85,7 @@ export class PlayerShip extends Communicator {
         // MARK: - Dragging (move)
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
+            this.toSailValue = false;
             const player = this.players.find(player => player.color === playerColor);
             const position = stage.getPointerPosition();
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
@@ -151,7 +152,7 @@ export class PlayerShip extends Communicator {
                 case targetZone && this.isDestinationValid:
                     targetZone.setFill(COLOR.activeHex);
 
-                    if (this.toSailValue) {
+                    if (this.toSailValue && !player.privilegedSailing) {
                         this.createEvent({
                             type: EventType.sail_attempt,
                             detail: {
