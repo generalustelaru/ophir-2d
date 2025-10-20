@@ -28,9 +28,9 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
     ) {
         this.localPlayerColor = localPlayerColor,
         this.group = new Konva.Group({
-            width: 100,
+            width: 250,
             height: 100,
-            x: 50,
+            x: 25,
             y: yOffset,
         });
 
@@ -38,18 +38,17 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
             width: this.group.width(),
             height: this.group.height(),
             stroke: COLOR.boneWhite,
-            fill: COLOR.boneWhite,
-            cornerRadius: 15,
+            cornerRadius: 5,
             strokeWidth: 0,
         });
 
         this.influenceDial = new InfluenceDial(
-            { x: -80, y: 25 },
+            { x: -55, y: 25 },
             COLOR.boneWhite,
         );
 
         this.shiftMarketButton = new ShiftMarketButton(stage, { x: 25, y: 10 });
-        this.concludeButton = new ConcludeButton(stage, { x: this.group.width() + 25, y: 25 });
+        this.concludeButton = new ConcludeButton(stage, { x: 100, y: 25 });
 
         this.group.add(...[
             this.background,
@@ -74,7 +73,7 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
         const mayConclude = this.localPlayerColor === activePlayerColor && isControllable && moves < 2;
         const mayShift = bearings.location === 'market' && mayConclude;
 
-        activePlayerColor && this.background.fill(isControllable ? COLOR[activePlayerColor] : COLOR.boneWhite);
+        activePlayerColor && this.background.stroke(isControllable ? COLOR[activePlayerColor] : COLOR.boneWhite);
         this.background.strokeWidth(isControllable ? 3 : 0);
         this.influenceDial.update({ value: influence, color: null });
         this.concludeButton.update({ isControllable, mayConclude });
