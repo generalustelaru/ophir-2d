@@ -211,7 +211,7 @@ export class SetupProcessor implements SessionProcessor {
                     templeTradeSlot: this.determineTempleTradeSlot(),
                 },
                 rival: this.getRivalShipData(
-                    Boolean(playerSelections.length == 2),
+                    Boolean(playerSelections.length < 3),
                     clientSetupPayload.hexPositions,
                     setupState.setup.mapPairings,
                     startingPlayerColor,
