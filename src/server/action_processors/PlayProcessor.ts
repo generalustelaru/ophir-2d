@@ -89,7 +89,7 @@ export class PlayProcessor implements SessionProcessor {
 
         if (isRivalShip) {
             const mayMoveRival = lib.checkConditions([
-                player.handlesRival(),
+                player.isFrozen(),
                 this.playState.rivalHasMoves(),
                 this.playState.isRivalDestinationValid(target),
             ]);
@@ -114,7 +114,7 @@ export class PlayProcessor implements SessionProcessor {
 
         const playerMovementAllowed = lib.checkConditions([
             player.getMoves() > 0,
-            false === player.handlesRival(),
+            false === player.isFrozen(),
             playerMovementLegal || navigatorMevementLegal,
         ]);
 
@@ -659,11 +659,17 @@ export class PlayProcessor implements SessionProcessor {
 
         const rival = this.playState.getRivalData();
 
-        if (!rival.isIncluded || !rival.isControllable)
-            return lib.fail('Rival is not active!');
+        if (!rival.isIncluded)
+            return lib.fail('Rival is not in the game!');
 
-        if (rival.moves === 2)
-            return lib.fail('Rival cannot act before moving');
+        const mayConclude = lib.checkConditions([
+            rival.isControllable,
+            rival.moves < 2,
+            player.isFrozen(),
+        ]);
+
+        if (mayConclude.err)
+            return lib.fail('Player cannot conclude rival turn');
 
         this.playState.concludeRivalTurn();
 
