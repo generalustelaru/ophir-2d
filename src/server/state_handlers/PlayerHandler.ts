@@ -278,7 +278,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public isAnchored(){
-        return this._isAnchored.get() && !this.handlesRival();
+        return this._isAnchored.get() && !this.isFrozen();
     }
 
     public setCargo(cargo: Array<ItemName>) {
@@ -323,10 +323,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
 
     public clearActions() {
         this.localActions.clear();
-    }
-
-    public handlesRival() {
-        return this.isHandlingRival.get();
     }
 
     public enableUndo() {
