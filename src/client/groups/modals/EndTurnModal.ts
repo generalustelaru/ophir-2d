@@ -43,15 +43,14 @@ export class EndTurnModal extends ModalBase implements DynamicModalInterface<Pla
     }
 
     public update(state: PlayState) {
-        if (Boolean(state.players.find(
-            p =>
-                p.specialist.name === SpecialistName.priest
-                && p.bearings.location === 'temple'
-                && p.color === localState.playerColor
-                && p.favor < 6,
-        ))) {
-            const iconSpan = '\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0';
-            this.text.text(`End turn and gain${iconSpan}?`);
+        const localPlayer = state.players.find(p => p.color === localState.playerColor);
+
+        if (
+            localPlayer?.specialist.name === SpecialistName.priest
+            && localPlayer.bearings.location === 'temple'
+            && localPlayer.favor < 6
+        ) {
+            this.text.text(`End turn and gain${'\u00A0'.repeat(13)}?`);
             this.favorDial.show();
         } else {
             this.text.text('End your turn?');
