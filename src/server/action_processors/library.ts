@@ -12,7 +12,7 @@ function fail<T>(message: string): Probable<T> {
 
 function checkConditions(arr: Array<boolean>): Probable<true> {
     if (arr.includes(false))
-        return fail('');
+        return fail('Condition failed');
     return pass(true);
 }
 
