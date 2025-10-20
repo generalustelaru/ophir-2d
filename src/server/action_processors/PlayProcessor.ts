@@ -674,8 +674,9 @@ export class PlayProcessor implements SessionProcessor {
             rival.bearings.seaZone,
         );
 
+        this.wipeState(player);
+
         if (isShiftingMarket) {
-            this.wipeState(player);
             if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
                 return lib.fail('Cannot shift market from here!');
 
