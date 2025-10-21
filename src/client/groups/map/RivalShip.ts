@@ -70,8 +70,8 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
             for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
-                seaZone.setRestricted(false);
-                seaZone.setToHitValue(false);
+                // seaZone.setRestricted(false);
+                // seaZone.setToHitValue(false);
                 seaZone.setFill(this.currentZone === seaZone.getId()
                     ? COLOR.activeHex
                     : COLOR.defaultHex,
@@ -87,7 +87,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                     this.isDestinationValid = true;
                     break;
                 default:
-                    targetZone.setRestricted(true);
+                    targetZone.setRestricted();
                     targetZone.setFill(COLOR.illegal);
             }
         });
@@ -96,8 +96,8 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
             for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
-                seaZone.setRestricted(false);
-                seaZone.setToHitValue(false);
+                // seaZone.setRestricted(false);
+                // seaZone.setToHitValue(false);
                 seaZone.setFill(COLOR.defaultHex);
             }
 

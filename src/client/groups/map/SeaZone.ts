@@ -24,13 +24,14 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     private location: LocationToken;
     private restrictedIcon: Konva.Path;
     private influenceDial: InfluenceDial;
+    private staticFill: Color;
 
     constructor(
         stage: Konva.Stage,
         center: Coordinates,
         name: ZoneName,
-        offsetX:number,
-        offsetY:number,
+        offsetX: number,
+        offsetY: number,
         island: IslandData,
         locationId: LocationName,
         iconData: IconLayer,
@@ -47,6 +48,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
             id: name,
         });
 
+        this.staticFill = fill;
         this.hexagon = new Konva.RegularPolygon({
             sides: 6,
             radius: 100,
@@ -88,28 +90,51 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
 
     update(update: SeaZoneUpdate): void {
         const localPlayer = update.player;
-        const canAct = (
-            localPlayer?.bearings.seaZone === this.getId()
-            && localPlayer.isActive
-            && !!localPlayer.locationActions.length
+        this.saveFill(COLOR.defaultHex);
+
+        if (!localPlayer || !localPlayer.isActive)
+            return;
+
+        if (
+            // local player is here and may perform actions
+            localPlayer.bearings.seaZone == this.getId()
             && localPlayer.isAnchored
-            && !localPlayer.isHandlingRival
-        );
+            && localPlayer.locationActions.length
+        ) {
+            this.saveFill(COLOR.navigatorAccess);
+        } else if (
+            // local player may still move and is able to enter this zone
+            localPlayer.moveActions > 0
+            && (
+                localPlayer.destinations.includes(this.getId())
+                || localPlayer.navigatorAccess.includes(this.getId())
+            )
+        ) {
+            this.saveFill(COLOR.activeHex);
+        }
 
-        const rival = update.rival;
-        const canRivalAct = (
-            rival.isIncluded
-            && rival.isControllable
-            && rival.bearings.seaZone === this.getId()
-        );
-
-        this.setFill(canAct || canRivalAct ? COLOR.activeHex : COLOR.defaultHex);
+        // if (
+        //     (
+        //         // local player is here and may perform actions
+        //         localPlayer.bearings.seaZone == this.getId()
+        //         && localPlayer.isAnchored
+        //         && localPlayer.locationActions.length
+        //     ) || (
+        //         // local player may still move and is able to enter this zone
+        //         localPlayer.moveActions > 0
+        //         && (
+        //             localPlayer.destinations.includes(this.getId())
+        //             || localPlayer.navigatorAccess.includes(this.getId())
+        //         )
+        //     )
+        // ) {
+        //     this.saveFill(COLOR.activeHex);
+        // }
 
         this.location.update({
             tradeGoodSupplies: update.itemSupplies.goods,
             mayPickup: (
-                canAct
-                && !!localPlayer.locationActions.includes(Action.load_good)
+                localPlayer.locationActions.includes(Action.load_good)
                 && localPlayer.cargo.includes('empty')
             ),
             templeIcon: update.templeIcon,
@@ -126,25 +151,53 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     public getTokenId(): LocationName {
         return this.location.getId();
     }
+
+
     public setFill(color: Color): void {
         this.hexagon.fill(color);
     }
-    public setRestricted(how: boolean): void {
-        //TODO: implement multiple states and control the details from here (icon and fill)
-        this.restrictedIcon.visible(how);
-        this.setFill(how ? COLOR.emptyHex : COLOR.emptyHex);
+
+    public setValid(): void {
+        this.hexagon.fill(COLOR.validHex);
     }
 
-    public setToHitValue(value: DiceSix|false): void {
-        this.influenceDial.update({ value, color: null });
+    public setRollDependant(value: DiceSix): void {
+        this.setToHitValue(value);
     }
 
-    public isIntersecting(vector: Vector2d|null): boolean {
+    public setValidForNavigator(): void {
+        this.hexagon.fill(COLOR.navigatorAccess);
+    }
+
+    public setRestricted(): void {
+        this.restrictedIcon.visible(true);
+        this.setFill(COLOR.illegal);
+        // this.saveFill(how ? COLOR.emptyHex : COLOR.emptyHex);
+    }
+
+    public resetFill(): void {
+        this.hexagon.fill(this.staticFill);
+        this.restrictedIcon.visible(false);
+        this.setToHitValue(false);
+    }
+
+
+
+    public isIntersecting(vector: Vector2d | null): boolean {
         if (!vector) {
             return false;
         }
 
         return this.hexagon.intersects(vector);
+    }
+
+    private saveFill(color: Color): void {
+        this.hexagon.fill(color);
+        this.staticFill = color;
+    }
+
+    private setToHitValue(value: DiceSix | false): void {
+        this.influenceDial.update({ value, color: null });
     }
 }
 

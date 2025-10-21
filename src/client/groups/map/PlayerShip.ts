@@ -96,32 +96,27 @@ export class PlayerShip extends Communicator {
 
             for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
-                seaZone.setRestricted(false);
-                seaZone.setToHitValue(false);
-                seaZone.setFill(player.bearings.seaZone === seaZone.getId() && player.locationActions
-                    ? COLOR.activeHex
-                    : COLOR.defaultHex,
-                );
+                seaZone.resetFill();
             }
 
             switch (true) {
                 case targetZone.getId() === player.bearings.seaZone:
-                    targetZone.setFill(player.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 case player.moveActions && player.destinations.includes(targetZone.getId()):
-                    targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
                     this.toSailValue = this.calculateToSailValue(targetZone.getId());
-                    targetZone.setToHitValue(player.privilegedSailing ? false : this.toSailValue );
+
+                    if (player.privilegedSailing || !this.toSailValue)
+                        targetZone.setValid();
+                    else
+                        targetZone.setRollDependant(this.toSailValue);
                     break;
                 case player.moveActions && player.navigatorAccess.includes(targetZone.getId()):
-                    targetZone.setFill(COLOR.navigatorAccess);
+                    targetZone.setValidForNavigator();
                     this.isDestinationValid = true;
-                    targetZone.setToHitValue(false);
                     break;
                 default:
-                    targetZone.setRestricted(true);
-                    targetZone.setFill(COLOR.illegal);
+                    targetZone.setRestricted();
             }
         });
 
@@ -130,9 +125,7 @@ export class PlayerShip extends Communicator {
 
             for (let i = 0; i < SEA_ZONE_COUNT; i++) {
                 const seaZone = this.seaZones[i];
-                seaZone.setRestricted(false);
-                seaZone.setToHitValue(false);
-                seaZone.setFill(COLOR.defaultHex);
+                seaZone.resetFill();
             }
 
             const player = this.players.find(player => player.color === playerColor);
@@ -150,7 +143,6 @@ export class PlayerShip extends Communicator {
 
             switch (true) {
                 case targetZone && this.isDestinationValid:
-                    targetZone.setFill(COLOR.activeHex);
 
                     if (this.toSailValue && !player.privilegedSailing) {
                         this.createEvent({
@@ -194,12 +186,11 @@ export class PlayerShip extends Communicator {
                             },
                         },
                     });
-                    departureZone.setFill(player?.locationActions.length ? COLOR.activeHex : COLOR.defaultHex);
                     break;
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
-                    departureZone.setFill(player?.locationActions.length ? COLOR.activeHex: COLOR.defaultHex);
+                    departureZone.resetFill();
             }
         });
         this.group.add(this.ship.getElement());
