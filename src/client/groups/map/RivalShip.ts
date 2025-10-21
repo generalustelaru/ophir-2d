@@ -55,11 +55,11 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
             stage.container().style.cursor = 'default';
         });
 
-        // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
+        // MARK: - MOVE
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
             const position = stage.getPointerPosition();
@@ -68,38 +68,25 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
             if (!position || !targetZone)
                 return;
 
-            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
-                const seaZone = this.seaZones[i];
-                // seaZone.setRestricted(false);
-                // seaZone.setToHitValue(false);
-                seaZone.setFill(this.currentZone === seaZone.getId()
-                    ? COLOR.activeHex
-                    : COLOR.defaultHex,
-                );
-            }
+            for (let i = 0; i < SEA_ZONE_COUNT; i++)
+                this.seaZones[i].resetFill();
 
             switch (true) {
                 case targetZone.getId() === this.currentZone:
-                    targetZone.setFill(COLOR.activeHex);
                     break;
                 case this.movesLeft && this.destinations.includes(targetZone.getId()):
-                    targetZone.setFill(COLOR.validHex);
                     this.isDestinationValid = true;
+                    targetZone.setValid();
                     break;
                 default:
                     targetZone.setRestricted();
-                    targetZone.setFill(COLOR.illegal);
             }
         });
-
+        // MARK: - END
         this.group.on('dragend', () => {
 
-            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
-                const seaZone = this.seaZones[i];
-                // seaZone.setRestricted(false);
-                // seaZone.setToHitValue(false);
-                seaZone.setFill(COLOR.defaultHex);
-            }
+            for (let i = 0; i < SEA_ZONE_COUNT; i++)
+                this.seaZones[i].resetFill();
 
             const position = stage.getPointerPosition();
             const departureZone = this.seaZones.find(hex => hex.getId() === this.currentZone);
@@ -126,12 +113,11 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                             repositioning: { x: this.group.x(), y: this.group.y() },
                         },
                     });
-                    departureZone.setFill( COLOR.activeHex);
                     break;
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
-                    departureZone.setFill(COLOR.activeHex);
+                    departureZone.resetFill();
             }
         });
 

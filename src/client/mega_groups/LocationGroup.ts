@@ -33,7 +33,6 @@ export class LocationGroup implements MegaGroupInterface {
 
     public drawElements(state: PlayState): void {
         const setup = state.setup;
-        const localPlayer = state.players.find(player => player.color === localState.playerColor) || null;
 
         if (!setup) {
             throw new Error('State is missing setup data.');
@@ -63,7 +62,6 @@ export class LocationGroup implements MegaGroupInterface {
                 x: 0,
                 y: this.marketArea.getElement().height(),
             },
-            { localPlayer: localPlayer, tier: state.temple.treasury, metalSupplies: state.itemSupplies.metals },
         );
 
         this.templeArea = new TempleArea(

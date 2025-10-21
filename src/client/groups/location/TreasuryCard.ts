@@ -2,26 +2,29 @@ import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryCardUpdate } from '~/client_types';
 import { ActionButton, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
-import { Coordinates, Action } from '~/shared_types';
+import { Coordinates, Action, MetalPurchasePayload, Metal, Currency } from '~/shared_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
 export class TreasuryCard extends ActionButton implements DynamicGroupInterface<TreasuryCardUpdate> {
     private background: Konva.Rect;
     private currencyDial: CoinDial | FavorDial;
+    private metalType: Metal;
+    private currencyType: Currency;
 
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        update: TreasuryCardUpdate,
+        payload: MetalPurchasePayload,
     ) {
         super(
             stage,
             { width: 66, height: 96, x: position.x, y: position.y },
-            {
-                action: Action.buy_metals,
-                payload: { metal: update.treasury.metal, currency: update.treasury.currency },
-            });
+            { action: Action.buy_metals, payload },
+        );
+
+        this.metalType = payload.metal;
+        this.currencyType = payload.currency;
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -32,13 +35,13 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
             cornerRadius: 15,
         });
 
-        this.currencyDial = update.treasury.currency === 'coins'
-            ? new CoinDial({ x: this.group.width() / 2, y: 32 }, update.treasury.price)
-            : new FavorDial({ x: 7, y: 7 }, update.treasury.price);
+        this.currencyDial = payload.currency === 'coins'
+            ? new CoinDial({ x: this.group.width() / 2, y: 32 }, 0)
+            : new FavorDial({ x: 7, y: 7 }, 0);
 
         const metalIcon = new Konva.Path({
-            data: CARGO_ITEM_DATA[update.treasury.metal].shape,
-            fill: CARGO_ITEM_DATA[update.treasury.metal].fill,
+            data: CARGO_ITEM_DATA[payload.metal].shape,
+            fill: CARGO_ITEM_DATA[payload.metal].fill,
             x: 1,
             y: 60,
             scaleX: 2.75,
@@ -56,11 +59,11 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
         return this.group;
     }
     public update(data: TreasuryCardUpdate): void {
-        this.currencyDial.update(data.treasury.price);
-        const isFeasible = (data.playerAmounts && data.treasury.supply
-            ? data.treasury.price <= data.playerAmounts[data.treasury.currency]
-            : false
-        );
+        this.currencyDial.update(data.price[this.currencyType]);
+        const isFeasible = Boolean(data.feasiblePurchases.find(
+            req => req.metal == this.metalType && req.currency == this.currencyType,
+        ));
+
         this.setEnabled(isFeasible);
         this.background.fill(isFeasible ? COLOR.treasuryGold : COLOR.treasuryDarkGold);
     }

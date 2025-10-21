@@ -1,8 +1,8 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocalAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
-    Specialist, SpecialistName,
+    Specialist, SpecialistName, MetalPurchasePayload,
 } from '~/shared_types';
-import { ObjectHandler, PlayerIdentity } from '~/server_types';
+import { ActionsAndDetails, ObjectHandler, PlayerIdentity } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 const MAX_FAVOR = 6;
@@ -30,6 +30,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private navigatorAccess: ArrayWritable<ZoneName>;
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<MarketSlotKey>;
+    private feasiblePurchases: ArrayWritable<MetalPurchasePayload>;
     private coins: Writable<number>;
     private turnPurchases: Writable<number>;
 
@@ -56,6 +57,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.navigatorAccess = arrayWritable(player.navigatorAccess);
         this.cargo = arrayWritable(player.cargo);
         this.feasibleTrades = arrayWritable(player.feasibleTrades);
+        this.feasiblePurchases = arrayWritable(player.feasiblePurchases);
         this.coins = writable(player.coins);
         this.turnPurchases = writable(player.turnPurchases);
     }
@@ -84,6 +86,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             navigatorAccess: this.navigatorAccess.get(),
             cargo: this.cargo.get(),
             feasibleTrades: this.feasibleTrades.get(),
+            feasiblePurchases: this.feasiblePurchases.get(),
             coins: this.coins.get(),
             turnPurchases: this.turnPurchases.get(),
         };
@@ -137,9 +140,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.navigatorAccess.overwrite(options);
     }
 
-    public setActions(actions: Array<LocalAction>) {
+    public setActionsAndDetails(data: ActionsAndDetails) {
+        this.localActions.overwrite(data.actions);
+        this.feasibleTrades.overwrite(data.trades);
+        this.feasiblePurchases.overwrite(data.purchases);
+    }
+
+    public anchorShip() {
         this._isAnchored.set(true);
-        this.localActions.overwrite(actions);
     }
 
     public appendActions(actions: Array<LocalAction>) {
@@ -254,6 +262,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return (this.hasAction(Action.buy_metals) && this.hasCargoRoom(2) && this.turnPurchases.get() < 2);
     }
 
+    public hasPurchaseAllowance() {
+        return this.turnPurchases.get() < 2;
+    }
+
     public canDonateMetal(metal: CargoMetal) {
         return (this.hasAction(Action.donate_metals) && this.cargo.includes(metal));
     }
@@ -278,7 +290,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public isAnchored(){
-        return this._isAnchored.get() && !this.isFrozen();
+        return this._isAnchored.get();
     }
 
     public setCargo(cargo: Array<ItemName>) {
@@ -321,10 +333,6 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.localActions.get();
     }
 
-    public clearActions() {
-        this.localActions.clear();
-    }
-
     public enableUndo() {
         this._mayUndo.set(true);
     }
@@ -342,10 +350,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.localActions.clear();
     }
 
-    public unfreeze(actions: Array<LocalAction>, rivalZone: ZoneName) {
-        this.isHandlingRival.set(false);
-        this.localActions.overwrite(actions);
+    public unfreeze(actionData: ActionsAndDetails, rivalZone: ZoneName) {
+        this.setActionsAndDetails(actionData);
         this.destinations.removeOne(rivalZone);
+        this.isHandlingRival.set(false);
     }
 
     public isFrozen() {
@@ -376,13 +384,13 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.overnightZone.set(this.getBearings().seaZone);
     }
 
-    // MARK: PRIVATE
-
-    private hasCargoRoom(req: 1 | 2): boolean {
+    public hasCargoRoom(req: 1 | 2): boolean {
         const emptySlots = this.getCargo().filter(
             item => item === 'empty',
         ).length;
 
         return (emptySlots >= req);
     }
+
+    // MARK: PRIVATE
 }

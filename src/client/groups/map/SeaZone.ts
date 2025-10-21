@@ -10,7 +10,7 @@ import clientConstants from '~/client_constants';
 const { COLOR, ICON_DATA } = clientConstants;
 
 type SeaZoneUpdate = {
-    player: Player | null,
+    localPlayer: Player | null,
     rival: Rival,
     templeIcon: IconLayer | null,
     itemSupplies: ItemSupplies,
@@ -89,56 +89,69 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     }
 
     update(update: SeaZoneUpdate): void {
-        const localPlayer = update.player;
+        const { localPlayer, rival } = update;
         this.saveFill(COLOR.defaultHex);
 
         if (!localPlayer || !localPlayer.isActive)
             return;
 
+        if (localPlayer.isHandlingRival) {
+            this.updateForRival(rival);
+        } else {
+            this.updateForPlayer(localPlayer);
+        }
+
+        this.location.update({
+            tradeGoodSupplies: update.itemSupplies.goods,
+            mayPickup: (
+                localPlayer.bearings.seaZone == this.getId()
+                && localPlayer.locationActions.includes(Action.load_good)
+            ),
+            templeIcon: update.templeIcon,
+        });
+    }
+
+    private updateForRival(rival: Rival) {
+
+        if (!rival.isIncluded)
+            return;
+
+        const { bearings, moves, destinations } = rival;
+
         if (
-            // local player is here and may perform actions
+            bearings.seaZone == this.getId()
+            && bearings.location == 'market'
+            && moves < 2
+        ) {
+            // rival is here and may shift the market
+            this.saveFill(COLOR.navigatorAccess);
+        } else if (
+            destinations.includes(this.getId())
+            && moves > 0
+        ) {
+            // local player may still move and is able to enter this zone
+            this.saveFill(COLOR.activeHex);
+        }
+    }
+
+    private updateForPlayer(localPlayer: Player) {
+        if (
             localPlayer.bearings.seaZone == this.getId()
             && localPlayer.isAnchored
             && localPlayer.locationActions.length
         ) {
+            // local player is here and may perform actions
             this.saveFill(COLOR.navigatorAccess);
         } else if (
-            // local player may still move and is able to enter this zone
             localPlayer.moveActions > 0
             && (
                 localPlayer.destinations.includes(this.getId())
                 || localPlayer.navigatorAccess.includes(this.getId())
             )
         ) {
+            // local player may still move and is able to enter this zone
             this.saveFill(COLOR.activeHex);
         }
-
-        // if (
-        //     (
-        //         // local player is here and may perform actions
-        //         localPlayer.bearings.seaZone == this.getId()
-        //         && localPlayer.isAnchored
-        //         && localPlayer.locationActions.length
-        //     ) || (
-        //         // local player may still move and is able to enter this zone
-        //         localPlayer.moveActions > 0
-        //         && (
-        //             localPlayer.destinations.includes(this.getId())
-        //             || localPlayer.navigatorAccess.includes(this.getId())
-        //         )
-        //     )
-        // ) {
-        //     this.saveFill(COLOR.activeHex);
-        // }
-
-        this.location.update({
-            tradeGoodSupplies: update.itemSupplies.goods,
-            mayPickup: (
-                localPlayer.locationActions.includes(Action.load_good)
-                && localPlayer.cargo.includes('empty')
-            ),
-            templeIcon: update.templeIcon,
-        });
     }
 
     public getElement(): Konva.Group {

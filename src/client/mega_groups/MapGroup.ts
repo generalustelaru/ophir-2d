@@ -70,7 +70,7 @@ export class MapGroup implements MegaGroupInterface {
 
         for (const zone of this.seaZones) {
             zone.update({
-                player: null,
+                localPlayer: null,
                 rival: state.rival,
                 templeIcon: this.getIconData(zone.getTokenId(), state),
                 itemSupplies: state.itemSupplies,
@@ -186,7 +186,7 @@ export class MapGroup implements MegaGroupInterface {
 
         for (const zone of this.seaZones) {
             zone.update({
-                player: localPlayer || null,
+                localPlayer: localPlayer || null,
                 rival: state.rival,
                 templeIcon: this.getIconData(zone.getTokenId(), state),
                 itemSupplies: state.itemSupplies,
@@ -223,6 +223,7 @@ export class MapGroup implements MegaGroupInterface {
         this.favorButton?.disable();
     }
 
+    // MARK: SETUP
     public createSetupPayload(): GameSetupPayload {
         const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
 
@@ -248,6 +249,7 @@ export class MapGroup implements MegaGroupInterface {
         };
     }
 
+    // MARK: PRIVATE
     private getIconData(locationName: LocationName, state: PlayState | SetupState): IconLayer {
 
         if (locationName != 'temple' || state.sessionPhase === Phase.setup)

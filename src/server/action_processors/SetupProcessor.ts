@@ -372,6 +372,7 @@ export class SetupProcessor implements SessionProcessor {
                 navigatorAccess: [],
                 cargo: ['empty', 'empty'],
                 feasibleTrades: [],
+                feasiblePurchases: [],
                 coins: 0,
                 turnPurchases: 0,
             };

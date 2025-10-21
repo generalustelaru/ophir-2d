@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { Action, ItemName } from '~/shared_types';
+import { Action } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
@@ -18,7 +18,6 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        update: TreasuryUpdate,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -35,68 +34,31 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
             visible: false,
         });
 
-        const playerAmounts = update.localPlayer && {
-            coins: update.localPlayer.coins,
-            favor: update.localPlayer.favor,
-        };
-
         const leftmargin = 10;
         const cardWidth = 66;
 
         this.goldForFavorCard = new TreasuryCard(
             stage,
             { x: 0, y: 0 },
-            {
-                playerAmounts,
-                treasury: {
-                    currency: 'favor',
-                    price: update.tier.goldCost.favor,
-                    metal: 'gold',
-                    supply: update.metalSupplies.gold,
-                },
-            },
+            { currency: 'favor', metal: 'gold' },
         );
 
         this.silverForFavorCard = new TreasuryCard(
             stage,
             { x: cardWidth + leftmargin, y: 0 },
-            {
-                playerAmounts,
-                treasury: {
-                    currency: 'favor',
-                    price: update.tier.silverCost.favor,
-                    metal: 'silver',
-                    supply: update.metalSupplies.silver,
-                },
-            },
+            { currency: 'favor', metal: 'silver' },
         );
 
         this.goldForCoinsCard = new TreasuryCard(
             stage,
             { x: cardWidth * 2 + leftmargin * 2, y: 0 },
-            {
-                playerAmounts,
-                treasury: {
-                    currency: 'coins',
-                    price: update.tier.goldCost.coins,
-                    metal: 'gold',
-                    supply: update.metalSupplies.gold,
-                },
-            },
+            { currency: 'coins', metal: 'gold' },
         );
 
         this.silverForCoinsCard = new TreasuryCard(
             stage,
             { x: cardWidth * 3 + leftmargin * 3, y: 0 },
-            {
-                playerAmounts,
-                treasury: {
-                    currency: 'coins',
-                    price: update.tier.silverCost.coins,
-                    metal: 'silver',
-                    supply: update.metalSupplies.silver,
-                },
-            },
+            { currency: 'coins', metal: 'silver' },
         );
 
         this.group.add(
@@ -109,65 +71,35 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
     }
 
     public update(update: TreasuryUpdate): void {
-        const { localPlayer } = update;
-        const playerCanAct = (
+        const { localPlayer, tier, metalSupplies } = update;
+        const feasiblePurchases =
             localPlayer?.locationActions.includes(Action.buy_metals)
-            && localPlayer.turnPurchases < 2
-            && localPlayer.isAnchored
-            && this.hasCargoRoom(localPlayer.cargo)
-        );
-
-        const playerAmounts = playerCanAct ? {
-            coins: localPlayer!.coins,
-            favor: localPlayer!.favor,
-        } : null;
+            && localPlayer.feasiblePurchases || [];
 
         this.goldForFavorCard.update({
-            playerAmounts,
-            treasury: {
-                currency: 'favor',
-                price: update.tier.goldCost.favor,
-                metal: 'gold',
-                supply: update.metalSupplies.gold,
-            },
+            feasiblePurchases,
+            price: tier.goldCost,
+            supply: metalSupplies.gold,
         });
         this.silverForFavorCard.update({
-            playerAmounts,
-            treasury: {
-                currency: 'favor',
-                price: update.tier.silverCost.favor,
-                metal: 'silver',
-                supply: update.metalSupplies.silver,
-            },
+            feasiblePurchases,
+            price: tier.silverCost,
+            supply: metalSupplies.silver,
         });
         this.goldForCoinsCard.update({
-            playerAmounts,
-            treasury: {
-                currency: 'coins',
-                price: update.tier.goldCost.coins,
-                metal: 'gold',
-                supply: update.metalSupplies.gold,
-            },
+            feasiblePurchases,
+            price: tier.goldCost,
+            supply: metalSupplies.gold,
         });
         this.silverForCoinsCard.update({
-            playerAmounts,
-            treasury: {
-                currency: 'coins',
-                price: update.tier.silverCost.coins,
-                metal: 'silver',
-                supply: update.metalSupplies.silver,
-            },
+            feasiblePurchases,
+            price: tier.silverCost,
+            supply: metalSupplies.silver,
         });
     }
 
     public getElement(): Konva.Group {
         return this.group;
-    }
-
-    private hasCargoRoom(cargo: Array<ItemName>): boolean {
-        const emptySlots = cargo.filter(item => item === 'empty').length;
-
-        return emptySlots >= 2;
     }
 
     public disable(): void {

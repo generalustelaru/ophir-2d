@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
-    Metal, MetalPrices, Currency, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState,
-    VpTransmission, State, EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix,
+    Metal, MetalPrices, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState, VpTransmission, State,
+    EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -104,8 +104,9 @@ export type TreasuryUpdate = {
 }
 
 export type TreasuryCardUpdate = {
-    playerAmounts: { coins: number, favor: number } | null,
-    treasury: { currency: Currency, price: number, metal: Metal, supply: number },
+    feasiblePurchases: Array<MetalPurchasePayload>,
+    price: MetalCost,
+    supply: number,
 }
 
 export type TempleUpdate = {

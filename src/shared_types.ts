@@ -143,6 +143,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     navigatorAccess: Array<ZoneName>,
     cargo: Array<ItemName>,
     feasibleTrades: Array<MarketSlotKey>,
+    feasiblePurchases: Array<MetalPurchasePayload>,
     coins: number,
     turnPurchases: number,
 }

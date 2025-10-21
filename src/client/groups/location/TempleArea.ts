@@ -88,41 +88,29 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
     }
 
     public update(data: TempleUpdate): void {
-        const localPlayer = data.localPlayer;
-        const playerCanAct = (
-            !!localPlayer
-            && localPlayer.isAnchored
-            && !!localPlayer.locationActions.length
-        );
+        const player = data.localPlayer;
 
         this.marketCard.update({
             trade: data.trade,
-            isFeasible: (
-                playerCanAct
-                && localPlayer.locationActions.includes(Action.donate_goods)
-                && localPlayer.feasibleTrades.includes(this.templeTradeSlot)
-            ),
+            isFeasible: !!player?.locationActions.includes(Action.donate_goods),
         });
 
-        this.upgradeButton.update((
-            playerCanAct
-            && localPlayer.locationActions.includes(Action.upgrade_cargo)
-            && localPlayer.coins >= 2
-            && localPlayer.cargo.length < 4
-        ));
+        this.upgradeButton.update(
+            !!player?.locationActions.includes(Action.upgrade_cargo),
+        );
 
         const playerCanDonateMetals = (
-            playerCanAct && !!localPlayer.locationActions.includes(Action.donate_metals)
+            !!player?.locationActions.includes(Action.donate_metals)
         );
 
         this.goldDonationCard.update((
             playerCanDonateMetals
-            && !!localPlayer.cargo.find(item => item === 'gold')
+            && !!player?.cargo.find(item => item === 'gold')
         ));
 
         this.silverDonationCard.update((
             playerCanDonateMetals
-            && !!localPlayer.cargo.find(item => item === 'silver')
+            && !!player?.cargo.find(item => item === 'silver')
         ));
 
         this.donationsBand.update(data.templeStatus);

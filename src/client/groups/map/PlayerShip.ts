@@ -35,7 +35,7 @@ export class PlayerShip extends Communicator {
         this.group.y(coordinates.y);
     };
 
-    // MARK: - Constructor
+    // MARK: -Constructor 
     constructor(
         stage: Konva.Stage,
         offsetX: number,
@@ -123,10 +123,8 @@ export class PlayerShip extends Communicator {
         // MARK: - Dragging (end)
         this.group.on('dragend', () => {
 
-            for (let i = 0; i < SEA_ZONE_COUNT; i++) {
-                const seaZone = this.seaZones[i];
-                seaZone.resetFill();
-            }
+            for (let i = 0; i < SEA_ZONE_COUNT; i++)
+                this.seaZones[i].resetFill();
 
             const player = this.players.find(player => player.color === playerColor);
 
@@ -137,9 +135,8 @@ export class PlayerShip extends Communicator {
             const departureZone = this.seaZones.find(hex => hex.getId() === player.bearings.seaZone);
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
-            if (!departureZone) {
+            if (!departureZone)
                 throw new Error('Missing departure hex data to compute repositioning/moving!');
-            }
 
             switch (true) {
                 case targetZone && this.isDestinationValid:

@@ -1,11 +1,7 @@
 import {
-    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName,
-    MessagePayload, ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage,
-    PlayerEntry,
-    ChatEntry,
-    SpecialistData,
-    StateResponse,
-    PlayState,
+    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
+    ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
+    StateResponse, PlayState, LocalAction, MarketSlotKey, MetalPurchasePayload,
 } from '~/shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -63,7 +59,11 @@ export type RequestMatch = {
     player: PlayerEntity,
     message: ClientMessage,
 }
-
+export type ActionsAndDetails = {
+    actions: Array<LocalAction>,
+    trades: Array<MarketSlotKey>,
+    purchases: Array<MetalPurchasePayload>
+}
 /**
  * @description Not to be shared with clients
 */
