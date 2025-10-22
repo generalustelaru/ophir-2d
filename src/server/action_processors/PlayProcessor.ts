@@ -176,10 +176,7 @@ export class PlayProcessor implements SessionProcessor {
             if (!blockingPlayers.length && influenceRoll >= rivalInfluence)
                 return true;
 
-            this.addServerMessage(
-                `${playerName} was blocked from sailing.`,
-                playerColor,
-            );
+            this.addServerMessage( `${playerName} was blocked from sailing.`, playerColor);
             this.playState.trimInfluenceByZone(target, rivalInfluence);
             this.addServerMessage(`Influence at the [${locationName}] was trimmed.`);
 
@@ -215,12 +212,13 @@ export class PlayProcessor implements SessionProcessor {
             if (this.playState.isRivalIncluded()) {
                 if (this.playState.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
+                    this.addServerMessage(`${playerName} has took control of the rival ship.`, playerColor);
                     player.freeze();
                 }
             }
 
         } else if (player.getMoves() === 0) {
-            this.addServerMessage(`${playerName} also ran out of moves and cannot act further`);
+            this.addServerMessage(`${playerName} also ran out of moves and cannot act further.`);
             this.processEndTurn(digest, false);
         }
 
@@ -691,6 +689,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail('Player cannot conclude rival turn');
 
         this.playState.concludeRivalTurn();
+        const { color } = player.getIdentity();
 
         if (isShiftingMarket) {
             if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
@@ -701,8 +700,12 @@ export class PlayProcessor implements SessionProcessor {
             if (marketShift.err)
                 return lib.fail(marketShift.message);
 
+            this.addServerMessage('Rival moved, rolled influence, and shifted the market.', color);
+
             if (marketShift.data.hasGameEnded)
                 this.playState.registerGameEnd(marketShift.data.countables);
+        } else {
+            this.addServerMessage('Rival moved and rolled influence.',  color);
         }
 
         player.unfreeze(
