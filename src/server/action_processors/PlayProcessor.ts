@@ -676,7 +676,6 @@ export class PlayProcessor implements SessionProcessor {
     public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
         const { player } = digest;
         this.preserveState(player);
-        console.log('begin_processRivalTurn', {anchored: player.isAnchored()})
         const rival = this.playState.getRivalData();
 
         if (!rival.isIncluded)
