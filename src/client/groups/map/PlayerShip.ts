@@ -40,7 +40,6 @@ export class PlayerShip extends Communicator {
         stage: Konva.Stage,
         offsetX: number,
         offsetY: number,
-        fill: Color,
         isActivePlayer: boolean,
         seaZones: Array<SeaZone>,
         players: Array<Player>,
@@ -65,7 +64,7 @@ export class PlayerShip extends Communicator {
         });
 
         this.ship = new ShipToken(
-            fill,
+            playerColor,
             { stroke: isActivePlayer && COLOR.activeShipBorder || COLOR.shipBorder },
         );
 

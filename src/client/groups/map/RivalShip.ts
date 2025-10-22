@@ -45,7 +45,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
             y: data.bearings.position.y,
         });
 
-        this.ship = new ShipToken(COLOR.boneWhite);
+        this.ship = new ShipToken('Neutral');
 
         this.group.on('mouseenter', () => {
             stage.container().style.cursor = 'grab';

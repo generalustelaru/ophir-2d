@@ -149,7 +149,6 @@ export class MapGroup implements MegaGroupInterface {
             this.stage,
             shipPosition.x,
             shipPosition.y,
-            COLOR[localState.playerColor],
             localPlayer.isActive,
             this.seaZones,
             state.players,

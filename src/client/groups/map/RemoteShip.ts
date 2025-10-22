@@ -27,7 +27,7 @@ export class RemoteShip implements DynamicGroupInterface<Player> {
         });
 
         this.ship = new ShipToken(
-            fill,
+            id,
             { stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder },
         );
 

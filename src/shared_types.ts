@@ -35,6 +35,7 @@ export type BarrierId = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 export type DiceSix = 1 | 2 | 3 | 4 | 5 | 6;
 export type Coordinates = { x: number, y: number };
 export type PlayerColor = 'Purple' | 'Yellow' | 'Red' | 'Green';
+export type NeutralColor = 'Neutral';
 export type ZoneName = 'center' | 'topRight' | 'right' | 'bottomRight' | 'bottomLeft' | 'left' | 'topLeft';
 export type TradeGood = 'gems' | 'ebony' | 'marble' | 'linen';
 export type Metal = 'silver' | 'gold';

@@ -18,6 +18,8 @@ const clientConstants: ClientConstants = {
         Yellow: '#FFC94A',
         Red: '#FF204E',
         Green: '#87A922',
+        Neutral: '#EDEDED',
+        darkNeutral: '#A9A9A9',
         illegal: '#A94438',
         validHex: '#A3FFD6',
         defaultHex: '#3887BE',
