@@ -12,7 +12,6 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
     private background: Konva.Rect;
     private upgradeButton: UpgradeButton;
     private marketCard: TempleMarketCard;
-    private templeTradeSlot: MarketSlotKey;
     private goldDonationCard: MetalDonationCard;
     private silverDonationCard: MetalDonationCard;
     private donationsBand: MetalDonationsBand;
@@ -56,7 +55,6 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
             card,
             () => donateGoodsCallback(marketSlot),
         );
-        this.templeTradeSlot = marketSlot;
 
         this.goldDonationCard = new MetalDonationCard(
             stage,
