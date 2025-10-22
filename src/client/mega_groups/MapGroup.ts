@@ -2,7 +2,7 @@ import Konva from 'konva';
 import {
     Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState,
 } from '~/shared_types';
-import { MegaGroupInterface, GroupLayoutData, IconLayer } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds } from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip,
 } from '../groups/map';
@@ -32,7 +32,7 @@ export class MapGroup implements MegaGroupInterface {
             x: layout.x,
             y: layout.y,
         });
-        stage.getLayers()[0].add(this.group);
+        stage.getLayers()[LayerIds.base].add(this.group);
         this.stage = stage;
     }
 

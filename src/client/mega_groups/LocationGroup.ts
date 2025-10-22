@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
 import { PlayState } from '~/shared_types';
@@ -27,7 +27,7 @@ export class LocationGroup implements MegaGroupInterface {
             x: layout.x + 10,
             y: layout.y + 10,
         });
-        stage.getLayers()[0].add(this.group);
+        stage.getLayers()[LayerIds.base].add(this.group);
         this.stage = stage;
     }
 

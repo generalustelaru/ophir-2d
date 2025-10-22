@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData, MegaGroupInterface } from '~/client_types';
+import { GroupLayoutData, LayerIds, MegaGroupInterface } from '~/client_types';
 import { SetupState } from '~/shared_types';
 import { ModalButton } from '../groups/setup/ModalButton';
 import { SetupModal } from '../groups/setup/SetupModal';
@@ -17,7 +17,7 @@ export class SetupGroup implements MegaGroupInterface {
             x: layout.x,
             y: layout.y,
         });
-        stage.getLayers()[1].add(this.group);
+        stage.getLayers()[LayerIds.modal].add(this.group);
         this.stage = stage;
     }
 

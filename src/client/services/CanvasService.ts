@@ -43,7 +43,8 @@ export const CanvasService = new class extends Communicator {
 
         this.stage.add(...[
             new Konva.Layer(), // [0] for the board
-            new Konva.Layer(), // [1] for overlay modals, popups, tooltips.
+            new Konva.Layer(), // [1] for modals
+            new Konva.Layer(), // [2] for popups, tooltips.
         ]);
 
         const segmentWidth = this.stage.width() / 4;

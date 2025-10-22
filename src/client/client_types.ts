@@ -27,6 +27,12 @@ export type LocalState = {
     vp: number,
 }
 
+export enum LayerIds {
+    base,
+    modal,
+    overlay,
+}
+
 export type ClientConstants = {
     DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,

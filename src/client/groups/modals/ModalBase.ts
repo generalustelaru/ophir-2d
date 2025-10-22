@@ -3,6 +3,7 @@ import clientConstants from '../../client_constants';
 import { DismissButton } from './DismissButton';
 import { AcceptButton } from './AcceptButton';
 import { ClientMessage } from '~/shared_types';
+import { LayerIds } from '~/client/client_types';
 
 type SubmitBehavior = {
     hasSubmit: true,
@@ -103,7 +104,7 @@ export abstract class ModalBase {
         this.screenGroup.add(...[
             this.modalGroup,
         ]);
-        stage.getLayers()[1].add(this.screenGroup);
+        stage.getLayers()[LayerIds.modal].add(this.screenGroup);
     }
 
     protected open(message: ClientMessage|null = null) {

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
 import { Player, PlayerColor, PlayState } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
@@ -17,7 +17,7 @@ export class PlayerGroup implements MegaGroupInterface {
             x: layout.x,
             y: layout.y,
         });
-        stage.getLayers()[0].add(this.group);
+        stage.getLayers()[LayerIds.base].add(this.group);
         this.stage = stage;
     }
 

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData, MegaGroupInterface } from '~/client_types';
+import { GroupLayoutData, MegaGroupInterface, LayerIds } from '~/client_types';
 import { EnrolmentState } from '~/shared_types';
 import { EnrolmentModal } from '../groups/enrolment/EnrolmentModal';
 import localState from '../state';
@@ -16,7 +16,7 @@ export class EnrolmentGroup implements MegaGroupInterface {
             x: layout.x,
             y: layout.y,
         });
-        stage.getLayers()[1].add(this.group);
+        stage.getLayers()[LayerIds.modal].add(this.group);
         this.stage = stage;
     }
 
