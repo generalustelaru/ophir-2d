@@ -47,7 +47,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
     }
 
     drawMetalPrices() {
-        return this.costTiers.drawFirst()?.costs || null;
+        return this.costTiers.drawFirst()?.treasury || null;
     }
 
     updateVictoryPoints(color: PlayerColor, amount: number) {

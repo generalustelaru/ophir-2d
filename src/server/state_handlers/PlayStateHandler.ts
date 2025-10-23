@@ -1,6 +1,6 @@
 import {
     ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
-    PlayState, TempleState, Trade, MetalPrices, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates,
+    PlayState, TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates,
     Phase,
 } from '~/shared_types';
 import { PlayerCountables, ObjectHandler } from '~/server_types';
@@ -16,6 +16,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     private gameResults: Writable<Array<PlayerCountables>>;
     private players: ArrayWritable<Player>;
     private market: Writable<MarketOffer>;
+    private treasury: Writable<TreasuryOffer>;
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;
     private itemSupplies: Writable<ItemSupplies>;
@@ -25,8 +26,8 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.serverName = readable(serverName);
 
         const {
-            gameId, sessionOwner, setup, sessionPhase, gameResults,
-            players, market, temple, chat, itemSupplies, rival, hasGameEnded,
+            gameId, sessionOwner, setup, sessionPhase, gameResults, players,
+            market, treasury, temple, chat, itemSupplies, rival, hasGameEnded,
         } = state;
 
         this.gameId = readable(gameId);
@@ -37,6 +38,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         this.gameResults = writable(gameResults);
         this.players = arrayWritable(players, 'color');
         this.market = writable(market);
+        this.treasury = writable(treasury);
         this.temple = writable(temple);
         this.chat = arrayWritable(chat);
         this.itemSupplies = writable(itemSupplies);
@@ -54,6 +56,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
             gameResults: this.gameResults.get(),
             players: this.players.get(),
             market: this.market.get(),
+            treasury: this.treasury.get(),
             temple: this.temple.get(),
             chat: this.chat.get(),
             itemSupplies: this.itemSupplies.get(),
@@ -293,7 +296,7 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
     }
 
     public getMetalCosts() {
-        const { goldCost, silverCost } = this.getTemple().treasury;
+        const { goldCost, silverCost } = this.treasury.get();
 
         return { gold: goldCost, silver: silverCost };
     }
@@ -322,9 +325,9 @@ export class PlayStateHandler implements ObjectHandler<PlayState>{
         return { isNewLevel, isTempleComplete };
     }
 
-    public setMetalPrices(prices: MetalPrices) {
-        this.temple.update(t => {
-            t.treasury = prices;
+    public setMetalPrices(prices: TreasuryOffer) {
+        this.treasury.update(t => {
+            t = prices;
             return t;
         });
     }

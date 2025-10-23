@@ -994,7 +994,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     private pickFeasiblePurchases(player: PlayerHandler): Array<MetalPurchasePayload> {
-        const { silverCost, goldCost } = this.playState.getTemple().treasury;
+        const { silver: silverCost, gold: goldCost } = this.playState.getMetalCosts();
         const playerCoins = player.getCoinAmount();
         const playerFavor = player.getFavor();
 

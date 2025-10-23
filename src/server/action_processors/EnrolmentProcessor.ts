@@ -2,9 +2,9 @@ import {
     ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, StateResponse,
 } from '~/shared_types';
 import { validator } from '../services/validation/ValidatorService';
-import lib, { Probable } from './library';
+import lib from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
-import { SessionProcessor } from '~/server_types';
+import { Probable, SessionProcessor } from '~/server_types';
 
 const serverName = String(process.env.SERVER_NAME);
 

@@ -109,7 +109,7 @@ export class LocationGroup implements MegaGroupInterface {
         this.marketArea?.update(marketUpdate);
         this.treasuryArea?.update({
             localPlayer: localPlayer ?? null,
-            tier: state.temple.treasury,
+            treasury: state.treasury,
             metalSupplies: state.itemSupplies.metals,
         });
         this.templeArea?.update(templeUpdate);

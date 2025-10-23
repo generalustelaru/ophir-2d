@@ -58,9 +58,9 @@ export type ChatEntry = { color: PlayerColor | null, name: string | null, messag
 export type ExchangeTier = {
     templeLevel: number,
     skipOnPlayerCounts: Array<number>,
-    costs: MetalPrices,
+    treasury: TreasuryOffer,
 }
-export type MetalPrices = {
+export type TreasuryOffer = {
     goldCost: MetalCost,
     silverCost: MetalCost,
 }
@@ -168,7 +168,6 @@ export type MarketFluctuations = {
 }
 
 export type TempleState = {
-    treasury: MetalPrices, // TODO: Extract treasury from TempleState
     currentLevel: number,
     maxLevel: number,
     levelCompletion: number,
@@ -197,6 +196,7 @@ export type PlayState = {
     hasGameEnded: boolean,
     gameResults: Array<PlayerCountables>,
     market: MarketOffer,
+    treasury: TreasuryOffer,
     temple: TempleState,
     itemSupplies: ItemSupplies,
     rival: Rival,

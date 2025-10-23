@@ -185,32 +185,32 @@ const serverConstants: ServerConstants = {
         {
             templeLevel: 0,
             skipOnPlayerCounts: [2, 3],
-            costs: { goldCost: { coins: 2, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
+            treasury: { goldCost: { coins: 2, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
         },
         {
             templeLevel: 1,
             skipOnPlayerCounts: [],
-            costs: { goldCost: { coins: 3, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
+            treasury: { goldCost: { coins: 3, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
         },
         {
             templeLevel: 2,
             skipOnPlayerCounts: [],
-            costs: { goldCost: { coins: 4, favor: 5 }, silverCost: { coins: 2, favor: 3 } },
+            treasury: { goldCost: { coins: 4, favor: 5 }, silverCost: { coins: 2, favor: 3 } },
         },
         {
             templeLevel: 3,
             skipOnPlayerCounts: [],
-            costs: { goldCost: { coins: 5, favor: 5 }, silverCost: { coins: 2, favor: 3 } },
+            treasury: { goldCost: { coins: 5, favor: 5 }, silverCost: { coins: 2, favor: 3 } },
         },
         {
             templeLevel: 4,
             skipOnPlayerCounts: [],
-            costs: { goldCost: { coins: 6, favor: 5 }, silverCost: { coins: 3, favor: 3 } },
+            treasury: { goldCost: { coins: 6, favor: 5 }, silverCost: { coins: 3, favor: 3 } },
         },
         {
             templeLevel: 5,
             skipOnPlayerCounts: [2],
-            costs: { goldCost: { coins: 7, favor: 5 }, silverCost: { coins: 4, favor: 3 } },
+            treasury: { goldCost: { coins: 7, favor: 5 }, silverCost: { coins: 4, favor: 3 } },
         },
     ],
 };

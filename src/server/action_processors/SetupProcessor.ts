@@ -4,7 +4,7 @@ import {
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity,
 } from '~/shared_types';
-import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor } from '~/server_types';
+import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor, Probable } from '~/server_types';
 import serverConstants from '~/server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -17,7 +17,7 @@ import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 import { HexCoordinates } from '~/client_types';
 import { validator } from '../services/validation/ValidatorService';
-import lib, { Probable } from './library';
+import lib from './library';
 
 // @ts-ignore
 const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {}); // eslint-disable-line max-len
@@ -196,10 +196,10 @@ export class SetupProcessor implements SessionProcessor {
                 chat: setupState.chat,
                 players,
                 market: marketData.marketOffer,
+                treasury: privateStateHandler.drawMetalPrices()!,
                 itemSupplies: this.getItemSupplies(players),
                 temple: {
                     maxLevel: privateStateHandler.getTempleLevelCount(),
-                    treasury: privateStateHandler.drawMetalPrices()!,
                     levelCompletion: 0,
                     currentLevel: SHORT_GAME ? privateStateHandler.getTempleLevelCount() - 1 : 0,
                     donations: [],

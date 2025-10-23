@@ -71,7 +71,7 @@ export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
     }
 
     public update(update: TreasuryUpdate): void {
-        const { localPlayer, tier, metalSupplies } = update;
+        const { localPlayer, treasury: tier, metalSupplies } = update;
         const feasiblePurchases =
             localPlayer?.locationActions.includes(Action.buy_metals)
             && localPlayer.feasiblePurchases || [];
