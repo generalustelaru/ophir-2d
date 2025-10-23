@@ -19,9 +19,11 @@ export class PlayerShip extends Communicator {
     private players: Array<Player>;
     private rival: Rival;
     private toSailValue: DiceSix|false = false;
+    private player: Player;
+    private inControl: boolean = false;
 
-    public switchControl(isDraggable: boolean) {
-        this.group.draggable(isDraggable);
+    public switchControl(isControllable: boolean) {
+        this.inControl = isControllable;
     }
 
     public getElement() {
@@ -29,10 +31,17 @@ export class PlayerShip extends Communicator {
     };
 
     public update(coordinates: Coordinates, players: Array<Player>, rival: Rival) {
+        const player = players.find(p => p.color === localState.playerColor);
+
+        if (!player)
+            throw new Error('Cannot update player ship w/o participating color');
+
         this.players = players;
+        this.player = player;
         this.rival = rival;
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
+        this.group.draggable(player.isActive);
     };
 
     // MARK: -Constructor
@@ -53,13 +62,20 @@ export class PlayerShip extends Communicator {
         const playerColor = localState.playerColor;
 
         if (!playerColor) {
-            throw new Error('Cannot create PlayerShip w/o Player ID!');
+            throw new Error('Player data missing in local state!');
         }
+
+        const player = players.find(p => p.color === playerColor);
+
+        if (!player)
+            throw new Error('Cannot update player ship w/o participating color');
+
+        this.player = player;
 
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
-            draggable: true,
+            draggable: player.isActive,
             id: playerColor,
         });
 
@@ -85,11 +101,10 @@ export class PlayerShip extends Communicator {
         this.group.on('dragmove', () => {
             this.isDestinationValid = false;
             this.toSailValue = false;
-            const player = this.players.find(player => player.color === playerColor);
             const position = stage.getPointerPosition();
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
-            if (!player || !position || !targetZone) {
+            if (!position || !targetZone) {
                 return;
             }
 
@@ -99,18 +114,26 @@ export class PlayerShip extends Communicator {
             }
 
             switch (true) {
-                case targetZone.getId() === player.bearings.seaZone:
+                case targetZone.getId() === this.player.bearings.seaZone:
                     break;
-                case player.moveActions && player.destinations.includes(targetZone.getId()):
+                case (
+                    this.inControl
+                    && this.player.moveActions
+                    && this.player.destinations.includes(targetZone.getId())
+                ):
                     this.isDestinationValid = true;
                     this.toSailValue = this.calculateToSailValue(targetZone.getId());
 
-                    if (player.privilegedSailing || !this.toSailValue)
+                    if (this.player.privilegedSailing || !this.toSailValue)
                         targetZone.setValid();
                     else
                         targetZone.setRollDependant(this.toSailValue);
                     break;
-                case player.moveActions && player.navigatorAccess.includes(targetZone.getId()):
+                case (
+                    this.inControl
+                    && this.player.moveActions
+                    && this.player.navigatorAccess.includes(targetZone.getId())
+                ):
                     targetZone.setValidForNavigator();
                     this.isDestinationValid = true;
                     break;
@@ -125,7 +148,7 @@ export class PlayerShip extends Communicator {
             for (let i = 0; i < SEA_ZONE_COUNT; i++)
                 this.seaZones[i].resetFill();
 
-            const player = this.players.find(player => player.color === playerColor);
+            const player = this.player;
 
             if (!player)
                 throw new Error('Cannot determine local player');
