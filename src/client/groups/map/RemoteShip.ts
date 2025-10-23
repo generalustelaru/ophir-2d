@@ -14,20 +14,19 @@ export class RemoteShip implements DynamicGroupInterface<Player> {
     constructor(
         offsetX: number,
         offsetY: number,
-        fill: Color,
         isActivePlayer: boolean,
-        id: PlayerColor,
+        playerColor: PlayerColor,
     ) {
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
             width: SHIP_DATA.dimensions.width,
             height: SHIP_DATA.dimensions.height,
-            id,
+            id: playerColor,
         });
 
         this.ship = new ShipToken(
-            id,
+            playerColor,
             { stroke: isActivePlayer ? COLOR.activeShipBorder : COLOR.shipBorder },
         );
 
