@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Color, EventType } from '~/client_types';
+import { EventType } from '~/client_types';
 import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName } from '~/shared_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
@@ -35,7 +35,7 @@ export class PlayerShip extends Communicator {
         this.group.y(coordinates.y);
     };
 
-    // MARK: -Constructor 
+    // MARK: -Constructor
     constructor(
         stage: Konva.Stage,
         offsetX: number,
