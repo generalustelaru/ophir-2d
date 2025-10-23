@@ -1,11 +1,11 @@
-import { WsDigest, DataDigest, SavedSession } from '~/server_types';
+import { WsDigest, DataDigest, SavedSession, Probable } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
 } from '~/shared_types';
 import { RequestMatch } from '~/server_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
-import lib, { Probable } from './action_processors/library';
+import lib from './action_processors/library';
 import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
@@ -324,6 +324,7 @@ export class GameSession {
             Action.drop_item,
             Action.reposition,
             Action.reposition_rival,
+            Action.reposition_opponent,
             Action.move_rival,
             Action.end_rival_turn,
             Action.shift_market,
@@ -350,6 +351,8 @@ export class GameSession {
                     return processor.processRepositioning(digest);
                 case Action.reposition_rival:
                     return processor.processRepositioning(digest, true);
+                case Action.reposition_opponent:
+                    return processor.processOpponentRepositioning(digest);
                 case Action.load_good:
                     return processor.processLoadGood(digest);
                 case Action.sell_goods:

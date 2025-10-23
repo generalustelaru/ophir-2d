@@ -2,11 +2,10 @@ import { HexCoordinates } from '~/client_types';
 import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
     LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
-    Action, SpecialistName, Phase,
-    EnrolmentPayload,
+    Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
-import { BackupState, PrivateState, SavedSession } from '~/server_types';
+import { BackupState, PrivateState, Probable, SavedSession } from '~/server_types';
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
@@ -177,6 +176,25 @@ class ValidatorService {
         }
 
         return repositioningPayload;
+    }
+
+    public validateOpponentRepositioningPayload(payload: unknown): Probable<OpponentRepositioningPayload> {
+        const opponentRepositioningPayload = this.validateObject<OpponentRepositioningPayload>(
+            'OpponentRepositioningPayload',
+            payload,
+            [
+                { key: 'color', type: 'string', nullable: false },
+                { key: 'repositioning', type: 'object', nullable: false },
+            ],
+        );
+
+        if (!opponentRepositioningPayload)
+            return lib.fail('object structure does not match.');
+
+        if (!this.validateCoordinates(opponentRepositioningPayload.repositioning))
+            return lib.fail('repositioning is missing coordinates.');
+
+        return lib.pass(opponentRepositioningPayload);
     }
 
     public validateGameSetupPayload(payload: unknown) {

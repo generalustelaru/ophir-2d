@@ -36,6 +36,10 @@ export class PlayerShip extends Communicator {
         if (!player)
             throw new Error('Cannot update player ship w/o participating color');
 
+        if (coordinates.x != this.group.x() && coordinates.y != this.group.y()) {
+            this.group.moveToTop();
+        }
+
         this.players = players;
         this.player = player;
         this.rival = rival;
@@ -85,7 +89,7 @@ export class PlayerShip extends Communicator {
         );
 
         this.group.on('mouseenter', () => {
-            stage.container().style.cursor = 'grab';
+            stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
 
         this.group.on('mouseleave', () => {
@@ -94,6 +98,7 @@ export class PlayerShip extends Communicator {
 
         // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
+            this.group.moveToTop();
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
@@ -114,15 +119,15 @@ export class PlayerShip extends Communicator {
             }
 
             switch (true) {
-                case targetZone.getId() === this.player.bearings.seaZone:
+                case targetZone.getZoneName() === this.player.bearings.seaZone:
                     break;
                 case (
                     this.inControl
                     && this.player.moveActions
-                    && this.player.destinations.includes(targetZone.getId())
+                    && this.player.destinations.includes(targetZone.getZoneName())
                 ):
                     this.isDestinationValid = true;
-                    this.toSailValue = this.calculateToSailValue(targetZone.getId());
+                    this.toSailValue = this.calculateToSailValue(targetZone.getZoneName());
 
                     if (this.player.privilegedSailing || !this.toSailValue)
                         targetZone.setValid();
@@ -132,7 +137,7 @@ export class PlayerShip extends Communicator {
                 case (
                     this.inControl
                     && this.player.moveActions
-                    && this.player.navigatorAccess.includes(targetZone.getId())
+                    && this.player.navigatorAccess.includes(targetZone.getZoneName())
                 ):
                     targetZone.setValidForNavigator();
                     this.isDestinationValid = true;
@@ -154,7 +159,7 @@ export class PlayerShip extends Communicator {
                 throw new Error('Cannot determine local player');
 
             const position = stage.getPointerPosition();
-            const departureZone = this.seaZones.find(hex => hex.getId() === player.bearings.seaZone);
+            const departureZone = this.seaZones.find(hex => hex.getZoneName() === player.bearings.seaZone);
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
             if (!departureZone)
@@ -171,7 +176,7 @@ export class PlayerShip extends Communicator {
                                 moveActions: player.moveActions,
                                 origin: this.initialPosition,
                                 destination: {
-                                    zoneId: targetZone.getId(),
+                                    zoneId: targetZone.getZoneName(),
                                     position: { x: this.group.x(), y: this.group.y() },
                                 },
                                 toSail: this.toSailValue,
@@ -187,7 +192,7 @@ export class PlayerShip extends Communicator {
                             detail: {
                                 action: Action.move,
                                 payload: {
-                                    zoneId: targetZone.getId(),
+                                    zoneId: targetZone.getZoneName(),
                                     position: { x: this.group.x(), y: this.group.y() },
                                 },
                             },

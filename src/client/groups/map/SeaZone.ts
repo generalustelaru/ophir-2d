@@ -96,7 +96,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         this.location.update({
             tradeGoodSupplies: update.itemSupplies.goods,
             mayPickup: (
-                localPlayer.bearings.seaZone == this.getId()
+                localPlayer.bearings.seaZone == this.getZoneName()
                 && localPlayer.locationActions.includes(Action.load_good)
             ),
             templeIcon: update.templeIcon,
@@ -111,14 +111,14 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         const { bearings, moves, destinations } = rival;
 
         if (
-            bearings.seaZone == this.getId()
+            bearings.seaZone == this.getZoneName()
             && bearings.location == 'market'
             && moves < 2
         ) {
             // rival is here and may shift the market
             this.saveFill(COLOR.navigatorAccess);
         } else if (
-            destinations.includes(this.getId())
+            destinations.includes(this.getZoneName())
             && moves > 0
         ) {
             // local player may still move and is able to enter this zone
@@ -128,7 +128,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
 
     private updateForPlayer(localPlayer: Player) {
         if (
-            localPlayer.bearings.seaZone == this.getId()
+            localPlayer.bearings.seaZone == this.getZoneName()
             && localPlayer.isAnchored
             && localPlayer.locationActions.length
         ) {
@@ -137,8 +137,8 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         } else if (
             localPlayer.moveActions > 0
             && (
-                localPlayer.destinations.includes(this.getId())
-                || localPlayer.navigatorAccess.includes(this.getId())
+                localPlayer.destinations.includes(this.getZoneName())
+                || localPlayer.navigatorAccess.includes(this.getZoneName())
             )
         ) {
             // local player may still move and is able to enter this zone
@@ -149,11 +149,11 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     public getElement(): Konva.Group {
         return this.group;
     }
-    public getId(): ZoneName {
+    public getZoneName(): ZoneName {
         return this.group.attrs.id as ZoneName;
     }
 
-    public getTokenId(): LocationName {
+    public getLocationName(): LocationName {
         return this.location.getId();
     }
 

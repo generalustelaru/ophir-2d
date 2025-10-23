@@ -1,7 +1,7 @@
 import { ChatEntry, PlayerColor } from '~/shared_types';
-import { BackupState } from '../server_types';
+import { BackupState, Probable } from '../server_types';
 import tools from '../services/ToolService';
-import lib, { Probable } from '../action_processors/library';
+import lib from '../action_processors/library';
 
 export class BackupStateHandler {
     private backupState: BackupState | null;

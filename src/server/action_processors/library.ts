@@ -1,28 +1,5 @@
 import { ErrorResponse, State, StateResponse } from '~/shared_types';
-
-export type Probable<T> = { err: true, message: string } | { err?: false, data: T };
-
-function pass<T>(data: T): Probable<T> {
-    return { data };
-}
-
-function fail<T>(message: string): Probable<T> {
-    return { err: true, message };
-}
-
-function checkConditions(arr: Array<boolean>): Probable<true> {
-    if (arr.includes(false))
-        return fail('Condition failed');
-    return pass(true);
-}
-
-function randomize<T>(array: Array<T>): Array<T> {
-    return (
-        array.map(element => { return { key: Math.random(), element }; })
-            .sort((a, b) => a.key - b.key)
-            .map(object => object.element)
-    );
-}
+import sLib from '../server_lib';
 
 function validationErrorMessage(){
     return 'Malformed request.';
@@ -43,10 +20,7 @@ function errorResponse(message: string, params?: object): ErrorResponse {
 }
 
 const lib = {
-    pass,
-    fail,
-    checkConditions,
-    randomize,
+    ...sLib,
     stateResponse,
     validationErrorMessage,
     errorResponse,

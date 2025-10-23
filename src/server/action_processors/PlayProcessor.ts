@@ -7,8 +7,8 @@ import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
-import { ActionsAndDetails, DataDigest, PlayerCountables, SessionProcessor, StateBundle } from '~/server_types';
-import lib, { Probable } from './library';
+import { ActionsAndDetails, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle } from '~/server_types';
+import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
@@ -241,6 +241,26 @@ export class PlayProcessor implements SessionProcessor {
             player.setBearings({ ...player.getBearings(), position });
 
         return lib.pass(this.saveAndReturn(player));
+    }
+
+    public processOpponentRepositioning(data: DataDigest): Probable<StateResponse> {
+        const { payload } = data;
+        const validation = validator.validateOpponentRepositioningPayload(payload);
+
+        if (validation.err)
+            return lib.fail(lib.validationErrorMessage());
+
+        const { color, repositioning } = validation.data;
+
+        try { // TODO: since PlayerHadler can now throw, check and adapt the other instances.
+            const opponent = new PlayerHandler(this.playState.getPlayer(color));
+            opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
+
+            return lib.pass(this.saveAndReturn(opponent));
+        } catch (error) {
+
+            return lib.fail('Cannot find opponent in state.');
+        }
     }
 
     // MARK: FAVOR

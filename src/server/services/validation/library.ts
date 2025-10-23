@@ -1,4 +1,4 @@
-
+import sLib from '../../server_lib';
 
 type TypeReference = Array<string | number> | null;
 
@@ -197,6 +197,7 @@ function isOfUnion(name: string, value: string | number, nullable: boolean, refe
 }
 
 export const lib = {
+    ...sLib,
     isObject,
     evaluateObject,
 };

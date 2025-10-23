@@ -72,7 +72,7 @@ export class MapGroup implements MegaGroupInterface {
             zone.update({
                 localPlayer: null,
                 rival: state.rival,
-                templeIcon: this.getIconData(zone.getTokenId(), state),
+                templeIcon: this.getIconData(zone.getLocationName(), state),
                 itemSupplies: state.itemSupplies,
             });
         }
@@ -113,10 +113,11 @@ export class MapGroup implements MegaGroupInterface {
             if (player.color && player.color !== localState.playerColor) {
                 const { position } = player.bearings;
                 const ship = new RemoteShip(
+                    this.stage,
                     position.x,
                     position.y,
-                    player.isActive,
-                    player.color,
+                    player,
+                    this.seaZones,
                 );
                 this.opponentShips.push(ship);
                 this.group.add(ship.getElement());
@@ -170,7 +171,7 @@ export class MapGroup implements MegaGroupInterface {
             zone.update({
                 localPlayer: localPlayer || null,
                 rival: state.rival,
-                templeIcon: this.getIconData(zone.getTokenId(), state),
+                templeIcon: this.getIconData(zone.getLocationName(), state),
                 itemSupplies: state.itemSupplies,
             });
         }
@@ -178,10 +179,10 @@ export class MapGroup implements MegaGroupInterface {
         // MARK: ships
         this.opponentShips.forEach(ship => {
             const opponentId: PlayerColor = ship.getId();
-            const player = players.find(player => player.color === opponentId);
+            const remotePlayer = players.find(player => player.color === opponentId);
 
-            if (player) {
-                ship.update(player);
+            if (remotePlayer) {
+                ship.update({ remotePlayer, isDraggable: localPlayer?.isActive || false });
             } else {
                 ship.destroy();
                 // TODO: implement a forfeit action for abandoning a session.

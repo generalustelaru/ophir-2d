@@ -9,6 +9,9 @@ import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
+
+export type Probable<T> = { err: true, message: string } | { err?: false, data: T };
+
 export type WsClient = {
     socketId: string,
     gameId: string | null,

@@ -10,13 +10,14 @@ export enum Action {
     pick_specialist = 'pick_specialist',
     start_play = 'start_play',
     move = 'move',
+    reposition = 'reposition',
     move_rival = 'move_rival',
     reposition_rival = 'reposition_rival',
+    reposition_opponent = 'reposition_opponent',
     shift_market = 'shift_market',
     end_rival_turn = 'end_rival_turn',
     load_good = 'load_good',
     drop_item = 'drop_item',
-    reposition = 'reposition',
     sell_goods = 'sell_goods',
     donate_goods = 'donate_goods',
     sell_specialty = 'sell_specialty',
@@ -241,6 +242,7 @@ export type EnrolmentPayload = { color: PlayerColor, name: string | null }
 export type ChatPayload = { input: string }
 export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
+export type OpponentRepositioningPayload = { color: PlayerColor, repositioning: Coordinates }
 export type GameSetupPayload = {
     hexPositions: Array<HexCoordinates>,
     startingPositions: Array<Coordinates>,
@@ -282,7 +284,7 @@ should persist
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.sell_goods | Action.donate_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist
-    | Action.enrol;
+    | Action.enrol | Action.reposition_opponent;
 export type LaconicAction =
     | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
@@ -302,6 +304,7 @@ export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, RepositioningPayload>;
+export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentRepositioningPayload>;
 export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSlotPayload>;
 export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSlotPayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
@@ -310,7 +313,7 @@ export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSp
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage
     | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage | EnrolMessage
-    | PickSpecialistMessage;
+    | PickSpecialistMessage | RepositionOpponentMessage;
 
 export type ClientRequest = {
     gameId: string | null,

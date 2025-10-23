@@ -34,7 +34,14 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private coins: Writable<number>;
     private turnPurchases: Writable<number>;
 
-    constructor(player: Player) {
+    /**
+     * @throws Instantiation error
+     */
+    constructor(player: Player | null) {
+
+        if (!player)
+            throw new Error('Cannot instantiate handler: Missing player data.');
+
         this.socketId = writable(player.socketId);
         this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);

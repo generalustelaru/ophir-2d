@@ -34,7 +34,6 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         data: RivalShipUpdate,
         localPlayerColor: PlayerColor | null,
     ) {
-        // this.stage = stage;
         this.seaZones = seaZones;
         this.currentZone = data.bearings.seaZone;
         this.movesLeft = data.moves;
@@ -49,7 +48,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         this.ship = new ShipToken('Neutral');
 
         this.group.on('mouseenter', () => {
-            stage.container().style.cursor = 'grab';
+            stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
 
         this.group.on('mouseleave', () => {
@@ -74,9 +73,9 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                 this.seaZones[i].resetFill();
 
             switch (true) {
-                case targetZone.getId() === this.currentZone:
+                case targetZone.getZoneName() === this.currentZone:
                     break;
-                case this.isControllable && this.movesLeft && this.destinations.includes(targetZone.getId()):
+                case this.isControllable && this.movesLeft && this.destinations.includes(targetZone.getZoneName()):
                     this.isDestinationValid = true;
                     targetZone.setValid();
                     break;
@@ -91,7 +90,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                 this.seaZones[i].resetFill();
 
             const position = stage.getPointerPosition();
-            const departureZone = this.seaZones.find(hex => hex.getId() === this.currentZone);
+            const departureZone = this.seaZones.find(hex => hex.getZoneName() === this.currentZone);
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
 
             if (!departureZone)
@@ -103,7 +102,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                     this.broadcastAction({
                         action: Action.move_rival,
                         payload: {
-                            zoneId: targetZone.getId(),
+                            zoneId: targetZone.getZoneName(),
                             position: { x: this.group.x(), y: this.group.y() },
                         },
                     });
