@@ -26,6 +26,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     private group: Konva.Group;
     private localPlayerColor: PlayerColor | null;
     private destinations: Array<ZoneName>;
+    private isControllable: boolean = false;
 
     constructor(
         stage: Konva.Stage,
@@ -56,6 +57,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         });
 
         this.group.on('dragstart', () => {
+            this.group.moveToTop();
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
@@ -74,7 +76,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
             switch (true) {
                 case targetZone.getId() === this.currentZone:
                     break;
-                case this.movesLeft && this.destinations.includes(targetZone.getId()):
+                case this.isControllable && this.movesLeft && this.destinations.includes(targetZone.getId()):
                     this.isDestinationValid = true;
                     targetZone.setValid();
                     break;
@@ -129,14 +131,17 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         return this.group;
     }
 
+    // MARK: UPDATE
     public update(data: RivalShipUpdate): void {
-        this.destinations = data.destinations;
-        this.currentZone = data.bearings.seaZone;
-        this.movesLeft = data.moves;
-        this.group.x(data.bearings.position.x);
-        this.group.y(data.bearings.position.y);
-        this.group.draggable(data.isControllable && data.activePlayerColor === this.localPlayerColor);
-        this.ship.update(data.isControllable ? COLOR[data.activePlayerColor] : COLOR.shipBorder);
+        const  { moves, bearings, isControllable, destinations, activePlayerColor } = data;
+        this.isControllable = isControllable;
+        this.destinations = destinations;
+        this.currentZone = bearings.seaZone;
+        this.movesLeft = moves;
+        this.group.x(bearings.position.x);
+        this.group.y(bearings.position.y);
+        this.group.draggable(activePlayerColor === this.localPlayerColor);
+        this.ship.update(isControllable ? COLOR[activePlayerColor] : COLOR.shipBorder);
     };
 
     private broadcastAction(detail: ClientMessage): void {
