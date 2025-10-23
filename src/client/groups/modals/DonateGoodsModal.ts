@@ -64,10 +64,8 @@ export class DonateGoodsModal extends ModalBase implements DynamicModalInterface
         this.market = state.market;
         const player = state.players.find(p => p.color == localState.playerColor);
 
-        if (!player)
-            throw new Error('Cannot find local player in state.');
-
-        this.playerFavor = player.favor;
+        if (player)
+            this.playerFavor = player.favor;
     }
 
     public show(slot: MarketSlotKey) {
