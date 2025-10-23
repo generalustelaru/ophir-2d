@@ -10,6 +10,9 @@ const clientConstants: ClientConstants = {
         vp: 0,
     },
     COLOR: {
+        lowRoll: '#FF7F50',
+        midRoll: '#FF4500',
+        highRoll: '#8B0000',
         barrierDefault: '#003C43',
         navigatorAccess: '#FFFDD7',
         activeShipBorder: '#FFFFFF',

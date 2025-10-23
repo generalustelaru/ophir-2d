@@ -3,7 +3,6 @@ import Konva from 'konva';
 import { Vector2d } from 'konva/lib/types';
 import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival } from '~/shared_types';
 import { Color, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
-import { InfluenceDial } from '../popular';
 import { LocationToken } from '.';
 import clientConstants from '~/client_constants';
 
@@ -23,7 +22,6 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     private island: Konva.Path;
     private location: LocationToken;
     private restrictedIcon: Konva.Path;
-    private influenceDial: InfluenceDial;
     private staticFill: Color;
 
     constructor(
@@ -80,12 +78,6 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
             visible: false,
         });
         this.group.add(this.restrictedIcon);
-
-        this.influenceDial = new InfluenceDial(
-            { x: -25, y: -25 },
-            COLOR.boneWhite,
-        );
-        this.group.add(this.influenceDial.getElement());
     }
 
     update(update: SeaZoneUpdate): void {
@@ -175,7 +167,14 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     }
 
     public setRollDependant(value: DiceSix): void {
-        this.setToHitValue(value);
+        const dangerHue = ((): Color => {
+            switch(true) {
+                case value < 3: return COLOR.lowRoll;
+                case value < 5: return COLOR.midRoll;
+                default: return COLOR.highRoll;
+            }
+        })();
+        this.hexagon.fill(dangerHue);
     }
 
     public setValidForNavigator(): void {
@@ -185,16 +184,12 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     public setRestricted(): void {
         this.restrictedIcon.visible(true);
         this.setFill(COLOR.illegal);
-        // this.saveFill(how ? COLOR.emptyHex : COLOR.emptyHex);
     }
 
     public resetFill(): void {
         this.hexagon.fill(this.staticFill);
         this.restrictedIcon.visible(false);
-        this.setToHitValue(false);
     }
-
-
 
     public isIntersecting(vector: Vector2d | null): boolean {
         if (!vector) {
@@ -207,10 +202,6 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     private saveFill(color: Color): void {
         this.hexagon.fill(color);
         this.staticFill = color;
-    }
-
-    private setToHitValue(value: DiceSix | false): void {
-        this.influenceDial.update({ value, color: null });
     }
 }
 
