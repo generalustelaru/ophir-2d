@@ -59,6 +59,7 @@ export class InfluenceDial implements DynamicGroupInterface<InfluenceDialUpdate>
         this.group.hide();
     }
 
+    // TODO: No longer used in map context. Change update so it doesn't affect visibility.
     public update(data: InfluenceDialUpdate): void {
         const { value, color } = data;
 
