@@ -135,14 +135,17 @@ export const CanvasService = new class extends Communicator {
 
     public drawUpdateElements(state: State, toDisable = false): void {
 
+        const { sessionPhase } = state;
+
         if (!localState.playerColor) {
             this.createEvent({
                 type: EventType.info,
-                detail: { text: 'You are a spectator' },
+                detail: { text: sessionPhase == Phase.enrolment
+                    ? 'Registrations open!'
+                    : 'You are a spectator.',
+                },
             });
         }
-
-        const { sessionPhase } = state;
 
         switch (sessionPhase) {
             case Phase.enrolment:
