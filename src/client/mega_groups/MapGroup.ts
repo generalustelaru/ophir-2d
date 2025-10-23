@@ -190,14 +190,7 @@ export class MapGroup implements MegaGroupInterface {
         });
 
         if (this.rivalShip && state.rival.isIncluded) {
-            const { isControllable, bearings, activePlayerColor, destinations, moves } = state.rival;
-            this.rivalShip.update({
-                isControllable,
-                bearings,
-                activePlayerColor,
-                destinations,
-                moves,
-            });
+            this.rivalShip.update({ ...state.rival });
         }
 
         if (localPlayer) {
