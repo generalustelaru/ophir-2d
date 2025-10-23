@@ -2,9 +2,6 @@ import Konva from 'konva';
 import { Coordinates, Player } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
 import { Button } from '../popular';
-import clientConstants from '~/client_constants';
-
-const { COLOR } = clientConstants;
 
 export class SpecialistBand extends Button implements DynamicGroupInterface<boolean> {
     private background: Konva.Rect;
@@ -14,7 +11,6 @@ export class SpecialistBand extends Button implements DynamicGroupInterface<bool
         stage: Konva.Stage,
         position: Coordinates,
         player: Player,
-        // isLocalPlayer: boolean,
         callback: Function,
     ) {
         const width = 125;
@@ -34,7 +30,6 @@ export class SpecialistBand extends Button implements DynamicGroupInterface<bool
             y: 1,
             width,
             height,
-            // text: isLocalPlayer ? 'You' : player.specialist.displayName,
             text: player.specialist.displayName,
             fontSize: 14,
             fontStyle: 'bold',
@@ -42,7 +37,7 @@ export class SpecialistBand extends Button implements DynamicGroupInterface<bool
             align: 'center',
             verticalAlign: 'middle',
             fontFamily: 'Custom',
-            fill: COLOR[player.color],
+            fill: player.isActive ? 'black' : 'white',
         });
 
         this.group.add(this.background, this.label);
@@ -54,6 +49,7 @@ export class SpecialistBand extends Button implements DynamicGroupInterface<bool
     }
 
     public update(isActive: boolean): void {
+        this.label.fill(isActive ? 'black': 'white');
         this.background.fill(isActive ? 'white' : 'black');
     }
 }
