@@ -106,7 +106,22 @@ export class MapGroup implements MegaGroupInterface {
             this.favorButton.getElement(),
         ]);
 
+
         //MARK: ships
+        players.forEach(player => {
+
+            if (player.color && player.color !== localState.playerColor) {
+                const { position } = player.bearings;
+                const ship = new RemoteShip(
+                    position.x,
+                    position.y,
+                    player.isActive,
+                    player.color,
+                );
+                this.opponentShips.push(ship);
+                this.group.add(ship.getElement());
+            }
+        });
 
         if (state.rival.isIncluded) {
             this.rivalShip = new RivalShip(
@@ -118,45 +133,24 @@ export class MapGroup implements MegaGroupInterface {
             this.group.add(this.rivalShip.getElement());
         }
 
-        players.forEach(player => {
+        if (localState.playerColor) {
+            const shipPosition = localPlayer?.bearings.position;
 
-            if (player.color && player.color !== localState.playerColor) {
-                const { position } = player.bearings;
-                const ship = new RemoteShip(
-                    position.x,
-                    position.y,
-                    COLOR[player.color],
-                    player.isActive,
-                    player.color,
-                );
-                this.opponentShips.push(ship);
-                this.group.add(ship.getElement());
-            }
-        });
+            if (!shipPosition)
+                throw new Error('Missing player data!');
 
-        if (!localState.playerColor) {
-            return;
+            this.localShip = new PlayerShip(
+                this.stage,
+                shipPosition.x,
+                shipPosition.y,
+                localPlayer.isActive,
+                this.seaZones,
+                state.players,
+                state.rival,
+            );
+            this.localShip.switchControl(localPlayer.isActive);
+            this.group.add(this.localShip.getElement());
         }
-
-        //MARK: player ship
-        const shipPosition = localPlayer?.bearings.position;
-
-        if (!shipPosition) {
-            throw new Error('Missing player data!');
-        }
-
-        this.localShip = new PlayerShip(
-            this.stage,
-            shipPosition.x,
-            shipPosition.y,
-            localPlayer.isActive,
-            this.seaZones,
-            state.players,
-            state.rival,
-        );
-        this.localShip.switchControl(localPlayer.isActive);
-
-        this.group.add(this.localShip.getElement());
     }
 
     // MARK: UPDATE
@@ -170,17 +164,6 @@ export class MapGroup implements MegaGroupInterface {
             this.endTurnButton?.update(localPlayer);
             this.actionDial?.update(localPlayer);
             this.favorButton?.update(localPlayer);
-        }
-
-        if (this.rivalShip && state.rival.isIncluded) {
-            const { isControllable, bearings, activePlayerColor, destinations, moves } = state.rival;
-            this.rivalShip.update({
-                isControllable,
-                bearings,
-                activePlayerColor,
-                destinations,
-                moves,
-            });
         }
 
         for (const zone of this.seaZones) {
@@ -206,7 +189,17 @@ export class MapGroup implements MegaGroupInterface {
             }
         });
 
-        //MARK: player ship
+        if (this.rivalShip && state.rival.isIncluded) {
+            const { isControllable, bearings, activePlayerColor, destinations, moves } = state.rival;
+            this.rivalShip.update({
+                isControllable,
+                bearings,
+                activePlayerColor,
+                destinations,
+                moves,
+            });
+        }
+
         if (localPlayer) {
             const localShip = this.localShip as PlayerShip;
 
