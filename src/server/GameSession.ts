@@ -219,6 +219,7 @@ export class GameSession {
 
         const enrolUpdate = ((): Probable<StateResponse> => {
             switch (action) {
+                // TODO: add new action change_color
                 case Action.start_setup: {
                     const { gameId, sessionOwner, players, chat } = state;
 
