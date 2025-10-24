@@ -39,8 +39,6 @@ export class FavorButton extends ActionButton implements DynamicGroupInterface<P
         switch (true) {
             case (player?.isHandlingRival):
                 this.setEnabled(false);
-                this.favorIcon.update(COLOR_PROFILES.favorStampReady);
-                this.checkmark.visible(false);
                 break;
 
             case (player?.isActive && player.privilegedSailing):
@@ -51,8 +49,8 @@ export class FavorButton extends ActionButton implements DynamicGroupInterface<P
 
             case (player?.isActive && player.favor > 0 && player.moveActions > 0):
                 this.setEnabled(true);
-                this.checkmark.visible(false);
                 this.favorIcon.update(COLOR_PROFILES.favorStampReady);
+                this.checkmark.visible(false);
                 break;
 
             default:
