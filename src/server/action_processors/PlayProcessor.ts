@@ -665,6 +665,8 @@ export class PlayProcessor implements SessionProcessor {
         }
 
         player.deactivate();
+        this.privateState.updatePlayerStats(player);
+        console.info(this.privateState.getGameStats());
         this.playState.savePlayer(player.toDto());
 
         const newPlayerResult = ((): Probable<PlayerHandler> => {
