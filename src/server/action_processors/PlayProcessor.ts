@@ -13,7 +13,7 @@ import { validator } from '../services/validation/ValidatorService';
 import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
-const { TRADE_DECK_B } = serverConstants;
+const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
 
 export class PlayProcessor implements SessionProcessor {
     private idleCheckInterval: NodeJS.Timeout | null = null;
@@ -448,7 +448,6 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(unloadResult.message);
 
         const reward = trade.reward.favorAndVp;
-        this.privateState.updateVictoryPoints(color, reward);
 
         player.gainFavor(reward);
         player.setCargo(unloadResult.data);
@@ -463,6 +462,7 @@ export class PlayProcessor implements SessionProcessor {
         else
             player.clearMoves();
 
+        this.privateState.updatePlayerStats(player, reward);
         this.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
         console.info(this.privateState.getGameStats());
 
@@ -599,7 +599,7 @@ export class PlayProcessor implements SessionProcessor {
             player.clearMoves();
 
         const reward = metal === 'gold' ? 10 : 5;
-        this.privateState.updateVictoryPoints(color, reward);
+        this.privateState.updatePlayerStats(player, reward);
 
         if (player.isPostmaster() && player.getBearings().location != 'temple') {
             this.addServerMessage(`${name} mailed one ${metal} for ${reward} VP`, color);
