@@ -20,7 +20,7 @@ export class TreasuryCard extends ActionButton implements DynamicGroupInterface<
         super(
             stage,
             { width: 66, height: 96, x: position.x, y: position.y },
-            { action: Action.buy_metals, payload },
+            { action: Action.buy_metal, payload },
         );
 
         this.metalType = payload.metal;

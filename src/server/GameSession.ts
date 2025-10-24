@@ -341,43 +341,43 @@ export class GameSession {
         const playUpdate = ((): Probable<StateResponse> => {
             switch (action) {
                 case Action.force_turn:
-                    return processor.processForcedTurn(digest);
+                    return processor.forceTurn(digest);
                 case Action.spend_favor:
-                    return processor.processFavorSpending(digest);
+                    return processor.spendFavor(digest);
                 case Action.move:
-                    return processor.processMove(digest);
+                    return processor.move(digest);
                 case Action.move_rival:
-                    return processor.processMove(digest, true);
+                    return processor.move(digest, true);
                 case Action.reposition:
-                    return processor.processRepositioning(digest);
+                    return processor.reposition(digest);
                 case Action.reposition_rival:
-                    return processor.processRepositioning(digest, true);
+                    return processor.reposition(digest, true);
                 case Action.reposition_opponent:
-                    return processor.processOpponentRepositioning(digest);
+                    return processor.repositionOpponent(digest);
                 case Action.load_good:
-                    return processor.processLoadGood(digest);
+                    return processor.loadGood(digest);
                 case Action.sell_goods:
-                    return processor.processSellGoods(digest);
+                    return processor.sellGoods(digest);
                 case Action.donate_goods:
                     return processor.donateGoods(digest);
                 case Action.sell_specialty:
-                    return processor.processSellSpecialty(digest);
-                case Action.buy_metals:
-                    return processor.processMetalPurchase(digest);
-                case Action.donate_metals:
-                    return processor.processMetalDonation(digest);
+                    return processor.sellSpecialty(digest);
+                case Action.buy_metal:
+                    return processor.buyMetal(digest);
+                case Action.donate_metal:
+                    return processor.donateMetal(digest);
                 case Action.end_turn:
-                    return processor.processEndTurn(digest);
+                    return processor.endTurn(digest);
                 case Action.end_rival_turn:
-                    return processor.processRivalTurn(digest);
+                    return processor.endRivalTurn(digest);
                 case Action.undo:
-                    return processor.processUndo(digest);
+                    return processor.undo(digest);
                 case Action.shift_market:
-                    return processor.processRivalTurn(digest, true);
+                    return processor.endRivalTurn(digest, true);
                 case Action.upgrade_cargo:
-                    return processor.processUpgrade(digest);
+                    return processor.upgradeCargo(digest);
                 case Action.drop_item:
-                    return processor.processItemDrop(digest);
+                    return processor.dropItem(digest);
                 default:
                     return lib.fail(`Unknown action: ${action}`);
             }

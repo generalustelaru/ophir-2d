@@ -82,7 +82,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: MOVE
-    public processMove(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
+    public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
         this.preserveState(player);
         const { name: playerName, color: playerColor } = player.getIdentity();
@@ -226,14 +226,14 @@ export class PlayProcessor implements SessionProcessor {
 
         } else if (player.getMoves() === 0) {
             this.addServerMessage(`${playerName} also ran out of moves and cannot act further.`);
-            this.processEndTurn(digest, false);
+            this.endTurn(digest, false);
         }
 
         return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: REPOSITION
-    public processRepositioning(data: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
+    public reposition(data: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { payload, player } = data;
         const repositioningPayload = validator.validateRepositioningPayload(payload);
 
@@ -250,7 +250,7 @@ export class PlayProcessor implements SessionProcessor {
         return lib.pass(this.saveAndReturn(player));
     }
 
-    public processOpponentRepositioning(data: DataDigest): Probable<StateResponse> {
+    public repositionOpponent(data: DataDigest): Probable<StateResponse> {
         const { payload } = data;
         const validation = validator.validateOpponentRepositioningPayload(payload);
 
@@ -271,7 +271,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: FAVOR
-    public processFavorSpending(data: DataDigest): Probable<StateResponse> {
+    public spendFavor(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
         this.preserveState(player);
 
@@ -290,7 +290,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: DROP ITEM
-    public processItemDrop(data: DataDigest): Probable<StateResponse> {
+    public dropItem(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.preserveState(player);
 
@@ -315,7 +315,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: LOAD GOOD
-    public processLoadGood(data: DataDigest): Probable<StateResponse> {
+    public loadGood(data: DataDigest): Probable<StateResponse> {
         const { payload, player } = data;
         const { color, name } = player.getIdentity();
         this.preserveState(player);
@@ -360,7 +360,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: TRADE
-    public processSellGoods(data: DataDigest): Probable<StateResponse> {
+    public sellGoods(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.wipeState(player);
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
@@ -480,7 +480,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: SPECIALTY
-    public processSellSpecialty(data: DataDigest): Probable<StateResponse> {
+    public sellSpecialty(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
         this.preserveState(player);
         const { name, color } = player.getIdentity();
@@ -518,7 +518,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: BUY METAL
-    public processMetalPurchase(data: DataDigest): Probable<StateResponse> {
+    public buyMetal(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.preserveState(player);
         const { name, color } = player.getIdentity();
@@ -571,7 +571,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: DONATE METAL
-    public processMetalDonation(data: DataDigest): Probable<StateResponse> {
+    public donateMetal(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.preserveState(player);
         const { color, name } = player.getIdentity();
@@ -647,7 +647,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: END TURN
-    public processEndTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
+    public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
         const { player } = data;
         this.wipeState(player);
         const { turnOrder, name, color } = player.getIdentity();
@@ -701,7 +701,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: RIVAL TURN
-    public processRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
+    public endRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
         const { player } = digest;
         this.preserveState(player);
         const rival = this.playState.getRivalData();
@@ -747,7 +747,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: FORCED TURN
-    public processForcedTurn(digest: DataDigest): Probable<StateResponse> {
+    public forceTurn(digest: DataDigest): Probable<StateResponse> {
         const { player } = digest;
 
         if (player.isActivePlayer())
@@ -773,11 +773,11 @@ export class PlayProcessor implements SessionProcessor {
             player.getIdentity().color,
         );
 
-        return this.processEndTurn({ player: idlerHandler, payload: null }, false);
+        return this.endTurn({ player: idlerHandler, payload: null }, false);
     }
 
     // MARK: UNDO
-    public processUndo(digest: DataDigest): Probable<StateResponse> {
+    public undo(digest: DataDigest): Probable<StateResponse> {
         const { player } = digest;
         const { color, name } = player.getIdentity();
 
@@ -809,7 +809,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     // MARK: UPGRADE
-    public processUpgrade(data: DataDigest): Probable<StateResponse> {
+    public upgradeCargo(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
         this.preserveState(player);
 
@@ -877,7 +877,7 @@ export class PlayProcessor implements SessionProcessor {
             for (const zone of adjacentZones) {
                 if (this.playState.getLocationName(zone) === 'temple') {
 
-                    return [Action.donate_metals];
+                    return [Action.donate_metal];
 
                 }
             }
@@ -1053,12 +1053,12 @@ export class PlayProcessor implements SessionProcessor {
                 case Action.donate_goods:
                     return trades.includes(this.playState.getTempleTradeSlot());
 
-                case Action.donate_metals:
+                case Action.donate_metal:
                     return player.getCargo()
                         .filter(item => ['silver', 'gold'].includes(item))
                         .length;
 
-                case Action.buy_metals:
+                case Action.buy_metal:
                     return (
                         player.hasPurchaseAllowance()
                         && player.hasCargoRoom(2)

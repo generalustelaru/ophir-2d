@@ -98,7 +98,7 @@ export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
         );
 
         const playerCanDonateMetals = (
-            !!player?.locationActions.includes(Action.donate_metals)
+            !!player?.locationActions.includes(Action.donate_metal)
         );
 
         this.goldDonationCard.update((

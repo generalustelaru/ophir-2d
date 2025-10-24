@@ -266,7 +266,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.turnPurchases.update(count => ++count);
     }
     public mayBuyMetal() {
-        return (this.hasAction(Action.buy_metals) && this.hasCargoRoom(2) && this.turnPurchases.get() < 2);
+        return (this.hasAction(Action.buy_metal) && this.hasCargoRoom(2) && this.turnPurchases.get() < 2);
     }
 
     public hasPurchaseAllowance() {
@@ -274,7 +274,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public canDonateMetal(metal: CargoMetal) {
-        return (this.hasAction(Action.donate_metals) && this.cargo.includes(metal));
+        return (this.hasAction(Action.donate_metal) && this.cargo.includes(metal));
     }
 
     public maySellSpecialtyGood() {

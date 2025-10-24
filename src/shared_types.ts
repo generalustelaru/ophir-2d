@@ -21,8 +21,8 @@ export enum Action {
     sell_goods = 'sell_goods',
     donate_goods = 'donate_goods',
     sell_specialty = 'sell_specialty',
-    buy_metals = 'buy_metals',
-    donate_metals = 'donate_metals',
+    buy_metal = 'buy_metal',
+    donate_metal = 'donate_metal',
     inquire = 'inquire',
     enrol = 'enrol',
     undo = 'undo',
@@ -45,8 +45,8 @@ export type Currency = 'coins' | 'favor';
 export type GoodsLocationName = 'quarry' | 'forest' | 'mines' | 'farms';
 export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
 export type LocalAction =
-    | Action.upgrade_cargo | Action.sell_goods | Action.sell_specialty | Action.donate_goods | Action.donate_metals
-    | Action.buy_metals | Action.load_good;
+    | Action.upgrade_cargo | Action.sell_goods | Action.sell_specialty | Action.donate_goods | Action.donate_metal
+    | Action.buy_metal | Action.load_good;
 export type ItemName = TradeGood | CargoMetal | 'empty';
 export type MarketSlotKey = 'slot_1' | 'slot_2' | 'slot_3';
 export type Trade = { request: Array<TradeGood>, reward: Reward };
@@ -283,7 +283,7 @@ should persist
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
-    | Action.sell_goods | Action.donate_goods | Action.buy_metals | Action.donate_metals | Action.pick_specialist
+    | Action.sell_goods | Action.donate_goods | Action.buy_metal | Action.donate_metal | Action.pick_specialist
     | Action.enrol | Action.reposition_opponent;
 export type LaconicAction =
     | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
@@ -307,8 +307,8 @@ export type RepositionMessage = MessageFormat<Action.reposition | Action.reposit
 export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentRepositioningPayload>;
 export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSlotPayload>;
 export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSlotPayload>;
-export type BuyMetalsMessage = MessageFormat<Action.buy_metals, MetalPurchasePayload>;
-export type DonateMetalMessage = MessageFormat<Action.donate_metals, MetalDonationPayload>;
+export type BuyMetalsMessage = MessageFormat<Action.buy_metal, MetalPurchasePayload>;
+export type DonateMetalMessage = MessageFormat<Action.donate_metal, MetalDonationPayload>;
 export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage

@@ -17,7 +17,7 @@ export class MetalDonationCard extends ActionButton implements DynamicGroupInter
         super(
             stage,
             { x: position.x, y: position.y, width: 66, height: 96 },
-            { action: Action.donate_metals, payload: { metal: metalType } },
+            { action: Action.donate_metal, payload: { metal: metalType } },
         );
 
         this.background = new Konva.Rect({
