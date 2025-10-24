@@ -44,6 +44,13 @@ export class PlayProcessor implements SessionProcessor {
         const activePlayer = players.find(p => p.isActive === true);
         const firstPlayer = players.find(p => p.turnOrder === 1);
 
+        if (privateState.getGameStats().find(stat => { stat.vp != 0; })) {
+            for (const stat of privateState.getGameStats()) {
+                const player = players.find(p => p.color === stat.color);
+                player && this.transmitVp(this.privateState.getPlayerVictoryPoints(player.color), player.socketId);
+            }
+        }
+
         if (!firstPlayer)
             throw new Error('Could not find the first player!');
 
@@ -600,7 +607,10 @@ export class PlayProcessor implements SessionProcessor {
             this.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
         }
 
-        this.transmitVp(reward, player.getIdentity().socketId);
+        this.transmitVp(
+            this.privateState.getPlayerVictoryPoints(color),
+            player.getIdentity().socketId,
+        );
 
         const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(metal);
 
@@ -725,7 +735,7 @@ export class PlayProcessor implements SessionProcessor {
             if (marketShift.data.hasGameEnded)
                 this.playState.registerGameEnd(marketShift.data.countables);
         } else {
-            this.addServerMessage('Rival moved and rolled influence.',  color);
+            this.addServerMessage('Rival moved and rolled influence.', color);
         }
 
         player.unfreeze(
@@ -1029,7 +1039,7 @@ export class PlayProcessor implements SessionProcessor {
         const trades = this.pickFeasibleTrades(player);
         const purchases = this.pickFeasiblePurchases(player);
         const actions = actionsByLocation.filter(action => {
-            switch(action) {
+            switch (action) {
                 case Action.upgrade_cargo:
                     return player.getCoinAmount() >= 2 && player.getCargo().length < 4;
 
@@ -1061,7 +1071,7 @@ export class PlayProcessor implements SessionProcessor {
                         !['temple', 'market', 'exchange'].includes(location)
                         && player.hasCargoRoom(1)
                         && this.playState.getItemSupplies().goods[
-                            serverConstants.LOCATION_GOODS[location as GoodsLocationName]
+                        serverConstants.LOCATION_GOODS[location as GoodsLocationName]
                         ]
                     );
             }
@@ -1122,7 +1132,7 @@ export class PlayProcessor implements SessionProcessor {
 
         this.playState.shiftMarketCards(newTrade);
 
-        return lib.pass({ hasGameEnded: false, countables : [] });
+        return lib.pass({ hasGameEnded: false, countables: [] });
     }
 
     private saveAndReturn(player: PlayerHandler): StateResponse {
