@@ -1066,13 +1066,11 @@ export class PlayProcessor implements SessionProcessor {
                     );
 
                 case Action.load_good:
-                    const location = player.getBearings().location;
+                    const { location } = player.getBearings();
                     return (
-                        !['temple', 'market', 'exchange'].includes(location)
+                        ['quarry' , 'forest', 'mines', 'farms'].includes(location)
                         && player.hasCargoRoom(1)
-                        && this.playState.getItemSupplies().goods[
-                        serverConstants.LOCATION_GOODS[location as GoodsLocationName]
-                        ]
+                        && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
                     );
             }
         });
