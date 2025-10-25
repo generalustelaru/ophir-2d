@@ -1,21 +1,22 @@
 import Konva from 'konva';
 import constants from '~/client_constants';
-import { Player } from '~/shared_types';
+import { Coordinates } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class MovesDial implements DynamicGroupInterface<Player> {
+type MovesDialUpdate = {
+    isActive: boolean,
+    moves: number,
+}
+export class MovesDial implements DynamicGroupInterface<MovesDialUpdate> {
 
     private group: Konva.Group;
     private upperWave: Konva.Path;
     private lowerWave: Konva.Path;
 
-    constructor(isActivePlayer: boolean) {
-        this.group = new Konva.Group({
-            x: 15,
-            y: 60,
-        });
+    constructor(position: Coordinates) {
+        this.group = new Konva.Group(position);
 
         const waveData = ICON_DATA.ocean_wave;
 
@@ -23,7 +24,7 @@ export class MovesDial implements DynamicGroupInterface<Player> {
             x: this.group.x(),
             y: 0,
             data: waveData.shape,
-            fill: isActivePlayer ? waveData.fill : COLOR.disabled,
+            fill: COLOR.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
 
@@ -31,7 +32,7 @@ export class MovesDial implements DynamicGroupInterface<Player> {
             x: this.group.x(),
             y: 20,
             data: waveData.shape,
-            fill: isActivePlayer ? waveData.fill : COLOR.disabled,
+            fill: COLOR.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
 
@@ -42,11 +43,12 @@ export class MovesDial implements DynamicGroupInterface<Player> {
         return this.group;
     }
 
-    public update(player: Player): void {
+    public update(data: MovesDialUpdate): void {
+        const { isActive, moves } = data;
         const waveColor = ICON_DATA.ocean_wave.fill;
-        if (player.isActive) {
-            this.upperWave.fill(player.moveActions > 1 ? waveColor : COLOR.disabled);
-            this.lowerWave.fill(player.moveActions > 0 ? waveColor : COLOR.disabled);
+        if (isActive) {
+            this.upperWave.fill(moves > 1 ? waveColor : COLOR.disabled);
+            this.lowerWave.fill(moves > 0 ? waveColor : COLOR.disabled);
         } else {
             this.upperWave.fill(COLOR.disabled);
             this.lowerWave.fill(COLOR.disabled);

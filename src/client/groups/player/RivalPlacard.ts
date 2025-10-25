@@ -5,7 +5,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { PlayerColor, Rival } from '~/shared_types';
-import { InfluenceDial } from '../popular';
+import { InfluenceDial, MovesDial } from '../popular';
 import { ShiftMarketButton, ConcludeButton } from '.';
 import clientConstants from '~/client_constants';
 
@@ -19,6 +19,7 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
     private influenceDial: InfluenceDial;
     private shiftMarketButton: ShiftMarketButton;
     private concludeButton: ConcludeButton;
+    private movesDial: MovesDial;
 
     constructor(
         stage: Konva.Stage,
@@ -49,12 +50,14 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
 
         this.shiftMarketButton = new ShiftMarketButton(stage, { x: 25, y: 10 });
         this.concludeButton = new ConcludeButton(stage, { x: 100, y: 25 });
+        this.movesDial = new MovesDial({ x:80, y:10 });
 
         this.group.add(...[
             this.background,
             this.influenceDial.getElement(),
             this.shiftMarketButton.getElement(),
             this.concludeButton.getElement(),
+            this.movesDial.getElement(),
         ]);
 
         this.update(rival);
@@ -78,5 +81,6 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
         this.influenceDial.update({ value: influence, color: null });
         this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
+        this.movesDial.update({ moves, isActive: activePlayerColor && isControllable });
     }
 }

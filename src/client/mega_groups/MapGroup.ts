@@ -4,8 +4,9 @@ import {
 } from '~/shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds } from '~/client_types';
 import {
-    SeaZone, BarrierToken, RemoteShip, PlayerShip, MovesDial, EndTurnButton, ActionDial, FavorButton, RivalShip,
+    SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, ActionDial, FavorButton, RivalShip,
 } from '../groups/map';
+import { MovesDial } from '../groups/popular';
 import localState from '../state';
 import clientConstants from '~/client_constants';
 
@@ -81,7 +82,7 @@ export class MapGroup implements MegaGroupInterface {
         const localPlayer = players.find(player => player.color === localState.playerColor);
         const isActivePlayer = localPlayer?.isActive || false;
         //MARK: dials
-        this.movesDial = new MovesDial(isActivePlayer);
+        this.movesDial = new MovesDial({ x: 15, y: 60 });
 
         this.endTurnButton = new EndTurnButton(
             this.stage,
@@ -158,10 +159,10 @@ export class MapGroup implements MegaGroupInterface {
     public update(state: PlayState): void {
         const players = state.players;
         const localPlayer = players.find(player => player.color === localState.playerColor);
-
         //MARK: dials & hexes
         if (localPlayer) {
-            this.movesDial?.update(localPlayer);
+            const { moveActions: moves, isActive } = localPlayer;
+            this.movesDial?.update({ moves, isActive });
             this.endTurnButton?.update(localPlayer);
             this.actionDial?.update(localPlayer);
             this.favorButton?.update(localPlayer);
