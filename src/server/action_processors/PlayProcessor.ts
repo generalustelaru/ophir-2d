@@ -22,6 +22,8 @@ export class PlayProcessor implements SessionProcessor {
     private backupState: BackupStateHandler;
     private autoBroadcast: (state: PlayState) => void;
     private transmitTurnNotification: (socketId: string) => void;
+    private transmitRivalControlNotification: (socketId: string) => void;
+
     private transmitVp: (vp: number, socketId: string) => void;
 
     /** @throws */
@@ -29,6 +31,7 @@ export class PlayProcessor implements SessionProcessor {
         stateBundle: StateBundle,
         broadcastCallback: (state: PlayState) => void,
         transmitTurnNotification: (socketId: string) => void,
+        transmitRivalControlNotification: (socketId: string) => void,
         transmitVp: (vp: number, socketId: string) => void,
     ) {
         const { playState, privateState, backupState } = stateBundle;
@@ -38,6 +41,7 @@ export class PlayProcessor implements SessionProcessor {
         this.backupState = backupState;
         this.autoBroadcast = broadcastCallback;
         this.transmitTurnNotification = transmitTurnNotification;
+        this.transmitRivalControlNotification = transmitRivalControlNotification;
         this.transmitVp = transmitVp;
 
         const players = this.playState.getAllPlayers();
@@ -221,6 +225,8 @@ export class PlayProcessor implements SessionProcessor {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
                     this.addServerMessage(`${playerName} has took control of the rival ship.`, playerColor);
                     player.freeze();
+                    this.transmitRivalControlNotification(player.getIdentity().socketId);
+                    // TODO: send  notification
                 }
             }
 

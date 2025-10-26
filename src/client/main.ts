@@ -6,8 +6,7 @@ import { UserInterface } from './services/UiService';
 import clientConstants from '~/client_constants';
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
-    EnrolmentResponse,
-    NewNameTransmission,
+    EnrolmentResponse, NewNameTransmission, RivalControlTransmission,
 } from '~/shared_types';
 
 const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
@@ -151,6 +150,13 @@ window.addEventListener(EventType.name_transmission, (event: CustomEventInit<New
 
     if (PERSIST_SESSION)
         localStorage.setItem('localState', JSON.stringify(localState));
+});
+
+window.addEventListener(EventType.rival_control_transmission, () => {
+    if (!localState.playerColor)
+        return signalError('Missing local player data')
+
+    CanvasService.notifyForRivalControl();
 });
 
 window.addEventListener(EventType.reset, (event: CustomEventInit) => {

@@ -13,6 +13,7 @@ import { StartTurnModal } from '../groups/modals/StartTurnModal';
 import { DonateGoodsModal } from '../groups/modals/DonateGoodsModal';
 import { EndTurnModal } from '../groups/modals/EndTurnModal';
 import { SailAttemptModal } from '../groups/modals/SailAttemptModal';
+import { RivalControlModal } from '../groups/modals/RivalControlModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -29,6 +30,7 @@ export const CanvasService = new class extends Communicator {
     private sellGoodsModal: SellGoodsModal;
     private donateGoodsModal: DonateGoodsModal;
     private sailAttemptModal: SailAttemptModal;
+    private rivalControlModal: RivalControlModal;
 
     public constructor() {
         super();
@@ -54,6 +56,7 @@ export const CanvasService = new class extends Communicator {
         this.endTurnModal = new EndTurnModal(this.stage);
         this.startTurnModal = new StartTurnModal(this.stage);
         this.sailAttemptModal = new SailAttemptModal(this.stage);
+        this.rivalControlModal = new RivalControlModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
             this.sellGoodsModal.show(slot);
@@ -131,6 +134,10 @@ export const CanvasService = new class extends Communicator {
 
     public notifyForTurn(): void {
         this.startTurnModal.show();
+    }
+
+    public notifyForRivalControl(): void {
+        this.rivalControlModal.show();
     }
 
     public drawUpdateElements(state: State, toDisable = false): void {

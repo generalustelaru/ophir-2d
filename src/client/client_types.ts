@@ -2,6 +2,7 @@ import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
     Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState, VpTransmission, State,
     EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost,
+    RivalControlTransmission,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -157,6 +158,7 @@ export enum EventType {
     identification = 'identification',
     vp_transmission = 'vp_transmission',
     name_transmission = 'name_transmission',
+    rival_control_transmission = 'rival_control_transmission',
     start_turn = 'start_turn',
 }
 
@@ -166,6 +168,7 @@ export type LaconicType =
     | EventType.close
     | EventType.timeout
     | EventType.start_turn
+    | EventType.rival_control_transmission
 ;
 
 export type Event =

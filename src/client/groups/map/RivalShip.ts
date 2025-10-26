@@ -139,8 +139,9 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         this.movesLeft = moves;
         this.group.x(bearings.position.x);
         this.group.y(bearings.position.y);
-        this.group.draggable(activePlayerColor === this.localPlayerColor);
+        this.group.draggable(activePlayerColor == this.localPlayerColor);
         this.ship.update(isControllable ? COLOR[activePlayerColor] : COLOR.shipBorder);
+        
     };
 
     private broadcastAction(detail: ClientMessage): void {
