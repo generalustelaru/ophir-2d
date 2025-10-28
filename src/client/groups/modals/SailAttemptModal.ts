@@ -1,16 +1,15 @@
 import Konva from 'konva';
 import { Action } from '~/shared_types';
 import { DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
-import { InfluenceDial } from '../popular';
+import { InfluenceDial, SymbolicInfluenceDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client/client_constants';
 
 const { COLOR } = clientConstants;
 
 export class SailAttemptModal extends ModalBase implements DynamicModalInterface<undefined, SailAttemptArgs> {
-    private ownerDieFace: Konva.Rect;
+    private ownerInfluenceDie: SymbolicInfluenceDial;
     private toSailDial: InfluenceDial;
-    private dieSymbol: Konva.Text;
     constructor(stage: Konva.Stage) {
         super(
             stage,
@@ -28,22 +27,9 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
             x: 76,
             y: 24,
         });
-        this.ownerDieFace = new Konva.Rect({
-            width: 50,
-            height: 50,
-            cornerRadius: 10,
-        });
-        this.dieSymbol = new Konva.Text({
-            text: '?',
-            width: this.ownerDieFace.width(),
-            height: this.ownerDieFace.height(),
-            align: 'center',
-            verticalAlign: 'middle',
-            y: 5,
-            fontSize: 38,
-            fontFamily: 'Custom',
-            fontStyle: '700',
-        });
+
+        this.ownerInfluenceDie = new SymbolicInfluenceDial();
+
         const greaterEqual = new Konva.Text({
             text: '≥',
             width: iconRow.width(),
@@ -64,8 +50,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
             COLOR.boneWhite,
         );
         iconRow.add(...[
-            this.ownerDieFace,
-            this.dieSymbol,
+            this.ownerInfluenceDie.getElement(),
             greaterEqual,
             this.toSailDial.getElement(),
         ]);
@@ -85,8 +70,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
                 default: return '?';
             }
         })();
-        this.dieSymbol.text(symbol) ;
-        this.ownerDieFace.fill(COLOR[data.playerColor]);
+        this.ownerInfluenceDie.update({ symbol, color: data.playerColor });
         this.toSailDial.update({ value: data.toSail, color: null });
 
         this.open({ action: Action.move, payload: data.destination });

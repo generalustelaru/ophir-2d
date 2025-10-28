@@ -7,3 +7,4 @@ export { InfluenceDial } from './InfluenceDial';
 export { ShipToken } from './ShipToken';
 export { VictoryPointDial } from './VictoryPointDial';
 export { MovesDial } from './MovesDial';
+export { SymbolicInfluenceDial } from './SymbolicInfluenceDial';
