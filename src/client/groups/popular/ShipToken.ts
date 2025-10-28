@@ -17,21 +17,23 @@ export class ShipToken implements DynamicGroupInterface<Color> {
         },
         isMapToken: boolean = true,
     ) {
-        this.group = new Konva.Group();
+        this.group = new Konva.Group({
+            width: 60,
+            height: 60,
+            x: options?.position?.x || 0,
+            y: options?.position?.y || 0,
+        });
 
         if (isMapToken) {
             const tokenFace = new Konva.Circle({
                 radius: 30,
-                x: 8,
-                y: 11,
                 fill: COLOR[color],
                 stroke: 'black',
                 strokeWidth: 1,
             });
             const tokenDepth = new Konva.Circle({
                 radius: 30,
-                x: 8,
-                y: 8 + 11,
+                y: 8,
                 fill: COLOR[`dark${color}`],
                 stroke: 'black',
                 strokeWidth: 1,
@@ -42,8 +44,8 @@ export class ShipToken implements DynamicGroupInterface<Color> {
 
         const scale = options?.scale || 1.5;
         this.token = new Konva.Path({
-            x: options?.position?.x || -15,
-            y: options?.position?.y || -5,
+            x: -24,// 15
+            y: -18, // 5
             data: SHIP_DATA.shape,
             fill: COLOR[color],
             scale: { x: scale, y: scale },

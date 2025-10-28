@@ -37,7 +37,11 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
             cornerRadius: 15,
         });
 
-        this.shipToken = new ShipToken(color, { scale: 4, position: { x: 40, y: 50 } }, false);
+        this.shipToken = new ShipToken(
+            color,
+            { scale: 4, position: { x: 60, y: 50 } },
+            false,
+        ),
 
         this.ownerName = new Konva.Text({
             width: layout.width,
