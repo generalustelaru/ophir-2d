@@ -1,6 +1,10 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { ShipToken } from '../popular';
+import clientConstants from '~/client/client_constants';
+import { PlayState } from '~/shared_types';
+
+const { COLOR } = clientConstants;
 
 export class RivalControlModal extends ModalBase {
     private shipToken : ShipToken;
@@ -10,13 +14,6 @@ export class RivalControlModal extends ModalBase {
             stage,
             { hasSubmit: false, cancelLabel: 'Close' },
             { width: 310, height: 200 },
-        );
-
-        this.shipToken = new ShipToken(
-            'Neutral',
-            {
-                position: { x: 100, y: 100 },
-            },
         );
 
         const text = new Konva.Text({
@@ -31,7 +28,18 @@ export class RivalControlModal extends ModalBase {
             fontFamily: 'Custom',
         });
 
+        this.shipToken = new ShipToken(
+            'Neutral',
+            { position: { x: 100, y: 100 } },
+        );
+
         this.contentGroup.add(text, this.shipToken.getElement());
+    }
+
+    public update(state: PlayState) {
+        const player = state.players.find(p => p.isActive);
+
+        player && this.shipToken.update(COLOR[player.color]);
     }
 
     public show() {
