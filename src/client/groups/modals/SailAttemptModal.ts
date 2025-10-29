@@ -8,7 +8,7 @@ import clientConstants from '~/client/client_constants';
 const { COLOR } = clientConstants;
 
 export class SailAttemptModal extends ModalBase implements DynamicModalInterface<undefined, SailAttemptArgs> {
-    private ownerInfluenceDie: SymbolicInfluenceDial;
+    private ownerDie: SymbolicInfluenceDial;
     private toSailDial: InfluenceDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -28,7 +28,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
             y: 24,
         });
 
-        this.ownerInfluenceDie = new SymbolicInfluenceDial();
+        this.ownerDie = new SymbolicInfluenceDial();
 
         const greaterEqual = new Konva.Text({
             text: '≥',
@@ -50,7 +50,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
             COLOR.boneWhite,
         );
         iconRow.add(...[
-            this.ownerInfluenceDie.getElement(),
+            this.ownerDie.getElement(),
             greaterEqual,
             this.toSailDial.getElement(),
         ]);
@@ -70,7 +70,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
                 default: return '?';
             }
         })();
-        this.ownerInfluenceDie.update({ symbol, color: data.playerColor });
+        this.ownerDie.update({ symbol, color: data.playerColor });
         this.toSailDial.update({ value: data.toSail, color: null });
 
         this.open({ action: Action.move, payload: data.destination });
