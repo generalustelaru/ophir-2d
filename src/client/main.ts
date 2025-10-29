@@ -6,7 +6,7 @@ import { UserInterface } from './services/UiService';
 import clientConstants from '~/client_constants';
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
-    EnrolmentResponse, NewNameTransmission, RivalControlTransmission,
+    EnrolmentResponse, NewNameTransmission,
 } from '~/shared_types';
 
 const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
