@@ -1,11 +1,12 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client/client_types';
-import { NeutralColor, PlayerColor } from '~/shared_types';
+import { Coordinates, NeutralColor, PlayerColor } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
 const { COLOR } = clientConstants;
 type SymbolicInfluenceDialUpdate = {
     color: PlayerColor | NeutralColor,
     symbol: string,
+    position?: Coordinates,
 }
 export class SymbolicInfluenceDial implements DynamicGroupInterface<SymbolicInfluenceDialUpdate> {
     private group: Konva.Group;
@@ -13,13 +14,16 @@ export class SymbolicInfluenceDial implements DynamicGroupInterface<SymbolicInfl
     private dieSymbol: Konva.Text;
     constructor(data?: SymbolicInfluenceDialUpdate) {
 
-        this.group = new Konva.Group();
+        this.group = new Konva.Group({
+            x: data?.position?.x || 0,
+            y: data?.position?.y || 0,
+        });
 
         this.dieFace = new Konva.Rect({
             width: 50,
             height: 50,
             cornerRadius: 10,
-            fill: data?.color,
+            fill: data ? COLOR[data.color] : undefined,
         });
         this.dieSymbol = new Konva.Text({
             text: data?.symbol,
