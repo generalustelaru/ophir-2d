@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { ShipToken } from '../popular';
+import { ShipToken, SymbolicInfluenceDial } from '../popular';
 import clientConstants from '~/client/client_constants';
 import { PlayState } from '~/shared_types';
 
@@ -30,10 +30,34 @@ export class RivalControlModal extends ModalBase {
 
         this.shipToken = new ShipToken(
             'Neutral',
-            { position: { x: 100, y: 100 } },
+            { position: { x: 90, y: 95 } },
         );
 
-        this.contentGroup.add(text, this.shipToken.getElement());
+        const ampersand = new Konva.Text({
+            text: '&',
+            width: this.contentGroup.width(),
+            height: this.contentGroup.height(),
+            align: 'center',
+            verticalAlign: 'middle',
+            y: 30,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+            fill: COLOR.boneWhite,
+        });
+
+        const rivalDie = new SymbolicInfluenceDial({
+            color: 'Neutral',
+            symbol: '?',
+            position: { x: 190, y: 74 },
+        });
+
+        this.contentGroup.add(...[
+            text,
+            this.shipToken.getElement(),
+            ampersand,
+            rivalDie.getElement(),
+        ]);
     }
 
     public update(state: PlayState) {
