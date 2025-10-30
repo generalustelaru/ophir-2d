@@ -7,7 +7,7 @@ import { EmptyLocationToken } from '.';
 type LocationTokenUpdate = {
     tradeGoodSupplies: Record<TradeGood, number>
     mayPickup: boolean
-    templeIcon: IconLayer|null
+    templeIcon: IconLayer
 };
 
 export class LocationToken extends ActionButton implements DynamicGroupInterface<LocationTokenUpdate> {
@@ -20,6 +20,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
         stage: Konva.Stage,
         locationId: LocationName,
         iconData: IconLayer,
+        isPlay: boolean,
     ) {
         const goodToPickup = ((): TradeGood | null => {
             switch (locationId) {
@@ -46,14 +47,14 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
 
         const verticalDrift = ((): number => {
             switch (locationId) {
-                // case 'temple': return -36;
+                case 'temple': return isPlay ? -36 : -18;
                 default: return -18;
             }
         })();
 
         const horizontalDrift = ((): number => {
             switch (locationId) {
-                // case 'temple':
+                case 'temple': return isPlay ? -36 : -18;
                 case 'treasury': return -36;
                 default: return -18;
             }
@@ -93,7 +94,7 @@ export class LocationToken extends ActionButton implements DynamicGroupInterface
             this.emptyLocation.update(supply > 0);
         }
 
-        if (update.templeIcon && this.id === 'temple') {
+        if (this.id === 'temple') {
             this.icon.data(update.templeIcon.shape);
             this.icon.fill(update.templeIcon.fill);
             this.icon.x(-36);

@@ -11,7 +11,7 @@ const { COLOR, ICON_DATA } = clientConstants;
 type SeaZoneUpdate = {
     localPlayer: Player | null,
     rival: Rival,
-    templeIcon: IconLayer | null,
+    templeIcon: IconLayer,
     itemSupplies: ItemSupplies,
 }
 
@@ -34,6 +34,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         locationId: LocationName,
         iconData: IconLayer,
         fill: Color,
+        isPlay: boolean,
     ) {
 
         this.group = new Konva.Group({
@@ -66,7 +67,7 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
         });
         this.group.add(this.island);
 
-        this.location = new LocationToken(stage, locationId, iconData);
+        this.location = new LocationToken(stage, locationId, iconData, isPlay);
         this.group.add(this.location.getElement());
 
         this.restrictedIcon = new Konva.Path({
@@ -81,26 +82,26 @@ export class SeaZone implements DynamicGroupInterface<SeaZoneUpdate> {
     }
 
     update(update: SeaZoneUpdate): void {
-        const { localPlayer, rival } = update;
         this.saveFill(COLOR.defaultHex);
 
-        if (!localPlayer || !localPlayer.isActive)
-            return;
-
-        if (localPlayer.isHandlingRival) {
-            this.updateForRival(rival);
-        } else {
-            this.updateForPlayer(localPlayer);
-        }
+        const { localPlayer, rival } = update;
 
         this.location.update({
             tradeGoodSupplies: update.itemSupplies.goods,
             mayPickup: (
-                localPlayer.bearings.seaZone == this.getZoneName()
+                localPlayer?.bearings.seaZone == this.getZoneName()
                 && localPlayer.locationActions.includes(Action.load_good)
             ),
             templeIcon: update.templeIcon,
         });
+
+        if (!localPlayer || !localPlayer.isActive)
+            return;
+
+        if (localPlayer.isHandlingRival)
+            this.updateForRival(rival);
+        else
+            this.updateForPlayer(localPlayer);
     }
 
     private updateForRival(rival: Rival) {

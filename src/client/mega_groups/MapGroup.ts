@@ -55,6 +55,7 @@ export class MapGroup implements MegaGroupInterface {
                     locationData.name,
                     this.getIconData(locationData.name, state),
                     COLOR.defaultHex,
+                    state.sessionPhase == Phase.play,
                 );
                 this.seaZones.push(seaZone);
                 this.group.add(seaZone.getElement());
