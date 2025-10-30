@@ -87,18 +87,10 @@ export class LocationGroup implements MegaGroupInterface {
 
     public update(state: PlayState): void {
 
-        const activePlayer = state.players.find(player => player.isActive);
-        const marketOffer = state.market;
-        if (!activePlayer || !marketOffer) {
-            throw new Error(
-                `Missing state data in Location Group: {activePlayer: ${activePlayer}, market: ${marketOffer}}.`,
-            );
-        }
-
         const localPlayer = state.players.find(player => player.color === localState.playerColor);
         const marketUpdate: MarketUpdate = {
             localPlayer: localPlayer ?? null,
-            marketOffer: marketOffer,
+            marketOffer: state.market,
         };
         const templeUpdate: TempleUpdate = {
             localPlayer: localPlayer ?? null,
