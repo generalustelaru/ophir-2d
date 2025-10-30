@@ -1,21 +1,22 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 
-export class StartTurnModal extends ModalBase {
+export class ForceTurnModal extends ModalBase {
     constructor(stage: Konva.Stage) {
         super(
             stage,
-            { hasSubmit: false, cancelLabel: 'Okay' },
+            { hasSubmit: false, cancelLabel: 'Close' },
+            { width: 400, height: 150 },
         );
 
         const text = new Konva.Text({
-            text: 'It\'s your turn!',
+            text: 'You\'ve failed your second sailing attempt.\nThe turn has passed to the next player.',
             fill: 'white',
             fontSize: 18,
             width: this.contentGroup.width(),
             height: this.contentGroup.height(),
             align: 'center',
-            verticalAlign: 'middle',
+            verticalAlign: 'left',
             fontFamily: 'Custom',
         });
 

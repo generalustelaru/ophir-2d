@@ -23,6 +23,7 @@ export class GameSession {
     private transmitEnrolment: (approvedColor: PlayerColor, socketId: string ) => void;
     private transmitNameUpdate: (newName: string, socketId: string) => void;
     private transmitTurnNotification: (socketId: string) => void;
+    private transmitForceTurnNotification: (socketId: string) => void;
     private transmitRivalControlNotification: (socketId: string) => void;
 
 
@@ -44,6 +45,9 @@ export class GameSession {
         };
         this.transmitTurnNotification = (socketId: string) => {
             transmitCallback(socketId, { turnStart: null });
+        };
+        this.transmitForceTurnNotification = (socketId: string) => {
+            transmitCallback(socketId, { forceTurn: null });
         };
         this.transmitRivalControlNotification = (socketId: string) => {
             transmitCallback(socketId, { rivalControl: null });
@@ -70,6 +74,7 @@ export class GameSession {
                         },
                         this.autoBroadcast,
                         this.transmitTurnNotification,
+                        this.transmitForceTurnNotification,
                         this.transmitRivalControlNotification,
                         this.transmitVp,
                     );
@@ -283,6 +288,7 @@ export class GameSession {
                             bundleResult.data,
                             this.autoBroadcast,
                             this.transmitTurnNotification,
+                            this.transmitForceTurnNotification,
                             this.transmitRivalControlNotification,
                             this.transmitVp,
                         );

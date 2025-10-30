@@ -335,6 +335,7 @@ export type ErrorResponse = { error: string }
 export type VpTransmission = { vp: number }
 export type NewNameTransmission = { newName: string }
 export type TurnNotificationTransmission = { turnStart: null }
+export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
 
 export type ServerMessage =
@@ -347,4 +348,5 @@ export type ServerMessage =
     | NewNameTransmission
     | TurnNotificationTransmission
     | RivalControlTransmission
+    | ForceTurnNotificationTransmission
 ;

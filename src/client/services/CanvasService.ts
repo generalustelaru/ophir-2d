@@ -14,6 +14,7 @@ import { DonateGoodsModal } from '../groups/modals/DonateGoodsModal';
 import { EndTurnModal } from '../groups/modals/EndTurnModal';
 import { SailAttemptModal } from '../groups/modals/SailAttemptModal';
 import { RivalControlModal } from '../groups/modals/RivalControlModal';
+import { ForceTurnModal } from '../groups/modals/ForceTurnModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -27,6 +28,7 @@ export const CanvasService = new class extends Communicator {
     private isPlayDrawn: boolean = false;
     private startTurnModal: StartTurnModal;
     private endTurnModal: EndTurnModal;
+    private forceTurnModal: ForceTurnModal;
     private sellGoodsModal: SellGoodsModal;
     private donateGoodsModal: DonateGoodsModal;
     private sailAttemptModal: SailAttemptModal;
@@ -55,6 +57,7 @@ export const CanvasService = new class extends Communicator {
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.endTurnModal = new EndTurnModal(this.stage);
         this.startTurnModal = new StartTurnModal(this.stage);
+        this.forceTurnModal = new ForceTurnModal(this.stage);
         this.sailAttemptModal = new SailAttemptModal(this.stage);
         this.rivalControlModal = new RivalControlModal(this.stage);
 
@@ -134,6 +137,10 @@ export const CanvasService = new class extends Communicator {
 
     public notifyForTurn(): void {
         this.startTurnModal.show();
+    }
+
+    public notifyForForceTurn(): void {
+        this.forceTurnModal.show();
     }
 
     public notifyForRivalControl(): void {

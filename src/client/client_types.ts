@@ -159,6 +159,7 @@ export enum EventType {
     name_transmission = 'name_transmission',
     rival_control_transmission = 'rival_control_transmission',
     start_turn = 'start_turn',
+    force_turn = 'force_turn',
 }
 
 export type LaconicType =
@@ -168,6 +169,7 @@ export type LaconicType =
     | EventType.timeout
     | EventType.start_turn
     | EventType.rival_control_transmission
+    | EventType.force_turn
 ;
 
 export type Event =

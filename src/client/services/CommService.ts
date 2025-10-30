@@ -4,6 +4,7 @@ import {
     NewNameTransmission,
     TurnNotificationTransmission,
     RivalControlTransmission,
+    ForceTurnNotificationTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -65,6 +66,9 @@ export const CommunicationService = new class extends Communicator {
                 case this.isTurnNotification(data):
                     this.createEvent({ type: EventType.start_turn, detail: null });
                     break;
+                case this.isForceTurnNotification(data):
+                    this.createEvent( { type: EventType.force_turn, detail: null });
+                    break;
                 case this.isVictoryPointsTransmission(data):
                     this.createEvent({ type: EventType.vp_transmission, detail: data });
                     break;
@@ -116,6 +120,10 @@ export const CommunicationService = new class extends Communicator {
 
     private isTurnNotification(data: ServerMessage): data is TurnNotificationTransmission {
         return 'turnStart' in data;
+    }
+
+    private isForceTurnNotification(data: ServerMessage): data is ForceTurnNotificationTransmission {
+        return 'forceTurn' in data;
     }
 
     private isEnrolmentApprovalTransmission(data: ServerMessage): data is EnrolmentResponse {

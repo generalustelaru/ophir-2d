@@ -22,6 +22,7 @@ export class PlayProcessor implements SessionProcessor {
     private backupState: BackupStateHandler;
     private autoBroadcast: (state: PlayState) => void;
     private transmitTurnNotification: (socketId: string) => void;
+    private transmitForceTurnNotification: (socketId: string) => void;
     private transmitRivalControlNotification: (socketId: string) => void;
 
     private transmitVp: (vp: number, socketId: string) => void;
@@ -31,6 +32,7 @@ export class PlayProcessor implements SessionProcessor {
         stateBundle: StateBundle,
         broadcastCallback: (state: PlayState) => void,
         transmitTurnNotification: (socketId: string) => void,
+        transmitForceTurnNotification: (socketId: string) => void,
         transmitRivalControlNotification: (socketId: string) => void,
         transmitVp: (vp: number, socketId: string) => void,
     ) {
@@ -41,6 +43,7 @@ export class PlayProcessor implements SessionProcessor {
         this.backupState = backupState;
         this.autoBroadcast = broadcastCallback;
         this.transmitTurnNotification = transmitTurnNotification;
+        this.transmitForceTurnNotification = transmitForceTurnNotification;
         this.transmitRivalControlNotification = transmitRivalControlNotification;
         this.transmitVp = transmitVp;
 
@@ -656,7 +659,7 @@ export class PlayProcessor implements SessionProcessor {
     public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
         const { player } = data;
         this.wipeState(player);
-        const { turnOrder, name, color } = player.getIdentity();
+        const { turnOrder, name, color, socketId } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
             return lib.fail('Ship is not anchored.');
@@ -674,6 +677,9 @@ export class PlayProcessor implements SessionProcessor {
         this.privateState.updatePlayerStats(player);
         console.info(this.privateState.getGameStats());
         this.playState.savePlayer(player.toDto());
+
+        if(!isVoluntary)
+            this.transmitForceTurnNotification(socketId);
 
         const newPlayerResult = ((): Probable<PlayerHandler> => {
             const allPlayers = this.playState.getAllPlayers();

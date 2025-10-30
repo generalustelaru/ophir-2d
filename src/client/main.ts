@@ -154,7 +154,7 @@ window.addEventListener(EventType.name_transmission, (event: CustomEventInit<New
 
 window.addEventListener(EventType.rival_control_transmission, () => {
     if (!localState.playerColor)
-        return signalError('Missing local player data')
+        return signalError('Missing local player data');
 
     CanvasService.notifyForRivalControl();
 });
@@ -214,8 +214,12 @@ window.addEventListener(EventType.play_update, (event: CustomEventInit) => {
     debug(playState);
 });
 
-window.addEventListener(EventType.start_turn, ()=> {
+window.addEventListener(EventType.start_turn, () => {
     CanvasService.notifyForTurn();
+});
+
+window.addEventListener(EventType.force_turn, () => {
+    CanvasService.notifyForForceTurn();
 });
 
 window.addEventListener(
