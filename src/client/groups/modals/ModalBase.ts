@@ -9,10 +9,10 @@ type SubmitBehavior = {
     hasSubmit: true,
     actionMessage: ClientMessage | null,
     submitLabel: string,
-    cancelLabel: string,
+    dismissLabel: string,
 } | {
     hasSubmit: false,
-    cancelLabel: string,
+    dismissLabel: string,
 }
 
 const { COLOR } = clientConstants;
@@ -77,7 +77,7 @@ export abstract class ModalBase {
                 x: this.modalGroup.width() / 2 - (behavior.hasSubmit ? 75 : 25),
                 y: buttonLevel,
             },
-            behavior.cancelLabel,
+            behavior.dismissLabel,
         );
         this.dismissButton.enable();
 

@@ -17,7 +17,7 @@ export class SailAttemptModal extends ModalBase implements DynamicModalInterface
                 hasSubmit: true,
                 actionMessage: null,
                 submitLabel: 'Roll',
-                cancelLabel: 'Cancel',
+                dismissLabel: 'Cancel',
             },
         );
 

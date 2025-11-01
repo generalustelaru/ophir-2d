@@ -5,7 +5,7 @@ export class StartTurnModal extends ModalBase {
     constructor(stage: Konva.Stage) {
         super(
             stage,
-            { hasSubmit: false, cancelLabel: 'Okay' },
+            { hasSubmit: false, dismissLabel: 'Okay' },
         );
 
         const text = new Konva.Text({

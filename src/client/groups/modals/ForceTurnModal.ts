@@ -8,7 +8,7 @@ export class ForceTurnModal extends ModalBase {
     constructor(stage: Konva.Stage) {
         super(
             stage,
-            { hasSubmit: false, cancelLabel: 'Close' },
+            { hasSubmit: false, dismissLabel: 'Close' },
             { width: 380, height: 160 },
         );
 

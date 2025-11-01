@@ -23,7 +23,7 @@ export class DonateGoodsModal extends ModalBase implements DynamicModalInterface
                 hasSubmit: true,
                 actionMessage: null,
                 submitLabel: 'Donate',
-                cancelLabel: 'Cancel',
+                dismissLabel: 'Cancel',
             },
         );
 

@@ -15,7 +15,7 @@ export class EndTurnModal extends ModalBase implements DynamicModalInterface<Pla
                 hasSubmit: true,
                 actionMessage: { action: Action.end_turn, payload: null },
                 submitLabel: 'End',
-                cancelLabel: 'Cancel',
+                dismissLabel: 'Cancel',
             },
         );
 

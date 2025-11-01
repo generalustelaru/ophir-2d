@@ -21,7 +21,7 @@ export class SellGoodsModal extends ModalBase implements DynamicModalInterface<P
                 hasSubmit: true,
                 actionMessage: null,
                 submitLabel: 'Sell',
-                cancelLabel: 'Cancel',
+                dismissLabel: 'Cancel',
             },
         );
 

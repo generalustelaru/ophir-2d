@@ -12,7 +12,7 @@ export class RivalControlModal extends ModalBase {
     constructor(stage: Konva.Stage) {
         super(
             stage,
-            { hasSubmit: false, cancelLabel: 'Close' },
+            { hasSubmit: false, dismissLabel: 'Close' },
             { width: 310, height: 200 },
         );
 
