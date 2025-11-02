@@ -139,7 +139,11 @@ export const UserInterface = new class extends Communicator {
 
         const activePlayer = state.players.find(p => p.isActive);
 
-        if (activePlayer && activePlayer.isIdle && localState.playerColor != activePlayer.color ) {
+        if (
+            activePlayer?.isIdle
+            && localState.playerColor
+            && localState.playerColor != activePlayer.color
+        ) {
             this.forceTurnButton.enable();
         }
 
