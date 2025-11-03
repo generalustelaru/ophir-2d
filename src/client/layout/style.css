@@ -49,7 +49,7 @@ input {
     flex-direction: column;
     justify-content: flex-end;
     padding: 5px;
-    /* & #chatMessages {
+    & #chatMessages {
         overflow-y: auto;
         height: 100px;
     }
@@ -63,22 +63,7 @@ input {
         & button {
             width: 100px;
         }
-    } */
-}
-#chatMessages {
-    overflow-y: auto;
-    height: 100px;
-}
-#inputLine {
-    display: flex;
-    justify-content: space-between;
-    align-items: left;
-}
-#inputLine input {
-    width: 100%;
-}
-#inputLine button {
-    width: 100px;
+    }
 }
 
 #info {
