@@ -19,22 +19,22 @@ import { EndRivalTurnModal } from '../groups/modals/EndRivalTurnModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
-    private locationGroup: LocationGroup;
-    private mapGroup: MapGroup;
-    private playerGroup: PlayerGroup;
-    private setupGroup: SetupGroup;
-    private enrolmentGroup: EnrolmentGroup;
+    private locationGroup!: LocationGroup;
+    private mapGroup!: MapGroup;
+    private playerGroup!: PlayerGroup;
+    private setupGroup!: SetupGroup;
+    private enrolmentGroup!: EnrolmentGroup;
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false;
     private isPlayDrawn: boolean = false;
-    private startTurnModal: StartTurnModal;
-    private endTurnModal: EndTurnModal;
-    private forceTurnModal: ForceTurnModal;
-    private sellGoodsModal: SellGoodsModal;
-    private donateGoodsModal: DonateGoodsModal;
-    private sailAttemptModal: SailAttemptModal;
-    private rivalControlModal: RivalControlModal;
-    private endRivalTurnModal: EndRivalTurnModal;
+    private startTurnModal!: StartTurnModal;
+    private endTurnModal!: EndTurnModal;
+    private forceTurnModal!: ForceTurnModal;
+    private sellGoodsModal!: SellGoodsModal;
+    private donateGoodsModal!: DonateGoodsModal;
+    private sailAttemptModal!: SailAttemptModal;
+    private rivalControlModal!: RivalControlModal;
+    private endRivalTurnModal!: EndRivalTurnModal;
 
     public constructor() {
         super();
@@ -55,84 +55,75 @@ export const CanvasService = new class extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
-        this.donateGoodsModal= new DonateGoodsModal(this.stage);
-        this.sellGoodsModal = new SellGoodsModal(this.stage);
-        this.endTurnModal = new EndTurnModal(this.stage);
-        this.startTurnModal = new StartTurnModal(this.stage);
-        this.forceTurnModal = new ForceTurnModal(this.stage);
-        this.sailAttemptModal = new SailAttemptModal(this.stage);
-        this.rivalControlModal = new RivalControlModal(this.stage);
-        this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
+        document.fonts.ready.then(() => {
+            this.donateGoodsModal = new DonateGoodsModal(this.stage);
+            this.sellGoodsModal = new SellGoodsModal(this.stage);
+            this.endTurnModal = new EndTurnModal(this.stage);
+            this.startTurnModal = new StartTurnModal(this.stage);
+            this.forceTurnModal = new ForceTurnModal(this.stage);
+            this.sailAttemptModal = new SailAttemptModal(this.stage);
+            this.rivalControlModal = new RivalControlModal(this.stage);
+            this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
 
-        const openSellGoodsModal = (slot: MarketSlotKey) => {
-            this.sellGoodsModal.show(slot);
-        };
+            this.locationGroup = new LocationGroup(
+                this.stage,
+                {
+                    height: this.stage.height(),
+                    width: segmentWidth,
+                    x: 0,
+                    y: 0,
+                },
+                (slot: MarketSlotKey) => {this.sellGoodsModal.show(slot);},
+                (slot: MarketSlotKey) => {this.donateGoodsModal.show(slot);},
+            ); // locationGroup covers 1 segment, sitting on the left
 
-        const openDonateGoodsModal = (slot: MarketSlotKey) => {
-            this.donateGoodsModal.show(slot);
-        };
+            this.playerGroup = new PlayerGroup(
+                this.stage,
+                {
+                    height: this.stage.height(),
+                    width: segmentWidth,
+                    x: segmentWidth * 3,
+                    y: 0,
+                },
+                (isShiftingMarket: boolean) => {
+                    this.endRivalTurnModal.show(isShiftingMarket);
+                },
+            ); // playerGroup covers 1 segment, sitting on the right
 
-        const openEndTurnModal = () => {
-            this.endTurnModal.show();
-        };
+            this.mapGroup = new MapGroup(
+                this.stage,
+                {
+                    height: this.stage.height(),
+                    width: segmentWidth * 2,
+                    x: segmentWidth,
+                    y: 0,
+                },
+                () => {this.endTurnModal.show();},
+            ); // mapGroup covers half the canvas (2 segments), sitting in the middle
 
-        const openEndRivalTurnModal = (isShiftingMarket: boolean) => {
-            this.endRivalTurnModal.show(isShiftingMarket);
-        };
+            this.setupGroup = new SetupGroup(
+                this.stage,
+                {
+                    height: this.stage.height(),
+                    width: this.stage.width(),
+                    x: 0,
+                    y: 0,
+                },
+            );
 
-        this.locationGroup = new LocationGroup(
-            this.stage,
-            {
-                height: this.stage.height(),
-                width: segmentWidth,
-                x: 0,
-                y: 0,
-            },
-            openSellGoodsModal,
-            openDonateGoodsModal,
-        ); // locationGroup covers 1 segment, sitting on the left
-
-        this.playerGroup = new PlayerGroup(
-            this.stage,
-            {
-                height: this.stage.height(),
-                width: segmentWidth,
-                x: segmentWidth * 3,
-                y: 0,
-            },
-            openEndRivalTurnModal,
-        ); // playerGroup covers 1 segment, sitting on the right
-
-        this.mapGroup = new MapGroup(
-            this.stage,
-            {
-                height: this.stage.height(),
-                width: segmentWidth * 2,
-                x: segmentWidth,
-                y: 0,
-            },
-            openEndTurnModal,
-        ); // mapGroup covers half the canvas (2 segments), sitting in the middle
-
-        this.setupGroup = new SetupGroup(
-            this.stage,
-            {
-                height: this.stage.height(),
-                width: this.stage.width(),
-                x: 0,
-                y: 0,
-            },
-        );
-
-        this.enrolmentGroup = new EnrolmentGroup(
-            this.stage,
-            {
-                height: this.stage.height(),
-                width: this.stage.width(),
-                x: 0,
-                y: 0,
-            },
-        );
+            this.enrolmentGroup = new EnrolmentGroup(
+                this.stage,
+                {
+                    height: this.stage.height(),
+                    width: this.stage.width(),
+                    x: 0,
+                    y: 0,
+                },
+            );
+        }).catch(err => {
+            console.error({ err });
+            throw new Error('Could not initialize groups');
+        });
     }
 
     public getSetupCoordinates(): GameSetupPayload {
@@ -140,19 +131,19 @@ export const CanvasService = new class extends Communicator {
     }
 
     public openSailAttemptModal(data: SailAttemptArgs) {
-        this.sailAttemptModal.show(data);
+        this.sailAttemptModal?.show(data);
     };
 
     public notifyForTurn(): void {
-        this.startTurnModal.show();
+        this.startTurnModal?.show();
     }
 
     public notifyForForceTurn(): void {
-        this.forceTurnModal.show();
+        this.forceTurnModal?.show();
     }
 
     public notifyForRivalControl(): void {
-        this.rivalControlModal.show();
+        this.rivalControlModal?.show();
     }
 
     public drawUpdateElements(state: State, toDisable = false): void {
@@ -162,16 +153,17 @@ export const CanvasService = new class extends Communicator {
         if (!localState.playerColor) {
             this.createEvent({
                 type: EventType.info,
-                detail: { text: sessionPhase == Phase.enrolment
-                    ? 'Registrations open!'
-                    : 'You are a spectator.',
+                detail: {
+                    text: sessionPhase == Phase.enrolment
+                        ? 'Registrations open!'
+                        : 'You are a spectator.',
                 },
             });
         }
 
         switch (sessionPhase) {
             case Phase.enrolment:
-                if(!this.isEnrolmentDrawn) {
+                if (!this.isEnrolmentDrawn) {
                     this.stage.visible(true);
                     this.enrolmentGroup.drawElements();
                     this.fitStageIntoParentContainer();
@@ -201,10 +193,10 @@ export const CanvasService = new class extends Communicator {
                     this.fitStageIntoParentContainer();
                     this.isPlayDrawn = true;
                 }
-                this.sellGoodsModal.update(state);
-                this.donateGoodsModal.update(state);
-                this.endTurnModal.update(state);
-                this.rivalControlModal.update(state);
+                this.sellGoodsModal?.update(state);
+                this.donateGoodsModal?.update(state);
+                this.endTurnModal?.update(state);
+                this.rivalControlModal?.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
