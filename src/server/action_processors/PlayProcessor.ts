@@ -717,7 +717,6 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: RIVAL TURN
     public endRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
         const { player } = digest;
-        this.preserveState(player);
         const rival = this.playState.getRivalData();
 
         if (!rival.isIncluded)
@@ -752,10 +751,13 @@ export class PlayProcessor implements SessionProcessor {
             this.addServerMessage('Rival moved and rolled influence.', color);
         }
 
+        this.wipeState(player);
+
         player.unfreeze(
             this.determineActionsAndDetails(player),
             rival.bearings.seaZone,
         );
+
 
         return lib.pass(this.saveAndReturn(player));
     }
