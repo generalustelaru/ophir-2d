@@ -9,8 +9,9 @@ export class PlayerGroup implements MegaGroupInterface {
     private group: Konva.Group;
     private playerPlacards: Array<PlayerPlacard> = [];
     private rivalPlacard: RivalPlacard | null = null;
+    private endRivalTurnCallback: (p: boolean) => void;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData, endRivalTurnCallback: (p: boolean) => void) {
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -19,6 +20,7 @@ export class PlayerGroup implements MegaGroupInterface {
         });
         stage.getLayers()[LayerIds.base].add(this.group);
         this.stage = stage;
+        this.endRivalTurnCallback = endRivalTurnCallback;
     }
 
     // MARK: DRAW
@@ -49,6 +51,7 @@ export class PlayerGroup implements MegaGroupInterface {
         if (rival.isIncluded) {
             this.rivalPlacard = new RivalPlacard(
                 this.stage,
+                this.endRivalTurnCallback,
                 localState.playerColor,
                 rival,
                 verticalOffsets.shift() as number,

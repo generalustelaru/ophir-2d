@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { Action, Coordinates } from '~/shared_types';
+import { Coordinates } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../popular';
+import { Button } from '../popular';
 import constants from '~/client_constants';
 
 const { ICON_DATA, COLOR } = constants;
@@ -10,19 +10,20 @@ type ConcludeButtonUpdate = {
     isControllable: boolean,
     mayConclude: boolean,
 }
-export class ConcludeButton extends ActionButton implements DynamicGroupInterface<ConcludeButtonUpdate>{
+export class ConcludeButton extends Button implements DynamicGroupInterface<ConcludeButtonUpdate>{
     private anchor: Konva.Path;
 
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
+        endRivalTurnCallback: (p: boolean) => void,
     ) {
         const layout = { width: 50, height: 50, x: position.x, y: position.y };
 
         super(
             stage,
             layout,
-            { action: Action.end_rival_turn, payload: null },
+            endRivalTurnCallback,
         );
 
         const hoverZone = new Konva.Rect({
@@ -45,7 +46,7 @@ export class ConcludeButton extends ActionButton implements DynamicGroupInterfac
         const icon = !isControllable || (isControllable && mayConclude) ? ICON_DATA.anchored : ICON_DATA.not_anchored;
         this.anchor.data(icon.shape);
         this.anchor.fill(isControllable ? icon.fill : COLOR.disabled);
-        this.setEnabled(mayConclude);
+        mayConclude ? this.enable() : this.disable();
     }
 
     public getElement() {

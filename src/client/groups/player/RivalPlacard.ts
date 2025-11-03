@@ -23,6 +23,7 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
 
     constructor(
         stage: Konva.Stage,
+        endRivalTurnCallback: (p: boolean) => void,
         localPlayerColor: PlayerColor | null,
         rival: Rival,
         yOffset: number,
@@ -48,8 +49,16 @@ export class RivalPlacard implements DynamicGroupInterface<Rival> {
             COLOR.boneWhite,
         );
 
-        this.shiftMarketButton = new ShiftMarketButton(stage, { x: 25, y: 10 });
-        this.concludeButton = new ConcludeButton(stage, { x: 100, y: 25 });
+        this.shiftMarketButton = new ShiftMarketButton(
+            stage,
+            { x: 25, y: 10 },
+            () => endRivalTurnCallback(true),
+        );
+        this.concludeButton = new ConcludeButton(
+            stage,
+            { x: 100, y: 25 },
+            () => endRivalTurnCallback(false),
+        );
         this.movesDial = new MovesDial({ x:80, y:10 });
 
         this.group.add(...[

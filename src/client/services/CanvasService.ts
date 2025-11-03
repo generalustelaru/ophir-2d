@@ -15,6 +15,7 @@ import { EndTurnModal } from '../groups/modals/EndTurnModal';
 import { SailAttemptModal } from '../groups/modals/SailAttemptModal';
 import { RivalControlModal } from '../groups/modals/RivalControlModal';
 import { ForceTurnModal } from '../groups/modals/ForceTurnModal';
+import { EndRivalTurnModal } from '../groups/modals/EndRivalTurnModal';
 
 export const CanvasService = new class extends Communicator {
     private stage: Konva.Stage;
@@ -33,6 +34,7 @@ export const CanvasService = new class extends Communicator {
     private donateGoodsModal: DonateGoodsModal;
     private sailAttemptModal: SailAttemptModal;
     private rivalControlModal: RivalControlModal;
+    private endRivalTurnModal: EndRivalTurnModal;
 
     public constructor() {
         super();
@@ -60,6 +62,7 @@ export const CanvasService = new class extends Communicator {
         this.forceTurnModal = new ForceTurnModal(this.stage);
         this.sailAttemptModal = new SailAttemptModal(this.stage);
         this.rivalControlModal = new RivalControlModal(this.stage);
+        this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
 
         const openSellGoodsModal = (slot: MarketSlotKey) => {
             this.sellGoodsModal.show(slot);
@@ -71,6 +74,10 @@ export const CanvasService = new class extends Communicator {
 
         const openEndTurnModal = () => {
             this.endTurnModal.show();
+        };
+
+        const openEndRivalTurnModal = (isShiftingMarket: boolean) => {
+            this.endRivalTurnModal.show(isShiftingMarket);
         };
 
         this.locationGroup = new LocationGroup(
@@ -93,6 +100,7 @@ export const CanvasService = new class extends Communicator {
                 x: segmentWidth * 3,
                 y: 0,
             },
+            openEndRivalTurnModal,
         ); // playerGroup covers 1 segment, sitting on the right
 
         this.mapGroup = new MapGroup(

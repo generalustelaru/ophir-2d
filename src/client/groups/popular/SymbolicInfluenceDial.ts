@@ -4,8 +4,8 @@ import { Coordinates, NeutralColor, PlayerColor } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
 const { COLOR } = clientConstants;
 type SymbolicInfluenceDialUpdate = {
-    color: PlayerColor | NeutralColor,
-    symbol: string,
+    color?: PlayerColor | NeutralColor,
+    symbol?: string,
     position?: Coordinates,
 }
 export class SymbolicInfluenceDial implements DynamicGroupInterface<SymbolicInfluenceDialUpdate> {
@@ -23,7 +23,7 @@ export class SymbolicInfluenceDial implements DynamicGroupInterface<SymbolicInfl
             width: 50,
             height: 50,
             cornerRadius: 10,
-            fill: data ? COLOR[data.color] : undefined,
+            fill: data?.color ? COLOR[data.color] : undefined,
         });
         this.dieSymbol = new Konva.Text({
             text: data?.symbol,
@@ -41,8 +41,16 @@ export class SymbolicInfluenceDial implements DynamicGroupInterface<SymbolicInfl
     }
 
     update(data: SymbolicInfluenceDialUpdate) {
-        this.dieSymbol.text(data.symbol) ;
-        this.dieFace.fill(COLOR[data.color]);
+        if (data.symbol)
+            this.dieSymbol.text(data.symbol) ;
+
+        if (data.color)
+            this.dieFace.fill(COLOR[data.color]);
+
+        if (data.position) {
+            this.group.x(data.position.x);
+            this.group.y(data.position.y);
+        }
     }
 
     getElement() {

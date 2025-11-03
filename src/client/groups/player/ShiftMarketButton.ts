@@ -1,23 +1,24 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { Action, Coordinates } from '~/shared_types';
-import { ActionButton } from '../popular';
+import { Coordinates } from '~/shared_types';
+import { Button } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class ShiftMarketButton extends ActionButton implements DynamicGroupInterface<boolean> {
+export class ShiftMarketButton extends Button implements DynamicGroupInterface<boolean> {
 
     private card: Konva.Rect;
     private coin: Konva.Circle;
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
+        endRivalTurnCallback: (p: boolean) => void,
     ) {
         super(
             stage,
             { x: position.x, y: position.y, width: 50, height: 81 },
-            { action: Action.shift_market, payload: null },
+            endRivalTurnCallback,
         );
 
         this.card = new Konva.Rect({
@@ -50,6 +51,6 @@ export class ShiftMarketButton extends ActionButton implements DynamicGroupInter
 
     update(mayShift: boolean) {
         this.card.fill(mayShift ? COLOR.marketOrange : COLOR.marketDarkOrange);
-        this.setEnabled(mayShift);
+        mayShift ? this.enable() : this.disable();
     }
 }
