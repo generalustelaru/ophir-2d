@@ -7,10 +7,11 @@ import { ModalBase } from './ModalBase';
 import clientConstants from '~/client_constants';
 import localState from '~/client/state';
 
-const { ICON_DATA } = clientConstants;
+const { ICON_DATA, COLOR } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements DynamicModalInterface<PlayState, MarketSlotKey> {
     private market: MarketOffer | null = null;
+    // private confirmationText: Konva.Text;
     private goodsAssortment: GoodsAssortment;
     private victoryPointDial: VictoryPointDial;
     private favorDial: FavorDial;
@@ -22,42 +23,62 @@ export class DonateGoodsModal extends ModalBase implements DynamicModalInterface
             {
                 hasSubmit: true,
                 actionMessage: null,
-                submitLabel: 'Donate',
+                submitLabel: 'Yes',
                 dismissLabel: 'Cancel',
             },
+            { width: 340, height: 180 },
         );
 
+        const confirmationText = new Konva.Text({
+            text: 'Donate these goods for favor and VP?',
+            fill: 'white',
+            fontSize: 18,
+            width: this.contentGroup.width(),
+            height: this.contentGroup.height(),
+            align: 'center',
+            verticalAlign: 'top',
+            y: 10,
+            fontFamily: 'Custom',
+        });
+
         this.goodsAssortment = new GoodsAssortment(
-            { x: 40, y: 15 },
+            { x: 40, y: 35 },
             'modal',
             null,
         );
 
-        const { shape, fill } = ICON_DATA['conversion_arrow'];
-        const conversionArrow = new Konva.Path({
-            data: shape,
-            fill: fill,
-            scale: { x: 3, y: 3 },
-            x: this.contentGroup.width() / 2 - 45,
-            y: this.contentGroup.height() / 2 - 5,
+        const colon = new Konva.Text({
+            text: ':',
+            width: this.contentGroup.width(),
+            height: this.contentGroup.height(),
+            align: 'center',
+            verticalAlign: 'middle',
+            y: 20,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+            fill: COLOR.boneWhite,
         });
 
         this.favorDial = new FavorDial(
-            { x: this.contentGroup.width() - 126, y: this.contentGroup.height() / 2 - 23 },
+            { x: this.contentGroup.width() - 126, y: this.contentGroup.height() / 2 - 3 },
             0,
         );
 
         this.victoryPointDial = new VictoryPointDial(
-            { x: this.contentGroup.width() - 96, y: this.contentGroup.height() / 2 - 33 },
+            { x: this.contentGroup.width() - 96, y: this.contentGroup.height() / 2 - 13 },
             0,
         );
 
         this.contentGroup.add(...[
+            confirmationText,
             this.goodsAssortment.getElement(),
-            conversionArrow,
+            colon,
             this.victoryPointDial.getElement(),
             this.favorDial.getElement(),
         ]);
+
+        // this.addToLayer(confirmationText);
     }
 
     public update(state: PlayState) {
