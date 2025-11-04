@@ -10,7 +10,7 @@ import { Communicator } from './Communicator';
 import localState from '../state';
 import { EventType } from '~/client_types';
 
-export const CommunicationService = new class extends Communicator {
+export class CommunicationService extends Communicator {
 
     private socket: WebSocket | null = null;
 

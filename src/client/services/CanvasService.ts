@@ -17,24 +17,25 @@ import { RivalControlModal } from '../groups/modals/RivalControlModal';
 import { ForceTurnModal } from '../groups/modals/ForceTurnModal';
 import { EndRivalTurnModal } from '../groups/modals/EndRivalTurnModal';
 
-export const CanvasService = new class extends Communicator {
+export class CanvasService extends Communicator {
+    // private fontsReady: Promise<void>;
     private stage: Konva.Stage;
-    private locationGroup!: LocationGroup;
-    private mapGroup!: MapGroup;
-    private playerGroup!: PlayerGroup;
-    private setupGroup!: SetupGroup;
-    private enrolmentGroup!: EnrolmentGroup;
+    private locationGroup: LocationGroup;
+    private mapGroup: MapGroup;
+    private playerGroup: PlayerGroup;
+    private setupGroup: SetupGroup;
+    private enrolmentGroup: EnrolmentGroup;
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false;
     private isPlayDrawn: boolean = false;
-    private startTurnModal!: StartTurnModal;
-    private endTurnModal!: EndTurnModal;
-    private forceTurnModal!: ForceTurnModal;
-    private sellGoodsModal!: SellGoodsModal;
-    private donateGoodsModal!: DonateGoodsModal;
-    private sailAttemptModal!: SailAttemptModal;
-    private rivalControlModal!: RivalControlModal;
-    private endRivalTurnModal!: EndRivalTurnModal;
+    private startTurnModal: StartTurnModal;
+    private endTurnModal: EndTurnModal;
+    private forceTurnModal: ForceTurnModal;
+    private sellGoodsModal: SellGoodsModal;
+    private donateGoodsModal: DonateGoodsModal;
+    private sailAttemptModal: SailAttemptModal;
+    private rivalControlModal: RivalControlModal;
+    private endRivalTurnModal: EndRivalTurnModal;
 
     public constructor() {
         super();
@@ -55,75 +56,75 @@ export const CanvasService = new class extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
-        document.fonts.ready.then(() => {
-            this.donateGoodsModal = new DonateGoodsModal(this.stage);
-            this.sellGoodsModal = new SellGoodsModal(this.stage);
-            this.endTurnModal = new EndTurnModal(this.stage);
-            this.startTurnModal = new StartTurnModal(this.stage);
-            this.forceTurnModal = new ForceTurnModal(this.stage);
-            this.sailAttemptModal = new SailAttemptModal(this.stage);
-            this.rivalControlModal = new RivalControlModal(this.stage);
-            this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
+        // this.fontsReady = document.fonts.ready.then(() => {
+        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+        this.sellGoodsModal = new SellGoodsModal(this.stage);
+        this.endTurnModal = new EndTurnModal(this.stage);
+        this.startTurnModal = new StartTurnModal(this.stage);
+        this.forceTurnModal = new ForceTurnModal(this.stage);
+        this.sailAttemptModal = new SailAttemptModal(this.stage);
+        this.rivalControlModal = new RivalControlModal(this.stage);
+        this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
 
-            this.locationGroup = new LocationGroup(
-                this.stage,
-                {
-                    height: this.stage.height(),
-                    width: segmentWidth,
-                    x: 0,
-                    y: 0,
-                },
-                (slot: MarketSlotKey) => {this.sellGoodsModal.show(slot);},
-                (slot: MarketSlotKey) => {this.donateGoodsModal.show(slot);},
-            ); // locationGroup covers 1 segment, sitting on the left
+        this.locationGroup = new LocationGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth,
+                x: 0,
+                y: 0,
+            },
+            (slot: MarketSlotKey) => { this.sellGoodsModal.show(slot); },
+            (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
+        ); // locationGroup covers 1 segment, sitting on the left
 
-            this.playerGroup = new PlayerGroup(
-                this.stage,
-                {
-                    height: this.stage.height(),
-                    width: segmentWidth,
-                    x: segmentWidth * 3,
-                    y: 0,
-                },
-                (isShiftingMarket: boolean) => {
-                    this.endRivalTurnModal.show(isShiftingMarket);
-                },
-            ); // playerGroup covers 1 segment, sitting on the right
+        this.playerGroup = new PlayerGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth,
+                x: segmentWidth * 3,
+                y: 0,
+            },
+            (isShiftingMarket: boolean) => {
+                this.endRivalTurnModal.show(isShiftingMarket);
+            },
+        ); // playerGroup covers 1 segment, sitting on the right
 
-            this.mapGroup = new MapGroup(
-                this.stage,
-                {
-                    height: this.stage.height(),
-                    width: segmentWidth * 2,
-                    x: segmentWidth,
-                    y: 0,
-                },
-                () => {this.endTurnModal.show();},
-            ); // mapGroup covers half the canvas (2 segments), sitting in the middle
+        this.mapGroup = new MapGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: segmentWidth * 2,
+                x: segmentWidth,
+                y: 0,
+            },
+            () => { this.endTurnModal.show(); },
+        ); // mapGroup covers half the canvas (2 segments), sitting in the middle
 
-            this.setupGroup = new SetupGroup(
-                this.stage,
-                {
-                    height: this.stage.height(),
-                    width: this.stage.width(),
-                    x: 0,
-                    y: 0,
-                },
-            );
+        this.setupGroup = new SetupGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: this.stage.width(),
+                x: 0,
+                y: 0,
+            },
+        );
 
-            this.enrolmentGroup = new EnrolmentGroup(
-                this.stage,
-                {
-                    height: this.stage.height(),
-                    width: this.stage.width(),
-                    x: 0,
-                    y: 0,
-                },
-            );
-        }).catch(err => {
-            console.error({ err });
-            throw new Error('Could not initialize groups');
-        });
+        this.enrolmentGroup = new EnrolmentGroup(
+            this.stage,
+            {
+                height: this.stage.height(),
+                width: this.stage.width(),
+                x: 0,
+                y: 0,
+            },
+        );
+        // }).catch(err => {
+        //     console.error({ err });
+        //     throw new Error('Could not initialize groups');
+        // });
     }
 
     public getSetupCoordinates(): GameSetupPayload {
@@ -146,8 +147,9 @@ export const CanvasService = new class extends Communicator {
         this.rivalControlModal?.show();
     }
 
-    public drawUpdateElements(state: State, toDisable = false): void {
+    public drawUpdateElements(state: State, toDisable = false) {
 
+        // const isFreshReload = !this.isEnrolmentDrawn && !this.isSetupDrawn && !this.isPlayDrawn;
         const { sessionPhase } = state;
 
         if (!localState.playerColor) {
@@ -161,12 +163,18 @@ export const CanvasService = new class extends Communicator {
             });
         }
 
+        // await this.fontsReady;
+
+        this.fitStageIntoParentContainer();
+
+        // document.fonts.ready.then()
+
+        // document.fonts.ready.then(()=> {
         switch (sessionPhase) {
             case Phase.enrolment:
                 if (!this.isEnrolmentDrawn) {
                     this.stage.visible(true);
                     this.enrolmentGroup.drawElements();
-                    this.fitStageIntoParentContainer();
                     this.isEnrolmentDrawn = true;
                 }
                 this.enrolmentGroup.update(state);
@@ -177,7 +185,6 @@ export const CanvasService = new class extends Communicator {
                     this.stage.visible(true);
                     this.mapGroup.drawElements(state);
                     this.setupGroup.drawElements(state);
-                    this.fitStageIntoParentContainer();
                     this.isSetupDrawn = true;
                 }
                 this.setupGroup.update(state);
@@ -190,13 +197,12 @@ export const CanvasService = new class extends Communicator {
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
-                    this.fitStageIntoParentContainer();
                     this.isPlayDrawn = true;
                 }
-                this.sellGoodsModal?.update(state);
-                this.donateGoodsModal?.update(state);
-                this.endTurnModal?.update(state);
-                this.rivalControlModal?.update(state);
+                this.sellGoodsModal.update(state);
+                this.donateGoodsModal.update(state);
+                this.endTurnModal.update(state);
+                this.rivalControlModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
@@ -207,6 +213,8 @@ export const CanvasService = new class extends Communicator {
             default:
                 throw new Error('Update case not covered!');
         }
+        // });
+        // return Promise.resolve(true);
     }
 
     public disable(): void {
