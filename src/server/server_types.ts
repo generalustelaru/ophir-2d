@@ -37,6 +37,8 @@ export type DestinationPackage = {
 
 export type PlayerCountables = {
     color: PlayerColor;
+    name: string,
+    specialist: string,
     vp: number;
     gold: number;
     silver: number;

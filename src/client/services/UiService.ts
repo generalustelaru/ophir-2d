@@ -248,7 +248,7 @@ export const UserInterface = new class extends Communicator {
         };
 
         for (const player of gameResults) {
-            message = message.concat(`${player.color} : ${player.vp} VP\n`);
+            message = message.concat(`${player.name} (${player.color}) : ${player.vp} VP\n`);
         }
 
         const vpWinners = getLeaders(gameResults, 'vp');

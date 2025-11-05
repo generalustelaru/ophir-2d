@@ -174,7 +174,16 @@ export class SetupProcessor implements SessionProcessor {
             tradeDeck: marketData.tradeDeck,
             costTiers: this.filterCostTiers(playerSelections.length),
             gameStats: playerSelections.map(p => (
-                { color: p.color, vp: 0, gold: 0, silver: 0, favor: 0, coins: 0 }
+                {
+                    color: p.color,
+                    name: p.name,
+                    specialist: p.specialist.displayName,
+                    vp: 0,
+                    gold: 0,
+                    silver: 0,
+                    favor: 0,
+                    coins: 0,
+                }
             )),
         });
 
