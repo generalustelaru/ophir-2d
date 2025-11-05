@@ -31,7 +31,7 @@ You can set up and run a server on your local network fairly easily.
       - Create a folder named *public* in the root folder.
       - Copy the contents of *src/client/layout/* into the newly created *public* folder.
       - Create a copy of *.env.example* and rename it as *.env*.
-      - Replace the SERVER_ADDRESS value with your local Ethernet address. How to obtain it:
+      - Replace the SERVER_ADDRESS value in .env with your local Ethernet address. How to obtain it:
           - Powershell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
           - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
       - Run `npm ci && npm run build_server && npm run build_client`.
