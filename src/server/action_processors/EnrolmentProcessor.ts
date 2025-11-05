@@ -73,11 +73,11 @@ export class EnrolmentProcessor implements SessionProcessor {
         if (!result)
             return lib.fail('Color change payload is malformed!');
 
-        if (this.enrolmentState.getAllPlayers().find(
-            p => p.color == result.color,
-        )) {
+        if (this.enrolmentState.getAllPlayers().find(p => p.color == result.color))
             return lib.fail('Color is currently taken.');
-        }
+
+        if (this.enrolmentState.getSessionOwner() == player.color)
+            this.enrolmentState.setSessionOwner(result.color);
 
         this.enrolmentState.changeColor(player.color, result.color);
         this.transmitColorChange(result.color, player.socketId);
