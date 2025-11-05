@@ -37,7 +37,7 @@ You can set up and run a server on your local network fairly easily.
       - Run `npm ci && npm run build_server && npm run build_client`.
 
 
-To start the server, run `make run` or `node public/server.cjs`.
+4. To start the server, run `make run` or `node public/server.cjs`.
 
 Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close, so two or more tabs on the same browser will mirror the same user.
 
