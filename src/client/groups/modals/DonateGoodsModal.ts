@@ -7,7 +7,7 @@ import { ModalBase } from './ModalBase';
 import clientConstants from '~/client_constants';
 import localState from '~/client/state';
 
-const { ICON_DATA, COLOR } = clientConstants;
+const { COLOR } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements DynamicModalInterface<PlayState, MarketSlotKey> {
     private market: MarketOffer | null = null;
@@ -23,20 +23,18 @@ export class DonateGoodsModal extends ModalBase implements DynamicModalInterface
             {
                 hasSubmit: true,
                 actionMessage: null,
-                submitLabel: 'Yes',
+                submitLabel: 'Donate',
                 dismissLabel: 'Cancel',
             },
             { width: 340, height: 180 },
         );
 
-        const confirmationText = new Konva.Text({
+        const description = new Konva.Text({
             text: 'Donate these goods for favor and VP?',
-            fill: 'white',
+            fill: COLOR.boneWhite,
             fontSize: 18,
             width: this.contentGroup.width(),
-            height: this.contentGroup.height(),
             align: 'center',
-            verticalAlign: 'top',
             y: 10,
             fontFamily: 'Custom',
         });
@@ -50,10 +48,8 @@ export class DonateGoodsModal extends ModalBase implements DynamicModalInterface
         const colon = new Konva.Text({
             text: ':',
             width: this.contentGroup.width(),
-            height: this.contentGroup.height(),
             align: 'center',
-            verticalAlign: 'middle',
-            y: 20,
+            y: 65,
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
@@ -61,24 +57,22 @@ export class DonateGoodsModal extends ModalBase implements DynamicModalInterface
         });
 
         this.favorDial = new FavorDial(
-            { x: this.contentGroup.width() - 126, y: this.contentGroup.height() / 2 - 3 },
+            { x: this.contentGroup.width() - 126, y: this.contentGroup.height() / 2 - 5 },
             0,
         );
 
         this.victoryPointDial = new VictoryPointDial(
-            { x: this.contentGroup.width() - 96, y: this.contentGroup.height() / 2 - 13 },
+            { x: this.contentGroup.width() - 96, y: this.contentGroup.height() / 2 - 15 },
             0,
         );
 
         this.contentGroup.add(...[
-            confirmationText,
+            description,
             this.goodsAssortment.getElement(),
             colon,
             this.victoryPointDial.getElement(),
             this.favorDial.getElement(),
         ]);
-
-        // this.addToLayer(confirmationText);
     }
 
     public update(state: PlayState) {
