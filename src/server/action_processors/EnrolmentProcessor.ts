@@ -10,18 +10,24 @@ const serverName = String(process.env.SERVER_NAME);
 
 export class EnrolmentProcessor implements SessionProcessor {
     enrolmentState: EnrolmentStateHandler;
-    transmitEnrolment: (color:PlayerColor, socketId: string) => void;
+    transmitEnrolment: (color: PlayerColor, socketId: string) => void;
+    transmitColorChange: (newColor: PlayerColor, socketId: string) => void;
 
-    constructor(state: EnrolmentState, transmitEnrolment: (color:PlayerColor, socketId: string) => void) {
+    constructor(
+        state: EnrolmentState,
+        transmitEnrolment: (color: PlayerColor, socketId: string) => void,
+        transmitColorChange: (newColor: PlayerColor, socketId: string) => void,
+    ) {
         this.enrolmentState = new EnrolmentStateHandler(serverName, state);
         this.transmitEnrolment = transmitEnrolment;
+        this.transmitColorChange = transmitColorChange;
     }
 
     public getState(): EnrolmentState {
         return this.enrolmentState.toDto();
     }
 
-    public processEnrol(socketId: string | null, payload: MessagePayload): Probable<StateResponse> {
+    public processEnrol(socketId: string, payload: MessagePayload): Probable<StateResponse> {
         const enrolmentPayload = validator.validateEnrolmentPayload(payload);
 
         if(!enrolmentPayload)
@@ -61,11 +67,27 @@ export class EnrolmentProcessor implements SessionProcessor {
         return lib.pass({ state: this.enrolmentState.toDto() });
     }
 
+    public processChangeColor(player: PlayerEntry, payload: MessagePayload): Probable<StateResponse> {
+        const result = validator.validateColorChangePayload(payload);
+
+        if (!result)
+            return lib.fail('Color change payload is malformed!');
+
+        if (this.enrolmentState.getAllPlayers().find(
+            p => p.color == result.color,
+        )) {
+            return lib.fail('Color is currently taken.');
+        }
+
+        this.enrolmentState.changeColor(player.color, result.color);
+        this.transmitColorChange(result.color, player.socketId);
+
+        return lib.pass({ state: this.enrolmentState.toDto() });
+    }
+
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
         return players.some(player => player.color === color);
     }
-
-
 
     public addChat(entry:ChatEntry): StateResponse {
         this.enrolmentState.addChatEntry(entry);

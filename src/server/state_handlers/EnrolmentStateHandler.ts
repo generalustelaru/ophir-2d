@@ -66,9 +66,21 @@ export class EnrolmentStateHandler implements ObjectHandler<EnrolmentState> {
         if (!player)
             return;
 
-        player.name = newName;
-        this.players.updateOne(player.color, () => {
-            return player;
+        this.players.updateOne(player.color, (p) => {
+            p.name = newName;
+            return p;
+        });
+    }
+
+    public changeColor(currentColor: PlayerColor, newColor: PlayerColor) {
+        const player = this.players.getOne(currentColor);
+
+        if (!player)
+            return;
+
+        this.players.updateOne(player.color, (p) => {
+            p.color = newColor;
+            return p;
         });
     }
 }

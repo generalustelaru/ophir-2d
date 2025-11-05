@@ -7,6 +7,7 @@ import clientConstants from '~/client_constants';
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
     EnrolmentResponse, NewNameTransmission,
+    ColorChangeResponse,
 } from '~/shared_types';
 
 const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
@@ -244,6 +245,13 @@ document.fonts.ready.then(() => {
         }
 
         debug(enrolmentState);
+    });
+
+    window.addEventListener( EventType.new_color_approval, (event: CustomEventInit<ColorChangeResponse>) => {
+        if (!event.detail)
+            return signalError('Missing color approval');
+
+        localState.playerColor = event.detail.approvedNewColor;
     });
 
     window.addEventListener(EventType.setup_update, (event: CustomEventInit) => {

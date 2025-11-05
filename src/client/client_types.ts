@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
     Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState, VpTransmission, State,
-    EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost,
+    EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, ColorChangeResponse,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -142,6 +142,7 @@ export type EventFormat<EventType, D> = {
 
 export enum EventType {
     enrolment_approval = 'enrolment_approval',
+    new_color_approval = 'new_color_approval',
     draft = 'draft',
     start_action = 'start',
     close = 'close',
@@ -182,6 +183,7 @@ export type Event =
     | EventFormat<EventType.play_update, PlayState>
     | EventFormat<EventType.setup_update, SetupState>
     | EventFormat<EventType.enrolment_approval, EnrolmentResponse>
+    | EventFormat<EventType.new_color_approval, ColorChangeResponse>
     | EventFormat<EventType.enrolment_update, EnrolmentState>
     | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>

@@ -22,6 +22,7 @@ export class GameSession {
     private autoBroadcast: (state: PlayState) => void;
     private transmitVp: (vp: number, socketId: string ) => void;
     private transmitEnrolment: (approvedColor: PlayerColor, socketId: string ) => void;
+    private transmitColorChange: (approvedNewColor: PlayerColor, socketId: string ) => void;
     private transmitNameUpdate: (newName: string, socketId: string) => void;
     private transmitTurnNotification: (socketId: string) => void;
     private transmitForceTurnNotification: (socketId: string) => void;
@@ -41,6 +42,9 @@ export class GameSession {
         this.transmitEnrolment = (approvedColor, socketId) => {
             transmitCallback(socketId, { approvedColor });
         };
+        this.transmitColorChange = (approvedNewColor, socketId) => {
+            transmitCallback(socketId, { approvedNewColor });
+        };
         this.transmitNameUpdate = (newName: string, socketId: string) => {
             transmitCallback(socketId, { newName });
         };
@@ -55,7 +59,11 @@ export class GameSession {
         };
 
         if (!savedSession) {
-            this.actionProcessor = new EnrolmentProcessor(this.getNewState(), this.transmitEnrolment);
+            this.actionProcessor = new EnrolmentProcessor(
+                this.getNewState(),
+                this.transmitEnrolment,
+                this.transmitColorChange,
+            );
             console.info('New game session created');
 
             return;
@@ -86,7 +94,7 @@ export class GameSession {
                     );
 
                 case Phase.enrolment:
-                    return new EnrolmentProcessor(sharedState, this.transmitEnrolment);
+                    return new EnrolmentProcessor(sharedState, this.transmitEnrolment, this.transmitColorChange);
 
                 default:
                     throw new Error('Cannot determine session phase');
@@ -109,7 +117,11 @@ export class GameSession {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
-        this.actionProcessor = new EnrolmentProcessor(this.getNewState(), this.transmitEnrolment);
+        this.actionProcessor = new EnrolmentProcessor(
+            this.getNewState(),
+            this.transmitEnrolment,
+            this.transmitColorChange,
+        );
         console.log('Session was reset');
     }
 
@@ -232,7 +244,9 @@ export class GameSession {
 
         const enrolUpdate = ((): Probable<StateResponse> => {
             switch (action) {
-                // TODO: add new action change_color
+                case Action.change_color: {
+                    return processor.processChangeColor(player, message.payload);
+                }
                 case Action.start_setup: {
                     const { gameId, sessionOwner, players, chat } = state;
 

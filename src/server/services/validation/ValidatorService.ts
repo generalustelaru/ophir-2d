@@ -2,7 +2,7 @@ import { HexCoordinates } from '~/client_types';
 import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
     LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
-    Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload,
+    Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload, ColorChangePayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { BackupState, PrivateState, Probable, SavedSession } from '~/server_types';
@@ -122,6 +122,17 @@ class ValidatorService {
             [
                 { key: 'color', type: 'string', nullable: false, ref: refs.playerColor },
                 { key: 'name', type: 'string', nullable: true },
+            ],
+        );
+    }
+
+    public validateColorChangePayload(payload: unknown) {
+        return this.validateObject<ColorChangePayload>(
+            'ColorChangePayload',
+            payload,
+            [
+                { key: 'color', type: 'string', nullable: false, ref: refs.playerColor },
+                { key: 'name', type: 'string', nullable: false },
             ],
         );
     }

@@ -1,10 +1,7 @@
 import {
     Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
-    VpTransmission, EnrolmentResponse,
-    NewNameTransmission,
-    TurnNotificationTransmission,
-    RivalControlTransmission,
-    ForceTurnNotificationTransmission,
+    VpTransmission, EnrolmentResponse, NewNameTransmission, TurnNotificationTransmission, RivalControlTransmission,
+    ForceTurnNotificationTransmission, ColorChangeResponse,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -81,6 +78,9 @@ export class CommunicationService extends Communicator {
                 case this.isEnrolmentApprovalTransmission(data):
                     this.createEvent({ type: EventType.enrolment_approval, detail: data });
                     break;
+                case this.isColorChangeApprovalTransmission(data):
+                    this.createEvent( { type: EventType.new_color_approval, detail: data });
+                    break;
                 case this.isResetOrder(data):
                     this.createEvent({ type: EventType.reset, detail: data });
                     break;
@@ -137,6 +137,10 @@ export class CommunicationService extends Communicator {
 
     private isEnrolmentApprovalTransmission(data: ServerMessage): data is EnrolmentResponse {
         return 'approvedColor' in data;
+    }
+
+    private isColorChangeApprovalTransmission(data: ServerMessage): data is ColorChangeResponse {
+        return 'approvedNewColor' in data;
     }
 
     private isVictoryPointsTransmission(data: ServerMessage): data is VpTransmission {

@@ -27,7 +27,7 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
             width: 200,
             height: 300,
         };
-        super(stage, layout, { action: Action.enrol, payload: { color, name: null } });
+        super(stage, layout, null);
 
         this.color = color;
         this.background = new Konva.Rect({
@@ -56,6 +56,8 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
             text: 'available',
         });
 
+        this.setEnabled(true);
+
         this.group.add(this.background, this.shipToken.getElement(), this.ownerName);
     }
 
@@ -67,16 +69,17 @@ export class ColorCard extends ActionButton implements DynamicGroupInterface<Col
         const { localPlayer, players } = update;
 
         const colorOwner = players.find(p => p.color == this.color);
-        const isLocalPlayerColor = localPlayer && localPlayer.name === colorOwner?.name;
+        const isLocalPlayerColor = !!localPlayer && localPlayer.name === colorOwner?.name;
         const text = isLocalPlayerColor
             ? `${localPlayer.name} (you)`
-            : (
-                colorOwner
-                    ? colorOwner?.name || 'picked'
-                    : 'available'
-            );
+            : ( colorOwner ? colorOwner?.name || 'picked' : 'available' );
 
-        this.setEnabled(!Boolean(localPlayer || colorOwner));
+        this.setEnabled(!Boolean(colorOwner));
+
+        this.updateActionMessage(!colorOwner && localPlayer?.color
+            ? { action: Action.change_color, payload: { color: this.color, name: localPlayer.name } }
+            : { action: Action.enrol, payload: { color: this.color, name: null } },
+        );
 
         this.background.fill(colorOwner ? COLOR[`dark${colorOwner.color}`] : COLOR.templeDarkRed);
         this.ownerName.text(text);
