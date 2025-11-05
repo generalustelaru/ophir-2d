@@ -317,7 +317,7 @@ export type ClientMessage =
 
 export type ClientRequest = {
     gameId: string | null,
-    socketId: string | null,
+    socketId: string,
     playerColor: PlayerColor | null,
     playerName: string | null,
     message: ClientMessage,

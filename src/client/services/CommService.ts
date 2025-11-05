@@ -107,6 +107,15 @@ export class CommunicationService extends Communicator {
         }
 
         const { gameId, socketId, playerColor, playerName } = localState;
+
+        if (!socketId) {
+            this.createEvent({
+                type: EventType.error,
+                detail:{ message: 'Cannot send messages without prior Ws registration' },
+            });
+
+            return;
+        }
         const request: ClientRequest = { gameId, socketId, playerColor, playerName, message };
 
         console.debug('->', request);
