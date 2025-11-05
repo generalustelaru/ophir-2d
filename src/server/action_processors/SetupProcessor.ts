@@ -52,7 +52,7 @@ export class SetupProcessor implements SessionProcessor {
             const randomized: Array<SpecialistData> = lib.randomize(deck);
             const selection = randomized.slice(0, playerCount + 1);
 
-            if (INCLUDE.length) {
+            if (Array.isArray(INCLUDE) && INCLUDE.length) {
                 const toInclude = INCLUDE.reverse();
                 for (const includeeName of toInclude) {
                     if (selection.find(s => s.name === includeeName))
