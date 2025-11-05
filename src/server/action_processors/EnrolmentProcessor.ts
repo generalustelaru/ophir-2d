@@ -36,8 +36,6 @@ export class EnrolmentProcessor implements SessionProcessor {
         if (this.isColorTaken(this.enrolmentState.getAllPlayers(), color))
             return lib.fail('Color is is already taken');
 
-        if (this.isNameTaken(this.enrolmentState.getAllPlayers(), name))
-            return lib.fail('This name is already taken');
 
         const result = ((): Probable<true> => {
 
@@ -67,13 +65,7 @@ export class EnrolmentProcessor implements SessionProcessor {
         return players.some(player => player.color === color);
     }
 
-    private isNameTaken(players: PlayerEntry[], name: string | null): boolean {
 
-        if (!name)
-            return false;
-
-        return players.some(player => player.name === name);
-    }
 
     public addChat(entry:ChatEntry): StateResponse {
         this.enrolmentState.addChatEntry(entry);

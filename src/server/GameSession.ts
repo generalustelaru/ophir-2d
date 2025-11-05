@@ -2,6 +2,7 @@ import { WsDigest, DataDigest, SavedSession, Probable } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
+    PlayerEntity,
 } from '~/shared_types';
 import { RequestMatch } from '~/server_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
@@ -149,13 +150,14 @@ export class GameSession {
                 if (nameMatch && nameMatch[0].length > 2) {
                     const newName = nameMatch[0];
 
-                    if (!state.players.some(p => p.name === newName)) {
-                        const response = this.actionProcessor.updatePlayerName(player, newName);
+                    if (this.isNameTaken(state.players, newName))
+                        return this.issueNominalResponse(lib.errorResponse('This name is already taken'));
 
-                        this.transmitNameUpdate(newName, player.socketId);
+                    const response = this.actionProcessor.updatePlayerName(player, newName);
+                    this.transmitNameUpdate(newName, player.socketId);
 
-                        return this.issueGroupResponse(response);
-                    }
+                    return this.issueGroupResponse(response);
+
                 } else {
                     return this.issueNominalResponse(lib.errorResponse(
                         `${commandMatch[0]} parameter must start with a non-space `
@@ -437,5 +439,12 @@ export class GameSession {
             return lib.fail(`[${playerName}] does not match name [${player.name}] in state`);
 
         return lib.pass({ player: { ...player, socketId }, message });
+    }
+
+    private isNameTaken(players: PlayerEntity[], name: string | null): boolean {
+        if (!name)
+            return false;
+
+        return players.some(player => player.name === name);
     }
 }
