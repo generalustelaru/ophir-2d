@@ -11,7 +11,7 @@ Work in progress.
 - The game is playable but has no lobby (a server supports only one session at a time).
 - Barebones persistence. Nothing is saved except the last session.
 - The game is currently getting "Specialists" (variable players powers).
-- The interface language not yet standardized and missing quality of life features (incl. animations, transitions, tooltips, FTUE screens).
+- The interface language not yet standardized and missing quality of life features ( animations, transitions, tooltips, FTUE screens).
 
 Try it out
 
@@ -19,22 +19,22 @@ Try it out
 You can set up and run a server on your local network fairly easily.
 
 1. Install [Node](https://nodejs.org/en/download/package-manager).
- - You may want to also install Make for a better dev-ops experience. First download and install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions). Then open a terminal and run `choco install make`.
+- You may want to also install Make for a straightforward experience. First, install [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions). Then open a command tool (i.e. Powershell) and run `choco install make`.
 
-2. Download the project (code) and enter its root folder (currently *ophir-2d-specialists*).
+2. Download the project
+   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git`
+   - Alternativelty, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/main.zip). Extract it and enter the root folder (*ophir-2d*).
 
-3. Rename *.env.example* into just *.env*. You might also want to replace the SERVER_ADDRESS value with your local IPv4 address (find it in your Ethernet settings). Browsers on other computers need the actual address to connect.
-
-4. Pick a terminal (i.e. Command Prompt) and open it in the project's root folder (*ophir-2d-specialists*) -- all commands should be run there.
-
- - If you have Make, run `make install` to download dependencies, bundle the code and start the server.
-
- - Alternatively, follow these steps:
-    - Create a folder named *public* in the root folder.
-    - Copy the contents of *src/client/layout/* into the newly created *public* folder.
-    - Run `npm install && npm run build_server && npm run build_client && node public/server.cjs` in the terminal.
-
- - Finally, you may run `npm run postinstall` to remove maintenance commits from blame history.
+3. Open a command tool in the project's root folder (*ophir-2d*) -- all commands should be run there.
+   - If you have Make, run `make install` and you're set.
+   - Alternatively, follow these steps:
+      - Create a folder named *public* in the root folder.
+      - Copy the contents of *src/client/layout/* into the newly created *public* folder.
+      - Create a copy of *.env.example* and rename it as *.env*.
+      - Replace the SERVER_ADDRESS value with your local Ethernet address. How to obtain it:
+          - Powershell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
+          - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
+      - Run `npm ci && npm run build_server && npm run build_client`.
 
 Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close, so two or more tabs on the same browser will mirror the same user.
 
@@ -44,9 +44,9 @@ You can also shut it down remotely by making a regular http request to "http://<
 To start the server again run `make run` or `node public/server.cjs`.
 
 ## Troubleshooting
-If you experience misalignments or mouse issues, try using an alternative browser (Chrome and Edge should work).
+If you experience misalignments or mouse issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
 If the session gets stuck, refresh the tab.
-If that doesn't work input `reset` in the running server's CLI. This will also force all clients to clear their sessions.
+If that doesn't work, input `reset` in the running server's CLI or make a request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/reset?auth=<ADMIN_AUTH>"
 
 ## How to play
 

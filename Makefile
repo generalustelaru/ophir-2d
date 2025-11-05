@@ -1,21 +1,27 @@
-update:
-	git pull
-	npm install
+install:
+ifeq ($(OS),Windows_NT)
+	powershell -command "cp .env.example .env"
+	powershell.exe -ExecutionPolicy Bypass -File update-ip.ps1
+else
+	cp .env.example .env
+	@sed -i '/^SERVER_ADDRESS=/d' .env 2>/dev/null || true
+	@echo "SERVER_ADDRESS=$$(ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $$NF}')" >> .env
+endif
+	npm ci
 	make build
+	npm run ommit_revs
 
+run:
+	node public/server.cjs
+
+# DEV
 build:
 	make layout
-	npm run build_client
-	npm run build_server
-	make run
-
-install:
-	npm install
-	make build
+	make server
+	make client
 
 server:
 	npm run build_server
-	make run
 
 client:
 	npm run build_client
@@ -30,9 +36,6 @@ else
 	if [ -f 'public/*' ]; then rm -r public/*; fi
 	cp -r src/client/layout/* public/
 endif
-
-run:
-	node public/server.cjs
 
 check:
 	npx tsc --noEmit

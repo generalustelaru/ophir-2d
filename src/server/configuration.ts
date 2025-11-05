@@ -14,10 +14,12 @@ export const SINGLE_PLAYER = Boolean(process.env.SINGLE_PLAYER === 'true');
 export const SHORT_GAME = Boolean(process.env.SHORT_GAME === 'true');
 export const INCLUDE = (() => {
     try {
-        return  JSON.parse(String(process.env.INCLUDE));
+        const array = JSON.parse(String(process.env.INCLUDE));
+
+        return array.length ? array : null;
     } catch (error) {
         console.error('Could not parse INCLUDE variable!');
-        return [];
+        return null;
     }
 })();
 

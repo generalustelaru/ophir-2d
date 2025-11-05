@@ -108,12 +108,14 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 let singleSession: GameSession | null;
 
 loadGameState().then(data => {
-    const savedState = validator.validateStateFile(data);
+    const savedState = PERSIST_SESSION && data
+        ? validator.validateStateFile(data)
+        : null;
 
     singleSession = new GameSession(
         broadcastCallback,
         transmitCallback,
-        PERSIST_SESSION ?  savedState : null,
+        savedState,
     );
 });
 
