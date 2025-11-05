@@ -1,13 +1,13 @@
 import Konva from 'konva';
 import { GroupLayoutData, MegaGroupInterface, LayerIds } from '~/client_types';
 import { EnrolmentState } from '~/shared_types';
-import { EnrolmentModal } from '../groups/enrolment/EnrolmentModal';
+import { EnrolmentPanel } from '../groups/enrolment/EnrolmentPanel';
 import localState from '../state';
 
 export class EnrolmentGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
-    private modal: EnrolmentModal | null = null;
+    private modal: EnrolmentPanel | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -21,7 +21,7 @@ export class EnrolmentGroup implements MegaGroupInterface {
     }
 
     public drawElements() {
-        this.modal = new EnrolmentModal(
+        this.modal = new EnrolmentPanel(
             this.stage,
             {
                 x: 50,

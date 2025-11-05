@@ -1,14 +1,14 @@
 import Konva from 'konva';
 import { GroupLayoutData, LayerIds, MegaGroupInterface } from '~/client_types';
 import { SetupState } from '~/shared_types';
-import { ModalButton } from '../groups/setup/ModalButton';
-import { SetupModal } from '../groups/setup/SetupModal';
+import { ShowHideButton } from '../groups/setup/ShowHideButton';
+import { SetupPanel } from '../groups/setup/SetupPanel';
 
 export class SetupGroup implements MegaGroupInterface {
     private stage: Konva.Stage;
     private group: Konva.Group;
-    private modal: SetupModal | null = null;
-    private showHideButton: ModalButton | null = null;
+    private modal: SetupPanel | null = null;
+    private showHideButton: ShowHideButton | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -22,7 +22,7 @@ export class SetupGroup implements MegaGroupInterface {
     }
 
     public drawElements(state: SetupState){
-        this.modal = new SetupModal(
+        this.modal = new SetupPanel(
             this.stage,
             {
                 x: 50,
@@ -33,7 +33,7 @@ export class SetupGroup implements MegaGroupInterface {
             state.specialists,
         );
 
-        this.showHideButton = new ModalButton(
+        this.showHideButton = new ShowHideButton(
             this.stage,
             { x: 550, y: 450 },
             '#002255',

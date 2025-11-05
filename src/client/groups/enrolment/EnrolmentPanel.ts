@@ -4,14 +4,14 @@ import { PlayerColor, PlayerEntry } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { ColorCard } from './ColorCard';
 
-type EnrolmentModalUpdate = {
+type EnrolmentPanelUpdate = {
     players: Array<PlayerEntry>,
     localPlayerColor: PlayerColor | null,
 }
 
 const { COLOR } = clientConstants;
 
-export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdate> {
+export class EnrolmentPanel implements DynamicGroupInterface<EnrolmentPanelUpdate> {
     private group: Konva.Group;
     private cards: Array<ColorCard> = [];
 
@@ -53,7 +53,7 @@ export class EnrolmentModal implements DynamicGroupInterface<EnrolmentModalUpdat
         return this.group;
     }
 
-    public update(data: EnrolmentModalUpdate) {
+    public update(data: EnrolmentPanelUpdate) {
         const { players, localPlayerColor } = data;
         const localPlayer = players.find(p => p.color === localPlayerColor);
 
