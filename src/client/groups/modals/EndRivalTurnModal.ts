@@ -25,7 +25,6 @@ export class EndRivalTurnModal extends ModalBase {
             fill: 'white',
             fontSize: 18,
             width: this.contentGroup.width() - 5,
-            height: this.contentGroup.height(),
             align: 'center',
             verticalAlign: 'top',
             y: 10,
