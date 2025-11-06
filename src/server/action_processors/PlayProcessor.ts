@@ -795,7 +795,7 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: UNDO
     public undo(digest: DataDigest): Probable<StateResponse> {
         const { player } = digest;
-        const { color, name } = player.getIdentity();
+        const { color } = player.getIdentity();
 
         if (!player.mayUndo)
             return lib.fail('Previous action cannot be undone.');
@@ -817,9 +817,10 @@ export class PlayProcessor implements SessionProcessor {
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
 
-        this.addServerMessage(`${name} has reconsidered last action/move`, color);
         const playerHandler = new PlayerHandler(revertedPlayer);
-        playerHandler.disableUndo();
+
+        if (this.backupState.isEmpty())
+            playerHandler.disableUndo();
 
         return lib.pass(this.saveAndReturn(playerHandler));
     }
@@ -1188,7 +1189,7 @@ export class PlayProcessor implements SessionProcessor {
     }
 
     private preserveState(player: PlayerHandler) {
-        this.backupState.saveCopy({
+        this.backupState.addState({
             playState: this.getState(),
             privateState: this.getPrivateState(),
         });
