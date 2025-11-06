@@ -18,7 +18,7 @@ export class MapGroup implements MegaGroupInterface {
     private movesDial: MovesDial | null = null;
     private endTurnButton: EndTurnButton | null = null;
     private endTurnCallback: Function;
-    private actionDial: UndoButton | null = null;
+    private undoButton: UndoButton | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
     private opponentShips: Array<RemoteShip> = [];
@@ -99,7 +99,7 @@ export class MapGroup implements MegaGroupInterface {
             { width: 50, height: 50, x: 500, y: 70 },
         );
 
-        this.actionDial = new UndoButton(
+        this.undoButton = new UndoButton(
             this.stage,
             { x: 35, y : 375 },
             isActivePlayer,
@@ -108,7 +108,7 @@ export class MapGroup implements MegaGroupInterface {
         this.group.add(...[
             this.movesDial.getElement(),
             this.endTurnButton.getElement(),
-            this.actionDial.getElement(),
+            this.undoButton.getElement(),
             this.favorButton.getElement(),
         ]);
 
@@ -169,7 +169,7 @@ export class MapGroup implements MegaGroupInterface {
             const { moveActions: moves, isActive } = localPlayer;
             this.movesDial?.update({ moves, isActive });
             this.endTurnButton?.update(localPlayer);
-            this.actionDial?.update(localPlayer);
+            this.undoButton?.update(localPlayer);
             this.favorButton?.update(localPlayer);
         }
 
