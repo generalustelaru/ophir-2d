@@ -3,7 +3,7 @@ export { BarrierToken } from './BarrierToken';
 export { LocationToken } from './LocationToken';
 export { EmptyLocationToken } from './EmptyLocationToken';
 export { SeaZone } from './SeaZone';
-export { ActionDial } from './ActionDial';
+export { UndoButton } from './UndoButton';
 export { PlayerShip } from './PlayerShip';
 export { RemoteShip } from './RemoteShip';
 export { MovesDial } from '../popular/MovesDial';

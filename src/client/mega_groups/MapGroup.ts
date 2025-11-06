@@ -4,7 +4,7 @@ import {
 } from '~/shared_types';
 import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds } from '~/client_types';
 import {
-    SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, ActionDial, FavorButton, RivalShip,
+    SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
 } from '../groups/map';
 import { MovesDial } from '../groups/popular';
 import localState from '../state';
@@ -18,7 +18,7 @@ export class MapGroup implements MegaGroupInterface {
     private movesDial: MovesDial | null = null;
     private endTurnButton: EndTurnButton | null = null;
     private endTurnCallback: Function;
-    private actionDial: ActionDial | null = null;
+    private actionDial: UndoButton | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
     private opponentShips: Array<RemoteShip> = [];
@@ -82,7 +82,7 @@ export class MapGroup implements MegaGroupInterface {
         const players = state.players;
         const localPlayer = players.find(player => player.color === localState.playerColor);
         const isActivePlayer = localPlayer?.isActive || false;
-        //MARK: dials
+        //MARK: dials/buttons
         this.movesDial = new MovesDial({ x: 15, y: 60 });
 
         this.endTurnButton = new EndTurnButton(
@@ -99,7 +99,11 @@ export class MapGroup implements MegaGroupInterface {
             { width: 50, height: 50, x: 500, y: 70 },
         );
 
-        this.actionDial = new ActionDial(this.stage, this.group, isActivePlayer);
+        this.actionDial = new UndoButton(
+            this.stage,
+            { x: 35, y : 375 },
+            isActivePlayer,
+        );
 
         this.group.add(...[
             this.movesDial.getElement(),
