@@ -1,4 +1,7 @@
 ## Setup and Goal
+
+Your goal is to collect as many VP as possible before the end game is triggered. Points are secured via donations of **gold**, **silver**, and **trade goods** at the **temple**. Leftover gold and silver also add 5 and 3 VP reespectively. Favor and coins are used for breaking ties.
+
 At game start, the map layout is revealed. Each player will now have to select a **specialist**. The specialist provides a unique special ability, some starting **favor** (an alternate currency), and, usually, a **specialty** trade good.
 
 Each player will control a single **ship** that will appear in the center **zone**.
@@ -6,7 +9,7 @@ Each player will control a single **ship** that will appear in the center **zone
 You can switch between the map and the specialist offer by clicking the bottom **show/hide** button.
 
 The map consists of seven sea zones, each containing a unique **location**. During the game, locations enable specific **actions** for players who **move** into their respective sea zones on their turn.
-- The four **trade good** locations (the mines, quarry, farms, and forest) provide **gems**, **marble**, **linen**, or **ebony**, which players can gather, sell,  donate, or hoard.
+- The four trade good locations (the mines, quarry, farms, and forest) provide **gems**, **marble**, **linen**, or **ebony**, which players can gather, sell,  donate, or hoard.
 - The orange house icon is the **market**. There, players can sell their trade goods for **coins**.
 - The yellow gold ingot icon is the **treasury**. There, players can purchase **gold** and **silver**.
 - The blue dome and obelisks icon is the **temple**. The temple receives donations of gold, silver, and trade goods, awarding **victory points** (VP) and **favor** in return.
@@ -23,7 +26,7 @@ Map Area: Around the map, from top left going clockwise, you have information re
 - the **moves** counter (two blueish wave icons which get discolored as you move)
 - the **favor button** (a red seal icon button for spending favor)
 - the **end turn button** (a red/green anchor icon button for ending your turn)
-- the **undo button** (a sun/moon icon for undoing the last acton)
+- the **undo button** (a circular arrow icon for undoing the last acton)
 
 Player Area: To the right of the map, you have the **player cards**. Each card displays:
 - the player's **influence** swatch (a die face situated left of the card itself)
@@ -38,9 +41,9 @@ The following is a detailed explanation of the rules and gameplay.
 ## Turns
 Starting with the last player who picked a specialist, players will take turns moving and taking actions around the map until the end of the game.
 
-To pass the turn, you must click the end turn button. The button becomes available as soon as you move or spend favor. Your turn may also end abruptly after losing access to actions or if opponents force it due to idleness. 
+To pass the turn, you must click the end turn button. The button becomes available as soon as you move or spend favor. Your turn can also end abruptly after failing an influence check or if you become idle.
 
-You can revert your last movement or action as long as it did not reveal a new market card or involved an influence roll.
+You can undo your movements and actions up until the start of your turn or right after an un-revertible action/movement which involved rolling a die or revealing a new market card.
 
 ## Game End
 The game can end in two ways:
