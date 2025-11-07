@@ -3,6 +3,7 @@ import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName
 import { DynamicGroupInterface } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
+import { defineBobbing } from '~/client/animations';
 import clientConstants from '~/client_constants';
 
 const { COLOR, SEA_ZONE_COUNT } = clientConstants;
@@ -27,6 +28,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
     private localPlayerColor: PlayerColor | null;
     private destinations: Array<ZoneName>;
     private isControllable: boolean = false;
+    private activeEffect: Konva.Animation;
 
     constructor(
         stage: Konva.Stage,
@@ -47,6 +49,14 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
 
         this.ship = new ShipToken('Neutral');
 
+        this.activeEffect = defineBobbing(
+            this.ship.getElement(),
+            {
+                pixelAmplitude: 5,
+                periodSeconds: 2,
+            },
+        );
+
         this.group.on('mouseenter', () => {
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
@@ -56,6 +66,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         });
 
         this.group.on('dragstart', () => {
+            this.activeEffect.stop();
             this.group.moveToTop();
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
@@ -120,6 +131,8 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
                     this.group.y(this.initialPosition.y);
                     departureZone.resetFill();
             }
+
+            this.isControllable && this.movesLeft && this.activeEffect.start();
         });
 
         this.group.add(this.ship.getElement());
@@ -141,7 +154,7 @@ export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
         this.group.y(bearings.position.y);
         this.group.draggable(activePlayerColor == this.localPlayerColor);
         this.ship.update(isControllable ? COLOR[activePlayerColor] : COLOR.shipBorder);
-        
+        isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };
 
     private broadcastAction(detail: ClientMessage): void {
