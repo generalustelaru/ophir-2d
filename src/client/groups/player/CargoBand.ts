@@ -1,48 +1,29 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { ItemName, PlayerColor } from '~/shared_types';
-import { CargoBandUpdate, Color, DynamicGroupInterface } from '~/client_types';
-import { CargoToken } from '.';
+import { PlayerColor } from '~/shared_types';
+import { CargoBandUpdate, DynamicGroupInterface } from '~/client_types';
+import { ItemRow } from '../popular';
 
 const { COLOR } = clientConstants;
 const SLOT_WIDTH = 25;
 
-type CargoSlot = {
-    x: number,
-    element: CargoToken | null,
-}
 export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
     private group: Konva.Group;
-    private stage: Konva.Stage;
     private cargoDisplay: Konva.Rect;
-    private cargoDrawData: Array<CargoSlot>;
-    private isLocalPlayer: boolean;
+    private itemRow: ItemRow;
 
-    constructor(stage: Konva.Stage, playerColor: PlayerColor, update: CargoBandUpdate, isLocalPlayer: boolean) {
-        this.isLocalPlayer = isLocalPlayer;
-        this.stage = stage;
+    constructor(stage: Konva.Stage, playerColor: PlayerColor, update: CargoBandUpdate) {
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
             height: 30,
             x: 10,
             y: 5,
         });
-        this.cargoDrawData = [
-            { x: 0, element: null },
-            { x: SLOT_WIDTH, element: null },
-            { x: SLOT_WIDTH * 2, element: null },
-            { x: SLOT_WIDTH * 3, element: null },
-        ];
-        const backgroundMapping: Record<PlayerColor, Color> = {
-            Red: COLOR.darkRed,
-            Purple: COLOR.darkPurple,
-            Green: COLOR.darkGreen,
-            Yellow: COLOR.darkYellow,
-        };
+
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: backgroundMapping[playerColor],
+            fill: COLOR[`dark${playerColor}`],
             stroke: COLOR.stampEdge,
             cornerRadius: 5,
             strokeWidth: 1,
@@ -53,9 +34,22 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
             fill: 'black',
             cornerRadius: 5,
         });
+
+        this.itemRow = new ItemRow(
+            stage,
+            {
+                x: 0,
+                y: 0,
+                width: this.group.width(),
+                height: this.group.height(),
+            },
+            SLOT_WIDTH,
+        );
+
         this.group.add(...[
             background,
             this.cargoDisplay,
+            this.itemRow.getElement(),
         ]);
         this.update(update);
     }
@@ -64,41 +58,10 @@ export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
         const { cargo, canDrop } = update;
         this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
 
-        for (const slot of this.cargoDrawData) {
-            slot.element = slot.element?.selfDestruct() || null;
-        }
-
-        for (let i = 0; i < cargo.length; i++) {
-            const item = cargo[i];
-
-            if (item) {
-                const slot = this.cargoDrawData[i];
-                this.addItem(item, slot);
-            }
-        }
-
-        !canDrop && this.disable();
+        this.itemRow.update(update.cargo, canDrop);
     };
-
-    private addItem(itemId: ItemName, cargoSlot: CargoSlot): void {
-        const token = new CargoToken(
-            this.stage,
-            { x: cargoSlot.x, y: 4 },
-            itemId,
-            this.isLocalPlayer,
-        );
-
-        cargoSlot.element = token;
-        this.group.add(token.getElement());
-    }
 
     public getElement() {
         return this.group;
-    }
-
-    public disable() {
-        this.cargoDrawData.forEach(slot => {
-            slot.element?.disable();
-        });
     }
 }
