@@ -3,10 +3,11 @@
 // should contain buttons for shifting the market and endig turn (its turn)
 
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { Color, DynamicGroupInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { Action, PlayerColor, SelectableSpecialist, SpecialistName } from '~/shared_types';
-import { ActionButton, FavorDial } from '../popular';
+import { Coordinates, PlayerColor, SelectableSpecialist, SpecialistName } from '~/shared_types';
+import { Button, FavorDial } from '../popular';
+import { ConfirmButton } from './ConfirmButton';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
@@ -16,39 +17,34 @@ type SpecialistCardUpdate = {
     shouldEnable: boolean;
 }
 
-export class SpecialistCard extends ActionButton implements DynamicGroupInterface<SpecialistCardUpdate> {
+export class SpecialistCard extends Button implements DynamicGroupInterface<SpecialistCardUpdate> {
 
     private background: Konva.Rect;
     private cardName: SpecialistName;
+    private stateFill: Color;
+    private selectButton: ConfirmButton;
 
     constructor(
         stage: Konva.Stage,
         specialist: SelectableSpecialist,
-        xOffset: number,
+        position: Coordinates,
+        selectionCallback: (name: SpecialistName) => void,
     ) {
-        const layout = {
-            width: 200,
-            height: 300,
-            x: xOffset,
-            y: 50,
-        };
-        super(
-            stage,
-            layout,
-            {
-                action: Action.pick_specialist,
-                payload: { name: specialist.name },
-            },
-        );
-        this.cardName = specialist.name;
+        const layout = { ...position, width: 200, height: 300 };
 
+        super(stage, layout, () => {});
+
+        this.cardName = specialist.name;
+        this.stateFill = COLOR.templeRed;
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeRed,
+            fill: this.stateFill,
             cornerRadius: 15,
             strokeWidth: 0,
         });
+
+        this.updateFunction(selectionCallback);
 
         const textCommon = {
             fontFamily: 'Custom',
@@ -75,6 +71,8 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
         const favorDial = new FavorDial({ x: 5, y: 240 }, specialist.startingFavor);
 
+        this.selectButton = new ConfirmButton(stage, { x: 0, y: 0 }, specialist);
+
         this.group.add(...[
             this.background,
             nameElement,
@@ -96,7 +94,9 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
             this.group.add(tradeGoodIcon);
         }
 
-        this.setEnabled(!specialist.owner);
+        this.group.add(this.selectButton.getElement());
+
+        !specialist.owner ? this.enable() : this.disable();
     }
 
     public getCardName() {
@@ -112,18 +112,36 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
         switch (true) {
             case shouldEnable:
-                this.background.fill(COLOR.templeRed);
+                this.setFill(COLOR.templeRed);
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
-                this.background.fill(COLOR[localPlayerColor]);
+                this.setFill(COLOR[localPlayerColor]);
+                this.selectButton.hide();
                 break;
             case !!specialist.owner:
-                this.background.fill(COLOR[`dark${specialist.owner}`]);
+                this.setFill(COLOR[`dark${specialist.owner}`]);
+                this.selectButton.hide();
                 break;
             default:
-                this.background.fill(COLOR.templeDarkRed);
+                this.setFill(COLOR.templeDarkRed);
+                this.selectButton.hide();
                 break;
         }
-        this.setEnabled(shouldEnable);
+        shouldEnable ? this.enable() : this.disable();
+    }
+
+    public preSelect(isPreSelected: boolean) {
+        if (isPreSelected) {
+            this.selectButton.show();
+            this.background.fill(COLOR.boneWhite);
+        } else {
+            this.setFill(this.stateFill);
+            this.selectButton.hide();
+        }
+    }
+
+    private setFill(color: Color) {
+        this.stateFill = color;
+        this.background.fill(color);
     }
 }

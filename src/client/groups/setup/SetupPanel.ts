@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import { PlayerColor, PlayerDraft, SelectableSpecialist } from '~/shared_types';
+import { PlayerColor, PlayerDraft, SelectableSpecialist, SpecialistName } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { SpecialistCard } from './SpecialistCard';
 import localState from '../../state';
@@ -38,7 +38,8 @@ export class SetupPanel implements DynamicGroupInterface<SetupPanelUpdate> {
             const card = new SpecialistCard(
                 stage,
                 specialist,
-                offset,
+                { x: offset, y: 50 },
+                (name = specialist.name) => {this.preSelect(name);},
             );
             this.group.add(card.getElement());
 
@@ -69,5 +70,11 @@ export class SetupPanel implements DynamicGroupInterface<SetupPanelUpdate> {
 
     public switchVisibility() {
         this.group.visible() ? this.group.hide() : this.group.show();
+    }
+
+    private preSelect(name: SpecialistName) {
+        for (const card of this.specialistCards) {
+            card.preSelect(card.getCardName() == name);
+        }
     }
 }
