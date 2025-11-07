@@ -7,9 +7,11 @@ export class BackupStateHandler {
     private backupState: Array<BackupState> = [];
     private serverName: string;
 
-    constructor(serverName: string, initialState: BackupState | null) {
+    constructor(serverName: string, initialState: Array<BackupState> | null) {
         this.serverName = serverName;
-        initialState && this.backupState.push(tools.getCopy(initialState));
+
+        if (initialState)
+            this.backupState = initialState;
     }
 
     getState() {
