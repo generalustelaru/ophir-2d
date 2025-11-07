@@ -53,7 +53,6 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
         const textCommon = {
             fontFamily: 'Custom',
             width: layout.width,
-            height: layout.height,
         };
 
         const nameElement = new Konva.Text({
@@ -67,7 +66,7 @@ export class SpecialistCard extends ActionButton implements DynamicGroupInterfac
 
         const descriptionElement = new Konva.Text({
             ...textCommon,
-            width: layout.width - 5,
+            width: layout.width,
             text: specialist.description,
             fontSize: 22,
             y: 70,
