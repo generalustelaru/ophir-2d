@@ -251,10 +251,14 @@ export class PlayProcessor implements SessionProcessor {
 
         const position = repositioningPayload.repositioning;
 
-        if (isRivalShip)
+        if (isRivalShip) {
             this.playState.repositionRivalShip(position);
-        else
+            this.backupState.saveRepositioning('Neutral', position);
+        }
+        else {
             player.setBearings({ ...player.getBearings(), position });
+            this.backupState.saveRepositioning(player.getIdentity().color, position);
+        }
 
         return lib.pass(this.saveAndReturn(player));
     }
