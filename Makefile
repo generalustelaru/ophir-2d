@@ -40,3 +40,6 @@ endif
 check:
 	npx tsc --noEmit
 	npx eslint .
+
+fix:
+	npx eslint . --fix
