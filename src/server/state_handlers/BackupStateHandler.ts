@@ -1,4 +1,4 @@
-import { ChatEntry, PlayerColor } from '~/shared_types';
+import { ChatEntry, Coordinates, NeutralColor, Player, PlayerColor, Rival } from '~/shared_types';
 import { BackupState, Probable } from '../server_types';
 import tools from '../services/ToolService';
 import lib from '../action_processors/library';
@@ -39,6 +39,21 @@ export class BackupStateHandler {
         const count = this.backupState.length;
         if (count)
             this.backupState[count - 1].playState.chat.push(chat);
+    }
+
+    public saveRepositioning(color: PlayerColor|NeutralColor, position: Coordinates) {
+        const count = this.backupState.length;
+
+        if (!count)
+            return;
+
+        const playStateRef = this.backupState[count -1].playState;
+        const entityRef: Player|Rival|undefined = color == 'Neutral' && playStateRef.rival.isIncluded
+            ? playStateRef.rival
+            : playStateRef.players.find(p => p.color == color);
+
+        if (entityRef)
+            entityRef.bearings.position = position;
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
