@@ -80,11 +80,7 @@ export class PlayerGroup implements MegaGroupInterface {
 
     public updatePlayerVp(color: PlayerColor|null, vp: number) {
         const localPlacard = this.playerPlacards.find(placard => placard.getId() === color);
-
-        if (!localPlacard || !color)
-            throw new Error('Faield to update VP swatch.');
-
-        localPlacard.updateVP(vp);
+        localPlacard && localPlacard.updateVP(vp);
     }
 
     public disable(): void {
