@@ -4,6 +4,7 @@ import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, Spe
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { Communicator } from '~/client/services/Communicator';
+import { defineBobbing } from '~/client/animations';
 import localState from '../../state';
 import clientConstants from '~/client_constants';
 
@@ -21,6 +22,7 @@ export class PlayerShip extends Communicator {
     private toSailValue: DiceSix|false = false;
     private player: Player;
     private inControl: boolean = false;
+    private activeEffect: Konva.Animation;
 
     public switchControl(isControllable: boolean) {
         this.inControl = isControllable;
@@ -46,6 +48,7 @@ export class PlayerShip extends Communicator {
         this.group.x(coordinates.x);
         this.group.y(coordinates.y);
         this.group.draggable(player.isActive);
+        this.inControl && player.moveActions ? this.activeEffect.start() : this.activeEffect.stop();
     };
 
     // MARK: -Constructor
@@ -88,6 +91,14 @@ export class PlayerShip extends Communicator {
             { stroke: isActivePlayer && COLOR.activeShipBorder || COLOR.shipBorder },
         );
 
+        this.activeEffect = defineBobbing(
+            this.ship.getElement(),
+            {
+                pixelAmplitude: 5,
+                periodSeconds: 2,
+            },
+        );
+
         this.group.on('mouseenter', () => {
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
@@ -98,6 +109,7 @@ export class PlayerShip extends Communicator {
 
         // MARK: - Dragging (start)
         this.group.on('dragstart', () => {
+            this.activeEffect.stop();
             this.group.moveToTop();
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
@@ -216,6 +228,8 @@ export class PlayerShip extends Communicator {
                     this.group.y(this.initialPosition.y);
                     departureZone.resetFill();
             }
+
+            this.inControl && player.moveActions && this.activeEffect.start();
         });
         this.group.add(this.ship.getElement());
     }
