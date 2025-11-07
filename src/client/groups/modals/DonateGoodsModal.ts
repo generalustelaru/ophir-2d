@@ -11,7 +11,6 @@ const { COLOR } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements DynamicModalInterface<PlayState, MarketSlotKey> {
     private market: MarketOffer | null = null;
-    // private confirmationText: Konva.Text;
     private goodsAssortment: GoodsAssortment;
     private victoryPointDial: VictoryPointDial;
     private favorDial: FavorDial;
