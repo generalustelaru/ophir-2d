@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
 import { PlayerColor, PlayerEntry } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { ColorCard } from './ColorCard';
@@ -11,7 +11,7 @@ type EnrolmentPanelUpdate = {
 
 const { COLOR } = clientConstants;
 
-export class EnrolmentPanel implements DynamicGroupInterface<EnrolmentPanelUpdate> {
+export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPanelUpdate>> {
     private group: Konva.Group;
     private cards: Array<ColorCard> = [];
 

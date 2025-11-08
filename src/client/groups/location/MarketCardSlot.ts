@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
 import { MarketCard } from '.';
 import { Trade, Fluctuation, MarketSlotKey } from '~/shared_types';
 import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;
 
-export class MarketCardSlot implements DynamicGroupInterface<MarketCardUpdate> {
+export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
     private group: Konva.Group;
     private marketCard: MarketCard;
 

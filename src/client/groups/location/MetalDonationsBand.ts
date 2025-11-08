@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates, TempleState } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { TempleLevelDial } from './TempleLevelDial';
 import clientConstants from '~/client_constants';
 
@@ -16,7 +16,7 @@ const LEVEL_DIAL_DRIFTS = [
     { id: 5, x: UNIT * 5 },
     { id: 6, x: UNIT * 6 },
 ];
-export class MetalDonationsBand implements DynamicGroupInterface<TempleState> {
+export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleState>> {
 
     private group: Konva.Group;
     private cargoDisplayGroup: Konva.Group;

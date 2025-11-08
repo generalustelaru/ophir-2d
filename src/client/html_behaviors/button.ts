@@ -1,6 +1,6 @@
-import { HTMLHandlerInterface } from '~/client_types';
+import { HTMLHandlerInterface, Unique } from '~/client_types';
 
-export class Button implements HTMLHandlerInterface {
+export class Button implements Unique<HTMLHandlerInterface> {
 
     element: HTMLButtonElement;
     callback: () => void;

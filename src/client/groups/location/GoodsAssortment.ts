@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { Coordinates, TradeGood } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
 type Scale = 'card' | 'modal'
-export class GoodsAssortment implements DynamicGroupInterface<Array<TradeGood>>
+export class GoodsAssortment implements Unique<DynamicGroupInterface<Array<TradeGood>>>
 {
     private group: Konva.Group;
     private scale: number;

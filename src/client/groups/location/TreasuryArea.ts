@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData, Unique } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { Action } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;
 
-export class TreasuryArea implements DynamicGroupInterface<TreasuryUpdate> {
+export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate>> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

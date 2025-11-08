@@ -1,6 +1,6 @@
-import { HTMLHandlerInterface } from '~/client_types';
+import { HTMLHandlerInterface, Unique } from '~/client_types';
 
-export class ChatInput implements HTMLHandlerInterface {
+export class ChatInput implements Unique<HTMLHandlerInterface> {
 
     element: HTMLTextAreaElement;
     inputCallback: (toSubmit: boolean) => void;

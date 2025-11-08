@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, LayerIds, Unique } from '~/client_types';
 import { Player, PlayerColor, PlayState } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
 
-export class PlayerGroup implements MegaGroupInterface {
+export class PlayerGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private playerPlacards: Array<PlayerPlacard> = [];

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MarketCardUpdate, DynamicGroupInterface } from '~/client_types';
+import { MarketCardUpdate, DynamicGroupInterface, Unique } from '~/client_types';
 import { Coordinates, Fluctuation, Trade } from '~/shared_types';
 import { CoinDial, Button } from '../popular';
 import { GoodsAssortment } from '.';
@@ -7,7 +7,7 @@ import clientConstants from '~/client_constants';
 import { MiniTempleRewardDial } from './MiniTempleRewardDial';
 
 const { COLOR } = clientConstants;
-export class MarketCard extends Button implements DynamicGroupInterface<MarketCardUpdate> {
+export class MarketCard extends Button implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;

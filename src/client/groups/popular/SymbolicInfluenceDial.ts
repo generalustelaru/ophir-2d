@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client/client_types';
+import { DynamicGroupInterface, Unique } from '~/client/client_types';
 import { Coordinates, NeutralColor, PlayerColor } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
 const { COLOR } = clientConstants;
@@ -8,7 +8,7 @@ type SymbolicInfluenceDialUpdate = {
     symbol?: string,
     position?: Coordinates,
 }
-export class SymbolicInfluenceDial implements DynamicGroupInterface<SymbolicInfluenceDialUpdate> {
+export class SymbolicInfluenceDial implements Unique<DynamicGroupInterface<SymbolicInfluenceDialUpdate>> {
     private group: Konva.Group;
     private dieFace: Konva.Rect;
     private dieSymbol: Konva.Text;

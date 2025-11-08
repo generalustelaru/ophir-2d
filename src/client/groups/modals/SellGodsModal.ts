@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState } from '~/shared_types';
-import { DynamicModalInterface } from '~/client_types';
+import { DynamicModalInterface, Unique } from '~/client_types';
 import { CoinDial } from '../popular';
 import { GoodsAssortment } from '../location';
 import { ModalBase } from './ModalBase';
@@ -8,7 +8,7 @@ import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;
 
-export class SellGoodsModal extends ModalBase implements DynamicModalInterface<PlayState, MarketSlotKey>{
+export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
     private coinDial: CoinDial;

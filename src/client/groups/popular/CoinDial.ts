@@ -1,10 +1,10 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Coordinates } from '~/shared_types';
 
 const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
-export class CoinDial implements DynamicGroupInterface<number> {
+export class CoinDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
     private amount: Konva.Text;
     private coinCenter: number;

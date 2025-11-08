@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Player, Coordinates, PlayerColor, Action } from '~/shared_types';
 import { ActionButton } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA, COLOR } = clientConstants;
 
-export class SpecialtyGoodButton extends ActionButton implements DynamicGroupInterface<boolean> {
+export class SpecialtyGoodButton extends ActionButton implements Unique<DynamicGroupInterface<boolean>> {
 
     background: Konva.Rect;
     playerColor: PlayerColor;

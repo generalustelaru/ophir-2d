@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { GroupLayoutData, LayerIds, MegaGroupInterface } from '~/client_types';
+import { GroupLayoutData, LayerIds, MegaGroupInterface, Unique } from '~/client_types';
 import { SetupState } from '~/shared_types';
 import { ShowHideButton } from '../groups/setup/ShowHideButton';
 import { SetupPanel } from '../groups/setup/SetupPanel';
 
-export class SetupGroup implements MegaGroupInterface {
+export class SetupGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private modal: SetupPanel | null = null;

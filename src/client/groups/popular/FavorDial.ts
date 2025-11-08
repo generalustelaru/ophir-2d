@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { FavorIcon } from './FavorIcon';
 import { Coordinates } from '~/shared_types';
 
 const { COLOR } = clientConstants;
-export class FavorDial implements DynamicGroupInterface<number> {
+export class FavorDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
     private favorCount: Konva.Text;
 

@@ -80,6 +80,8 @@ export interface StaticGroupInterface {
     getElement(): Konva.Group,
 }
 
+export type Unique<T> = T & { p?: undefined }
+
 export type GroupLayoutData = {
     width: number,
     height: number,

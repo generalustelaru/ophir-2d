@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Button } from '../popular';
 import constants from '~/client_constants';
 
@@ -10,7 +10,7 @@ type ConcludeButtonUpdate = {
     isControllable: boolean,
     mayConclude: boolean,
 }
-export class ConcludeButton extends Button implements DynamicGroupInterface<ConcludeButtonUpdate>{
+export class ConcludeButton extends Button implements Unique<DynamicGroupInterface<ConcludeButtonUpdate>> {
     private anchor: Konva.Path;
 
     constructor(

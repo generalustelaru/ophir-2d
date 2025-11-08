@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Coordinates } from '~/shared_types';
 import { Button } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class ShiftMarketButton extends Button implements DynamicGroupInterface<boolean> {
+export class ShiftMarketButton extends Button implements Unique<DynamicGroupInterface<boolean>> {
 
     private card: Konva.Rect;
     private coin: Konva.Circle;

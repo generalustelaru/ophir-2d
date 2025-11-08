@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import clientConstants from '~/client_constants';
 
 const { LAYERED_ICONS } = clientConstants;
 
-export class EmptyLocationToken implements DynamicGroupInterface<boolean> {
+export class EmptyLocationToken implements Unique<DynamicGroupInterface<boolean>> {
     private group: Konva.Group;
 
     constructor(

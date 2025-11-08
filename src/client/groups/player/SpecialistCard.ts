@@ -1,11 +1,11 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
 import { Player } from '~/shared_types';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class SpecialistCard implements DynamicGroupInterface<string> {
+export class SpecialistCard implements Unique<DynamicGroupInterface<string>> {
     private group: Konva.Group;
     private isLocalPlayer: boolean;
     private name: Konva.Text;

@@ -1,12 +1,12 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData, TempleUpdate, Unique } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { MarketSlotKey, MarketOffer, Action } from '~/shared_types';
 import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from '.';
 
 const { COLOR } = clientConstants;
 
-export class TempleArea implements DynamicGroupInterface<TempleUpdate> {
+export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
 
     private group: Konva.Group;
     private background: Konva.Rect;

@@ -1,11 +1,11 @@
 
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { ColorProfile, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { ColorProfile, DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
 
 const { ICON_DATA, COLOR, LOCATION_TOKEN_DATA } = clientConstants;
 
-export class FavorIcon implements DynamicGroupInterface<ColorProfile> {
+export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
     private group: Konva.Group;
     public verticalAxis: number;
     public templeIcon: Konva.Path;

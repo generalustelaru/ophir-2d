@@ -1,6 +1,6 @@
-import { HTMLHandlerInterface } from '~/client_types';
+import { HTMLHandlerInterface, Unique } from '~/client_types';
 
-export class TextInput implements HTMLHandlerInterface {
+export class TextInput implements Unique<HTMLHandlerInterface> {
 
     element: HTMLInputElement;
     inputCallback: () => void;

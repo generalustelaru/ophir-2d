@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import { Action, Coordinates, Metal } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { ActionButton, VictoryPointDial } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
-export class MetalDonationCard extends ActionButton implements DynamicGroupInterface<boolean> {
+export class MetalDonationCard extends ActionButton implements Unique<DynamicGroupInterface<boolean>> {
     private background: Konva.Rect;
 
     constructor(

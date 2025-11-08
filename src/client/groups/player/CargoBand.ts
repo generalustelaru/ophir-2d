@@ -1,13 +1,13 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
 import { PlayerColor } from '~/shared_types';
-import { CargoBandUpdate, DynamicGroupInterface } from '~/client_types';
+import { CargoBandUpdate, DynamicGroupInterface, Unique } from '~/client_types';
 import { ItemRow } from '../popular';
 
 const { COLOR } = clientConstants;
 const SLOT_WIDTH = 25;
 
-export class CargoBand implements DynamicGroupInterface<CargoBandUpdate> {
+export class CargoBand implements Unique<DynamicGroupInterface<CargoBandUpdate>> {
     private group: Konva.Group;
     private cargoDisplay: Konva.Rect;
     private itemRow: ItemRow;

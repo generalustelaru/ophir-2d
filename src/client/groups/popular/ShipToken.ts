@@ -1,10 +1,10 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { Color, DynamicGroupInterface } from '~/client_types';
+import { Color, DynamicGroupInterface, Unique } from '~/client_types';
 import { Coordinates, NeutralColor, PlayerColor } from '~/shared_types';
 
 const { COLOR, SHIP_DATA } = clientConstants;
-export class ShipToken implements DynamicGroupInterface<Color> {
+export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
     group: Konva.Group;
     token: Konva.Path;
 

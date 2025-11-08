@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Action, Player, PlayerColor } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyGoodButton } from '.';
@@ -8,7 +8,7 @@ import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class PlayerPlacard implements DynamicGroupInterface<Player> {
+export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
     private stage: Konva.Stage;
     private group: Konva.Group;

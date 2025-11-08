@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DiceSix } from '~/shared_types';
 import { Coordinates } from '~/shared_types';
-import { Color, DynamicGroupInterface } from '~/client_types';
+import { Color, DynamicGroupInterface, Unique } from '~/client_types';
 
 type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null }
 type PipData = Array<PipDataElement>
@@ -9,7 +9,7 @@ type InfluenceDialUpdate = {
     value: DiceSix|false,
     color: Color|null
 }
-export class InfluenceDial implements DynamicGroupInterface<InfluenceDialUpdate> {
+export class InfluenceDial implements Unique<DynamicGroupInterface<InfluenceDialUpdate>> {
     private group: Konva.Group;
     private body: Konva.Rect;
     private dotMatrix: PipData;

@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds, Unique } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
 import { PlayState } from '~/shared_types';
 
-export class LocationGroup implements MegaGroupInterface {
+export class LocationGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private marketArea: MarketArea | null = null;

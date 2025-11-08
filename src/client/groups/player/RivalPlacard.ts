@@ -3,7 +3,7 @@
 // should contain buttons for shifting the market and endig turn (its turn)
 
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { PlayerColor, Rival } from '~/shared_types';
 import { InfluenceDial, MovesDial } from '../popular';
 import { ShiftMarketButton, ConcludeButton } from '.';
@@ -11,7 +11,7 @@ import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class RivalPlacard implements DynamicGroupInterface<Rival> {
+export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
 
     private localPlayerColor: PlayerColor | null;
     private group: Konva.Group;

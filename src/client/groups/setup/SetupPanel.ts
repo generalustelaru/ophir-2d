@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
 import { PlayerColor, PlayerDraft, SelectableSpecialist, SpecialistName } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { SpecialistCard } from './SpecialistCard';
@@ -12,7 +12,7 @@ type SetupPanelUpdate = {
 
 const { COLOR } = clientConstants;
 
-export class SetupPanel implements DynamicGroupInterface<SetupPanelUpdate> {
+export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate>> {
     private group: Konva.Group;
     private specialistCards:  Array<SpecialistCard> = [];
     private localPlayerColor: PlayerColor | null;

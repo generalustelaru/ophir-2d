@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { Player  } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Button } from '../popular';
 import constants from '~/client_constants';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class EndTurnButton extends Button implements DynamicGroupInterface<Player> {
+export class EndTurnButton extends Button implements Unique<DynamicGroupInterface<Player>> {
     private anchor: Konva.Path;
 
     constructor(

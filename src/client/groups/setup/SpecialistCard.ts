@@ -3,7 +3,7 @@
 // should contain buttons for shifting the market and endig turn (its turn)
 
 import Konva from 'konva';
-import { Color, DynamicGroupInterface } from '~/client_types';
+import { Color, DynamicGroupInterface, Unique } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { Coordinates, PlayerColor, SelectableSpecialist, SpecialistName } from '~/shared_types';
 import { Button, FavorDial } from '../popular';
@@ -17,7 +17,7 @@ type SpecialistCardUpdate = {
     shouldEnable: boolean;
 }
 
-export class SpecialistCard extends Button implements DynamicGroupInterface<SpecialistCardUpdate> {
+export class SpecialistCard extends Button implements Unique<DynamicGroupInterface<SpecialistCardUpdate>> {
 
     private background: Konva.Rect;
     private cardName: SpecialistName;

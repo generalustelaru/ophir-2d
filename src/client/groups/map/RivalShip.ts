@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, ZoneName } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { defineBobbing } from '~/client/animations';
@@ -15,7 +15,7 @@ export type RivalShipUpdate = {
     moves: number,
     activePlayerColor: PlayerColor,
 }
-export class RivalShip implements DynamicGroupInterface<RivalShipUpdate> {
+export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>> {
 
     // private stage: Konva.Stage;
     private seaZones: Array<SeaZone>;

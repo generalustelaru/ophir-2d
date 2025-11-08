@@ -1,13 +1,13 @@
 import Konva from 'konva';
 import { Action } from '~/shared_types';
-import { DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
+import { DynamicModalInterface, SailAttemptArgs, Unique } from '~/client/client_types';
 import { InfluenceDial, SymbolicInfluenceDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class SailAttemptModal extends ModalBase implements DynamicModalInterface<undefined, SailAttemptArgs> {
+export class SailAttemptModal extends ModalBase implements Unique<DynamicModalInterface<undefined, SailAttemptArgs>> {
     private ownerDie: SymbolicInfluenceDial;
     private toSailDial: InfluenceDial;
     constructor(stage: Konva.Stage) {

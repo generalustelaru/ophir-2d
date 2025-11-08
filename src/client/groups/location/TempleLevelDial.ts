@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import { Coordinates, Metal } from '~/shared_types';
-import { StaticGroupInterface } from '~/client_types';
+import { StaticGroupInterface, Unique } from '~/client_types';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 const UNIT = 27;
-export class TempleLevelDial implements StaticGroupInterface {
+export class TempleLevelDial implements Unique<StaticGroupInterface> {
     private group: Konva.Group;
 
     constructor(

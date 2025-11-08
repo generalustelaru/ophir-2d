@@ -1,10 +1,10 @@
 import Konva from 'konva';
-import { GroupLayoutData, MegaGroupInterface, LayerIds } from '~/client_types';
+import { GroupLayoutData, MegaGroupInterface, LayerIds, Unique } from '~/client_types';
 import { EnrolmentState } from '~/shared_types';
 import { EnrolmentPanel } from '../groups/enrolment/EnrolmentPanel';
 import localState from '../state';
 
-export class EnrolmentGroup implements MegaGroupInterface {
+export class EnrolmentGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private modal: EnrolmentPanel | null = null;

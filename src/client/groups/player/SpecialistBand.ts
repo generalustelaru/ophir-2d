@@ -1,9 +1,9 @@
 import Konva from 'konva';
 import { Coordinates, Player } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { Button } from '../popular';
 
-export class SpecialistBand extends Button implements DynamicGroupInterface<boolean> {
+export class SpecialistBand extends Button implements Unique<DynamicGroupInterface<boolean>> {
     private background: Konva.Rect;
     private label: Konva.Text;
 

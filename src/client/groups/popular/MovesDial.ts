@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import constants from '~/client_constants';
 import { Coordinates } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 
 const { ICON_DATA, COLOR } = constants;
 
@@ -9,7 +9,7 @@ type MovesDialUpdate = {
     isActive: boolean,
     moves: number,
 }
-export class MovesDial implements DynamicGroupInterface<MovesDialUpdate> {
+export class MovesDial implements Unique<DynamicGroupInterface<MovesDialUpdate>> {
 
     private group: Konva.Group;
     private upperWave: Konva.Path;

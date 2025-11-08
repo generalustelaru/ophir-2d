@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, Player, PlayerColor } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, Unique } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone } from './SeaZone';
@@ -11,7 +11,7 @@ type RemoteShipUpdate = {
     remotePlayer: Player,
     isDraggable: boolean,
 }
-export class RemoteShip implements DynamicGroupInterface<RemoteShipUpdate> {
+export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate>> {
 
     private ship: ShipToken;
     private localZone: SeaZone;
