@@ -8,7 +8,12 @@ export class ItemRow {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private drawData: Array<TokenData>;
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, segmentWidth: number) {
+    constructor(
+        stage: Konva.Stage,
+        layout: GroupLayoutData,
+        segmentWidth: number,
+        alignRight: boolean = false,
+    ) {
         this.group = new Konva.Group({ ...layout });
         this.stage = stage;
         this.drawData = [
@@ -17,6 +22,9 @@ export class ItemRow {
             { x: segmentWidth * 2, token: null },
             { x: segmentWidth * 3, token: null },
         ];
+
+        if (alignRight)
+            this.drawData = this.drawData.reverse();
     }
 
     public getElement() {

@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState } from '~/shared_types';
 import { DynamicModalInterface, Unique } from '~/client_types';
 import { CoinDial } from '../popular';
-import { GoodsAssortment } from '../location';
+import { ItemRow } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client_constants';
 
@@ -12,7 +12,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
     private coinDial: CoinDial;
-    private goodsAssortment: GoodsAssortment;
+    private itemRow: ItemRow;
 
     constructor(stage: Konva.Stage) {
         super(
@@ -24,11 +24,17 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
                 dismissLabel: 'Cancel',
             },
         );
-
-        this.goodsAssortment = new GoodsAssortment(
-            { x: 60, y: 15 },
-            'modal',
-            null,
+        const itemWidth = 50;
+        this.itemRow = new ItemRow(
+            stage,
+            {
+                width: itemWidth,
+                height: 30,
+                x: 60,
+                y: 35,
+            },
+            30,
+            true,
         );
 
         const { shape, fill } = ICON_DATA['conversion_arrow'];
@@ -49,7 +55,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
         );
 
         this.contentGroup.add(...[
-            this.goodsAssortment.getElement(),
+            this.itemRow.getElement(),
             conversionArrow,
             this.coinDial.getElement(),
         ]);
@@ -65,7 +71,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
             throw new Error('Cannot render modal! Update data is missing.');
 
         this.coinDial.update(this.market[slot].reward.coins  + this.fluctuations[slot]);
-        this.goodsAssortment.update(this.market[slot].request);
+        this.itemRow.update(this.market[slot].request);
         this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }
