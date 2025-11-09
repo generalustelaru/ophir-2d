@@ -28,7 +28,7 @@ class ValidatorService {
             [
                 { key: 'sharedState', type: 'object', nullable: false },
                 { key: 'privateState', type: 'object', nullable: true },
-                { key: 'backupState', type: 'object', nullable: true },
+                { key: 'backupStates', type: 'array', nullable: true },
             ],
         );
 
@@ -66,17 +66,19 @@ class ValidatorService {
             if (!privateState)
                 return null;
 
-            if (savedSession.backupState != null) {
-                const backupState = this.validateObject<BackupState>(
-                    'BackupState',
-                    savedSession.backupState,
-                    [
-                        { key: 'playState', type: 'object', nullable: false },
-                        { key: 'privateState', type: 'object', nullable: false },
-                    ],
-                );
+            if (savedSession.backupStates != null) {
+                const backupStates = savedSession.backupStates.map((state) => {
+                    return this.validateObject<BackupState>(
+                        'BackupState',
+                        state,
+                        [
+                            { key: 'playState', type: 'object', nullable: false },
+                            { key: 'privateState', type: 'object', nullable: false },
+                        ],
+                    );
+                });
 
-                if(!backupState)
+                if (backupStates.includes(null))
                     return null;
             }
         }

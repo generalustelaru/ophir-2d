@@ -128,5 +128,5 @@ export interface SessionProcessor {
 export type SavedSession = {
     sharedState: State,
     privateState: PrivateState | null
-    backupState: Array<BackupState> | null,
+    backupStates: Array<BackupState> | null,
 }

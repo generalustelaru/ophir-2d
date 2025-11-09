@@ -69,7 +69,7 @@ export class GameSession {
             return;
         }
 
-        const { sharedState, privateState, backupState } = savedSession;
+        const { sharedState, privateState, backupStates: backupState } = savedSession;
         const { gameId, sessionOwner, players, chat } = sharedState;
 
         this.actionProcessor = (() => {
@@ -107,7 +107,7 @@ export class GameSession {
         const isPlay = state.sessionPhase === Phase.play;
         return {
             sharedState: state,
-            backupState: isPlay ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
+            backupStates: isPlay ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
             privateState: isPlay ? (this.actionProcessor as PlayProcessor).getPrivateState() : null,
         };
     }
