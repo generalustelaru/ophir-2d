@@ -1,6 +1,6 @@
 import { Trade, ExchangeTier, ZoneName, PlayerColor } from '~/shared_types';
-import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage } from '~/server_types';
-import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable } from './library';
+import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage, Deed } from '~/server_types';
+import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable, Writable, writable } from './library';
 import { PlayerHandler } from './PlayerHandler';
 
 /**
@@ -11,6 +11,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
     private tradeDeck: ArrayWritable<Trade>;
     private costTiers: ArrayWritable<ExchangeTier>;
     private gameStats: ArrayWritable<PlayerCountables>;
+    private turnSummary: Writable<Array<Deed>>;
     private gameTempleLevels: number;
 
     constructor(privateState: PrivateState) {
@@ -18,6 +19,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         this.tradeDeck = arrayWritable(privateState.tradeDeck);
         this.costTiers = arrayWritable(privateState.costTiers,'templeLevel');
         this.gameStats = arrayWritable(privateState.gameStats,'color');
+        this.turnSummary = writable(privateState.turnSummary);
 
         this.gameTempleLevels = this.costTiers.count();
     }
@@ -28,6 +30,7 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
             tradeDeck: this.tradeDeck.get(),
             costTiers: this.costTiers.get(),
             gameStats: this.gameStats.get(),
+            turnSummary: this.turnSummary.get(),
         };
     }
 
@@ -43,15 +46,15 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         return this.destinationPackages.findOne(from)!.navigatorAccess;
     }
 
-    getTempleLevelCount() {
+    public getTempleLevelCount() {
         return this.gameTempleLevels;
     }
 
-    drawMetalPrices() {
+    public drawMetalPrices() {
         return this.costTiers.drawFirst()?.treasury || null;
     }
 
-    updatePlayerStats(player: PlayerHandler, amount: number = 0) {
+    public updatePlayerStats(player: PlayerHandler, amount: number = 0) {
         this.gameStats.updateOne(player.getIdentity().color, (countables) => {
             countables.vp += amount;
 
@@ -65,20 +68,16 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         });
     }
 
-    getPlayerVictoryPoints(color: PlayerColor) {
+    public getPlayerVictoryPoints(color: PlayerColor) {
         const ps = this.gameStats.getOne(color);
         return ps ? ps.vp : 0;
     }
 
-    getGameStats() {
+    public getGameStats() {
         return this.gameStats.get();
     }
 
-    isTradeDeckEmpty() {
-        return this.tradeDeck.count() === 0;
-    }
-
-    loadTradeDeck(deck: Array<Trade>) {
+    public loadTradeDeck(deck: Array<Trade>) {
         this.tradeDeck.overwrite(deck
             .map(t => { return { key: Math.random(), trade: t }; })
             .sort((a,b) => a.key - b.key)
@@ -86,7 +85,21 @@ export class PrivateStateHandler implements ObjectHandler<PrivateState> {
         );
     }
 
-    drawTrade() {
+    public drawTrade() {
         return this.tradeDeck.drawFirst();
+    }
+
+    public addDeed(deed: Deed) {
+        this.turnSummary.update(s => {
+            s.push(deed);
+            return s;
+        });
+    }
+
+    public getDeeds() {
+        const deeds = this.turnSummary.get();
+        this.turnSummary.reset();
+
+        return deeds;
     }
 }

@@ -7,7 +7,9 @@ import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
-import { ActionsAndDetails, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle } from '~/server_types';
+import {
+    ActionsAndDetails, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle, TurnEvent,
+} from '~/server_types';
 import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
@@ -90,7 +92,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: MOVE
     public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
-        const { player, payload } = digest;
+        const { player, payload, action } = digest;
         this.preserveState(player);
 
         const movementPayload = validator.validateMovementPayload(payload);
@@ -139,7 +141,10 @@ export class PlayProcessor implements SessionProcessor {
             player.spendMove();
 
             if (player.isBarrierCrossing(target)) {
-                player.addDeed(`used hidden passage to reach the ${locationName}`);
+                this.privateState.addDeed({
+                    context: action,
+                    description: `used hidden passage to reach the ${locationName}`,
+                });
 
                 return true;
             }
@@ -152,7 +157,7 @@ export class PlayProcessor implements SessionProcessor {
                 : 0;
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
-                player.addDeed(`reached the ${locationName} undeterred`);
+                this.privateState.addDeed({ context: action, description: `sailed to the ${locationName}` });
 
                 return true;
             }
@@ -176,13 +181,19 @@ export class PlayProcessor implements SessionProcessor {
             const blockingPlayers = playersInZone.filter(p => p.influence > influenceRoll);
 
             if (!blockingPlayers.length && influenceRoll >= rivalInfluence) {
-                player.addDeed(`exerted influence succesfully to reach the ${locationName}`);
+                this.privateState.addDeed({
+                    context: action,
+                    description: `exerted influence to reach the ${locationName}`,
+                });
 
                 return true;
             }
 
             this.playState.trimInfluenceByZone(target, rivalInfluence);
-            player.addDeed(`was blocked from sailing towards the ${locationName}`);
+            this.privateState.addDeed({
+                context: TurnEvent.failed_move,
+                description: `was blocked from sailing towards the ${locationName}`,
+            });
 
             return false;
         })();
@@ -216,14 +227,20 @@ export class PlayProcessor implements SessionProcessor {
             if (this.playState.isRivalIncluded()) {
                 if (this.playState.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
-                    player.addDeed('took control of the rival ship');
+                    this.privateState.addDeed({
+                        context: TurnEvent.rival_handling,
+                        description: 'took control of the rival ship',
+                    });
                     player.freeze();
                     this.transmitRivalControlNotification(player.getIdentity().socketId);
                 }
             }
 
         } else if (player.getMoves() === 0) {
-            player.addDeed('also being out of moves cannot act further');
+            this.privateState.addDeed({
+                context: TurnEvent.failed_turn,
+                description: 'also being out of moves--cannot act further',
+            });
             this.endTurn(digest, false);
         }
 
@@ -274,7 +291,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: FAVOR
     public spendFavor(data: DataDigest): Probable<StateResponse> {
-        const { player } = data;
+        const { player, action } = data;
         this.preserveState(player);
 
         if (!player.getFavor() || player.isPrivileged())
@@ -282,14 +299,14 @@ export class PlayProcessor implements SessionProcessor {
 
         player.enablePrivilege();
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        player.addDeed('spent favor to obtain privileges');
+        this.privateState.addDeed({ context: action, description: 'spent favor to obtain privileges' });
 
         return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: DROP ITEM
     public dropItem(data: DataDigest): Probable<StateResponse> {
-        const { player, payload } = data;
+        const { player, action, payload } = data;
         this.preserveState(player);
 
         const dropPayload = validator.validateDropItemPayload(payload);
@@ -305,15 +322,15 @@ export class PlayProcessor implements SessionProcessor {
 
         player.setCargo(result.data);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        player.addDeed(`ditched one ${item} from cargo`);
+        this.privateState.addDeed({ context: action, description: `ditched ${item} from cargo` });
 
         return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: LOAD GOOD
     public loadGood(data: DataDigest): Probable<StateResponse> {
-        const { payload, player } = data;
-        const { color, name } = player.getIdentity();
+        const { action, payload, player } = data;
+        const { color } = player.getIdentity();
         this.preserveState(player);
 
         const loadGoodPayload = validator.validateLoadGoodPayload(payload);
@@ -344,7 +361,7 @@ export class PlayProcessor implements SessionProcessor {
         player.setCargo(loadItem.data);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
         player.removeAction(Action.load_good);
-        player.addDeed(`picked up one ${localGood}`);
+        this.privateState.addDeed({ context: action, description: `picked up ${localGood}` });
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -356,7 +373,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: TRADE
     public sellGoods(data: DataDigest): Probable<StateResponse> {
-        const { player, payload } = data;
+        const { player, action, payload } = data;
         this.wipeState(player);
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
@@ -364,7 +381,7 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(lib.validationErrorMessage());
 
         const { slot } = marketSlotPayload;
-        const { color, name } = player.getIdentity();
+        const { name } = player.getIdentity();
 
         if (lib.checkConditions([
             player.hasAction(Action.sell_goods),
@@ -389,10 +406,13 @@ export class PlayProcessor implements SessionProcessor {
         const coinForm = reward === 1 ? 'coin' : 'coins';
         const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location === 'temple';
 
-        player.addDeed(
-            `${moneyChangerAtTemple ? 'accessed the market and ' : ''}`
-            + `traded for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`,
-        );
+        this.privateState.addDeed({
+            context: action,
+            description: (
+                `${moneyChangerAtTemple ? 'accessed the market and ' : ''}`
+                + `traded for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`
+            ),
+        });
 
         if (moneyChangerAtTemple)
             player.removeAction(Action.donate_goods);
@@ -402,7 +422,7 @@ export class PlayProcessor implements SessionProcessor {
         else
             player.clearMoves();
 
-        const marketShift = this.shiftMarketCards();
+        const marketShift = this.shiftMarketCards(player);
 
         if (marketShift.err)
             return lib.fail(marketShift.message);
@@ -415,7 +435,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: DONATE
     public donateGoods(data: DataDigest): Probable<StateResponse> {
-        const { player, payload } = data;
+        const { player, action, payload } = data;
         this.wipeState(player);
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
@@ -457,12 +477,12 @@ export class PlayProcessor implements SessionProcessor {
             player.clearMoves();
 
         this.privateState.updatePlayerStats(player, reward);
-        player.addDeed(`donated goods for ${reward} favor and VP`);
+        this.privateState.addDeed({ context: action, description: `donated goods for ${reward} favor and VP` });
         console.info(this.privateState.getGameStats());
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
 
-        const marketShift = this.shiftMarketCards();
+        const marketShift = this.shiftMarketCards(player);
 
         if (marketShift.err)
             return lib.fail(marketShift.message);
@@ -475,7 +495,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: SPECIALTY
     public sellSpecialty(data: DataDigest): Probable<StateResponse> {
-        const { player } = data;
+        const { player, action } = data;
         this.preserveState(player);
         const specialty = player.getSpecialty();
 
@@ -494,9 +514,12 @@ export class PlayProcessor implements SessionProcessor {
 
             if (player.isMoneychanger() && player.getBearings().location === 'temple') {
                 player.removeAction(Action.donate_goods);
-                player.addDeed(`accessed the market and sold ${specialty} for 1 coin`);
+                this.privateState.addDeed({
+                    context: action,
+                    description: `accessed the market and sold ${specialty} for 1 coin`,
+                });
             } else {
-                player.addDeed(`sold ${specialty} for 1 coin`);
+                this.privateState.addDeed({ context: action, description: `sold ${specialty} for 1 coin` });
             }
 
             if (player.isHarbormaster())
@@ -512,9 +535,9 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: BUY METAL
     public buyMetal(data: DataDigest): Probable<StateResponse> {
-        const { player, payload } = data;
+        const { player, action, payload } = data;
         this.preserveState(player);
-        const { name, color } = player.getIdentity();
+        const { name } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
 
         if (!purchasePayload)
@@ -558,14 +581,17 @@ export class PlayProcessor implements SessionProcessor {
         else
             player.clearMoves();
 
-        player.addDeed(`bought ${metal} for ${metalCost[currency]} ${currency}`);
+        this.privateState.addDeed({
+            context: action,
+            description: `bought ${metal} for ${metalCost[currency]} ${currency}`,
+        });
 
         return lib.pass(this.saveAndReturn(player));
     }
 
     // MARK: DONATE METAL
     public donateMetal(data: DataDigest): Probable<StateResponse> {
-        const { player, payload } = data;
+        const { player, action, payload } = data;
         this.preserveState(player);
         const { color, name } = player.getIdentity();
         const donationPayload = validator.validateMetalDonationPayload(payload);
@@ -595,9 +621,9 @@ export class PlayProcessor implements SessionProcessor {
         this.privateState.updatePlayerStats(player, reward);
 
         if (player.isPostmaster() && player.getBearings().location != 'temple') {
-            player.addDeed(`mailed one ${metal} for ${reward} VP`);
+            this.privateState.addDeed({ context: action, description: `mailed ${metal} for ${reward} VP` });
         } else {
-            player.addDeed(`donated ${metal} for ${reward} VP`);
+            this.privateState.addDeed({ context: action, description: `donated ${metal} for ${reward} VP` });
         }
 
         this.transmitVp(
@@ -611,7 +637,7 @@ export class PlayProcessor implements SessionProcessor {
 
         if (isTempleComplete) {
             this.killIdleChecks();
-            this.addTurnSummaryMessage(player);
+            this.addServerMessage(this.convertDeedsToMessage(player), color);
             player.deactivate();
             this.playState.savePlayer(player.toDto());
 
@@ -642,7 +668,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: END TURN
     public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
-        const { player } = data;
+        const { player, action } = data;
         this.wipeState(player);
         const { turnOrder, socketId } = player.getIdentity();
 
@@ -654,10 +680,10 @@ export class PlayProcessor implements SessionProcessor {
             && player.getSpecialistName() === SpecialistName.priest
             && isVoluntary
         ) {
-            player.addDeed('gained 1 Favor for stopping at the temple');
+            this.privateState.addDeed({ context: action, description: 'gained 1 Favor for remaining at the temple' });
             player.gainFavor(1);
         }
-        this.addTurnSummaryMessage(player);
+        this.addServerMessage(this.convertDeedsToMessage(player), player.getIdentity().color);
 
         player.deactivate();
         this.privateState.updatePlayerStats(player);
@@ -702,7 +728,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: RIVAL TURN
     public endRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
-        const { player } = digest;
+        const { player, action } = digest;
         const rival = this.playState.getRivalData();
 
         if (!rival.isIncluded)
@@ -718,24 +744,23 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail('Player cannot conclude rival turn');
 
         this.playState.concludeRivalTurn();
-        const { color } = player.getIdentity();
         const rivalLocation = this.playState.getLocationName(rival.bearings.seaZone);
 
         if (isShiftingMarket) {
             if (rivalLocation !== 'market')
                 return lib.fail('Cannot shift market from here!');
 
-            const marketShift = this.shiftMarketCards();
+            const marketShift = this.shiftMarketCards(player);
 
             if (marketShift.err)
                 return lib.fail(marketShift.message);
 
-            player.addDeed('moved the rival ship at the market and cycled it');
+            this.privateState.addDeed({ context: action, description: 'sent it to the market, cycled it' });
 
             if (marketShift.data.hasGameEnded)
                 this.playState.registerGameEnd(marketShift.data.countables);
         } else {
-            player.addDeed(`moved the rival ship at the ${rivalLocation}`);
+            this.privateState.addDeed({ context: action, description: `sent it to the ${rivalLocation}` });
         }
 
         this.wipeState(player);
@@ -751,7 +776,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: FORCED TURN
     public forceTurn(digest: DataDigest): Probable<StateResponse> {
-        const { player } = digest;
+        const { player, action } = digest;
 
         if (player.isActivePlayer())
             return lib.fail('Active player cannot force own turn!');
@@ -776,7 +801,7 @@ export class PlayProcessor implements SessionProcessor {
             player.getIdentity().color,
         );
 
-        return this.endTurn({ player: idlerHandler, payload: null }, false);
+        return this.endTurn({ player: idlerHandler, action, payload: null }, false);
     }
 
     // MARK: UNDO
@@ -814,7 +839,7 @@ export class PlayProcessor implements SessionProcessor {
 
     // MARK: UPGRADE
     public upgradeCargo(data: DataDigest): Probable<StateResponse> {
-        const { player } = data;
+        const { player, action } = data;
         this.preserveState(player);
 
         if (player.mayUpgradeCargo()) {
@@ -822,7 +847,7 @@ export class PlayProcessor implements SessionProcessor {
             player.addCargoSpace();
             player.setActionsAndDetails(this.determineActionsAndDetails(player));
             player.removeAction(Action.upgrade_cargo);
-            player.addDeed('bought a cargo slot');
+            this.privateState.addDeed({ context: action, description: 'bought a cargo slot' });
 
             if (player.isHarbormaster())
                 this.updateMovesAsHarbormaster(player);
@@ -1094,7 +1119,7 @@ export class PlayProcessor implements SessionProcessor {
         return lib.pass(gameStats);
     }
 
-    private shiftMarketCards(): Probable<{ hasGameEnded: boolean, countables: PlayerCountables[] }> {
+    private shiftMarketCards(player: PlayerHandler): Probable<{ hasGameEnded: boolean, countables: PlayerCountables[] }> {
         const newTrade = (() => {
             const trade = this.privateState.drawTrade();
 
@@ -1111,6 +1136,7 @@ export class PlayProcessor implements SessionProcessor {
         })();
 
         if (!newTrade) {
+            this.addServerMessage(this.convertDeedsToMessage(player), player.getIdentity().color);
             this.killIdleChecks();
             const results = this.compileGameResults();
 
@@ -1178,21 +1204,29 @@ export class PlayProcessor implements SessionProcessor {
         player.disableUndo();
     }
 
-    private addTurnSummaryMessage(player: PlayerHandler) {
-        const { color, name } = player.getIdentity();
-        const deeds = player.getDeeds();
-
+    private convertDeedsToMessage(player: PlayerHandler): string {
+        const { name } = player.getIdentity();
+        const deeds = this.privateState.getDeeds();
+        const length = deeds.length;
         let message = `${name} `;
-        for (let i = 0; i < deeds.length; i++) {
-            if (i != 0)
-                message += ', ';
 
-            if (i == deeds.length - 1)
-                message += 'and ';
+        deeds.forEach((deed, key) => {
+            const { context: action, description } = deed;
+            const [prev, next] = [deeds[key-1], deeds[key+1]];
+            const isSecondMovement = key > 0 && action == Action.move && prev.context == Action.move;
 
-            message += deeds[i];
-        }
+            if (key != 0) {
+                const ligature = isSecondMovement ? ' then ' : (length > 2 ? ', ' : ' ');
+                message += ligature;
+            }
 
-        this.addServerMessage(`${message}.`, color);
+            if (!next)
+                message += isSecondMovement ? '' : (length > 3 ? 'and finally ' : 'and ');
+
+            message += description;
+        });
+
+        return `${message}.`;
+        // this.addServerMessage(`${message}.`, color);
     }
 }

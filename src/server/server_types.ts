@@ -2,6 +2,7 @@ import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
     StateResponse, PlayState, LocalAction, MarketSlotKey, MetalPurchasePayload,
+    Action,
 } from '~/shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -69,6 +70,18 @@ export type ActionsAndDetails = {
     trades: Array<MarketSlotKey>,
     purchases: Array<MetalPurchasePayload>
 }
+
+export enum TurnEvent {
+    rival_handling = 'rival_handling',
+    failed_move = 'failed_move',
+    failed_turn = 'failed_turn',
+}
+
+export type Deed = {
+    context: Action | TurnEvent,
+    description: string,
+}
+
 /**
  * @description Not to be shared with clients
 */
@@ -77,6 +90,7 @@ export type PrivateState = {
     tradeDeck: Array<Trade>,
     costTiers: Array<ExchangeTier>,
     gameStats: Array<PlayerCountables>,
+    turnSummary: Array<Deed>,
 }
 
 export type StateBundle = {
@@ -91,6 +105,7 @@ export type BackupState = {
 }
 
 export type DataDigest = {
+    action: Action,
     player: PlayerHandler,
     payload: MessagePayload
 }

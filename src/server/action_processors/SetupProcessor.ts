@@ -185,6 +185,7 @@ export class SetupProcessor implements SessionProcessor {
                     coins: 0,
                 }
             )),
+            turnSummary: [],
         });
 
         const { players, startingPlayer } = this.hydratePlayers(
@@ -384,7 +385,6 @@ export class SetupProcessor implements SessionProcessor {
                 feasiblePurchases: [],
                 coins: 0,
                 turnPurchases: 0,
-                turnSummary: [],
             };
 
             if (playerDto.specialist.name === SpecialistName.ambassador)
