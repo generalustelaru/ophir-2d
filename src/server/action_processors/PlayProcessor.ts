@@ -610,7 +610,6 @@ export class PlayProcessor implements SessionProcessor {
             return lib.fail(unload.message);
 
         player.setCargo(unload.data);
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -662,6 +661,8 @@ export class PlayProcessor implements SessionProcessor {
             this.playState.setMetalPrices(newPrices);
             this.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
+
+        player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
         return lib.pass(this.saveAndReturn(player));
     }
