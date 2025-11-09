@@ -1,8 +1,7 @@
 import Konva from 'konva';
 import { MarketOffer, PlayState, MarketSlotKey, Action } from '~/shared_types';
 import { DynamicModalInterface, Unique } from '~/client/client_types';
-import { FavorDial, VictoryPointDial } from '../popular';
-import { GoodsAssortment } from '../location';
+import { FavorDial, ItemRow, VictoryPointDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client_constants';
 import localState from '~/client/state';
@@ -11,7 +10,7 @@ const { COLOR } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private market: MarketOffer | null = null;
-    private goodsAssortment: GoodsAssortment;
+    private itemRow: ItemRow;
     private victoryPointDial: VictoryPointDial;
     private favorDial: FavorDial;
     private playerFavor: number = 0;
@@ -22,7 +21,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             {
                 hasSubmit: true,
                 actionMessage: null,
-                submitLabel: 'Donate',
+                submitLabel: 'Yes',
                 dismissLabel: 'Cancel',
             },
             { width: 340, height: 180 },
@@ -38,10 +37,16 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             fontFamily: 'Custom',
         });
 
-        this.goodsAssortment = new GoodsAssortment(
-            { x: 40, y: 35 },
-            'modal',
-            null,
+        this.itemRow = new ItemRow(
+            stage,
+            {
+                width: 50,
+                height: 30,
+                x: 30,
+                y: 65,
+            },
+            30,
+            true,
         );
 
         const colon = new Konva.Text({
@@ -55,19 +60,21 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             fill: COLOR.boneWhite,
         });
 
+        const rewardX = 195;
+        const rewardY = 45;
         this.favorDial = new FavorDial(
-            { x: this.contentGroup.width() - 126, y: this.contentGroup.height() / 2 - 5 },
+            { x: rewardX, y: rewardY + 10 },
             0,
         );
 
         this.victoryPointDial = new VictoryPointDial(
-            { x: this.contentGroup.width() - 96, y: this.contentGroup.height() / 2 - 15 },
+            { x: rewardX + 30, y: rewardY },
             0,
         );
 
         this.contentGroup.add(...[
             description,
-            this.goodsAssortment.getElement(),
+            this.itemRow.getElement(),
             colon,
             this.victoryPointDial.getElement(),
             this.favorDial.getElement(),
@@ -91,7 +98,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
         const missingFavor = 6 - this.playerFavor;
 
         this.favorDial.update(Math.min(favorReward, missingFavor));
-        this.goodsAssortment.update(trade.request);
+        this.itemRow.update(trade.request);
         this.victoryPointDial.update(trade.reward.favorAndVp);
 
         this.open({ action: Action.donate_goods, payload: { slot } });

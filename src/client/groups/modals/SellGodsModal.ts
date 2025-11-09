@@ -20,7 +20,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
             {
                 hasSubmit: true,
                 actionMessage: null,
-                submitLabel: 'Sell',
+                submitLabel: 'Yes',
                 dismissLabel: 'Cancel',
             },
             { width: 340, height: 180 },
@@ -84,8 +84,9 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
         if (!this.market || !this.fluctuations)
             throw new Error('Cannot render modal! Update data is missing.');
 
-        this.coinDial.update(this.market[slot].reward.coins  + this.fluctuations[slot]);
-        this.itemRow.update(this.market[slot].request);
+        const trade = this.market[slot];
+        this.coinDial.update(trade.reward.coins  + this.fluctuations[slot]);
+        this.itemRow.update(trade.request);
         this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }
