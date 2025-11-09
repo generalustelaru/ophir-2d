@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { MarketCard } from '.';
-import { MarketDeckKey, MarketOffer } from '~/shared_types';
+import { MarketDeckKey, MarketOffer, Unique } from '~/shared_types';
 
 export class MarketDeck implements Unique<DynamicGroupInterface<MarketOffer>>
 {

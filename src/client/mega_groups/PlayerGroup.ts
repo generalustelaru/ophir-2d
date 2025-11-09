@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, LayerIds, Unique } from '~/client_types';
-import { Player, PlayerColor, PlayState } from '~/shared_types';
+import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
+import { Player, PlayerColor, PlayState, Unique } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
 

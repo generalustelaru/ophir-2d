@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, Unique } from '~/client/client_types';
-import { Coordinates, NeutralColor, PlayerColor } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client/client_types';
+import { Coordinates, NeutralColor, PlayerColor, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
 const { COLOR } = clientConstants;
 type SymbolicInfluenceDialUpdate = {

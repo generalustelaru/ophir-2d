@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, TreasuryCardUpdate, Unique } from '~/client_types';
+import { DynamicGroupInterface, TreasuryCardUpdate } from '~/client_types';
 import { ActionButton, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
-import { Coordinates, Action, MetalPurchasePayload, Metal, Currency } from '~/shared_types';
+import { Coordinates, Action, MetalPurchasePayload, Metal, Currency, Unique } from '~/shared_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 

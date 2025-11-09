@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData, Unique } from '~/client_types';
+import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { Action } from '~/shared_types';
+import { Action, Unique } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { COLOR } = clientConstants;

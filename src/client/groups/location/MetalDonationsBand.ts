@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, TempleState } from '~/shared_types';
-import { DynamicGroupInterface, Unique } from '~/client_types';
+import { Coordinates, TempleState, Unique } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
 import { TempleLevelDial } from './TempleLevelDial';
 import clientConstants from '~/client_constants';
 

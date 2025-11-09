@@ -1,5 +1,5 @@
 import {
-    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, StateResponse,
+    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, StateResponse, Unique,
 } from '~/shared_types';
 import { validator } from '../services/validation/ValidatorService';
 import lib from './library';
@@ -8,7 +8,7 @@ import { Probable, SessionProcessor } from '~/server_types';
 
 const serverName = String(process.env.SERVER_NAME);
 
-export class EnrolmentProcessor implements SessionProcessor {
+export class EnrolmentProcessor implements Unique<SessionProcessor> {
     enrolmentState: EnrolmentStateHandler;
     transmitEnrolment: (color: PlayerColor, socketId: string) => void;
     transmitColorChange: (newColor: PlayerColor, socketId: string) => void;

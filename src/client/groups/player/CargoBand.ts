@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { PlayerColor } from '~/shared_types';
-import { CargoBandUpdate, DynamicGroupInterface, Unique } from '~/client_types';
+import { PlayerColor, Unique } from '~/shared_types';
+import { CargoBandUpdate, DynamicGroupInterface } from '~/client_types';
 import { ItemRow } from '../popular';
 
 const { COLOR } = clientConstants;

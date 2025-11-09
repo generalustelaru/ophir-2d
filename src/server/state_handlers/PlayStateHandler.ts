@@ -1,12 +1,11 @@
 import {
-    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor,
-    PlayState, TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates,
-    Phase,
+    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor, PlayState,
+    TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates, Phase, Unique,
 } from '~/shared_types';
 import { PlayerCountables, ObjectHandler } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
-export class PlayStateHandler implements ObjectHandler<PlayState>{
+export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionOwner: Readable<PlayerColor>;

@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { DiceSix } from '~/shared_types';
+import { DiceSix, Unique } from '~/shared_types';
 import { Coordinates } from '~/shared_types';
-import { Color, DynamicGroupInterface, Unique } from '~/client_types';
+import { Color, DynamicGroupInterface } from '~/client_types';
 
 type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null }
 type PipData = Array<PipDataElement>

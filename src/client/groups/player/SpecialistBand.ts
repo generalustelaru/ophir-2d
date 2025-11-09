@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates, Player } from '~/shared_types';
-import { DynamicGroupInterface, Unique } from '~/client_types';
+import { Coordinates, Player, Unique } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
 import { Button } from '../popular';
 
 export class SpecialistBand extends Button implements Unique<DynamicGroupInterface<boolean>> {

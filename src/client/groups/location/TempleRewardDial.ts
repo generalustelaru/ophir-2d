@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, Unique } from '~/client_types';
-import { Coordinates } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import { Coordinates, Unique } from '~/shared_types';
 import { FavorIcon } from '../popular';
 import clientConstants from '~/client_constants';
 

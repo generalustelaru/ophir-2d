@@ -1,7 +1,8 @@
 
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { ColorProfile, DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
+import { ColorProfile, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { Unique } from '~/shared_types';
 
 const { ICON_DATA, COLOR, LOCATION_TOKEN_DATA } = clientConstants;
 

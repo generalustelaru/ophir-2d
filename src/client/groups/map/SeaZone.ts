@@ -1,8 +1,8 @@
 
 import Konva from 'konva';
 import { Vector2d } from 'konva/lib/types';
-import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival } from '~/shared_types';
-import { Color, DynamicGroupInterface, IslandData, IconLayer, Unique } from '~/client_types';
+import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival, Unique } from '~/shared_types';
+import { Color, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
 import { LocationToken } from '.';
 import clientConstants from '~/client_constants';
 

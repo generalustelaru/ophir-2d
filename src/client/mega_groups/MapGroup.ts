@@ -1,8 +1,9 @@
 import Konva from 'konva';
 import {
     Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState,
+    Unique,
 } from '~/shared_types';
-import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, Unique } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds } from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
 } from '../groups/map';

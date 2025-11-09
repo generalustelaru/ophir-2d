@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { GroupLayoutData, LayerIds, MegaGroupInterface, Unique } from '~/client_types';
-import { SetupState } from '~/shared_types';
+import { GroupLayoutData, LayerIds, MegaGroupInterface } from '~/client_types';
+import { SetupState, Unique } from '~/shared_types';
 import { ShowHideButton } from '../groups/setup/ShowHideButton';
 import { SetupPanel } from '../groups/setup/SetupPanel';
 

@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Action } from '~/shared_types';
-import { DynamicModalInterface, SailAttemptArgs, Unique } from '~/client/client_types';
+import { Action, Unique } from '~/shared_types';
+import { DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
 import { InfluenceDial, SymbolicInfluenceDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client/client_constants';

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import constants from '~/client_constants';
-import { BarrierId } from '~/shared_types';
-import { StaticGroupInterface, Unique } from '~/client_types';
+import { BarrierId, Unique } from '~/shared_types';
+import { StaticGroupInterface } from '~/client_types';
 
 const { COLOR } = constants;
 

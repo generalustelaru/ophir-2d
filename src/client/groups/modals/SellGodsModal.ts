@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState } from '~/shared_types';
-import { DynamicModalInterface, Unique } from '~/client_types';
+import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, Unique } from '~/shared_types';
+import { DynamicModalInterface } from '~/client_types';
 import { CoinDial } from '../popular';
 import { ItemRow } from '../popular';
 import { ModalBase } from './ModalBase';

@@ -1,7 +1,7 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, Trade, ChatEntry, PlayerEntity, LocalAction,
-    MetalPurchasePayload,
+    MetalPurchasePayload, Unique,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -17,7 +17,7 @@ import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
 
-export class PlayProcessor implements SessionProcessor {
+export class PlayProcessor implements Unique<SessionProcessor> {
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;

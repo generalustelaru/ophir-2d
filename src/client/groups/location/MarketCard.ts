@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { MarketCardUpdate, DynamicGroupInterface, Unique } from '~/client_types';
-import { Coordinates, Fluctuation, Trade } from '~/shared_types';
+import { MarketCardUpdate, DynamicGroupInterface } from '~/client_types';
+import { Coordinates, Fluctuation, Trade, Unique } from '~/shared_types';
 import { CoinDial, Button } from '../popular';
 import { GoodsAssortment } from '.';
 import clientConstants from '~/client_constants';

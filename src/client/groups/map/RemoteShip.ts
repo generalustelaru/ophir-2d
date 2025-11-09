@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Action, ClientMessage, Coordinates, Player, PlayerColor } from '~/shared_types';
-import { DynamicGroupInterface, Unique } from '~/client_types';
+import { Action, ClientMessage, Coordinates, Player, PlayerColor, Unique } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone } from './SeaZone';

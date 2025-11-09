@@ -1,4 +1,4 @@
-import { Trade, ExchangeTier, ZoneName, PlayerColor } from '~/shared_types';
+import { Trade, ExchangeTier, ZoneName, PlayerColor, Unique } from '~/shared_types';
 import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage, Deed } from '~/server_types';
 import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable, Writable, writable } from './library';
 import { PlayerHandler } from './PlayerHandler';
@@ -6,7 +6,7 @@ import { PlayerHandler } from './PlayerHandler';
 /**
  * @description Contains game session reference data for the server.
  */
-export class PrivateStateHandler implements ObjectHandler<PrivateState> {
+export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> {
     private destinationPackages: ArrayReadable<DestinationPackage>;
     private tradeDeck: ArrayWritable<Trade>;
     private costTiers: ArrayWritable<ExchangeTier>;

@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { GroupLayoutData, MegaGroupInterface, LayerIds, Unique } from '~/client_types';
-import { EnrolmentState } from '~/shared_types';
+import { GroupLayoutData, MegaGroupInterface, LayerIds } from '~/client_types';
+import { EnrolmentState, Unique } from '~/shared_types';
 import { EnrolmentPanel } from '../groups/enrolment/EnrolmentPanel';
 import localState from '../state';
 

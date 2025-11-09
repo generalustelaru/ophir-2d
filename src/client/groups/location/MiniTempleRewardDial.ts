@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Coordinates } from '~/shared_types';
-import { DynamicGroupInterface, Unique } from '~/client_types';
+import { Coordinates, Unique } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
 
 const { COLOR, ICON_DATA } = clientConstants;

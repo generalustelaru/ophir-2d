@@ -1,4 +1,5 @@
-import { HTMLHandlerInterface, Unique } from '~/client_types';
+import { HTMLHandlerInterface } from '~/client_types';
+import { Unique } from '~/shared_types';
 
 export class Button implements Unique<HTMLHandlerInterface> {
 

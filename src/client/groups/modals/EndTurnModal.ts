@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Action, PlayState, SpecialistName } from '~/shared_types';
-import { DynamicModalInterface, Unique } from '~/client/client_types';
+import { Action, PlayState, SpecialistName, Unique } from '~/shared_types';
+import { DynamicModalInterface } from '~/client/client_types';
 import { FavorDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import localState from '~/client/state';

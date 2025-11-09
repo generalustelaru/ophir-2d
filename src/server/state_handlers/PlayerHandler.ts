@@ -1,12 +1,12 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocalAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
-    Specialist, SpecialistName, MetalPurchasePayload,
+    Specialist, SpecialistName, MetalPurchasePayload, Unique,
 } from '~/shared_types';
 import { ActionsAndDetails, ObjectHandler, PlayerIdentity } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 const MAX_FAVOR = 6;
-export class PlayerHandler implements ObjectHandler<Player>{
+export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     private socketId: Writable<string>;
     private color: Readable<PlayerColor>;

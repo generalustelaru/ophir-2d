@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { IconLayer, DynamicGroupInterface, Unique } from '~/client_types';
-import { Action, LocationName, TradeGood } from '~/shared_types';
+import { IconLayer, DynamicGroupInterface } from '~/client_types';
+import { Action, LocationName, TradeGood, Unique } from '~/shared_types';
 import { ActionButton } from '../popular';
 import { EmptyLocationToken } from '.';
 

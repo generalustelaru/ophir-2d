@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Color, DynamicGroupInterface, Unique } from '~/client_types';
-import { Coordinates } from '~/shared_types';
+import { Color, DynamicGroupInterface } from '~/client_types';
+import { Coordinates, Unique } from '~/shared_types';
 import { Button } from '../popular';
 
 export class ShowHideButton extends Button implements Unique<DynamicGroupInterface<string>> {

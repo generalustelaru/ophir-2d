@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
-import { Player } from '~/shared_types';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { Player, Unique } from '~/shared_types';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;

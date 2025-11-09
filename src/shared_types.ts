@@ -2,6 +2,11 @@ import { HexCoordinates } from "~/client_types";
 import { PlayerCountables } from "~/server_types";
 
 /**
+ * @description Interface wrapper hack to prevent the TSS from polluting class method references.
+ */
+export type Unique<T> = T & { p?: undefined }
+
+/**
  * @description Action strings require detailed standardization as they appear in intersecting types.
  */
 export enum Action {

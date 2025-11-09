@@ -1,10 +1,11 @@
 import {
     PlayerColor, ChatEntry, SetupState, Phase, PlayerDraft, GamePartialSetup, SpecialistName, SelectableSpecialist,
+    Unique,
 } from '~/shared_types';
 import { ObjectHandler } from '~/server_types';
 import { Readable, readable, arrayWritable, ArrayWritable } from './library';
 
-export class SetupStateHandler implements ObjectHandler<SetupState> {
+export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
     private serverName: Readable<string>;
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.setup>;

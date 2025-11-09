@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
-import { DynamicGroupInterface, Unique } from '~/client_types';
-import { Action, Player, PlayerColor } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import { Action, Player, PlayerColor, Unique } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyGoodButton } from '.';
 import clientConstants from '~/client_constants';

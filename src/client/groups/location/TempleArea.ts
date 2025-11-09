@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, TempleUpdate, Unique } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { MarketSlotKey, MarketOffer, Action } from '~/shared_types';
+import { MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
 import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from '.';
 
 const { COLOR } = clientConstants;

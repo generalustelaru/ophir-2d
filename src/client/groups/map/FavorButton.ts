@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, Unique } from '~/client_types';
-import { Player, ClientMessage } from '~/shared_types';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { Player, ClientMessage, Unique } from '~/shared_types';
 import { ActionButton, FavorIcon } from '../popular';
 import clientConstants from '~/client_constants';
 

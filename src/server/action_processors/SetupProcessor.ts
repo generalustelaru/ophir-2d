@@ -2,7 +2,7 @@ import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
-    PlayerEntity,
+    PlayerEntity, Unique,
 } from '~/shared_types';
 import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor, Probable } from '~/server_types';
 import serverConstants from '~/server_constants';
@@ -28,7 +28,7 @@ const {
     BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS, SPECIALISTS,
 } = serverConstants;
 
-export class SetupProcessor implements SessionProcessor {
+export class SetupProcessor implements Unique<SessionProcessor> {
 
     private setupState: SetupStateHandler;
 
