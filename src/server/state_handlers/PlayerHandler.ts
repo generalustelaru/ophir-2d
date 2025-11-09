@@ -33,6 +33,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
     private feasiblePurchases: ArrayWritable<MetalPurchasePayload>;
     private coins: Writable<number>;
     private turnPurchases: Writable<number>;
+    private turnSummary: Writable<Array<string>>;
 
     /**
      * @throws Instantiation error
@@ -67,6 +68,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.feasiblePurchases = arrayWritable(player.feasiblePurchases);
         this.coins = writable(player.coins);
         this.turnPurchases = writable(player.turnPurchases);
+        this.turnSummary = writable(player.turnSummary);
     }
 
     public toDto(): Player {
@@ -96,6 +98,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
             feasiblePurchases: this.feasiblePurchases.get(),
             coins: this.coins.get(),
             turnPurchases: this.turnPurchases.get(),
+            turnSummary: this.turnSummary.get(),
         };
     }
 
@@ -367,6 +370,19 @@ export class PlayerHandler implements ObjectHandler<Player>{
         return this.isHandlingRival.get();
     }
 
+    public addDeed(deed: string) {
+        console.log(deed);
+        this.turnSummary.update(s => {
+            s.push(deed);
+            return s;
+        });
+        console.log(this.getDeeds());
+    }
+
+    public getDeeds() {
+        return this.turnSummary.get();
+    }
+
     public activate(
         destinations: Array<ZoneName>,
         navigatorAccess: Array<ZoneName>,
@@ -389,6 +405,7 @@ export class PlayerHandler implements ObjectHandler<Player>{
         this.feasibleTrades.clear();
         this.destinations.clear();
         this.overnightZone.set(this.getBearings().seaZone);
+        this.turnSummary.set([]);
     }
 
     public hasCargoRoom(req: 1 | 2): boolean {

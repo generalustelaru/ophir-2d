@@ -149,6 +149,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     feasiblePurchases: Array<MetalPurchasePayload>,
     coins: number,
     turnPurchases: number,
+    turnSummary: Array<string>,
 }
 
 export type PlayerEntity = PlayerEntry | PlayerDraft | PlayerSelection | Player;

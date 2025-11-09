@@ -187,7 +187,7 @@ export class SetupProcessor implements SessionProcessor {
             )),
         });
 
-        const { players, startingPlayerColor } = this.hydratePlayers(
+        const { players, startingPlayer } = this.hydratePlayers(
             playerSelections,
             privateStateHandler.getDestinationPackages(),
             clientSetupPayload.startingPositions,
@@ -223,7 +223,7 @@ export class SetupProcessor implements SessionProcessor {
                     Boolean(playerSelections.length < 3),
                     clientSetupPayload.hexPositions,
                     setupState.setup.mapPairings,
-                    startingPlayerColor,
+                    startingPlayer.color,
                     privateStateHandler.getDestinationPackages(),
                 ),
             });
@@ -346,7 +346,7 @@ export class SetupProcessor implements SessionProcessor {
         mapPairings: MapPairings,
     ): {
         players: Array<Player>,
-        startingPlayerColor: PlayerColor
+        startingPlayer: Player
     } {
         const initialRules = tools.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
@@ -384,6 +384,7 @@ export class SetupProcessor implements SessionProcessor {
                 feasiblePurchases: [],
                 coins: 0,
                 turnPurchases: 0,
+                turnSummary: [],
             };
 
             if (playerDto.specialist.name === SpecialistName.ambassador)
@@ -392,9 +393,6 @@ export class SetupProcessor implements SessionProcessor {
             return playerDto;
         });
 
-        const startingPlayerColor = players[0].color;
-
-        // debug options
         return {
             players: players.map(player => {
                 if (RICH_PLAYERS)
@@ -419,7 +417,7 @@ export class SetupProcessor implements SessionProcessor {
 
                 return player;
             }),
-            startingPlayerColor,
+            startingPlayer: players[0],
         };
     }
 

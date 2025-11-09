@@ -92,7 +92,6 @@ export class PlayProcessor implements SessionProcessor {
     public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
         this.preserveState(player);
-        const { name: playerName, color: playerColor } = player.getIdentity();
 
         const movementPayload = validator.validateMovementPayload(payload);
 
@@ -140,10 +139,7 @@ export class PlayProcessor implements SessionProcessor {
             player.spendMove();
 
             if (player.isBarrierCrossing(target)) {
-                this.addServerMessage(
-                    `${playerName} used a hidden passage to cross a barrier.`,
-                    playerColor,
-                );
+                player.addDeed(`used hidden passage to reach the ${locationName}`);
 
                 return true;
             }
@@ -155,8 +151,11 @@ export class PlayProcessor implements SessionProcessor {
                 ? rival.influence
                 : 0;
 
-            if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged())
+            if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
+                player.addDeed(`reached the ${locationName} undeterred`);
+
                 return true;
+            }
 
             this.wipeState(player);
 
@@ -164,35 +163,26 @@ export class PlayProcessor implements SessionProcessor {
                 player.rollInfluence();
                 const roll = player.getInfluence();
 
-                if (roll === 6) {
-                    this.addServerMessage(`${playerName} rolled a natural 6!`, playerColor);
-
-                    return roll;
-                }
-
                 if (player.getSpecialistName() === SpecialistName.temple_guard) {
-
                     const bumpedRoll = roll + 1 as DiceSix;
-
                     player.setInfluence(bumpedRoll);
-                    this.addServerMessage(`${playerName} bumped the roll to ${bumpedRoll}.`, playerColor);
 
                     return bumpedRoll;
                 }
-
-                this.addServerMessage(`${playerName} rolled a ${roll}`, playerColor);
 
                 return roll;
             })();
 
             const blockingPlayers = playersInZone.filter(p => p.influence > influenceRoll);
 
-            if (!blockingPlayers.length && influenceRoll >= rivalInfluence)
-                return true;
+            if (!blockingPlayers.length && influenceRoll >= rivalInfluence) {
+                player.addDeed(`exerted influence succesfully to reach the ${locationName}`);
 
-            this.addServerMessage( `${playerName} was blocked from sailing.`, playerColor);
+                return true;
+            }
+
             this.playState.trimInfluenceByZone(target, rivalInfluence);
-            this.addServerMessage(`Influence at the [${locationName}] was trimmed.`);
+            player.addDeed(`was blocked from sailing towards the ${locationName}`);
 
             return false;
         })();
@@ -226,15 +216,14 @@ export class PlayProcessor implements SessionProcessor {
             if (this.playState.isRivalIncluded()) {
                 if (this.playState.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
-                    this.addServerMessage(`${playerName} has took control of the rival ship.`, playerColor);
+                    player.addDeed('took control of the rival ship');
                     player.freeze();
                     this.transmitRivalControlNotification(player.getIdentity().socketId);
-                    // TODO: send  notification
                 }
             }
 
         } else if (player.getMoves() === 0) {
-            this.addServerMessage(`${playerName} also ran out of moves and cannot act further.`);
+            player.addDeed('also being out of moves cannot act further');
             this.endTurn(digest, false);
         }
 
@@ -293,11 +282,7 @@ export class PlayProcessor implements SessionProcessor {
 
         player.enablePrivilege();
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
-
-        this.addServerMessage(
-            `${player.getIdentity().name} has spent favor`,
-            player.getIdentity().color,
-        );
+        player.addDeed('spent favor to obtain privileges');
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -320,9 +305,7 @@ export class PlayProcessor implements SessionProcessor {
 
         player.setCargo(result.data);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
-
-        const { name, color } = player.getIdentity();
-        this.addServerMessage(`${name} ditched one ${item}`, color);
+        player.addDeed(`ditched one ${item} from cargo`);
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -361,8 +344,7 @@ export class PlayProcessor implements SessionProcessor {
         player.setCargo(loadItem.data);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
         player.removeAction(Action.load_good);
-
-        this.addServerMessage(`${name} picked up ${localGood}`, color);
+        player.addDeed(`picked up one ${localGood}`);
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -405,16 +387,15 @@ export class PlayProcessor implements SessionProcessor {
         player.removeAction(Action.sell_goods);
 
         const coinForm = reward === 1 ? 'coin' : 'coins';
-        const isRemote = player.isMoneychanger() && player.getBearings().location === 'temple';
+        const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location === 'temple';
 
-        if (isRemote)
-            player.removeAction(Action.donate_goods);
-
-        this.addServerMessage(
-            `${name} ${isRemote ? 'accessed the market and' : ''}`
-            + ` traded for ${reward} ${coinForm}${reward === 0 ? ' (what?!)' : ''}`,
-            color,
+        player.addDeed(
+            `${moneyChangerAtTemple ? 'accessed the market and ' : ''}`
+            + `traded for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`,
         );
+
+        if (moneyChangerAtTemple)
+            player.removeAction(Action.donate_goods);
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -476,7 +457,7 @@ export class PlayProcessor implements SessionProcessor {
             player.clearMoves();
 
         this.privateState.updatePlayerStats(player, reward);
-        this.addServerMessage(`${name} donated goods for ${reward} favor and VP`, color);
+        player.addDeed(`donated goods for ${reward} favor and VP`);
         console.info(this.privateState.getGameStats());
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
@@ -496,7 +477,6 @@ export class PlayProcessor implements SessionProcessor {
     public sellSpecialty(data: DataDigest): Probable<StateResponse> {
         const { player } = data;
         this.preserveState(player);
-        const { name, color } = player.getIdentity();
         const specialty = player.getSpecialty();
 
         if (specialty && player.maySellSpecialtyGood()) {
@@ -514,9 +494,9 @@ export class PlayProcessor implements SessionProcessor {
 
             if (player.isMoneychanger() && player.getBearings().location === 'temple') {
                 player.removeAction(Action.donate_goods);
-                this.addServerMessage(`${name} accessed the market and sold ${specialty} for 1 coin`, color);
+                player.addDeed(`accessed the market and sold ${specialty} for 1 coin`);
             } else {
-                this.addServerMessage(`${name} sold ${specialty} for 1 coin`, color);
+                player.addDeed(`sold ${specialty} for 1 coin`);
             }
 
             if (player.isHarbormaster())
@@ -578,7 +558,7 @@ export class PlayProcessor implements SessionProcessor {
         else
             player.clearMoves();
 
-        this.addServerMessage(`${name} bought ${metal} for ${metalCost[currency]} ${currency}`, color);
+        player.addDeed(`bought ${metal} for ${metalCost[currency]} ${currency}`);
 
         return lib.pass(this.saveAndReturn(player));
     }
@@ -615,9 +595,9 @@ export class PlayProcessor implements SessionProcessor {
         this.privateState.updatePlayerStats(player, reward);
 
         if (player.isPostmaster() && player.getBearings().location != 'temple') {
-            this.addServerMessage(`${name} mailed one ${metal} for ${reward} VP`, color);
+            player.addDeed(`mailed one ${metal} for ${reward} VP`);
         } else {
-            this.addServerMessage(`${name} donated ${metal} for ${reward} VP`, color);
+            player.addDeed(`donated ${metal} for ${reward} VP`);
         }
 
         this.transmitVp(
@@ -631,6 +611,7 @@ export class PlayProcessor implements SessionProcessor {
 
         if (isTempleComplete) {
             this.killIdleChecks();
+            this.addTurnSummaryMessage(player);
             player.deactivate();
             this.playState.savePlayer(player.toDto());
 
@@ -663,7 +644,7 @@ export class PlayProcessor implements SessionProcessor {
     public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
         const { player } = data;
         this.wipeState(player);
-        const { turnOrder, name, color, socketId } = player.getIdentity();
+        const { turnOrder, socketId } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
             return lib.fail('Ship is not anchored.');
@@ -673,9 +654,10 @@ export class PlayProcessor implements SessionProcessor {
             && player.getSpecialistName() === SpecialistName.priest
             && isVoluntary
         ) {
-            this.addServerMessage(`${name} gained 1 Favor for stopping at the temple.`, color);
+            player.addDeed('gained 1 Favor for stopping at the temple');
             player.gainFavor(1);
         }
+        this.addTurnSummaryMessage(player);
 
         player.deactivate();
         this.privateState.updatePlayerStats(player);
@@ -737,9 +719,10 @@ export class PlayProcessor implements SessionProcessor {
 
         this.playState.concludeRivalTurn();
         const { color } = player.getIdentity();
+        const rivalLocation = this.playState.getLocationName(rival.bearings.seaZone);
 
         if (isShiftingMarket) {
-            if (this.playState.getLocationName(rival.bearings.seaZone) !== 'market')
+            if (rivalLocation !== 'market')
                 return lib.fail('Cannot shift market from here!');
 
             const marketShift = this.shiftMarketCards();
@@ -747,12 +730,12 @@ export class PlayProcessor implements SessionProcessor {
             if (marketShift.err)
                 return lib.fail(marketShift.message);
 
-            this.addServerMessage('Rival moved, rolled influence, and shifted the market.', color);
+            player.addDeed('moved the rival ship at the market and cycled it');
 
             if (marketShift.data.hasGameEnded)
                 this.playState.registerGameEnd(marketShift.data.countables);
         } else {
-            this.addServerMessage('Rival moved and rolled influence.', color);
+            player.addDeed(`moved the rival ship at the ${rivalLocation}`);
         }
 
         this.wipeState(player);
@@ -839,11 +822,7 @@ export class PlayProcessor implements SessionProcessor {
             player.addCargoSpace();
             player.setActionsAndDetails(this.determineActionsAndDetails(player));
             player.removeAction(Action.upgrade_cargo);
-
-            this.addServerMessage(
-                `${player.getIdentity().name} bought a cargo slot.`,
-                player.getIdentity().color,
-            );
+            player.addDeed('bought a cargo slot');
 
             if (player.isHarbormaster())
                 this.updateMovesAsHarbormaster(player);
@@ -874,14 +853,8 @@ export class PlayProcessor implements SessionProcessor {
     // MARK: PRIVATE
 
     private updateMovesAsHarbormaster(harbormaster: PlayerHandler) {
-        const moves = harbormaster.getMoves();
-
-        if (harbormaster.isPrivileged() && moves === 1) {
-            const { name, color } = harbormaster.getIdentity();
-            this.addServerMessage(`${name} can move and act again.`, color);
-        } else {
+        if (!harbormaster.isPrivileged() || harbormaster.getMoves() != 1)
             harbormaster.clearMoves();
-        }
     }
 
     private getDefaultActions(player: PlayerHandler): LocalAction[] {
@@ -1203,5 +1176,23 @@ export class PlayProcessor implements SessionProcessor {
     private wipeState(player: PlayerHandler) {
         this.backupState.wipeBackup();
         player.disableUndo();
+    }
+
+    private addTurnSummaryMessage(player: PlayerHandler) {
+        const { color, name } = player.getIdentity();
+        const deeds = player.getDeeds();
+
+        let message = `${name} `;
+        for (let i = 0; i < deeds.length; i++) {
+            if (i != 0)
+                message += ', ';
+
+            if (i == deeds.length - 1)
+                message += 'and ';
+
+            message += deeds[i];
+        }
+
+        this.addServerMessage(`${message}.`, color);
     }
 }
