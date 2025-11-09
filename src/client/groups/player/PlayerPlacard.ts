@@ -56,7 +56,6 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
             this.stage,
             color,
             { cargo, canDrop: false },
-            isLocalPlayer,
         );
 
         this.favorDial = new FavorDial(
@@ -153,7 +152,6 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     }
 
     public disable() {
-        this.cargoBand.disable();
         this.specialtyGoodButton.disable();
     }
 
