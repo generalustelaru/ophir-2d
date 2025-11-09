@@ -371,12 +371,10 @@ export class PlayerHandler implements ObjectHandler<Player>{
     }
 
     public addDeed(deed: string) {
-        console.log(deed);
         this.turnSummary.update(s => {
             s.push(deed);
             return s;
         });
-        console.log(this.getDeeds());
     }
 
     public getDeeds() {
