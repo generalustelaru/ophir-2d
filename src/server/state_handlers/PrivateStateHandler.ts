@@ -98,7 +98,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
 
     public getDeeds() {
         const deeds = this.turnSummary.get();
-        this.turnSummary.reset();
+        this.turnSummary.set([]);
 
         return deeds;
     }
