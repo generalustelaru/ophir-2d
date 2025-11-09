@@ -6,7 +6,7 @@ import { ItemRow } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client_constants';
 
-const { ICON_DATA } = clientConstants;
+const { COLOR } = clientConstants;
 
 export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private fluctuations: MarketFluctuations | null = null;
@@ -23,40 +23,54 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
                 submitLabel: 'Sell',
                 dismissLabel: 'Cancel',
             },
+            { width: 340, height: 180 },
         );
-        const itemWidth = 50;
+
+        const description = new Konva.Text({
+            text: 'Sell these goods for coins?',
+            fill: COLOR.boneWhite,
+            fontSize: 18,
+            width: this.contentGroup.width(),
+            align: 'center',
+            y: 10,
+            fontFamily: 'Custom',
+        });
+
         this.itemRow = new ItemRow(
             stage,
             {
-                width: itemWidth,
+                width: 50,
                 height: 30,
-                x: 60,
-                y: 35,
+                x: 30,
+                y: 65,
             },
             30,
             true,
         );
 
-        const { shape, fill } = ICON_DATA['conversion_arrow'];
-        const conversionArrow = new Konva.Path({
-            data: shape,
-            fill: fill,
-            scale: { x: 3, y:3 },
-            x: this.contentGroup.width() / 2 - 25,
-            y: this.contentGroup.height() / 2 - 5,
+        const colon = new Konva.Text({
+            text: ':',
+            width: this.contentGroup.width(),
+            align: 'center',
+            y: 65,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+            fill: COLOR.boneWhite,
         });
 
         this.coinDial = new CoinDial(
             {
-                x: this.contentGroup.width() - 90,
-                y: this.contentGroup.height() / 2,
+                x: 215,
+                y: 83,
             },
             0,
         );
 
         this.contentGroup.add(...[
+            description,
             this.itemRow.getElement(),
-            conversionArrow,
+            colon,
             this.coinDial.getElement(),
         ]);
     }
