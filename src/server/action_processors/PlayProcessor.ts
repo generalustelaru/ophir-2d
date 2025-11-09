@@ -72,7 +72,7 @@ export class PlayProcessor implements SessionProcessor {
 
         this.transmitTurnNotification(player.getIdentity().socketId);
 
-        if (IDLE_CHECKS)
+        if (IDLE_CHECKS && IDLE_TIMEOUT)
             this.startIdleChecks();
     }
 

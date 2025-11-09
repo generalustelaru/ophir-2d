@@ -6,7 +6,7 @@ export const WS_PORT = Number(process.env.WS_PORT);
 export const SERVER_NAME = String(process.env.SERVER_NAME);
 export const ADMIN_AUTH = String(process.env.ADMIN_AUTH);
 export const IDLE_CHECKS = Boolean(process.env.IDLE_CHECKS === 'true');
-export const IDLE_TIMEOUT = (60 * 1000) * Number(process.env.IDLE_TIMEOUT);
+export const IDLE_TIMEOUT = (60 * 1000) * Math.min(Number(process.env.IDLE_TIMEOUT), 60);
 export const RICH_PLAYERS = Boolean(process.env.RICH_PLAYERS === 'true');
 export const FAVORED_PLAYERS = Boolean(process.env.FAVORED_PLAYERS === 'true');
 export const CARGO_BONUS = Number(process.env.CARGO_BONUS);
