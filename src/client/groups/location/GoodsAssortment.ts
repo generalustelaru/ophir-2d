@@ -35,9 +35,9 @@ export class GoodsAssortment implements Unique<DynamicGroupInterface<Array<Trade
         return this.group;
     }
 
-    public update(goods: Array<TradeGood>): void {
+    public update(goods: Array<TradeGood> | null): void {
         this.group.destroyChildren();
-        this.group.add(this.getGoodsGroup(goods));
+        goods && this.group.add(this.getGoodsGroup(goods));
     }
 
     private getGoodsGroup(goods: Array<TradeGood>): Konva.Group {

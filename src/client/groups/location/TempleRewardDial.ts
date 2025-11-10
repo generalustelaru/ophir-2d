@@ -12,7 +12,7 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
     private favorAmount: Konva.Text;
     constructor(
         position: Coordinates,
-        amount: number,
+        amount: number | null,
     ) {
         this.group = new Konva.Group({
             x: position.x,
@@ -43,7 +43,7 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
         this.vpAmount = new Konva.Text({
             x: coinCenter - 12,
             y: coinCenter - 10,
-            text: String(amount),
+            text: String(amount || ''),
             fontSize: 20,
             fill: COLOR.vpCardPurple,
             stroke: COLOR.vpCardPurple,
@@ -54,7 +54,7 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
         this.favorAmount = new Konva.Text({
             x: coinCenter + 5,
             y: coinCenter - 10,
-            text: String(amount),
+            text: String(amount || ''),
             fontSize: 20,
             fill: COLOR.boneWhite,
             stroke: COLOR.boneWhite,
@@ -80,8 +80,8 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
         return this.group;
     }
 
-    public update(value: number): void {
-        this.vpAmount.text(String(value));
-        this.favorAmount.text(String(value));
+    public update(amount: number | null): void {
+        this.vpAmount.text(String(amount || ''));
+        this.favorAmount.text(String(amount || ''));
     }
 }

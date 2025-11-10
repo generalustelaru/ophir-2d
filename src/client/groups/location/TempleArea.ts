@@ -54,6 +54,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
             stage,
             { x: this.group.width() - 62 - margin, y: 10 },
             card,
+            isAdvisor,
             (isAdvisor
                 ? () => { alert('advisor modal not implemented'); }
                 : () => donateGoodsCallback(marketSlot)
