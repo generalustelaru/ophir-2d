@@ -98,7 +98,6 @@ document.fonts.ready.then(() => {
     const comms = new CommunicationService();
 
     window.addEventListener('resize', () => {
-        console.log('Caught resize event!!');
         canvas.fitStageIntoParentContainer();
     });
 
