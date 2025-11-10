@@ -191,6 +191,10 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         return this.getSpecialistName() === SpecialistName.chancellor;
     }
 
+    public isAdvisor() {
+        return this.getSpecialistName() === SpecialistName.advisor;
+    }
+
     public clearMoves() {
         this.moveActions.set(0);
     }

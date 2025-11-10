@@ -888,7 +888,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return defaultActions;
     }
 
-    private getSpecialistActions(player: PlayerHandler): LocalAction[] {
+    private getRemoteActions(player: PlayerHandler): LocalAction[] {
         const currentZone = player.getBearings().seaZone;
 
         if (player.isPostmaster()) {
@@ -1054,7 +1054,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!player.isAnchored())
             return { actions: [], trades: [], purchases: [] };
 
-        const actionsByLocation = this.getDefaultActions(player).concat(this.getSpecialistActions(player));
+        const actionsByLocation = this.getDefaultActions(player).concat(this.getRemoteActions(player));
 
         const trades = this.pickFeasibleTrades(player);
         const purchases = this.pickFeasiblePurchases(player);
@@ -1071,7 +1071,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                     return !!specialty && player.getCargo().includes(specialty);
 
                 case Action.donate_goods:
-                    return trades.includes(this.playState.getTempleTradeSlot());
+                    return player.isAdvisor()
+                        ? trades.length
+                        : trades.includes(this.playState.getTempleTradeSlot());
 
                 case Action.donate_metal:
                     return player.getCargo()

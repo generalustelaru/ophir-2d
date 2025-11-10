@@ -4,13 +4,13 @@ import { ServerConstants } from '~/server_types';
 const serverConstants: ServerConstants = {
 
     SPECIALISTS: [
-        // {
-        //     name: SpecialistName.advisor,
-        //     displayName: 'Advisor',
-        //     startingFavor: 1,
-        //     specialty: 'linen',
-        //     description: 'May complete temple trades using any market slot.', // TODO: implement Advisor
-        // },
+        {
+            name: SpecialistName.advisor,
+            displayName: 'Advisor',
+            startingFavor: 1,
+            specialty: 'linen',
+            description: 'May complete temple trades using any market slot.', // TODO: implement Advisor
+        },
         {
             name: SpecialistName.ambassador,
             displayName: 'Ambassador',
@@ -23,7 +23,7 @@ const serverConstants: ServerConstants = {
         //     displayName: 'Chancellor',
         //     startingFavor: 1,
         //     specialty: 'gems',
-        //     description: 'May substitute goods with Favor when trading.', // TODO: implement Chancellor
+        //     description: 'May substitute goods with Favor when trading at the market.', // TODO: implement Chancellor
         // },
         {
             name: SpecialistName.harbormaster,

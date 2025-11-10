@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
-import { PlayState, Unique } from '~/shared_types';
+import { PlayState, SpecialistName, Unique } from '~/shared_types';
 
 export class LocationGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage;
@@ -64,6 +64,10 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             },
         );
 
+        const isAdvisor = state.players.find(
+            p => p.color == localState.playerColor,
+        )?.specialist.name == SpecialistName.advisor;
+
         this.templeArea = new TempleArea(
             this.stage,
             state.setup.templeTradeSlot,
@@ -75,6 +79,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 y: this.marketArea.getElement().height() + this.treasuryArea.getElement().height(),
             },
             state.temple.maxLevel,
+            isAdvisor,
             this.donateGoodsCallback,
         );
 
