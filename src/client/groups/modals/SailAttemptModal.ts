@@ -66,7 +66,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
         const symbol = (()=> {
             switch (true) {
                 case data.toSail <= (data.isTempleGuard ? 2 : 1) : return '✓';
-                case data.moveActions === 1: return (data.toSail > 4 ? '!!' : '!');
+                case data.moveActions === 1 : return '!!';
                 default: return '?';
             }
         })();
