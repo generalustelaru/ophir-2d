@@ -18,7 +18,6 @@ import { ForceTurnModal } from '../groups/modals/ForceTurnModal';
 import { EndRivalTurnModal } from '../groups/modals/EndRivalTurnModal';
 
 export class CanvasService extends Communicator {
-    // private fontsReady: Promise<void>;
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
@@ -121,10 +120,6 @@ export class CanvasService extends Communicator {
                 y: 0,
             },
         );
-        // }).catch(err => {
-        //     console.error({ err });
-        //     throw new Error('Could not initialize groups');
-        // });
     }
 
     public getSetupCoordinates(): GameSetupPayload {
