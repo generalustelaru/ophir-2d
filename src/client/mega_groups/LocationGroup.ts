@@ -12,15 +12,19 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private templeArea: TempleArea | null = null;
     private sellGoodsCallback: Function;
     private donateGoodsCallback: Function;
+    private advisorOptionsCallback: Function;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         sellGoodsCallback: Function,
         donateGoodsCallback: Function,
+        advisorCallback: Function,
     ) {
         this.sellGoodsCallback = sellGoodsCallback;
         this.donateGoodsCallback = donateGoodsCallback;
+        this.advisorOptionsCallback = advisorCallback;
+
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height - 20,
@@ -81,6 +85,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             state.temple.maxLevel,
             isAdvisor,
             this.donateGoodsCallback,
+            this.advisorOptionsCallback,
         );
 
         this.group.add(

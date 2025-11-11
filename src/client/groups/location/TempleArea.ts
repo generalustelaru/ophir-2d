@@ -24,6 +24,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
         maxLevel: number,
         isAdvisor: boolean,
         donateGoodsCallback: Function,
+        advisorOptionsCallback: Function,
     ) {
         this.group = new Konva.Group(layout);
 
@@ -56,7 +57,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
             card,
             isAdvisor,
             (isAdvisor
-                ? () => { alert('advisor modal not implemented'); }
+                ? () => advisorOptionsCallback()
                 : () => donateGoodsCallback(marketSlot)
             ),
         );

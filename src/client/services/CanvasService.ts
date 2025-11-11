@@ -8,14 +8,10 @@ import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
 import { EventType, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
-import { SellGoodsModal } from '../groups/modals/SellGodsModal';
-import { StartTurnModal } from '../groups/modals/StartTurnModal';
-import { DonateGoodsModal } from '../groups/modals/DonateGoodsModal';
-import { EndTurnModal } from '../groups/modals/EndTurnModal';
-import { SailAttemptModal } from '../groups/modals/SailAttemptModal';
-import { RivalControlModal } from '../groups/modals/RivalControlModal';
-import { ForceTurnModal } from '../groups/modals/ForceTurnModal';
-import { EndRivalTurnModal } from '../groups/modals/EndRivalTurnModal';
+import {
+    SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
+    EndRivalTurnModal, AdvisorModal,
+} from '../groups/modals/';
 
 export class CanvasService extends Communicator {
     private stage: Konva.Stage;
@@ -35,6 +31,7 @@ export class CanvasService extends Communicator {
     private sailAttemptModal: SailAttemptModal;
     private rivalControlModal: RivalControlModal;
     private endRivalTurnModal: EndRivalTurnModal;
+    private advisorModal: AdvisorModal;
 
     public constructor() {
         super();
@@ -64,6 +61,7 @@ export class CanvasService extends Communicator {
         this.sailAttemptModal = new SailAttemptModal(this.stage);
         this.rivalControlModal = new RivalControlModal(this.stage);
         this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
+        this.advisorModal = new AdvisorModal(this.stage);
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -75,6 +73,7 @@ export class CanvasService extends Communicator {
             },
             (slot: MarketSlotKey) => { this.sellGoodsModal.show(slot); },
             (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
+            () => { this.advisorModal.show(); },
         ); // locationGroup covers 1 segment, sitting on the left
 
         this.playerGroup = new PlayerGroup(
