@@ -2,6 +2,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { PlayerColor, PlayerDraft, SelectableSpecialist, SpecialistName, Unique } from '~/shared_types';
 import  clientConstants from '~/client_constants';
+import { RowDistributor } from '../popular';
 import { SpecialistCard } from './SpecialistCard';
 import localState from '../../state';
 
@@ -33,19 +34,25 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
         });
         this.group.add(background);
 
-        let offset = 20;
         specialists.forEach( specialist => {
             const card = new SpecialistCard(
                 stage,
                 specialist,
-                { x: offset, y: 50 },
+                { x: 0, y: 0 },
                 (name = specialist.name) => {this.preSelect(name);},
             );
-            this.group.add(card.getElement());
 
             this.specialistCards.push(card);
-            offset += 220;
         });
+
+        const cardRow = new RowDistributor(
+            { ...layout, x: 0, y: 50 },
+            this.specialistCards.map(s => {
+                return { id: s.getCardName(), node: s.getElement() };
+            }),
+        );
+
+        this.group.add(cardRow.getElement());
     }
 
     public getElement() {

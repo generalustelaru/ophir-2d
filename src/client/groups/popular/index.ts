@@ -9,3 +9,4 @@ export { VictoryPointDial } from './VictoryPointDial';
 export { MovesDial } from './MovesDial';
 export { SymbolicInfluenceDial } from './SymbolicInfluenceDial';
 export { ItemRow } from './ItemRow';
+export { RowDistributor } from './RowDistributor';
