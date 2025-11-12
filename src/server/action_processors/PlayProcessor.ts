@@ -452,7 +452,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         ]);
 
         if (conditions.err)
-            return lib.fail(`${name} cannnot donate goods`);
+            return lib.fail(`${name} cannot donate goods`);
 
         // Transaction
         const trade = this.playState.getMarketTrade(slot);
