@@ -9,7 +9,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Advisor',
             startingFavor: 1,
             specialty: 'linen',
-            description: 'May complete temple trades using any market slot.', // TODO: implement Advisor
+            description: 'May donate commodities to the Temple using any Market contract.',
         },
         {
             name: SpecialistName.ambassador,
@@ -30,14 +30,14 @@ const serverConstants: ServerConstants = {
             displayName: 'Harbormaster',
             startingFavor: 2,
             specialty: 'marble',
-            description: 'Can complete actions after first and second move after spending Favor.',
+            description: 'May perform actions after first and second move after spending Favor.',
         },
         {
             name: SpecialistName.moneychanger,
             displayName: 'Moneychanger',
             startingFavor: 2,
             specialty: 'linen',
-            description : 'May perform market actions at the temple by foregoing trade goods donation.',
+            description : 'May perform Market actions at the Temple instead of donating commodities.',
         },
         {
             name: SpecialistName.navigator,
