@@ -142,8 +142,6 @@ export class CanvasService extends Communicator {
     }
 
     public drawUpdateElements(state: State, toDisable = false) {
-
-        // const isFreshReload = !this.isEnrolmentDrawn && !this.isSetupDrawn && !this.isPlayDrawn;
         const { sessionPhase } = state;
 
         if (!localState.playerColor) {
@@ -157,13 +155,8 @@ export class CanvasService extends Communicator {
             });
         }
 
-        // await this.fontsReady;
-
         this.fitStageIntoParentContainer();
 
-        // document.fonts.ready.then()
-
-        // document.fonts.ready.then(()=> {
         switch (sessionPhase) {
             case Phase.enrolment:
                 if (!this.isEnrolmentDrawn) {
@@ -207,8 +200,6 @@ export class CanvasService extends Communicator {
             default:
                 throw new Error('Update case not covered!');
         }
-        // });
-        // return Promise.resolve(true);
     }
 
     public disable(): void {

@@ -32,7 +32,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
     ) {
         const layout = { ...position, width: 200, height: 300 };
 
-        super(stage, layout, () => {});
+        super(stage, layout, selectionCallback);
 
         this.cardName = specialist.name;
         this.stateFill = COLOR.templeRed;
@@ -43,8 +43,6 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
             cornerRadius: 15,
             strokeWidth: 0,
         });
-
-        this.updateFunction(selectionCallback);
 
         const textCommon = {
             fontFamily: 'Custom',
