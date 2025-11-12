@@ -445,13 +445,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const { name, color, socketId } = player.getIdentity();
         const { slot } = marketSlotPayload;
 
-        const conditions = lib.checkConditions([
-            player.hasAction(Action.donate_goods),
-            this.playState.getTempleTradeSlot() === slot,
-            player.getTrades().includes(slot),
-        ]);
-
-        if (conditions.err)
+        if (!player.hasAction(Action.donate_goods))
             return lib.fail(`${name} cannot donate goods`);
 
         // Transaction
