@@ -61,7 +61,13 @@ export class CanvasService extends Communicator {
         this.sailAttemptModal = new SailAttemptModal(this.stage);
         this.rivalControlModal = new RivalControlModal(this.stage);
         this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
-        this.advisorModal = new AdvisorModal(this.stage);
+
+        const donateGoodsCallback = (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); }
+
+        this.advisorModal = new AdvisorModal(
+            this.stage,
+            donateGoodsCallback,
+        );
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -72,7 +78,7 @@ export class CanvasService extends Communicator {
                 y: 0,
             },
             (slot: MarketSlotKey) => { this.sellGoodsModal.show(slot); },
-            (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
+            donateGoodsCallback,
             () => { this.advisorModal.show(); },
         ); // locationGroup covers 1 segment, sitting on the left
 
@@ -190,6 +196,7 @@ export class CanvasService extends Communicator {
                 this.donateGoodsModal.update(state);
                 this.endTurnModal.update(state);
                 this.rivalControlModal.update(state);
+                this.advisorModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
