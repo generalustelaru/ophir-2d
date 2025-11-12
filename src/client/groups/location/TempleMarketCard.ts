@@ -11,12 +11,12 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
     private rewardDial: TempleRewardDial;
     private goodsAssortment: GoodsAssortment;
     private background: Konva.Rect;
-    private isAdvisor: boolean;
+    private opensModal: boolean;
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
         trade: Trade,
-        isAdvisor: boolean,
+        opensAdvisorModal: boolean,
         callback: Function,
     ) {
         super(
@@ -30,7 +30,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
             callback,
         );
 
-        this.isAdvisor = isAdvisor;
+        this.opensModal = opensAdvisorModal;
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -43,7 +43,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
 
         this.rewardDial = new TempleRewardDial(
             { x: 0, y: 0 },
-            isAdvisor ? null : trade.reward.favorAndVp,
+            opensAdvisorModal ? null : trade.reward.favorAndVp,
         );
         this.rewardDial.getElement().x((this.background.width() - this.rewardDial.getDiameter()) / 2);
         this.rewardDial.getElement().y(this.background.height() - this.rewardDial.getDiameter() - 30);
@@ -54,7 +54,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
                 y: 0,
             },
             'card',
-            isAdvisor ? null : trade.request,
+            opensAdvisorModal ? null : trade.request,
         );
 
         this.group.add(...[
@@ -63,7 +63,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
             this.goodsAssortment.getElement(),
         ]);
 
-        isAdvisor && this.group.add(new Konva.Text({
+        opensAdvisorModal && this.group.add(new Konva.Text({
             text: '...',
             width: this.group.width(),
             align: 'center',
@@ -76,8 +76,8 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
     }
 
     public update(data: MarketCardUpdate): void {
-        this.rewardDial.update(this.isAdvisor ? null : data.trade.reward.favorAndVp);
-        this.goodsAssortment.update(this.isAdvisor ? null : data.trade.request);
+        this.rewardDial.update(this.opensModal ? null : data.trade.reward.favorAndVp);
+        this.goodsAssortment.update(this.opensModal ? null : data.trade.request);
         this.background.fill(data.isFeasible ? COLOR.templeRed : COLOR.templeDarkRed);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         data.isFeasible ? this.enable() : this.disable();
