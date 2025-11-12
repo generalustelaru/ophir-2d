@@ -38,6 +38,10 @@ export class RowDistributor {
     public setNodes(elements: Array<RowElement>) {
         this.group.destroyChildren();
         this.elements = elements;
+
+        if (!elements.length)
+            return;
+
         const nodeWidth = elements[0].node.width();
         const freeWidth = this.group.width() - (nodeWidth * elements.length);
         const interSpace = freeWidth / (elements.length + 1);
