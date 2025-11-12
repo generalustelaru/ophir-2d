@@ -116,4 +116,8 @@ export abstract class ModalBase {
         }
         this.screenGroup.show();
     }
+
+    protected close() {
+        this.screenGroup.hide();
+    }
 }
