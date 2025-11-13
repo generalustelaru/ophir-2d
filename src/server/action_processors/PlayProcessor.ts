@@ -371,7 +371,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass(this.saveAndReturn(player));
     }
 
-    // MARK: TRADE
+    // MARK: SELL
     public sellGoods(data: DataDigest): Probable<StateResponse> {
         const { player, action, payload } = data;
         this.wipeState(player);
@@ -391,7 +391,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         }
 
         const trade = this.playState.getMarketTrade(slot);
-        const unloadResult = this.deductTradeGoods(player, trade);
+        const unloadResult = this.subtractTradeGoods(player.getCargo(), trade.request);
 
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
@@ -405,7 +405,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         const coinForm = reward === 1 ? 'coin' : 'coins';
         const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location === 'temple';
-
         this.privateState.addDeed({
             context: action,
             description: (
@@ -421,6 +420,64 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
+
+        const marketShift = this.shiftMarketCards(player);
+
+        if (marketShift.err)
+            return lib.fail(marketShift.message);
+
+        if (marketShift.data.hasGameEnded)
+            this.playState.registerGameEnd(marketShift.data.countables);
+
+        return lib.pass(this.saveAndReturn(player));
+    }
+
+    public sellAsChancellor(data: DataDigest): Probable<StateResponse> {
+        const { player, action, payload } = data;
+        this.wipeState(player);
+
+        if (player.getSpecialist().name != SpecialistName.chancellor)
+            return lib.fail('Only chancellor may sell favor as goods.');
+
+        const chancellorPayload = validator.validateChancellorPurchasePayload(payload);
+
+        if(!chancellorPayload)
+            return lib.fail(lib.validationErrorMessage());
+
+        const { slot, omit } = chancellorPayload;
+
+        const favor = player.getFavor();
+
+        if (favor < omit.length)
+            return lib.fail('Not enough favor to substitute ommisions');
+
+        const trade = this.playState.getMarketTrade(slot);
+        const payable = this.subtractTradeGoods(trade.request, omit);
+
+        if(payable.err)
+            return lib.fail('Ommited items are not included in request');
+
+        const cargo = this.subtractTradeGoods(player.getCargo(), payable.data);
+
+        if(cargo.err)
+            return lib.fail(cargo.message);
+
+        player.setCargo(cargo.data);
+        player.spendFavor(omit.length);
+        player.gainCoins(trade.reward.coins);
+        player.setActionsAndDetails(this.determineActionsAndDetails(player));
+        player.removeAction(Action.sell_as_chancellor);
+        player.clearMoves();
+
+        const reward = trade.reward.coins;
+
+        const coinForm = trade.reward.coins === 1 ? 'coin' : 'coins';
+        this.privateState.addDeed({
+            context: action,
+            description: (
+                omit.length ? `spent ${omit.length} favor and ` : ''
+                + `traded for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`),
+        });
 
         const marketShift = this.shiftMarketCards(player);
 
@@ -450,7 +507,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         // Transaction
         const trade = this.playState.getMarketTrade(slot);
-        const unloadResult = this.deductTradeGoods(player, trade);
+        const unloadResult = this.subtractTradeGoods(player.getCargo(), trade.request);
 
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
@@ -543,7 +600,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(`Player ${name} cannot buy metals`);
 
         const metalCost = this.playState.getMetalCosts()[metal];
-        const playerAmount = currency === 'coins' ? player.getCoinAmount() : player.getFavorAmount();
+        const playerAmount = currency === 'coins' ? player.getCoinAmount() : player.getFavor();
 
         const price = metalCost[currency];
         const remainder = playerAmount - price;
@@ -882,26 +939,25 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return defaultActions;
     }
 
-    private getRemoteActions(player: PlayerHandler): LocalAction[] {
+    private getPositionalActions(player: PlayerHandler): LocalAction[] {
         const currentZone = player.getBearings().seaZone;
+        const currentLocation = this.playState.getLocationName(currentZone);
 
         if (player.isPostmaster()) {
             const adjacentZones = this.privateState.getDestinations(currentZone);
 
             for (const zone of adjacentZones) {
-                if (this.playState.getLocationName(zone) === 'temple') {
-
+                if (this.playState.getLocationName(zone) == 'temple')
                     return [Action.donate_metal];
-
-                }
             }
         }
 
-        if (player.isMoneychanger()) {
-            if (this.playState.getLocationName(currentZone) === 'temple') {
+        if (player.isMoneychanger() && currentLocation == 'temple') {
+            return [Action.sell_goods, Action.sell_specialty];
+        }
 
-                return [Action.sell_goods, Action.sell_specialty];
-            }
+        if (player.isChancellor() && currentLocation == 'market') {
+            return [Action.sell_as_chancellor];
         }
 
         return [];
@@ -967,17 +1023,15 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass(cargo);
     }
 
-    private deductTradeGoods(player: PlayerHandler, trade: Trade): Probable<Array<ItemName>> {
-        const cargo = player.getCargo();
+    private subtractTradeGoods(minuend: Array<ItemName>, subtrahend: Array<ItemName>): Probable<Array<ItemName>> {
+        for (const tradeGood of subtrahend) {
+            const subtractionResult = this.unloadItem(minuend, tradeGood);
 
-        for (const tradeGood of trade.request) {
-            const unloadResult = this.unloadItem(cargo, tradeGood);
-
-            if (unloadResult.err)
-                return unloadResult;
+            if (subtractionResult.err)
+                return subtractionResult;
         }
 
-        return lib.pass(cargo);
+        return lib.pass(minuend);
     }
 
     private pickFeasibleTrades(player: PlayerHandler): Array<MarketSlotKey> {
@@ -1048,7 +1102,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!player.isAnchored())
             return { actions: [], trades: [], purchases: [] };
 
-        const actionsByLocation = this.getDefaultActions(player).concat(this.getRemoteActions(player));
+        const actionsByLocation = this.getDefaultActions(player).concat(this.getPositionalActions(player));
 
         const trades = this.pickFeasibleTrades(player);
         const purchases = this.pickFeasiblePurchases(player);
@@ -1058,6 +1112,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                     return player.getCoinAmount() >= 2 && player.getCargo().length < 4;
 
                 case Action.sell_goods:
+                    return player.isChancellor() ? false : trades.length;
+
+                case Action.sell_as_chancellor:
                     return trades.length;
 
                 case Action.sell_specialty:
@@ -1088,6 +1145,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                         && player.hasCargoRoom(1)
                         && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
                     );
+                default:
+                    return false;
             }
         });
 

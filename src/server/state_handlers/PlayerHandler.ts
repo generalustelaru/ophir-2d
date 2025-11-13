@@ -328,10 +328,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.coins.update(c => c -= cost);
     }
 
-    public getFavorAmount() {
-        return this.favor.get();
-    }
-
     public gainFavor(amount: number) {
         this.favor.update(f => Math.min(f + amount, MAX_FAVOR));
     }

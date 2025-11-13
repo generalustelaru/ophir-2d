@@ -3,6 +3,7 @@ import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
     LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
     Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload, ColorChangePayload,
+    ChancellorPurchasePayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { BackupState, PrivateState, Probable, SavedSession } from '~/server_types';
@@ -265,6 +266,29 @@ class ValidatorService {
                 { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
             ],
         );
+    }
+
+    public validateChancellorPurchasePayload(payload: unknown) {
+        const chancellorPayload = this.validateObject<ChancellorPurchasePayload>(
+            'ChancellorPurchasePayload',
+            payload,
+            [
+                { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
+                { key: 'omit', type: 'array', nullable: false }, //TODO: add refs to array maybe?
+            ],
+        );
+
+        if (!chancellorPayload)
+            return null;
+
+        const isTradeGoods = chancellorPayload.omit.every(item => { //instead of this
+            return refs.tradeGood.includes(item);},
+        );
+
+        if (!isTradeGoods)
+            return null;
+
+        return chancellorPayload;
     }
 
     public validateMetalPurchasePayload(payload: unknown) {

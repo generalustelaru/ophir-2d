@@ -387,6 +387,8 @@ export class GameSession {
                     return processor.loadGood(digest);
                 case Action.sell_goods:
                     return processor.sellGoods(digest);
+                case Action.sell_as_chancellor:
+                    return processor.sellAsChancellor(digest);
                 case Action.donate_goods:
                     return processor.donateGoods(digest);
                 case Action.sell_specialty:

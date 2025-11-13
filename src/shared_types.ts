@@ -24,6 +24,7 @@ export enum Action {
     load_good = 'load_good',
     drop_item = 'drop_item',
     sell_goods = 'sell_goods',
+    sell_as_chancellor = 'sell_as_chancellor',
     donate_goods = 'donate_goods',
     sell_specialty = 'sell_specialty',
     buy_metal = 'buy_metal',
@@ -52,7 +53,7 @@ export type GoodsLocationName = 'quarry' | 'forest' | 'mines' | 'farms';
 export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
 export type LocalAction =
     | Action.upgrade_cargo | Action.sell_goods | Action.sell_specialty | Action.donate_goods | Action.donate_metal
-    | Action.buy_metal | Action.load_good;
+    | Action.buy_metal | Action.load_good | Action.sell_as_chancellor;
 export type ItemName = TradeGood | CargoMetal | 'empty';
 export type MarketSlotKey = 'slot_1' | 'slot_2' | 'slot_3';
 export type Trade = { request: Array<TradeGood>, reward: Reward };
@@ -257,6 +258,7 @@ export type GameSetupPayload = {
 export type LoadGoodPayload = { tradeGood: TradeGood }
 export type DropItemPayload = { item: ItemName }
 export type MarketSlotPayload = { slot: MarketSlotKey }
+export type ChancellorPurchasePayload = { slot: MarketSlotKey, omit: Array<TradeGood> }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
@@ -291,7 +293,7 @@ should persist
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.sell_goods | Action.donate_goods | Action.buy_metal | Action.donate_metal | Action.pick_specialist
-    | Action.enrol | Action.reposition_opponent | Action.change_color;
+    | Action.enrol | Action.reposition_opponent | Action.change_color | Action.sell_as_chancellor;
 export type LaconicAction =
     | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
@@ -299,7 +301,7 @@ export type LaconicAction =
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
-    | MarketSlotPayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload | EnrolmentPayload
+    | MarketSlotPayload | ChancellorPurchasePayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload | EnrolmentPayload
     | LoadGoodPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
@@ -314,6 +316,7 @@ export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, RepositioningPayload>;
 export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentRepositioningPayload>;
 export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSlotPayload>;
+export type SellAsChancellorMessage = MessageFormat<Action.sell_as_chancellor, ChancellorPurchasePayload>
 export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSlotPayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metal, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metal, MetalDonationPayload>;
@@ -321,7 +324,7 @@ export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSp
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage
     | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage | EnrolMessage
-    | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage;
+    | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage;
 
 export type ClientRequest = {
     gameId: string | null,
