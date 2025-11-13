@@ -17,6 +17,7 @@ import { SERVER_NAME, SINGLE_PLAYER  } from '../server/configuration';
 import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
+/**@throws */
 export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private autoBroadcast: (state: PlayState) => void;
