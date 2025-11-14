@@ -20,11 +20,11 @@ const { COLOR } = clientConstants;
 export abstract class ModalBase {
     protected stage: Konva.Stage;
     private screenGroup: Konva.Group;
-    // protected contentLayout: GroupLayoutData;
     private modalGroup: Konva.Group;
     protected contentGroup: Konva.Group;
     private dismissButton: DismissButton;
     private acceptButton: AcceptButton | null = null;
+    private isFixedActionMessage: boolean;
 
     constructor(
         stage: Konva.Stage,
@@ -81,6 +81,8 @@ export abstract class ModalBase {
         );
         this.dismissButton.enable();
 
+        this.isFixedActionMessage = behavior.hasSubmit && !!behavior.actionMessage;
+
         if (behavior.hasSubmit) {
             this.acceptButton = new AcceptButton(
                 this.stage,
@@ -93,7 +95,6 @@ export abstract class ModalBase {
                 () => { this.screenGroup.hide(); },
             );
             this.modalGroup.add(this.acceptButton.getElement());
-            this.acceptButton.enable();
         }
 
         this.modalGroup.add(...[
@@ -108,12 +109,25 @@ export abstract class ModalBase {
     }
 
     protected open(message: ClientMessage|null = null) {
-        if (message) {
-            if (!this.acceptButton)
-                throw new Error('Cannot assign message. Accept button not initialized!');
 
-            this.acceptButton.updateActionMessage(message);
+        if (message && !this.acceptButton)
+            throw new Error('Cannot assign message. Accept button not initialized!');
+
+        if (this.acceptButton) {
+            switch (true) {
+                case !!message:
+                    this.acceptButton.updateActionMessage(message);
+                    this.acceptButton.setAcceptable(true);
+                    break;
+                case this.isFixedActionMessage:
+                    this.acceptButton.setAcceptable(true);
+                    break;
+                default:
+                    this.acceptButton.setAcceptable(false);
+                    break;
+            }
         }
+
         this.screenGroup.show();
     }
 
