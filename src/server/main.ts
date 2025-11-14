@@ -52,7 +52,7 @@ app.get('/shutdown', (req: Request, res: Response) => {
 
 app.get('/reset', (req: Request, res: Response) => {
     if (req.query.auth !== process.env.ADMIN_AUTH) {
-        console.error('Unauthorized shutdown attempt');
+        console.error('Unauthorized reset attempt');
         res.status(401).send('Unauthorized');
 
         return;
