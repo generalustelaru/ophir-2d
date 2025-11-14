@@ -4,6 +4,8 @@ import { ActionButton } from '../popular';
 
 export class AcceptButton extends ActionButton {
 
+    private buttonBackground: Konva.Rect;
+
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
@@ -20,11 +22,13 @@ export class AcceptButton extends ActionButton {
 
         super(stage, layout, actionMessage);
 
-        const buttonBackground = new Konva.Rect({
+        this.buttonBackground = new Konva.Rect({
             width: layout.width,
             height: layout.height,
-            fill: 'green',
+            fill: actionMessage ? 'green' : 'brown',
         });
+
+        this.setEnabled(!!actionMessage);
 
         const buttonLabel = new Konva.Text({
             width: layout.width,
@@ -38,12 +42,17 @@ export class AcceptButton extends ActionButton {
             fontFamily: 'Custom',
         });
 
-        this.group.add(buttonBackground, buttonLabel);
+        this.group.add(this.buttonBackground, buttonLabel);
 
         this.group.on('click', () => {
             if (this.isActive)
                 dismissCallback();
         });
+    }
+
+    setAcceptable(isAcceptable: boolean) {
+        this.buttonBackground.fill(isAcceptable ? 'green' : 'brown');
+        this.setEnabled(isAcceptable);
     }
 
     public getElement() {
