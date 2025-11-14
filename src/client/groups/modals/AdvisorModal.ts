@@ -1,19 +1,19 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { MarketSlotKey, PlayState, SpecialistName, Trade } from '~/shared_types';
+import { MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
 import { RowDistributor } from '../popular';
 import { TempleMarketCard } from '../location';
+import { DynamicModalInterface } from '~/client/client_types';
 
 type DonationItem = {
     slot: MarketSlotKey,
     trade: Trade,
 }
 
-export class AdvisorModal extends ModalBase {
+export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
     private advisorTrades: Array<DonationItem>;
     private cardRow: RowDistributor;
     private cardSelectionCallback: (slot: MarketSlotKey) => void;
-    // add prop with player trade data to have rendered upon opening only
     constructor(
         stage: Konva.Stage,
         donateGoodsCallback: (slot: MarketSlotKey) => void,
@@ -21,7 +21,6 @@ export class AdvisorModal extends ModalBase {
         super(
             stage,
             { hasSubmit: false, dismissLabel: 'Cancel' },
-            // { width: 600, height: 400 },
             { width: 300, height: 220 },
         );
 
