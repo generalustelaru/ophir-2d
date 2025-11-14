@@ -25,6 +25,13 @@ export default [
             'array-bracket-spacing': ['warn', 'never'],
             'comma-dangle': ['warn', 'always-multiline'],
             'indent': ['warn', 4, { 'SwitchCase': 1 }],
+            '@typescript-eslint/explicit-member-accessibility': [ // class methods
+                'warn',
+                {
+                    'accessibility': 'explicit',
+                    'overrides': { 'constructors': 'no-public' },
+                },
+            ],
         },
     },
     {
