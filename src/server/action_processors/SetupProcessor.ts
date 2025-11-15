@@ -45,30 +45,41 @@ export class SetupProcessor implements Unique<SessionProcessor> {
 
         const specialists = ((): Array<SelectableSpecialist> => {
             const deck = tools.getCopy(SPECIALISTS);
+            const required = playerCount + 1;
 
-            if (playerCount >= deck.length)
+            if (required > deck.length)
                 throw new Error('Not enough specialist cards!');
 
             const randomized: Array<SpecialistData> = lib.randomize(deck);
-            const selection = randomized.slice(0, playerCount + 1);
+            if (
+                Array.isArray(INCLUDE)
+                && INCLUDE.length
+                && INCLUDE.every((s: unknown) => typeof s == 'string')
+            ) {
+                const toInclude = [...INCLUDE];
+                const selectionPool = deck.filter(s => {
+                    return toInclude.includes(s.name);
+                });
 
-            if (Array.isArray(INCLUDE) && INCLUDE.length) {
-                const toInclude = INCLUDE.reverse();
-                for (const includeeName of toInclude) {
-                    if (selection.find(s => s.name === includeeName))
-                        break;
+                while (selectionPool.length != required) {
 
-                    const specialist = deck.find(s => s.name === includeeName);
+                    if (selectionPool.length < required) {
+                        const randomSpecialist = randomized.pop();
 
-                    if (specialist)
-                        selection.push(specialist);
+                        if (!toInclude.includes(randomSpecialist!.name))
+                            selectionPool.push(randomSpecialist!);
+                    }
+
+                    if (selectionPool.length > required)
+                        selectionPool.pop();
                 }
 
-                while (selection.length > playerCount + 1)
-                    selection.shift();
+                return selectionPool.map(s => { return { ...s, owner: null }; });
             }
 
-            return selection.map(s => { return { ...s, owner: null }; });
+            const randomPool = randomized.slice(0, playerCount + 1);
+
+            return randomPool.map(s => { return { ...s, owner: null }; });
         })();
 
         const playerDrafts = this.draftPlayers(playerEntries);
