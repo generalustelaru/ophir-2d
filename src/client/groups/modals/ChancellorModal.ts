@@ -8,7 +8,12 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     constructor(stage: Konva.Stage) {
         super(
             stage,
-            { hasSubmit: false, dismissLabel: 'Cancel' },
+            {
+                hasSubmit: true,
+                actionMessage: null,
+                submitLabel: 'Accept',
+                dismissLabel: 'Cancel',
+            },
         );
 
         this.text = new Konva.Text({ fill: 'white', fontSize: 24 });
