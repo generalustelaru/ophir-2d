@@ -10,7 +10,7 @@ import { EventType, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
-    EndRivalTurnModal, AdvisorModal,
+    EndRivalTurnModal, AdvisorModal, ChancellorModal,
 } from '../groups/modals/';
 
 export class CanvasService extends Communicator {
@@ -32,8 +32,9 @@ export class CanvasService extends Communicator {
     private rivalControlModal: RivalControlModal;
     private endRivalTurnModal: EndRivalTurnModal;
     private advisorModal: AdvisorModal;
+    private chancellorModal: ChancellorModal;
 
-    public constructor() {
+    constructor() {
         super();
 
         this.stage = new Konva.Stage({
@@ -52,7 +53,6 @@ export class CanvasService extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
-        // this.fontsReady = document.fonts.ready.then(() => {
         this.donateGoodsModal = new DonateGoodsModal(this.stage);
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.endTurnModal = new EndTurnModal(this.stage);
@@ -62,12 +62,13 @@ export class CanvasService extends Communicator {
         this.rivalControlModal = new RivalControlModal(this.stage);
         this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
 
-        const donateGoodsCallback = (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); }
+        const donateGoodsCallback = (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); };
 
         this.advisorModal = new AdvisorModal(
             this.stage,
             donateGoodsCallback,
         );
+        this.chancellorModal = new ChancellorModal(this.stage);
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -80,6 +81,7 @@ export class CanvasService extends Communicator {
             (slot: MarketSlotKey) => { this.sellGoodsModal.show(slot); },
             donateGoodsCallback,
             () => { this.advisorModal.show(); },
+            (slot: MarketSlotKey) => { this.chancellorModal.show(slot); },
         ); // locationGroup covers 1 segment, sitting on the left
 
         this.playerGroup = new PlayerGroup(

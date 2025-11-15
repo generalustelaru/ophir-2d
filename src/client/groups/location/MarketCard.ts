@@ -16,9 +16,9 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        callback: Function | null,
+        tradeCallback: Function | null,
         trade: Trade,
-        fluctuation: Fluctuation | null = null,
+        fluctuation: Fluctuation | null,
     ) {
         super(
             stage,
@@ -28,7 +28,7 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
                 x: position.x,
                 y: position.y,
             },
-            callback,
+            tradeCallback,
         );
 
         this.fluctuation = fluctuation;

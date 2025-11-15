@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { MarketFluctuations, MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
+import { MarketFluctuations, MarketSlotKey, MarketOffer, Action, Unique, SpecialistName } from '~/shared_types';
 import { MarketDeck, MarketCardSlot } from '.';
 
 const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
@@ -21,7 +21,8 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         templeTradeSlot: MarketSlotKey,
         market: MarketOffer,
         layout: GroupLayoutData,
-        sellGoodsCallback: Function,
+        defaultCallback: Function,
+        peddlerCallback: Function | null,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -54,6 +55,12 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             market.deckId,
         );
 
+        const pickCallback = (slot: MarketSlotKey): Function =>  {
+            if (peddlerCallback && marketFluctuations[slot] == -1)
+                return peddlerCallback;
+            return defaultCallback;
+        };
+
         this.slot_1 = new MarketCardSlot(
             stage,
             {
@@ -65,7 +72,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             'slot_1',
             market.slot_1,
             marketFluctuations.slot_1,
-            sellGoodsCallback,
+            pickCallback('slot_1'),
         );
 
         this.slot_2 = new MarketCardSlot(
@@ -79,7 +86,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             'slot_2',
             market.slot_2,
             marketFluctuations.slot_2,
-            sellGoodsCallback,
+            pickCallback('slot_2'),
         );
 
         this.slot_3 = new MarketCardSlot(
@@ -93,7 +100,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             'slot_3',
             market.slot_3,
             marketFluctuations.slot_3,
-            sellGoodsCallback,
+            pickCallback('slot_3'),
         );
 
         const templeIcon = new Konva.Path({
@@ -122,7 +129,9 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         const localPLayerMaySell = !!(
             localPlayer?.isActive
             && localPlayer.isAnchored
-            && localPlayer.locationActions.includes(Action.sell_goods)
+            && localPlayer.locationActions.filter(
+                a => [Action.sell_goods, Action.sell_as_chancellor].includes(a),
+            ).length
         );
 
         const cardSlots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];

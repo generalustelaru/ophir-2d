@@ -1,6 +1,6 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
-    StateResponse, PlayState, SpecialistName, DiceSix, Trade, ChatEntry, PlayerEntity, LocalAction,
+    StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction,
     MetalPurchasePayload, Unique,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';

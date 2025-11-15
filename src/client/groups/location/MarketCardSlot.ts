@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { MarketCard } from '.';
-import { Trade, Fluctuation, MarketSlotKey, Unique } from '~/shared_types';
+import { Trade, Fluctuation, MarketSlotKey, Unique, SpecialistName } from '~/shared_types';
 import clientConstants from '~/client_constants';
 
 const { ICON_DATA } = clientConstants;
@@ -16,7 +16,7 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
         marketKey: MarketSlotKey,
         trade: Trade,
         fluctuation: Fluctuation,
-        modalCallback: Function,
+        tradeCallback: Function,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -29,8 +29,7 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
         this.marketCard = new MarketCard(
             stage,
             { x: 0, y: segmentHeight },
-            () => modalCallback(marketKey),
-            // { action: Action.sell_goods, payload: { slot: marketKey } },
+            () => tradeCallback(marketKey),
             trade,
             fluctuation,
         );

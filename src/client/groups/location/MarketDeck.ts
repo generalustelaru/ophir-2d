@@ -29,6 +29,7 @@ export class MarketDeck implements Unique<DynamicGroupInterface<MarketOffer>>
             { x: 0, y: this.cardY - offer.deckSize },
             null,
             offer.future,
+            null,
         );
 
         const deckEffect = new Konva.Rect({

@@ -7,3 +7,4 @@ export { RivalControlModal } from './RivalControlModal';
 export { ForceTurnModal } from './ForceTurnModal';
 export { EndRivalTurnModal } from './EndRivalTurnModal';
 export { AdvisorModal } from './AdvisorModal';
+export { ChancellorModal } from './ChancellorModal';
