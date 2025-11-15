@@ -151,6 +151,7 @@ export class CanvasService extends Communicator {
         this.rivalControlModal?.show();
     }
 
+    // MARK: UPDATE
     public drawUpdateElements(state: State, toDisable = false) {
         const { sessionPhase } = state;
 
@@ -201,6 +202,7 @@ export class CanvasService extends Communicator {
                 this.endTurnModal.update(state);
                 this.rivalControlModal.update(state);
                 this.advisorModal.update(state);
+                this.chancellorModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
