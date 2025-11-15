@@ -9,9 +9,9 @@ import { Probable, SessionProcessor } from '~/server_types';
 const serverName = String(process.env.SERVER_NAME);
 
 export class EnrolmentProcessor implements Unique<SessionProcessor> {
-    enrolmentState: EnrolmentStateHandler;
-    transmitEnrolment: (color: PlayerColor, socketId: string) => void;
-    transmitColorChange: (newColor: PlayerColor, socketId: string) => void;
+    private enrolmentState: EnrolmentStateHandler;
+    private transmitEnrolment: (color: PlayerColor, socketId: string) => void;
+    private transmitColorChange: (newColor: PlayerColor, socketId: string) => void;
 
     constructor(
         state: EnrolmentState,
