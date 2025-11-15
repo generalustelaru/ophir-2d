@@ -1003,24 +1003,24 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass(orderedCargo);
     }
 
-    private unloadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
-        const itemIndex = cargo.indexOf(item);
+    private unloadItem(pool: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
+        const itemIndex = pool.indexOf(item);
 
         if (itemIndex === -1)
-            return lib.fail(`Cannot find [${item}] in cargo!`);
+            return lib.fail(`Cannot find [${item}] in item pool!`);
 
-        cargo.splice(itemIndex, 1, 'empty');
+        pool.splice(itemIndex, 1, 'empty');
 
         const metals: Array<ItemName> = ['gold', 'silver'];
 
         if (metals.includes(item)) {
-            cargo.splice(itemIndex + 1, 1, 'empty');
+            pool.splice(itemIndex + 1, 1, 'empty');
             this.playState.returnMetal(item as Metal);
         } else {
             this.playState.returnTradeGood(item as TradeGood);
         }
 
-        return lib.pass(cargo);
+        return lib.pass(pool);
     }
 
     private subtractTradeGoods(minuend: Array<ItemName>, subtrahend: Array<ItemName>): Probable<Array<ItemName>> {
