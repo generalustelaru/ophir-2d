@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { MarketFluctuations, MarketSlotKey, MarketOffer, Action, Unique, SpecialistName } from '~/shared_types';
+import { MarketFluctuations, MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
 import { MarketDeck, MarketCardSlot } from '.';
 
 const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
