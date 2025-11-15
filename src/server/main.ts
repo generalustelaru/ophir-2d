@@ -111,12 +111,15 @@ loadGameState().then(data => {
     const savedState = PERSIST_SESSION && data
         ? validator.validateStateFile(data)
         : null;
-
-    singleSession = new GameSession(
-        broadcastCallback,
-        transmitCallback,
-        savedState,
-    );
+    try {
+        singleSession = new GameSession(
+            broadcastCallback,
+            transmitCallback,
+            savedState,
+        );
+    } catch (error) {
+        console.error('Failed to launch game session', { error });
+    }
 });
 
 socketServer.on('connection', function connection(socket) {
