@@ -53,22 +53,24 @@ export class CanvasService extends Communicator {
 
         const segmentWidth = this.stage.width() / 4;
 
+        // Common modals
         this.donateGoodsModal = new DonateGoodsModal(this.stage);
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.endTurnModal = new EndTurnModal(this.stage);
-        this.startTurnModal = new StartTurnModal(this.stage);
-        this.forceTurnModal = new ForceTurnModal(this.stage);
         this.sailAttemptModal = new SailAttemptModal(this.stage);
         this.rivalControlModal = new RivalControlModal(this.stage);
         this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
 
-        const donateGoodsCallback = (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); };
-
+        // Specialist modals
         this.advisorModal = new AdvisorModal(
             this.stage,
-            donateGoodsCallback,
+            (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
         );
         this.chancellorModal = new ChancellorModal(this.stage);
+
+        // Notification modals 
+        this.startTurnModal = new StartTurnModal(this.stage);
+        this.forceTurnModal = new ForceTurnModal(this.stage);
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -79,7 +81,7 @@ export class CanvasService extends Communicator {
                 y: 0,
             },
             (slot: MarketSlotKey) => { this.sellGoodsModal.show(slot); },
-            donateGoodsCallback,
+            (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
             () => { this.advisorModal.show(); },
             (slot: MarketSlotKey) => { this.chancellorModal.show(slot); },
         ); // locationGroup covers 1 segment, sitting on the left
