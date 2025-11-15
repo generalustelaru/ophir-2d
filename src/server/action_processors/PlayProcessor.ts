@@ -452,7 +452,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail('Not enough favor to substitute ommisions');
 
         const trade = this.playState.getMarketTrade(slot);
-        const payable = this.subtractTradeGoods(trade.request, omit);
+        const payable = this.subtractTradeGoods(trade.request, omit, false);
 
         if(payable.err)
             return lib.fail('Ommited items are not included in request');
@@ -462,16 +462,16 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if(cargo.err)
             return lib.fail(cargo.message);
 
+        const reward = trade.reward.coins + this.playState.getFluctuation(slot);
+
         player.setCargo(cargo.data);
         player.spendFavor(omit.length);
-        player.gainCoins(trade.reward.coins);
+        player.gainCoins(reward);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
         player.removeAction(Action.sell_as_chancellor);
         player.clearMoves();
 
-        const reward = trade.reward.coins;
-
-        const coinForm = trade.reward.coins === 1 ? 'coin' : 'coins';
+        const coinForm = reward === 1 ? 'coin' : 'coins';
         this.privateState.addDeed({
             context: action,
             description: (
@@ -1003,18 +1003,24 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass(orderedCargo);
     }
 
-    private unloadItem(pool: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
+    private unloadItem(pool: Array<ItemName>, item: ItemName, isPlayerCargo: boolean = true): Probable<Array<ItemName>> {
         const itemIndex = pool.indexOf(item);
+
+        const strip = (items: Array<ItemName>, index: number, useEmpty: boolean) => {
+            useEmpty
+                ? items.splice(index, 1, 'empty')
+                : items.splice(index, 1);
+        };
 
         if (itemIndex === -1)
             return lib.fail(`Cannot find [${item}] in item pool!`);
 
-        pool.splice(itemIndex, 1, 'empty');
+        strip(pool, itemIndex, isPlayerCargo);
 
         const metals: Array<ItemName> = ['gold', 'silver'];
 
         if (metals.includes(item)) {
-            pool.splice(itemIndex + 1, 1, 'empty');
+            strip(pool, itemIndex + 1, isPlayerCargo);
             this.playState.returnMetal(item as Metal);
         } else {
             this.playState.returnTradeGood(item as TradeGood);
@@ -1023,9 +1029,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass(pool);
     }
 
-    private subtractTradeGoods(minuend: Array<ItemName>, subtrahend: Array<ItemName>): Probable<Array<ItemName>> {
+    private subtractTradeGoods(
+        minuend: Array<ItemName>,
+        subtrahend: Array<ItemName>,
+        isPlayerCargo: boolean = true,
+    ): Probable<Array<ItemName>> {
         for (const tradeGood of subtrahend) {
-            const subtractionResult = this.unloadItem(minuend, tradeGood);
+            const subtractionResult = this.unloadItem(minuend, tradeGood, isPlayerCargo);
 
             if (subtractionResult.err)
                 return subtractionResult;
