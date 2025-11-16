@@ -63,4 +63,7 @@ If that doesn't work, input `reset` in the running server's CLI or make a reques
 
  With two players, a third ship is added. Players must move it during their turn when they enter its zone.
 
- There's a decent amount of rules to Ophir. Refer to the included RULES.md document for details. You can also play by following your intuition. The rules are enforced. You can't cheat, only make mistakes.
+ There's a decent amount of rules to Ophir. To learn more you can:
+ - Watch this [how-to-play video](https://youtu.be/pJrDOh6HadI?si=ZOGegm3W-7GWgNP1) from the Dice Tower YouTube channel.
+ - Examine to the included [RULES.md](https://github.com/generalustelaru/ophir-2d/blob/main/RULES.md) document.
+ - Follow your intuition. The rules are enforced. You can't cheat, only make mistakes.
