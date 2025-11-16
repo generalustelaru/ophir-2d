@@ -3,7 +3,6 @@ import { Action, Coordinates, ItemName } from '~/shared_types';
 import { ActionButton } from '../popular';
 import clientConstants from '~/client_constants';
 
-
 const { CARGO_ITEM_DATA } = clientConstants;
 
 export class CargoToken extends ActionButton {
@@ -30,7 +29,7 @@ export class CargoToken extends ActionButton {
         this.group.height(this.path.height());
 
         this.group.add(this.path);
-        this.setEnabled(true);
+        this.setEnabled(isClickable);
     }
 
     public getElement(): Konva.Group {

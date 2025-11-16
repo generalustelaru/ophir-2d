@@ -133,6 +133,11 @@ export type PlayerSelection = Omit<PlayerDraft, 'turnToPick'> & {
     specialist: SelectableSpecialist,
 }
 
+export type FeasibleTrade = {
+    slot: MarketSlotKey,
+    missing: Array<TradeGood>
+}
+
 export type Player = Omit<PlayerSelection, 'specialist'> & {
     timeStamp: number,
     isIdle: boolean,
@@ -151,7 +156,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     destinations: Array<ZoneName>,
     navigatorAccess: Array<ZoneName>,
     cargo: Array<ItemName>,
-    feasibleTrades: Array<MarketSlotKey>,
+    feasibleTrades: Array<FeasibleTrade>,
     feasiblePurchases: Array<MetalPurchasePayload>,
     coins: number,
     turnPurchases: number,

@@ -43,8 +43,8 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         const advisorPlayer = state.players.find(p => p.specialist.name == SpecialistName.advisor);
 
         this.advisorTrades = (advisorPlayer
-            ? advisorPlayer.feasibleTrades.map((key): DonationItem => {
-                return { slot: key, trade: state.market[key] };
+            ? advisorPlayer.feasibleTrades.map((feasible): DonationItem => {
+                return { slot: feasible.slot, trade: state.market[feasible.slot] };
             }) : []
         );
     }

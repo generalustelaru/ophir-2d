@@ -1,6 +1,6 @@
 import {
-    Action, CargoMetal, DiceSix, ItemName, LocalAction, MarketSlotKey, Player, PlayerColor, ShipBearings, ZoneName,
-    Specialist, SpecialistName, MetalPurchasePayload, Unique,
+    Action, CargoMetal, DiceSix, ItemName, LocalAction, Player, PlayerColor, ShipBearings, ZoneName,
+    Specialist, SpecialistName, MetalPurchasePayload, Unique, FeasibleTrade,
 } from '~/shared_types';
 import { ActionsAndDetails, ObjectHandler, PlayerIdentity } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
@@ -29,7 +29,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     private destinations: ArrayWritable<ZoneName>;
     private navigatorAccess: ArrayWritable<ZoneName>;
     private cargo: ArrayWritable<ItemName>;
-    private feasibleTrades: ArrayWritable<MarketSlotKey>;
+    private feasibleTrades: ArrayWritable<FeasibleTrade>;
     private feasiblePurchases: ArrayWritable<MetalPurchasePayload>;
     private coins: Writable<number>;
     private turnPurchases: Writable<number>;
@@ -308,7 +308,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.cargo.overwrite(cargo);
     }
 
-    public setTrades(trades: Array<MarketSlotKey>) {
+    public setTrades(trades: Array<FeasibleTrade>) {
         this.feasibleTrades.overwrite(trades);
     }
 

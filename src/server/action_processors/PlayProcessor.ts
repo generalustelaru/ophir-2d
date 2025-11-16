@@ -1,7 +1,7 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
-    StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction,
-    MetalPurchasePayload, Unique,
+    StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, MetalPurchasePayload,
+    Unique, FeasibleTrade,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -385,7 +385,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         if (lib.checkConditions([
             player.hasAction(Action.sell_goods),
-            player.getTrades().includes(slot),
+            player.getTrades().map(t => t.slot).includes(slot),
         ]).err) {
             return lib.fail(`${name} cannnot sell goods`);
         }
@@ -1044,13 +1044,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass(minuend);
     }
 
-    private pickFeasibleTrades(player: PlayerHandler): Array<MarketSlotKey> {
+    private pickFeasibleTrades(player: PlayerHandler): Array<FeasibleTrade> {
         const cargo = player.getCargo();
         const market = this.playState.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
 
         const slots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
-        const feasible: Array<MarketSlotKey> = [];
+        const feasible: Array<FeasibleTrade> = [];
 
         slots.forEach(key => {
             const unfilledGoods = market[key].request;
@@ -1071,10 +1071,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
             if (player.isChancellor()) { // TODO: (Chancellor) have the modal Accept button switchable on/off for this
                 if (player.getFavor() - unfilledGoods.length >= 0) {
-                    feasible.push(key);
+                    feasible.push({ slot: key, missing: unfilledGoods });
                 }
             } else if (unfilledGoods.length === 0) {
-                feasible.push(key);
+                feasible.push({ slot: key, missing: [] });
             }
         });
 
@@ -1132,10 +1132,18 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                     return !!specialty && player.getCargo().includes(specialty);
 
                 case Action.donate_goods:
-                    return player.isAdvisor()
-                        ? trades.length
-                        : trades.includes(this.playState.getTempleTradeSlot());
-
+                    return (() => {
+                        const templeSlot = this.playState.getTempleTradeSlot();
+                        const templeFeasible = trades.find(f => f.slot == templeSlot);
+                        switch (true) {
+                            case player.isAdvisor():
+                                return trades.length;
+                            case player.isChancellor():
+                                return templeFeasible?.missing.length == 0;
+                            default:
+                                return !!templeFeasible;
+                        }
+                    })();
                 case Action.donate_metal:
                     return player.getCargo()
                         .filter(item => ['silver', 'gold'].includes(item))

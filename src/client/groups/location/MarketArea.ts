@@ -137,7 +137,9 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         const cardSlots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
 
         cardSlots.forEach(slot => {
-            const isFeasible = localPLayerMaySell && localPlayer.feasibleTrades.includes(slot);
+            const isFeasible =
+                localPLayerMaySell
+                && localPlayer.feasibleTrades.map(f => f.slot).includes(slot);
             this[slot].update({
                 trade: data.marketOffer[slot],
                 isFeasible,

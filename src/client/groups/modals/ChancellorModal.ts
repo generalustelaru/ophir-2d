@@ -1,14 +1,22 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { DynamicModalInterface } from '~/client/client_types';
-import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique } from '~/shared_types';
-import { CoinDial } from '../popular';
+import {
+    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, TradeGood, Unique,
+} from '~/shared_types';
+import { CoinDial, ItemRow } from '../popular';
+import clientConstants from '~/client_constants';
+
+const { COLOR } = clientConstants;
 
 export class ChancellorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private description: Konva.Text;
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
-    private playerFavor: number = 0;
+    // private playerFavor: number = 0;
+    private playerFeasibles: Array<FeasibleTrade> = [];
+    // private playerGoods: Array<TradeGood> = [];
+    private itemRow: ItemRow;
     private coinDial: CoinDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -19,6 +27,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 submitLabel: 'Accept',
                 dismissLabel: 'Cancel',
             },
+            { width: 340, height: 180 },
         );
 
         this.description = new Konva.Text({
@@ -30,6 +39,29 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             fontFamily: 'Custom',
         });
 
+        const colon = new Konva.Text({
+            text: ':',
+            width: this.contentGroup.width(),
+            align: 'center',
+            y: 65,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+            fill: COLOR.boneWhite,
+        });
+
+        this.itemRow = new ItemRow(
+            stage,
+            {
+                width: 50,
+                height: 30,
+                x: 30,
+                y: 65,
+            },
+            30,
+            true,
+        );
+
         this.coinDial = new CoinDial(
             {
                 x: 215,
@@ -38,32 +70,66 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             0,
         );
 
-        this.contentGroup.add(this.description, this.coinDial.getElement());
+        this.contentGroup.add(...[
+            this.description,
+            colon,
+            this.itemRow.getElement(),
+            this.coinDial.getElement(),
+        ]);
     }
 
     public update(state: PlayState) {
         const chancellorPlayer = state.players.find(p => {
             return p.specialist.name == SpecialistName.chancellor;
         });
-        chancellorPlayer && (this.playerFavor = chancellorPlayer.favor);
+
+        if (!chancellorPlayer)
+            return;
+
         this.market = state.market;
         this.fluctuations = state.setup.marketFluctuations;
+        this.playerFeasibles = chancellorPlayer.feasibleTrades;
     }
 
     public show(slot: MarketSlotKey) {
         if (!this.market || !this.fluctuations)
             throw new Error('Cannot render modal! Update data is missing.');
-        this.description.text((()=> {
-            const goods = this.playerFavor > 1 ? 'goods' : 'good';
-            return this.playerFavor
-                ? `You may substitute up to ${this.playerFavor} ${goods} with favor.`
-                : 'You have no favor to spare.';
+
+        const feasible = this.playerFeasibles.find(f => f.slot == slot);
+
+        if (!feasible)
+            throw new Error('Cannot render modal! Current trade not feasible');
+
+        this.description.text((() => {
+            const missingCount = feasible.missing.length;
+            const enumeration = (() => {
+                switch (missingCount) {
+                    case 0: return '';
+                    case 1: return feasible.missing[0];
+                    default: return feasible.missing.reduce(
+                        (acc, current, i) => {
+                            switch (missingCount - 1) {
+                                case i + 1: return acc + `${current}, and `;
+                                case i: return acc + current;
+                                default: return acc + `${current}, `;
+                            }
+                        },
+                        '',
+                    );
+                }
+            })();
+            return missingCount
+                ? `You will need to substitute ${enumeration} with ${missingCount} favor.`
+                : 'You have all the goods needed for this trade';
         })());
+
         const trade = this.market[slot];
+        this.itemRow.update(trade.request);
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
+
         this.open({
             action: Action.sell_as_chancellor,
-            payload: { slot, omit: [] },
+            payload: { slot, omit: feasible.missing },
         });
     }
-}// { slot: MarketSlotKey, omit: Array<TradeGood> }
+}
