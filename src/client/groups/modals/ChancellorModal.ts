@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { DynamicModalInterface } from '~/client/client_types';
 import {
-    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, TradeGood, Unique,
+    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
 } from '~/shared_types';
 import { CoinDial, ItemRow } from '../popular';
 import clientConstants from '~/client_constants';
@@ -102,20 +102,14 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
 
         this.description.text((() => {
             const missingCount = feasible.missing.length;
+            const m = feasible.missing;
             const enumeration = (() => {
                 switch (missingCount) {
                     case 0: return '';
-                    case 1: return feasible.missing[0];
-                    default: return feasible.missing.reduce(
-                        (acc, current, i) => {
-                            switch (missingCount - 1) {
-                                case i + 1: return acc + `${current}, and `;
-                                case i: return acc + current;
-                                default: return acc + `${current}, `;
-                            }
-                        },
-                        '',
-                    );
+                    case 1: return m[0];
+                    case 2: return `${m[0]} and ${m[1]}`;
+                    case 3: return `${m[0]}, ${m[1]}, and ${m[2]}`;
+                    default: throw new Error('Cannot render moda! Missing goods exceeds requirement potential');
                 }
             })();
             return missingCount
