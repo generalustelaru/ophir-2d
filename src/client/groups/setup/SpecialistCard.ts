@@ -62,9 +62,9 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
             ...textCommon,
             width: layout.width,
             text: specialist.description,
-            fontSize: 21,
+            fontSize: 22,
+            padding: 3,
             y: 70,
-            x: 3,
         });
 
         const favorDial = new FavorDial({ x: 5, y: 240 }, specialist.startingFavor);
