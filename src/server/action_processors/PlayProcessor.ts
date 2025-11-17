@@ -945,7 +945,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return defaultActions;
     }
 
-    private getPositionalActions(player: PlayerHandler): LocalAction[] {
+    private getSpecialistActions(player: PlayerHandler): LocalAction[] {
         const currentZone = player.getBearings().seaZone;
         const currentLocation = this.playState.getLocationName(currentZone);
 
@@ -1120,7 +1120,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         const actionsByLocation = (
             this.getDefaultActions(player)
-                .concat(this.getPositionalActions(player))
+                .concat(this.getSpecialistActions(player))
                 .filter(a =>
                     !this.privateState.getSpentActions().includes(a),
                 )
@@ -1156,6 +1156,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                                 return !!templeFeasible;
                         }
                     })();
+
                 case Action.donate_metal:
                     return player.getCargo()
                         .filter(item => ['silver', 'gold'].includes(item))
@@ -1171,7 +1172,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 case Action.load_good:
                     const { location } = player.getBearings();
                     return (
-                        ['quarry' , 'forest', 'mines', 'farms'].includes(location)
+                        ['quarry', 'forest', 'mines', 'farms'].includes(location)
                         && player.hasCargoRoom(1)
                         && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
                     );
