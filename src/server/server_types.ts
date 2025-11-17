@@ -105,7 +105,6 @@ export type BackupState = {
 }
 
 export type DataDigest = {
-    action: Action,
     player: PlayerHandler,
     payload: MessagePayload
 }

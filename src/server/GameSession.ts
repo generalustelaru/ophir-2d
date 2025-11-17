@@ -344,7 +344,7 @@ export class GameSession {
         const playerHandler = new PlayerHandler(player);
         playerHandler.refreshTimeStamp();
 
-        const digest: DataDigest = { player: playerHandler, action, payload };
+        const digest: DataDigest = { player: playerHandler, payload };
 
         if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action))
             return this.issueNominalResponse(lib.errorResponse(

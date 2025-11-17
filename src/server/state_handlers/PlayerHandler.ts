@@ -37,11 +37,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     /**
      * @throws Instantiation error
      */
-    constructor(player: Player | null) {
-
-        if (!player)
-            throw new Error('Cannot instantiate handler: Missing player data.');
-
+    constructor(player: Player) {
         this.socketId = writable(player.socketId);
         this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);
@@ -265,7 +261,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     public registerMetalPurchase() {
         this.turnPurchases.update(count => ++count);
     }
-    public mayBuyMetal() {
+    public mayBuyMetal() { // TODO: try removing hasAction() checks and use addSpentAction() instead where needed.
         return (this.hasAction(Action.buy_metal) && this.hasCargoRoom(2) && this.turnPurchases.get() < 2);
     }
 
@@ -353,8 +349,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.localActions.clear();
     }
 
-    public unfreeze(actionData: ActionsAndDetails, rivalZone: ZoneName) {
-        this.setActionsAndDetails(actionData);
+    public unfreeze(rivalZone: ZoneName) {
         this.destinations.removeOne(rivalZone);
         this.isHandlingRival.set(false);
     }

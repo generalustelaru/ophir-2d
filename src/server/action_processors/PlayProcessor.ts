@@ -92,7 +92,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: MOVE
     public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
-        const { player, payload, action } = digest;
+        const { player, payload } = digest;
         this.preserveState(player);
 
         const movementPayload = validator.validateMovementPayload(payload);
@@ -122,7 +122,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 this.privateState.getDestinations(target),
             );
 
-            return this.continueTurn(player);
+            return this.continueTurn(player, false);
         }
 
         const playerMovementLegal = player.isDestinationValid(target);
@@ -142,7 +142,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
             if (player.isBarrierCrossing(target)) {
                 this.privateState.addDeed({
-                    context: action,
+                    context: Action.move,
                     description: `used hidden passage to reach the ${locationName}`,
                 });
 
@@ -157,12 +157,12 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 : 0;
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
-                this.privateState.addDeed({ context: action, description: `sailed to the ${locationName}` });
+                this.privateState.addDeed({ context: Action.move, description: `sailed to the ${locationName}` });
 
                 return true;
             }
 
-            this.wipeState(player);
+            this.clearUndo(player);
 
             const influenceRoll = ((): DiceSix => {
                 player.rollInfluence();
@@ -182,7 +182,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
             if (!blockingPlayers.length && influenceRoll >= rivalInfluence) {
                 this.privateState.addDeed({
-                    context: action,
+                    context: Action.move,
                     description: `exerted influence to reach the ${locationName}`,
                 });
 
@@ -244,9 +244,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return this.endTurn(digest, false);
         }
 
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-
-        return this.continueTurn(player);
+        return this.continueTurn(player, hasSailed && !player.isFrozen());
     }
 
     // MARK: REPOSITION
@@ -268,7 +266,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             this.backupState.saveRepositioning(player.getIdentity().color, position);
         }
 
-        return this.continueTurn(player);
+        return this.continueTurn(player, false);
     }
 
     public repositionOpponent(data: DataDigest): Probable<StateResponse> {
@@ -280,35 +278,34 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         const { color, repositioning } = validation.data;
 
-        try { // TODO: since PlayerHadler can now throw, check and adapt the other instances.
-            const opponent = new PlayerHandler(this.playState.getPlayer(color));
-            opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
+        const opponentDto = this.playState.getPlayer(color);
 
-            return this.continueTurn(opponent);
-        } catch (error) {
-
+        if (!opponentDto)
             return lib.fail('Cannot find opponent in state.');
-        }
+
+        const opponent = new PlayerHandler(opponentDto);
+        opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
+
+        return this.continueTurn(opponent, false);
     }
 
     // MARK: FAVOR
     public spendFavor(data: DataDigest): Probable<StateResponse> {
-        const { player, action } = data;
+        const { player } = data;
         this.preserveState(player);
 
         if (!player.getFavor() || player.isPrivileged())
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        this.privateState.addDeed({ context: action, description: 'spent favor to obtain privileges' });
+        this.privateState.addDeed({ context: Action.spend_favor, description: 'spent favor to obtain privileges' });
 
         return this.continueTurn(player);
     }
 
     // MARK: DROP ITEM
     public dropItem(data: DataDigest): Probable<StateResponse> {
-        const { player, action, payload } = data;
+        const { player, payload } = data;
         this.preserveState(player);
 
         const dropPayload = validator.validateDropItemPayload(payload);
@@ -323,15 +320,14 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        this.privateState.addDeed({ context: action, description: `ditched ${item} from cargo` });
+        this.privateState.addDeed({ context: Action.drop_item, description: `ditched ${item} from cargo` });
 
         return this.continueTurn(player);
     }
 
     // MARK: LOAD GOOD
     public loadGood(data: DataDigest): Probable<StateResponse> {
-        const { action, payload, player } = data;
+        const { player, payload } = data;
         const { color } = player.getIdentity();
         this.preserveState(player);
 
@@ -362,8 +358,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         player.setCargo(loadItem.data);
         this.privateState.addSpentAction(Action.load_good);
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        this.privateState.addDeed({ context: action, description: `picked up ${localGood}` });
+        this.privateState.addDeed({ context: Action.load_good, description: `picked up ${localGood}` });
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -375,8 +370,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: SELL
     public sellGoods(data: DataDigest): Probable<StateResponse> {
-        const { player, action, payload } = data;
-        this.wipeState(player);
+        const { player, payload } = data;
+        this.clearUndo(player);
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
         if (!marketSlotPayload)
@@ -409,10 +404,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (moneyChangerAtTemple)
             this.privateState.addSpentAction(Action.donate_goods);
 
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-
         this.privateState.addDeed({
-            context: action,
+            context: Action.sell_goods,
             description: (
                 `${moneyChangerAtTemple ? 'accessed the market and ' : ''}`
                 + `traded for ${reward === 0 ? 'naught' : `${reward} ${reward === 1 ? 'coin' : 'coins'}`}`
@@ -436,10 +429,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     public sellAsChancellor(data: DataDigest): Probable<StateResponse> {
-        const { player, action, payload } = data;
-        this.wipeState(player);
+        const { player, payload } = data;
+        this.clearUndo(player);
 
-        if (player.getSpecialist().name != SpecialistName.chancellor)
+        if (!player.hasAction(Action.sell_as_chancellor))
             return lib.fail('Only chancellor may sell favor as goods.');
 
         const chancellorPayload = validator.validateChancellorPurchasePayload(payload);
@@ -471,12 +464,11 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         player.spendFavor(omit.length);
         player.gainCoins(reward);
         this.privateState.addSpentAction(Action.sell_as_chancellor);
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
         player.clearMoves();
 
         const coinForm = reward === 1 ? 'coin' : 'coins';
         this.privateState.addDeed({
-            context: action,
+            context: Action.sell_as_chancellor,
             description: (
                 omit.length ? `spent ${omit.length} favor and ` : ''
                 + `traded for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`),
@@ -495,8 +487,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: DONATE
     public donateGoods(data: DataDigest): Probable<StateResponse> {
-        const { player, action, payload } = data;
-        this.wipeState(player);
+        const { player, payload } = data;
+        this.clearUndo(player);
         const marketSlotPayload = validator.validateMarketSlotPayload(payload);
 
         if (!marketSlotPayload)
@@ -524,15 +516,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (player.isMoneychanger())
             this.privateState.addSpentAction(Action.sell_goods);
 
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
         else
             player.clearMoves();
 
         this.privateState.updatePlayerStats(player, reward);
-        this.privateState.addDeed({ context: action, description: `donated goods for ${reward} favor and VP` });
+        this.privateState.addDeed({ context: Action.donate_goods, description: `donated goods for ${reward} favor and VP` });
         console.info(this.privateState.getGameStats());
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
@@ -550,7 +540,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: SPECIALTY
     public sellSpecialty(data: DataDigest): Probable<StateResponse> {
-        const { player, action } = data;
+        const { player } = data;
         this.preserveState(player);
         const specialty = player.getSpecialty();
 
@@ -569,11 +559,11 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             if (player.isMoneychanger() && player.getBearings().location === 'temple') {
                 this.privateState.addSpentAction(Action.donate_goods);
                 this.privateState.addDeed({
-                    context: action,
+                    context: Action.sell_specialty,
                     description: `accessed the market and sold ${specialty} for 1 coin`,
                 });
             } else {
-                this.privateState.addDeed({ context: action, description: `sold ${specialty} for 1 coin` });
+                this.privateState.addDeed({ context: Action.sell_specialty, description: `sold ${specialty} for 1 coin` });
             }
 
 
@@ -581,8 +571,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 this.updateMovesAsHarbormaster(player);
             else
                 player.clearMoves();
-
-            player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
             return this.continueTurn(player);
         }
@@ -592,7 +580,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: BUY METAL
     public buyMetal(data: DataDigest): Probable<StateResponse> {
-        const { player, action, payload } = data;
+        const { player, payload } = data;
         this.preserveState(player);
         const { name } = player.getIdentity();
         const purchasePayload = validator.validateMetalPurchasePayload(payload);
@@ -631,7 +619,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         player.setCargo(metalLoad.data);
         player.registerMetalPurchase();
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -639,7 +626,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             player.clearMoves();
 
         this.privateState.addDeed({
-            context: action,
+            context: Action.buy_metal,
             description: `bought ${metal} for ${metalCost[currency]} ${currency}`,
         });
 
@@ -648,7 +635,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: DONATE METAL
     public donateMetal(data: DataDigest): Probable<StateResponse> {
-        const { player, action, payload } = data;
+        const { player, payload } = data;
         this.preserveState(player);
         const { color, name } = player.getIdentity();
         const donationPayload = validator.validateMetalDonationPayload(payload);
@@ -676,11 +663,11 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const reward = metal === 'gold' ? 10 : 5;
         this.privateState.updatePlayerStats(player, reward);
 
-        if (player.isPostmaster() && player.getBearings().location != 'temple') {
-            this.privateState.addDeed({ context: action, description: `mailed ${metal} for ${reward} VP` });
-        } else {
-            this.privateState.addDeed({ context: action, description: `donated ${metal} for ${reward} VP` });
-        }
+        const isMailing = player.isPostmaster() && player.getBearings().location != 'temple';
+        this.privateState.addDeed({
+            context: Action.donate_metal,
+            description: `${isMailing ? 'mailed' : 'donated'} ${metal} for ${reward} VP`,
+        });
 
         this.transmitVp(
             this.privateState.getPlayerVictoryPoints(color),
@@ -719,15 +706,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             this.addServerMessage('Current temple level is complete. Metal costs increase.');
         }
 
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-
         return this.continueTurn(player);
     }
 
     // MARK: END TURN
     public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
-        const { player, action } = data;
-        this.wipeState(player);
+        const { player } = data;
+        this.clearUndo(player);
         const { turnOrder, socketId } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
@@ -738,7 +723,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             && player.getSpecialistName() === SpecialistName.priest
             && isVoluntary
         ) {
-            this.privateState.addDeed({ context: action, description: 'gained 1 Favor for remaining at the temple' });
+            this.privateState.addDeed({
+                context: Action.end_turn,
+                description: 'gained 1 Favor for remaining at the temple',
+            });
             player.gainFavor(1);
         }
         this.addServerMessage(this.convertDeedsToMessage(player), player.getIdentity().color);
@@ -786,7 +774,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: RIVAL TURN
     public endRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
-        const { player, action } = digest;
+        const { player } = digest;
         const rival = this.playState.getRivalData();
 
         if (!rival.isIncluded)
@@ -813,28 +801,29 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             if (marketShift.err)
                 return lib.fail(marketShift.message);
 
-            this.privateState.addDeed({ context: action, description: 'sent it to the market, cycled it' });
+            this.privateState.addDeed({
+                context: Action.end_rival_turn,
+                description: 'sent it to the market, cycled it',
+            });
 
             if (marketShift.data.hasGameEnded)
                 this.playState.registerGameEnd(marketShift.data.countables);
         } else {
-            this.privateState.addDeed({ context: action, description: `sent it to the ${rivalLocation}` });
+            this.privateState.addDeed({
+                context: Action.end_rival_turn,
+                description: `sent it to the ${rivalLocation}`,
+            });
         }
 
-        this.wipeState(player);
-
-        player.unfreeze(
-            this.determineActionsAndDetails(player),
-            rival.bearings.seaZone,
-        );
-
+        this.clearUndo(player);
+        player.unfreeze(rival.bearings.seaZone);
 
         return this.continueTurn(player);
     }
 
     // MARK: FORCED TURN
     public forceTurn(digest: DataDigest): Probable<StateResponse> {
-        const { player, action } = digest;
+        const { player } = digest;
 
         if (player.isActivePlayer())
             return lib.fail('Active player cannot force own turn!');
@@ -859,7 +848,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             player.getIdentity().color,
         );
 
-        return this.endTurn({ player: idlerHandler, action, payload: null }, false);
+        return this.endTurn({ player: idlerHandler, payload: null }, false);
     }
 
     // MARK: UNDO
@@ -897,15 +886,17 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: UPGRADE
     public upgradeCargo(data: DataDigest): Probable<StateResponse> {
-        const { player, action } = data;
+        const { player } = data;
         this.preserveState(player);
 
         if (player.mayUpgradeCargo()) {
             player.spendCoins(2);
             player.addCargoSpace();
-            this.privateState.addDeed({ context: action, description: 'bought a cargo slot' });
+            this.privateState.addDeed({
+                context: Action.upgrade_cargo,
+                description: 'bought a cargo slot',
+            });
             this.privateState.addSpentAction(Action.upgrade_cargo);
-            player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
             if (player.isHarbormaster())
                 this.updateMovesAsHarbormaster(player);
@@ -1240,7 +1231,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass({ hasGameEnded: false, countables: [] });
     }
 
-    private continueTurn(player: PlayerHandler): Probable<StateResponse> {
+    private continueTurn(player: PlayerHandler, updateActions: boolean = true): Probable<StateResponse> {
+        updateActions && player.setActionsAndDetails(this.determineActionsAndDetails(player));
         this.playState.savePlayer(player.toDto());
 
         return lib.pass({ state: this.playState.toDto() });
@@ -1286,7 +1278,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         player.enableUndo();
     }
 
-    private wipeState(player: PlayerHandler) {
+    private clearUndo(player: PlayerHandler) {
         this.backupState.wipeBackup();
         player.disableUndo();
     }
