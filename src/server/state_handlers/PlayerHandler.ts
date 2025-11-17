@@ -163,10 +163,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         }
     }
 
-    public removeAction(action: LocalAction) {
-        this.localActions.removeOne(action);
-    }
-
     public spendMove() {
         this.moveActions.update(a => --a);
     }

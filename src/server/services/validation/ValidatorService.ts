@@ -61,6 +61,7 @@ class ValidatorService {
                     { key: 'tradeDeck', type: 'array', nullable: false }, // Array<Trade>;
                     { key: 'costTiers', type: 'array', nullable: false }, // Array<ExchangeTier>;
                     { key: 'gameStats', type: 'array', nullable: false }, // Array<PlayerCountables>;
+                    { key: 'playerSpentActions', type: 'array', 'nullable': false }, // Array<LocalAction>
                 ],
             );
 

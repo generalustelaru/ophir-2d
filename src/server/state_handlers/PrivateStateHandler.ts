@@ -1,4 +1,4 @@
-import { Trade, ExchangeTier, ZoneName, PlayerColor, Unique } from '~/shared_types';
+import { Trade, ExchangeTier, ZoneName, PlayerColor, Unique, LocalAction } from '~/shared_types';
 import { ObjectHandler, PlayerCountables, PrivateState, DestinationPackage, Deed } from '~/server_types';
 import { ArrayWritable, arrayWritable, ArrayReadable, arrayReadable, Writable, writable } from './library';
 import { PlayerHandler } from './PlayerHandler';
@@ -12,6 +12,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
     private costTiers: ArrayWritable<ExchangeTier>;
     private gameStats: ArrayWritable<PlayerCountables>;
     private turnSummary: Writable<Array<Deed>>;
+    private playerSpentActions: ArrayWritable<LocalAction>;
     private gameTempleLevels: number;
 
     constructor(privateState: PrivateState) {
@@ -20,6 +21,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
         this.costTiers = arrayWritable(privateState.costTiers,'templeLevel');
         this.gameStats = arrayWritable(privateState.gameStats,'color');
         this.turnSummary = writable(privateState.turnSummary);
+        this.playerSpentActions = arrayWritable(privateState.playerSpentActions);
 
         this.gameTempleLevels = this.costTiers.count();
     }
@@ -31,6 +33,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
             costTiers: this.costTiers.get(),
             gameStats: this.gameStats.get(),
             turnSummary: this.turnSummary.get(),
+            playerSpentActions: this.playerSpentActions.get(),
         };
     }
 
@@ -101,5 +104,17 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
         this.turnSummary.set([]);
 
         return deeds;
+    }
+
+    public addSpentAction(action: LocalAction) {
+        this.playerSpentActions.addOne(action);
+    }
+
+    public getSpentActions() {
+        return this.playerSpentActions.get();
+    }
+
+    public clearSpentActions() {
+        this.playerSpentActions.clear();
     }
 }

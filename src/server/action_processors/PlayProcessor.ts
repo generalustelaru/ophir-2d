@@ -122,7 +122,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 this.privateState.getDestinations(target),
             );
 
-            return lib.pass(this.saveAndReturn(player));
+            return this.continueTurn(player);
         }
 
         const playerMovementLegal = player.isDestinationValid(target);
@@ -205,7 +205,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 position: movementPayload.position,
                 location: this.playState.getLocationName(target),
             });
-            player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
             if (player.getMoves() > 0) {
                 player.setDestinationOptions(
@@ -241,10 +240,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 context: TurnEvent.failed_turn,
                 description: 'also being out of moves--cannot act further',
             });
-            this.endTurn(digest, false);
+
+            return this.endTurn(digest, false);
         }
 
-        return lib.pass(this.saveAndReturn(player));
+        player.setActionsAndDetails(this.determineActionsAndDetails(player));
+
+        return this.continueTurn(player);
     }
 
     // MARK: REPOSITION
@@ -266,7 +268,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             this.backupState.saveRepositioning(player.getIdentity().color, position);
         }
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     public repositionOpponent(data: DataDigest): Probable<StateResponse> {
@@ -282,7 +284,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             const opponent = new PlayerHandler(this.playState.getPlayer(color));
             opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
 
-            return lib.pass(this.saveAndReturn(opponent));
+            return this.continueTurn(opponent);
         } catch (error) {
 
             return lib.fail('Cannot find opponent in state.');
@@ -301,7 +303,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
         this.privateState.addDeed({ context: action, description: 'spent favor to obtain privileges' });
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: DROP ITEM
@@ -324,7 +326,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
         this.privateState.addDeed({ context: action, description: `ditched ${item} from cargo` });
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: LOAD GOOD
@@ -359,8 +361,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(loadItem.message);
 
         player.setCargo(loadItem.data);
+        this.privateState.addSpentAction(Action.load_good);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        player.removeAction(Action.load_good);
         this.privateState.addDeed({ context: action, description: `picked up ${localGood}` });
 
         if (player.isHarbormaster())
@@ -368,7 +370,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         else
             player.clearMoves();
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: SELL
@@ -400,21 +402,22 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         player.setCargo(unloadResult.data);
         player.gainCoins(reward);
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        player.removeAction(Action.sell_goods);
+        this.privateState.addSpentAction(Action.sell_goods);
 
-        const coinForm = reward === 1 ? 'coin' : 'coins';
         const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location === 'temple';
+
+        if (moneyChangerAtTemple)
+            this.privateState.addSpentAction(Action.donate_goods);
+
+        player.setActionsAndDetails(this.determineActionsAndDetails(player));
+
         this.privateState.addDeed({
             context: action,
             description: (
                 `${moneyChangerAtTemple ? 'accessed the market and ' : ''}`
-                + `traded for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`
+                + `traded for ${reward === 0 ? 'naught' : `${reward} ${reward === 1 ? 'coin' : 'coins'}`}`
             ),
         });
-
-        if (moneyChangerAtTemple)
-            player.removeAction(Action.donate_goods);
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -429,7 +432,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (marketShift.data.hasGameEnded)
             this.playState.registerGameEnd(marketShift.data.countables);
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     public sellAsChancellor(data: DataDigest): Probable<StateResponse> {
@@ -467,8 +470,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         player.setCargo(cargo.data);
         player.spendFavor(omit.length);
         player.gainCoins(reward);
+        this.privateState.addSpentAction(Action.sell_as_chancellor);
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        player.removeAction(Action.sell_as_chancellor);
         player.clearMoves();
 
         const coinForm = reward === 1 ? 'coin' : 'coins';
@@ -487,7 +490,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (marketShift.data.hasGameEnded)
             this.playState.registerGameEnd(marketShift.data.countables);
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: DONATE
@@ -516,11 +519,12 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         player.gainFavor(reward);
         player.setCargo(unloadResult.data);
-        player.setActionsAndDetails(this.determineActionsAndDetails(player));
-        player.removeAction(Action.donate_goods);
+        this.privateState.addSpentAction(Action.donate_goods);
 
         if (player.isMoneychanger())
-            player.removeAction(Action.sell_goods);
+            this.privateState.addSpentAction(Action.sell_goods);
+
+        player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -541,7 +545,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (marketShift.data.hasGameEnded)
             this.playState.registerGameEnd(marketShift.data.countables);
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: SPECIALTY
@@ -558,13 +562,12 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
             player.setCargo(unload.data);
             player.gainCoins(1);
-            player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
             if (!player.getCargo().includes(specialty))
-                player.removeAction(Action.sell_specialty);
+                this.privateState.addSpentAction(Action.sell_specialty);
 
             if (player.isMoneychanger() && player.getBearings().location === 'temple') {
-                player.removeAction(Action.donate_goods);
+                this.privateState.addSpentAction(Action.donate_goods);
                 this.privateState.addDeed({
                     context: action,
                     description: `accessed the market and sold ${specialty} for 1 coin`,
@@ -573,12 +576,15 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 this.privateState.addDeed({ context: action, description: `sold ${specialty} for 1 coin` });
             }
 
+
             if (player.isHarbormaster())
                 this.updateMovesAsHarbormaster(player);
             else
                 player.clearMoves();
 
-            return lib.pass(this.saveAndReturn(player));
+            player.setActionsAndDetails(this.determineActionsAndDetails(player));
+
+            return this.continueTurn(player);
         }
 
         return lib.fail('Player does not meet conditions for selling specialty good.');
@@ -637,7 +643,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             description: `bought ${metal} for ${metalCost[currency]} ${currency}`,
         });
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: DONATE METAL
@@ -715,7 +721,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: END TURN
@@ -738,8 +744,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.addServerMessage(this.convertDeedsToMessage(player), player.getIdentity().color);
 
         player.deactivate();
+        this.privateState.clearSpentActions();
         this.privateState.updatePlayerStats(player);
-        console.info(this.privateState.getGameStats());
         this.playState.savePlayer(player.toDto());
 
         if(!isVoluntary)
@@ -775,7 +781,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const newPlayer = newPlayerResult.data;
         this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
 
-        return lib.pass(this.saveAndReturn(newPlayer));
+        return this.continueTurn(newPlayer);
     }
 
     // MARK: RIVAL TURN
@@ -823,7 +829,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         );
 
 
-        return lib.pass(this.saveAndReturn(player));
+        return this.continueTurn(player);
     }
 
     // MARK: FORCED TURN
@@ -886,7 +892,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (this.backupState.isEmpty())
             playerHandler.disableUndo();
 
-        return lib.pass(this.saveAndReturn(playerHandler));
+        return this.continueTurn(playerHandler);
     }
 
     // MARK: UPGRADE
@@ -897,16 +903,16 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (player.mayUpgradeCargo()) {
             player.spendCoins(2);
             player.addCargoSpace();
-            player.setActionsAndDetails(this.determineActionsAndDetails(player));
-            player.removeAction(Action.upgrade_cargo);
             this.privateState.addDeed({ context: action, description: 'bought a cargo slot' });
+            this.privateState.addSpentAction(Action.upgrade_cargo);
+            player.setActionsAndDetails(this.determineActionsAndDetails(player));
 
             if (player.isHarbormaster())
                 this.updateMovesAsHarbormaster(player);
             else
                 player.clearMoves();
 
-            return lib.pass(this.saveAndReturn(player));
+            return this.continueTurn(player);
         }
 
         return lib.fail('Conditions for upgrade not met.');
@@ -1112,7 +1118,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!player.isAnchored())
             return { actions: [], trades: [], purchases: [] };
 
-        const actionsByLocation = this.getDefaultActions(player).concat(this.getPositionalActions(player));
+        const actionsByLocation = (
+            this.getDefaultActions(player)
+                .concat(this.getPositionalActions(player))
+                .filter(a =>
+                    !this.privateState.getSpentActions().includes(a),
+                )
+        );
 
         const trades = this.pickFeasibleTrades(player);
         const purchases = this.pickFeasiblePurchases(player);
@@ -1227,10 +1239,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass({ hasGameEnded: false, countables: [] });
     }
 
-    private saveAndReturn(player: PlayerHandler): StateResponse {
+    private continueTurn(player: PlayerHandler): Probable<StateResponse> {
         this.playState.savePlayer(player.toDto());
 
-        return { state: this.playState.toDto() };
+        return lib.pass({ state: this.playState.toDto() });
     }
 
     private startIdleChecks(): void {
@@ -1301,6 +1313,5 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         });
 
         return `${message}.`;
-        // this.addServerMessage(`${message}.`, color);
     }
 }

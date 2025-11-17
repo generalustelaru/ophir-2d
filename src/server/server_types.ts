@@ -90,6 +90,7 @@ export type PrivateState = {
     costTiers: Array<ExchangeTier>,
     gameStats: Array<PlayerCountables>,
     turnSummary: Array<Deed>,
+    playerSpentActions: Array<LocalAction>
 }
 
 export type StateBundle = {
