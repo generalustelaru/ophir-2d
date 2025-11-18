@@ -187,6 +187,10 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         return this.getSpecialistName() === SpecialistName.advisor;
     }
 
+    public isPeddler() {
+        return this.getSpecialistName() == SpecialistName.peddler;
+    }
+
     public clearMoves() {
         this.moveActions.set(0);
     }
