@@ -10,7 +10,7 @@ import { EventType, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
-    EndRivalTurnModal, AdvisorModal, ChancellorModal,
+    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal,
 } from '../groups/modals/';
 
 export class CanvasService extends Communicator {
@@ -33,6 +33,7 @@ export class CanvasService extends Communicator {
     private endRivalTurnModal: EndRivalTurnModal;
     private advisorModal: AdvisorModal;
     private chancellorModal: ChancellorModal;
+    private peddlerModal: PeddlerModal;
 
     constructor() {
         super();
@@ -67,8 +68,9 @@ export class CanvasService extends Communicator {
             (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
         );
         this.chancellorModal = new ChancellorModal(this.stage);
+        this.peddlerModal = new PeddlerModal(this.stage);
 
-        // Notification modals 
+        // Notification modals
         this.startTurnModal = new StartTurnModal(this.stage);
         this.forceTurnModal = new ForceTurnModal(this.stage);
 
@@ -84,6 +86,7 @@ export class CanvasService extends Communicator {
             (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
             () => { this.advisorModal.show(); },
             (slot: MarketSlotKey) => { this.chancellorModal.show(slot); },
+            () => { this.peddlerModal.show(); },
         ); // locationGroup covers 1 segment, sitting on the left
 
         this.playerGroup = new PlayerGroup(
@@ -195,6 +198,7 @@ export class CanvasService extends Communicator {
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
+                    this.peddlerModal.initialize(state);
                     this.isPlayDrawn = true;
                 }
                 this.sellGoodsModal.update(state);
@@ -203,6 +207,7 @@ export class CanvasService extends Communicator {
                 this.rivalControlModal.update(state);
                 this.advisorModal.update(state);
                 this.chancellorModal.update(state);
+                this.peddlerModal.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);

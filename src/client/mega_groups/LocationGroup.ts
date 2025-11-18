@@ -14,6 +14,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private donateGoodsCallback: Function;
     private advisorOptionsCallback: Function;
     private chancellorOptionsCallback: Function;
+    private peddlerCallback: Function;
 
     constructor(
         stage: Konva.Stage,
@@ -22,11 +23,13 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         donateGoodsCallback: Function,
         advisorCallback: Function,
         chancellorCallback: Function,
+        peddlerCallback: Function,
     ) {
         this.sellGoodsCallback = sellGoodsCallback;
         this.donateGoodsCallback = donateGoodsCallback;
         this.advisorOptionsCallback = advisorCallback;
         this.chancellorOptionsCallback = chancellorCallback;
+        this.peddlerCallback = peddlerCallback;
 
         this.group = new Konva.Group({
             width: layout.width,
@@ -49,7 +52,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             p => p.color == localState.playerColor,
         )?.specialist.name || null;
 
-        const defaultCallback = (specialistName == SpecialistName.chancellor
+        const tradeCallback = (specialistName == SpecialistName.chancellor
             ? this.chancellorOptionsCallback
             : this.sellGoodsCallback
         );
@@ -67,8 +70,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 x: 0,
                 y: 0,
             },
-            defaultCallback,
-            null,
+            tradeCallback,
+            specialistName == SpecialistName.peddler ? this.peddlerCallback : null,
         );
 
         this.treasuryArea = new TreasuryArea(

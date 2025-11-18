@@ -72,7 +72,8 @@ const serverConstants: ServerConstants = {
             displayName: 'Peddler',
             startingFavor: 2,
             specialty: null,
-            description: 'Ignores one required trade good when completing a reduced value market trade.',
+            description: 'Still in development!'
+            // description: 'Ignores one required trade good when completing a reduced value market trade.',
         }, // TODO: implement Peddler
     ],
     TRADE_DECK_A: [

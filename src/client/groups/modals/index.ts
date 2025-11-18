@@ -8,3 +8,4 @@ export { ForceTurnModal } from './ForceTurnModal';
 export { EndRivalTurnModal } from './EndRivalTurnModal';
 export { AdvisorModal } from './AdvisorModal';
 export { ChancellorModal } from './ChancellorModal';
+export { PeddlerModal } from './PeddlerModal';
