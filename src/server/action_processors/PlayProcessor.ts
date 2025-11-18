@@ -372,7 +372,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     public sellGoods(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.clearUndo(player);
-        const marketSlotPayload = validator.validateMarketSlotPayload(payload);
+        const marketSlotPayload = validator.validateMarketPayload(payload);
 
         if (!marketSlotPayload)
             return lib.fail(lib.validationErrorMessage());
@@ -435,7 +435,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!player.hasAction(Action.sell_as_chancellor))
             return lib.fail('Only chancellor may sell favor as goods.');
 
-        const chancellorPayload = validator.validateChancellorPurchasePayload(payload);
+        const chancellorPayload = validator.validateChancellorPayload(payload);
 
         if(!chancellorPayload)
             return lib.fail(lib.validationErrorMessage());
@@ -489,7 +489,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     public donateGoods(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.clearUndo(player);
-        const marketSlotPayload = validator.validateMarketSlotPayload(payload);
+        const marketSlotPayload = validator.validateMarketPayload(payload);
 
         if (!marketSlotPayload)
             return lib.fail(lib.validationErrorMessage());

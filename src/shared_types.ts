@@ -262,8 +262,8 @@ export type GameSetupPayload = {
 }
 export type LoadGoodPayload = { tradeGood: TradeGood }
 export type DropItemPayload = { item: ItemName }
-export type MarketSlotPayload = { slot: MarketSlotKey }
-export type ChancellorPurchasePayload = { slot: MarketSlotKey, omit: Array<TradeGood> }
+export type MarketSalePayload = { slot: MarketSlotKey }
+export type ChancellorMarketSalePayload = { slot: MarketSlotKey, omit: Array<TradeGood> }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
@@ -306,7 +306,7 @@ export type LaconicAction =
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
-    | MarketSlotPayload | ChancellorPurchasePayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload | EnrolmentPayload
+    | MarketSalePayload | ChancellorMarketSalePayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload | EnrolmentPayload
     | LoadGoodPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
@@ -320,9 +320,9 @@ export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, RepositioningPayload>;
 export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentRepositioningPayload>;
-export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSlotPayload>;
-export type SellAsChancellorMessage = MessageFormat<Action.sell_as_chancellor, ChancellorPurchasePayload>
-export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSlotPayload>;
+export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSalePayload>;
+export type SellAsChancellorMessage = MessageFormat<Action.sell_as_chancellor, ChancellorMarketSalePayload>
+export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSalePayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metal, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metal, MetalDonationPayload>;
 export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;

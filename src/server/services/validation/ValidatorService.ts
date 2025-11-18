@@ -1,9 +1,9 @@
 import { HexCoordinates } from '~/client_types';
 import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
-    LoadGoodPayload, MarketSlotPayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
+    LoadGoodPayload, MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
     Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload, ColorChangePayload,
-    ChancellorPurchasePayload,
+    ChancellorMarketSalePayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { BackupState, PrivateState, Probable, SavedSession } from '~/server_types';
@@ -259,9 +259,9 @@ class ValidatorService {
         );
     }
 
-    public validateMarketSlotPayload(payload: unknown) {
-        return this.validateObject<MarketSlotPayload>(
-            'MarketSlotPayload',
+    public validateMarketPayload(payload: unknown) {
+        return this.validateObject<MarketSalePayload>(
+            'MarketSalePayload',
             payload,
             [
                 { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
@@ -269,9 +269,9 @@ class ValidatorService {
         );
     }
 
-    public validateChancellorPurchasePayload(payload: unknown) {
-        const chancellorPayload = this.validateObject<ChancellorPurchasePayload>(
-            'ChancellorPurchasePayload',
+    public validateChancellorPayload(payload: unknown) {
+        const chancellorPayload = this.validateObject<ChancellorMarketSalePayload>(
+            'ChancellorMarketSalePayload',
             payload,
             [
                 { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
