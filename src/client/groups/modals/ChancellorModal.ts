@@ -112,6 +112,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                     default: throw new Error('Cannot render moda! Missing goods exceeds requirement potential');
                 }
             })();
+
             return typeCount
                 ? `You will need to substitute ${enumeration} with ${feasible.missing.length} favor.`
                 : 'You have all the goods needed for this trade';
