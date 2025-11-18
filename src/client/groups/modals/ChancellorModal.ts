@@ -101,19 +101,19 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             throw new Error('Cannot render modal! Current trade not feasible');
 
         this.description.text((() => {
-            const missingCount = feasible.missing.length;
-            const m = feasible.missing;
+            const types = [...new Set(feasible.missing)];
+            const typeCount = types.length;
             const enumeration = (() => {
-                switch (missingCount) {
+                switch (typeCount) {
                     case 0: return '';
-                    case 1: return m[0];
-                    case 2: return `${m[0]} and ${m[1]}`;
-                    case 3: return `${m[0]}, ${m[1]}, and ${m[2]}`;
+                    case 1: return types[0];
+                    case 2: return `${types[0]} and ${types[1]}`;
+                    case 3: return `${types[0]}, ${types[1]}, and ${types[2]}`;
                     default: throw new Error('Cannot render moda! Missing goods exceeds requirement potential');
                 }
             })();
-            return missingCount
-                ? `You will need to substitute ${enumeration} with ${missingCount} favor.`
+            return typeCount
+                ? `You will need to substitute ${enumeration} with ${feasible.missing.length} favor.`
                 : 'You have all the goods needed for this trade';
         })());
 
