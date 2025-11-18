@@ -1045,33 +1045,32 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const cargo = player.getCargo();
         const market = this.playState.getMarket();
         const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
-
-        const slots: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
+        const keys: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
         const feasible: Array<FeasibleTrade> = [];
 
-        slots.forEach(key => {
+        keys.forEach(key => {
             const unfilledGoods = market[key].request;
 
-            for (let i = 0; i < cargo.length; i++) {
+            for (const item of cargo) {
 
-                if (nonGoods.includes(cargo[i])) {
+                if (nonGoods.includes(item))
                     continue;
-                }
 
-                const carriedGood = cargo[i] as TradeGood;
+                const carriedGood = item as TradeGood;
                 const match = unfilledGoods.indexOf(carriedGood);
 
-                if (match !== -1) {
+                if (match != -1)
                     unfilledGoods.splice(match, 1);
-                }
             }
 
-            if (player.isChancellor()) { // TODO: (Chancellor) have the modal Accept button switchable on/off for this
-                if (player.getFavor() - unfilledGoods.length >= 0) {
+            switch (true) {
+                case player.isPeddler() && (this.playState.getFluctuation(key) == -1) && unfilledGoods.length < 2:
+                case player.isChancellor() && (player.getFavor() - unfilledGoods.length >= 0):
                     feasible.push({ slot: key, missing: unfilledGoods });
-                }
-            } else if (unfilledGoods.length === 0) {
-                feasible.push({ slot: key, missing: [] });
+                    break;
+
+                case unfilledGoods.length === 0:
+                    feasible.push({ slot: key, missing: [] });
             }
         });
 
