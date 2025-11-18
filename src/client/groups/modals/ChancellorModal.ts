@@ -50,7 +50,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             fill: COLOR.boneWhite,
         });
 
-        this.itemRow = new ItemRow(
+        this.itemRow = new ItemRow( // TODO: have favor icons join the row for better visualization
             stage,
             {
                 width: 50,
