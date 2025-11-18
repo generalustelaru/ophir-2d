@@ -23,7 +23,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Chancellor',
             startingFavor: 1,
             specialty: 'gems',
-            description: 'May substitute goods with Favor when trading at the market.', // TODO: implement Chancellor
+            description: 'May substitute goods with Favor when trading at the market.',
         },
         {
             name: SpecialistName.harbormaster,
@@ -67,14 +67,13 @@ const serverConstants: ServerConstants = {
             specialty: 'gems',
             description: 'May donate metals to the Temple from an adjacent sea zone.',
         },
-        // {
-        //     name: SpecialistName.peddler,
-        //     displayName: 'Peddler',
-        //     startingFavor: 2,
-        //     specialty: null,
-        //     description: 'Ignores one required trade good when completing a reduced value market trade.',
-        //
-        // }, // TODO: implement Peddler
+        {
+            name: SpecialistName.peddler,
+            displayName: 'Peddler',
+            startingFavor: 2,
+            specialty: null,
+            description: 'Ignores one required trade good when completing a reduced value market trade.',
+        }, // TODO: implement Peddler
     ],
     TRADE_DECK_A: [
         { request: ['ebony'], reward: { coins: 1, favorAndVp: 1 } },
