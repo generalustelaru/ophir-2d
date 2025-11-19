@@ -3,25 +3,25 @@ import { Unique } from '~/shared_types';
 
 export class ChatInput implements Unique<HTMLHandlerInterface> {
 
-    element: HTMLTextAreaElement;
-    inputCallback: (toSubmit: boolean) => void;
+    public element: HTMLTextAreaElement;
+    public inputCallback: (toSubmit: boolean) => void;
 
     constructor(id: string, input: (toSubmit: boolean) => void) {
         this.element = document.getElementById(id) as HTMLTextAreaElement;
         this.inputCallback = input.bind(this);
     }
 
-    enable = () => {
+    public enable = () => {
         this.element.disabled = false;
         this.element.addEventListener('keyup', event => this.inputCallback(event.key === 'Enter'));
     };
 
-    disable = () => {
+    public disable = () => {
         this.element.disabled = true;
         this.element.removeEventListener('keyup', event => this.inputCallback(event.key === 'Enter'));
     };
 
-    setValue = (value: string | null) => {
+    public setValue = (value: string | null) => {
         this.element.value = value ?? '';
     };
 

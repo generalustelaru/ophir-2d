@@ -63,11 +63,11 @@ export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleSt
         this.group.add(background, this.cargoDisplayGroup);
     }
 
-    getElement(): Konva.Group {
+    public getElement(): Konva.Group {
         return this.group;
     }
 
-    update(status: TempleState): void {
+    public update(status: TempleState): void {
         this.levelDials.forEach(dial => dial.getElement().destroy());
         this.levelDials = [];
         const donationsCount = status.donations.length;

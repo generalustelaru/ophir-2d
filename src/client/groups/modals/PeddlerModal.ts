@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { MarketSlotKey, PlayState, Trade, Unique } from '~/shared_types';
-import { DynamicModalInterface, MarketCardUpdate } from '~/client/client_types';
+import { DynamicModalInterface } from '~/client/client_types';
 
 export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
 
@@ -37,6 +37,6 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
 
     public show(): void {
         this.open();
-        console.log({trade: this.trade});
+        console.log({ trade: this.trade });
     }
 }

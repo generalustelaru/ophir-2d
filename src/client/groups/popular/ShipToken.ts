@@ -5,8 +5,8 @@ import { Coordinates, NeutralColor, PlayerColor, Unique } from '~/shared_types';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
-    group: Konva.Group;
-    token: Konva.Path;
+    private group: Konva.Group;
+    private token: Konva.Path;
 
     constructor(
         color: PlayerColor | NeutralColor,
@@ -55,11 +55,11 @@ export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
         this.group.add(this.token);
     }
 
-    getElement(): Konva.Group {
+    public getElement(): Konva.Group {
         return this.group;
     }
 
-    update(stroke: Color): void {
+    public update(stroke: Color): void {
         this.token.stroke(stroke);
     }
 }

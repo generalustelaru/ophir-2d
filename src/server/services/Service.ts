@@ -1,6 +1,6 @@
 
 export class Service {
-    static instance: Service|null = null;
+    private static instance: Service|null = null;
 
     public static getInstance<I>(): I {
 

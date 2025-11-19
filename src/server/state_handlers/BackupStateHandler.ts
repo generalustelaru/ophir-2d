@@ -14,7 +14,7 @@ export class BackupStateHandler {
             this.backupState = initialState;
     }
 
-    getState() {
+    public getState() {
         return this.backupState;
     }
 

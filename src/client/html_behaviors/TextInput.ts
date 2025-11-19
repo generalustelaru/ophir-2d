@@ -3,25 +3,25 @@ import { Unique } from '~/shared_types';
 
 export class TextInput implements Unique<HTMLHandlerInterface> {
 
-    element: HTMLInputElement;
-    inputCallback: () => void;
+    private element: HTMLInputElement;
+    private inputCallback: () => void;
 
     constructor(id: string, input: () => void) {
         this.element = document.getElementById(id) as HTMLInputElement;
         this.inputCallback = input.bind(this);
     }
 
-    enable = () => {
+    public enable = () => {
         this.element.disabled = false;
         this.element.addEventListener('input', this.inputCallback);
     };
 
-    disable = () => {
+    public disable = () => {
         this.element.disabled = true;
         this.element.removeEventListener('input', this.inputCallback);
     };
 
-    setValue = (value: string | null) => {
+    public setValue = (value: string | null) => {
         this.element.value = value ?? '';
     };
 }

@@ -40,7 +40,7 @@ export class SymbolicInfluenceDial implements Unique<DynamicGroupInterface<Symbo
         this.group.add(this.dieFace, this.dieSymbol);
     }
 
-    update(data: SymbolicInfluenceDialUpdate) {
+    public update(data: SymbolicInfluenceDialUpdate) {
         if (data.symbol)
             this.dieSymbol.text(data.symbol) ;
 
@@ -53,7 +53,7 @@ export class SymbolicInfluenceDial implements Unique<DynamicGroupInterface<Symbo
         }
     }
 
-    getElement() {
+    public getElement() {
         return this.group;
     }
 }

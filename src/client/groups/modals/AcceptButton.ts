@@ -50,7 +50,7 @@ export class AcceptButton extends RequestButton {
         });
     }
 
-    setAcceptable(isAcceptable: boolean) {
+    public setAcceptable(isAcceptable: boolean) {
         this.buttonBackground.fill(isAcceptable ? 'green' : 'brown');
         this.setEnabled(isAcceptable);
     }

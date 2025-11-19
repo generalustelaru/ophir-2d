@@ -49,7 +49,7 @@ export class ShiftMarketButton extends Button implements Unique<DynamicGroupInte
         return this.group;
     }
 
-    update(mayShift: boolean) {
+    public update(mayShift: boolean) {
         this.card.fill(mayShift ? COLOR.marketOrange : COLOR.marketDarkOrange);
         mayShift ? this.enable() : this.disable();
     }

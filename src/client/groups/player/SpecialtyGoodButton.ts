@@ -8,9 +8,9 @@ const { CARGO_ITEM_DATA, COLOR } = clientConstants;
 
 export class SpecialtyGoodButton extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
 
-    background: Konva.Rect;
-    playerColor: PlayerColor;
-    isLocalPlayer: boolean;
+    private background: Konva.Rect;
+    private playerColor: PlayerColor;
+    private isLocalPlayer: boolean;
 
     constructor(
         stage: Konva.Stage,

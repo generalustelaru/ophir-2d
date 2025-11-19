@@ -81,7 +81,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         this.group.add(this.restrictedIcon);
     }
 
-    update(update: SeaZoneUpdate): void {
+    public update(update: SeaZoneUpdate): void {
         this.saveFill(COLOR.defaultHex);
 
         const { localPlayer, rival } = update;

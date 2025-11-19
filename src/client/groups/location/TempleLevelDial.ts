@@ -34,7 +34,7 @@ export class TempleLevelDial implements Unique<StaticGroupInterface> {
         }
     }
 
-    getElement(): Konva.Group {
+    public getElement(): Konva.Group {
         return this.group;
     }
 }
