@@ -12,6 +12,7 @@ export const FAVORED_PLAYERS = Boolean(process.env.FAVORED_PLAYERS === 'true');
 export const CARGO_BONUS = Number(process.env.CARGO_BONUS);
 export const SINGLE_PLAYER = Boolean(process.env.SINGLE_PLAYER === 'true');
 export const SHORT_GAME = Boolean(process.env.SHORT_GAME === 'true');
+export const NO_RIVAL = Boolean(process.env.NO_RIVAL === 'true');
 export const INCLUDE = (() => {
     try {
         const array = JSON.parse(String(process.env.INCLUDE));
