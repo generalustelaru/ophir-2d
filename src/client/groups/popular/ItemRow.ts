@@ -3,8 +3,9 @@ import { ItemToken } from '../player';
 import { Action, ItemName } from '~/shared_types';
 import { EventType, GroupLayoutData } from '~/client/client_types';
 import { Communicator } from '~/client/services/Communicator';
+import { FavorDial } from '.';
 
-type TokenData = { x: number, token: ItemToken | null }
+type TokenData = { x: number, token: ItemToken | FavorDial | null }
 export class ItemRow extends Communicator {
     private group: Konva.Group;
     private stage: Konva.Stage;
@@ -34,7 +35,7 @@ export class ItemRow extends Communicator {
         return this.group;
     }
 
-    public update(items: Array<ItemName>, isClickable: boolean = false) {
+    public update(items: Array<ItemName | 'favor'>, isClickable: boolean = false) {
         for (const oldItem of this.drawData) {
             oldItem.token = oldItem.token?.selfDestruct() || null;
         }
@@ -48,16 +49,21 @@ export class ItemRow extends Communicator {
         }
     }
 
-    private addItem(itemId: ItemName, slot: TokenData, isClickable: boolean): void {
-        const token = new ItemToken(
-            this.stage,
-            { x: slot.x, y: 4 }, //TODO: remove fixed y value
-            itemId,
-            isClickable ? () => this.createEvent({
-                type: EventType.action,
-                detail: { action: Action.drop_item, payload: { item: itemId } },
-            }) : null,
-        );
+    private addItem(itemId: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
+        const token = itemId == 'favor'
+            ? new FavorDial(
+                { x: slot.x, y: 4 },
+                1,
+            )
+            : new ItemToken(
+                this.stage,
+                { x: slot.x, y: 4 },
+                itemId,
+                isClickable ? () => this.createEvent({
+                    type: EventType.action,
+                    detail: { action: Action.drop_item, payload: { item: itemId } },
+                }) : null,
+            );
 
         slot.token = token;
         this.group.add(token.getElement());

@@ -6,6 +6,7 @@ import {
 } from '~/shared_types';
 import { CoinDial, ItemRow } from '../popular';
 import clientConstants from '~/client_constants';
+import { request } from 'express';
 
 const { COLOR } = clientConstants;
 
@@ -119,7 +120,18 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         })());
 
         const trade = this.market[slot];
-        this.itemRow.update(trade.request);
+        const unremoved = [...feasible.missing];
+        const rowItems = trade.request.map(requested => {
+            if (unremoved.includes(requested)) {
+                unremoved.splice(unremoved.indexOf(requested), 1);
+
+                return 'favor';
+            }
+
+            return requested;
+        });
+
+        this.itemRow.update(rowItems);
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
