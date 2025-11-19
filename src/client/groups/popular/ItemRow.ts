@@ -1,10 +1,11 @@
 import Konva from 'konva';
 import { ItemToken } from '../player';
-import { ItemName } from '~/shared_types';
-import { GroupLayoutData } from '~/client/client_types';
+import { Action, ItemName } from '~/shared_types';
+import { EventType, GroupLayoutData } from '~/client/client_types';
+import { Communicator } from '~/client/services/Communicator';
 
 type TokenData = { x: number, token: ItemToken | null }
-export class ItemRow {
+export class ItemRow extends Communicator {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private drawData: Array<TokenData>;
@@ -14,6 +15,8 @@ export class ItemRow {
         segmentWidth: number,
         alignRight: boolean = false,
     ) {
+        super();
+
         this.group = new Konva.Group({ ...layout });
         this.stage = stage;
         this.drawData = [
@@ -50,10 +53,14 @@ export class ItemRow {
             this.stage,
             { x: slot.x, y: 4 }, //TODO: remove fixed y value
             itemId,
-            isClickable,
+            isClickable ? () => this.createEvent({
+                type: EventType.action,
+                detail: { action: Action.drop_item, payload: { item: itemId } },
+            }) : null,
         );
 
         slot.token = token;
         this.group.add(token.getElement());
     }
+
 }

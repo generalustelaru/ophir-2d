@@ -1,18 +1,23 @@
 import Konva from 'konva';
-import { Action, Coordinates, ItemName } from '~/shared_types';
-import { RequestButton } from '../popular';
+import { Coordinates, ItemName } from '~/shared_types';
+import { Button } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
-export class ItemToken extends RequestButton {
+export class ItemToken extends Button {
     private path: Konva.Path;
 
-    constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemName, isClickable: boolean) {
+    constructor(
+        stage: Konva.Stage,
+        position: Coordinates,
+        itemId: ItemName,
+        callback: Function | null,
+    ) {
         super(
             stage,
             { width: 0, height: 0, x: position.x, y: position.y },
-            isClickable ? { action: Action.drop_item, payload: { item: itemId } }: null,
+            callback,
         );
 
         const tokenData = CARGO_ITEM_DATA[itemId];
@@ -29,7 +34,7 @@ export class ItemToken extends RequestButton {
         this.group.height(this.path.height());
 
         this.group.add(this.path);
-        this.setEnabled(isClickable);
+        callback && this.enable();
     }
 
     public getElement(): Konva.Group {
