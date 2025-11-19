@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { ClientMessage, Coordinates } from '~/shared_types';
-import { ActionButton } from '../popular';
+import { RequestButton } from '../popular';
 
-export class AcceptButton extends ActionButton {
+export class AcceptButton extends RequestButton {
 
     private buttonBackground: Konva.Rect;
 

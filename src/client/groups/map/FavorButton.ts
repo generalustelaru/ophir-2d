@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { Player, ClientMessage, Unique } from '~/shared_types';
-import { ActionButton, FavorIcon } from '../popular';
+import { RequestButton, FavorIcon } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { COLOR_PROFILES, ICON_DATA } = clientConstants;
 
-export class FavorButton extends ActionButton implements Unique<DynamicGroupInterface<Player>> {
+export class FavorButton extends RequestButton implements Unique<DynamicGroupInterface<Player>> {
 
     private favorIcon: FavorIcon;
     private checkmark: Konva.Path;

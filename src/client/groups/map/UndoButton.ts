@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { Action, Coordinates, Player, Unique } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
-import { ActionButton } from '../popular';
+import { RequestButton } from '../popular';
 import constants from '~/client_constants';
 
 const { ICON_DATA, COLOR } = constants;
 
-export class UndoButton extends ActionButton implements Unique<DynamicGroupInterface<Player>> {
+export class UndoButton extends RequestButton implements Unique<DynamicGroupInterface<Player>> {
     private icon: Konva.Path;
 
     constructor(stage: Konva.Stage, position: Coordinates, isActivePlayer: boolean) {

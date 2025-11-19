@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryCardUpdate } from '~/client_types';
-import { ActionButton, CoinDial, FavorDial } from '../popular';
+import { RequestButton, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
 import { Coordinates, Action, MetalPurchasePayload, Metal, Currency, Unique } from '~/shared_types';
 
 const { COLOR, CARGO_ITEM_DATA } = clientConstants;
 
-export class TreasuryCard extends ActionButton implements Unique<DynamicGroupInterface<TreasuryCardUpdate>> {
+export class TreasuryCard extends RequestButton implements Unique<DynamicGroupInterface<TreasuryCardUpdate>> {
     private background: Konva.Rect;
     private currencyDial: CoinDial | FavorDial;
     private metalType: Metal;

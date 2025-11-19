@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { ShipToken, ActionButton } from '../popular';
+import { ShipToken, RequestButton } from '../popular';
 import clientConstants from '~/client_constants';
 import { Action, Coordinates, PlayerColor, PlayerEntry, Unique } from '~/shared_types';
 
@@ -10,7 +10,7 @@ type ColorCardUpdate = {
     localPlayer: PlayerEntry | null
     players: Array<PlayerEntry>
 }
-export class ColorCard extends ActionButton implements Unique<DynamicGroupInterface<ColorCardUpdate>> {
+export class ColorCard extends RequestButton implements Unique<DynamicGroupInterface<ColorCardUpdate>> {
     private background: Konva.Rect;
     private shipToken: ShipToken;
     private color: PlayerColor;

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { IconLayer, DynamicGroupInterface } from '~/client_types';
 import { Action, LocationName, TradeGood, Unique } from '~/shared_types';
-import { ActionButton } from '../popular';
+import { RequestButton } from '../popular';
 import { EmptyLocationToken } from '.';
 
 type LocationTokenUpdate = {
@@ -10,7 +10,7 @@ type LocationTokenUpdate = {
     templeIcon: IconLayer
 };
 
-export class LocationToken extends ActionButton implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
+export class LocationToken extends RequestButton implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
     private icon: Konva.Path;
     private id: LocationName;
     private emptyLocation: EmptyLocationToken;

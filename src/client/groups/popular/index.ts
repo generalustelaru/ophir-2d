@@ -1,4 +1,4 @@
-export { ActionButton } from './ActionButton';
+export { RequestButton } from './RequestButton';
 export { Button } from './Button';
 export { CoinDial } from './CoinDial';
 export { FavorDial } from './FavorDial';

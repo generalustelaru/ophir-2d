@@ -1,11 +1,11 @@
 import Konva from 'konva';
 import { Action, Coordinates, ItemName } from '~/shared_types';
-import { ActionButton } from '../popular';
+import { RequestButton } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
-export class CargoToken extends ActionButton {
+export class CargoToken extends RequestButton {
     private path: Konva.Path;
 
     constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemName, isClickable: boolean) {

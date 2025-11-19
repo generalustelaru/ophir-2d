@@ -1,8 +1,8 @@
 import Konva from 'konva';
-import { ActionButton } from '../popular';
+import { RequestButton } from '../popular';
 import { Action, Coordinates, SpecialistData } from '~/shared_types';
 import { defineBobbing } from '~/client/animations';
-export class ConfirmButton extends ActionButton {
+export class ConfirmButton extends RequestButton {
     private textAnimation: Konva.Animation;
     constructor(stage: Konva.Stage, position: Coordinates, specialist: SpecialistData) {
         const layout = { ...position, width: 200, height: 300 };

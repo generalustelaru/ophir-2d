@@ -3,7 +3,7 @@ import { GroupLayoutData } from '~/client_types';
 import { ClientMessage } from '~/shared_types';
 import { Button } from './Button';
 
-export abstract class ActionButton extends Button {
+export abstract class RequestButton extends Button {
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, actionMessage: ClientMessage | null) {
         super(

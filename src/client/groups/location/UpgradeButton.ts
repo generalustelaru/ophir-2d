@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { Action, Unique } from '~/shared_types';
-import { ActionButton, CoinDial } from '../popular';
+import { RequestButton, CoinDial } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
 
-export class UpgradeButton extends ActionButton implements Unique<DynamicGroupInterface<boolean>> {
+export class UpgradeButton extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
 
     private background: Konva.Rect;
     private plusSign: Konva.Text;
