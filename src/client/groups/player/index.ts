@@ -1,5 +1,5 @@
 export { CargoBand } from './CargoBand';
-export { CargoToken } from './CargoToken';
+export { ItemToken } from './ItemToken';
 export { ConcludeButton } from './ConcludeButton';
 export { PlayerPlacard } from './PlayerPlacard';
 export { RivalPlacard } from './RivalPlacard';

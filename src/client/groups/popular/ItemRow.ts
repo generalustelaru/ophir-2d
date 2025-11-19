@@ -1,9 +1,9 @@
 import Konva from 'konva';
-import { CargoToken } from '../player';
+import { ItemToken } from '../player';
 import { ItemName } from '~/shared_types';
 import { GroupLayoutData } from '~/client/client_types';
 
-type TokenData = { x: number, token: CargoToken | null }
+type TokenData = { x: number, token: ItemToken | null }
 export class ItemRow {
     private group: Konva.Group;
     private stage: Konva.Stage;
@@ -46,7 +46,7 @@ export class ItemRow {
     }
 
     private addItem(itemId: ItemName, slot: TokenData, isClickable: boolean): void {
-        const token = new CargoToken(
+        const token = new ItemToken(
             this.stage,
             { x: slot.x, y: 4 }, //TODO: remove fixed y value
             itemId,

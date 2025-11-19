@@ -5,7 +5,7 @@ import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
-export class CargoToken extends RequestButton {
+export class ItemToken extends RequestButton {
     private path: Konva.Path;
 
     constructor(stage: Konva.Stage, position: Coordinates, itemId: ItemName, isClickable: boolean) {
