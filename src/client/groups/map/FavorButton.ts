@@ -18,7 +18,7 @@ export class FavorButton extends RequestButton implements Unique<DynamicGroupInt
     ) {
         super(stage, layout, message);
 
-        this.favorIcon = new FavorIcon({ x: 0, y: 0, width: layout.width, height: layout.height });
+        this.favorIcon = new FavorIcon({ x: 0, y: 0 });
 
         this.checkmark = new Konva.Path({
             data: ICON_DATA.active_favor_check.shape,

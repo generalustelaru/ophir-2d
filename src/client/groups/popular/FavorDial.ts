@@ -18,7 +18,7 @@ export class FavorDial implements Unique<DynamicGroupInterface<number>> {
             y: position.y,
         });
 
-        const favorIcon = new FavorIcon({ x: 0, y: 0, width: 0, height: 0 });
+        const favorIcon = new FavorIcon({ x: 0, y: 0 });
 
         const stampCenter = favorIcon.getVerticalAxis();
 

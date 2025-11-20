@@ -20,7 +20,7 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
             // width: 66, height: 96,
         });
 
-        const favorIcon = new FavorIcon({ x: -20, y: -23, width: 0, height: 0 }, 'medium');
+        const favorIcon = new FavorIcon({ x: -20, y: -23 });
 
         const semiDisc = new Konva.Wedge({
             y: -1,

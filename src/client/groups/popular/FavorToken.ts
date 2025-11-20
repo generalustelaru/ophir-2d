@@ -18,7 +18,7 @@ export class FavorToken extends Button implements Unique<StaticGroupInterface> {
         };
         super(stage, layout, callback);
 
-        const icon = new FavorIcon({x: 0, y: 0, width: 0, height: 0}, 'small');
+        const icon = new FavorIcon({ x: 0, y: 0 }, 'small');
         this.group.add(icon.getElement());
     }
 

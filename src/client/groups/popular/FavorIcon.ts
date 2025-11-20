@@ -2,7 +2,7 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
 import { ColorProfile, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import { Unique } from '~/shared_types';
+import { Coordinates, Unique } from '~/shared_types';
 
 const { ICON_DATA, COLOR, LOCATION_TOKEN_DATA } = clientConstants;
 
@@ -14,16 +14,15 @@ export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
     private outerStamp: Konva.Path;
 
     constructor(
-        layout: GroupLayoutData, // TODO: Change to Coordiantes
+        position: Coordinates,
         size: 'medium' | 'small' = 'medium',
     ) {
         const scale = size == 'medium' ? 2 : 1;
 
         this.group = new Konva.Group({
-            x: layout.x,
-            y: layout.y,
-            height: layout.height,
-            width: layout.width,
+            ...position,
+            height: 30 * scale,
+            width: 30 * scale,
         });
 
         this.outerStamp = new Konva.Path({
