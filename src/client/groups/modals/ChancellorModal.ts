@@ -6,7 +6,6 @@ import {
 } from '~/shared_types';
 import { CoinDial, ItemRow } from '../popular';
 import clientConstants from '~/client_constants';
-import { request } from 'express';
 
 const { COLOR } = clientConstants;
 
