@@ -57,9 +57,9 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
         return this.costTiers.drawFirst()?.treasury || null;
     }
 
-    public updatePlayerStats(player: PlayerHandler, amount: number = 0) {
+    public updatePlayerStats(player: PlayerHandler, vp: number = 0) {
         this.gameStats.updateOne(player.getIdentity().color, (countables) => {
-            countables.vp += amount;
+            countables.vp += vp;
 
             return {
                 ...countables,
