@@ -14,9 +14,11 @@ export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
     private outerStamp: Konva.Path;
 
     constructor(
-        layout: GroupLayoutData,
-        scale: number = 2,
+        layout: GroupLayoutData, // TODO: Change to Coordiantes
+        size: 'medium' | 'small' = 'medium',
     ) {
+        const scale = size == 'medium' ? 2 : 1;
+
         this.group = new Konva.Group({
             x: layout.x,
             y: layout.y,
@@ -44,8 +46,8 @@ export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: COLOR.stampEdge,
             scale: { x: scale + 1/6 * scale, y: 3/4 * scale },
-            x: 13,
-            y: 14,
+            x: scale * 7,
+            y: scale * 7,
         });
 
         this.verticalAxis = this.outerStamp.getClientRect().width / 2;

@@ -45,8 +45,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
                 x: 30,
                 y: 65,
             },
-            30,
-            true,
+            { alignRight: true },
         );
 
         const colon = new Konva.Text({

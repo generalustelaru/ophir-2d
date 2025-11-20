@@ -3,9 +3,12 @@ import { ItemToken } from '../player';
 import { Action, ItemName } from '~/shared_types';
 import { EventType, GroupLayoutData } from '~/client/client_types';
 import { Communicator } from '~/client/services/Communicator';
-import { FavorDial } from '.';
-
-type TokenData = { x: number, token: ItemToken | FavorDial | null }
+import { FavorToken } from '.';
+type Distribution = {
+    alignRight?: boolean,
+    spacing?: number,
+}
+type TokenData = { x: number, token: ItemToken | FavorToken | null }
 export class ItemRow extends Communicator {
     private group: Konva.Group;
     private stage: Konva.Stage;
@@ -13,13 +16,14 @@ export class ItemRow extends Communicator {
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        segmentWidth: number,
-        alignRight: boolean = false,
+        distribution: Distribution = { alignRight: false, spacing: 30 },
     ) {
         super();
 
+        const { alignRight, spacing } = distribution;
         this.group = new Konva.Group({ ...layout });
         this.stage = stage;
+        const segmentWidth = spacing || 30;
         this.drawData = [
             { x: 0, token: null },
             { x: segmentWidth, token: null },
@@ -49,19 +53,20 @@ export class ItemRow extends Communicator {
         }
     }
 
-    private addItem(itemId: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
-        const token = itemId == 'favor'
-            ? new FavorDial(
+    private addItem(itemName: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
+        const token = itemName == 'favor'
+            ? new FavorToken(
+                this.stage,
                 { x: slot.x, y: 4 },
-                1,
+                () => {},
             )
             : new ItemToken(
                 this.stage,
                 { x: slot.x, y: 4 },
-                itemId,
+                itemName,
                 isClickable ? () => this.createEvent({
                     type: EventType.action,
-                    detail: { action: Action.drop_item, payload: { item: itemId } },
+                    detail: { action: Action.drop_item, payload: { item: itemName } },
                 }) : null,
             );
 

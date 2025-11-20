@@ -44,8 +44,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
                 x: 30,
                 y: 65,
             },
-            30,
-            true,
+            { alignRight: true },
         );
 
         const colon = new Konva.Text({

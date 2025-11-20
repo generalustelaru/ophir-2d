@@ -59,8 +59,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 x: 30,
                 y: 65,
             },
-            30,
-            true,
+            { alignRight: true },
         );
 
         this.coinDial = new CoinDial(

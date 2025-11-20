@@ -43,7 +43,7 @@ export class CargoBand implements Unique<DynamicGroupInterface<CargoBandUpdate>>
                 width: this.group.width(),
                 height: this.group.height(),
             },
-            SLOT_WIDTH,
+            { spacing: SLOT_WIDTH },
         );
 
         this.group.add(...[

@@ -49,9 +49,4 @@ export class FavorDial implements Unique<DynamicGroupInterface<number>> {
     public hide() {
         this.group.visible(false);
     }
-
-    public selfDestruct(): null {
-        this.group.destroy();
-        return null;
-    }
 }

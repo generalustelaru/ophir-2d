@@ -14,11 +14,7 @@ export class ItemToken extends Button {
         itemId: ItemName,
         callback: Function | null,
     ) {
-        super(
-            stage,
-            { width: 0, height: 0, x: position.x, y: position.y },
-            callback,
-        );
+        super( stage, { ...position, width: 0, height: 0 }, callback );
 
         const tokenData = CARGO_ITEM_DATA[itemId];
 
