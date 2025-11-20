@@ -50,7 +50,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             fill: COLOR.boneWhite,
         });
 
-        this.itemRow = new ItemRow( // TODO: have favor icons join the row for better visualization
+        this.itemRow = new ItemRow(
             stage,
             {
                 width: 50,
@@ -58,7 +58,11 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 x: 30,
                 y: 65,
             },
-            { alignRight: true },
+            {
+                alignRight: true,
+                itemCallback: (name) => console.log(name),
+                favorCallback: () => console.log('favor'),
+            },
         );
 
         this.coinDial = new CoinDial(
@@ -129,7 +133,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             return requested;
         });
 
-        this.itemRow.update(rowItems);
+        this.itemRow.update(rowItems, true);
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({

@@ -12,9 +12,13 @@ export class ItemToken extends Button {
         stage: Konva.Stage,
         position: Coordinates,
         itemId: ItemName,
-        callback: Function | null,
+        callback: ((name:ItemName) => void) | null,
     ) {
-        super( stage, { ...position, width: 0, height: 0 }, callback );
+        super(
+            stage,
+            { ...position, width: 0, height: 0 },
+            callback ? () => callback(itemId) : null,
+        );
 
         const tokenData = CARGO_ITEM_DATA[itemId];
 

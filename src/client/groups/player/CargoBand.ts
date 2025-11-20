@@ -1,18 +1,21 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { PlayerColor, Unique } from '~/shared_types';
-import { CargoBandUpdate, DynamicGroupInterface } from '~/client_types';
+import { Action, ItemName, PlayerColor, Unique } from '~/shared_types';
+import { CargoBandUpdate, DynamicGroupInterface, EventType } from '~/client_types';
 import { ItemRow } from '../popular';
+import { Communicator } from '~/client/services/Communicator';
 
 const { COLOR } = clientConstants;
 const SLOT_WIDTH = 25;
 
-export class CargoBand implements Unique<DynamicGroupInterface<CargoBandUpdate>> {
+export class CargoBand extends Communicator implements Unique<DynamicGroupInterface<CargoBandUpdate>> {
     private group: Konva.Group;
     private cargoDisplay: Konva.Rect;
     private itemRow: ItemRow;
 
     constructor(stage: Konva.Stage, playerColor: PlayerColor, update: CargoBandUpdate) {
+        super();
+
         this.group = new Konva.Group({
             width: SLOT_WIDTH * 4,
             height: 30,
@@ -43,7 +46,15 @@ export class CargoBand implements Unique<DynamicGroupInterface<CargoBandUpdate>>
                 width: this.group.width(),
                 height: this.group.height(),
             },
-            { spacing: SLOT_WIDTH },
+            {
+                spacing: SLOT_WIDTH,
+                itemCallback: (name: ItemName) => {
+                    this.createEvent({
+                        type: EventType.action,
+                        detail: { action: Action.drop_item, payload: { item: name } },
+                    });
+                },
+            },
         );
 
         this.group.add(...[
@@ -65,3 +76,4 @@ export class CargoBand implements Unique<DynamicGroupInterface<CargoBandUpdate>>
         return this.group;
     }
 }
+

@@ -1,26 +1,33 @@
 import Konva from 'konva';
 import { ItemToken } from '../player';
-import { Action, ItemName } from '~/shared_types';
-import { EventType, GroupLayoutData } from '~/client/client_types';
+import { ItemName } from '~/shared_types';
+import { GroupLayoutData } from '~/client_types';
 import { Communicator } from '~/client/services/Communicator';
 import { FavorToken } from '.';
-type Distribution = {
+type Specificity = {
     alignRight?: boolean,
     spacing?: number,
+    itemCallback?: (name: ItemName) => void,
+    favorCallback?: Function,
 }
 type TokenData = { x: number, token: ItemToken | FavorToken | null }
 export class ItemRow extends Communicator {
     private group: Konva.Group;
     private stage: Konva.Stage;
     private drawData: Array<TokenData>;
+    private itemCallback: ((name: ItemName) => void) | null;
+    private favorCallback: Function | null;
+
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        distribution: Distribution = { alignRight: false, spacing: 30 },
+        specificity: Specificity = { alignRight: false, spacing: 30 },
     ) {
         super();
 
-        const { alignRight, spacing } = distribution;
+        const { alignRight, spacing, itemCallback, favorCallback } = specificity;
+        this.itemCallback = itemCallback || null;
+        this.favorCallback = favorCallback || null;
         this.group = new Konva.Group({ ...layout });
         this.stage = stage;
         const segmentWidth = spacing || 30;
@@ -58,16 +65,13 @@ export class ItemRow extends Communicator {
             ? new FavorToken(
                 this.stage,
                 { x: slot.x, y: 4 },
-                () => {},
+                this.favorCallback,
             )
             : new ItemToken(
                 this.stage,
                 { x: slot.x, y: 4 },
                 itemName,
-                isClickable ? () => this.createEvent({
-                    type: EventType.action,
-                    detail: { action: Action.drop_item, payload: { item: itemName } },
-                }) : null,
+                isClickable ? this.itemCallback : null,
             );
 
         slot.token = token;
