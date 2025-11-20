@@ -387,16 +387,16 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(`${name} cannnot sell goods`);
         }
 
-        const trade = this.playState.getMarketTrade(slot);
-        const unloadResult = this.subtractTradeGoods(player.getCargo(), trade.request);
+        const { request, reward } = this.playState.getMarketTrade(slot);
+        const unloadResult = this.subtractTradeGoods(player.getCargo(), request);
 
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
 
-        const reward = trade.reward.coins + this.playState.getFluctuation(slot);
+        const coins = reward.coins + this.playState.getFluctuation(slot);
 
         player.setCargo(unloadResult.data);
-        player.gainCoins(reward);
+        player.gainCoins(coins);
         this.privateState.addSpentAction(Action.sell_goods);
 
         const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location === 'temple';
@@ -407,8 +407,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.privateState.addDeed({
             context: Action.sell_goods,
             description: (
-                `${moneyChangerAtTemple ? 'accessed the market and ' : ''}`
-                + `traded for ${reward === 0 ? 'naught' : `${reward} ${reward === 1 ? 'coin' : 'coins'}`}`
+                moneyChangerAtTemple ? 'accessed the market and ' : ''
+                + `traded ${request.length} goods for `
+                + (coins === 0 ? 'naught' : `${coins} ${coins === 1 ? 'coin' : 'coins'}`)
             ),
         });
 
@@ -447,8 +448,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (favor < omit.length)
             return lib.fail('Not enough favor to substitute ommisions');
 
-        const trade = this.playState.getMarketTrade(slot);
-        const payable = this.subtractTradeGoods(trade.request, omit, false);
+        const { request, reward } = this.playState.getMarketTrade(slot);
+        const payable = this.subtractTradeGoods([...request], omit, false);
 
         if(payable.err)
             return lib.fail('Ommited items are not included in request');
@@ -458,19 +459,20 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if(cargo.err)
             return lib.fail(cargo.message);
 
-        const reward = trade.reward.coins + this.playState.getFluctuation(slot);
+        const coins = reward.coins + this.playState.getFluctuation(slot);
 
         player.setCargo(cargo.data);
         player.spendFavor(omit.length);
-        player.gainCoins(reward);
+        player.gainCoins(coins);
         this.privateState.addSpentAction(Action.sell_as_chancellor);
         player.clearMoves();
-
+        const delivered = request.length - omit.length;
         this.privateState.addDeed({
             context: Action.sell_as_chancellor,
             description: (
-                (omit.length ? `spent ${omit.length} favor to trade for ` : 'traded for ')
-                + (reward === 0 ? 'naught' : `${reward} ${reward === 1 ? 'coin' : 'coins'}`)
+                (omit.length ? `spent ${omit.length} favor to trade ` : 'traded ')
+                + `${delivered} ${delivered == 1 ? 'good' : 'goods'} for `
+                + (coins === 0 ? 'naught' : `${coins} ${coins === 1 ? 'coin' : 'coins'}`)
             ),
         });
 
@@ -501,15 +503,15 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(`${name} cannot donate goods`);
 
         // Transaction
-        const trade = this.playState.getMarketTrade(slot);
-        const unloadResult = this.subtractTradeGoods(player.getCargo(), trade.request);
+        const {request, reward } = this.playState.getMarketTrade(slot);
+        const unloadResult = this.subtractTradeGoods(player.getCargo(), request);
 
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
 
-        const reward = trade.reward.favorAndVp;
+        const donationReward = reward.favorAndVp;
 
-        player.gainFavor(reward);
+        player.gainFavor(donationReward);
         player.setCargo(unloadResult.data);
         this.privateState.addSpentAction(Action.donate_goods);
 
@@ -521,8 +523,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         else
             player.clearMoves();
 
-        this.privateState.updatePlayerStats(player, reward);
-        this.privateState.addDeed({ context: Action.donate_goods, description: `donated goods for ${reward} favor and VP` });
+        this.privateState.updatePlayerStats(player, donationReward);
+
+        const count = request.length;
+        this.privateState.addDeed({
+            context: Action.donate_goods,
+            description: `donated ${count} ${count == 1 ? 'good' : 'goods'} for ${donationReward} favor and VP`,
+        });
         console.info(this.privateState.getGameStats());
 
         this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
@@ -1031,6 +1038,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         subtrahend: Array<ItemName>,
         isPlayerCargo: boolean = true,
     ): Probable<Array<ItemName>> {
+
         for (const tradeGood of subtrahend) {
             const subtractionResult = this.unloadItem(minuend, tradeGood, isPlayerCargo);
 
