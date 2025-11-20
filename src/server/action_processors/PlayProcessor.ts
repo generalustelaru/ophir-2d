@@ -466,12 +466,12 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.privateState.addSpentAction(Action.sell_as_chancellor);
         player.clearMoves();
 
-        const coinForm = reward === 1 ? 'coin' : 'coins';
         this.privateState.addDeed({
             context: Action.sell_as_chancellor,
             description: (
-                (omit.length ? `spent ${omit.length} favor to ` : '')
-                + `trade for ${reward === 0 ? 'naught' : `${reward} ${coinForm}`}`),
+                (omit.length ? `spent ${omit.length} favor to trade for ` : 'traded for ')
+                + (reward === 0 ? 'naught' : `${reward} ${reward === 1 ? 'coin' : 'coins'}`)
+            ),
         });
 
         const marketShift = this.shiftMarketCards(player);
