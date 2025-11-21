@@ -16,7 +16,7 @@ import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
-
+// TODO: Reduce linecount; extract utility-like functions, move deed composition to dedicated service.
 export class PlayProcessor implements Unique<SessionProcessor> {
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private playState: PlayStateHandler;
