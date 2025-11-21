@@ -97,7 +97,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
         const missingFavor = 6 - this.playerFavor;
 
         this.favorDial.update(Math.min(favorReward, missingFavor));
-        this.itemRow.update(trade.request);
+        this.itemRow.update({ items: trade.request });
         this.victoryPointDial.update(trade.reward.favorAndVp);
 
         this.open({ action: Action.donate_goods, payload: { slot } });

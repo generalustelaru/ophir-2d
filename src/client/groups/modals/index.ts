@@ -9,3 +9,4 @@ export { EndRivalTurnModal } from './EndRivalTurnModal';
 export { AdvisorModal } from './AdvisorModal';
 export { ChancellorModal } from './ChancellorModal';
 export { PeddlerModal } from './PeddlerModal';
+export { SymbolRow } from './SymbolRow';

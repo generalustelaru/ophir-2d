@@ -85,7 +85,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
 
         const trade = this.market[slot];
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
-        this.itemRow.update(trade.request);
+        this.itemRow.update({ items: trade.request });
         this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }

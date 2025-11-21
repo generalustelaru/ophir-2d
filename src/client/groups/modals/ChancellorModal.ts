@@ -4,7 +4,8 @@ import { DynamicModalInterface } from '~/client/client_types';
 import {
     Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
 } from '~/shared_types';
-import { CoinDial, ItemRow } from '../popular';
+import { CoinDial } from '../popular';
+import { SymbolRow } from './';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
@@ -16,7 +17,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     // private playerFavor: number = 0;
     private playerFeasibles: Array<FeasibleTrade> = [];
     // private playerGoods: Array<TradeGood> = [];
-    private itemRow: ItemRow;
+    private symbolRow: SymbolRow;
     private coinDial: CoinDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -50,7 +51,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             fill: COLOR.boneWhite,
         });
 
-        this.itemRow = new ItemRow(
+        this.symbolRow = new SymbolRow(
             stage,
             {
                 width: 50,
@@ -58,11 +59,8 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 x: 30,
                 y: 65,
             },
-            {
-                alignRight: true,
-                itemCallback: (name) => console.log(name),
-                favorCallback: () => console.log('favor'),
-            },
+            (name) => console.log(name),
+            () => console.log('favor'),
         );
 
         this.coinDial = new CoinDial(
@@ -76,7 +74,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         this.contentGroup.add(...[
             this.description,
             colon,
-            this.itemRow.getElement(),
+            this.symbolRow.getElement(),
             this.coinDial.getElement(),
         ]);
     }
@@ -133,7 +131,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             return requested;
         });
 
-        this.itemRow.update(rowItems, true);
+        this.symbolRow.update({ items: rowItems, isClickable: true });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({

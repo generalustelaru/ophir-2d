@@ -121,11 +121,6 @@ export type TempleUpdate = {
     localPlayer: Player | null,
 }
 
-export type CargoBandUpdate = {
-    cargo: Array<ItemName>,
-    canDrop: boolean,
-}
-
 export type SailAttemptArgs = {
     playerColor: PlayerColor,
     moveActions: number,

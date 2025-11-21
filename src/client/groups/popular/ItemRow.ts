@@ -1,36 +1,34 @@
 import Konva from 'konva';
 import { ItemToken } from '../player';
-import { ItemName } from '~/shared_types';
-import { GroupLayoutData } from '~/client_types';
-import { Communicator } from '~/client/services/Communicator';
+import { ItemName, Unique } from '~/shared_types';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { FavorToken } from '.';
+
 type Specificity = {
     alignRight?: boolean,
     spacing?: number,
     itemCallback?: (name: ItemName) => void,
-    favorCallback?: Function,
 }
 type TokenData = { x: number, token: ItemToken | FavorToken | null }
-export class ItemRow extends Communicator {
+type Update = { items: Array<ItemName>, isClickable?: boolean }
+
+export class ItemRow implements Unique<DynamicGroupInterface<Update>>{
     private group: Konva.Group;
     private stage: Konva.Stage;
     private drawData: Array<TokenData>;
     private itemCallback: ((name: ItemName) => void) | null;
-    private favorCallback: Function | null;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         specificity: Specificity = { alignRight: false, spacing: 30 },
     ) {
-        super();
-
-        const { alignRight, spacing, itemCallback, favorCallback } = specificity;
-        this.itemCallback = itemCallback || null;
-        this.favorCallback = favorCallback || null;
-        this.group = new Konva.Group({ ...layout });
-        this.stage = stage;
+        const { alignRight, spacing, itemCallback } = specificity;
         const segmentWidth = spacing || 30;
+
+        this.stage = stage;
+        this.itemCallback = itemCallback || null;
+        this.group = new Konva.Group({ ...layout });
         this.drawData = [
             { x: 0, token: null },
             { x: segmentWidth, token: null },
@@ -38,41 +36,32 @@ export class ItemRow extends Communicator {
             { x: segmentWidth * 3, token: null },
         ];
 
-        if (alignRight)
-            this.drawData = this.drawData.reverse();
+        alignRight && (this.drawData = this.drawData.reverse());
     }
 
     public getElement() {
         return this.group;
     }
 
-    public update(items: Array<ItemName | 'favor'>, isClickable: boolean = false) {
+    public update(data: Update) {
+        const { items, isClickable } = data;
+
         for (const oldItem of this.drawData) {
             oldItem.token = oldItem.token?.selfDestruct() || null;
         }
 
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-
-            if (item) {
-                this.addItem(item, this.drawData[i], isClickable);
-            }
-        }
+        items.forEach((newItem, index) => {
+            newItem && this.addItem(newItem, this.drawData[index], isClickable || false);
+        });
     }
 
-    private addItem(itemName: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
-        const token = itemName == 'favor'
-            ? new FavorToken(
-                this.stage,
-                { x: slot.x, y: 4 },
-                this.favorCallback,
-            )
-            : new ItemToken(
-                this.stage,
-                { x: slot.x, y: 4 },
-                itemName,
-                isClickable ? this.itemCallback : null,
-            );
+    private addItem(itemName: ItemName, slot: TokenData, isClickable: boolean): void {
+        const token = new ItemToken(
+            this.stage,
+            { x: slot.x, y: 4 },
+            itemName,
+            isClickable ? this.itemCallback : null,
+        );
 
         slot.token = token;
         this.group.add(token.getElement());
