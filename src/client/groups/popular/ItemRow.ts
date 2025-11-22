@@ -17,6 +17,7 @@ export class ItemRow implements Unique<DynamicGroupInterface<Update>>{
     private stage: Konva.Stage;
     private drawData: Array<TokenData>;
     private itemCallback: ((name: ItemName) => void) | null;
+    private isRightAligned: boolean = false;
 
     constructor(
         stage: Konva.Stage,
@@ -36,7 +37,10 @@ export class ItemRow implements Unique<DynamicGroupInterface<Update>>{
             { x: segmentWidth * 3, token: null },
         ];
 
-        alignRight && (this.drawData = this.drawData.reverse());
+        if (alignRight) {
+            this.drawData = this.drawData.reverse();
+            this.isRightAligned = true;
+        }
     }
 
     public getElement() {
@@ -44,14 +48,17 @@ export class ItemRow implements Unique<DynamicGroupInterface<Update>>{
     }
 
     public update(data: Update) {
-        const { items, isClickable } = data;
 
         for (const oldItem of this.drawData) {
             oldItem.token = oldItem.token?.selfDestruct() || null;
         }
 
-        items.forEach((newItem, index) => {
-            newItem && this.addItem(newItem, this.drawData[index], isClickable || false);
+        const { items, isClickable } = data;
+        const displayItems = [...items];
+        this.isRightAligned && displayItems.reverse();
+
+        displayItems.forEach((newItem, index) => {
+            this.addItem(newItem, this.drawData[index], isClickable || false);
         });
     }
 

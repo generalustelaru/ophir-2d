@@ -2,13 +2,19 @@ import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { DynamicModalInterface } from '~/client/client_types';
 import {
-    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
+    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, TradeGood, Unique,
 } from '~/shared_types';
 import { CoinDial } from '../popular';
 import { SymbolRow } from './';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
+
+type CommodityState = {
+    name: TradeGood;
+    isOmited: boolean; // replaced w/ favor
+    isLocked: boolean; // not optional
+}
 
 export class ChancellorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private description: Konva.Text;
@@ -18,6 +24,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     private playerFeasibles: Array<FeasibleTrade> = [];
     // private playerGoods: Array<TradeGood> = [];
     private symbolRow: SymbolRow;
+    private tradeSpecification: Array<CommodityState> = [];
     private coinDial: CoinDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -119,11 +126,17 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 : 'You have all the goods needed for this trade';
         })());
 
+        // set vanilla specification
         const trade = this.market[slot];
-        const unremoved = [...feasible.missing];
-        const rowItems = trade.request.map(requested => {
-            if (unremoved.includes(requested)) {
-                unremoved.splice(unremoved.indexOf(requested), 1);
+        this.tradeSpecification = trade.request.map(requested => {
+            return { name: requested, isOmited: false, isLocked: false };
+        });
+
+        // determine feasible symbols
+        const unaccounted = [...feasible.missing];
+        const feasibleSymbols = trade.request.map(requested => {
+            if (unaccounted.includes(requested)) {
+                unaccounted.splice(unaccounted.indexOf(requested), 1);
 
                 return 'favor';
             }
@@ -131,7 +144,17 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             return requested;
         });
 
-        this.symbolRow.update({ items: rowItems, isClickable: true });
+        // update specification for feasability
+        feasibleSymbols.forEach((symbol, index) => {
+            if (symbol == 'favor') {
+                this.tradeSpecification[index].isOmited = true;
+                this.tradeSpecification[index].isLocked = true;
+            }
+        });
+
+        console.log(this.tradeSpecification);
+
+        this.symbolRow.update({ items: feasibleSymbols, isClickable: true });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({

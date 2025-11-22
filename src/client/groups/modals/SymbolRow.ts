@@ -41,22 +41,22 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
     }
 
     public update(data: Update) {
-        const { items, isClickable } = data;
+
         for (const oldItem of this.drawData) {
             oldItem.token = oldItem.token?.selfDestruct() || null;
         }
 
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
+        const { items, isClickable } = data;
+        const displayItems = [...items];
+        displayItems.reverse();
 
-            if (item) {
-                this.addItem(item, this.drawData[i], isClickable || false);
-            }
-        }
+        displayItems.forEach((item, index) => {
+            this.addItem(item, this.drawData[index], isClickable || false);
+        });
     }
 
-    private addItem(itemName: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
-        const token = itemName == 'favor'
+    private addItem(symbol: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
+        const token = symbol == 'favor'
             ? new FavorToken(
                 this.stage,
                 { x: slot.x, y: 4 },
@@ -65,7 +65,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
             : new ItemToken(
                 this.stage,
                 { x: slot.x, y: 4 },
-                itemName,
+                symbol,
                 isClickable ? this.itemCallback : null,
             );
 
