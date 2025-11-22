@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { ItemToken } from '../player';
-import { ItemName, Unique } from '~/shared_types';
-import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import { FavorToken } from '../popular';
+import { Unique } from '~/shared_types';
+import { DynamicGroupInterface, DynamicTradeGood, GroupLayoutData } from '~/client_types';
+import { TradeGoodToken, FavorToken } from './';
 
 type TokenData = { x: number, token: ItemToken | FavorToken | null }
 type Update = {
-    items: Array<ItemName | 'favor'>,
+    goods: Array<DynamicTradeGood>,
     isClickable?: boolean
 }
 
@@ -14,25 +14,21 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
     private group: Konva.Group;
     private stage: Konva.Stage;
     private drawData: Array<TokenData>;
-    private itemCallback: ((name: ItemName) => void);
-    private symbolCallback: ((name: ItemName) => void);
+    private switchCallback: ((index: number) => void);
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        itemCallback: (name: ItemName) => void,
-        symbolCallback: (name: ItemName) => void,
+        switchCallback: (index: number) => void,
     ) {
-        this.itemCallback = itemCallback;
-        this.symbolCallback = symbolCallback;
+        this.switchCallback = switchCallback;
         this.group = new Konva.Group({ ...layout });
         this.stage = stage;
         const segmentWidth = 30;
         this.drawData = [
-            { x: segmentWidth * 3, token: null },
-            { x: segmentWidth * 2, token: null },
             { x: segmentWidth, token: null },
-            { x: 0, token: null },
+            { x: segmentWidth * 2, token: null },
+            { x: segmentWidth * 3, token: null },
         ];
     }
 
@@ -46,30 +42,35 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
             oldItem.token = oldItem.token?.selfDestruct() || null;
         }
 
-        const { items, isClickable } = data;
-        const displayItems = [...items];
-        displayItems.reverse();
+        const { goods: items } = data;
 
-        displayItems.forEach((item, index) => {
-            this.addItem(item, this.drawData[index], isClickable || false);
+        let layoutIndex = 3 - items.length;
+        items.forEach((item, index) => {
+            this.addItem(layoutIndex++, index, item);
         });
     }
 
-    private addItem(symbol: ItemName | 'favor', slot: TokenData, isClickable: boolean): void {
-        const token = symbol == 'favor'
+    private addItem(
+        layoutIndex: number,
+        itemIndex: number,
+        item: DynamicTradeGood,
+    ): void {
+        const data = this.drawData[layoutIndex];
+        const callback = () => this.switchCallback(itemIndex)
+        const token = item.isOmited
             ? new FavorToken(
                 this.stage,
-                { x: slot.x, y: 4 },
-                this.symbolCallback,
+                { x: data.x, y: 4 },
+                callback,
             )
-            : new ItemToken(
+            : new TradeGoodToken(
                 this.stage,
-                { x: slot.x, y: 4 },
-                symbol,
-                isClickable ? this.itemCallback : null,
+                { x: data.x, y: 4 },
+                item.name,
+                callback,
             );
 
-        slot.token = token;
+        data.token = token;
         this.group.add(token.getElement());
     }
 

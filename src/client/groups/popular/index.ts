@@ -10,4 +10,4 @@ export { MovesDial } from './MovesDial';
 export { SymbolicInfluenceDial } from './SymbolicInfluenceDial';
 export { ItemRow } from './ItemRow';
 export { RowDistributor } from './RowDistributor';
-export { FavorToken } from './FavorToken';
+export { FavorToken } from '../modals/FavorToken';

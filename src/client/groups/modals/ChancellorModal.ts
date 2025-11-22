@@ -1,20 +1,14 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { DynamicModalInterface } from '~/client/client_types';
+import { DynamicModalInterface, DynamicTradeGood } from '~/client/client_types';
 import {
-    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, TradeGood, Unique,
+    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
 } from '~/shared_types';
 import { CoinDial } from '../popular';
 import { SymbolRow } from './';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
-
-type CommodityState = {
-    name: TradeGood;
-    isOmited: boolean; // replaced w/ favor
-    isLocked: boolean; // not optional
-}
 
 export class ChancellorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private description: Konva.Text;
@@ -24,7 +18,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     private playerFeasibles: Array<FeasibleTrade> = [];
     // private playerGoods: Array<TradeGood> = [];
     private symbolRow: SymbolRow;
-    private tradeSpecification: Array<CommodityState> = [];
+    private tradeSpecification: Array<DynamicTradeGood> = [];
     private coinDial: CoinDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -66,8 +60,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 x: 30,
                 y: 65,
             },
-            (name) => console.log(name),
-            () => console.log('favor'),
+            (index: number) => console.log(index),
         );
 
         this.coinDial = new CoinDial(
@@ -154,7 +147,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
 
         console.log(this.tradeSpecification);
 
-        this.symbolRow.update({ items: feasibleSymbols, isClickable: true });
+        this.symbolRow.update({ goods: this.tradeSpecification, isClickable: true });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({

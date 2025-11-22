@@ -1,14 +1,14 @@
 import Konva from 'konva';
 import { StaticGroupInterface } from '~/client_types';
 import { Coordinates, Unique } from '~/shared_types';
-import { Button, FavorIcon } from './';
+import { Button, FavorIcon } from '../popular';
 
 export class FavorToken extends Button implements Unique<StaticGroupInterface> {
 
-    constructor(
+    constructor( // TODO: move this out of popular and into modals
         stage: Konva.Stage,
         position: Coordinates,
-        callback: Function | null,
+        callback: ((index: number) => void) | null,
     ) {
         const layout = {
             x: position.x,

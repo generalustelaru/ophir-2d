@@ -2,6 +2,7 @@ import {
     ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
     Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState, VpTransmission, State,
     EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, ColorChangeResponse,
+    TradeGood,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -25,6 +26,12 @@ export type LocalState = {
     playerColor: PlayerColor | null,
     playerName: string | null,
     vp: number,
+}
+
+export type DynamicTradeGood = {
+    name: TradeGood;
+    isOmited: boolean; // replaced w/ favor
+    isLocked: boolean; // not optional
 }
 
 export enum LayerIds {

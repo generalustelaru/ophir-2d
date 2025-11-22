@@ -10,3 +10,5 @@ export { AdvisorModal } from './AdvisorModal';
 export { ChancellorModal } from './ChancellorModal';
 export { PeddlerModal } from './PeddlerModal';
 export { SymbolRow } from './SymbolRow';
+export { TradeGoodToken } from './TradeGoodToken';
+export { FavorToken } from './FavorToken';
