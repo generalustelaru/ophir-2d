@@ -147,7 +147,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             }
         });
 
-        this.symbolRow.update({ goods: this.tradeSpecification, isClickable: true });
+        this.symbolRow.update({ goods: this.tradeSpecification });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
@@ -179,6 +179,6 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             });
         }
 
-        this.symbolRow.update({ goods: this.tradeSpecification, isClickable: true });
+        this.symbolRow.update({ goods: this.tradeSpecification });
     }
 }

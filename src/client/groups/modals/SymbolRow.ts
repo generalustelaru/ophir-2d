@@ -7,7 +7,6 @@ import { TradeGoodToken, FavorToken } from './';
 type TokenData = { x: number, token: ItemToken | FavorToken | null }
 type Update = {
     goods: Array<Specification>,
-    isClickable?: boolean
 }
 
 export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
@@ -50,11 +49,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
         });
     }
 
-    private addItem(
-        layoutIndex: number,
-        itemIndex: number,
-        item: Specification,
-    ): void {
+    private addItem(layoutIndex: number, itemIndex: number, item: Specification): void {
         const data = this.drawData[layoutIndex];
         const callback = () => this.switchCallback(itemIndex);
         const token = item.isOmited
