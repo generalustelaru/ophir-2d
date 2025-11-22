@@ -28,7 +28,7 @@ export type LocalState = {
     vp: number,
 }
 
-export type DynamicTradeGood = {
+export type Specification = {
     name: TradeGood;
     isOmited: boolean; // replaced w/ favor
     isLocked: boolean; // not optional

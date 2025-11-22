@@ -134,4 +134,18 @@ export abstract class ModalBase {
     protected close() {
         this.screenGroup.hide();
     }
+
+    protected updateActionMessage(message: ClientMessage) {
+        if (!this.acceptButton)
+            throw new Error('Cannot update missing accept button.');
+
+        this.acceptButton.updateActionMessage(message);
+    }
+
+    protected setAcceptable(isAcceptable: boolean) {
+        if (!this.acceptButton)
+            throw new Error('Cannot update missing accept button.');
+
+        this.acceptButton.setAcceptable(isAcceptable);
+    }
 }

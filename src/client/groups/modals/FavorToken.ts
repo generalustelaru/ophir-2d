@@ -5,7 +5,7 @@ import { Button, FavorIcon } from '../popular';
 
 export class FavorToken extends Button implements Unique<StaticGroupInterface> {
 
-    constructor( // TODO: move this out of popular and into modals
+    constructor(
         stage: Konva.Stage,
         position: Coordinates,
         callback: ((index: number) => void) | null,
@@ -16,11 +16,12 @@ export class FavorToken extends Button implements Unique<StaticGroupInterface> {
             width: 0,
             height: 0,
         };
+
         super(stage, layout, callback);
-        this.enable();
 
         const icon = new FavorIcon({ x: 0, y: 0 }, 'small');
         this.group.add(icon.getElement());
+        callback && this.enable();
     }
 
     public getElement() {

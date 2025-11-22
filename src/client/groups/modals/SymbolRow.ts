@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { ItemToken } from '../player';
 import { Unique } from '~/shared_types';
-import { DynamicGroupInterface, DynamicTradeGood, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, Specification, GroupLayoutData } from '~/client_types';
 import { TradeGoodToken, FavorToken } from './';
 
 type TokenData = { x: number, token: ItemToken | FavorToken | null }
 type Update = {
-    goods: Array<DynamicTradeGood>,
+    goods: Array<Specification>,
     isClickable?: boolean
 }
 
@@ -53,21 +53,21 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>>{
     private addItem(
         layoutIndex: number,
         itemIndex: number,
-        item: DynamicTradeGood,
+        item: Specification,
     ): void {
         const data = this.drawData[layoutIndex];
-        const callback = () => this.switchCallback(itemIndex)
+        const callback = () => this.switchCallback(itemIndex);
         const token = item.isOmited
             ? new FavorToken(
                 this.stage,
                 { x: data.x, y: 4 },
-                callback,
+                item.isLocked ? null : callback,
             )
             : new TradeGoodToken(
                 this.stage,
                 { x: data.x, y: 4 },
                 item.name,
-                callback,
+                item.isLocked ? null : callback,
             );
 
         data.token = token;

@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { DynamicModalInterface, DynamicTradeGood } from '~/client/client_types';
+import { DynamicModalInterface, Specification } from '~/client/client_types';
 import {
     Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
 } from '~/shared_types';
@@ -14,11 +14,11 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     private description: Konva.Text;
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
-    // private playerFavor: number = 0;
+    private marketSlot: MarketSlotKey | null = null;
+    private playerFavor: number = 0;
     private playerFeasibles: Array<FeasibleTrade> = [];
-    // private playerGoods: Array<TradeGood> = [];
     private symbolRow: SymbolRow;
-    private tradeSpecification: Array<DynamicTradeGood> = [];
+    private tradeSpecification: Array<Specification> = [];
     private coinDial: CoinDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -60,7 +60,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 x: 30,
                 y: 65,
             },
-            (index: number) => console.log(index),
+            (index: number) => this.switchToken(index),
         );
 
         this.coinDial = new CoinDial(
@@ -87,6 +87,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         if (!chancellorPlayer)
             return;
 
+        this.playerFavor = chancellorPlayer.favor;
         this.market = state.market;
         this.fluctuations = state.setup.marketFluctuations;
         this.playerFeasibles = chancellorPlayer.feasibleTrades;
@@ -101,6 +102,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         if (!feasible)
             throw new Error('Cannot render modal! Current trade not feasible');
 
+        this.marketSlot = slot;
         this.description.text((() => {
             const types = [...new Set(feasible.missing)];
             const typeCount = types.length;
@@ -145,8 +147,6 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             }
         });
 
-        console.log(this.tradeSpecification);
-
         this.symbolRow.update({ goods: this.tradeSpecification, isClickable: true });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
@@ -154,5 +154,31 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             action: Action.sell_as_chancellor,
             payload: { slot, omit: feasible.missing },
         });
+    }
+
+    private switchToken(index: number) {
+        if (!this.marketSlot)
+            throw new Error('Cannot edit request. Market slot missing.');
+
+        const tradeGoodData = this.tradeSpecification[index];
+
+        tradeGoodData.isOmited = !tradeGoodData.isOmited;
+
+        const omited = (this.tradeSpecification
+            .filter(sp => sp.isOmited)
+            .map(sp => { return sp.name; })
+        );
+
+        if (omited.length > this.playerFavor) {
+            this.setAcceptable(false);
+        } else {
+            this.setAcceptable(true);
+            this.updateActionMessage({
+                action: Action.sell_as_chancellor,
+                payload: { slot: this.marketSlot, omit: omited },
+            });
+        }
+
+        this.symbolRow.update({ goods: this.tradeSpecification, isClickable: true });
     }
 }
