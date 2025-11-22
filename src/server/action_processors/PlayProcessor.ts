@@ -503,7 +503,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(`${name} cannot donate goods`);
 
         // Transaction
-        const {request, reward } = this.playState.getMarketTrade(slot);
+        const { request, reward } = this.playState.getMarketTrade(slot);
         const unloadResult = this.subtractTradeGoods(player.getCargo(), request);
 
         if (unloadResult.err)
