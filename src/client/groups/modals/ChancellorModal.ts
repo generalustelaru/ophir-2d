@@ -19,7 +19,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     private playerFavor: number = 0;
     private playerFeasibles: Array<FeasibleTrade> = [];
     private symbolRow: SymbolRow;
-    private tradeSpecification: Array<Specification> = [];
+    private tradeSpecifications: Array<Specification> = [];
     private coinDial: CoinDial;
     constructor(stage: Konva.Stage) {
         super(
@@ -124,7 +124,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
 
         // set vanilla specification
         const trade = this.market[slot];
-        this.tradeSpecification = trade.request.map(requested => {
+        this.tradeSpecifications = trade.request.map(requested => {
             return { name: requested, isOmited: false, isLocked: false };
         });
 
@@ -136,12 +136,12 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         // update specification for feasability
         feasibleSymbols.forEach((symbol, index) => {
             if (symbol == 'other') {
-                this.tradeSpecification[index].isOmited = true;
-                this.tradeSpecification[index].isLocked = true;
+                this.tradeSpecifications[index].isOmited = true;
+                this.tradeSpecifications[index].isLocked = true;
             }
         });
 
-        this.symbolRow.update({ specifications: this.tradeSpecification, specialist: SpecialistName.chancellor });
+        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.chancellor });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
@@ -154,11 +154,11 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         if (!this.marketSlot)
             throw new Error('Cannot edit request. Market slot missing.');
 
-        const tradeGoodData = this.tradeSpecification[index];
+        const tradeGoodData = this.tradeSpecifications[index];
 
         tradeGoodData.isOmited = !tradeGoodData.isOmited;
 
-        const omited = (this.tradeSpecification
+        const omited = (this.tradeSpecifications
             .filter(sp => sp.isOmited)
             .map(sp => { return sp.name; })
         );
@@ -173,6 +173,6 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             });
         }
 
-        this.symbolRow.update({ specifications: this.tradeSpecification, specialist: SpecialistName.chancellor });
+        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.chancellor });
     }
 }

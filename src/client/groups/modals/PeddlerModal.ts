@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { FeasibleTrade, MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
+import { Action, FeasibleTrade, MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
 import { DynamicModalInterface, Specification } from '~/client_types';
 import { CoinDial } from '../popular';
 import { SymbolRow } from './SymbolRow';
@@ -16,8 +16,9 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
     private feasability: FeasibleTrade | null = null;
     private trade: Trade | null = null;
     private symbolRow: SymbolRow;
-    private tradeSpecification: Array<Specification> = [];
+    private tradeSpecifications: Array<Specification> = [];
     private coinDial: CoinDial;
+    private selectedIndex: number = -1;
 
     constructor(stage: Konva.Stage) {
         super(
@@ -111,7 +112,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
         if (!this.trade)
             return lib.throwRenderError('Trade is missing.');
 
-        this.tradeSpecification = this.trade.request.map(requested => {
+        this.tradeSpecifications = this.trade.request.map(requested => {
             return { name: requested, isOmited: false, isLocked: false };
         });
 
@@ -125,21 +126,46 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
 
         const isGoodMissing = feasibleSymbols.includes('other');
         feasibleSymbols.forEach((symbol, index) => {
-            this.tradeSpecification[index].isLocked = isGoodMissing;
+            this.tradeSpecifications[index].isLocked = isGoodMissing;
             if (symbol == 'other')
-                this.tradeSpecification[index].isOmited = true;
+                this.tradeSpecifications[index].isOmited = true;
         });
 
-        this.symbolRow.update({ specifications: this.tradeSpecification, specialist: SpecialistName.peddler });
+        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.peddler });
         this.coinDial.update(this.trade.reward.coins - 1);
         this.open();
     }
 
     private switchToken(index: number) {
-        // const actionMessage =  {
-        //             action: Action.sell_as_peddler,
-        //             payload: { omit: 'marble' },
-        // },
-        console.log({ index, message: 'Not implemented.' });
+
+        for (const spec of this.tradeSpecifications) {
+            spec.isOmited = false;
+        }
+
+        const hasDeselected = index == this.selectedIndex;
+
+        if (hasDeselected) {
+            if (!this.slot)
+                throw new Error('Cannot set standard trade! Slot is missing.');
+
+            this.updateActionMessage({
+                action: Action.sell_goods,
+                payload: { slot: this.slot },
+            });
+        } else {
+            this.selectedIndex = index;
+            const selected = this.tradeSpecifications[index];
+            selected.isOmited = true;
+
+            this.updateActionMessage({
+                action: Action.sell_as_peddler,
+                payload: { omit: selected.name },
+            });
+        }
+
+        this.symbolRow.update({
+            specifications: this.tradeSpecifications,
+            specialist: SpecialistName.peddler,
+        });
     }
 }

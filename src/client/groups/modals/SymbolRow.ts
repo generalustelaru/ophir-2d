@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { ItemToken } from '../player';
 import { SpecialistName, Unique } from '~/shared_types';
 import { DynamicGroupInterface, Specification, GroupLayoutData } from '~/client_types';
-import { TradeGoodToken, FavorToken } from './';
+import { TradeGoodToken, FavorToken, RetainedToken } from './';
 
 type TokenData = { x: number, token: ItemToken | FavorToken | null }
 type Update = {
@@ -63,7 +63,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
                         { x: data.x, y: 4 },
                         item.isLocked ? null : callback,
                     )
-                    : new FavorToken( // TODO: replace with peddler-specific token class
+                    : new RetainedToken(
                         this.stage,
                         { x: data.x, y: 4 },
                         item.isLocked ? null : callback,
