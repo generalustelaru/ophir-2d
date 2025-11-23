@@ -2,6 +2,9 @@ import Konva from 'konva';
 import { StaticGroupInterface } from '~/client_types';
 import { Coordinates, Unique } from '~/shared_types';
 import { Button, FavorIcon } from '../popular';
+import clientConstants from '~/client/client_constants';
+
+const { COLOR } = clientConstants;
 
 export class FavorToken extends Button implements Unique<StaticGroupInterface> {
 
@@ -19,7 +22,18 @@ export class FavorToken extends Button implements Unique<StaticGroupInterface> {
 
         super(stage, layout, callback);
 
-        const icon = new FavorIcon({ x: 0, y: 0 }, 'small');
+        callback && this.group.add(new Konva.Rect({
+            width: 30,
+            height: 30,
+            stroke: COLOR.boneWhite,
+            strokeWidth: 1,
+            x: -3,
+            y: -3,
+            cornerRadius: 5,
+            fill: COLOR.modalLightBlue,
+        }));
+
+        const icon = new FavorIcon({ x: -1, y: -1 }, 'small');
         this.group.add(icon.getElement());
         callback && this.enable();
     }

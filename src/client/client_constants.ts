@@ -49,6 +49,7 @@ const clientConstants: ClientConstants = {
         vpGold: '#E5D280',
         vpCardPurple: '#A70FFA',
         vpCardLightPurple: '#E37AF5',
+        modalLightBlue: '#184588ff',
         modalBlue: '#002255',
 
     },
