@@ -28,6 +28,7 @@ export type LocalState = {
     vp: number,
 }
 
+export type TradeGoodSymbol = TradeGood | 'other';
 export type Specification = {
     name: TradeGood;
     isOmited: boolean; // replaced w/ favor

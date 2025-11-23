@@ -7,6 +7,7 @@ import {
 import { CoinDial } from '../popular';
 import { SymbolRow } from './';
 import clientConstants from '~/client_constants';
+import { lib } from './lib';
 
 const { COLOR } = clientConstants;
 
@@ -33,7 +34,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         );
 
         this.description = new Konva.Text({
-            fill: 'white',
+            fill: COLOR.boneWhite,
             fontSize: 18,
             width: this.contentGroup.width(),
             align: 'center',
@@ -80,9 +81,9 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     }
 
     public update(state: PlayState) {
-        const chancellorPlayer = state.players.find(p => {
-            return p.specialist.name == SpecialistName.chancellor;
-        });
+        const chancellorPlayer = state.players.find(
+            p => p.specialist.name == SpecialistName.chancellor,
+        );
 
         if (!chancellorPlayer)
             return;
@@ -95,12 +96,12 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
 
     public show(slot: MarketSlotKey) {
         if (!this.market || !this.fluctuations)
-            throw new Error('Cannot render modal! Update data is missing.');
+            return lib.throwRenderError(' Update data is missing.');
 
         const feasible = this.playerFeasibles.find(f => f.slot == slot);
 
         if (!feasible)
-            throw new Error('Cannot render modal! Current trade not feasible');
+            return lib.throwRenderError('Current trade not feasible');
 
         this.marketSlot = slot;
         this.description.text((() => {
@@ -127,27 +128,20 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             return { name: requested, isOmited: false, isLocked: false };
         });
 
-        // determine feasible symbols
-        const unaccounted = [...feasible.missing];
-        const feasibleSymbols = trade.request.map(requested => {
-            if (unaccounted.includes(requested)) {
-                unaccounted.splice(unaccounted.indexOf(requested), 1);
-
-                return 'favor';
-            }
-
-            return requested;
-        });
+        const feasibleSymbols = lib.getFeasibleSymbols(
+            trade.request,
+            feasible.missing,
+        );
 
         // update specification for feasability
         feasibleSymbols.forEach((symbol, index) => {
-            if (symbol == 'favor') {
+            if (symbol == 'other') {
                 this.tradeSpecification[index].isOmited = true;
                 this.tradeSpecification[index].isLocked = true;
             }
         });
 
-        this.symbolRow.update({ goods: this.tradeSpecification });
+        this.symbolRow.update({ specifications: this.tradeSpecification, specialist: SpecialistName.chancellor });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
@@ -179,6 +173,6 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             });
         }
 
-        this.symbolRow.update({ goods: this.tradeSpecification });
+        this.symbolRow.update({ specifications: this.tradeSpecification, specialist: SpecialistName.chancellor });
     }
 }
