@@ -1,20 +1,82 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
-import { MarketSlotKey, PlayState, Trade, Unique } from '~/shared_types';
-import { DynamicModalInterface } from '~/client/client_types';
+import { FeasibleTrade, MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
+import { DynamicModalInterface, Specification } from '~/client_types';
+import { CoinDial } from '../popular';
+import { SymbolRow } from './SymbolRow';
+import clientConstants from '~/client_constants';
+import { lib } from './lib';
+
+const { COLOR } = clientConstants;
 
 export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
 
+    private description: Konva.Text;
     private slot: MarketSlotKey | null = null;
+    private feasability: FeasibleTrade | null = null;
     private trade: Trade | null = null;
+    private symbolRow: SymbolRow;
+    private tradeSpecification: Array<Specification> = [];
+    private coinDial: CoinDial;
+
     constructor(stage: Konva.Stage) {
         super(
             stage,
             {
-                hasSubmit: false,
+                hasSubmit: true,
+                actionMessage: null,
+                submitLabel: 'Accept',
                 dismissLabel: 'Close',
             },
+            { width: 340, height: 180 },
         );
+
+        this.description = new Konva.Text({
+            fill: COLOR.boneWhite,
+            fontSize: 18,
+            width: this.contentGroup.width(),
+            align: 'center',
+            y: 10,
+            fontFamily: 'Custom',
+            text: 'In development...',
+        });
+
+        this.symbolRow = new SymbolRow(
+            stage,
+            {
+                width: 50,
+                height: 30,
+                x: 30,
+                y: 65,
+            },
+            (index: number) => this.switchToken(index),
+        );
+
+        const colon = new Konva.Text({
+            text: ':',
+            width: this.contentGroup.width(),
+            align: 'center',
+            y: 65,
+            fontSize: 38,
+            fontFamily: 'Custom',
+            fontStyle: '700',
+            fill: COLOR.boneWhite,
+        });
+
+        this.coinDial = new CoinDial(
+            {
+                x: 215,
+                y: 83,
+            },
+            0,
+        );
+
+        this.contentGroup.add(...[
+            this.description,
+            colon,
+            this.coinDial.getElement(),
+            this.symbolRow.getElement(),
+        ]);
     }
 
     public initialize(state: PlayState) {
@@ -29,14 +91,55 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
     }
 
     public update(state: PlayState): void {
+        const peddlerPlayer = state.players.find(
+            p => p.specialist.name == SpecialistName.peddler,
+        );
+
+        if (!peddlerPlayer)
+            return;
+
         if (!this.slot)
             throw new Error('Cannot update! Peddler modal is not properly initialized.');
 
         this.trade = state.market[this.slot];
+        this.feasability = peddlerPlayer.feasibleTrades.find(
+            t => t.slot == this.slot,
+        ) || null;
     }
 
     public show(): void {
+        if (!this.trade)
+            return lib.throwRenderError('Trade is missing.');
+
+        this.tradeSpecification = this.trade.request.map(requested => {
+            return { name: requested, isOmited: false, isLocked: false };
+        });
+
+        if (!this.feasability)
+            return lib.throwRenderError('Trade feasibility is missing.');
+
+        const feasibleSymbols = lib.getFeasibleSymbols(
+            this.trade.request,
+            this.feasability.missing,
+        );
+
+        const isGoodMissing = feasibleSymbols.includes('other');
+        feasibleSymbols.forEach((symbol, index) => {
+            this.tradeSpecification[index].isLocked = isGoodMissing;
+            if (symbol == 'other')
+                this.tradeSpecification[index].isOmited = true;
+        });
+
+        this.symbolRow.update({ specifications: this.tradeSpecification, specialist: SpecialistName.peddler });
+        this.coinDial.update(this.trade.reward.coins - 1);
         this.open();
-        console.log({ trade: this.trade });
+    }
+
+    private switchToken(index: number) {
+        // const actionMessage =  {
+        //             action: Action.sell_as_peddler,
+        //             payload: { omit: 'marble' },
+        // },
+        console.log({ index, message: 'Not implemented.' });
     }
 }

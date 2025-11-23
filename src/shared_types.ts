@@ -25,6 +25,7 @@ export enum Action {
     drop_item = 'drop_item',
     sell_goods = 'sell_goods',
     sell_as_chancellor = 'sell_as_chancellor',
+    sell_as_peddler = 'sell_as_peddler',
     donate_goods = 'donate_goods',
     sell_specialty = 'sell_specialty',
     buy_metal = 'buy_metal',
@@ -264,6 +265,7 @@ export type LoadGoodPayload = { tradeGood: TradeGood }
 export type DropItemPayload = { item: ItemName }
 export type MarketSalePayload = { slot: MarketSlotKey }
 export type ChancellorMarketSalePayload = { slot: MarketSlotKey, omit: Array<TradeGood> }
+export type PeddlerMarketPayload = { omit: TradeGood }
 export type MetalPurchasePayload = { metal: Metal, currency: Currency }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
@@ -298,7 +300,7 @@ should persist
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
     | Action.sell_goods | Action.donate_goods | Action.buy_metal | Action.donate_metal | Action.pick_specialist
-    | Action.enrol | Action.reposition_opponent | Action.change_color | Action.sell_as_chancellor;
+    | Action.enrol | Action.reposition_opponent | Action.change_color | Action.sell_as_chancellor | Action.sell_as_peddler;
 export type LaconicAction =
     | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
@@ -306,8 +308,8 @@ export type LaconicAction =
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
-    | MarketSalePayload | ChancellorMarketSalePayload | MetalPurchasePayload | PickSpecialistPayload | MetalDonationPayload | EnrolmentPayload
-    | LoadGoodPayload;
+    | MarketSalePayload | ChancellorMarketSalePayload | MetalPurchasePayload | PickSpecialistPayload
+    | MetalDonationPayload | EnrolmentPayload | LoadGoodPayload | PeddlerMarketPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type EnrolMessage = MessageFormat<Action.enrol, EnrolmentPayload>;
@@ -322,6 +324,7 @@ export type RepositionMessage = MessageFormat<Action.reposition | Action.reposit
 export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentRepositioningPayload>;
 export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSalePayload>;
 export type SellAsChancellorMessage = MessageFormat<Action.sell_as_chancellor, ChancellorMarketSalePayload>
+export type SellAsPeddlerMessage = MessageFormat<Action.sell_as_peddler, PeddlerMarketPayload>
 export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSalePayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metal, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metal, MetalDonationPayload>;
@@ -329,7 +332,7 @@ export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSp
 export type ClientMessage =
     | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage
     | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage | EnrolMessage
-    | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage;
+    | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage | SellAsPeddlerMessage;
 
 export type ClientRequest = {
     gameId: string | null,
