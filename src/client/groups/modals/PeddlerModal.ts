@@ -1,11 +1,9 @@
 import Konva from 'konva';
-import { ModalBase } from './ModalBase';
 import { Action, FeasibleTrade, MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
 import { DynamicModalInterface, Specification } from '~/client_types';
 import { CoinDial } from '../popular';
-import { SymbolRow } from './SymbolRow';
+import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
-import { lib } from './lib';
 
 const { COLOR } = clientConstants;
 
