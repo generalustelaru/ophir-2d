@@ -2,14 +2,14 @@ import Konva from 'konva';
 import { ItemToken } from '../player';
 import { ItemName, Unique } from '~/shared_types';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import { FavorToken } from '.';
+// import { ItemToken } from '.'
 
 type Specificity = {
     alignRight?: boolean,
     spacing?: number,
     itemCallback?: (name: ItemName) => void,
 }
-type TokenData = { x: number, token: ItemToken | FavorToken | null }
+type TokenData = { x: number, token: ItemToken | null }
 type Update = { items: Array<ItemName>, isClickable?: boolean }
 
 export class ItemRow implements Unique<DynamicGroupInterface<Update>>{
