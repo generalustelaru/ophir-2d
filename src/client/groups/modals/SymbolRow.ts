@@ -1,36 +1,45 @@
 import Konva from 'konva';
-import { ItemToken } from '../player';
-import { SpecialistName, Unique } from '~/shared_types';
+import { Coordinates, SpecialistName, Unique } from '~/shared_types';
 import { DynamicGroupInterface, Specification, GroupLayoutData } from '~/client_types';
-import { TradeGoodToken, FavorToken, RetainedToken } from './';
+import { SpecificationToken } from './SpecificationToken';
 
-type TokenData = { x: number, token: ItemToken | FavorToken | null }
 type Update = {
     specifications: Array<Specification>,
     specialist: SpecialistName.peddler | SpecialistName.chancellor,
 }
 
+const segmentWidth = 30;
+
 export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
 
     private group: Konva.Group;
-    private stage: Konva.Stage;
-    private drawData: Array<TokenData>;
-    private switchCallback: ((index: number) => void);
-
+    // private stage: Konva.Stage;
+    // private drawData: Array<TokenData>;
+    private tokens: Array<SpecificationToken>;
+    // private switchCallback: ((index: number) => void);
+    private referenceX: number;
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         switchCallback: (index: number) => void,
     ) {
-        this.switchCallback = switchCallback;
         this.group = new Konva.Group({ ...layout });
-        this.stage = stage;
-        const segmentWidth = 30;
-        this.drawData = [
-            { x: segmentWidth, token: null },
-            { x: segmentWidth * 2, token: null },
-            { x: segmentWidth * 3, token: null },
+        this.referenceX = layout.x;
+
+        const vOffset = 4;
+        const tokenPositions: Array<Coordinates> = [
+            { x: segmentWidth, y: vOffset },
+            { x: segmentWidth * 2, y: vOffset },
+            { x: segmentWidth * 3, y: vOffset },
         ];
+
+        this.tokens = tokenPositions.map((position, index) => {
+            return new SpecificationToken(stage, position, () => switchCallback(index));
+        });
+
+        for (const token of this.tokens) {
+            this.group.add(token.getElement());
+        }
     }
 
     public getElement() {
@@ -38,48 +47,21 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
     }
 
     public update(data: Update) {
+        const { specifications, specialist } = data;
+        const omitSymbol = specialist == SpecialistName.chancellor ? 'favor' : 'none';
 
-        for (const oldItem of this.drawData) {
-            oldItem.token = oldItem.token?.selfDestruct() || null;
-        }
+        this.tokens.forEach((token, index) => {
+            const entry = specifications[index];
 
-        const { specifications: items, specialist } = data;
-        const omitSymbol = specialist == SpecialistName.chancellor ? 'favor' : 'retained';
+            if(!entry)
+                return token.update(null);
 
-        let layoutIndex = 3 - items.length;
-        items.forEach((item, index) => {
-            this.addItem(layoutIndex++, index, item, omitSymbol);
+            token.update({
+                type: entry.isOmited ? omitSymbol : entry.name,
+                isClickable: !entry.isLocked,
+            });
         });
+
+        this.group.x(this.referenceX + (3 - specifications.length) * segmentWidth);
     }
-
-    private addItem(layoutIndex: number, itemIndex: number, item: Specification, omitSymbol: 'favor' | 'retained'): void {
-        const data = this.drawData[layoutIndex];
-        const callback = () => this.switchCallback(itemIndex);
-        const token = (() => {
-            if (item.isOmited) {
-                return omitSymbol == 'favor'
-                    ? new FavorToken(
-                        this.stage,
-                        { x: data.x, y: 4 },
-                        item.isLocked ? null : callback,
-                    )
-                    : new RetainedToken(
-                        this.stage,
-                        { x: data.x, y: 4 },
-                        item.isLocked ? null : callback,
-                    );
-            }
-
-            return new TradeGoodToken(
-                this.stage,
-                { x: data.x, y: 4 },
-                item.name,
-                item.isLocked ? null : callback,
-            );
-        })();
-
-        data.token = token;
-        this.group.add(token.getElement());
-    }
-
 }

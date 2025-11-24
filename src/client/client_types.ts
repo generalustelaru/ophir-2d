@@ -88,6 +88,10 @@ export interface StaticGroupInterface {
     getElement(): Konva.Group,
 }
 
+export interface GroupFactory {
+    produceElement(p?: any): Konva.Group,
+}
+
 export type GroupLayoutData = {
     width: number,
     height: number,
