@@ -1,3 +1,5 @@
+export { lib } from './lib';
+export { ModalBase } from './ModalBase';
 export { SellGoodsModal } from './SellGodsModal';
 export { StartTurnModal } from './StartTurnModal';
 export { DonateGoodsModal } from './DonateGoodsModal';

@@ -5,7 +5,7 @@ import { SpecificationToken } from './SpecificationToken';
 
 type Update = {
     specifications: Array<Specification>,
-    specialist: SpecialistName.peddler | SpecialistName.chancellor,
+    specialist: SpecialistName.peddler | SpecialistName.chancellor | null,
 }
 
 const segmentWidth = 30;
@@ -13,15 +13,13 @@ const segmentWidth = 30;
 export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
 
     private group: Konva.Group;
-    // private stage: Konva.Stage;
-    // private drawData: Array<TokenData>;
     private tokens: Array<SpecificationToken>;
-    // private switchCallback: ((index: number) => void);
     private referenceX: number;
+
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        switchCallback: (index: number) => void,
+        switchCallback: ((index: number) => void) | null,
     ) {
         this.group = new Konva.Group({ ...layout });
         this.referenceX = layout.x;
@@ -34,7 +32,11 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
         ];
 
         this.tokens = tokenPositions.map((position, index) => {
-            return new SpecificationToken(stage, position, () => switchCallback(index));
+            return new SpecificationToken(
+                stage,
+                { ...position },
+                switchCallback ? () => switchCallback(index) : null,
+            );
         });
 
         for (const token of this.tokens) {

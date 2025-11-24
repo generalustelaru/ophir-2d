@@ -1,8 +1,8 @@
 import Konva from 'konva';
 import { MarketOffer, PlayState, MarketSlotKey, Action, Unique } from '~/shared_types';
 import { DynamicModalInterface } from '~/client/client_types';
-import { FavorDial, ItemRow, VictoryPointDial } from '../popular';
-import { ModalBase } from './ModalBase';
+import { FavorDial, VictoryPointDial } from '../popular';
+import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
 import localState from '~/client/state';
 
@@ -10,7 +10,7 @@ const { COLOR } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private market: MarketOffer | null = null;
-    private itemRow: ItemRow;
+    private symbolRow: SymbolRow;
     private victoryPointDial: VictoryPointDial;
     private favorDial: FavorDial;
     private playerFavor: number = 0;
@@ -37,7 +37,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             fontFamily: 'Custom',
         });
 
-        this.itemRow = new ItemRow(
+        this.symbolRow = new SymbolRow(
             stage,
             {
                 width: 50,
@@ -45,7 +45,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
                 x: 30,
                 y: 65,
             },
-            { alignRight: true },
+            null,
         );
 
         const colon = new Konva.Text({
@@ -73,7 +73,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
 
         this.contentGroup.add(...[
             description,
-            this.itemRow.getElement(),
+            this.symbolRow.getElement(),
             colon,
             this.victoryPointDial.getElement(),
             this.favorDial.getElement(),
@@ -90,14 +90,17 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
 
     public show(slot: MarketSlotKey) {
         if (!this.market)
-            throw new Error('Cannot render modal! Update data is missing.');
+            return lib.throwRenderError('Market data is not initialized.');
 
         const trade = this.market[slot];
         const favorReward = trade.reward.favorAndVp;
         const missingFavor = 6 - this.playerFavor;
 
         this.favorDial.update(Math.min(favorReward, missingFavor));
-        this.itemRow.update({ items: trade.request });
+        const specifications = trade.request.map(requested => {
+            return { name: requested, isOmited: false, isLocked: true };
+        });
+        this.symbolRow.update({ specifications, specialist: null });
         this.victoryPointDial.update(trade.reward.favorAndVp);
 
         this.open({ action: Action.donate_goods, payload: { slot } });

@@ -2,8 +2,7 @@ import Konva from 'konva';
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, Unique } from '~/shared_types';
 import { DynamicModalInterface } from '~/client_types';
 import { CoinDial } from '../popular';
-import { ItemRow } from '../popular';
-import { ModalBase } from './ModalBase';
+import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
 
 const { COLOR } = clientConstants;
@@ -12,7 +11,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
     private fluctuations: MarketFluctuations | null = null;
     private market: MarketOffer | null = null;
     private coinDial: CoinDial;
-    private itemRow: ItemRow;
+    private symbolRow: SymbolRow;
 
     constructor(stage: Konva.Stage) {
         super(
@@ -36,7 +35,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
             fontFamily: 'Custom',
         });
 
-        this.itemRow = new ItemRow(
+        this.symbolRow = new SymbolRow(
             stage,
             {
                 width: 50,
@@ -44,7 +43,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
                 x: 30,
                 y: 65,
             },
-            { alignRight: true },
+            null,
         );
 
         const colon = new Konva.Text({
@@ -68,7 +67,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
 
         this.contentGroup.add(...[
             description,
-            this.itemRow.getElement(),
+            this.symbolRow.getElement(),
             colon,
             this.coinDial.getElement(),
         ]);
@@ -81,11 +80,15 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
 
     public show(slot: MarketSlotKey) {
         if (!this.market || !this.fluctuations)
-            throw new Error('Cannot render modal! Update data is missing.');
+            return lib.throwRenderError('Update data is missing.');
 
         const trade = this.market[slot];
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
-        this.itemRow.update({ items: trade.request });
+
+        const specifications = trade.request.map(requested => {
+            return { name: requested, isOmited: false, isLocked: true };
+        });
+        this.symbolRow.update({ specifications, specialist: null });
         this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }
