@@ -9,18 +9,21 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
     private group: Konva.Group;
     private playerPlacards: Array<PlayerPlacard> = [];
     private rivalPlacard: RivalPlacard | null = null;
-    private endRivalTurnCallback: (p: boolean) => void;
+    private endRivalTurnCallback: ((isShiftingMarket: boolean) => void) | null = null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, endRivalTurnCallback: (p: boolean) => void) {
+    constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
             x: layout.x,
             y: layout.y,
         });
-        stage.getLayers()[LayerIds.base].add(this.group);
+        stage.getLayers()[LayerIds.board].add(this.group);
         this.stage = stage;
-        this.endRivalTurnCallback = endRivalTurnCallback;
+    }
+
+    public setRivalCallback(callback: (p: boolean) => void) {
+        this.endRivalTurnCallback = callback;
     }
 
     // MARK: DRAW
@@ -49,6 +52,9 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         });
 
         if (rival.isIncluded) {
+            if (!this.endRivalTurnCallback)
+                throw new Error('Cannot add rival placard. Callback not initialized.');
+
             this.rivalPlacard = new RivalPlacard(
                 this.stage,
                 this.endRivalTurnCallback,

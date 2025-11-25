@@ -3,7 +3,7 @@ import { DynamicGroupInterface } from '~/client_types';
 import { Coordinates, TradeGood, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import clientConstants from '~/client/client_constants';
-import { FavorFactory, TradeGoodFactory} from './';
+import { FavorFactory, TradeGoodFactory } from '.';
 
 const { COLOR } = clientConstants;
 
@@ -57,7 +57,6 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
         return this.group;
     }
 
-
     public update(data: Update) {
 
         if (data == null) {
@@ -97,9 +96,4 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
             this.activeBackground.visible(false);
         }
     }
-
-    // public selfDestruct(): null {
-    //     this.group.destroy();
-    //     return null;
-    // }
 }

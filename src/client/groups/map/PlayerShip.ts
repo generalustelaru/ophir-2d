@@ -227,9 +227,9 @@ export class PlayerShip extends Communicator {
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
                     departureZone.resetFill();
+                    this.inControl && player.moveActions && this.activeEffect.start();
             }
 
-            this.inControl && player.moveActions && this.activeEffect.start();
         });
         this.group.add(this.ship.getElement());
     }

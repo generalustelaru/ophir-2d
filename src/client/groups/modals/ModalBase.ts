@@ -15,10 +15,9 @@ type SubmitBehavior = {
     dismissLabel: string,
 }
 
-const { COLOR } = clientConstants;
+const { COLOR, STAGE_AREA } = clientConstants;
 
 export abstract class ModalBase {
-    protected stage: Konva.Stage;
     private screenGroup: Konva.Group;
     private modalGroup: Konva.Group;
     protected contentGroup: Konva.Group;
@@ -31,34 +30,34 @@ export abstract class ModalBase {
         behavior: SubmitBehavior,
         dimensions: { width: number, height: number } = { width: 300, height: 150 },
     ) {
-        this.stage = stage;
-        const { width, height } = dimensions;
+        const { width: stageWidth, height: stageHeight } = STAGE_AREA;
+        const { width: modalWidth, height: modalHeight } = dimensions;
 
         this.screenGroup = new Konva.Group({
-            width: stage.width(),
-            height: stage.height(),
+            width: stageWidth,
+            height: stageHeight,
             visible: false,
         });
 
         // lock layer
         this.screenGroup.add(...[
             new Konva.Rect({
-                width: stage.width(),
-                height: stage.height(),
+                width: stageWidth,
+                height: stageHeight,
             }),
         ]);
 
         this.modalGroup = new Konva.Group({
-            x: stage.width() / 2 - width / 2,
-            y: stage.height() / 2 - height / 2,
-            width,
-            height,
+            x: stageWidth / 2 - modalWidth / 2,
+            y: stageHeight / 2 - modalHeight / 2,
+            width: modalWidth,
+            height: modalHeight,
         });
 
         this.modalGroup.add(...[
             new Konva.Rect({
-                width,
-                height,
+                width: modalWidth,
+                height: modalHeight,
                 fill: COLOR.modalBlue,
                 cornerRadius: 10,
                 stroke: COLOR.boneWhite,
@@ -66,9 +65,9 @@ export abstract class ModalBase {
             }),
         ]);
 
-        const buttonLevel = height - 50;
+        const buttonLevel = modalHeight - 50;
 
-        this.contentGroup = new Konva.Group({ width, height: buttonLevel });
+        this.contentGroup = new Konva.Group({ width: modalWidth, height: buttonLevel });
 
         this.dismissButton = new DismissButton(
             stage,
@@ -85,7 +84,7 @@ export abstract class ModalBase {
 
         if (behavior.hasSubmit) {
             this.acceptButton = new AcceptButton(
-                this.stage,
+                stage,
                 {
                     x: this.modalGroup.width() / 2 + 25,
                     y: buttonLevel,
@@ -105,7 +104,7 @@ export abstract class ModalBase {
         this.screenGroup.add(...[
             this.modalGroup,
         ]);
-        stage.getLayers()[LayerIds.modal].add(this.screenGroup);
+        stage.getLayers()[LayerIds.modals].add(this.screenGroup);
     }
 
     protected open(message: ClientMessage|null = null) {

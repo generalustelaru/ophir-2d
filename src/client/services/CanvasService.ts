@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GameSetupPayload, MarketSlotKey, Phase, State } from '~/shared_types';
+import { GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -12,28 +12,29 @@ import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
     EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal,
 } from '../groups/modals/';
+import clientConstants from '../client_constants';
 
 export class CanvasService extends Communicator {
     private stage: Konva.Stage;
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
     private playerGroup: PlayerGroup;
-    private setupGroup: SetupGroup;
-    private enrolmentGroup: EnrolmentGroup;
+    private setupGroup: SetupGroup; // TODO: make nullable, not to persist in play phase
+    private enrolmentGroup: EnrolmentGroup; // TODO: make nullable, not to persist in play phase
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false;
     private isPlayDrawn: boolean = false;
     private startTurnModal: StartTurnModal;
     private endTurnModal: EndTurnModal;
-    private forceTurnModal: ForceTurnModal;
-    private sellGoodsModal: SellGoodsModal;
-    private donateGoodsModal: DonateGoodsModal;
     private sailAttemptModal: SailAttemptModal;
-    private rivalControlModal: RivalControlModal;
-    private endRivalTurnModal: EndRivalTurnModal;
-    private advisorModal: AdvisorModal;
-    private chancellorModal: ChancellorModal;
-    private peddlerModal: PeddlerModal;
+    private forceTurnModal: ForceTurnModal;
+    private sellGoodsModal: SellGoodsModal | null = null;
+    private donateGoodsModal: DonateGoodsModal | null = null;
+    private rivalControlModal: RivalControlModal | null = null;
+    private endRivalTurnModal: EndRivalTurnModal | null = null;
+    private advisorModal: AdvisorModal | null = null;
+    private chancellorModal: ChancellorModal | null = null;
+    private peddlerModal: PeddlerModal | null = null;
 
     constructor() {
         super();
@@ -47,30 +48,17 @@ export class CanvasService extends Communicator {
         });
 
         this.stage.add(...[
-            new Konva.Layer(), // [0] for the board
-            new Konva.Layer(), // [1] for modals
-            new Konva.Layer(), // [2] for popups, tooltips.
+            new Konva.Layer(), //  base
+            new Konva.Layer(), //  map
+            new Konva.Layer(), //  modal
+            new Konva.Layer(), //  overlay.
         ]);
 
         const segmentWidth = this.stage.width() / 4;
 
         // Common modals
-        this.donateGoodsModal = new DonateGoodsModal(this.stage);
-        this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.endTurnModal = new EndTurnModal(this.stage);
         this.sailAttemptModal = new SailAttemptModal(this.stage);
-        this.rivalControlModal = new RivalControlModal(this.stage);
-        this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
-
-        // Specialist modals
-        this.advisorModal = new AdvisorModal(
-            this.stage,
-            (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
-        );
-        this.chancellorModal = new ChancellorModal(this.stage);
-        this.peddlerModal = new PeddlerModal(this.stage);
-
-        // Notification modals
         this.startTurnModal = new StartTurnModal(this.stage);
         this.forceTurnModal = new ForceTurnModal(this.stage);
 
@@ -82,11 +70,7 @@ export class CanvasService extends Communicator {
                 x: 0,
                 y: 0,
             },
-            (slot: MarketSlotKey) => { this.sellGoodsModal.show(slot); },
-            (slot: MarketSlotKey) => { this.donateGoodsModal.show(slot); },
-            () => { this.advisorModal.show(); },
-            (slot: MarketSlotKey) => { this.chancellorModal.show(slot); },
-            () => { this.peddlerModal.show(); },
+
         ); // locationGroup covers 1 segment, sitting on the left
 
         this.playerGroup = new PlayerGroup(
@@ -96,9 +80,6 @@ export class CanvasService extends Communicator {
                 width: segmentWidth,
                 x: segmentWidth * 3,
                 y: 0,
-            },
-            (isShiftingMarket: boolean) => {
-                this.endRivalTurnModal.show(isShiftingMarket);
             },
         ); // playerGroup covers 1 segment, sitting on the right
 
@@ -194,20 +175,20 @@ export class CanvasService extends Communicator {
             case Phase.play:
                 this.setupGroup.disable();
                 if (!this.isPlayDrawn) {
+                    this.initializeModals(state);
                     this.stage.visible(true);
                     this.mapGroup.drawElements(state);
                     this.locationGroup.drawElements(state);
                     this.playerGroup.drawElements(state);
-                    this.peddlerModal.initialize(state);
                     this.isPlayDrawn = true;
                 }
-                this.sellGoodsModal.update(state);
-                this.donateGoodsModal.update(state);
-                this.endTurnModal.update(state);
-                this.rivalControlModal.update(state);
-                this.advisorModal.update(state);
-                this.chancellorModal.update(state);
-                this.peddlerModal.update(state);
+                this.sellGoodsModal?.update(state);
+                this.donateGoodsModal?.update(state);
+                this.endTurnModal?.update(state);
+                this.rivalControlModal?.update(state);
+                this.advisorModal?.update(state);
+                this.chancellorModal?.update(state);
+                this.peddlerModal?.update(state);
                 this.locationGroup.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
@@ -227,7 +208,14 @@ export class CanvasService extends Communicator {
     }
 
     public fitStageIntoParentContainer() {
+        const { width, height, scale } = this.calculateDimensions();
 
+        this.stage.width(width);
+        this.stage.height(height);
+        this.stage.scale({ x: scale, y: scale });
+    }
+
+    private calculateDimensions() {
         const container = document.getElementById('canvas')?.getBoundingClientRect();
 
         if (!container)
@@ -235,14 +223,99 @@ export class CanvasService extends Communicator {
 
         const elementWidth = container.width;
 
-        const sceneWidth = 1200;
-        const sceneHeight = 500;
+        const {
+            width: sceneWidth ,
+            height: sceneHeight,
+        } = clientConstants.STAGE_AREA;
 
         const scale = elementWidth / sceneWidth;
 
-        this.stage.width(sceneWidth * scale);
-        this.stage.height(sceneHeight * scale);
-        this.stage.scale({ x: scale, y: scale });
+        return {
+            width: sceneWidth * scale,
+            height: sceneHeight * scale,
+            scale,
+        };
+    }
+
+    private initializeModals(state: PlayState) {
+        const localPlayer = state.players.find(p => p.color == localState.playerColor);
+
+        if (!localPlayer)
+            return;
+
+        if (state.rival.isIncluded) {
+            this.rivalControlModal = new RivalControlModal(this.stage);
+            this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
+            this.playerGroup.setRivalCallback(
+                (isShiftingMarket: boolean) => { this.endRivalTurnModal!.show(isShiftingMarket);},
+            );
+            // this.mapGroup.
+        }
+
+        switch (localPlayer.specialist.name) {
+            case SpecialistName.advisor:
+                this.initializeForAdvisor();
+                break;
+            case SpecialistName.chancellor:
+                this.initializeForChancellor();
+                break;
+            case SpecialistName.peddler:
+                this.initializeForPeddler(state);
+                break;
+            default:
+                this.initializeForOther();
+        }
+    }
+
+    private initializeForAdvisor() {
+        this.sellGoodsModal = new SellGoodsModal(this.stage);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+        this.advisorModal = new AdvisorModal(
+            this.stage,
+            (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+        );
+
+        this.locationGroup.setCallbacks({
+            tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal?.show(slot); },
+            advisorCallback: () => { this.advisorModal!.show(); },
+            // donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+        });
+    }
+
+    private initializeForChancellor() {
+        this.chancellorModal = new ChancellorModal(this.stage);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+
+        this.locationGroup.setCallbacks({
+            tradeCallback: (slot: MarketSlotKey) => { this.chancellorModal!.show(slot); },
+            donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+        });
+    }
+
+    private initializeForPeddler(state: PlayState) {
+        const { marketFluctuations } = state.setup;
+        this.peddlerModal = new PeddlerModal(
+            this.stage,
+            { ...marketFluctuations },
+        );
+        this.sellGoodsModal = new SellGoodsModal(this.stage);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+
+        this.locationGroup.setCallbacks({
+            tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
+            peddlerCallback: () => { this.peddlerModal!.show(); },
+            donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+        });
+    }
+
+    private initializeForOther() {
+        this.sellGoodsModal = new SellGoodsModal(this.stage);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+
+        this.locationGroup.setCallbacks({
+            tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
+            donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+        });
     }
 };
 

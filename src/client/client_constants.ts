@@ -2,6 +2,7 @@
 import { ClientConstants } from '~/client_types';
 
 const clientConstants: ClientConstants = {
+    STAGE_AREA: { width: 1200, height: 500 },
     DEFAULT_LOCAL_STATE: {
         gameId: null,
         socketId: null,

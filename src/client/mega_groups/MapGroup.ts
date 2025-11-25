@@ -15,6 +15,7 @@ const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEM
 
 export class MapGroup implements Unique<MegaGroupInterface> {
     private group: Konva.Group;
+    private shipGroup: Konva.Group;
     private stage: Konva.Stage;
     private movesDial: MovesDial | null = null;
     private endTurnButton: EndTurnButton | null = null;
@@ -28,13 +29,11 @@ export class MapGroup implements Unique<MegaGroupInterface> {
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, endTurnCallback: Function) {
         this.endTurnCallback = endTurnCallback;
-        this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            x: layout.x,
-            y: layout.y,
-        });
-        stage.getLayers()[LayerIds.base].add(this.group);
+        this.group = new Konva.Group({ ...layout });
+        stage.getLayers()[LayerIds.board].add(this.group);
+
+        this.shipGroup = new Konva.Group({ ...layout });
+        stage.getLayers()[LayerIds.ships].add(this.shipGroup);
         this.stage = stage;
     }
 
@@ -115,6 +114,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
 
 
         //MARK: ships
+        const shipNodes: Array<Konva.Group> = [];
         players.forEach(player => {
 
             if (player.color && player.color !== localState.playerColor) {
@@ -127,7 +127,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                     this.seaZones,
                 );
                 this.opponentShips.push(ship);
-                this.group.add(ship.getElement());
+                shipNodes.push(ship.getElement());
             }
         });
 
@@ -138,7 +138,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 state.rival,
                 localState.playerColor,
             );
-            this.group.add(this.rivalShip.getElement());
+            shipNodes.push(this.rivalShip.getElement());
         }
 
         if (localState.playerColor) {
@@ -157,8 +157,10 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 state.rival,
             );
             this.localShip.switchControl(localPlayer.isActive);
-            this.group.add(this.localShip.getElement());
+            shipNodes.push(this.localShip.getElement());
         }
+
+        this.shipGroup.add( ...shipNodes );
     }
 
     // MARK: UPDATE

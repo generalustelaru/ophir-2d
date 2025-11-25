@@ -16,7 +16,7 @@ export class EnrolmentGroup implements Unique<MegaGroupInterface> {
             x: layout.x,
             y: layout.y,
         });
-        stage.getLayers()[LayerIds.modal].add(this.group);
+        stage.getLayers()[LayerIds.modals].add(this.group);
         this.stage = stage;
     }
 

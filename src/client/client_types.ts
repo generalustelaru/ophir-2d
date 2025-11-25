@@ -36,12 +36,14 @@ export type Specification = {
 }
 
 export enum LayerIds {
-    base,
-    modal,
+    board,
+    ships,
+    modals,
     overlay,
 }
 
 export type ClientConstants = {
+    STAGE_AREA: { width: number, height: number },
     DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,

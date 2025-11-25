@@ -11,6 +11,7 @@ type DonationItem = {
 }
 
 export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
+    private stage: Konva.Stage;
     private advisorTrades: Array<DonationItem>;
     private cardRow: RowDistributor;
     private cardSelectionCallback: (slot: MarketSlotKey) => void;
@@ -25,7 +26,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         );
 
         this.cardSelectionCallback = donateGoodsCallback;
-
+        this.stage = stage;
         this.advisorTrades = [];
         this.cardRow = new RowDistributor(
             {
@@ -49,7 +50,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         );
     }
 
-    public show() {
+    public show() { // TODO: see not to create these on the fly, but update them.
         const rowElements = this.advisorTrades.map(item => {
             const card = new TempleMarketCard(
                 this.stage,

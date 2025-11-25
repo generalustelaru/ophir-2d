@@ -4,32 +4,27 @@ import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
 import { PlayState, SpecialistName, Unique } from '~/shared_types';
 
+type LocationGroupCallbacks = {
+    tradeCallback: Function
+    donateGoodsCallback?: Function,
+    advisorCallback?: Function,
+    peddlerCallback?: Function,
+}
 export class LocationGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage;
     private group: Konva.Group;
     private marketArea: MarketArea | null = null;
     private treasuryArea: TreasuryArea | null = null;
     private templeArea: TempleArea | null = null;
-    private sellGoodsCallback: Function;
-    private donateGoodsCallback: Function;
-    private advisorOptionsCallback: Function;
-    private chancellorOptionsCallback: Function;
-    private peddlerCallback: Function;
+    private tradeCallback: Function | null = null;
+    private peddlerCallback: Function | null = null;
+    private donateGoodsCallback: Function | null = null;
+    private advisorOptionsCallback: Function | null = null;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        sellGoodsCallback: Function,
-        donateGoodsCallback: Function,
-        advisorCallback: Function,
-        chancellorCallback: Function,
-        peddlerCallback: Function,
     ) {
-        this.sellGoodsCallback = sellGoodsCallback;
-        this.donateGoodsCallback = donateGoodsCallback;
-        this.advisorOptionsCallback = advisorCallback;
-        this.chancellorOptionsCallback = chancellorCallback;
-        this.peddlerCallback = peddlerCallback;
 
         this.group = new Konva.Group({
             width: layout.width,
@@ -37,25 +32,26 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             x: layout.x + 10,
             y: layout.y + 10,
         });
-        stage.getLayers()[LayerIds.base].add(this.group);
+        stage.getLayers()[LayerIds.board].add(this.group);
         this.stage = stage;
+    }
+
+    public setCallbacks(selection:LocationGroupCallbacks) {
+        const { tradeCallback, donateGoodsCallback, advisorCallback, peddlerCallback } = selection;
+        this.tradeCallback = tradeCallback;
+        donateGoodsCallback && (this.donateGoodsCallback = donateGoodsCallback);
+        advisorCallback && (this.advisorOptionsCallback = advisorCallback);
+        peddlerCallback && (this.peddlerCallback = peddlerCallback);
     }
 
     public drawElements(state: PlayState): void {
         const setup = state.setup;
 
-        if (!setup) {
+        if (!setup)
             throw new Error('State is missing setup data.');
-        }
 
-        const specialistName = state.players.find(
-            p => p.color == localState.playerColor,
-        )?.specialist.name || null;
-
-        const tradeCallback = (specialistName == SpecialistName.chancellor
-            ? this.chancellorOptionsCallback
-            : this.sellGoodsCallback
-        );
+        if (!this.tradeCallback)
+            throw new Error('Default trade callback is missing.');
 
         const heightSegment = this.group.height() / 9;
 
@@ -70,8 +66,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 x: 0,
                 y: 0,
             },
-            tradeCallback,
-            specialistName == SpecialistName.peddler ? this.peddlerCallback : null,
+            this.tradeCallback,
+            this.peddlerCallback,
         );
 
         this.treasuryArea = new TreasuryArea(
@@ -83,6 +79,10 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 y: this.marketArea.getElement().height(),
             },
         );
+
+        const specialistName = state.players.find(
+            p => p.color == localState.playerColor,
+        )?.specialist.name || null;
 
         this.templeArea = new TempleArea(
             this.stage,
@@ -96,8 +96,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             },
             state.temple.maxLevel,
             specialistName == SpecialistName.advisor,
-            this.donateGoodsCallback,
-            this.advisorOptionsCallback,
+            this.donateGoodsCallback || (() => {}),
+            this.advisorOptionsCallback || (() => {}),
         );
 
         this.group.add(

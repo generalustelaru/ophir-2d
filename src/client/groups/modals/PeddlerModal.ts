@@ -1,5 +1,7 @@
 import Konva from 'konva';
-import { Action, FeasibleTrade, MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
+import {
+    Action, FeasibleTrade, MarketFluctuations, MarketSlotKey, PlayState, SpecialistName, Trade, Unique,
+} from '~/shared_types';
 import { DynamicModalInterface, Specification } from '~/client_types';
 import { CoinDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
@@ -10,7 +12,7 @@ const { COLOR } = clientConstants;
 export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
 
     private description: Konva.Text;
-    private slot: MarketSlotKey | null = null;
+    private slot: MarketSlotKey;
     private feasability: FeasibleTrade | null = null;
     private trade: Trade | null = null;
     private symbolRow: SymbolRow;
@@ -18,7 +20,10 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
     private coinDial: CoinDial;
     private selectedIndex: number = -1;
 
-    constructor(stage: Konva.Stage) {
+    constructor(
+        stage: Konva.Stage,
+        marketFluctuations: MarketFluctuations,
+    ) {
         super(
             stage,
             {
@@ -29,6 +34,15 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             },
             { width: 340, height: 180 },
         );
+
+        this.slot = ((): MarketSlotKey => {
+            const { slot_1, slot_2 } = marketFluctuations;
+            switch(-1) {
+                case slot_1: return 'slot_1';
+                case slot_2: return 'slot_2';
+                default: return 'slot_3';
+            }
+        })();
 
         this.description = new Konva.Text({
             fill: COLOR.boneWhite,
@@ -76,17 +90,6 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             this.coinDial.getElement(),
             this.symbolRow.getElement(),
         ]);
-    }
-
-    public initialize(state: PlayState) {
-        this.slot = ((): MarketSlotKey => {
-            const { slot_1, slot_2 } = state.setup.marketFluctuations;
-            switch(-1) {
-                case slot_1: return 'slot_1';
-                case slot_2: return 'slot_2';
-                default: return 'slot_3';
-            }
-        })();
     }
 
     public update(state: PlayState): void {
