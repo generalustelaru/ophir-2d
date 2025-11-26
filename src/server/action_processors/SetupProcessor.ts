@@ -207,6 +207,8 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             setupState.setup.mapPairings,
         );
 
+        const fluctuations = this.getMarketFluctuations();
+
         const playStateHandler = new PlayStateHandler(
             SERVER_NAME,
             {
@@ -229,8 +231,9 @@ export class SetupProcessor implements Unique<SessionProcessor> {
                 setup: {
                     barriers: setupState.setup.barriers,
                     mapPairings: setupState.setup.mapPairings,
-                    marketFluctuations: this.getMarketFluctuations(),
+                    marketFluctuations: fluctuations,
                     templeTradeSlot: this.determineTempleTradeSlot(),
+                    reducedValueSlot: this.getReducedValueSlot(fluctuations),
                 },
                 rival: this.getRivalShipData(
                     Boolean(playerSelections.length < 3),
@@ -526,6 +529,17 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             .splice(Math.floor(Math.random() * 3), 1)
             .shift() as MarketSlotKey
         );
+    }
+
+    private getReducedValueSlot(fluctuations: MarketFluctuations): MarketSlotKey {
+        switch (-1) {
+            case fluctuations.slot_1:
+                return 'slot_1';
+            case fluctuations.slot_2:
+                return 'slot_2';
+            default:
+                return 'slot_3';
+        }
     }
 
     // MARK: Exchange

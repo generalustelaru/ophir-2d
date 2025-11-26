@@ -382,7 +382,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         if (lib.checkConditions([
             player.hasAction(Action.sell_goods),
-            player.getTrades().map(t => t.slot).includes(slot),
+            player.getFeasibles().map(t => t.slot).includes(slot),
         ]).err) {
             return lib.fail(`${name} cannnot sell goods`);
         }
@@ -433,9 +433,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const { player, payload } = data;
         this.clearUndo(player);
 
-        if (!player.hasAction(Action.sell_as_chancellor))
-            return lib.fail('Only chancellor may sell favor as goods.');
-
         const chancellorPayload = validator.validateChancellorPayload(payload);
 
         if(!chancellorPayload)
@@ -443,13 +440,17 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         const { slot, omit } = chancellorPayload;
 
-        const favor = player.getFavor();
+        const maySell = lib.checkConditions([
+            player.isChancellor(),
+            player.hasAction(Action.sell_as_chancellor),
+            !!player.getFeasibles().find(f => f.slot == slot),
+        ]);
 
-        if (favor < omit.length)
-            return lib.fail('Not enough favor to substitute ommisions');
+        if (!maySell)
+            return lib.fail('Conditions for chancellor sale not met.');
 
         const { request, reward } = this.playState.getMarketTrade(slot);
-        const payable = this.subtractTradeGoods([...request], omit, false);
+        const payable = this.subtractTradeGoods(request, omit, false);
 
         if(payable.err)
             return lib.fail('Ommited items are not included in request');
@@ -473,6 +474,63 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 (omit.length ? `spent ${omit.length} favor to trade ` : 'traded ')
                 + `${delivered} ${delivered == 1 ? 'good' : 'goods'} for `
                 + (coins === 0 ? 'naught' : `${coins} ${coins === 1 ? 'coin' : 'coins'}`)
+            ),
+        });
+
+        const marketShift = this.shiftMarketCards(player);
+
+        if (marketShift.err)
+            return lib.fail(marketShift.message);
+
+        if (marketShift.data.hasGameEnded)
+            this.playState.registerGameEnd(marketShift.data.countables);
+
+        return this.continueTurn(player);
+    }
+
+    public sellAsPeddler(data: DataDigest): Probable<StateResponse> {
+        const { player, payload } = data;
+        this.clearUndo(player);
+
+        const peddlerPayload = validator.validatePeddlerPayload(payload);
+
+        if (!peddlerPayload)
+            return lib.fail(lib.validationErrorMessage());
+
+        const maySell = lib.checkConditions([
+            player.isPeddler(),
+            player.hasAction(Action.sell_goods),
+            !!player.getFeasibles().find(t => t.slot == this.playState.getReducedValueSlot()),
+        ]);
+
+        if (!maySell)
+            return lib.fail('Conditions for peddler sale not met.');
+
+        const { omit } = peddlerPayload;
+        const { request, reward } = this.playState.getMarketTrade(this.playState.getReducedValueSlot());
+
+        const payable = this.subtractTradeGoods(request, [omit], false);
+
+        if(payable.err)
+            return lib.fail(payable.message);
+
+        const cargo = this.subtractTradeGoods(player.getCargo(), payable.data);
+
+        if (cargo.err)
+            return lib.fail(cargo.message);
+
+        const coinReward = reward.coins - 1;
+        player.setCargo(cargo.data);
+        player.gainCoins(coinReward);
+        player.clearMoves();
+
+        this.privateState.addSpentAction(Action.sell_goods);
+        this.privateState.addDeed({
+            context: Action.sell_as_peddler,
+            description: (
+                (request.length > 1 ? `traded 1 good less than ${request.length}` : 'traded nothing')
+                + ' for '
+                + (coinReward > 0 ? coinReward > 1 ? `${coinReward} coins` : '1 coin' : 'nothing')
             ),
         });
 
@@ -1038,15 +1096,16 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         subtrahend: Array<ItemName>,
         isPlayerCargo: boolean = true,
     ): Probable<Array<ItemName>> {
+        const pool = [...minuend];
 
         for (const tradeGood of subtrahend) {
-            const subtractionResult = this.unloadItem(minuend, tradeGood, isPlayerCargo);
+            const subtractionResult = this.unloadItem(pool, tradeGood, isPlayerCargo);
 
             if (subtractionResult.err)
                 return subtractionResult;
         }
 
-        return lib.pass(minuend);
+        return lib.pass(pool);
     }
 
     private pickFeasibleTrades(player: PlayerHandler): Array<FeasibleTrade> {

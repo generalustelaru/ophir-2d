@@ -4,6 +4,7 @@ import {
     LoadGoodPayload, MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
     Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload, ColorChangePayload,
     ChancellorMarketSalePayload,
+    PeddlerMarketPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { BackupState, PrivateState, Probable, SavedSession } from '~/server_types';
@@ -290,6 +291,16 @@ class ValidatorService {
             return null;
 
         return chancellorPayload;
+    }
+
+    public validatePeddlerPayload(payload: unknown) {
+        const peddlerPayload = this.validateObject<PeddlerMarketPayload>(
+            'PeddlerMarketPayload',
+            payload,
+            [{ key: 'omit', type: 'string', nullable: false, ref: refs.tradeGood }],
+        );
+
+        return peddlerPayload;
     }
 
     public validateMetalPurchasePayload(payload: unknown) {

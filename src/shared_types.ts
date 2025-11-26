@@ -25,7 +25,7 @@ export enum Action {
     drop_item = 'drop_item',
     sell_goods = 'sell_goods',
     sell_as_chancellor = 'sell_as_chancellor',
-    sell_as_peddler = 'sell_as_peddler',
+    sell_as_peddler = 'sell_as_peddler', // not in use as local action
     donate_goods = 'donate_goods',
     sell_specialty = 'sell_specialty',
     buy_metal = 'buy_metal',
@@ -247,6 +247,7 @@ export type GameSetup = {
     mapPairings: MapPairings,
     marketFluctuations: MarketFluctuations,
     templeTradeSlot: MarketSlotKey,
+    reducedValueSlot: MarketSlotKey
 }
 export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 

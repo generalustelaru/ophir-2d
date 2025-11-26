@@ -304,11 +304,11 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.cargo.overwrite(cargo);
     }
 
-    public setTrades(trades: Array<FeasibleTrade>) {
+    public setFeasibles(trades: Array<FeasibleTrade>) {
         this.feasibleTrades.overwrite(trades);
     }
 
-    public getTrades() {
+    public getFeasibles() {
         return this.feasibleTrades.get();
     }
 

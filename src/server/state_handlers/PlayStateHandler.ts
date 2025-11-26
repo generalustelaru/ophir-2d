@@ -260,6 +260,10 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
         return this.setup.get().marketFluctuations[slot];
     }
 
+    public getReducedValueSlot(): MarketSlotKey {
+        return this.setup.get().reducedValueSlot;
+    }
+
     public getTempleTradeSlot(): MarketSlotKey {
         return this.setup.get().templeTradeSlot;
     }
