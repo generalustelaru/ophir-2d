@@ -1,22 +1,30 @@
 ## Setup and Goal
 
-Your goal is to collect as many VP as possible before the end game is triggered. Points are secured via donations of **gold**, **silver**, and **trade goods** at the **temple**. Leftover gold and silver also add 5 and 3 VP reespectively. Favor and coins are used for breaking ties.
+Players will first have to select a color out of the four available. This is a free-for-all state. A player may select a differentcolor as long as it is available. The first player to have selected a color becomes the game owner.
 
-At game start, the map layout is revealed. Each player will now have to select a **specialist**. The specialist provides a unique special ability, some starting **favor** (an alternate currency), and, usually, a **specialty** trade good.
+THe game owner may reset the session at any time.
 
-Each player will control a single **ship** that will appear in the center **zone**.
+Once you've chosen a color, you can start typing in the included chat. As a special command, you can currently change your player name by typing `#name <your name>`. You can do this anytime during the session.
+
+When the owner is satisfied with the player composition, she may click on **Draft**. This will reveal the map layout and present a number of **specialist** cards. Each specialist provides a unique special ability, some starting **favor** (an alternate currency), and, usually, a **specialty** trade good.
+
+Specialist selection is done in reverse player order. Don't worry, the game will handles rules 100%. Once you've selected a specialist card, you must click on it again to confirm it. You can't change your mind after that.
 
 You can switch between the map and the specialist offer by clicking the bottom **show/hide** button.
 
 The map consists of seven sea zones, each containing a unique **location**. During the game, locations enable specific **actions** for players who **move** into their respective sea zones on their turn.
-- The four trade good locations (the mines, quarry, farms, and forest) provide **gems**, **marble**, **linen**, or **ebony**, which players can gather, sell,  donate, or hoard.
+- The four trade good locations (the mines, quarry, farms, and forest) provide **gems**, **marble**, **linen**, or **ebony**, which players can gather, sell, and donate.
 - The orange house icon is the **market**. There, players can sell their trade goods for **coins**.
 - The yellow gold ingot icon is the **treasury**. There, players can purchase **gold** and **silver**.
 - The blue dome and obelisks icon is the **temple**. The temple receives donations of gold, silver, and trade goods, awarding **victory points** (VP) and **favor** in return.
 
 The two grey **barriers** are blocking access between adjacent sea zones. The separated zones are not considered to be adjacent. Player ships have a reach of two zones. However, barriers can considerably hinder zone access. So take that into account when choosing your specialist.
 
-The session owner may start the game when all players have selected a specialist. Upon starting the game, new information is revealed:
+When all players have selected a card, the owner may click on **Start** to start the game.
+
+Upon starting, players will receive a rounded **ship** token that will appear on the map's center **zone**.
+
+Your goal is to collect as many VP as possible before the end game is triggered. Points are secured via donations of **gold**, **silver**, and **trade goods** at the **temple**. Leftover gold and silver also add 5 and 3 VP respectively to your end game score. Favor and coins are used for breaking ties.
 
 ## The Play Space
 Zone Button Areas: To the left of the map, you have, from top to bottom, action buttons for the market, the treasury, and the temple.
@@ -24,9 +32,9 @@ Zone Button Areas: To the left of the map, you have, from top to bottom, action 
 
 Map Area: Around the map, from top left going clockwise, you have information relevant to you on your turn:
 - the **moves** counter (two blueish wave icons which get discolored as you move)
-- the **favor button** (a red seal icon button for spending favor)
+- the **favor button** (a red seal icon button used for spending a favor to obtain turn privileges)
 - the **end turn button** (a red/green anchor icon button for ending your turn)
-- the **undo button** (a circular arrow icon for undoing the last acton)
+- the **undo button** (a circular arrow icon for undoing actions and movements)
 
 Player Area: To the right of the map, you have the **player cards**. Each card displays:
 - the player's **influence** swatch (a die face situated left of the card itself)
@@ -39,11 +47,13 @@ Player Area: To the right of the map, you have the **player cards**. Each card d
 The following is a detailed explanation of the rules and gameplay.
 
 ## Turns
-Starting with the last player who picked a specialist, players will take turns moving and taking actions around the map until the end of the game.
+Starting with the first player, players will take turns moving and taking actions around the map until the end of the game.
 
-To pass the turn, you must click the end turn button. The button becomes available as soon as you move or spend favor. Your turn can also end abruptly after failing an influence check or if you become idle.
+To pass the turn, you must click the end turn button. The button becomes available as soon as you move or spend favor. Your turn can also end abruptly after failing an influence check or if you become idle and play companions decide to skip you.
 
-You can undo your movements and actions up until the start of your turn or right after an un-revertible action/movement which involved rolling a die or revealing a new market card.
+You can undo your movements and actions up until any un-revertible action/movement which involved rolling a die or revealing a new market card.
+
+Any action that cannot be undone will open a confirmation dialog first.
 
 ## Game End
 The game can end in two ways:
@@ -180,19 +190,19 @@ Important to note:
 
 ## Specialists
 
-Some of the specialists that players can select at the beginning of the game will break the rules in some way or another. Consult their descriptions to familiarize yourself with their potential play style.
+Most of the specialists that players can select at the beginning of the game will break the rules in some way or another. Consult their descriptions to familiarize yourself with their potential play style.
 
 ## Two-player games
 
 When starting a game with two players, a third ship (white) will spawn in the market's sea zone. This ship also has an influence die, and may block your movement like any other player ship (trimming its value on failed attempts).
 
-When a player manages to enter the neutral ship's zone, his/her turn is paused, gaining control of the neutral ship figure.
+When a player manages to enter the neutral ship's zone, her turn is paused, gaining control of the neutral ship figure.
 
 While controlling the neutral ship, the player must move it once or twice according to the regular movement rules, as if it had spent favor. After movement, the player must conclude the rival's turn by either:
 - a) clicking the bespoke anchor icon next to its card or,
 - b) if the ship ended movement at the market zone -- clicking the market card button on the rival card to shift the market; Then, in either case:
 - The neutral ship will roll its influence die
-- The player will regain control of their turn
+- The player will regain control of her turn
 
 Important to note:
 - A player cannot enter the zone containing the nutral ship again, after having controlled it on the same turn. It will appear as restricted.

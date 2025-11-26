@@ -36,15 +36,12 @@ You can set up and run a server on your local network fairly easily.
           - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
       - Run `npm ci && npm run build_server && npm run build_client`.
 
-
 4. To start the server, run `make run` or `node public/server.cjs`.
 
 Share the server address to play on your network. If you want to open multiple clients on the same machine, make sure each runs on a different browser or incognito window. The browser storage is being used to identify each client and resume the connection in case of page refresh or close, so two or more tabs on the same browser will mirror the same user.
 
 To shut down the server gracefully, input `shutdown` in the running server's command line interface (CLI).
 You can also shut it down remotely by making a regular http request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<ADMIN_AUTH>". Use the values in your .env file.
-
-
 
 ## Troubleshooting
 If you experience misalignments or mouse issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
@@ -53,17 +50,9 @@ If that doesn't work, input `reset` in the running server's CLI or make a reques
 
 ## How to play
 
- Any page visitor may become the Session Owner by being the first to select a color card.Visitors who've selected a color (up to 4) can begin using the built-in chat. There can be any number of spectators.
+ Any page visitor may become join the game by selecting a color card. Visitors who've selected a color (up to 4) can begin using the built-in chat. There can be any number of spectators.
 
- Once there are at least 2 players the Session Owner may click the **Draft** button to initiate the setup (pick from the available specialists), then on **Start** to begin playing. The Session Owner also has the ability to Reset the game at any time (revert to a new open session without players).
-
- On the board, players are identified by their Ship Figure (on the map center zone) and the Player Card (on the right side of the screen), both displayed in their chosen color. Player Cards are arranged from top to bottom, signifying the turn order. Your Player Card appears on top and also displays your current VP. The visual elements on the left of the screen are buttons displaying information and actions available at the Market, Exchange, and Temple locations on the map.
-
- On your turn you will move and get to perform available Actions at your destination by clicking on elements. Interactive elements are generally depicted as cards or icons. Your cursor will turn into a pointer when hovering over them if they're available or into a restricted icon if they're not available. When done, you will have to end your turn by clicking on the green anchor icon (lower right of the map). The next player will be able to take his or her turn immediately after.
-
- With two players, a third ship is added. Players must move it during their turn when they enter its zone.
-
- There's a decent amount of rules to Ophir. To learn more you can:
+ There's a decent amount of rules to Ophir. To learn you can:
  - Watch this [how-to-play video](https://youtu.be/pJrDOh6HadI?si=ZOGegm3W-7GWgNP1) from the Dice Tower YouTube channel.
  - Examine to the included [RULES.md](https://github.com/generalustelaru/ophir-2d/blob/main/RULES.md) document.
  - Follow your intuition. The rules are enforced. You can't cheat, only make mistakes.
