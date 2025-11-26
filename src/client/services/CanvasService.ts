@@ -38,6 +38,7 @@ export class CanvasService extends Communicator {
 
     constructor() {
         super();
+        // TODO: Reduce group.add() calls.throughout subclasses
 
         this.stage = new Konva.Stage({
             container: 'canvas',

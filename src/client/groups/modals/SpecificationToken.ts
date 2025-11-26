@@ -50,7 +50,6 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
         this.symbolGroup = new Konva.Group();
 
         this.group.add(this.activeBackground, this.symbolGroup);
-        console.log('I\'m here!');
     }
 
     public getElement() {
@@ -67,11 +66,11 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
         }
 
         const { type, isClickable } = data;
-        console.log('updating', { data });
 
         if (type == this.currentSymbol)
             return;
 
+        this.currentSymbol = type;
         this.symbolGroup.destroyChildren();
 
         switch(type) {

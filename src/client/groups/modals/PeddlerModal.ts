@@ -1,6 +1,7 @@
 import Konva from 'konva';
 import {
-    Action, FeasibleTrade, MarketFluctuations, MarketSlotKey, PlayState, SpecialistName, Trade, Unique,
+    Action, ClientMessage, FeasibleTrade, MarketFluctuations, MarketSlotKey, PlayState, SpecialistName, Trade, TradeGood,
+    Unique,
 } from '~/shared_types';
 import { DynamicModalInterface, Specification } from '~/client_types';
 import { CoinDial } from '../popular';
@@ -126,19 +127,21 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
         );
 
         const isGoodMissing = feasibleSymbols.includes('other');
+
         feasibleSymbols.forEach((symbol, index) => {
             this.tradeSpecifications[index].isLocked = isGoodMissing;
             if (symbol == 'other')
                 this.tradeSpecifications[index].isOmited = true;
         });
 
+        const actionMessage = this.composeMessage(isGoodMissing ? this.feasability.missing[0] : false);
+
         this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.peddler });
         this.coinDial.update(this.trade.reward.coins - 1);
-        this.open();
+        this.open(actionMessage);
     }
 
     private switchToken(index: number) {
-
         for (const spec of this.tradeSpecifications) {
             spec.isOmited = false;
         }
@@ -149,24 +152,30 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             if (!this.slot)
                 throw new Error('Cannot set standard trade! Slot is missing.');
 
-            this.updateActionMessage({
-                action: Action.sell_goods,
-                payload: { slot: this.slot },
-            });
+            this.updateActionMessage(this.composeMessage(false));
         } else {
             this.selectedIndex = index;
             const selected = this.tradeSpecifications[index];
             selected.isOmited = true;
 
-            this.updateActionMessage({
-                action: Action.sell_as_peddler,
-                payload: { omit: selected.name },
-            });
+            this.updateActionMessage(this.composeMessage(selected.name));
         }
 
         this.symbolRow.update({
             specifications: this.tradeSpecifications,
             specialist: SpecialistName.peddler,
         });
+    }
+
+    private composeMessage(toOmit: TradeGood | false): ClientMessage {
+        return toOmit
+            ? {
+                action: Action.sell_as_peddler,
+                payload: { omit: toOmit },
+            }
+            : {
+                action: Action.sell_goods,
+                payload: { slot: this.slot },
+            };
     }
 }
