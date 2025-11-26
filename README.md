@@ -10,7 +10,6 @@ Work in progress.
 
 - The game is playable but has no lobby (a server supports only one session at a time).
 - Barebones persistence. Nothing is saved except the last session.
-- The game is currently getting "Specialists" (variable players powers).
 - The interface language not yet standardized and missing quality of life features ( animations, transitions, tooltips, FTUE screens).
 
 Try it out
