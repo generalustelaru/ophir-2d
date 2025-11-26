@@ -47,17 +47,20 @@ export class BackupStateHandler {
         if (!count)
             return;
 
-        const playStateRef = this.backupState[count -1].playState;
-        const entityRef: Player|Rival|undefined = color == 'Neutral' && playStateRef.rival.isIncluded
-            ? playStateRef.rival
-            : playStateRef.players.find(p => p.color == color);
+        const { playState, privateState } = this.backupState[count -1];
+
+        if (privateState.playerHasMovedPreviously)
+            return;
+
+        const entityRef: Player|Rival|undefined = color == 'Neutral' && playState.rival.isIncluded
+            ? playState.rival
+            : playState.players.find(p => p.color == color);
 
         if (entityRef)
             entityRef.bearings.position = position;
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
-        // this.backupState?.playState.chat.push({ color: as, name: this.serverName, message });
         this.addChat({ color: as, name: this.serverName, message });
     }
 

@@ -93,7 +93,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     // MARK: MOVE
     public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
         const { player, payload } = digest;
-        this.preserveState(player);
+        this.preserveState(player, true);
 
         const movementPayload = validator.validateMovementPayload(payload);
 
@@ -1336,11 +1336,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.backupState.addServerMessage(message, as);
     }
 
-    private preserveState(player: PlayerHandler) {
-        this.backupState.addState({
-            playState: this.getState(),
-            privateState: this.getPrivateState(),
-        });
+    private preserveState(player: PlayerHandler, hasMoved: boolean = false) {
+        this.privateState.setMovedPreviously(hasMoved);
+
+        this.backupState.addState(
+            { playState: this.getState(), privateState: this.getPrivateState() },
+        );
+
         player.enableUndo();
     }
 

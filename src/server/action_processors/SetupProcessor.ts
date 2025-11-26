@@ -198,6 +198,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             )),
             turnSummary: [],
             playerSpentActions: [],
+            playerHasMovedPreviously: false,
         });
 
         const { players, startingPlayer } = this.hydratePlayers(

@@ -13,6 +13,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
     private gameStats: ArrayWritable<PlayerCountables>;
     private turnSummary: Writable<Array<Deed>>;
     private playerSpentActions: ArrayWritable<LocalAction>;
+    private playerHasMovedPreviously: Writable<boolean>;
     private gameTempleLevels: number;
 
     constructor(privateState: PrivateState) {
@@ -22,6 +23,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
         this.gameStats = arrayWritable(privateState.gameStats,'color');
         this.turnSummary = writable(privateState.turnSummary);
         this.playerSpentActions = arrayWritable(privateState.playerSpentActions);
+        this.playerHasMovedPreviously = writable(privateState.playerHasMovedPreviously);
 
         this.gameTempleLevels = this.costTiers.count();
     }
@@ -34,6 +36,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
             gameStats: this.gameStats.get(),
             turnSummary: this.turnSummary.get(),
             playerSpentActions: this.playerSpentActions.get(),
+            playerHasMovedPreviously:this.playerHasMovedPreviously.get(), 
         };
     }
 
@@ -116,5 +119,9 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
 
     public clearSpentActions() {
         this.playerSpentActions.clear();
+    }
+
+    public setMovedPreviously(hasMoved: boolean) {
+        this.playerHasMovedPreviously.set(hasMoved);
     }
 }

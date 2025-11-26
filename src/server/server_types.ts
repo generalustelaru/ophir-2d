@@ -91,6 +91,7 @@ export type PrivateState = {
     gameStats: Array<PlayerCountables>,
     turnSummary: Array<Deed>,
     playerSpentActions: Array<LocalAction>
+    playerHasMovedPreviously: boolean,
 }
 
 export type StateBundle = {
