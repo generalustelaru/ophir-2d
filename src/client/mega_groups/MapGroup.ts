@@ -216,6 +216,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         this.localShip?.switchControl(false);
         this.endTurnButton?.disable();
         this.favorButton?.disable();
+        this.undoButton?.disable();
     }
 
     // MARK: SETUP

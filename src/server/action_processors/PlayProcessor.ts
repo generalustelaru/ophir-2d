@@ -744,9 +744,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         console.info(this.privateState.getGameStats());
 
         if (isTempleComplete) {
-            this.killIdleChecks();
-            this.addServerMessage(this.convertDeedsToMessage(player), color);
             player.deactivate();
+            this.clearUndo(player);
+            this.killIdleChecks();
             this.playState.savePlayer(player.toDto());
 
             const results = this.compileGameResults();
@@ -755,9 +755,11 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 return lib.fail(results.message);
 
             this.playState.registerGameEnd(results.data);
-            this.addServerMessage('The temple construction is complete! Game has ended.');
-            this.addServerMessage(JSON.stringify(results.data));
 
+            this.addServerMessage(this.convertDeedsToMessage(player), color);
+            this.addServerMessage('The temple construction is complete! Game has ended.');
+
+            // this.addServerMessage(JSON.stringify(results.data));
             return lib.pass({ state: this.playState.toDto() });
         }
 
