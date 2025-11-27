@@ -146,15 +146,16 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
     // MARK: UPDATE
     public update(data: RivalShipUpdate): void {
         const  { moves, bearings, isControllable, destinations, activePlayerColor } = data;
+        const isLocalPlayerActive = activePlayerColor == this.localPlayerColor;
         this.isControllable = isControllable;
         this.destinations = destinations;
         this.currentZone = bearings.seaZone;
         this.movesLeft = moves;
         this.group.x(bearings.position.x);
         this.group.y(bearings.position.y);
-        this.group.draggable(activePlayerColor == this.localPlayerColor);
+        this.group.draggable(isLocalPlayerActive);
         this.ship.update(isControllable ? COLOR[activePlayerColor] : COLOR.shipBorder);
-        isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
+        isLocalPlayerActive && isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };
 
     private broadcastAction(detail: ClientMessage): void {
