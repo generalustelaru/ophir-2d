@@ -70,12 +70,12 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             0,
         );
 
-        this.contentGroup.add(...[
+        this.contentGroup.add(
             this.description,
             colon,
             this.symbolRow.getElement(),
             this.coinDial.getElement(),
-        ]);
+        );
     }
 
     public update(state: PlayState) {

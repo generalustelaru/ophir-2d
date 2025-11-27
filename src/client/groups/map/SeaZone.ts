@@ -36,7 +36,6 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         fill: Color,
         isPlay: boolean,
     ) {
-
         this.group = new Konva.Group({
             width: 100,
             height: 100,
@@ -55,7 +54,6 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             stroke: 'black',
             strokeWidth: 1,
         });
-        this.group.add(this.hexagon);
 
         this.island = new Konva.Path({
             x: island.x,
@@ -65,10 +63,8 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             scale: { x: 7.5, y: 7.5 },
             strokeWidth: 1,
         });
-        this.group.add(this.island);
 
         this.location = new LocationToken(stage, locationId, iconData, isPlay);
-        this.group.add(this.location.getElement());
 
         this.restrictedIcon = new Konva.Path({
             x: -75,
@@ -78,7 +74,13 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             scale: { x: 2, y: 2 },
             visible: false,
         });
-        this.group.add(this.restrictedIcon);
+
+        this.group.add(
+            this.hexagon,
+            this.island,
+            this.location.getElement(),
+            this.restrictedIcon,
+        );
     }
 
     public update(update: SeaZoneUpdate): void {

@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { IconLayer, DynamicGroupInterface } from '~/client_types';
+import { IconLayer, DynamicGroupInterface, ElementList } from '~/client_types';
 import { Action, LocationName, TradeGood, Unique } from '~/shared_types';
 import { RequestButton } from '../popular';
 import { EmptyLocationToken } from '.';
@@ -22,6 +22,7 @@ export class LocationToken extends RequestButton implements Unique<DynamicGroupI
         iconData: IconLayer,
         isPlay: boolean,
     ) {
+        const elements: ElementList = [];
         const goodToPickup = ((): TradeGood | null => {
             switch (locationId) {
                 case 'mines': return 'gems';
@@ -69,13 +70,14 @@ export class LocationToken extends RequestButton implements Unique<DynamicGroupI
             strokeWidth: .75,
             scale: { x: scale, y: scale },
         });
-        this.group.add(this.icon);
+        elements.push(this.icon);
 
         this.emptyLocation = new EmptyLocationToken();
 
-        if (this.tradeGood) {
-            this.group.add(this.emptyLocation.getElement());
-        }
+        if (this.tradeGood)
+            elements.push(this.emptyLocation.getElement());
+
+        this.group.add( ...elements);
     }
 
     public getElement() {

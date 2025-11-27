@@ -71,13 +71,13 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             0,
         );
 
-        this.contentGroup.add(...[
+        this.contentGroup.add(
             description,
             this.symbolRow.getElement(),
             colon,
             this.victoryPointDial.getElement(),
             this.favorDial.getElement(),
-        ]);
+        );
     }
 
     public update(state: PlayState) {

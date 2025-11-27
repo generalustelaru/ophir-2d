@@ -39,9 +39,9 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
             );
         });
 
-        for (const token of this.tokens) {
-            this.group.add(token.getElement());
-        }
+        this.group.add(...this.tokens.map(
+            token => token.getElement(),
+        ));
     }
 
     public getElement() {

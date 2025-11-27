@@ -43,11 +43,11 @@ export class MetalDonationCard extends RequestButton implements Unique<DynamicGr
             metalType === 'gold' ? 10 : 5,
         );
 
-        this.group.add(...[
+        this.group.add(
             this.background,
             metalIcon,
             vpDial.getElement(),
-        ]);
+        );
     }
 
     public getElement(): Konva.Group {

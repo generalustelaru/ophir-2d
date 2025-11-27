@@ -57,7 +57,7 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
     }
 
     public update(data: Update) {
-
+        // TODO: move logic into constructor and alternate hiding and showing the elements instead of destroying and recreating.
         if (data == null) {
             this.symbolGroup.destroyChildren();
             this.activeBackground.visible(false);

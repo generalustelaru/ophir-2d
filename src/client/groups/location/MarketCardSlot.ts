@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { MarketCardUpdate, DynamicGroupInterface, GroupLayoutData, ElementList } from '~/client_types';
 import { MarketCard } from '.';
 import { Trade, Fluctuation, MarketSlotKey, Unique } from '~/shared_types';
 import clientConstants from '~/client_constants';
@@ -33,11 +33,13 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
             trade,
             fluctuation,
         );
+        const elements: ElementList = [this.marketCard.getElement()];
 
-        this.group.add(this.marketCard.getElement());
+        if (!!fluctuation) {
+            elements.push(this.getFluctuationSymbol(fluctuation));
+        }
 
-        if (!!fluctuation)
-            this.group.add(this.getFluctuationSymbol(fluctuation));
+        this.group.add(...elements);
     }
 
     public getElement(): Konva.Group {

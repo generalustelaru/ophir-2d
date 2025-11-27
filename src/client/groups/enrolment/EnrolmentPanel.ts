@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData, ElementList } from '~/client_types';
 import { PlayerColor, PlayerEntry, Unique } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { ColorCard } from './ColorCard';
@@ -19,6 +19,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
+        const elements: ElementList = [];
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -32,7 +33,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             fill: COLOR.modalBlue,
 
         });
-        this.group.add(background);
+        elements.push(background);
 
         const playerColors: Array<PlayerColor> = ['Purple' , 'Yellow' , 'Red' , 'Green'];
         const margin = 60;
@@ -43,10 +44,11 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             const optionCard = new ColorCard(stage, { x:drift, y:50 }, color);
 
             this.cards.push(optionCard);
-            this.group.add(optionCard.getElement());
+            elements.push(optionCard.getElement());
             drift += margin + offset;
         });
 
+        this.group.add(...elements);
     }
 
     public getElement() {

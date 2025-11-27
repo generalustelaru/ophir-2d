@@ -40,7 +40,6 @@ export class EndRivalTurnModal extends ModalBase {
             strokeWidth: .75,
             scale: { x: 4, y: 4 },
         });
-        this.contentGroup.add();
 
         this.rivalDie = new SymbolicInfluenceDial({
             color: 'Neutral',
@@ -48,11 +47,11 @@ export class EndRivalTurnModal extends ModalBase {
             position: { x: 0, y: 74 },
         });
 
-        this.contentGroup.add(...[
+        this.contentGroup.add(
             this.confirmationText,
             this.marketIcon,
             this.rivalDie.getElement(),
-        ]);
+        );
     }
 
     public show(isShiftingMarket: boolean) {

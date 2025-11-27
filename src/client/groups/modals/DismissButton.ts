@@ -31,6 +31,7 @@ export class DismissButton extends Button {
         });
 
         this.group.add(buttonBackground, buttonLabel);
+        this.enable();
     }
 
     public getElement() {

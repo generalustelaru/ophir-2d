@@ -21,43 +21,37 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
             },
         );
 
-        const iconRow = new Konva.Group({
-            width: 150,
-            height: 50,
-            x: 76,
-            y: 24,
-        });
+        const offset = { x: 76, y: 24 };
 
-        this.ownerDie = new SymbolicInfluenceDial();
+        this.ownerDie = new SymbolicInfluenceDial( { position: offset });
 
         const greaterEqual = new Konva.Text({
             text: '≥',
-            width: iconRow.width(),
-            height: iconRow.height(),
+            width: 150,
+            height: 50,
             align: 'center',
             verticalAlign: 'middle',
-            y: 5,
+            x: offset.x,
+            y: offset.y + 5,
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
             fill: COLOR.boneWhite,
         });
+
         this.toSailDial = new InfluenceDial(
             {
-                x: 100,
-                y: 0,
+                x: offset.x + 100,
+                y: offset.y,
             },
             COLOR.boneWhite,
         );
-        iconRow.add(...[
+
+        this.contentGroup.add(
             this.ownerDie.getElement(),
             greaterEqual,
             this.toSailDial.getElement(),
-        ]);
-
-        this.contentGroup.add(...[
-            iconRow,
-        ]);
+        );
     }
 
     public update() {}

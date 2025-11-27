@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MarketCardUpdate, DynamicGroupInterface } from '~/client_types';
+import { MarketCardUpdate, DynamicGroupInterface, ElementList } from '~/client_types';
 import { Coordinates, Trade, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import { GoodsAssortment, TempleRewardDial } from '.';
@@ -57,13 +57,13 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
             opensAdvisorModal ? null : trade.request,
         );
 
-        this.group.add(...[
+        const elements: ElementList = [
             this.background,
             this.rewardDial.getElement(),
             this.goodsAssortment.getElement(),
-        ]);
+        ];
 
-        opensAdvisorModal && this.group.add(new Konva.Text({
+        opensAdvisorModal && elements.push(new Konva.Text({
             text: '...',
             width: this.group.width(),
             align: 'center',
@@ -73,6 +73,8 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
             fontStyle: '700',
             fill: COLOR.boneWhite,
         }));
+
+        this.group.add(...elements);
     }
 
     public update(data: MarketCardUpdate): void {

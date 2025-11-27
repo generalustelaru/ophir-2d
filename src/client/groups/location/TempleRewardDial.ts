@@ -63,13 +63,13 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
 
         });
 
-        this.group.add(...[
+        this.group.add(
             favorIcon.getElement(),
             semiDisc,
             semiWreath,
             this.vpAmount,
             this.favorAmount,
-        ]);
+        );
     }
 
     public getDiameter(): number {

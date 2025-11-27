@@ -22,7 +22,7 @@ export class FavorFactory implements Unique<GroupFactory> {
 
         return new Konva.Group({
             ...this.layout,
-        }).add(...[
+        }).add(
             // outer stamp
             new Konva.Path({
                 data: outerShape,
@@ -47,6 +47,6 @@ export class FavorFactory implements Unique<GroupFactory> {
                 x: scale * 7,
                 y: scale * 7,
             }),
-        ]);
+        );
     }
 }

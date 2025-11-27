@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates, TempleState, Unique } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, ElementList } from '~/client_types';
 import { TempleLevelDial } from './TempleLevelDial';
 import clientConstants from '~/client_constants';
 
@@ -72,14 +72,16 @@ export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleSt
         this.levelDials = [];
         const donationsCount = status.donations.length;
         const levelDialCount = (donationsCount - status.levelCompletion) / 3 + 1;
-
+        const elements: ElementList = [];
         for (let i = 0; i < levelDialCount; i++) {
             const dial = new TempleLevelDial(
                 { x: LEVEL_DIAL_DRIFTS[i].x, y: 0 },
                 status.donations.slice(i * 3, i * 3 + 3),
             );
-            this.cargoDisplayGroup.add(dial.getElement());
+            elements.push(dial.getElement());
             this.levelDials.push(dial);
         }
+
+        this.cargoDisplayGroup.add(...elements);
     }
 }

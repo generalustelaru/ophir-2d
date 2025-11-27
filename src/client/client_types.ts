@@ -6,6 +6,9 @@ import {
 } from '~/shared_types';
 import Konva from 'konva';
 
+export type ElementList = Array<Konva.Group | Konva.Shape>
+
+// export type ElementList = Array<Konva.Group | Konva.Path | Konva.Text | Konva.Node | Konva.Shape>
 export type Color = `#${string}`;
 export type DynamicColor = {active: Color, inactive: Color}
 export type HexCoordinates = { id: ZoneName, x: number, y: number };

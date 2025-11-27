@@ -48,11 +48,11 @@ export class TreasuryCard extends RequestButton implements Unique<DynamicGroupIn
             scaleY: 2.75,
         });
 
-        this.group.add(...[
+        this.group.add(
             this.background,
             metalIcon,
             this.currencyDial.getElement(),
-        ]);
+        );
     }
 
     public getElement(): Konva.Group {
