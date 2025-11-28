@@ -32,7 +32,7 @@ export abstract class ModalBase {
 
         const { width: stageWidth, height: stageHeight } = STAGE_AREA;
         const { width: modalWidth, height: modalHeight } = dimensions;
-        const offset = { x: stageWidth / 2 - modalWidth / 2, y: stageHeight / 2 - modalHeight / 2}
+        const offset = { x: stageWidth / 2 - modalWidth / 2, y: stageHeight / 2 - modalHeight / 2 };
 
         const lockLayer = new Konva.Rect({ width: stageWidth, height: stageHeight });
         const modalBody = new Konva.Rect({
