@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { Color, DynamicGroupInterface } from '~/client_types';
+import { Color, DynamicGroupInterface, ElementList } from '~/client_types';
 import { Coordinates, NeutralColor, PlayerColor, Unique } from '~/shared_types';
 
 const { COLOR, SHIP_DATA } = clientConstants;
 export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
-    private group: Konva.Group;
-    private token: Konva.Path;
+    private group: Konva.Group | null;
+    private token: Konva.Path | null;
 
     constructor(
         color: PlayerColor | NeutralColor,
@@ -24,6 +24,8 @@ export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
             y: options?.position?.y || 0,
         });
 
+        const mapTokenElements: ElementList = [];
+
         if (isMapToken) {
             const tokenFace = new Konva.Circle({
                 radius: 30,
@@ -39,7 +41,7 @@ export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
                 strokeWidth: 1,
             });
 
-            this.group.add(tokenDepth, tokenFace);
+            mapTokenElements.push(tokenDepth, tokenFace);
         }
 
         const scale = options?.scale || 1.5;
@@ -52,14 +54,27 @@ export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
             stroke: options?.stroke || COLOR.shipBorder,
             strokeWidth: 2,
         });
-        this.group.add(this.token);
+        this.group.add(...mapTokenElements, this.token);
     }
 
     public getElement(): Konva.Group {
+        if (!this.group)
+            throw new Error('Cannot provide element. ShipToken was destroyed improperly.');
+
         return this.group;
     }
 
     public update(stroke: Color): void {
-        this.token.stroke(stroke);
+        this.token?.stroke(stroke);
+    }
+
+    public selfDecomission() {
+        this.token?.destroy();
+        this.token = null;
+
+        this.group?.destroy();
+        this.group = null;
+
+        return null;
     }
 }

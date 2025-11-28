@@ -19,10 +19,10 @@ type SpecialistCardUpdate = {
 
 export class SpecialistCard extends Button implements Unique<DynamicGroupInterface<SpecialistCardUpdate>> {
 
-    private background: Konva.Rect;
+    private background: Konva.Rect | null;
     private cardName: SpecialistName;
     private stateFill: Color;
-    private selectButton: ConfirmButton;
+    private selectButton: ConfirmButton | null;
 
     constructor(
         stage: Konva.Stage,
@@ -37,8 +37,8 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
         this.cardName = specialist.name;
         this.stateFill = COLOR.templeRed;
         this.background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
+            width: layout.width,
+            height: layout.height,
             fill: this.stateFill,
             cornerRadius: 15,
             strokeWidth: 0,
@@ -114,15 +114,15 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
                 this.setFill(COLOR[localPlayerColor]);
-                this.selectButton.hide();
+                this.selectButton?.hide();
                 break;
             case !!specialist.owner:
                 this.setFill(COLOR[`dark${specialist.owner}`]);
-                this.selectButton.hide();
+                this.selectButton?.hide();
                 break;
             default:
                 this.setFill(COLOR.templeDarkRed);
-                this.selectButton.hide();
+                this.selectButton?.hide();
                 break;
         }
         shouldEnable ? this.enable() : this.disable();
@@ -130,16 +130,25 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
 
     public preSelect(isPreSelected: boolean) {
         if (isPreSelected) {
-            this.selectButton.show();
-            this.background.fill(COLOR.boneWhite);
+            this.selectButton?.show();
+            this.background?.fill(COLOR.boneWhite);
         } else {
             this.setFill(this.stateFill);
-            this.selectButton.hide();
+            this.selectButton?.hide();
         }
     }
 
     private setFill(color: Color) {
         this.stateFill = color;
-        this.background.fill(color);
+        this.background?.fill(color);
+    }
+
+    public selfDecomission(): null {
+        this.background?.destroy();
+        this.background = null;
+        this.selectButton = this.selectButton?.selfDecomission() || null;
+        this.clearReferences();
+
+        return null;
     }
 }

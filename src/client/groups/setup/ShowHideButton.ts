@@ -4,8 +4,8 @@ import { Coordinates, Unique } from '~/shared_types';
 import { Button } from '../popular';
 
 export class ShowHideButton extends Button implements Unique<DynamicGroupInterface<string>> {
-    private background: Konva.Rect;
-    private label: Konva.Text;
+    private background: Konva.Rect | null;
+    private label: Konva.Text | null;
 
     constructor(
         stage: Konva.Stage,
@@ -14,11 +14,12 @@ export class ShowHideButton extends Button implements Unique<DynamicGroupInterfa
         text: string,
         callback: Function,
     ) {
-        super(stage, { ...position, height: 50, width: 100 }, callback);
+        const layout = { ...position, height: 50, width: 100 };
+        super(stage, layout, callback);
 
         this.background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
+            width: layout.width,
+            height: layout.height,
             fill: color,
             cornerRadius: 15,
         });
@@ -31,7 +32,7 @@ export class ShowHideButton extends Button implements Unique<DynamicGroupInterfa
             scale: { x: scale, y: scale },
             fontFamily: 'Custom',
         });
-        this.group.add(this.background, this.label);
+        this.group!.add(this.background, this.label);
     }
 
     public getElement() {
@@ -39,6 +40,18 @@ export class ShowHideButton extends Button implements Unique<DynamicGroupInterfa
     }
 
     public update(text: string) {
-        this.label.text(text);
+        this.label?.text(text);
+    }
+
+    public selfDecomission(): null {
+        this.background?.destroy();
+        this.background = null;
+
+        this.label?.destroy();
+        this.label = null;
+
+        this.clearReferences();
+
+        return null;
     }
 }

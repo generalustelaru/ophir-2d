@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData } from '~/client/client_types';
+import { ElementList, GroupLayoutData } from '~/client/client_types';
 
 type RowElement = {
     id: string,
@@ -46,12 +46,15 @@ export class RowDistributor {
         const freeWidth = this.group.width() - (nodeWidth * elements.length);
         const interSpace = freeWidth / (elements.length + 1);
 
+        const nodes: ElementList = [];
         let drift = interSpace;
         for (const element of elements) {
             const node = element.node;
             node.x(drift);
-            this.group.add(node);
+            nodes.push(node);
             drift += interSpace + nodeWidth;
         }
+
+        this.group.add(...nodes);
     }
 }

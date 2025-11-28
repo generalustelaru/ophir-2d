@@ -5,9 +5,9 @@ import { ShowHideButton } from '../groups/setup/ShowHideButton';
 import { SetupPanel } from '../groups/setup/SetupPanel';
 
 export class SetupGroup implements Unique<MegaGroupInterface> {
-    private stage: Konva.Stage;
-    private group: Konva.Group;
-    private modal: SetupPanel | null = null;
+    private stage: Konva.Stage | null;
+    private group: Konva.Group | null;
+    private panel: SetupPanel | null = null;
     private showHideButton: ShowHideButton | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
@@ -22,7 +22,11 @@ export class SetupGroup implements Unique<MegaGroupInterface> {
     }
 
     public drawElements(state: SetupState){
-        this.modal = new SetupPanel(
+
+        if (!this.stage || !this.group)
+            return;
+
+        this.panel = new SetupPanel(
             this.stage,
             {
                 x: 50,
@@ -39,23 +43,32 @@ export class SetupGroup implements Unique<MegaGroupInterface> {
             '#002255',
             'Show / Hide',
             () => {
-                this.modal && this.modal.switchVisibility();
+                this.panel && this.panel.switchVisibility();
             },
         );
         this.showHideButton.enable();
-        this.group.add(this.modal.getElement(), this.showHideButton.getElement());
+        this.group.add(this.panel.getElement(), this.showHideButton.getElement());
     }
 
     public update(state: SetupState) {
         const { players, specialists } = state;
 
-        if (!this.modal)
-            throw new Error('Can\'t update without initialization');
-
-        this.modal.update({ players, specialists });
+        this.panel?.update({ players, specialists });
     }
 
-    public disable() {
-        this.group.hide();
+    public disable(): void {
+        this.group?.hide();
+    }
+
+    public selfDecomission(): null {
+        if (!this.group)
+            console.warn('SetupGroup cannot be destroyed: Lost reference.');
+
+        this.group?.destroy();
+        this.showHideButton = this.showHideButton?.selfDecomission() || null;
+        this.panel = this.panel?.selfDecomission() || null; // TODO: continue implementing self boom
+        this.stage = null;
+
+        return null;
     }
 }

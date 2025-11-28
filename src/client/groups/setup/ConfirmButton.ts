@@ -3,7 +3,7 @@ import { RequestButton } from '../popular';
 import { Action, Coordinates, SpecialistData } from '~/shared_types';
 import { defineBobbing } from '~/client/animations';
 export class ConfirmButton extends RequestButton {
-    private textAnimation: Konva.Animation;
+    private textAnimation: Konva.Animation | null;
     constructor(stage: Konva.Stage, position: Coordinates, specialist: SpecialistData) {
         const layout = { ...position, width: 200, height: 300 };
 
@@ -40,16 +40,23 @@ export class ConfirmButton extends RequestButton {
     }
 
     public show() {
-        this.textAnimation.start();
+        this.textAnimation?.start();
         this.group.visible(true);
     }
 
     public hide() {
-        this.textAnimation.stop();
+        this.textAnimation?.stop();
         this.group.visible(false);
     }
 
     public getElement(): Konva.Group {
         return this.group;
+    }
+
+    public selfDecomission(): null {
+        this.textAnimation = null;
+        this.clearReferences();
+
+        return null;
     }
 }

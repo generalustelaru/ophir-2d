@@ -74,6 +74,7 @@ export interface MegaGroupInterface {
     drawElements(state: State): void,
     update(state: State): void,
     disable(): void,
+    selfDecomission(): null,
 }
 
 export interface DynamicGroupInterface<U> {

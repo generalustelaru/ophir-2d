@@ -12,7 +12,7 @@ type EnrolmentPanelUpdate = {
 const { COLOR } = clientConstants;
 
 export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPanelUpdate>> {
-    private group: Konva.Group;
+    private group: Konva.Group | null;
     private cards: Array<ColorCard> = [];
 
     constructor(
@@ -52,6 +52,9 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
     }
 
     public getElement() {
+        if (!this.group)
+            throw new Error('Cannot provide element. EnrolmentPanel was destroyed improperly.');
+
         return this.group;
     }
 
@@ -62,5 +65,17 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         this.cards.forEach(colorCard => {
             colorCard.update({ localPlayer: localPlayer || null, players });
         });
+    }
+
+    public selfDecomission(): null {
+        this.group?.destroy();
+        this.group = null;
+
+        this.cards = this.cards.filter(card => {
+            card.selfDecomission();
+            return false;
+        });
+
+        return null;
     }
 }

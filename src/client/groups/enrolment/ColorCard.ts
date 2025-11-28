@@ -11,10 +11,10 @@ type ColorCardUpdate = {
     players: Array<PlayerEntry>
 }
 export class ColorCard extends RequestButton implements Unique<DynamicGroupInterface<ColorCardUpdate>> {
-    private background: Konva.Rect;
-    private shipToken: ShipToken;
+    private background: Konva.Rect | null;
+    private shipToken: ShipToken | null;
     private color: PlayerColor;
-    private ownerName: Konva.Text;
+    private ownerName: Konva.Text | null;
 
     constructor(
         stage: Konva.Stage,
@@ -66,8 +66,11 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
     }
 
     public update(update: ColorCardUpdate): void {
-        const { localPlayer, players } = update;
 
+        if (!this.background || !this.ownerName || !this.shipToken)
+            return;
+
+        const { localPlayer, players } = update;
         const colorOwner = players.find(p => p.color == this.color);
         const isLocalPlayerColor = !!localPlayer && localPlayer.name === colorOwner?.name;
         const text = isLocalPlayerColor
@@ -85,5 +88,15 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
         this.ownerName.text(text);
         this.ownerName.fill(colorOwner ? COLOR[colorOwner.color] : 'white');
         this.shipToken.update(isLocalPlayerColor ? COLOR.activeShipBorder : COLOR.shipBorder);
+    }
+
+    public selfDecomission(): null {
+        this.clearReferences();
+        this.background?.destroy();
+        this.background = null;
+        this.ownerName?.destroy();
+        this.ownerName = null;
+        this.shipToken = this.shipToken?.selfDecomission() || null;
+        return null;
     }
 }

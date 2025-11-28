@@ -14,7 +14,7 @@ type SetupPanelUpdate = {
 const { COLOR } = clientConstants;
 
 export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate>> {
-    private group: Konva.Group;
+    private group: Konva.Group | null;
     private specialistCards:  Array<SpecialistCard> = [];
     private localPlayerColor: PlayerColor | null;
 
@@ -56,6 +56,9 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
     }
 
     public getElement() {
+        if (!this.group)
+            throw new Error('Cannot provide element. SetupPanel was destroyed improperly.');
+
         return this.group;
     }
 
@@ -76,12 +79,24 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
     }
 
     public switchVisibility() {
-        this.group.visible() ? this.group.hide() : this.group.show();
+        this.group?.visible() ? this.group.hide() : this.group?.show();
     }
 
     private preSelect(name: SpecialistName) {
         for (const card of this.specialistCards) {
             card.preSelect(card.getCardName() == name);
         }
+    }
+
+    public selfDecomission(): null {
+        this.group?.destroy();
+        this.group = null;
+
+        this.specialistCards = this.specialistCards.filter( card => {
+            card.selfDecomission();
+            return false;
+        });
+
+        return null;
     }
 }

@@ -5,9 +5,9 @@ import { EnrolmentPanel } from '../groups/enrolment/EnrolmentPanel';
 import localState from '../state';
 
 export class EnrolmentGroup implements Unique<MegaGroupInterface> {
-    private stage: Konva.Stage;
-    private group: Konva.Group;
-    private modal: EnrolmentPanel | null = null;
+    private stage: Konva.Stage | null;
+    private group: Konva.Group | null;
+    private panel: EnrolmentPanel | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -21,7 +21,10 @@ export class EnrolmentGroup implements Unique<MegaGroupInterface> {
     }
 
     public drawElements() {
-        this.modal = new EnrolmentPanel(
+        if (!this.stage || !this.group)
+            return;
+
+        this.panel = new EnrolmentPanel(
             this.stage,
             {
                 x: 50,
@@ -31,18 +34,20 @@ export class EnrolmentGroup implements Unique<MegaGroupInterface> {
             },
         );
 
-        this.group.add(this.modal.getElement());
+        this.group.add(this.panel.getElement());
     }
 
     public update(state: EnrolmentState) {
-
-        if (!this.modal)
-            throw new Error('Can\'t update what ain\'t there');
-
-        this.modal.update({ players: state.players, localPlayerColor: localState.playerColor });
+        this.panel?.update({ players: state.players, localPlayerColor: localState.playerColor });
     }
 
     public disable() {
-        this.group.hide();
+        this.group?.hide();
+    }
+
+    public selfDecomission(): null {
+        this.stage = null;
+        this.panel = this.panel?.selfDecomission() || null;
+        return null;
     }
 }

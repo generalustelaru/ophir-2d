@@ -19,8 +19,8 @@ export class CanvasService extends Communicator {
     private locationGroup: LocationGroup;
     private mapGroup: MapGroup;
     private playerGroup: PlayerGroup;
-    private setupGroup: SetupGroup; // TODO: make nullable, not to persist in play phase
-    private enrolmentGroup: EnrolmentGroup; // TODO: make nullable, not to persist in play phase
+    private setupGroup: SetupGroup | null;
+    private enrolmentGroup: EnrolmentGroup | null;
     private isEnrolmentDrawn: boolean = false;
     private isSetupDrawn: boolean = false;
     private isPlayDrawn: boolean = false;
@@ -157,24 +157,25 @@ export class CanvasService extends Communicator {
             case Phase.enrolment:
                 if (!this.isEnrolmentDrawn) {
                     this.stage.visible(true);
-                    this.enrolmentGroup.drawElements();
+                    this.enrolmentGroup?.drawElements();
                     this.isEnrolmentDrawn = true;
                 }
-                this.enrolmentGroup.update(state);
+                this.enrolmentGroup?.update(state);
                 break;
+
             case Phase.setup:
-                this.enrolmentGroup.disable();
+                this.enrolmentGroup = this.enrolmentGroup?.selfDecomission() || null;
                 if (!this.isSetupDrawn) {
                     this.stage.visible(true);
                     this.mapGroup.drawElements(state);
-                    this.setupGroup.drawElements(state);
+                    this.setupGroup?.drawElements(state);
                     this.isSetupDrawn = true;
                 }
-                this.setupGroup.update(state);
+                this.setupGroup?.update(state);
                 break;
 
             case Phase.play:
-                this.setupGroup.disable();
+                this.setupGroup = this.setupGroup?.selfDecomission() || null;
                 if (!this.isPlayDrawn) {
                     this.initializeModals(state);
                     this.stage.visible(true);
