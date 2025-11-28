@@ -6,8 +6,7 @@ import { UserInterface } from './services/UiService';
 import clientConstants from '~/client_constants';
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
-    EnrolmentResponse, NewNameTransmission,
-    ColorChangeResponse,
+    EnrolmentResponse, NewNameTransmission, ColorChangeResponse, State, Phase,
 } from '~/shared_types';
 
 const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
@@ -225,27 +224,6 @@ document.fonts.ready.then(() => {
         window.location.reload();
     });
 
-    // MARK: State
-    window.addEventListener(EventType.enrolment_update, (event: CustomEventInit) => {
-        if (!event.detail)
-            return signalError('State is missing!');
-
-        const enrolmentState = event.detail as EnrolmentState;
-
-        UserInterface.updateAsEnrolment(enrolmentState);
-        canvas.drawUpdateElements(enrolmentState, true);
-
-        if (!localState.gameId) {
-            localState.gameId = enrolmentState.gameId;
-            sessionStorage.setItem('localState', JSON.stringify(localState));
-
-            if (PERSIST_SESSION)
-                localStorage.setItem('localStateCopy', JSON.stringify(localState));
-        }
-
-        debug(enrolmentState);
-    });
-
     window.addEventListener( EventType.new_color_approval, (event: CustomEventInit<ColorChangeResponse>) => {
         if (!event.detail)
             return signalError('Missing color approval');
@@ -253,27 +231,24 @@ document.fonts.ready.then(() => {
         localState.playerColor = event.detail.approvedNewColor;
     });
 
-    window.addEventListener(EventType.setup_update, (event: CustomEventInit) => {
+    window.addEventListener(EventType.state_update, (event: CustomEventInit) => {
         if (!event.detail)
             return signalError('State is missing!');
 
-        const setupState = event.detail as SetupState;
-        UserInterface.updateAsSetup(setupState);
-        canvas.drawUpdateElements(setupState, true);
+        const state = event.detail as State;
 
-        debug(setupState);
-    });
+        if (!localState.gameId) {
+            localState.gameId = state.gameId;
+            sessionStorage.setItem('localState', JSON.stringify(localState));
 
-    window.addEventListener(EventType.play_update, (event: CustomEventInit) => {
+            if (PERSIST_SESSION)
+                localStorage.setItem('localStateCopy', JSON.stringify(localState));
+        }
 
-        if (!event.detail)
-            return signalError('State is missing!');
+        UserInterface.update(state);
+        canvas.drawUpdateElements(state, state.sessionPhase == Phase.play && state.hasGameEnded);
 
-        const playState = event.detail as PlayState;
-        UserInterface.updateAsPlay(playState);
-        canvas.drawUpdateElements(playState, playState.hasGameEnded);
-
-        debug(playState);
+        debug(state);
     });
 
     window.addEventListener(EventType.start_turn, () => {

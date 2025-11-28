@@ -1,5 +1,5 @@
 import {
-    Phase, ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
+    ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission, EnrolmentResponse, NewNameTransmission, TurnNotificationTransmission, RivalControlTransmission,
     ForceTurnNotificationTransmission, ColorChangeResponse,
 } from '~/shared_types';
@@ -168,19 +168,6 @@ export class CommunicationService extends Communicator {
     }
 
     private createStateEvent(data: StateResponse) {
-        const { state } = data;
-
-        switch (state.sessionPhase) {
-            case Phase.enrolment:
-                return this.createEvent({ type: EventType.enrolment_update, detail: state });
-            case Phase.setup:
-                return this.createEvent({ type: EventType.setup_update, detail: state });
-            case Phase.play:
-                return this.createEvent({ type: EventType.play_update, detail: state });
-            default:
-                return this.createEvent({
-                    type: EventType.error, detail: { message: 'Unknown phase value in state.' },
-                });
-        }
+        return this.createEvent({ type: EventType.state_update, detail: data.state });
     }
 };

@@ -1,8 +1,7 @@
 import {
-    ZoneName, PlayerColor, PlayState, Coordinates, LocationName, ItemName, EnrolmentState, Trade, MarketOffer, Player,
-    Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, ClientIdResponse, SetupState, VpTransmission, State,
-    EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, ColorChangeResponse,
-    TradeGood,
+    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorChangeResponse,
+    Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, ClientIdResponse, VpTransmission, State,
+    EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, TradeGood,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -74,7 +73,6 @@ export interface MegaGroupInterface {
     drawElements(state: State): void,
     update(state: State): void,
     disable(): void,
-    selfDecomission(): null,
 }
 
 export interface DynamicGroupInterface<U> {
@@ -148,8 +146,8 @@ export type SailAttemptArgs = {
     isTempleGuard: boolean,
 }
 
-export type EventFormat<EventType, D> = {
-    type: EventType,
+export type EventFormat<T extends EventType, D> = {
+    type: T,
     detail: D,
 }
 
@@ -165,9 +163,7 @@ export enum EventType {
     error = 'error',
     info = 'info',
     reset = 'reset',
-    play_update = 'play_update',
-    setup_update = 'setup_update',
-    enrolment_update = 'enrolment_update',
+    state_update = 'state_update',
     identification = 'identification',
     vp_transmission = 'vp_transmission',
     name_transmission = 'name_transmission',
@@ -193,11 +189,9 @@ export type Event =
     | EventFormat<EventType.error, ErrorDetail>
     | EventFormat<EventType.info, InfoDetail>
     | EventFormat<EventType.reset, ResetResponse>
-    | EventFormat<EventType.play_update, PlayState>
-    | EventFormat<EventType.setup_update, SetupState>
+    | EventFormat<EventType.state_update, State>
     | EventFormat<EventType.enrolment_approval, EnrolmentResponse>
     | EventFormat<EventType.new_color_approval, ColorChangeResponse>
-    | EventFormat<EventType.enrolment_update, EnrolmentState>
     | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>
     | EventFormat<EventType.name_transmission, NewNameTransmission>
