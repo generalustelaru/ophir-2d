@@ -64,6 +64,16 @@ function probe(intervalSeconds: number) {
     milliseconds);
 }
 
+function resetClient(source: string) {
+    sessionStorage.clear();
+
+    if (PERSIST_SESSION)
+        localStorage.clear();
+
+    alert(`Client reset ordered by ${source}`);
+    window.location.reload();
+}
+
 // Debugging
 function debug(state: PlayState | SetupState | EnrolmentState) {
     if ('isStatusResponse' in state && state.isStatusResponse)
@@ -215,13 +225,7 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.reset, (event: CustomEventInit) => {
         const response: ResetResponse = event.detail;
-        sessionStorage.clear();
-
-        if (PERSIST_SESSION)
-            localStorage.clear();
-
-        alert(`The game has been reset by ${response.resetFrom}`);
-        window.location.reload();
+        resetClient(response.resetFrom);
     });
 
     window.addEventListener( EventType.new_color_approval, (event: CustomEventInit<ColorChangeResponse>) => {
@@ -244,6 +248,9 @@ document.fonts.ready.then(() => {
             if (PERSIST_SESSION)
                 localStorage.setItem('localStateCopy', JSON.stringify(localState));
         }
+
+        if (localState.gameId != state.gameId)
+            return resetClient('client');
 
         UserInterface.update(state);
         canvas.drawUpdateElements(state, state.sessionPhase == Phase.play && state.hasGameEnded);
