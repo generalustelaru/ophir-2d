@@ -4,7 +4,7 @@ import { PlayState, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
 import { PlayerCountables } from '~/server/server_types';
 
-const { COLOR, STAGE_AREA} = clientConstants;
+const { COLOR, STAGE_AREA } = clientConstants;
 export class ResultsPanel implements Unique<StaticGroupInterface> {
 
     private group: Konva.Group;
@@ -27,6 +27,9 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
             fill: 'white',
             fontSize: 18,
             lineHeight: 1.2,
+            x: 10,
+            y: 10,
+
         });
 
         this.group.add(panelBody, results);
@@ -90,14 +93,17 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
     private addTiedPlayers(players: Array<PlayerCountables>, criteria: string): string {
         const key = criteria as keyof PlayerCountables;
 
-        const playerList = players.map(player => `${player.name}: ${player[key]} ${criteria}\n`).join('')
+        const playerList = players.map(
+            player => `${player.name}: ${player[key]} ${criteria}\n`,
+        ).join('');
 
         return `\nTie-break by ${criteria}:\n\n${playerList}`;
     };
 
     private addWinner(winner: PlayerCountables, criteria: string): string {
         const key = criteria as keyof PlayerCountables;
+        const tieBreaker = criteria == 'vp' ? '' : ` (and ${winner[key]} ${criteria})`;
 
-        return `\nWinner is:\n\n${winner.name}: ${winner.vp}VP (and ${winner[key]} ${criteria})\n`;
+        return `\n${winner.name} has won with ${winner.vp}VP${tieBreaker}\n`;
     };
 }
