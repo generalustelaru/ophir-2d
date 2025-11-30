@@ -53,7 +53,7 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
             const winner = winnerAsArray[0];
             const key = criteria as keyof typeof winner;
 
-            return message.concat(`\nThe winner is ${winner.color} with ${winner[key]} ${criteria}\n`);
+            return message.concat(`\nThe winner is ${winner.name} with ${winner[key]} ${criteria}\n`);
         };
         const addTiedPlayers = (players: Array<PlayerCountables>, criteria: string, message: string) : string => {
             const key = criteria as keyof typeof players[0];

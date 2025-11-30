@@ -986,6 +986,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
         this.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.playState.updateName(player.color, newName);
+        this.privateState.updatePlayerName(player.color, newName);
         this.backupState.updatePlayerName(player.color, newName);
 
         return { state: this.getState() };

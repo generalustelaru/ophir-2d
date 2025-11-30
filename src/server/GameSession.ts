@@ -166,6 +166,9 @@ export class GameSession {
                     if (this.isNameTaken(state.players, newName))
                         return this.issueNominalResponse(lib.errorResponse('This name is already taken'));
 
+                    if (state.sessionPhase == 'play' && state.hasGameEnded)
+                        return this.issueNominalResponse(lib.errorResponse('Name can no longer be updated.'));
+
                     const response = this.actionProcessor.updatePlayerName(player, newName);
                     this.transmitNameUpdate(newName, player.socketId);
 

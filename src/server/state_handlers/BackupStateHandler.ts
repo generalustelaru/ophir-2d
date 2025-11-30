@@ -66,13 +66,17 @@ export class BackupStateHandler {
 
     public updatePlayerName(color: PlayerColor, name: string ) {
         const count = this.backupState.length;
-        if (count) {
-            const stateRef = this.backupState[count - 1].playState;
-            const playerRef = stateRef.players.find(p => p.color === color);
 
-            if (playerRef)
-                playerRef.name = name;
+        if (!count)
+            return;
 
+        const { playState, privateState } = this.backupState[count - 1];
+        const playerRef = playState.players.find(p => p.color == color);
+        const countableRef = privateState.gameStats.find(c => c.color == color);
+
+        if (playerRef && countableRef) {
+            playerRef.name = name;
+            countableRef.name = name;
         }
     }
 

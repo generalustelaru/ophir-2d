@@ -74,6 +74,12 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
         });
     }
 
+    public updatePlayerName(color: PlayerColor, newName: string) {
+        this.gameStats.updateOne(color, (countables) => {
+            return  { ...countables, name: newName };
+        });
+    }
+
     public getPlayerVictoryPoints(color: PlayerColor) {
         const ps = this.gameStats.getOne(color);
         return ps ? ps.vp : 0;
