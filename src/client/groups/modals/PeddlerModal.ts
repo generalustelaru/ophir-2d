@@ -52,7 +52,6 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             align: 'center',
             y: 10,
             fontFamily: 'Custom',
-            text: 'In development...',
         });
 
         this.symbolRow = new SymbolRow(
@@ -127,6 +126,12 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
         );
 
         const isGoodMissing = feasibleSymbols.includes('other');
+        const missingGood = isGoodMissing ? this.feasability.missing[0] : null;
+
+        this.description.text(isGoodMissing
+            ? `You may complete this trade without delivering ${missingGood}.`
+            : 'You may choose to withhold one commodity from this delivery.',
+        );
 
         feasibleSymbols.forEach((symbol, index) => {
             this.tradeSpecifications[index].isLocked = isGoodMissing;
@@ -134,7 +139,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
                 this.tradeSpecifications[index].isOmited = true;
         });
 
-        const actionMessage = this.composeMessage(isGoodMissing ? this.feasability.missing[0] : false);
+        const actionMessage = this.composeMessage(missingGood || false);
 
         this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.peddler });
         this.coinDial.update(this.trade.reward.coins - 1);
