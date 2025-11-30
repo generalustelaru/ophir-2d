@@ -89,8 +89,8 @@ You move by dragging and releasing the ship figure onto an adjacent sea zone. Zo
 When you drop your token into such a zone, a dialog will inform you of your chances and ask for confirmation on rolling your influence die. Your chances depend on the player with the highest influence that has her ship token there.
 
 Confirming your attempt will still spend a move, then:
-	a. If your rolled influence value is at least equal to the highest influence there, your move is succesful.
-	b. If not, you will remain in the same zone, but all players in that zone who's influence matches the threshold will have thier influence value reduced by one.
+- a) If your rolled influence value is at least equal to the highest influence there, your move is succesful.
+- b) If not, you will remain in the same zone, but all players in that zone who's influence matches the threshold will have thier influence value reduced by one.
 
 Failing a roll always costs you the move, but if you run out of moves as the result of a failure, your turn will end automatically. Always consider this when making your second move (unless the threshhold value is 1, of course).
 
