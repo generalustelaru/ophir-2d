@@ -244,6 +244,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return this.endTurn(digest, false);
         }
 
+        if(player.isHarbormaster() && player.isPrivileged())
+            this.privateState.clearSpentActions();
+
         return this.continueTurn(player, hasSailed && !player.isFrozen());
     }
 
@@ -948,7 +951,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (this.backupState.isEmpty())
             playerHandler.disableUndo();
 
-        return this.continueTurn(playerHandler);
+        return this.continueTurn(playerHandler, false);
     }
 
     // MARK: UPGRADE
