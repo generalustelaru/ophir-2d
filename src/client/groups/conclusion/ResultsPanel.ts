@@ -26,6 +26,7 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
             text: this.composeResults(state.gameResults),
             fill: 'white',
             fontSize: 18,
+            lineHeight: 1.2,
         });
 
         this.group.add(panelBody, results);
@@ -36,61 +37,67 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
     }
 
     private composeResults(gameResults: Array<PlayerCountables>): string {
-        let message = 'The game has ended\n\n';
+        let message = 'Results:\n\n';
 
-        const getLeaders = (tiedPlayers: Array<PlayerCountables>, criteria: string) : Array<PlayerCountables> => {
-            const key = criteria as keyof typeof tiedPlayers[0];
-            const topValue = tiedPlayers.reduce((acc, player) => {
-                const value = player[key] as number;
-
-                return value > acc ? value : acc;
-            }, 0);
-
-            return tiedPlayers.filter(player => player[key] === topValue);
-        };
-
-        const addWinner = (winnerAsArray: Array<PlayerCountables>, criteria: string, message: string) : string => {
-            const winner = winnerAsArray[0];
-            const key = criteria as keyof typeof winner;
-
-            return message.concat(`\nThe winner is ${winner.name} with ${winner[key]} ${criteria}\n`);
-        };
-        const addTiedPlayers = (players: Array<PlayerCountables>, criteria: string, message: string) : string => {
-            const key = criteria as keyof typeof players[0];
-
-            return message.concat(
-                `\n${criteria}-tied players:\n\n${players.map(
-                    player => `${player.color} : ${player[key]} ${criteria}\n`,
-                ).join('')}`,
-            );
-        };
-
+        // add player scores
         for (const player of gameResults) {
-            message = message.concat(`${player.name} (${player.color}) : ${player.vp} VP\n`);
+            message += (`${player.name} (${player.color}): ${player.vp}VP\n`);
         }
 
-        const vpWinners = getLeaders(gameResults, 'vp');
+        const vpLeaders = this.getLeaders(gameResults, 'vp');
 
-        if (vpWinners.length == 1)
-            return addWinner(vpWinners, 'vp', message);
+        if (vpLeaders.length == 1) {
+            message += (this.addWinner(vpLeaders[0], 'vp'));
+            return message;
+        }
 
-        message = addTiedPlayers(vpWinners, 'favor', message);
-        const favorWinners = getLeaders(vpWinners, 'favor');
+        message += this.addTiedPlayers(vpLeaders, 'favor');
 
-        if (favorWinners.length == 1)
-            return addWinner(favorWinners, 'favor', message);
+        const favorLeaders = this.getLeaders(vpLeaders, 'favor');
 
-        message = addTiedPlayers(favorWinners, 'coins', message);
-        const coinWinners = getLeaders(favorWinners, 'coins');
+        if (favorLeaders.length == 1) {
+            message += (this.addWinner(favorLeaders[0], 'favor'));
+            return message;
+        }
 
-        if (coinWinners.length == 1)
-            return addWinner(coinWinners, 'coins', message);
+        message += this.addTiedPlayers(favorLeaders, 'coins');
+        const coinLeaders = this.getLeaders(favorLeaders, 'coins');
 
-        message = message.concat('\nShared victory:\n');
+        if (coinLeaders.length == 1) {
+            message += (this.addWinner(coinLeaders[0], 'coins'));
+            return message;
+        }
 
-        for (const player of coinWinners)
-            message = message.concat(`${player.color} : ${player.vp} VP + ${player.coins} coins\n`);
+        message += ('\nShared victory:\n');
+
+        for (const player of coinLeaders)
+            message += (`${player.color} : ${player.vp}VP\n`);
 
         return message;
     }
+
+    private getLeaders(tiedPlayers: Array<PlayerCountables>, criteria: string): Array<PlayerCountables> {
+        const key = criteria as keyof PlayerCountables;
+        const topValue = tiedPlayers.reduce((acc, player) => {
+            const value = player[key] as number;
+
+            return value > acc ? value : acc;
+        }, 0);
+
+        return tiedPlayers.filter(player => player[key] === topValue);
+    };
+
+    private addTiedPlayers(players: Array<PlayerCountables>, criteria: string): string {
+        const key = criteria as keyof PlayerCountables;
+
+        const playerList = players.map(player => `${player.name}: ${player[key]} ${criteria}\n`).join('')
+
+        return `\nTie-break by ${criteria}:\n\n${playerList}`;
+    };
+
+    private addWinner(winner: PlayerCountables, criteria: string): string {
+        const key = criteria as keyof PlayerCountables;
+
+        return `\nWinner is:\n\n${winner.name}: ${winner.vp}VP (and ${winner[key]} ${criteria})\n`;
+    };
 }
