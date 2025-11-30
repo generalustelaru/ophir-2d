@@ -6,17 +6,18 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { EventType, SailAttemptArgs } from '~/client_types';
+import { EventType, LayerIds, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
     EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal,
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
+import { ResultsPanel } from '../groups/conclusion/ResultsPanel';
 
 export class CanvasService extends Communicator {
     private stage: Konva.Stage;
-    private locationGroup: LocationGroup;
+    private locationGroup: LocationGroup | null;
     private mapGroup: MapGroup;
     private playerGroup: PlayerGroup;
     private setupGroup: SetupGroup | null;
@@ -137,7 +138,7 @@ export class CanvasService extends Communicator {
     }
 
     // MARK: UPDATE
-    public drawUpdateElements(state: State, toDisable = false) {
+    public drawUpdateElements(state: State, hasGameEnded = false) {
         const { sessionPhase } = state;
 
         if (!localState.playerColor) {
@@ -180,7 +181,7 @@ export class CanvasService extends Communicator {
                     this.initializeModals(state);
                     this.stage.visible(true);
                     this.mapGroup.drawElements(state);
-                    this.locationGroup.drawElements(state);
+                    this.locationGroup?.drawElements(state);
                     this.playerGroup.drawElements(state);
                     this.isPlayDrawn = true;
                 }
@@ -191,20 +192,23 @@ export class CanvasService extends Communicator {
                 this.advisorModal?.update(state);
                 this.chancellorModal?.update(state);
                 this.peddlerModal?.update(state);
-                this.locationGroup.update(state);
+                this.locationGroup?.update(state);
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
                 this.playerGroup.updatePlayerVp(localState.playerColor, localState.vp);
-                toDisable && this.disable();
-                break;
 
-            default:
-                throw new Error('Update case not covered!');
+                if (hasGameEnded) {
+                    this.disable();
+                    this.locationGroup = this.locationGroup?.selfDecomission() || null;
+                    this.stage
+                        .getLayers()[LayerIds.board]
+                        .add(new ResultsPanel(state).getElement());
+                }
         }
     }
 
     public disable(): void {
-        this.locationGroup.disable();
+        this.locationGroup?.disable();
         this.mapGroup.disable();
         this.playerGroup.disable();
     }
@@ -251,7 +255,6 @@ export class CanvasService extends Communicator {
             this.playerGroup.setRivalCallback(
                 (isShiftingMarket: boolean) => { this.endRivalTurnModal!.show(isShiftingMarket);},
             );
-            // this.mapGroup.
         }
 
         switch (localPlayer.specialist.name) {
@@ -277,10 +280,9 @@ export class CanvasService extends Communicator {
             (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
         );
 
-        this.locationGroup.setCallbacks({
+        this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal?.show(slot); },
             advisorCallback: () => { this.advisorModal!.show(); },
-            // donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
         });
     }
 
@@ -288,7 +290,7 @@ export class CanvasService extends Communicator {
         this.chancellorModal = new ChancellorModal(this.stage);
         this.donateGoodsModal = new DonateGoodsModal(this.stage);
 
-        this.locationGroup.setCallbacks({
+        this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.chancellorModal!.show(slot); },
             donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
         });
@@ -303,7 +305,7 @@ export class CanvasService extends Communicator {
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.donateGoodsModal = new DonateGoodsModal(this.stage);
 
-        this.locationGroup.setCallbacks({
+        this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
             peddlerCallback: () => { this.peddlerModal!.show(); },
             donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
@@ -314,7 +316,7 @@ export class CanvasService extends Communicator {
         this.sellGoodsModal = new SellGoodsModal(this.stage);
         this.donateGoodsModal = new DonateGoodsModal(this.stage);
 
-        this.locationGroup.setCallbacks({
+        this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
             donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
         });

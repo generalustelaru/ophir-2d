@@ -11,8 +11,8 @@ type LocationGroupCallbacks = {
     peddlerCallback?: Function,
 }
 export class LocationGroup implements Unique<MegaGroupInterface> {
-    private stage: Konva.Stage;
-    private group: Konva.Group;
+    private stage: Konva.Stage | null;
+    private group: Konva.Group | null;
     private marketArea: MarketArea | null = null;
     private treasuryArea: TreasuryArea | null = null;
     private templeArea: TempleArea | null = null;
@@ -25,7 +25,6 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height - 20,
@@ -45,6 +44,9 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     }
 
     public drawElements(state: PlayState): void {
+        if (!this.group || !this.stage)
+            return;
+
         const setup = state.setup;
 
         if (!setup)
@@ -108,6 +110,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     }
 
     public update(state: PlayState): void {
+        if (!this.group)
+            return;
 
         const localPlayer = state.players.find(player => player.color === localState.playerColor);
         const marketUpdate: MarketUpdate = {
@@ -135,4 +139,20 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         this.templeArea?.disable();
     }
 
+    public selfDecomission(): null {
+        this.group?.destroy();
+        this.group = null;
+        this.stage = null;
+        this.tradeCallback = null;
+        this.peddlerCallback = null;
+        this.donateGoodsCallback = null;
+        this.advisorOptionsCallback = null;
+
+        // these remain in memory
+        this.marketArea = null;
+        this.treasuryArea = null;
+        this.templeArea = null;
+
+        return null;
+    }
 }

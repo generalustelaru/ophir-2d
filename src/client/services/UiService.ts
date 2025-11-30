@@ -144,7 +144,7 @@ export const UserInterface = new class extends Communicator {
         }
 
         if (state.hasGameEnded)
-            this.handleEndedState(state);
+            this.handleEndedState();
         else
             this.handleStartedState(state);
     }
@@ -199,73 +199,10 @@ export const UserInterface = new class extends Communicator {
         }
     }
 
-    private handleEndedState(state: PlayState): void {
+    private handleEndedState(): void {
         this.setInfo('The game has ended');
         this.resetButton.enable();
         this.forceTurnButton.disable();
-
-        setTimeout(() => {
-            this.alertGameResults(state.gameResults);
-        }, 1000);
-    }
-
-    private alertGameResults(gameResults: Array<PlayerCountables>): void {
-        let message = 'The game has ended\n\n';
-
-        const getLeaders = (tiedPlayers: Array<PlayerCountables>, criteria: string) : Array<PlayerCountables> => {
-            const key = criteria as keyof typeof tiedPlayers[0];
-            const topValue = tiedPlayers.reduce((acc, player) => {
-                const value = player[key] as number;
-
-                return value > acc ? value : acc;
-            }, 0);
-
-            return tiedPlayers.filter(player => player[key] === topValue);
-        };
-
-        const addWinner = (winnerAsArray: Array<PlayerCountables>, criteria: string, message: string) : string => {
-            const winner = winnerAsArray[0];
-            const key = criteria as keyof typeof winner;
-
-            return message.concat(`\nThe winner is ${winner.color} with ${winner[key]} ${criteria}\n`);
-        };
-        const addTiedPlayers = (players: Array<PlayerCountables>, criteria: string, message: string) : string => {
-            const key = criteria as keyof typeof players[0];
-
-            return message.concat(
-                `\n${criteria}-tied players:\n\n${players.map(
-                    player => `${player.color} : ${player[key]} ${criteria}\n`,
-                ).join('')}`,
-            );
-        };
-
-        for (const player of gameResults) {
-            message = message.concat(`${player.name} (${player.color}) : ${player.vp} VP\n`);
-        }
-
-        const vpWinners = getLeaders(gameResults, 'vp');
-
-        if (vpWinners.length == 1)
-            return alert(addWinner(vpWinners, 'vp', message));
-
-        message = addTiedPlayers(vpWinners, 'favor', message);
-        const favorWinners = getLeaders(vpWinners, 'favor');
-
-        if (favorWinners.length == 1)
-            return alert(addWinner(favorWinners, 'favor', message));
-
-        message = addTiedPlayers(favorWinners, 'coins', message);
-        const coinWinners = getLeaders(favorWinners, 'coins');
-
-        if (coinWinners.length == 1)
-            return alert(addWinner(coinWinners, 'coins', message));
-
-        message = message.concat('\nShared victory:\n');
-
-        for (const player of coinWinners)
-            message = message.concat(`${player.color} : ${player.vp} VP + ${player.coins} coins\n`);
-
-        alert(message);
     }
 
     private updateChat(chat: Array<ChatEntry>): void {
