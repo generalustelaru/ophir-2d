@@ -3,7 +3,6 @@ import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
-import { PlayerCountables } from '~/server_types';
 import clientConstants from '~/client_constants';
 import { EventType } from '~/client_types';
 
