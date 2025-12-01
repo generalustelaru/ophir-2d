@@ -16,7 +16,7 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
         marketKey: MarketSlotKey,
         trade: Trade,
         fluctuation: Fluctuation,
-        tradeCallback: Function,
+        tradeCallback: Function | null,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -29,7 +29,7 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
         this.marketCard = new MarketCard(
             stage,
             { x: 0, y: segmentHeight },
-            () => tradeCallback(marketKey),
+            tradeCallback ? () => tradeCallback(marketKey) : null,
             trade,
             fluctuation,
         );

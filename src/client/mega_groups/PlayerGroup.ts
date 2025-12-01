@@ -52,12 +52,10 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         });
 
         if (rival.isIncluded) {
-            if (!this.endRivalTurnCallback)
-                throw new Error('Cannot add rival placard. Callback not initialized.');
 
             this.rivalPlacard = new RivalPlacard(
                 this.stage,
-                this.endRivalTurnCallback,
+                this.endRivalTurnCallback || null,
                 localState.playerColor,
                 rival,
                 verticalOffsets.shift() as number,

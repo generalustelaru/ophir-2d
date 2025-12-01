@@ -13,7 +13,7 @@ export class ShiftMarketButton extends Button implements Unique<DynamicGroupInte
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        endRivalTurnCallback: (p: boolean) => void,
+        endRivalTurnCallback: ((p: boolean) => void) | null,
     ) {
         super(
             stage,

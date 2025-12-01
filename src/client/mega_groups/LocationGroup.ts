@@ -52,9 +52,6 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         if (!setup)
             throw new Error('State is missing setup data.');
 
-        if (!this.tradeCallback)
-            throw new Error('Default trade callback is missing.');
-
         const heightSegment = this.group.height() / 9;
 
         this.marketArea = new MarketArea(
@@ -68,7 +65,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 x: 0,
                 y: 0,
             },
-            this.tradeCallback,
+            this.tradeCallback || null,
             this.peddlerCallback,
         );
 
@@ -86,6 +83,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             p => p.color == localState.playerColor,
         )?.specialist.name || null;
 
+        const isAdvisor = specialistName == SpecialistName.advisor;
+
         this.templeArea = new TempleArea(
             this.stage,
             state.setup.templeTradeSlot,
@@ -97,9 +96,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 y: this.marketArea.getElement().height() + this.treasuryArea.getElement().height(),
             },
             state.temple.maxLevel,
-            specialistName == SpecialistName.advisor,
-            this.donateGoodsCallback || (() => {}),
-            this.advisorOptionsCallback || (() => {}),
+            isAdvisor,
+            isAdvisor ? this.donateGoodsCallback : this.advisorOptionsCallback,
         );
 
         this.group.add(
