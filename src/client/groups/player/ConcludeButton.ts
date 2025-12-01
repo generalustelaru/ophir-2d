@@ -16,7 +16,7 @@ export class ConcludeButton extends Button implements Unique<DynamicGroupInterfa
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
-        endRivalTurnCallback: (p: boolean) => void,
+        endRivalTurnCallback: ((p: boolean) => void) | null,
     ) {
         const layout = { width: 50, height: 50, x: position.x, y: position.y };
 

@@ -17,7 +17,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
         position: Coordinates,
         trade: Trade,
         opensAdvisorModal: boolean,
-        callback: Function,
+        callback: Function | null,
     ) {
         super(
             stage,

@@ -23,8 +23,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
         layout: GroupLayoutData,
         maxLevel: number,
         isAdvisor: boolean,
-        donateGoodsCallback: Function,
-        advisorOptionsCallback: Function,
+        donateGoodsCallback: Function | null,
     ) {
         this.group = new Konva.Group(layout);
 
@@ -56,9 +55,11 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
             { x: this.group.width() - 62 - margin, y: 10 },
             card,
             isAdvisor,
-            (isAdvisor
-                ? () => advisorOptionsCallback()
-                : () => donateGoodsCallback(marketSlot)
+            (donateGoodsCallback
+                ? isAdvisor
+                    ? () => donateGoodsCallback()
+                    : () => donateGoodsCallback(marketSlot)
+                : null
             ),
         );
 

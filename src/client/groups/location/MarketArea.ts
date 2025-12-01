@@ -21,7 +21,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         templeTradeSlot: MarketSlotKey,
         market: MarketOffer,
         layout: GroupLayoutData,
-        defaultCallback: Function,
+        defaultCallback: Function | null,
         peddlerCallback: Function | null,
     ) {
         this.group = new Konva.Group({
@@ -55,7 +55,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             market.deckId,
         );
 
-        const pickCallback = (slot: MarketSlotKey): Function =>  {
+        const pickCallback = (slot: MarketSlotKey): Function | null =>  {
             if (peddlerCallback && marketFluctuations[slot] == -1)
                 return peddlerCallback;
             return defaultCallback;
