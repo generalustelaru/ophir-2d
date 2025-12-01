@@ -8,16 +8,15 @@ import { GameSession } from './GameSession';
 import { validator } from './services/validation/ValidatorService';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
-const fs = require('fs').promises;
-const path = require('path');
-const STATE_FILE = 'game-state.json';
 
-import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, SERVER_NAME, PERSIST_SESSION } from './configuration';
+import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT, SERVER_NAME, PERSIST_SESSION } from './configuration';
 
-if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT) {
+if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
     console.error('Missing environment variables');
     process.exit(1);
 }
+
+const dbAddress = `http://localhost:${DB_PORT}`;
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
@@ -107,8 +106,8 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 
 let singleSession: GameSession | null;
 
-loadGameState().then(data => {
-    const savedState = PERSIST_SESSION && data
+loadGameState(PERSIST_SESSION).then(data => {
+    const savedState = data
         ? validator.validateStateFile(data)
         : null;
     try {
@@ -220,7 +219,10 @@ function reset() {
 
     console.log('Session is resetting!');
     singleSession.resetSession();
-    saveGameState(singleSession.getCurrentSession());
+
+    if (PERSIST_SESSION)
+        saveGameState(singleSession.getCurrentSession());
+
     const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
 
     broadcast(resetMessage);
@@ -247,29 +249,44 @@ setInterval(() => {
 
 // DEBUG
 
-async function saveGameState(statepack: SavedSession) {
-    const fileAddress = path.join(__dirname, '..', STATE_FILE);
+async function saveGameState(savedSession: SavedSession) {
 
-    try {
-        await fs.writeFile(fileAddress, JSON.stringify(statepack, null, 2));
-    } catch (error) {
-        console.error('Failed to save game state:', error);
-    }
+    const id = savedSession.sharedState.gameId;
+
+    const response = await fetch(
+        `${dbAddress}/sessions/d3eeadad-6795-42b6-8a7b-4852b578bdd0`,
+        {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, data: savedSession }),
+        },
+    );
+
+    if (!response.ok)
+        console.error('Failed to save game state:', { error: response.status });
 }
 
-async function loadGameState(): Promise<object | null> {
-    const fileAddress = path.join(__dirname, '..', STATE_FILE);
-    try {
-        const data = await fs.readFile(fileAddress, 'utf8');
+async function loadGameState(isPersistence: boolean): Promise<object | null> {
 
-        try {
-            return JSON.parse(data);
-        } catch (error) {
-            console.log('Save file is corrupted', { error });
-            return null;
-        }
+    if (!isPersistence)
+        Promise.resolve(null);
+
+    try {
+        const response = await fetch(`${dbAddress}/sessions/d3eeadad-6795-42b6-8a7b-4852b578bdd0`);
+
+        if (!response.ok)
+            throw new Error(`DB Error: ${response.status}`);
+
+        const entry = await response.json();
+
+        if (typeof entry != 'object' || !entry.data)
+            throw new Error(`Data Error: ${entry}`);
+
+        return entry.data as object;
 
     } catch (error) {
+        console.log('Could not resolve data', { error });
+
         return null;
     }
 }

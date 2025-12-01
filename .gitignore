@@ -3,3 +3,4 @@ public/
 # svg/
 .env
 game-state.json
+db.json
