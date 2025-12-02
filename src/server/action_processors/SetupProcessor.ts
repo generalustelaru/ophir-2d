@@ -19,7 +19,7 @@ import { validator } from '../services/validation/ValidatorService';
 import lib from './library';
 
 // @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE, NO_RIVAL }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {}); // eslint-disable-line max-len
+const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, INCLUDE, NO_RIVAL }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {}); // eslint-disable-line max-len
 console.log('Active keys:');
 console.log(activeKeys);
 
