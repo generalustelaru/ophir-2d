@@ -1,4 +1,4 @@
-import { WsDigest, DataDigest, SavedSession, Probable } from '~/server_types';
+import { WsDigest, DataDigest, SessionState, Probable } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
@@ -19,6 +19,7 @@ import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 /**@throws */
 export class GameSession {
+    private gameId: string;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private autoBroadcast: (state: PlayState) => void;
     private transmitVp: (vp: number, socketId: string ) => void;
@@ -33,9 +34,8 @@ export class GameSession {
     constructor(
         broadcastCallback: (state: PlayState) => void,
         transmitCallback: (socketId: string, message: ServerMessage) => void,
-        savedSession: SavedSession | null,
+        savedSession: SessionState | null,
     ) {
-
         this.autoBroadcast = broadcastCallback;
         this.transmitVp = (vp, socketId) => {
             transmitCallback(socketId, { vp });
@@ -60,8 +60,9 @@ export class GameSession {
         };
 
         if (!savedSession) {
+            this.gameId = randomUUID();
             this.actionProcessor = new EnrolmentProcessor(
-                this.getNewState(),
+                this.getNewState(this.gameId),
                 this.transmitEnrolment,
                 this.transmitColorChange,
             );
@@ -72,6 +73,8 @@ export class GameSession {
 
         const { sharedState, privateState, backupStates: backupState } = savedSession;
         const { gameId, sessionOwner, players, chat } = sharedState;
+
+        this.gameId = gameId;
 
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
@@ -103,7 +106,11 @@ export class GameSession {
         })();
     }
 
-    public getCurrentSession(): SavedSession {
+    public getGameId(): string {
+        return this.gameId;
+    }
+
+    public getCurrentState(): SessionState {
         const state = this.actionProcessor.getState();
         const isPlay = state.sessionPhase === Phase.play;
         return {
@@ -113,13 +120,13 @@ export class GameSession {
         };
     }
 
-    public resetSession() {
+    public reset() {
         if ('killIdleChecks' in this.actionProcessor) {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
         this.actionProcessor = new EnrolmentProcessor(
-            this.getNewState(),
+            this.getNewState(this.gameId),
             this.transmitEnrolment,
             this.transmitColorChange,
         );
@@ -194,7 +201,7 @@ export class GameSession {
             const { sessionOwner, sessionPhase } = state;
 
             if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
-                this.resetSession();
+                this.reset();
 
                 return this.issueGroupResponse({ resetFrom: player.name });
             }
@@ -434,9 +441,8 @@ export class GameSession {
         return { senderOnly: false, message };
     }
 
-    private getNewState() {
+    private getNewState(gameId: string) {
         const state = JSON.parse(JSON.stringify(serverConstants.DEFAULT_NEW_STATE));
-        const gameId = randomUUID();
 
         return { ...state, gameId };
     }

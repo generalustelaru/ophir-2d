@@ -7,7 +7,7 @@ import {
     PeddlerMarketPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
-import { BackupState, PrivateState, Probable, SavedSession } from '~/server_types';
+import { BackupState, PrivateState, Probable, SessionState } from '~/server_types';
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
@@ -24,7 +24,7 @@ const refs = {
 class ValidatorService {
 
     public validateStateFile(fileContent: unknown) {
-        const savedSession = this.validateObject<SavedSession>(
+        const savedSession = this.validateObject<SessionState>(
             'SavedSession',
             fileContent,
             [
@@ -94,8 +94,8 @@ class ValidatorService {
             'ClientRequest',
             request,
             [
-                { key: 'socketId', type: 'string', nullable: true },
-                { key: 'gameId', type: 'string', nullable: true },
+                { key: 'socketId', type: 'string', nullable: false },
+                { key: 'gameId', type: 'string', nullable: false },
                 { key: 'playerName', type: 'string', nullable: true },
                 { key: 'playerColor', type: 'string', nullable: true, ref: refs.playerColor },
                 { key: 'message', type: 'object', nullable: false },

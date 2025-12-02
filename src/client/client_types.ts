@@ -23,8 +23,8 @@ export type PathData = { shape: string, fill: Color };
 export type IslandData = { x: number, y: number, shape: string };
 
 export type LocalState = {
+    gameId: string,
     socketId: string | null,
-    gameId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
     vp: number,
@@ -46,7 +46,6 @@ export enum LayerIds {
 
 export type ClientConstants = {
     STAGE_AREA: { width: number, height: number },
-    DEFAULT_LOCAL_STATE: LocalState,
     COLOR: Record<string, Color>,
     COLOR_PROFILES: Record<string, ColorProfile>,
     SEA_ZONE_COUNT: 7,

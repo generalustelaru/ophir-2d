@@ -140,7 +140,7 @@ export interface SessionProcessor {
     updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
 }
 
-export type SavedSession = {
+export type SessionState = {
     sharedState: State,
     privateState: PrivateState | null
     backupStates: Array<BackupState> | null,

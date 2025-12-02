@@ -1,15 +1,16 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ClientIdResponse, ServerMessage, ResetResponse, ClientRequest, PlayState, PlayerEntity } from '~/shared_types';
-import { WsClient, SavedSession } from '~/server_types';
+import { ServerMessage, ClientRequest, PlayState } from '~/shared_types';
+import { SessionState } from '~/server_types';
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
 import { validator } from './services/validation/ValidatorService';
 import { randomUUID } from 'crypto';
 import readline from 'readline';
+import path from 'path';
 
-import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT, SERVER_NAME, PERSIST_SESSION } from './configuration';
+import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT } from './configuration';
 
 if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
     console.error('Missing environment variables');
@@ -26,51 +27,6 @@ process.on('SIGINT', () => {
     process.exit(0);
 });
 
-// MARK: HTTP
-const app = express();
-app.use(express.static('public'));
-app.use(express.static(__dirname));
-
-app.get('/', (req: Request, res: Response) => {
-    console.info('GET / from', req.ip);
-    res.sendFile(__dirname + 'public/index.html');
-});
-
-app.get('/shutdown', (req: Request, res: Response) => {
-    if (req.query.auth !== process.env.ADMIN_AUTH) {
-        console.error('Unauthorized shutdown attempt');
-        res.status(401).send('Unauthorized');
-
-        return;
-    }
-
-    console.warn('Remote server shutdown!');
-    res.status(200).send('SHUTDOWN OK');
-    shutDown();
-});
-
-app.get('/reset', (req: Request, res: Response) => {
-    if (req.query.auth !== process.env.ADMIN_AUTH) {
-        console.error('Unauthorized reset attempt');
-        res.status(401).send('Unauthorized');
-
-        return;
-    }
-
-    console.warn('Remote server shutdown!');
-    res.status(200).send(' OK');
-    reset();
-});
-
-app.get('/probe', (req: Request, res: Response) => {
-    console.info('Server probed', { ip: req.ip });
-    res.status(200).send('SERVER OK');
-});
-
-app.listen(HTTP_PORT, () => {
-    console.info(`Server running at http://${SERVER_ADDRESS}:${HTTP_PORT}`);
-});
-
 // MARK: CLI
 const rl = readline.createInterface({
     input: process.stdin,
@@ -79,16 +35,12 @@ const rl = readline.createInterface({
 
 (
     function promptForInput(): void {
-        rl.question('\n', (input) => {
+        rl.question('\nophir-2d :: ', (input) => {
 
             switch (input) {
                 case 'shutdown':
                     shutDown();
                     return;
-
-                case 'reset':
-                    reset();
-                    break;
 
                 default:
                     console.error('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m', input);
@@ -100,82 +52,167 @@ const rl = readline.createInterface({
     }
 )();
 
-// MARK: WS
-const socketClients: Map<string, WsClient> = new Map();
-const socketServer = new WebSocketServer({ port: WS_PORT });
+// MARK: HTTP
+const app = express();
 
-let singleSession: GameSession | null;
-
-loadGameState(PERSIST_SESSION).then(data => {
-    const savedState = data
-        ? validator.validateStateFile(data)
-        : null;
-    try {
-        singleSession = new GameSession(
-            broadcastCallback,
-            transmitCallback,
-            savedState,
-        );
-    } catch (error) {
-        console.error('Failed to launch game session', { error });
-    }
+app.listen(HTTP_PORT, () => {
+    console.info(`Listening on http://${SERVER_ADDRESS}:${HTTP_PORT}`);
 });
 
-socketServer.on('connection', function connection(socket) {
-    const socketId = randomUUID();
-    socketClients.set(socketId, { socketId, gameId: null, socket });
+app.get('/shutdown', (req: Request, res: Response) => {
+    if (req.query.auth != process.env.ADMIN_AUTH) {
+        console.warn('Unauthorized shutdown attempt');
+        res.status(401).send('Unauthorized');
 
-    const response: ClientIdResponse = { socketId };
-    socket.send(JSON.stringify(response));
+        return;
+    }
+
+    console.warn('Remote server shutdown!');
+    res.status(200).send('SHUTDOWN OK');
+    shutDown();
+});
+
+app.get('/probe', (req: Request, res: Response) => {
+    console.info('Server probed', { ip: req.ip });
+    res.status(200).send('SERVER OK');
+});
+
+app.get('/', (req: Request, res: Response) => {
+    console.info('New visitor', { ip: req.ip });
+    const session = activateSession(null);
+
+    res.redirect(`/${session.getGameId()}`);
+});
+
+app.use(express.static('public'));
+
+app.get('/:id', (req: Request, res: Response) => {
+    console.info(`Visitor for session ${req.params.id}`, { ip: req.ip });
+
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// MARK: WS
+
+type SessionGroup = {
+    session: GameSession,
+    sockets: Map<string, WebSocket>,
+}
+const socketServer = new WebSocketServer({ port: WS_PORT });
+const broadcastGroup: Map<string, WebSocket> = new Map();
+const activeSessions: Map<string, SessionGroup> = new Map();
+
+setInterval(() => {
+    activeSessions.forEach((group) => {
+
+        group.sockets.forEach((socket, socketId) => {
+
+            if (socket.readyState === WebSocket.CLOSED) {
+                group.sockets.delete(socketId);
+                console.log('Removing abandoned client:', socketId);
+            }
+        });
+    });
+}, 60000); // Every minute
+
+socketServer.on('connection', function connection(socket,req) {
+    const socketId = randomUUID();
+    const params = req.url ? new URL(req.url, `http://${req.headers.host}`).searchParams : null;
+    const gameId = params?.get('gameId');
+
+    if (!gameId){
+        console.error('WS connection did not provide gameId.');
+        return transmit(socket, { error: 'Invalid connection data.' });
+    }
+
+    const group = activeSessions.get(gameId);
+
+    if (group) {
+        group.sockets.set(socketId, socket);
+
+    } else {
+        loadGameState(gameId).then(state => {
+            if (!state) {
+                console.error('Could not find active session', { gameId });
+                return transmit(socket, { error: 'Invalid connection data.' });
+            }
+
+            const group = {
+                sockets: new Map().set(socketId, socket),
+                session: new GameSession(broadcastCallback, transmitCallback, state),
+            };
+
+            activeSessions.set(gameId, group);
+        });
+    }
+
+    broadcastGroup.set(socketId, socket);
+    socket.send(JSON.stringify({ socketId }));
 
     socket.on('message', function incoming(req: string) {
-        if (!singleSession)
-            return transmit(socket, { error: 'Session is unavailable.' });
-
         const clientRequest = validator.validateClientRequest(tools.parse(req));
 
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
         logRequest(clientRequest);
-        const response = singleSession.processAction(clientRequest);
+        const gameId = clientRequest.gameId;
+        const session = activeSessions.get(gameId)?.session;
 
-        if (!response)
-            return transmit(socket, { error: 'Session has become corrupt.' });
+        if (!session) {
+            console.error('Connected client requested non-active session', { id: gameId });
 
-        if (PERSIST_SESSION)
-            saveGameState(singleSession.getCurrentSession());
+            return transmit(socket, { error: `Game ${gameId} cannot be served.` });
+        }
 
-        if (response.senderOnly)
-            return transmit(socket, response.message);
-
-        return broadcast(response.message);
+        processResponse(session, clientRequest, socket);
     });
 
     socket.on('close', () => {
-        const deadClient = (
-            singleSession?.getCurrentSession().sharedState.players.find((p: PlayerEntity) => p.socketId === socketId)
-        );
-
-        deadClient && console.log('Removing disconnected client of', deadClient.name);
-
-        socketClients.delete(socketId);
+        broadcastGroup.delete(socketId);
+        group?.sockets.delete(socketId);
     });
 });
 
-// MARK: CALLBACKS
+function activateSession(savedSession: SessionState | null): GameSession {
+    const gameSession = new GameSession(broadcastCallback, transmitCallback, savedSession);
+    const gameId = gameSession.getGameId();
 
+    if (!savedSession)
+        addGameState(gameSession.getCurrentState());
+
+    activeSessions.set(gameId, { session: gameSession, sockets: new Map() });
+
+    return gameSession;
+}
+
+function processResponse(session: GameSession, request: ClientRequest, socket: WebSocket) {
+    const response = session.processAction(request);
+
+    if (!response)
+        return transmit(socket, { error: 'Session has become corrupt.' });
+
+    const gameState = session.getCurrentState();
+    saveGameState(gameState);
+
+    if (response.senderOnly)
+        return transmit(socket, response.message);
+
+    return broadcastToGroup(gameState.sharedState.gameId, response.message);
+}
+
+// MARK: CALLBACKS
 function broadcastCallback(state: PlayState) {
-    broadcast({ state });
+    broadcastToGroup(state.gameId, { state });
 }
 
 function transmitCallback(socketId: string, message: ServerMessage) {
-    const client = socketClients.get(socketId);
+    const socket = broadcastGroup.get(socketId);
 
-    if (!client)
-        return console.error('Cannot deliver message: Missing socket client.');
+    if (!socket)
+        return console.error('Cannot deliver message: Missing socket client.', { message });
 
-    transmit(client.socket, message);
+    transmit(socket, message);
 }
 
 // MARK: FUNCTIONS
@@ -205,7 +242,9 @@ function shutDown() {
     broadcast({ error: 'The server is entering maintenance.' });
     console.log('Shutting down...');
     rl.close();
-    socketClients.forEach(client => client.socket.close(1000));
+
+    broadcastGroup.forEach(socket => socket.close(1000));
+
     setTimeout(() => {
         socketServer.close();
         console.log('Server off.');
@@ -213,24 +252,9 @@ function shutDown() {
     }, 3000);
 }
 
-function reset() {
-    if (!singleSession)
-        return broadcast({ error: 'Session has become corrupt.' });
-
-    console.log('Session is resetting!');
-    singleSession.resetSession();
-
-    if (PERSIST_SESSION)
-        saveGameState(singleSession.getCurrentSession());
-
-    const resetMessage: ResetResponse = { resetFrom: SERVER_NAME };
-
-    broadcast(resetMessage);
-}
-
 function broadcast(message: ServerMessage): void {
-    socketClients.forEach(client => {
-        client.socket.send(JSON.stringify(message));
+    broadcastGroup.forEach(socket => {
+        transmit(socket, message);
     });
 }
 
@@ -238,23 +262,41 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
     socket.send(JSON.stringify(message));
 }
 
-setInterval(() => {
-    socketClients.forEach((client, socketId) => {
-        if (client.socket.readyState === WebSocket.CLOSED) {
-            socketClients.delete(socketId);
-            console.log('Removing abandoned client:', socketId);
-        }
+function broadcastToGroup(gameId: string, message: ServerMessage): void {
+    const groupSockets = activeSessions.get(gameId)?.sockets;
+
+    if (!groupSockets)
+        return console.error('Cannot find active GameSession', { gameId });
+
+    groupSockets.forEach(socket => {
+        transmit(socket, message);
     });
-}, 60000); // Every minute
+}
 
-// DEBUG
+// MARK: DATABASE
 
-async function saveGameState(savedSession: SavedSession) {
+async function addGameState(savedSession: SessionState) {
+    const id = savedSession.sharedState.gameId;
+
+    const response = await fetch(
+        `${dbAddress}/sessions`,
+        {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, data: savedSession }),
+        },
+    );
+
+    if (!response.ok)
+        console.error('Failed to add game state:', { error: response.status });
+}
+
+async function saveGameState(savedSession: SessionState) {
 
     const id = savedSession.sharedState.gameId;
 
     const response = await fetch(
-        `${dbAddress}/sessions/d3eeadad-6795-42b6-8a7b-4852b578bdd0`,
+        `${dbAddress}/sessions/${id}`,
         {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -266,13 +308,9 @@ async function saveGameState(savedSession: SavedSession) {
         console.error('Failed to save game state:', { error: response.status });
 }
 
-async function loadGameState(isPersistence: boolean): Promise<object | null> {
-
-    if (!isPersistence)
-        Promise.resolve(null);
-
+async function loadGameState(gameId: string): Promise<SessionState | null> {
     try {
-        const response = await fetch(`${dbAddress}/sessions/d3eeadad-6795-42b6-8a7b-4852b578bdd0`);
+        const response = await fetch(`${dbAddress}/sessions/${gameId}`);
 
         if (!response.ok)
             throw new Error(`DB Error: ${response.status}`);
@@ -282,7 +320,15 @@ async function loadGameState(isPersistence: boolean): Promise<object | null> {
         if (typeof entry != 'object' || !entry.data)
             throw new Error(`Data Error: ${entry}`);
 
-        return entry.data as object;
+        if (!('data' in entry))
+            throw new Error('Db entry is corrupted.');
+
+        const gameState = validator.validateStateFile(entry.data);
+
+        if (!gameState)
+            throw new Error('Stored game state is corrupted.');
+
+        return gameState;
 
     } catch (error) {
         console.log('Could not resolve data', { error });

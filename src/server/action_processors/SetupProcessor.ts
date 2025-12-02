@@ -9,8 +9,7 @@ import serverConstants from '~/server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import {
-    SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION,
-    INCLUDE, NO_RIVAL,
+    SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, INCLUDE, NO_RIVAL,
 } from '../configuration';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';

@@ -1,15 +1,13 @@
-import { InfoDetail, ErrorDetail, EventType, LocalState, SailAttemptArgs } from '~/client_types';
+import { InfoDetail, ErrorDetail, EventType, SailAttemptArgs, LocalState } from '~/client_types';
 import localState from './state';
 import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
-import clientConstants from '~/client_constants';
 import {
     Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
     EnrolmentResponse, NewNameTransmission, ColorChangeResponse, State, Phase,
 } from '~/shared_types';
 
-const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');
 const CLIENT_DEBUG = Boolean(process.env.CLIENT_DEBUG === 'true');
 
 const serverAddress = process.env.SERVER_ADDRESS;
@@ -20,24 +18,42 @@ if (!wsPort || !serverAddress)
 
 const wsAddress = `ws://${serverAddress}:${wsPort}`;
 
-if (!PERSIST_SESSION)
-    localStorage.removeItem('localStateCopy');
+const pathSegments = window.location.pathname.split('/');
+const requestedGameId = pathSegments[1];
+const savedState: LocalState | null = (() => {
+    const str = localStorage.getItem('localState');
 
-const savedState = sessionStorage.getItem('localState');
-const persistedState = localStorage.getItem('localStateCopy');
-const { gameId, socketId, playerColor, playerName, vp } = ((): LocalState => {
-    switch (true) {
-        case !!savedState: return JSON.parse(savedState);
-        case PERSIST_SESSION && !!persistedState: return JSON.parse(persistedState);
-        default: return clientConstants.DEFAULT_LOCAL_STATE;
-    }
+    if (!str)
+        return null;
+
+    const obj = JSON.parse(str);
+
+    if (
+        typeof obj == 'object'
+        && 'gameId' in obj
+        && 'playerColor' in obj
+        && 'playerName' in obj
+        && 'socketId' in obj
+        && 'vp' in obj
+    )
+        return obj;
+
+    return null;
 })();
 
-localState.gameId = gameId;
-localState.socketId = socketId;
-localState.playerColor = playerColor;
-localState.playerName = playerName;
-localState.vp = vp;
+if (!savedState || savedState.gameId != requestedGameId) {
+    localState.gameId = requestedGameId;
+    localState.playerColor = null;
+    localState.playerName = null;
+    localState.socketId = null;
+    localState.vp = 0;
+} else {
+    localState.gameId = savedState.gameId;
+    localState.playerColor = savedState.playerColor;
+    localState.playerName = savedState.playerName;
+    localState.socketId = savedState.socketId;
+    localState.vp = savedState.vp;
+}
 
 function signalError(message?: string) {
     console.error(message || 'An error occurred');
@@ -65,10 +81,7 @@ function probe(intervalSeconds: number) {
 }
 
 function resetClient(source: string) {
-    sessionStorage.clear();
-
-    if (PERSIST_SESSION)
-        localStorage.clear();
+    localStorage.clear();
 
     alert(`Client reset ordered by ${source}`);
     window.location.reload();
@@ -161,7 +174,6 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.close, () => {
         console.warn('Connection closed');
-        sessionStorage.removeItem('localState');
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('The server has entered maintenance.');
@@ -174,7 +186,7 @@ document.fonts.ready.then(() => {
             return signalError('Id response has failed');
 
         localState.socketId = event.detail.socketId;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
+        localStorage.setItem('localState', JSON.stringify(localState));
         comms.sendMessage({ action: Action.inquire, payload: null });
     });
 
@@ -186,10 +198,7 @@ document.fonts.ready.then(() => {
 
         localState.playerColor = approvedColor;
         localState.playerName = approvedColor;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
-
-        if (PERSIST_SESSION)
-            localStorage.setItem('localStateCopy', JSON.stringify(localState));
+        localStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
@@ -198,10 +207,7 @@ document.fonts.ready.then(() => {
 
         const { vp } = event.detail;
         localState.vp = vp;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
-
-        if (PERSIST_SESSION)
-            localStorage.setItem('localStateCopy', JSON.stringify(localState));
+        localStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.name_transmission, (event: CustomEventInit<NewNameTransmission>) => {
@@ -210,10 +216,7 @@ document.fonts.ready.then(() => {
 
         const { newName } = event.detail;
         localState.playerName = newName;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
-
-        if (PERSIST_SESSION)
-            localStorage.setItem('localState', JSON.stringify(localState));
+        localStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.rival_control_transmission, () => {
@@ -241,12 +244,10 @@ document.fonts.ready.then(() => {
 
         const state = event.detail as State;
 
+        // TODO: investigate and see if this still makes sense in light of gameID as path
         if (!localState.gameId) {
             localState.gameId = state.gameId;
-            sessionStorage.setItem('localState', JSON.stringify(localState));
-
-            if (PERSIST_SESSION)
-                localStorage.setItem('localStateCopy', JSON.stringify(localState));
+            localStorage.setItem('localState', JSON.stringify(localState));
         }
 
         if (localState.gameId != state.gameId)

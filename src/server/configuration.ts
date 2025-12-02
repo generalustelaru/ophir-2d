@@ -24,6 +24,3 @@ export const INCLUDE = (() => {
         return null;
     }
 })();
-
-//TODO: Adapt or remove persistence logic after implementing DB solution
-export const PERSIST_SESSION = Boolean(process.env.PERSIST_SESSION === 'true');

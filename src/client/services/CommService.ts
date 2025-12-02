@@ -16,7 +16,7 @@ export class CommunicationService extends Communicator {
     }
 
     public createConnection(url: string) {
-        this.socket = new WebSocket(url);
+        this.socket = new WebSocket(`${url}?gameId=${localState.gameId}`);
 
         this.socket.onopen = () => {
             console.info('Connection established.');

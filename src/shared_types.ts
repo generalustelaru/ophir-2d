@@ -336,7 +336,7 @@ export type ClientMessage =
     | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage | SellAsPeddlerMessage;
 
 export type ClientRequest = {
-    gameId: string | null,
+    gameId: string,
     socketId: string,
     playerColor: PlayerColor | null,
     playerName: string | null,
