@@ -25,7 +25,7 @@ You can set up and run a server fairly easily on your local network.
    - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/main.zip). Extract it and enter the root folder (*ophir-2d*).
 
 3. Open a command tool in the project's root folder (*ophir-2d*) -- you should run all commands there.
-   - If you have Make, run `make install` to have everything ready.
+   - If you have Make, run `make install` to have everything set up and ready.
    - Alternatively, follow these steps:
       - Create a folder named *public* in the root folder.
       - Copy the contents of *src/client/layout/* into the newly created *public* folder.
@@ -33,11 +33,14 @@ You can set up and run a server fairly easily on your local network.
       - Replace the SERVER_ADDRESS value in .env with your local Ethernet address. How to obtain it:
           - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
           - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
+      - Create file `db.json` and copy this content into it: `{\"sessions\": [], \"config\":{}}`.
       - Run `npm ci && npm run build_server && npm run build_client`.
 
-4. To start the server, run `make run` or `node public/server.cjs`.
+4. Start json-server: Run `make db` or `npx json-server --watch db.json`.
 
-Share the server address to play on your network. If you want to open multiple clients on the same machine, ensure that each one runs on a different browser or incognito window. The browser storage holds your player identity, so two or more tabs on the same browser will mirror the same user.
+5. Start the game server: Open a new terminal and run `make run` or `node public/server.cjs`.
+
+Once you navigate to the server's address you will see a custom URL in your address bar. Share it with your peers for them to connect to the same game. If you want to open multiple clients on the same machine, ensure that each one runs on a different browser or incognito window. The browser storage holds your player identity, so two or more tabs on the same browser will mirror the same user.
 
 To shut down the server gracefully, type `shutdown` in the server command-line interface (CLI).
 You can also shut it down remotely by making a regular HTTP request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<ADMIN_AUTH>". Use the values in your .env file.
@@ -49,9 +52,9 @@ If that doesn't work, input `reset` in the server CLI or run a request to "http:
 
 ## How to play
 
-Any page visitor may join the game session by selecting a color card. Visitors who've chosen a color (up to four) can begin using the built-in chat. There can be any number of spectators.
+Any page visitor may enrol in the game session by selecting a color card. Visitors who've chosen a color (up to four) can begin using the built-in chat. There can be any number of spectators.
 
- There's a decent number of rules in Ophir. To learn, you can:
+ There's a decent number of rules in Ophir. To learn how to play, you can:
  - Watch this [how-to-play video](https://youtu.be/pJrDOh6HadI?si=ZOGegm3W-7GWgNP1) from the Dice Tower YouTube channel.
  - Examine the included [RULES.md](https://github.com/generalustelaru/ophir-2d/blob/main/RULES.md) document.
- - Follow your intuition. The game rules are enforced. You can't cheat, but you can certainly make mistakes.
+ - Follow your intuition. The game rules are enforced. You can't cheat but you can certainly make mistakes.

@@ -10,6 +10,19 @@ endif
 	npm ci
 	make build
 	npm run ommit_revs
+	make migrate
+
+migrate:
+ifeq ($(OS),Windows_NT)
+	powershell -Command "New-Item -Path db.json -ItemType File -Force"
+	powershell -Command "{\"sessions\":[], \"config\":{}} | Out-File db.json"
+else
+	echo "{\"sessions\": [], \"config\":{}}" > db.json
+endif
+
+db:
+	npx json-server --watch db.json
+# docs at https://github.com/typicode/json-server/tree/v0
 
 run:
 	node public/server.cjs

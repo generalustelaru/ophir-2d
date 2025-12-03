@@ -19,6 +19,14 @@ if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
 
 const dbAddress = `http://localhost:${DB_PORT}`;
 
+fetch(`${dbAddress}/config`).then(response => {
+    if (!response.ok)
+        throw new Error(response.statusText);
+}).catch(error => {
+    console.error('Error connecting to DB',{ error });
+    process.exit(1);
+});
+
 // MARK: PROCESS
 process.on('SIGINT', () => {
     broadcast({ error: 'The server encountered an issue and is shutting down :(' });
@@ -76,7 +84,7 @@ app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
 });
-
+// TODO: have an extra HTML file sent to gather localStorage data and call the possible existing session
 app.get('/', (req: Request, res: Response) => {
     console.info('New visitor', { ip: req.ip });
     const session = activateSession(null);
