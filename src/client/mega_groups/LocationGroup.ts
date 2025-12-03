@@ -97,7 +97,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             },
             state.temple.maxLevel,
             isAdvisor,
-            isAdvisor ? this.donateGoodsCallback : this.advisorOptionsCallback,
+            isAdvisor ? this.advisorOptionsCallback : this.donateGoodsCallback,
         );
 
         this.group.add(
