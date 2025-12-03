@@ -26,7 +26,7 @@ module.exports = (env, argv) => {
             ws: 'commonjs ws',
         } : {},
         output: {
-            path: path.resolve(__dirname, 'public'),
+            path: path.resolve(__dirname, `dist${isServer ? '' : '/public'}`),
             filename: isServer ? 'server.cjs' : 'client.js',
         },
         resolve: {

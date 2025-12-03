@@ -5,7 +5,7 @@ ifeq ($(OS),Windows_NT)
 else
 	cp .env.example .env
 	@sed -i '/^SERVER_ADDRESS=/d' .env 2>/dev/null || true
-	@echo "SERVER_ADDRESS=$$(ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $$NF}')" >> .env
+	@echo "SERVER_ADDRESS=$$(hostname -I | awk '{print $$1}')" >> .env
 endif
 	npm ci
 	make build
@@ -25,11 +25,11 @@ db:
 # docs at https://github.com/typicode/json-server/tree/v0
 
 run:
-	node public/server.cjs
+	node dist/server.cjs
 
 # DEV
 build:
-	make layout
+	make static
 	make server
 	make client
 
@@ -39,15 +39,16 @@ server:
 client:
 	npm run build_client
 
-layout:
+static:
 ifeq ($(OS),Windows_NT)
-	powershell -command "if (-not (Test-Path 'public')) { New-Item -ItemType Directory -Name 'public' }"
+	# FIXME: adapt Windows script for dist/public
+	powershell -command "if (-not (Test-Path 'dist/public')) { New-Item -ItemType Directory -Name 'public' }"
 	powershell -command "if (Get-ChildItem 'public' -ErrorAction SilentlyContinue) { Get-ChildItem 'public' -Recurse | Remove-Item -Force }"
-	powershell -command "cp -r src/client/layout/* public/"
+	powershell -command "cp -r src/client/static/* dist/public/"
 else
-	if [ ! -d 'public' ]; then mkdir 'public'; fi
-	if [ -f 'public/*' ]; then rm -r public/*; fi
-	cp -r src/client/layout/* public/
+	if [ ! -d 'dist' ]; then mkdir 'dist'; mkdir 'dist/public'; fi
+	if [ -f 'dist/*' ]; then rm -r dist/*; fi
+	cp -r src/client/static/* dist/public/
 endif
 
 check:

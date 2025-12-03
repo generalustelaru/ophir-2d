@@ -13,7 +13,9 @@ import path from 'path';
 import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT } from './configuration';
 
 if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
-    console.error('Missing environment variables');
+    console.error('Missing environment variables', {
+        SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT,
+    });
     process.exit(1);
 }
 
@@ -92,12 +94,12 @@ app.get('/', (req: Request, res: Response) => {
     res.redirect(`/${session.getGameId()}`);
 });
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:id', (req: Request, res: Response) => {
     console.info(`Visitor for session ${req.params.id}`, { ip: req.ip });
 
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname,'public', 'index.html'));
 });
 
 // MARK: WS

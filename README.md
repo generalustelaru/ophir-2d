@@ -27,12 +27,13 @@ You can set up and run a server fairly easily on your local network.
 3. Open a command tool in the project's root folder (*ophir-2d*) -- you should run all commands there.
    - If you have Make, run `make install` to have everything set up and ready.
    - Alternatively, follow these steps:
-      - Create a folder named *public* in the root folder.
-      - Copy the contents of *src/client/layout/* into the newly created *public* folder.
+      - Create the folder structure named *dist/public* in the root folder.
+      - Copy the contents of *src/client/static/* into the newly created *public* folder.
       - Create a copy of *.env.example* and rename it as *.env*.
       - Replace the SERVER_ADDRESS value in .env with your local Ethernet address. How to obtain it:
           - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
           - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
+          - Linux: `hostname -I`
       - Create file `db.json` and copy this content into it: `{\"sessions\": [], \"config\":{}}`.
       - Run `npm ci && npm run build_server && npm run build_client`.
 
