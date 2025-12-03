@@ -8,9 +8,10 @@ During the game, you will sail across the archipelago, picking up commodities an
 
 Work in progress.
 
-- The game is playable but has no lobby (a server supports only one session at a time).
-- Barebones persistence. Nothing is saved except the last session.
+- The game is fully playable but only supports one session at a time.
 - The interface language is not yet standardized and is missing quality of life features (utility animations and transitions, tooltips, FTUE screens).
+
+- The `multisession` branch is ahead with multi-session support, including saving and retreiving lost sessions by default.
 
 Try it out
 
