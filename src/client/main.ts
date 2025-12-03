@@ -267,6 +267,12 @@ document.fonts.ready.then(() => {
         canvas.notifyForForceTurn();
     });
 
+    window.addEventListener(EventType.renew, () => {
+        alert('This session is no longer supported.');
+        localStorage.removeItem('localState');
+        window.location.href = '/new';
+    });
+
     window.addEventListener(
         EventType.info,
         (event: CustomEventInit) => {

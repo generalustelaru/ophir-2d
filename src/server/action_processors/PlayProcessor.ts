@@ -72,8 +72,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         );
         this.playState.savePlayer(player.toDto());
 
-        this.transmitTurnNotification(player.getIdentity().socketId);
-
         if (IDLE_CHECKS && IDLE_TIMEOUT)
             this.startIdleChecks();
     }

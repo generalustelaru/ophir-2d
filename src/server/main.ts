@@ -1,7 +1,7 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ServerMessage, ClientRequest, PlayState } from '~/shared_types';
+import { ServerMessage, ClientRequest, PlayState, Phase, State } from '~/shared_types';
 import { SessionState } from '~/server_types';
 import tools from './services/ToolService';
 import { GameSession } from './GameSession';
@@ -86,9 +86,45 @@ app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
 });
-// TODO: have an extra HTML file sent to gather localStorage data and call the possible existing session
+
 app.get('/', (req: Request, res: Response) => {
-    console.info('New visitor', { ip: req.ip });
+    console.info('Unchecked visitor', { ip: req.ip });
+
+    res.sendFile(path.join(__dirname,'public', 'session-check.html'));
+});
+
+app.get('/find', (req: Request, res: Response) => {
+    const gameId = req.query.gameId;
+    console.info('Visitor returns possible gameId', { ip: req.ip, gameId });
+
+    if (typeof gameId == 'string' && activeSessions.has(gameId)) {
+        res.status(200);
+
+    } else if (typeof gameId == 'string') {
+        loadGameState(gameId).then(state => {
+            if (!state) {
+                res.status(404);
+
+            } else {
+                const session = new GameSession(
+                    broadcastCallback,
+                    transmitCallback,
+                    state,
+                );
+                activeSessions.set(gameId, { session, sockets: new Map() });
+                res.status(200);
+            }
+        });
+    } else {
+        res.status(400);
+    }
+
+    res.send();
+});
+
+
+app.get('/new', (req: Request, res: Response) => {
+    console.info('Visitor calls for new session', { ip: req.ip });
     const session = activateSession(null);
 
     res.redirect(`/${session.getGameId()}`);
@@ -97,7 +133,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:id', (req: Request, res: Response) => {
-    console.info(`Visitor for session ${req.params.id}`, { ip: req.ip });
+    console.info(`Visitor seeks session ${req.params.id}`, { ip: req.ip });
 
     res.sendFile(path.join(__dirname,'public', 'index.html'));
 });
@@ -135,22 +171,31 @@ socketServer.on('connection', function connection(socket,req) {
         return transmit(socket, { error: 'Invalid connection data.' });
     }
 
+    function notifyIfActive(state: State) {
+        if (state.sessionPhase == Phase.play) {
+            const activePlayer = state.players.find(p => p.isActive);
+            activePlayer?.socketId == socketId && transmit(socket, { turnStart: null });
+        }
+    }
+
     const group = activeSessions.get(gameId);
 
     if (group) {
         group.sockets.set(socketId, socket);
+        notifyIfActive(group.session.getCurrentState().sharedState);
 
     } else {
         loadGameState(gameId).then(state => {
             if (!state) {
-                console.error('Could not find active session', { gameId });
-                return transmit(socket, { error: 'Invalid connection data.' });
+                console.error('Could not find stored session', { gameId });
+                return transmit(socket, { notFound: null });
             }
 
             const group = {
                 sockets: new Map().set(socketId, socket),
                 session: new GameSession(broadcastCallback, transmitCallback, state),
             };
+            notifyIfActive(state.sharedState);
 
             activeSessions.set(gameId, group);
         });
@@ -167,19 +212,30 @@ socketServer.on('connection', function connection(socket,req) {
 
         logRequest(clientRequest);
         const gameId = clientRequest.gameId;
-        const session = activeSessions.get(gameId)?.session;
+        let session = activeSessions.get(gameId)?.session;
 
-        if (!session) {
-            console.error('Connected client requested non-active session', { id: gameId });
+        if (session)
+            return processResponse(session, clientRequest, socket);
 
-            return transmit(socket, { error: `Game ${gameId} cannot be served.` });
-        }
+        loadGameState(gameId).then(state => {
+            if (!state) {
+                console.error('Could not find stored session', { gameId });
+                return transmit(socket, { notFound: null });
+            }
 
-        processResponse(session, clientRequest, socket);
+            const session = new GameSession(broadcastCallback, transmitCallback, state);
+            activeSessions.set(
+                gameId,
+                { session, sockets: new Map().set(socketId, socket) },
+            );
+
+            processResponse(session, clientRequest, socket);
+        });
     });
 
     socket.on('close', () => {
         broadcastGroup.delete(socketId);
+        // TODO: check the socket group for abandonment; dereference session and remove the object if true. 
         group?.sockets.delete(socketId);
     });
 });
@@ -202,13 +258,11 @@ function processResponse(session: GameSession, request: ClientRequest, socket: W
     if (!response)
         return transmit(socket, { error: 'Session has become corrupt.' });
 
-    const gameState = session.getCurrentState();
-    saveGameState(gameState);
+    saveGameState(session.getCurrentState());
 
-    if (response.senderOnly)
-        return transmit(socket, response.message);
-
-    return broadcastToGroup(gameState.sharedState.gameId, response.message);
+    response.senderOnly
+        ? transmit(socket, response.message)
+        : broadcastToGroup(session.getGameId(), response.message);
 }
 
 // MARK: CALLBACKS

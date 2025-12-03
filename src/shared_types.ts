@@ -348,11 +348,9 @@ export type ClientIdResponse = { socketId: string }
 export type EnrolmentResponse = { approvedColor: PlayerColor }
 export type ColorChangeResponse = { approvedNewColor: PlayerColor }
 export type StateResponse = { state: State }
-
 export type ResetResponse = { resetFrom: string | PlayerColor }
-
 export type ErrorResponse = { error: string }
-
+export type NotFoundTransmission = { notFound: null }
 export type VpTransmission = { vp: number }
 export type NewNameTransmission = { newName: string }
 export type TurnNotificationTransmission = { turnStart: null }
@@ -366,6 +364,7 @@ export type ServerMessage =
     | ErrorResponse
     | EnrolmentResponse
     | ColorChangeResponse
+    | NotFoundTransmission
     | VpTransmission
     | NewNameTransmission
     | TurnNotificationTransmission

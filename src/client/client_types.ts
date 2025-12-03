@@ -162,6 +162,7 @@ export enum EventType {
     error = 'error',
     info = 'info',
     reset = 'reset',
+    renew = 'renew',
     state_update = 'state_update',
     identification = 'identification',
     vp_transmission = 'vp_transmission',
@@ -179,6 +180,7 @@ export type LaconicType =
     | EventType.start_turn
     | EventType.rival_control_transmission
     | EventType.force_turn
+    | EventType.renew
 ;
 
 export type Event =
