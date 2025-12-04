@@ -7,7 +7,7 @@ import {
     PeddlerMarketPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
-import { BackupState, PrivateState, Probable, SessionState } from '~/server_types';
+import { BackupState, Configuration, PrivateState, Probable, SessionState } from '~/server_types';
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
@@ -23,10 +23,44 @@ const refs = {
 };
 class ValidatorService {
 
-    public validateStateFile(fileContent: unknown) {
+    public validateConfiguration(db_data: unknown): Configuration | null {
+        const config = this.validateObject<Configuration>(
+            'Configuration',
+            db_data,
+            [
+                { key: 'ADMIN_AUTH', type: 'string', nullable: false },
+                { key: 'SERVER_NAME', type: 'string', nullable: false },
+                { key: 'IDLE_CHECKS', type: 'boolean', nullable: false },
+                { key: 'IDLE_TIMEOUT', type: 'number', nullable: false },
+                { key: 'SINGLE_PLAYER', type: 'boolean', nullable: false },
+                { key: 'NO_RIVAL', type: 'boolean', nullable: false },
+                { key: 'RICH_PLAYERS', type: 'boolean', nullable: false },
+                { key: 'FAVORED_PLAYERS', type: 'boolean', nullable: false },
+                { key: 'CARGO_BONUS', type: 'number', nullable: false, ref: [0,1,2,3] },
+                { key: 'SHORT_GAME', type: 'boolean', nullable: false },
+                { key: 'INCLUDE', type: 'array', nullable: false },
+            ],
+        );
+
+        if (!config)
+            return null;
+
+        const includeTest = lib.evaluateArray(
+            'INCLUDE',
+            config.INCLUDE,
+            'string',
+            refs.specialistName,
+        );
+
+        if (includeTest.passed)
+            return config;
+
+        return null;
+    }
+    public validateState(db_data: unknown) {
         const savedSession = this.validateObject<SessionState>(
             'SavedSession',
-            fileContent,
+            db_data,
             [
                 { key: 'sharedState', type: 'object', nullable: false },
                 { key: 'privateState', type: 'object', nullable: true },

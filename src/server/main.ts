@@ -3,10 +3,11 @@ import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import { ServerMessage, ClientRequest, PlayState, Phase, State } from '~/shared_types';
 import { SessionState } from '~/server_types';
-import tools from './services/ToolService';
 import { GameSession } from './GameSession';
-import { validator } from './services/validation/ValidatorService';
 import { randomUUID } from 'crypto';
+import { validator } from './services/validation/ValidatorService';
+import tools from './services/ToolService';
+import dbService from './services/DatabaseService';
 import readline from 'readline';
 import path from 'path';
 
@@ -19,15 +20,15 @@ if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
     process.exit(1);
 }
 
-const dbAddress = `http://localhost:${DB_PORT}`;
+dbService.getConfig().then(configuration => {
+    if (!configuration){
+        console.error('Missing Configuration object.');
+        process.exit(1);
+    }
 
-fetch(`${dbAddress}/config`).then(response => {
-    if (!response.ok)
-        throw new Error(response.statusText);
-}).catch(error => {
-    console.error('Error connecting to DB',{ error });
-    process.exit(1);
+    console.log(configuration);
 });
+
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
@@ -101,7 +102,7 @@ app.get('/find', (req: Request, res: Response) => {
         res.status(200);
 
     } else if (typeof gameId == 'string') {
-        loadGameState(gameId).then(state => {
+        dbService.loadGameState(gameId).then(state => {
             if (!state) {
                 res.status(404);
 
@@ -185,7 +186,7 @@ socketServer.on('connection', function connection(socket,req) {
         notifyIfActive(group.session.getCurrentState().sharedState);
 
     } else {
-        loadGameState(gameId).then(state => {
+        dbService.loadGameState(gameId).then(state => {
             if (!state) {
                 console.error('Could not find stored session', { gameId });
                 return transmit(socket, { notFound: null });
@@ -217,7 +218,7 @@ socketServer.on('connection', function connection(socket,req) {
         if (session)
             return processResponse(session, clientRequest, socket);
 
-        loadGameState(gameId).then(state => {
+        dbService.loadGameState(gameId).then(state => {
             if (!state) {
                 console.error('Could not find stored session', { gameId });
                 return transmit(socket, { notFound: null });
@@ -245,7 +246,7 @@ function activateSession(savedSession: SessionState | null): GameSession {
     const gameId = gameSession.getGameId();
 
     if (!savedSession)
-        addGameState(gameSession.getCurrentState());
+        dbService.addGameState(gameSession.getCurrentState());
 
     activeSessions.set(gameId, { session: gameSession, sockets: new Map() });
 
@@ -258,7 +259,7 @@ function processResponse(session: GameSession, request: ClientRequest, socket: W
     if (!response)
         return transmit(socket, { error: 'Session has become corrupt.' });
 
-    saveGameState(session.getCurrentState());
+    dbService.saveGameState(session.getCurrentState());
 
     response.senderOnly
         ? transmit(socket, response.message)
@@ -335,68 +336,4 @@ function broadcastToGroup(gameId: string, message: ServerMessage): void {
     groupSockets.forEach(socket => {
         transmit(socket, message);
     });
-}
-
-// MARK: DATABASE
-
-async function addGameState(savedSession: SessionState) {
-    const id = savedSession.sharedState.gameId;
-
-    const response = await fetch(
-        `${dbAddress}/sessions`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, data: savedSession }),
-        },
-    );
-
-    if (!response.ok)
-        console.error('Failed to add game state:', { error: response.status });
-}
-
-async function saveGameState(savedSession: SessionState) {
-
-    const id = savedSession.sharedState.gameId;
-
-    const response = await fetch(
-        `${dbAddress}/sessions/${id}`,
-        {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, data: savedSession }),
-        },
-    );
-
-    if (!response.ok)
-        console.error('Failed to save game state:', { error: response.status });
-}
-
-async function loadGameState(gameId: string): Promise<SessionState | null> {
-    try {
-        const response = await fetch(`${dbAddress}/sessions/${gameId}`);
-
-        if (!response.ok)
-            throw new Error(`DB Error: ${response.status}`);
-
-        const entry = await response.json();
-
-        if (typeof entry != 'object' || !entry.data)
-            throw new Error(`Data Error: ${entry}`);
-
-        if (!('data' in entry))
-            throw new Error('Db entry is corrupted.');
-
-        const gameState = validator.validateStateFile(entry.data);
-
-        if (!gameState)
-            throw new Error('Stored game state is corrupted.');
-
-        return gameState;
-
-    } catch (error) {
-        console.log('Could not resolve data', { error });
-
-        return null;
-    }
 }

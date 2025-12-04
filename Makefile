@@ -14,15 +14,13 @@ endif
 
 migrate:
 ifeq ($(OS),Windows_NT)
-	powershell -Command "New-Item -Path db.json -ItemType File -Force"
-	powershell -Command "{\"sessions\":[], \"config\":{}} | Out-File db.json"
+	powershell -command "cp db_template.json db.json"
 else
-	echo "{\"sessions\": [], \"config\":{}}" > db.json
+	cp db_template.json db.json
 endif
 
 db:
 	npx json-server --watch db.json
-# docs at https://github.com/typicode/json-server/tree/v0
 
 run:
 	node dist/server.cjs

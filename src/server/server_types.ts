@@ -1,7 +1,7 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
-    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade,
+    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName,
 } from '~/shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -128,6 +128,20 @@ export type ServerConstants = {
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
     COST_TIERS: Array<ExchangeTier>,
+}
+
+export type Configuration = {
+    ADMIN_AUTH: string,
+    SERVER_NAME: string,
+    IDLE_CHECKS: boolean,
+    IDLE_TIMEOUT: number,
+    SINGLE_PLAYER: boolean,
+    NO_RIVAL: boolean,
+    RICH_PLAYERS: boolean,
+    FAVORED_PLAYERS: boolean,
+    CARGO_BONUS: 0|1|2|3,
+    SHORT_GAME: boolean,
+    INCLUDE: Array<SpecialistName>
 }
 
 export interface ObjectHandler<T> {
