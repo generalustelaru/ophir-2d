@@ -83,7 +83,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
             this.enrolmentState.setSessionOwner(newColor);
 
         this.enrolmentState.changeColor(player.color, newColor);
-        this.transmit(player.socketId, { approvedColor: newColor });
+        this.transmit(player.socketId, { approvedNewColor: newColor });
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }

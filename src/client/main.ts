@@ -236,6 +236,7 @@ document.fonts.ready.then(() => {
             return signalError('Missing color approval');
 
         localState.playerColor = event.detail.approvedNewColor;
+        localStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.state_update, (event: CustomEventInit) => {
