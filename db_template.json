@@ -1,8 +1,7 @@
 {
-    "sessions": [],
     "config":{
         "ADMIN_AUTH": "0451",
-        "SERVER_NAME": "King Salmon",
+        "SERVER_NAME": "Laputan Machine",
         "IDLE_CHECKS": true,
         "IDLE_TIMEOUT": 3,
         "SINGLE_PLAYER": false,
@@ -12,5 +11,6 @@
         "CARGO_BONUS": 0,
         "SHORT_GAME": false,
         "INCLUDE": []
-    }
+    },
+    "sessions": []
 }
