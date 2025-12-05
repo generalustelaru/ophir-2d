@@ -38,11 +38,10 @@ client:
 	npm run build_client
 
 static:
-ifeq ($(OS),Windows_NT)
-	# FIXME: adapt Windows script for dist/public
-	powershell -command "if (-not (Test-Path 'dist/public')) { New-Item -ItemType Directory -Name 'public' }"
-	powershell -command "if (Get-ChildItem 'public' -ErrorAction SilentlyContinue) { Get-ChildItem 'public' -Recurse | Remove-Item -Force }"
-	powershell -command "cp -r src/client/static/* dist/public/"
+ifeq ($( -commandO"S),Windows_NT)"
+	powershell -command "if (-not (Test-Path 'dist')) { New-Item -ItemType Directory -Path 'dist'; New-Item -ItemType Directory -Path 'dist/public' }"
+	powershell -command "if (Test-Path 'dist/*') { Remove-Item -Recurse -Force dist/* }"
+	powershell -command "Copy-Item -Recurse -Force src/client/static/* dist/public/"
 else
 	if [ ! -d 'dist' ]; then mkdir 'dist'; mkdir 'dist/public'; fi
 	if [ -f 'dist/*' ]; then rm -r dist/*; fi
