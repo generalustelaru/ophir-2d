@@ -73,16 +73,26 @@ Any page visitor may enrol in the game session by selecting a color card. Visito
 You can edit the "config" values found in `db.json`. The values will only be applied after resetting the game or starting a new one. 
 
 `SERVER_NAME`: The name that appears in chat for server messages.
+
 `ADMIN_AUTH`: The 'auth' URL parameter value for the GET request to /shutdown.
+
 `IDLE_CHECKS`: Enables other players to force-end the turn of the current player if idle.
+
 `IDLE_TIMEOUT`: Time of perceived inactivity (in minutes) for the current player before receiving the idle status.
+
 `SINGLE_PLAYER`: Allows session to start with a single enrolled player.
+
 `NO_RIVAL`: Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled).
+
 `RICH_PLAYERS`: Players start with 99 coins.
+
 `FAVORED_PLAYERS`: Players start with maximum favor (6).
+
 `CARGO_BONUS`: Players start with cargo advantages.
    - values: 0 (No bonus), 1 (Upgraded cargo), 2 (One of each commodity onboard), 3 (One gold and one silver onboard)
+
 `SHORT_GAME`: Reduces the Temple Track to a single column (the game ends after three metal donations).
+
 `INCLUDE`: Ensures selected specialists appear in the draft (from first to last, up to the amount required for the player count).
    - Values: ambassador, harbormaster, moneychanger, priest, temple_guard, postmaster, navigator, advisor, chancellor, peddler
    - Format: `["<value>"]`, `["<value>","<value>"]`, etc.
