@@ -8,10 +8,10 @@ During the game, you will sail across the archipelago, picking up commodities an
 
 Work in progress.
 
-- The game is fully playable but only supports one session at a time.
-- The interface language is not yet standardized and is missing quality of life features (utility animations and transitions, tooltips, FTUE screens).
-
-- The `multisession` branch is ahead with multi-session support, including saving and retreiving lost sessions by default.
+- Performance optimizations may still be needed.
+- The interface language is not yet standardized and is missing quality of life features (more utility animations, transitions, tooltips, FTUE screens).
+- The game is fully playable on a local network. I haven't tested deployments yet.
+- There is a planned 'lobby' page for viewing and joining sessions. You currently have to check the database to see what's avaialable, LOL.
 
 Try it out
 
@@ -69,8 +69,7 @@ Any page visitor may enrol in the game session by selecting a color card. Visito
  - Follow your intuition. The game rules are enforced. You can't cheat but you can certainly make mistakes.
 
 ## Debug options (fun stuff)
-
-You can edit the "config" values found in `db.json`. The values will only be applied after resetting the game or starting a new one. 
+You can edit the "config" values found in `db.json`. The values will only be applied after resetting the game or starting a new one.
 
 `SERVER_NAME`: The name that appears in chat for server messages.
 
