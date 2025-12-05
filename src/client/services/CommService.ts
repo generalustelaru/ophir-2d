@@ -1,7 +1,7 @@
 import {
     ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission, EnrolmentResponse, NewNameTransmission, TurnNotificationTransmission, RivalControlTransmission,
-    ForceTurnNotificationTransmission, ColorChangeResponse, NotFoundTransmission,
+    ForceTurnNotificationTransmission, ColorChangeResponse, NotFoundTransmission, Action,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -42,6 +42,10 @@ export class CommunicationService extends Communicator {
                 detail: { message: 'The connection encountered an error' },
             });
         };
+
+        setInterval(()=> {
+            this.sendMessage({ action: Action.ping, payload: null });
+        },30000);
 
         this.socket.onmessage = (event) => {
             const data: ServerMessage = JSON.parse(event.data);

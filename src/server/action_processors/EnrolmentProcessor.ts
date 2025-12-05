@@ -1,26 +1,24 @@
 import {
-    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, StateResponse, Unique,
+    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse, Unique,
 } from '~/shared_types';
 import { validator } from '../services/validation/ValidatorService';
 import lib from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
-import { Probable, SessionProcessor } from '~/server_types';
-
-const serverName = String(process.env.SERVER_NAME);
+import { Configuration, Probable, SessionProcessor } from '~/server_types';
 
 export class EnrolmentProcessor implements Unique<SessionProcessor> {
     private enrolmentState: EnrolmentStateHandler;
-    private transmitEnrolment: (color: PlayerColor, socketId: string) => void;
-    private transmitColorChange: (newColor: PlayerColor, socketId: string) => void;
+    private transmit: (socketId: string, message: ServerMessage) => void;
+    private isSinglePlayer: boolean;
 
     constructor(
         state: EnrolmentState,
-        transmitEnrolment: (color: PlayerColor, socketId: string) => void,
-        transmitColorChange: (newColor: PlayerColor, socketId: string) => void,
+        transmitCallback: (socketId: string, message: ServerMessage) => void,
+        configuration: Configuration,
     ) {
-        this.enrolmentState = new EnrolmentStateHandler(serverName, state);
-        this.transmitEnrolment = transmitEnrolment;
-        this.transmitColorChange = transmitColorChange;
+        this.isSinglePlayer = configuration.SINGLE_PLAYER;
+        this.enrolmentState = new EnrolmentStateHandler(configuration.SERVER_NAME, state);
+        this.transmit = transmitCallback;
     }
 
     public getState(): EnrolmentState {
@@ -35,13 +33,16 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
 
         const { color, name: nameInput } = enrolmentPayload;
         const name = nameInput || color;
+        const players = this.enrolmentState.getAllPlayers();
 
         if (!socketId)
             return lib.fail('Cannot enrol in session. socketId is missing.');
 
-        if (this.isColorTaken(this.enrolmentState.getAllPlayers(), color))
+        if (this.isColorTaken(players, color))
             return lib.fail('Color is is already taken');
 
+        if (this.isSinglePlayer || players.length > 1)
+            this.enrolmentState.allowDraft();
 
         const result = ((): Probable<true> => {
 
@@ -59,7 +60,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         if (result.err)
             return result;
 
-        this.transmitEnrolment(color, socketId);
+        this.transmit(socketId, { approvedColor: color });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
         this.enrolmentState.addServerMessage('Pick/change your name by typing #name &ltyour new name&gt in the chat');
@@ -68,19 +69,21 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
     }
 
     public processChangeColor(player: PlayerEntry, payload: MessagePayload): Probable<StateResponse> {
-        const result = validator.validateColorChangePayload(payload);
+        const change = validator.validateColorChangePayload(payload);
 
-        if (!result)
+        if (!change)
             return lib.fail('Color change payload is malformed!');
 
-        if (this.enrolmentState.getAllPlayers().find(p => p.color == result.color))
+        const { color: newColor } = change;
+
+        if (this.enrolmentState.getAllPlayers().find(p => p.color == newColor))
             return lib.fail('Color is currently taken.');
 
         if (this.enrolmentState.getSessionOwner() == player.color)
-            this.enrolmentState.setSessionOwner(result.color);
+            this.enrolmentState.setSessionOwner(newColor);
 
-        this.enrolmentState.changeColor(player.color, result.color);
-        this.transmitColorChange(result.color, player.socketId);
+        this.enrolmentState.changeColor(player.color, newColor);
+        this.transmit(player.socketId, { approvedColor: newColor });
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }

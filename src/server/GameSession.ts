@@ -1,4 +1,4 @@
-import { WsDigest, DataDigest, SessionState, Probable } from '~/server_types';
+import { WsDigest, DataDigest, SessionState, Probable, Configuration } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
     ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
@@ -13,65 +13,40 @@ import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from '~/server_constants';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
-import { SERVER_NAME, SINGLE_PLAYER  } from '../server/configuration';
+// import { SERVER_NAME, SINGLE_PLAYER  } from '../server/configuration';
 import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 /**@throws */
 export class GameSession {
     private gameId: string;
+    private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
-    private autoBroadcast: (state: PlayState) => void;
-    private transmitVp: (vp: number, socketId: string ) => void;
-    private transmitEnrolment: (approvedColor: PlayerColor, socketId: string ) => void;
-    private transmitColorChange: (approvedNewColor: PlayerColor, socketId: string ) => void;
-    private transmitNameUpdate: (newName: string, socketId: string) => void;
-    private transmitTurnNotification: (socketId: string) => void;
-    private transmitForceTurnNotification: (socketId: string) => void;
-    private transmitRivalControlNotification: (socketId: string) => void;
-
-
+    private broadcast: ((state: PlayState) => void) | null;
+    private transmit: ((socketId: string, message: ServerMessage) => void) | null;
     constructor(
         broadcastCallback: (state: PlayState) => void,
         transmitCallback: (socketId: string, message: ServerMessage) => void,
+        configuration: Configuration,
         savedSession: SessionState | null,
     ) {
-        this.autoBroadcast = broadcastCallback;
-        this.transmitVp = (vp, socketId) => {
-            transmitCallback(socketId, { vp });
-        };
-        this.transmitEnrolment = (approvedColor, socketId) => {
-            transmitCallback(socketId, { approvedColor });
-        };
-        this.transmitColorChange = (approvedNewColor, socketId) => {
-            transmitCallback(socketId, { approvedNewColor });
-        };
-        this.transmitNameUpdate = (newName: string, socketId: string) => {
-            transmitCallback(socketId, { newName });
-        };
-        this.transmitTurnNotification = (socketId: string) => {
-            transmitCallback(socketId, { turnStart: null });
-        };
-        this.transmitForceTurnNotification = (socketId: string) => {
-            transmitCallback(socketId, { forceTurn: null });
-        };
-        this.transmitRivalControlNotification = (socketId: string) => {
-            transmitCallback(socketId, { rivalControl: null });
-        };
+        this.config = { ...configuration };
+        this.broadcast = broadcastCallback;
+        this.transmit = transmitCallback;
 
         if (!savedSession) {
             this.gameId = randomUUID();
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
-                this.transmitEnrolment,
-                this.transmitColorChange,
+                transmitCallback,
+                configuration,
             );
             console.info('New game session created');
 
             return;
         }
 
-        const { sharedState, privateState, backupStates: backupState } = savedSession;
+        const { sharedState, privateState, backupStates } = savedSession;
         const { gameId, sessionOwner, players, chat } = sharedState;
 
         this.gameId = gameId;
@@ -79,31 +54,46 @@ export class GameSession {
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
                 case Phase.play:
+                    if (!privateState)
+                        throw new Error('Cannot resume play session w/o PrivateState object');
+
                     return new PlayProcessor(
                         {
-                            playState: new PlayStateHandler(SERVER_NAME, sharedState),
-                            privateState: new PrivateStateHandler(privateState!),
-                            backupState: new BackupStateHandler(SERVER_NAME, backupState),
+                            privateState: new PrivateStateHandler(privateState),
+                            playState: new PlayStateHandler(
+                                configuration.SERVER_NAME, sharedState,
+                            ),
+                            backupState: new BackupStateHandler(
+                                configuration.SERVER_NAME, backupStates,
+                            ),
                         },
-                        this.autoBroadcast,
-                        this.transmitTurnNotification,
-                        this.transmitForceTurnNotification,
-                        this.transmitRivalControlNotification,
-                        this.transmitVp,
+                        configuration,
+                        broadcastCallback,
+                        transmitCallback,
                     );
 
                 case Phase.setup:
                     return new SetupProcessor(
-                        { gameId, sessionOwner:(sessionOwner as PlayerColor), players, chat },
+                        { gameId, sessionOwner: (sessionOwner as PlayerColor), players, chat },
+                        configuration,
                     );
 
                 case Phase.enrolment:
-                    return new EnrolmentProcessor(sharedState, this.transmitEnrolment, this.transmitColorChange);
+                    return new EnrolmentProcessor(
+                        sharedState,
+                        transmitCallback,
+                        configuration,
+                    );
 
                 default:
                     throw new Error('Cannot determine session phase');
             }
         })();
+    }
+
+    public deReference() {
+        this.broadcast = null;
+        this.transmit = null;
     }
 
     public getGameId(): string {
@@ -120,22 +110,29 @@ export class GameSession {
         };
     }
 
+    public updateConfig(configuration: Configuration) {
+        this.config = { ...configuration };
+    }
+
     public reset() {
         if ('killIdleChecks' in this.actionProcessor) {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
+        if (!this.transmit)
+            return console.error('GameSession was dereferenced but not removed');
+
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
-            this.transmitEnrolment,
-            this.transmitColorChange,
+            this.transmit,
+            this.config,
         );
         console.log('Session was reset');
     }
 
     public processAction(request: ClientRequest): WsDigest {
         const state = this.actionProcessor.getState();
-        const { message  }= request;
+        const { message } = request;
         const { action, payload } = message;
 
         if (action === Action.inquire)
@@ -147,9 +144,9 @@ export class GameSession {
         const match = this.matchRequestToPlayer(request);
 
         if (match.err) {
-            console.info('Resetting client;',match.message);
+            console.info('Resetting client;', match.message);
 
-            return this.issueNominalResponse({ resetFrom: SERVER_NAME });
+            return this.issueNominalResponse({ resetFrom: this.config.SERVER_NAME });
         }
 
         const { player } = match.data;
@@ -158,7 +155,7 @@ export class GameSession {
 
             const message = validator.validateChatPayload(payload);
 
-            if(!message)
+            if (!message)
                 return this.issueNominalResponse(lib.errorResponse('Malformed chat message'));
 
             const commandMatch = message.input.match(/^#\w*(?=\s)/);
@@ -177,7 +174,7 @@ export class GameSession {
                         return this.issueNominalResponse(lib.errorResponse('Name can no longer be updated.'));
 
                     const response = this.actionProcessor.updatePlayerName(player, newName);
-                    this.transmitNameUpdate(newName, player.socketId);
+                    this.transmit && this.transmit(player.socketId, { newName } );
 
                     return this.issueGroupResponse(response);
 
@@ -264,11 +261,14 @@ export class GameSession {
                     if (sessionOwner !== player.color)
                         return lib.fail('Only the session owner may continue.');
 
-                    if (!sessionOwner || !players.length || !SINGLE_PLAYER && players.length < 2)
+                    if (!sessionOwner || !players.length || !this.config.SINGLE_PLAYER && players.length < 2)
                         return lib.fail('Setup data is incomplete');
 
                     try {
-                        this.actionProcessor = new SetupProcessor({ gameId, sessionOwner, players, chat });
+                        this.actionProcessor = new SetupProcessor(
+                            { gameId, sessionOwner, players, chat },
+                            this.config,
+                        );
                     } catch (error) {
                         return lib.fail(String(error));
                     }
@@ -303,21 +303,24 @@ export class GameSession {
         const setupUpdate = ((): Probable<StateResponse> => {
             switch (action) {
                 case Action.pick_specialist:
-                    return processor.processSpecialistSelection((player as PlayerDraft), payload );
+                    return processor.processSpecialistSelection((player as PlayerDraft), payload);
                 case Action.start_play: {
                     const bundleResult = processor.processStart(payload);
 
                     if (bundleResult.err)
                         return lib.fail('Cannot start game!');
 
+                    if (!this.broadcast || !this.transmit) {
+                        console.error('GameSession was dereferenced but not removed');
+                        return lib.fail('Cannot start game!');
+                    }
+
                     try {
                         this.actionProcessor = new PlayProcessor(
                             bundleResult.data,
-                            this.autoBroadcast,
-                            this.transmitTurnNotification,
-                            this.transmitForceTurnNotification,
-                            this.transmitRivalControlNotification,
-                            this.transmitVp,
+                            this.config,
+                            this.broadcast,
+                            this.transmit,
                         );
                     } catch (error) {
                         return lib.fail(String(error));
@@ -447,7 +450,7 @@ export class GameSession {
         return { ...state, gameId };
     }
 
-    private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch>  {
+    private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch> {
         const { gameId, socketId, playerColor, playerName, message } = request;
 
         if (!gameId || !socketId || !playerColor || !playerName)

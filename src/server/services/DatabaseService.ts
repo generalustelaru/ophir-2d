@@ -32,7 +32,7 @@ class DatabaseService {
         }
     }
 
-    public async addGameState(savedSession: SessionState) {
+    public async addGameState(savedSession: SessionState): Promise<{ok: boolean}> {
         const id = savedSession.sharedState.gameId;
 
         const response = await fetch(
@@ -44,11 +44,14 @@ class DatabaseService {
             },
         );
 
-        if (!response.ok)
-            console.error('Failed to add game state:', { error: response.status });
+        if (response.ok)
+            return { ok: true };
+
+        console.error('Failed to add game state:', { error: response.status });
+        return { ok: false };
     }
 
-    public async saveGameState(savedSession: SessionState) {
+    public async saveGameState(savedSession: SessionState): Promise<{ok: boolean}> {
 
         const id = savedSession.sharedState.gameId;
 
@@ -61,8 +64,11 @@ class DatabaseService {
             },
         );
 
-        if (!response.ok)
-            console.error('Failed to save game state:', { error: response.status });
+        if (response.ok)
+            return { ok: true };
+
+        console.error('Failed to save game state:', { error: response.status });
+        return { ok: false };
     }
 
     public async loadGameState(gameId: string): Promise<SessionState | null> {

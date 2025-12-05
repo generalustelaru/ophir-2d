@@ -1,7 +1,7 @@
 import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ServerMessage, ClientRequest, PlayState, Phase, State } from '~/shared_types';
+import { ServerMessage, ClientRequest, PlayState, Phase, Action } from '~/shared_types';
 import { SessionState } from '~/server_types';
 import { GameSession } from './GameSession';
 import { randomUUID } from 'crypto';
@@ -26,7 +26,7 @@ dbService.getConfig().then(configuration => {
         process.exit(1);
     }
 
-    console.log(configuration);
+    console.info('DB responded',{ configuration });
 });
 
 
@@ -35,7 +35,7 @@ process.on('SIGINT', () => {
     broadcast({ error: 'The server encountered an issue and is shutting down :(' });
     socketServer.close();
     console.log('Exiting...');
-    process.exit(0);
+    process.exit(1);
 });
 
 // MARK: CLI
@@ -95,75 +95,98 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 app.get('/find', (req: Request, res: Response) => {
-    const gameId = req.query.gameId;
+    const gameId = String(req.query.gameId);
     console.info('Visitor returns possible gameId', { ip: req.ip, gameId });
 
-    if (typeof gameId == 'string' && activeSessions.has(gameId)) {
+    if (playGroups.has(gameId)){
         res.status(200);
-
-    } else if (typeof gameId == 'string') {
-        dbService.loadGameState(gameId).then(state => {
-            if (!state) {
+    } else {
+        reviveGameSession(gameId).then(session => {
+            if (!session) {
                 res.status(404);
-
             } else {
-                const session = new GameSession(
-                    broadcastCallback,
-                    transmitCallback,
-                    state,
-                );
-                activeSessions.set(gameId, { session, sockets: new Map() });
+                playGroups.set(gameId, { session, sockets: new Map() });
                 res.status(200);
             }
         });
-    } else {
-        res.status(400);
     }
-
     res.send();
 });
 
-
 app.get('/new', (req: Request, res: Response) => {
     console.info('Visitor calls for new session', { ip: req.ip });
-    const session = activateSession(null);
 
-    res.redirect(`/${session.getGameId()}`);
+    createGameSession().then(session => {
+        if (session) {
+            const gameId = session.getGameId();
+            const group = { session, sockets: new Map() };
+            playGroups.set(gameId, group);
+
+            res.redirect(`/${gameId}`);
+        } else {
+            res.status(500).send('Server has encountered a problem :(');
+        }
+    });
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:id', (req: Request, res: Response) => {
-    console.info(`Visitor seeks session ${req.params.id}`, { ip: req.ip });
+    const gameId = req.params.id;
+    console.info(`Visitor seeks session ${gameId}`, { ip: req.ip });
 
-    res.sendFile(path.join(__dirname,'public', 'index.html'));
+    if (playGroups.has(gameId))
+        return res.sendFile(path.join(__dirname,'public', 'index.html'));
+
+    reviveGameSession(gameId).then(session => {
+        if (!session)
+            return res.redirect('/new');
+
+        playGroups.set(gameId, { session, sockets: new Map() });
+
+        return res.sendFile(path.join(__dirname,'public', 'index.html'));
+    });
 });
 
 // MARK: WS
-
-type SessionGroup = {
+type PlayGroup = {
     session: GameSession,
     sockets: Map<string, WebSocket>,
 }
+type SocketReference = {
+    socket: WebSocket,
+    gameId: string,
+    timeStamp: number,
+}
+
 const socketServer = new WebSocketServer({ port: WS_PORT });
-const broadcastGroup: Map<string, WebSocket> = new Map();
-const activeSessions: Map<string, SessionGroup> = new Map();
+const socketRefs: Map<string, SocketReference> = new Map();
+const playGroups: Map<string, PlayGroup> = new Map();
 
 setInterval(() => {
-    activeSessions.forEach((group) => {
+    const time = Date.now();
 
-        group.sockets.forEach((socket, socketId) => {
+    socketRefs.forEach((reference, socketId) => {
+        const { gameId, timeStamp, socket } = reference;
 
-            if (socket.readyState === WebSocket.CLOSED) {
-                group.sockets.delete(socketId);
-                console.log('Removing abandoned client:', socketId);
+        if (socket.readyState == socket.CLOSED || time - timeStamp > 45000) { // 45 seconds
+            socketRefs.delete(socketId);
+            const playGroup = playGroups.get(gameId);
+            playGroup && playGroup.sockets.delete(socketId);
+
+            if (playGroup?.sockets.size == 0) {
+                playGroup.session.deReference();
+                playGroups.delete(gameId);
+                console.log('deactivated empty session', { gameId });
             }
-        });
+        }
     });
 }, 60000); // Every minute
 
 socketServer.on('connection', function connection(socket,req) {
     const socketId = randomUUID();
+    socket.send(JSON.stringify({ socketId }));
+
     const params = req.url ? new URL(req.url, `http://${req.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
 
@@ -172,98 +195,75 @@ socketServer.on('connection', function connection(socket,req) {
         return transmit(socket, { error: 'Invalid connection data.' });
     }
 
-    function notifyIfActive(state: State) {
+    const playGroup = playGroups.get(gameId);
+
+    if (!playGroup)
+        return transmit(socket, { notFound: null });
+
+    playGroup.sockets.set(socketId, socket);
+    console.log('websocket added to play group');
+
+    const reference = { gameId, socket, timeStamp: Date.now() };
+    socketRefs.set(socketId, reference);
+
+    const sessionState = playGroup.session.getCurrentState();
+    const { sharedState: state } = sessionState;
+
+    setTimeout(() => {
         if (state.sessionPhase == Phase.play) {
-            const activePlayer = state.players.find(p => p.isActive);
-            activePlayer?.socketId == socketId && transmit(socket, { turnStart: null });
+            const { players } = state;
+            const activePlayer = players.find(p => p.isActive);
+
+            if (activePlayer?.socketId == socketId)
+                transmit(socket, { turnStart: null });
         }
-    }
-
-    const group = activeSessions.get(gameId);
-
-    if (group) {
-        group.sockets.set(socketId, socket);
-        notifyIfActive(group.session.getCurrentState().sharedState);
-
-    } else {
-        dbService.loadGameState(gameId).then(state => {
-            if (!state) {
-                console.error('Could not find stored session', { gameId });
-                return transmit(socket, { notFound: null });
-            }
-
-            const group = {
-                sockets: new Map().set(socketId, socket),
-                session: new GameSession(broadcastCallback, transmitCallback, state),
-            };
-            notifyIfActive(state.sharedState);
-
-            activeSessions.set(gameId, group);
-        });
-    }
-
-    broadcastGroup.set(socketId, socket);
-    socket.send(JSON.stringify({ socketId }));
+    }, 2000);
 
     socket.on('message', function incoming(req: string) {
+        reference.timeStamp = Date.now();
         const clientRequest = validator.validateClientRequest(tools.parse(req));
 
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
+        if (clientRequest.message.action == Action.ping)
+            return;
+
         logRequest(clientRequest);
+
         const gameId = clientRequest.gameId;
-        let session = activeSessions.get(gameId)?.session;
+        const session = playGroups.get(gameId)?.session;
 
-        if (session)
-            return processResponse(session, clientRequest, socket);
+        if (!session)
+            return transmit(socket, { notFound: null });
 
-        dbService.loadGameState(gameId).then(state => {
-            if (!state) {
-                console.error('Could not find stored session', { gameId });
-                return transmit(socket, { notFound: null });
-            }
+        if (clientRequest.message.action == Action.declare_reset) {
+            dbService.getConfig().then(configuration => {
+                configuration && session.updateConfig(configuration);
 
-            const session = new GameSession(broadcastCallback, transmitCallback, state);
-            activeSessions.set(
-                gameId,
-                { session, sockets: new Map().set(socketId, socket) },
-            );
-
-            processResponse(session, clientRequest, socket);
-        });
-    });
-
-    socket.on('close', () => {
-        broadcastGroup.delete(socketId);
-        // TODO: check the socket group for abandonment; dereference session and remove the object if true. 
-        group?.sockets.delete(socketId);
+                processAction(session, clientRequest, socket);
+            });
+        } else {
+            processAction(session, clientRequest, socket);
+        }
     });
 });
 
-function activateSession(savedSession: SessionState | null): GameSession {
-    const gameSession = new GameSession(broadcastCallback, transmitCallback, savedSession);
-    const gameId = gameSession.getGameId();
-
-    if (!savedSession)
-        dbService.addGameState(gameSession.getCurrentState());
-
-    activeSessions.set(gameId, { session: gameSession, sockets: new Map() });
-
-    return gameSession;
-}
-
-function processResponse(session: GameSession, request: ClientRequest, socket: WebSocket) {
+async function processAction(session: GameSession, request: ClientRequest, socket: WebSocket) {
     const response = session.processAction(request);
 
     if (!response)
         return transmit(socket, { error: 'Session has become corrupt.' });
 
-    dbService.saveGameState(session.getCurrentState());
+    const save = await dbService.saveGameState(session.getCurrentState());
 
-    response.senderOnly
-        ? transmit(socket, response.message)
-        : broadcastToGroup(session.getGameId(), response.message);
+    if (save.ok) {
+        response.senderOnly
+            ? transmit(socket, response.message)
+            : broadcastToGroup(session.getGameId(), response.message);
+    } else {
+        broadcastToGroup(session.getGameId(), { error: 'Action cannot be saved' });
+    }
 }
 
 // MARK: CALLBACKS
@@ -272,12 +272,12 @@ function broadcastCallback(state: PlayState) {
 }
 
 function transmitCallback(socketId: string, message: ServerMessage) {
-    const socket = broadcastGroup.get(socketId);
+    const reference = socketRefs.get(socketId);
 
-    if (!socket)
+    if (!reference)
         return console.error('Cannot deliver message: Missing socket client.', { message });
 
-    transmit(socket, message);
+    transmit(reference.socket, message);
 }
 
 // MARK: FUNCTIONS
@@ -304,11 +304,11 @@ function logRequest(request: ClientRequest) {
 }
 
 function shutDown() {
-    broadcast({ error: 'The server is entering maintenance.' });
-    console.log('Shutting down...');
     rl.close();
+    console.log('Shutting down...');
 
-    broadcastGroup.forEach(socket => socket.close(1000));
+    broadcast({ error: 'The server is entering maintenance.' });
+    socketRefs.forEach(ref => ref.socket.close(1000));
 
     setTimeout(() => {
         socketServer.close();
@@ -318,8 +318,8 @@ function shutDown() {
 }
 
 function broadcast(message: ServerMessage): void {
-    broadcastGroup.forEach(socket => {
-        transmit(socket, message);
+    socketRefs.forEach(ref => {
+        transmit(ref.socket, message);
     });
 }
 
@@ -328,12 +328,57 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
 }
 
 function broadcastToGroup(gameId: string, message: ServerMessage): void {
-    const groupSockets = activeSessions.get(gameId)?.sockets;
+    const groupSockets = playGroups.get(gameId)?.sockets;
 
     if (!groupSockets)
         return console.error('Cannot find active GameSession', { gameId });
 
     groupSockets.forEach(socket => {
         transmit(socket, message);
+    });
+}
+
+async function createGameSession(): Promise<GameSession|null> {
+    return new Promise(async resolve => {
+        const gameSession = await getGameSessionInstance(null);
+
+        if (!gameSession)
+            return resolve(null);
+
+        const post = await dbService.addGameState(gameSession.getCurrentState());
+
+        if (post.ok)
+            return resolve(gameSession);
+
+        resolve(null);
+    });
+}
+
+async function reviveGameSession(gameId: string): Promise<GameSession|null> {
+    return new Promise(async resolve => {
+        const state = await dbService.loadGameState(gameId);
+
+        if (state) {
+            const session = await getGameSessionInstance(state);
+            session && resolve(session);
+        }
+
+        resolve(null);
+    });
+}
+
+async function getGameSessionInstance(savedSession: SessionState | null): Promise<GameSession|null> {
+    return new Promise(async resolve => {
+        const configuration = await dbService.getConfig();
+
+        if (!configuration)
+            resolve(null);
+        else try {
+            const instance = new GameSession(broadcastCallback, transmitCallback, configuration, savedSession);
+            resolve(instance);
+        } catch (error) {
+            console.error({ error });
+            resolve(null);
+        }
     });
 }

@@ -172,12 +172,7 @@ const serverConstants: ServerConstants = {
         sessionPhase: Phase.enrolment,
         sessionOwner: null,
         chat: [],
-        availableSlots: [
-            'Purple',
-            'Yellow',
-            'Red',
-            'Green',
-        ],
+        mayDraft: false,
         players: [],
     },
     COST_TIERS: [
