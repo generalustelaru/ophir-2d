@@ -64,7 +64,7 @@ export const UserInterface = new class extends Communicator {
 
         setTimeout(() => {
             this.chatInput.element.focus();
-        }, 5);
+        }, 1000);
     };
 
     private processDraft = (): void => {
