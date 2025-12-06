@@ -5,7 +5,7 @@ import { Button } from '../popular';
 import clientConstants from '~/client/client_constants';
 import { FavorFactory, TradeGoodFactory } from '.';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 type Update = {
     type: TradeGood | 'favor' | 'none',
@@ -36,12 +36,12 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
         this.activeBackground = new Konva.Rect({
             width: 30,
             height: 30,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 1,
             x: -3,
             y: -3,
             cornerRadius: 5,
-            fill: COLOR.modalLightBlue,
+            fill: HUES.modalLightBlue,
             visible: false,
         });
 

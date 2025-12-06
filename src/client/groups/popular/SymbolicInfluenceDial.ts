@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client/client_types';
 import { Coordinates, NeutralColor, PlayerColor, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 type SymbolicInfluenceDialUpdate = {
     color?: PlayerColor | NeutralColor,
     symbol?: string,
@@ -23,7 +23,7 @@ export class SymbolicInfluenceDial implements Unique<DynamicGroupInterface<Symbo
             width: 50,
             height: 50,
             cornerRadius: 10,
-            fill: data?.color ? COLOR[data.color] : undefined,
+            fill: data?.color ? HUES[data.color] : undefined,
         });
         this.dieSymbol = new Konva.Text({
             text: data?.symbol,
@@ -45,7 +45,7 @@ export class SymbolicInfluenceDial implements Unique<DynamicGroupInterface<Symbo
             this.dieSymbol.text(data.symbol) ;
 
         if (data.color)
-            this.dieFace.fill(COLOR[data.color]);
+            this.dieFace.fill(HUES[data.color]);
 
         if (data.position) {
             this.group.x(data.position.x);

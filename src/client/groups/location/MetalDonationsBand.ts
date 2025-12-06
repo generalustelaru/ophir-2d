@@ -5,7 +5,7 @@ import { TempleLevelDial } from './TempleLevelDial';
 import clientConstants from '~/client_constants';
 
 const SHORT_GAME = Boolean(process.env.SHORT_GAME === 'true');
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 const UNIT = 27;
 const LEVEL_DIAL_DRIFTS = [
     { id: 0, x: 0 },
@@ -37,8 +37,8 @@ export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleSt
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkBlue,
-            stroke: COLOR.stampEdge,
+            fill: HUES.templeDarkBlue,
+            stroke: HUES.stampEdge,
             cornerRadius: 5,
         });
 
@@ -53,7 +53,7 @@ export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleSt
             width: this.cargoDisplayGroup.width(),
             height: this.cargoDisplayGroup.height(),
             fill: 'black',
-            stroke: COLOR.stampEdge,
+            stroke: HUES.stampEdge,
             cornerRadius: 5,
             strokeWidth: 1,
         });

@@ -6,7 +6,7 @@ import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyGoodButton } from '.';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
@@ -47,7 +47,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR[`${isActive ? '' : 'dark'}${color}`],
+            fill: HUES[`${isActive ? '' : 'dark'}${color}`],
             cornerRadius: 5,
         });
 
@@ -70,8 +70,8 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
         this.influenceDial = new InfluenceDial(
             { x: -55, y: 25 },
-            COLOR[`dark${player.color}`]);
-        this.influenceDial.update({ value: player.influence, color: COLOR[`dark${player.color}`] });
+            HUES[`dark${player.color}`]);
+        this.influenceDial.update({ value: player.influence, color: HUES[`dark${player.color}`] });
 
         this.group.add(
             this.background,
@@ -117,11 +117,11 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
     public update(player: Player): void {
         const { cargo, favor, isActive, influence, color, locationActions, isAnchored, specialist, name } = player;
-        this.background.fill(COLOR[`${isActive ? '' : 'dark'}${color}`]);
+        this.background.fill(HUES[`${isActive ? '' : 'dark'}${color}`]);
         this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
-        this.influenceDial.update({ value: influence, color: COLOR[`${isActive ? '' : 'dark'}${color}`] });
+        this.influenceDial.update({ value: influence, color: HUES[`${isActive ? '' : 'dark'}${color}`] });
         this.specialistBand.update(isActive);
         this.specialistCard.update(name);
         this.specialtyGoodButton.update(!!(

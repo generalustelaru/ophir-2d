@@ -5,7 +5,7 @@ import { InfluenceDial, SymbolicInfluenceDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class SailAttemptModal extends ModalBase implements Unique<DynamicModalInterface<undefined, SailAttemptArgs>> {
     private ownerDie: SymbolicInfluenceDial;
@@ -36,7 +36,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         this.toSailDial = new InfluenceDial(
@@ -44,7 +44,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
                 x: offset.x + 100,
                 y: offset.y,
             },
-            COLOR.boneWhite,
+            HUES.boneWhite,
         );
 
         this.contentGroup.add(

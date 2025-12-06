@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import constants from '~/client_constants';
 
-const { ICON_DATA, COLOR } = constants;
+const { ICON_DATA, HUES } = constants;
 
 export class ForceTurnModal extends ModalBase {
     constructor(stage: Konva.Stage) {
@@ -26,7 +26,7 @@ export class ForceTurnModal extends ModalBase {
         const anchorPath = ICON_DATA.anchored;
         const disabledAnchor = new Konva.Path({
             data: anchorPath.shape,
-            fill: COLOR.disabled,
+            fill: HUES.disabled,
             scale: { x: 1.5, y: 1.5 },
             x: this.contentGroup.width() / 2 - 24,
             y: 50,

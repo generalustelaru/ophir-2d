@@ -3,7 +3,7 @@ import constants from '~/client_constants';
 import { BarrierId, Unique } from '~/shared_types';
 import { StaticGroupInterface } from '~/client_types';
 
-const { COLOR } = constants;
+const { HUES } = constants;
 
 type OffsetData = {x: number, y: number, rotation: number};
 
@@ -28,7 +28,7 @@ export class BarrierToken implements Unique<StaticGroupInterface> {
     constructor(
         center: {x: number, y: number},
         barrierId: BarrierId,
-        fill: string = COLOR.barrierDefault,
+        fill: string = HUES.barrierDefault,
     ) {
         this.group = new Konva.Group({});
         const rect = new Konva.Rect({

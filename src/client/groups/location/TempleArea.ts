@@ -4,7 +4,7 @@ import clientConstants from '~/client_constants';
 import { MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
 import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from '.';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
 
@@ -30,7 +30,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkBlue,
+            fill: HUES.templeDarkBlue,
             cornerRadius: 15,
             visible: false,
         });

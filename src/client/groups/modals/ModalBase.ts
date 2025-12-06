@@ -15,7 +15,7 @@ type SubmitBehavior = {
     dismissLabel: string,
 }
 
-const { COLOR, STAGE_AREA } = clientConstants;
+const { HUES, STAGE_AREA } = clientConstants;
 
 export abstract class ModalBase {
     private screenGroup: Konva.Group;
@@ -40,9 +40,9 @@ export abstract class ModalBase {
             y: offset.y,
             width: modalWidth,
             height: modalHeight,
-            fill: COLOR.modalBlue,
+            fill: HUES.modalBlue,
             cornerRadius: 10,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 4,
         });
 

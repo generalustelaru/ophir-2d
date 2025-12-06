@@ -5,7 +5,7 @@ import { DynamicGroupInterface, EventType } from '~/client_types';
 import { ItemRow } from '../popular';
 import { Communicator } from '~/client/services/Communicator';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 const SLOT_WIDTH = 25;
 
 type Update = {
@@ -31,8 +31,8 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR[`dark${playerColor}`],
-            stroke: COLOR.stampEdge,
+            fill: HUES[`dark${playerColor}`],
+            stroke: HUES.stampEdge,
             cornerRadius: 5,
             strokeWidth: 1,
         });

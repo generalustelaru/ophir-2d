@@ -5,7 +5,7 @@ import { Button } from '../popular';
 import { GoodsAssortment, TempleRewardDial } from '.';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 export class TempleMarketCard extends Button implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
 
     private rewardDial: TempleRewardDial;
@@ -35,9 +35,9 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkBlue,
+            fill: HUES.templeDarkBlue,
             cornerRadius: 15,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 2,
         });
 
@@ -71,7 +71,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         }));
 
         this.group.add(...elements);
@@ -80,8 +80,8 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
     public update(data: MarketCardUpdate): void {
         this.rewardDial.update(this.opensModal ? null : data.trade.reward.favorAndVp);
         this.goodsAssortment.update(this.opensModal ? null : data.trade.request);
-        this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
-        this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
+        this.background.fill(data.isFeasible ? HUES.templeBlue : HUES.templeDarkBlue);
+        this.background.stroke(data.isFeasible ? HUES.treasuryGold : HUES.boneWhite);
         data.isFeasible ? this.enable() : this.disable();
     }
 

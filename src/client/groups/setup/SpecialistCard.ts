@@ -3,13 +3,13 @@
 // should contain buttons for shifting the market and endig turn (its turn)
 
 import Konva from 'konva';
-import { Color, DynamicGroupInterface } from '~/client_types';
+import { Hue, DynamicGroupInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { Coordinates, PlayerColor, SelectableSpecialist, SpecialistName, Unique } from '~/shared_types';
 import { Button, FavorDial } from '../popular';
 import { ConfirmButton } from './ConfirmButton';
 
-const { COLOR, CARGO_ITEM_DATA } = clientConstants;
+const { HUES, CARGO_ITEM_DATA } = clientConstants;
 
 type SpecialistCardUpdate = {
     localPlayerColor: PlayerColor | null
@@ -21,7 +21,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
 
     private background: Konva.Rect | null;
     private cardName: SpecialistName;
-    private stateFill: Color;
+    private stateFill: Hue;
     private selectButton: ConfirmButton | null;
 
     constructor(
@@ -35,7 +35,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
         super(stage, layout, selectionCallback);
 
         this.cardName = specialist.name;
-        this.stateFill = COLOR.templeBlue;
+        this.stateFill = HUES.templeBlue;
         this.background = new Konva.Rect({
             width: layout.width,
             height: layout.height,
@@ -110,18 +110,18 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
 
         switch (true) {
             case shouldEnable:
-                this.setFill(COLOR.templeBlue);
+                this.setFill(HUES.templeBlue);
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
-                this.setFill(COLOR[localPlayerColor]);
+                this.setFill(HUES[localPlayerColor]);
                 this.selectButton?.hide();
                 break;
             case !!specialist.owner:
-                this.setFill(COLOR[`dark${specialist.owner}`]);
+                this.setFill(HUES[`dark${specialist.owner}`]);
                 this.selectButton?.hide();
                 break;
             default:
-                this.setFill(COLOR.templeDarkBlue);
+                this.setFill(HUES.templeDarkBlue);
                 this.selectButton?.hide();
                 break;
         }
@@ -131,14 +131,14 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
     public preSelect(isPreSelected: boolean) {
         if (isPreSelected) {
             this.selectButton?.show();
-            this.background?.fill(COLOR.boneWhite);
+            this.background?.fill(HUES.boneWhite);
         } else {
             this.setFill(this.stateFill);
             this.selectButton?.hide();
         }
     }
 
-    private setFill(color: Color) {
+    private setFill(color: Hue) {
         this.stateFill = color;
         this.background?.fill(color);
     }

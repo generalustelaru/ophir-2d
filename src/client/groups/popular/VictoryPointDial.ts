@@ -3,7 +3,7 @@ import { DynamicGroupInterface } from '~/client_types';
 import { Coordinates, Unique } from '~/shared_types';
 import clientConstants from '~/client_constants';
 
-const { COLOR, ICON_DATA } = clientConstants;
+const { HUES, ICON_DATA } = clientConstants;
 export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
 
     private group: Konva.Group;
@@ -18,7 +18,7 @@ export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
             x: this.group.width() / 2,
             y: this.group.height() / 2,
             radius: 22,
-            fill: COLOR.vpGold,
+            fill: HUES.vpGold,
         });
 
         const wreathY = 12;
@@ -47,8 +47,8 @@ export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
             verticalAlign: 'middle',
             text: value ? String(value) : '0',
             fontSize: 20,
-            fill: COLOR.vpCardPurple,
-            stroke: COLOR.vpCardPurple,
+            fill: HUES.vpCardPurple,
+            stroke: HUES.vpCardPurple,
             fontFamily: 'Calibri',
         });
 

@@ -4,7 +4,7 @@ import clientConstants from '~/client_constants';
 import { MarketFluctuations, MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
 import { MarketDeck, MarketCardSlot } from '.';
 
-const { COLOR, LOCATION_TOKEN_DATA } = clientConstants;
+const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
 
 export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
 
@@ -34,7 +34,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.marketDarkOrange,
+            fill: HUES.marketDarkOrange,
             cornerRadius: 10,
             visible: false,
         });

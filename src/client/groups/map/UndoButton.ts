@@ -4,7 +4,7 @@ import { DynamicGroupInterface } from '~/client_types';
 import { RequestButton } from '../popular';
 import constants from '~/client_constants';
 
-const { ICON_DATA, COLOR } = constants;
+const { ICON_DATA, HUES } = constants;
 
 export class UndoButton extends RequestButton implements Unique<DynamicGroupInterface<Player>> {
     private icon: Konva.Path;
@@ -28,7 +28,7 @@ export class UndoButton extends RequestButton implements Unique<DynamicGroupInte
             x: 8,
             y: 9,
             data: data.shape,
-            fill: isActivePlayer ? data.fill : COLOR.disabled,
+            fill: isActivePlayer ? data.fill : HUES.disabled,
             scale: { x: 2, y: 2 },
         });
         this.group.add(hoverZone, this.icon);
@@ -39,7 +39,7 @@ export class UndoButton extends RequestButton implements Unique<DynamicGroupInte
     }
 
     public update(player: Player): void {
-        this.icon.fill(player.mayUndo ? ICON_DATA.undo_arrow.fill : COLOR.disabled);
+        this.icon.fill(player.mayUndo ? ICON_DATA.undo_arrow.fill : HUES.disabled);
         this.setEnabled(player.mayUndo);
     }
 }

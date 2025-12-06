@@ -3,7 +3,7 @@ import constants from '~/client_constants';
 import { Coordinates, Unique } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
 
-const { ICON_DATA, COLOR } = constants;
+const { ICON_DATA, HUES } = constants;
 
 type MovesDialUpdate = {
     isActive: boolean,
@@ -24,7 +24,7 @@ export class MovesDial implements Unique<DynamicGroupInterface<MovesDialUpdate>>
             x: this.group.x(),
             y: 0,
             data: waveData.shape,
-            fill: COLOR.disabled,
+            fill: HUES.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
 
@@ -32,7 +32,7 @@ export class MovesDial implements Unique<DynamicGroupInterface<MovesDialUpdate>>
             x: this.group.x(),
             y: 20,
             data: waveData.shape,
-            fill: COLOR.disabled,
+            fill: HUES.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
 
@@ -47,11 +47,11 @@ export class MovesDial implements Unique<DynamicGroupInterface<MovesDialUpdate>>
         const { isActive, moves } = data;
         const waveColor = ICON_DATA.ocean_wave.fill;
         if (isActive) {
-            this.upperWave.fill(moves > 1 ? waveColor : COLOR.disabled);
-            this.lowerWave.fill(moves > 0 ? waveColor : COLOR.disabled);
+            this.upperWave.fill(moves > 1 ? waveColor : HUES.disabled);
+            this.lowerWave.fill(moves > 0 ? waveColor : HUES.disabled);
         } else {
-            this.upperWave.fill(COLOR.disabled);
-            this.lowerWave.fill(COLOR.disabled);
+            this.upperWave.fill(HUES.disabled);
+            this.lowerWave.fill(HUES.disabled);
         }
     }
 }

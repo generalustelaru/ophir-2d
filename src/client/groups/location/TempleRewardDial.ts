@@ -4,7 +4,7 @@ import { Coordinates, Unique } from '~/shared_types';
 import { FavorIcon } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { ICON_DATA, COLOR } = clientConstants;
+const { ICON_DATA, HUES } = clientConstants;
 
 export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
@@ -26,7 +26,7 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
             y: -1,
             radius: 22,
             angle: 180,
-            fill: COLOR.vpGold,
+            fill: HUES.vpGold,
             rotation: 90,
         });
 
@@ -45,8 +45,8 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
             y: coinCenter - 10,
             text: String(amount || ''),
             fontSize: 20,
-            fill: COLOR.vpCardPurple,
-            stroke: COLOR.vpCardPurple,
+            fill: HUES.vpCardPurple,
+            stroke: HUES.vpCardPurple,
             // strokeWidth: 2,
             fontFamily: 'Calibri',
         });
@@ -56,8 +56,8 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
             y: coinCenter - 10,
             text: String(amount || ''),
             fontSize: 20,
-            fill: COLOR.boneWhite,
-            stroke: COLOR.boneWhite,
+            fill: HUES.boneWhite,
+            stroke: HUES.boneWhite,
             // strokeWidth: 2,
             fontFamily: 'Calibri',
 

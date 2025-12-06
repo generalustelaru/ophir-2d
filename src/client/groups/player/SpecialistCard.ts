@@ -3,7 +3,7 @@ import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { Player, Unique } from '~/shared_types';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class SpecialistCard implements Unique<DynamicGroupInterface<string>> {
     private group: Konva.Group;
@@ -25,7 +25,7 @@ export class SpecialistCard implements Unique<DynamicGroupInterface<string>> {
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR[`dark${player.color}`],
+            fill: HUES[`dark${player.color}`],
             cornerRadius: 5,
         });
 

@@ -5,7 +5,7 @@ import { CoinDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private fluctuations: MarketFluctuations | null = null;
@@ -27,7 +27,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
 
         const description = new Konva.Text({
             text: 'Sell these goods for coins?',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
             fontSize: 18,
             width: this.contentGroup.width(),
             align: 'center',
@@ -54,7 +54,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         this.coinDial = new CoinDial(

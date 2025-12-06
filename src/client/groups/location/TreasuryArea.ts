@@ -4,7 +4,7 @@ import clientConstants from '~/client_constants';
 import { Action, Unique } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate>> {
 
@@ -29,7 +29,7 @@ export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.treasuryDarkGold,
+            fill: HUES.treasuryDarkGold,
             cornerRadius: 15,
             visible: false,
         });

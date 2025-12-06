@@ -8,10 +8,11 @@ import Konva from 'konva';
 export type ElementList = Array<Konva.Group | Konva.Shape>
 
 // export type ElementList = Array<Konva.Group | Konva.Path | Konva.Text | Konva.Node | Konva.Shape>
-export type Color = `#${string}`;
-export type DynamicColor = {active: Color, inactive: Color}
+export type Hue = `#${string}`;
+// TODO: use this to implement 4 hues based on player color (light and dark)
+export type DynamicHue = { active: Hue, inactive: Hue }
 export type HexCoordinates = { id: ZoneName, x: number, y: number };
-export type IconLayer = { shape: string, fill: Color }
+export type IconLayer = { shape: string, fill: Hue }
 export type IconName = 'empty_location'
 export type LayeredIconData = {
     layer_1: IconLayer,
@@ -19,7 +20,7 @@ export type LayeredIconData = {
     layer_3: IconLayer | null,
 };
 export type TempleIconData = { shapeId: number, icon: IconLayer };
-export type PathData = { shape: string, fill: Color };
+export type PathData = { shape: string, fill: Hue };
 export type IslandData = { x: number, y: number, shape: string };
 
 export type LocalState = {
@@ -46,7 +47,7 @@ export enum LayerIds {
 
 export type ClientConstants = {
     STAGE_AREA: { width: number, height: number },
-    COLOR: Record<string, Color>,
+    HUES: Record<string, Hue>,
     COLOR_PROFILES: Record<string, ColorProfile>,
     SEA_ZONE_COUNT: 7,
     HEX_OFFSET_DATA: Array<HexCoordinates>,
@@ -103,9 +104,9 @@ export type GroupLayoutData = {
 };
 
 export type ColorProfile = {
-    primary: Color,
-    secondary: Color,
-    tertiary: Color | null,
+    primary: Hue,
+    secondary: Hue,
+    tertiary: Hue | null,
 }
 
 export type MarketCardUpdate = {

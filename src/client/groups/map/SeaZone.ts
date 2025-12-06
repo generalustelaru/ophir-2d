@@ -2,11 +2,11 @@
 import Konva from 'konva';
 import { Vector2d } from 'konva/lib/types';
 import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival, Unique } from '~/shared_types';
-import { Color, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
+import { Hue, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
 import { LocationToken } from '.';
 import clientConstants from '~/client_constants';
 
-const { COLOR, ICON_DATA } = clientConstants;
+const { HUES, ICON_DATA } = clientConstants;
 
 type SeaZoneUpdate = {
     localPlayer: Player | null,
@@ -22,7 +22,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
     private island: Konva.Path;
     private location: LocationToken;
     private restrictedIcon: Konva.Path;
-    private staticFill: Color;
+    private staticFill: Hue;
 
     constructor(
         stage: Konva.Stage,
@@ -33,7 +33,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         island: IslandData,
         locationId: LocationName,
         iconData: IconLayer,
-        fill: Color,
+        fill: Hue,
         isPlay: boolean,
     ) {
         this.group = new Konva.Group({
@@ -59,7 +59,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             x: island.x,
             y: island.y,
             data: island.shape,
-            fill: COLOR.islandGreen,
+            fill: HUES.islandGreen,
             scale: { x: 7.5, y: 7.5 },
             strokeWidth: 1,
         });
@@ -84,7 +84,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
     }
 
     public update(update: SeaZoneUpdate): void {
-        this.saveFill(COLOR.defaultHex);
+        this.saveFill(HUES.defaultHex);
 
         const { localPlayer, rival } = update;
 
@@ -119,13 +119,13 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             && moves < 2
         ) {
             // rival is here and may shift the market
-            this.saveFill(COLOR.navigatorAccess);
+            this.saveFill(HUES.navigatorAccess);
         } else if (
             destinations.includes(this.getZoneName())
             && moves > 0
         ) {
             // local player may still move and is able to enter this zone
-            this.saveFill(COLOR.activeHex);
+            this.saveFill(HUES.activeHex);
         }
     }
 
@@ -136,7 +136,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             && localPlayer.locationActions.length
         ) {
             // local player is here and may perform actions
-            this.saveFill(COLOR.navigatorAccess);
+            this.saveFill(HUES.navigatorAccess);
         } else if (
             localPlayer.moveActions > 0
             && (
@@ -145,7 +145,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             )
         ) {
             // local player may still move and is able to enter this zone
-            this.saveFill(COLOR.activeHex);
+            this.saveFill(HUES.activeHex);
         }
     }
 
@@ -161,32 +161,32 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
     }
 
 
-    public setFill(color: Color): void {
+    public setFill(color: Hue): void {
         this.hexagon.fill(color);
     }
 
     public setValid(): void {
-        this.hexagon.fill(COLOR.validHex);
+        this.hexagon.fill(HUES.validHex);
     }
 
     public setRollDependant(value: DiceSix): void {
-        const dangerHue = ((): Color => {
+        const dangerHue = ((): Hue => {
             switch(true) {
-                case value < 3: return COLOR.lowRoll;
-                case value < 5: return COLOR.midRoll;
-                default: return COLOR.highRoll;
+                case value < 3: return HUES.lowRoll;
+                case value < 5: return HUES.midRoll;
+                default: return HUES.highRoll;
             }
         })();
         this.hexagon.fill(dangerHue);
     }
 
     public setValidForNavigator(): void {
-        this.hexagon.fill(COLOR.navigatorAccess);
+        this.hexagon.fill(HUES.navigatorAccess);
     }
 
     public setRestricted(): void {
         this.restrictedIcon.visible(true);
-        this.setFill(COLOR.illegal);
+        this.setFill(HUES.illegal);
     }
 
     public resetFill(): void {
@@ -202,7 +202,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         return this.hexagon.intersects(vector);
     }
 
-    private saveFill(color: Color): void {
+    private saveFill(color: Hue): void {
         this.hexagon.fill(color);
         this.staticFill = color;
     }

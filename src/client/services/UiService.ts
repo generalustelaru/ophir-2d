@@ -208,8 +208,8 @@ export const UserInterface = new class extends Communicator {
         this.chatMessages.innerHTML = chat.map(entry => {
             const name = entry.name ? `${entry.name}: ` : '';
             const message = entry.message;
-            const color = entry.color ? clientConstants.COLOR[entry.color] : 'white';
-            return `<span style="color:${color}; font-weight: bold">${name}</span>${message}</br>`;
+            const hue = entry.color ? clientConstants.HUES[entry.color] : 'white';
+            return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }

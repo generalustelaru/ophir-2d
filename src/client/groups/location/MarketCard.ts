@@ -6,7 +6,7 @@ import { GoodsAssortment } from '.';
 import clientConstants from '~/client_constants';
 import { MiniTempleRewardDial } from './MiniTempleRewardDial';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 export class MarketCard extends Button implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
     private coinDial: CoinDial;
     private goodsAssortment: GoodsAssortment;
@@ -36,9 +36,9 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.marketDarkOrange,
+            fill: HUES.marketDarkOrange,
             cornerRadius: 15,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 2,
         });
 
@@ -73,8 +73,8 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
         this.coinDial.update(data.trade.reward.coins + (this.fluctuation ?? 0));
         this.miniRewardDial.update(data.trade.reward.favorAndVp);
         this.goodsAssortment.update(data.trade.request);
-        this.background.fill(data.isFeasible ? COLOR.marketOrange : COLOR.marketDarkOrange);
-        this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
+        this.background.fill(data.isFeasible ? HUES.marketOrange : HUES.marketDarkOrange);
+        this.background.stroke(data.isFeasible ? HUES.treasuryGold : HUES.boneWhite);
         data.isFeasible ? this.enable() : this.disable();
     }
 

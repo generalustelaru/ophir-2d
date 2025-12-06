@@ -4,7 +4,7 @@ import { ShipToken, RequestButton } from '../popular';
 import clientConstants from '~/client_constants';
 import { Action, Coordinates, PlayerColor, PlayerEntry, Unique } from '~/shared_types';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 type ColorCardUpdate = {
     localPlayer: PlayerEntry | null
@@ -33,7 +33,7 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
         this.background = new Konva.Rect({
             width: layout.width,
             height: layout.height,
-            fill: COLOR.templeDarkRed,
+            fill: HUES.templeDarkBlue,
             cornerRadius: 15,
         });
 

@@ -8,7 +8,7 @@ import { CoinDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
 
@@ -46,7 +46,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
         })();
 
         this.description = new Konva.Text({
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
             fontSize: 18,
             width: this.contentGroup.width(),
             align: 'center',
@@ -73,7 +73,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         this.coinDial = new CoinDial(

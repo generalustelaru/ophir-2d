@@ -4,7 +4,7 @@ import { PlayState, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
 import { PlayerCountables } from '~/server/server_types';
 
-const { COLOR, STAGE_AREA } = clientConstants;
+const { HUES, STAGE_AREA } = clientConstants;
 export class ResultsPanel implements Unique<StaticGroupInterface> {
 
     private group: Konva.Group;
@@ -16,9 +16,9 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
         const panelBody = new Konva.Rect({
             width: width / 4,
             height,
-            fill: COLOR.modalBlue,
+            fill: HUES.modalBlue,
             cornerRadius: 10,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 2,
         });
 

@@ -9,7 +9,7 @@ type EnrolmentPanelUpdate = {
     localPlayerColor: PlayerColor | null,
 }
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPanelUpdate>> {
     private group: Konva.Group | null;
@@ -30,7 +30,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
-            fill: COLOR.modalBlue,
+            fill: HUES.modalBlue,
 
         });
         elements.push(background);

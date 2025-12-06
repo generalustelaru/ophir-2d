@@ -4,7 +4,7 @@ import { DynamicGroupInterface } from '~/client_types';
 import { RequestButton, VictoryPointDial } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { COLOR, CARGO_ITEM_DATA } = clientConstants;
+const { HUES, CARGO_ITEM_DATA } = clientConstants;
 export class MetalDonationCard extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
     private background: Konva.Rect;
 
@@ -23,8 +23,8 @@ export class MetalDonationCard extends RequestButton implements Unique<DynamicGr
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: isEnabled ? COLOR.templeBlue : COLOR.templeDarkBlue,
-            stroke: isEnabled ? COLOR.treasuryGold : COLOR.boneWhite,
+            fill: isEnabled ? HUES.templeBlue : HUES.templeDarkBlue,
+            stroke: isEnabled ? HUES.treasuryGold : HUES.boneWhite,
             strokeWidth: 2,
             cornerRadius: 15,
         });
@@ -56,6 +56,6 @@ export class MetalDonationCard extends RequestButton implements Unique<DynamicGr
 
     public update(canDonate: boolean): void {
         this.setEnabled(canDonate);
-        this.background.fill(canDonate ? COLOR.templeBlue : COLOR.templeDarkBlue);
+        this.background.fill(canDonate ? HUES.templeBlue : HUES.templeDarkBlue);
     }
 }

@@ -3,7 +3,7 @@ import { ClientConstants } from '~/client_types';
 
 const clientConstants: ClientConstants = {
     STAGE_AREA: { width: 1200, height: 500 },
-    COLOR: {
+    HUES: {
         lowRoll: '#FF7F50',
         midRoll: '#FF4500',
         highRoll: '#8B0000',

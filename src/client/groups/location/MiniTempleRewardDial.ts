@@ -3,7 +3,7 @@ import { Coordinates, Unique } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
 
-const { COLOR, ICON_DATA } = clientConstants;
+const { HUES, ICON_DATA } = clientConstants;
 
 export class MiniTempleRewardDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
@@ -25,7 +25,7 @@ export class MiniTempleRewardDial implements Unique<DynamicGroupInterface<number
             y: 0,
             radius: this.group.width() / 2,
             fill: ICON_DATA.favor_stamp_inner.fill,
-            stroke: COLOR.templeDarkBlue,
+            stroke: HUES.templeDarkBlue,
             strokeWidth: 1,
         });
 
@@ -35,7 +35,7 @@ export class MiniTempleRewardDial implements Unique<DynamicGroupInterface<number
             radius: this.group.width() / 2,
             angle: 180,
             rotation: 90,
-            fill: COLOR.vpGold,
+            fill: HUES.vpGold,
         });
 
         this.amount  = new Konva.Text({
