@@ -60,6 +60,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 y: 65,
             },
             (index: number) => this.switchToken(index),
+            true,
         );
 
         this.coinDial = new CoinDial(
@@ -139,7 +140,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             }
         });
 
-        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.chancellor });
+        this.symbolRow.update({ specifications: this.tradeSpecifications });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
@@ -171,6 +172,6 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             });
         }
 
-        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.chancellor });
+        this.symbolRow.update({ specifications: this.tradeSpecifications });
     }
 }

@@ -44,6 +44,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
                 y: 65,
             },
             null,
+            false,
         );
 
         const colon = new Konva.Text({
@@ -88,7 +89,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
         const specifications = trade.request.map(requested => {
             return { name: requested, isOmited: false, isLocked: true };
         });
-        this.symbolRow.update({ specifications, specialist: null });
+        this.symbolRow.update({ specifications });
         this.open({ action: Action.sell_goods, payload: { slot } });
     }
 }

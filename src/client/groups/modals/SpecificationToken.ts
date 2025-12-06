@@ -10,20 +10,17 @@ const { COLOR } = clientConstants;
 type Update = {
     type: TradeGood | 'favor' | 'none',
     isClickable: boolean;
-} | null
+}
 
 export class SpecificationToken extends Button implements Unique<DynamicGroupInterface<Update>> {
-
-    private favorFactory: FavorFactory;
-    private tradeGoodFactory: TradeGoodFactory;
-    private symbolGroup: Konva.Group;
+    private tokens: Map<TradeGood|'favor', Konva.Group> = new Map();
     private activeBackground: Konva.Rect;
-    private currentSymbol: TradeGood | 'favor' | 'none' = 'none';
 
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
         callback: ((index: number) => void) | null,
+        isChancellor: boolean,
     ) {
         const layout = {
             x: position.x,
@@ -45,11 +42,30 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
             visible: false,
         });
 
-        this.favorFactory = new FavorFactory({ x: -1, y: -1 });
-        this.tradeGoodFactory = new TradeGoodFactory();
-        this.symbolGroup = new Konva.Group();
+        const tradeGoodFactory = new TradeGoodFactory();
+        const symbols: Array<TradeGood> = ['linen', 'ebony', 'gems', 'marble'];
 
-        this.group.add(this.activeBackground, this.symbolGroup);
+        for (const symbol of symbols) {
+            this.tokens.set(
+                symbol,
+                tradeGoodFactory.produceElement(symbol),
+            );
+        }
+
+        if (isChancellor) {
+            const favorFactory = new FavorFactory({ x: -1, y: -1 });
+            this.tokens.set('favor', favorFactory.produceElement());
+        }
+
+        const tokenGroup = new Konva.Group().add(...(()=> {
+            const nodes: Array<Konva.Group> = [];
+            this.tokens.forEach(token => {
+                nodes.push(token);
+            });
+            return nodes;
+        })());
+
+        this.group.add(this.activeBackground, tokenGroup);
     }
 
     public getElement() {
@@ -57,36 +73,14 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
     }
 
     public update(data: Update) {
-    // TODO: move logic into constructor and alternate hiding and showing the elements instead of destroying and recreating.
-        if (data == null) {
-            this.symbolGroup.destroyChildren();
-            this.activeBackground.visible(false);
-            this.disable();
-            return;
-        }
+        this.tokens.forEach(token => token.hide());
+        this.activeBackground.visible(false);
+        this.disable();
 
         const { type, isClickable } = data;
 
-        if (type == this.currentSymbol)
-            return;
-
-        this.currentSymbol = type;
-        this.symbolGroup.destroyChildren();
-
-        switch(type) {
-            case 'none':
-                break;
-            case 'favor':
-                this.symbolGroup.add(
-                    this.favorFactory.produceElement(),
-                );
-                break;
-            default:
-                this.symbolGroup.add(
-                    this.tradeGoodFactory.produceElement(type),
-                );
-        }
-
+        type != 'none' && this.tokens.get(type)?.show();
+        
         if (isClickable) {
             this.enable();
             this.activeBackground.visible(true);

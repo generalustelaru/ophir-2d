@@ -1,12 +1,9 @@
 import Konva from 'konva';
-import { Coordinates, SpecialistName, Unique } from '~/shared_types';
+import { Coordinates, Unique } from '~/shared_types';
 import { DynamicGroupInterface, Specification, GroupLayoutData } from '~/client_types';
 import { SpecificationToken } from './SpecificationToken';
 
-type Update = {
-    specifications: Array<Specification>,
-    specialist: SpecialistName.peddler | SpecialistName.chancellor | null,
-}
+type Update = { specifications: Array<Specification> }
 
 const segmentWidth = 30;
 
@@ -15,12 +12,15 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
     private group: Konva.Group;
     private tokens: Array<SpecificationToken>;
     private referenceX: number;
+    private omitSymbol: 'favor' | 'none';
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
         switchCallback: ((index: number) => void) | null,
+        isChancellor: boolean,
     ) {
+        this.omitSymbol = isChancellor ? 'favor' : 'none';
         this.group = new Konva.Group({ ...layout });
         this.referenceX = layout.x;
 
@@ -36,6 +36,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
                 stage,
                 { ...position },
                 switchCallback ? () => switchCallback(index) : null,
+                isChancellor,
             );
         });
 
@@ -48,20 +49,19 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
         return this.group;
     }
 
-    public update(data: Update) {
-        const { specifications, specialist } = data;
-        const omitSymbol = specialist == SpecialistName.chancellor ? 'favor' : 'none';
+    public update(update: Update) {
+        const { specifications } = update;
 
         this.tokens.forEach((token, index) => {
-            const entry = specifications[index];
-
-            if(!entry)
-                return token.update(null);
-
-            token.update({
-                type: entry.isOmited ? omitSymbol : entry.name,
-                isClickable: !entry.isLocked,
-            });
+            if (specifications[index]) {
+                const { isOmited, name, isLocked } = specifications[index];
+                token.update({
+                    type: isOmited ? this.omitSymbol : name,
+                    isClickable: !isLocked,
+                });
+            } else {
+                token.update({ type: 'none',isClickable: false });
+            }
         });
 
         this.group.x(this.referenceX + (3 - specifications.length) * segmentWidth);

@@ -11,7 +11,7 @@ export class TradeGoodFactory implements Unique<GroupFactory> {
 
     public produceElement(name: TradeGood): Konva.Group {
         const { shape: data, fill } = CARGO_ITEM_DATA[name];
-        // TODO: eliminate the group here
+
         return new Konva.Group().add(...[
             new Konva.Path({
                 data,
@@ -20,6 +20,6 @@ export class TradeGoodFactory implements Unique<GroupFactory> {
                 strokeWidth: 1,
                 scale: { x: 2, y: 2 },
             }),
-        ]);
+        ]).hide();
     }
 }

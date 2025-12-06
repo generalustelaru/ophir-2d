@@ -63,6 +63,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
                 y: 65,
             },
             (index: number) => this.switchToken(index),
+            false,
         );
 
         const colon = new Konva.Text({
@@ -141,7 +142,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
 
         const actionMessage = this.composeMessage(missingGood || false);
 
-        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.peddler });
+        this.symbolRow.update({ specifications: this.tradeSpecifications });
         this.coinDial.update(this.trade.reward.coins - 1);
         this.open(actionMessage);
     }
@@ -166,10 +167,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             this.updateActionMessage(this.composeMessage(selected.name));
         }
 
-        this.symbolRow.update({
-            specifications: this.tradeSpecifications,
-            specialist: SpecialistName.peddler,
-        });
+        this.symbolRow.update({ specifications: this.tradeSpecifications });
     }
 
     private composeMessage(toOmit: TradeGood | false): ClientMessage {

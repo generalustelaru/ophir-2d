@@ -47,6 +47,6 @@ export class FavorFactory implements Unique<GroupFactory> {
                 x: scale * 7,
                 y: scale * 7,
             }),
-        );
+        ).hide();
     }
 }
