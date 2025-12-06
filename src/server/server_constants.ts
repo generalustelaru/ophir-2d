@@ -58,7 +58,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Temple Guard',
             startingFavor: 2,
             specialty: 'ebony',
-            description: 'Adds 1 to influence checks (up to 6).',
+            description: 'Adds 1 to influence checks\n(up to 6).',
         },
         {
             name: SpecialistName.postmaster,

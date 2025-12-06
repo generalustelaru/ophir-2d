@@ -66,7 +66,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         this.transmit(socketId, { approvedColor: color, playerName: name });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
-        this.enrolmentState.addServerMessage('Pick/change your name by typing #name &ltyour new name&gt in the chat');
+        this.enrolmentState.addServerMessage('Type #name &ltyour new name&gt in the chat to set your name.');
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }
