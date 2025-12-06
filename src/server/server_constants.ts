@@ -123,6 +123,7 @@ const serverConstants: ServerConstants = {
         { request: ['gems', 'linen'], reward: { coins: 3, favorAndVp: 2 } },
         { request: ['gems'], reward: { coins: 2, favorAndVp: 1 } },
     ],
+    DEFAULT_NAMES: ['Sargon', 'Ashurbanipal', 'Nebuchadnezzar', 'Naram-Sin', 'Cyrus', 'Semiramis', 'Enheduanna', 'Puabi', 'Naqi’a', 'Serua'],
     DEFAULT_MOVE_RULES: [
         { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
         { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1, 2, 3] },

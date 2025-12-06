@@ -194,10 +194,10 @@ document.fonts.ready.then(() => {
         if (!event.detail)
             return signalError('Player registration has failed');
 
-        const { approvedColor } = event.detail;
+        const { approvedColor, playerName } = event.detail;
 
         localState.playerColor = approvedColor;
-        localState.playerName = approvedColor;
+        localState.playerName = playerName;
         localStorage.setItem('localState', JSON.stringify(localState));
     });
 

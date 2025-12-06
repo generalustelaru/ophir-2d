@@ -123,6 +123,7 @@ export type ServerConstants = {
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
     DEFAULT_NEW_STATE: EnrolmentState,
+    DEFAULT_NAMES: Array<string>
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerColor>,
     TRADE_DECK_A: Array<Trade>,
