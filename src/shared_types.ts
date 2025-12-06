@@ -346,7 +346,7 @@ export type ClientRequest = {
 
 // MARK: RESPONSE
 export type ClientIdResponse = { socketId: string }
-export type EnrolmentResponse = { approvedColor: PlayerColor }
+export type EnrolmentResponse = { approvedColor: PlayerColor, playerName: string }
 export type ColorChangeResponse = { approvedNewColor: PlayerColor }
 export type StateResponse = { state: State }
 export type ResetResponse = { resetFrom: string | PlayerColor }

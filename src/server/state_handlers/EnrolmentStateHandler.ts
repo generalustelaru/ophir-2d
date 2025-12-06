@@ -34,6 +34,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
 
     public addChatEntry(chat: ChatEntry) {
         this.chat.addOne(chat);
+        this.trimChatList();
     }
 
     public getAllPlayers() {
@@ -62,7 +63,9 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
         this.chat.addOne({ color: as, name: this.serverName.get(), message });
+        this.trimChatList();
     }
+
     public updateName(color: PlayerColor, newName: string) {
         const player = this.players.getOne(color);
 
@@ -85,5 +88,9 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
             p.color = newColor;
             return p;
         });
+    }
+
+    private trimChatList() {
+        (this.chat.get().length > 10) && this.chat.drawFirst();
     }
 }

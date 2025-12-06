@@ -5,11 +5,13 @@ import { validator } from '../services/validation/ValidatorService';
 import lib from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
 import { Configuration, Probable, SessionProcessor } from '~/server_types';
+import serverConstants from '../server_constants';
 
 export class EnrolmentProcessor implements Unique<SessionProcessor> {
     private enrolmentState: EnrolmentStateHandler;
     private transmit: (socketId: string, message: ServerMessage) => void;
     private isSinglePlayer: boolean;
+    private defaultNames: Array<string>;
 
     constructor(
         state: EnrolmentState,
@@ -19,6 +21,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         this.isSinglePlayer = configuration.SINGLE_PLAYER;
         this.enrolmentState = new EnrolmentStateHandler(configuration.SERVER_NAME, state);
         this.transmit = transmitCallback;
+        this.defaultNames = [...serverConstants.DEFAULT_NAMES];
     }
 
     public getState(): EnrolmentState {
@@ -32,7 +35,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
             return lib.fail('Cannot enrol in session.');
 
         const { color, name: nameInput } = enrolmentPayload;
-        const name = nameInput || color;
+        const name = nameInput || this.assignDefaultName();
         const players = this.enrolmentState.getAllPlayers();
 
         if (!socketId)
@@ -60,7 +63,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         if (result.err)
             return result;
 
-        this.transmit(socketId, { approvedColor: color });
+        this.transmit(socketId, { approvedColor: color, playerName: name });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
         this.enrolmentState.addServerMessage('Pick/change your name by typing #name &ltyour new name&gt in the chat');
@@ -104,4 +107,11 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
 
         return { state: this.getState() };
     };
+
+    public assignDefaultName() {
+        const pick = Math.random() * this.defaultNames.length;
+        const name = this.defaultNames.splice(pick, 1);
+
+        return name[0];
+    }
 }

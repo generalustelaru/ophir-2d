@@ -73,6 +73,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
 
     public addChatEntry(chat: ChatEntry) {
         this.chat.addOne(chat);
+        this.trimChatList();
     }
 
     public updateName(color: PlayerColor, newName: string) {
@@ -86,6 +87,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
         this.chat.addOne({ color: as, name: this.serverName.get(), message });
+        this.trimChatList();
     }
 
     // MARK: Player
@@ -341,5 +343,9 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     public registerGameEnd(results: Array<PlayerCountables>) {
         this.gameResults.set(results);
         this.hasGameEnded.set(true);
+    }
+
+    private trimChatList() {
+        (this.chat.get().length > 10) && this.chat.drawFirst();
     }
 }
