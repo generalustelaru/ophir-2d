@@ -44,9 +44,6 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         if (this.isColorTaken(players, color))
             return lib.fail('Color is is already taken');
 
-        if (this.isSinglePlayer || players.length > 1)
-            this.enrolmentState.allowDraft();
-
         const result = ((): Probable<true> => {
 
             if (!this.enrolmentState.isRoomForNewPlayer())
@@ -56,6 +53,9 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
 
             if (this.enrolmentState.getSessionOwner() === null)
                 this.enrolmentState.setSessionOwner(color);
+
+            if (this.isSinglePlayer || this.enrolmentState.getAllPlayers().length > 1)
+                this.enrolmentState.allowDraft();
 
             return lib.pass(true);
         })();
