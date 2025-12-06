@@ -46,6 +46,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
                 y: 65,
             },
             null,
+            false,
         );
 
         const colon = new Konva.Text({
@@ -100,7 +101,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
         const specifications = trade.request.map(requested => {
             return { name: requested, isOmited: false, isLocked: true };
         });
-        this.symbolRow.update({ specifications, specialist: null });
+        this.symbolRow.update({ specifications });
         this.victoryPointDial.update(trade.reward.favorAndVp);
 
         this.open({ action: Action.donate_goods, payload: { slot } });
