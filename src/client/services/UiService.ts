@@ -150,14 +150,15 @@ export const UserInterface = new class extends Communicator {
     private handleCreatedState(state: EnrolmentState): void {
 
         if (!localState.playerColor)
-            return this.setInfo('A game is waiting for you');
+            return this.setInfo('Select a color to join this session.');
 
         if (state.sessionOwner === localState.playerColor) {
+            this.resetButton.enable();
 
             if (state.mayDraft) {
-                this.enableElements(this.draftButton, this.resetButton);
+                this.draftButton.enable();
 
-                return this.setInfo('You may start whenever you want!');
+                return this.setInfo('You may begin draft whenever you want!');
             }
 
             return this.setInfo('Waiting for more players to join...');
@@ -167,7 +168,7 @@ export const UserInterface = new class extends Communicator {
     }
 
     private handleEmptyState(): void {
-        return this.setInfo('You may create the game');
+        return this.setInfo('You may claim ownership of this session.');
     }
 
     private handleFullState(state: EnrolmentState): void {
@@ -178,7 +179,7 @@ export const UserInterface = new class extends Communicator {
         if (localState.playerColor === state.sessionOwner) {
             this.enableElements(this.draftButton, this.resetButton);
 
-            return this.setInfo('You may start whenever you want');
+            return this.setInfo('You may begin draft whenever you want!');
         }
 
         return this.setInfo('The game might start at any time.');
