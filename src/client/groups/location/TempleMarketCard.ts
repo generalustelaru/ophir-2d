@@ -35,7 +35,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkRed,
+            fill: COLOR.templeDarkBlue,
             cornerRadius: 15,
             stroke: COLOR.boneWhite,
             strokeWidth: 2,
@@ -80,7 +80,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
     public update(data: MarketCardUpdate): void {
         this.rewardDial.update(this.opensModal ? null : data.trade.reward.favorAndVp);
         this.goodsAssortment.update(this.opensModal ? null : data.trade.request);
-        this.background.fill(data.isFeasible ? COLOR.templeRed : COLOR.templeDarkRed);
+        this.background.fill(data.isFeasible ? COLOR.templeBlue : COLOR.templeDarkBlue);
         this.background.stroke(data.isFeasible ? COLOR.treasuryGold : COLOR.boneWhite);
         data.isFeasible ? this.enable() : this.disable();
     }

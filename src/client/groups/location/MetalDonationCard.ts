@@ -23,7 +23,7 @@ export class MetalDonationCard extends RequestButton implements Unique<DynamicGr
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: isEnabled ? COLOR.templeRed : COLOR.templeDarkRed,
+            fill: isEnabled ? COLOR.templeBlue : COLOR.templeDarkBlue,
             stroke: isEnabled ? COLOR.treasuryGold : COLOR.boneWhite,
             strokeWidth: 2,
             cornerRadius: 15,
@@ -56,6 +56,6 @@ export class MetalDonationCard extends RequestButton implements Unique<DynamicGr
 
     public update(canDonate: boolean): void {
         this.setEnabled(canDonate);
-        this.background.fill(canDonate ? COLOR.templeRed : COLOR.templeDarkRed);
+        this.background.fill(canDonate ? COLOR.templeBlue : COLOR.templeDarkBlue);
     }
 }

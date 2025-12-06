@@ -35,7 +35,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
         super(stage, layout, selectionCallback);
 
         this.cardName = specialist.name;
-        this.stateFill = COLOR.templeRed;
+        this.stateFill = COLOR.templeBlue;
         this.background = new Konva.Rect({
             width: layout.width,
             height: layout.height,
@@ -110,7 +110,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
 
         switch (true) {
             case shouldEnable:
-                this.setFill(COLOR.templeRed);
+                this.setFill(COLOR.templeBlue);
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
                 this.setFill(COLOR[localPlayerColor]);
@@ -121,7 +121,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
                 this.selectButton?.hide();
                 break;
             default:
-                this.setFill(COLOR.templeDarkRed);
+                this.setFill(COLOR.templeDarkBlue);
                 this.selectButton?.hide();
                 break;
         }

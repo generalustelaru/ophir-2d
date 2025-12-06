@@ -30,7 +30,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.templeDarkRed,
+            fill: COLOR.templeDarkBlue,
             cornerRadius: 15,
             visible: false,
         });
