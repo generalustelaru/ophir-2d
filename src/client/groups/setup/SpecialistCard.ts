@@ -9,7 +9,7 @@ import { Coordinates, PlayerColor, SelectableSpecialist, SpecialistName, Unique 
 import { Button, FavorDial } from '../popular';
 import { ConfirmButton } from './ConfirmButton';
 
-const { HUES, CARGO_ITEM_DATA } = clientConstants;
+const { HUES, PLAYER_HUES, CARGO_ITEM_DATA } = clientConstants;
 
 type SpecialistCardUpdate = {
     localPlayerColor: PlayerColor | null
@@ -113,11 +113,11 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
                 this.setFill(HUES.templeBlue);
                 break;
             case !!localPlayerColor && localPlayerColor === specialist.owner:
-                this.setFill(HUES[localPlayerColor]);
+                this.setFill(PLAYER_HUES[localPlayerColor].muted.light);
                 this.selectButton?.hide();
                 break;
             case !!specialist.owner:
-                this.setFill(HUES[`dark${specialist.owner}`]);
+                this.setFill(PLAYER_HUES[specialist.owner].vivid.dark);
                 this.selectButton?.hide();
                 break;
             default:

@@ -3,7 +3,7 @@ import { ModalBase } from './ModalBase';
 import { SymbolicInfluenceDial } from '../popular';
 import { Action } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
-const { LOCATION_TOKEN_DATA } = clientConstants;
+const { LOCATION_TOKEN_DATA, HUES } = clientConstants;
 
 export class EndRivalTurnModal extends ModalBase {
     private confirmationText: Konva.Text;
@@ -42,7 +42,7 @@ export class EndRivalTurnModal extends ModalBase {
         });
 
         this.rivalDie = new SymbolicInfluenceDial({
-            color: 'Neutral',
+            hue: HUES.Neutral,
             symbol: '?',
             position: { x: 0, y: 74 },
         });

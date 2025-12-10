@@ -6,11 +6,10 @@ import {
 import Konva from 'konva';
 
 export type ElementList = Array<Konva.Group | Konva.Shape>
-
-// export type ElementList = Array<Konva.Group | Konva.Path | Konva.Text | Konva.Node | Konva.Shape>
 export type Hue = `#${string}`;
-// TODO: use this to implement 4 hues based on player color (light and dark)
-export type DynamicHue = { active: Hue, inactive: Hue }
+
+export type HueCombo = { dark: Hue, light: Hue, accent: Hue }
+export type PlayerHueVariation = { vivid: HueCombo, muted: HueCombo }
 export type HexCoordinates = { id: ZoneName, x: number, y: number };
 export type IconLayer = { shape: string, fill: Hue }
 export type IconName = 'empty_location'
@@ -33,9 +32,9 @@ export type LocalState = {
 
 export type TradeGoodSymbol = TradeGood | 'other';
 export type Specification = {
-    name: TradeGood;
-    isOmited: boolean; // replaced w/ favor
-    isLocked: boolean; // not optional
+    name: TradeGood
+    isOmited: boolean
+    isLocked: boolean
 }
 
 export enum LayerIds {
@@ -48,6 +47,7 @@ export enum LayerIds {
 export type ClientConstants = {
     STAGE_AREA: { width: number, height: number },
     HUES: Record<string, Hue>,
+    PLAYER_HUES: Record<PlayerColor, PlayerHueVariation>
     COLOR_PROFILES: Record<string, ColorProfile>,
     SEA_ZONE_COUNT: 7,
     HEX_OFFSET_DATA: Array<HexCoordinates>,

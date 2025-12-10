@@ -1,12 +1,12 @@
 
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, PlayerHueVariation } from '~/client_types';
 import { Action, Player, PlayerColor, Unique } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyGoodButton } from '.';
 import clientConstants from '~/client_constants';
 
-const { HUES } = clientConstants;
+const { PLAYER_HUES } = clientConstants;
 
 export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
@@ -22,6 +22,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     private vpDial: VictoryPointDial | null;
     private specialtyGoodButton: SpecialtyGoodButton;
     private color: PlayerColor;
+    private variation: PlayerHueVariation;
     private localPlayerColor: PlayerColor | null;
 
     constructor(
@@ -30,8 +31,8 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         localColorName: PlayerColor | null,
         yOffset: number,
     ) {
-        const { color, cargo, isActive } = player;
-
+        const { color, cargo } = player;
+        this.variation = PLAYER_HUES[player.color];
         const isLocalPlayer = localColorName === color;
 
         this.stage = stage;
@@ -47,10 +48,8 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: HUES[`${isActive ? '' : 'dark'}${color}`],
             cornerRadius: 5,
         });
-
 
         this.cargoBand = new CargoBand(
             this.stage,
@@ -70,8 +69,8 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
         this.influenceDial = new InfluenceDial(
             { x: -55, y: 25 },
-            HUES[`dark${player.color}`]);
-        this.influenceDial.update({ value: player.influence, color: HUES[`dark${player.color}`] });
+            this.variation.vivid.light,
+        );
 
         this.group.add(
             this.background,
@@ -117,11 +116,14 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
 
     public update(player: Player): void {
         const { cargo, favor, isActive, influence, color, locationActions, isAnchored, specialist, name } = player;
-        this.background.fill(HUES[`${isActive ? '' : 'dark'}${color}`]);
+        this.background.fill(isActive ? this.variation.vivid.light : this.variation.muted.dark);
         this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
-        this.influenceDial.update({ value: influence, color: HUES[`${isActive ? '' : 'dark'}${color}`] });
+        this.influenceDial.update({
+            value: influence,
+            color: isActive ? this.variation.muted.dark : this.variation.vivid.light,
+        });
         this.specialistBand.update(isActive);
         this.specialistCard.update(name);
         this.specialtyGoodButton.update(!!(

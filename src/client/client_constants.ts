@@ -11,15 +11,7 @@ const clientConstants: ClientConstants = {
         navigatorAccess: '#FFFDD7',
         activeShipBorder: '#FFFFFF',
         shipBorder: '#000000',
-        Purple: '#E6E6FA',
-        darkPurple: '#4B0082',
-        Yellow: '#FFFFE0',
-        darkYellow: '#B8860B',
-        Red: '#FFB3BA',
-        darkRed: '#8B0000',
-        Green: '#90EE90',
-        darkGreen: '#006400',
-        Neutral: '#EDEDED',
+        Neutral: '#FFF8DC',
         darkNeutral: '#A9A9A9',
         illegal: '#A94438',
         validHex: '#A3FFD6',
@@ -45,7 +37,24 @@ const clientConstants: ClientConstants = {
         vpCardLightPurple: '#E37AF5',
         modalLightBlue: '#184588ff',
         modalBlue: '#002255',
-
+    },
+    PLAYER_HUES: {
+        Red: {
+            vivid:  { light: '#FFB3A7', dark: '#C1440E', accent: '#FF6347' },
+            muted: { light: '#F5D5D0', dark: '#8B4C3A', accent: '#CD8B7A' },
+        },
+        Green: {
+            vivid:{ light: '#B4F8C8', dark: '#0B6E4F', accent: '#00D084' },
+            muted: { light: '#D4E8DC', dark: '#4A6B5C', accent: '#7FA896' },
+        },
+        Yellow: {
+            vivid:{ light: '#FFE680', dark: '#CC8800', accent: '#FFD700' },
+            muted: { light: '#F5EDD1', dark: '#8B7355', accent: '#D4AF37' },
+        },
+        Purple: {
+            vivid:{ light: '#E6D5F5', dark: '#6A0DAD', accent: '#9D4EDD' },
+            muted: { light: '#E8E0EE', dark: '#5C4A6B', accent: '#9B8AA4' },
+        },
     },
     COLOR_PROFILES: {
         favorStampReady: { primary: '#aa0000', secondary: '#850c03', tertiary: null },
@@ -129,6 +138,6 @@ const clientConstants: ClientConstants = {
             layer_3: null,
         },
     },
-};
+} as const;
 
 export default clientConstants;

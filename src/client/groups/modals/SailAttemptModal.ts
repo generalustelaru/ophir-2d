@@ -5,7 +5,7 @@ import { InfluenceDial, SymbolicInfluenceDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client/client_constants';
 
-const { HUES } = clientConstants;
+const { PLAYER_HUES, HUES } = clientConstants;
 
 export class SailAttemptModal extends ModalBase implements Unique<DynamicModalInterface<undefined, SailAttemptArgs>> {
     private ownerDie: SymbolicInfluenceDial;
@@ -64,7 +64,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
                 default: return '?';
             }
         })();
-        this.ownerDie.update({ symbol, color: data.playerColor });
+        this.ownerDie.update({ symbol, hue: PLAYER_HUES[data.playerColor].vivid.light });
         this.toSailDial.update({ value: data.toSail, color: null });
 
         this.open({ action: Action.move, payload: data.destination });

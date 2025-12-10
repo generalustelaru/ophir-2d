@@ -21,9 +21,10 @@ module.exports = (env, argv) => {
             minimize: true,
             minimizer: [new TerserPlugin()],
         },
-        externals: isServer ? {
+        externals: isServer ? { // TODO: see into not bundling the server, only TS transpile it 
             express: 'commonjs express',
             ws: 'commonjs ws',
+            canvas: 'commonjs canvas',
         } : {},
         output: {
             path: path.resolve(__dirname, `dist${isServer ? '' : '/public'}`),

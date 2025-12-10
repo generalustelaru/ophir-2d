@@ -151,7 +151,6 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 this.stage,
                 shipPosition.x,
                 shipPosition.y,
-                localPlayer.isActive,
                 this.seaZones,
                 state.players,
                 state.rival,
@@ -207,7 +206,6 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             const localShip = this.localShip as PlayerShip;
 
             localShip.switchControl(localPlayer.isActive && !localPlayer.isHandlingRival);
-            localShip.switchHighlight(localPlayer.isActive);
             localShip.update(localPlayer.bearings.position, state.players, state.rival);
         }
     }

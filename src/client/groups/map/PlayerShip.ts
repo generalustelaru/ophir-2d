@@ -8,7 +8,7 @@ import { defineBobbing } from '~/client/animations';
 import localState from '../../state';
 import clientConstants from '~/client_constants';
 
-const { COLOR, SEA_ZONE_COUNT } = clientConstants;
+const { PLAYER_HUES, SEA_ZONE_COUNT } = clientConstants;
 
 export class PlayerShip extends Communicator {
 
@@ -56,7 +56,6 @@ export class PlayerShip extends Communicator {
         stage: Konva.Stage,
         offsetX: number,
         offsetY: number,
-        isActivePlayer: boolean,
         seaZones: Array<SeaZone>,
         players: Array<Player>,
         rival: Rival,
@@ -87,8 +86,9 @@ export class PlayerShip extends Communicator {
         });
 
         this.ship = new ShipToken(
-            playerColor,
-            { stroke: isActivePlayer && COLOR.activeShipBorder || COLOR.shipBorder },
+            {
+                combo: PLAYER_HUES[playerColor].vivid,
+            },
         );
 
         this.activeEffect = defineBobbing(
@@ -240,10 +240,6 @@ export class PlayerShip extends Communicator {
 
     public destroy(): void {
         this.group.destroy();
-    }
-
-    public switchHighlight(isHighlighted: boolean): void {
-        this.ship.update(isHighlighted ? COLOR.activeShipBorder : COLOR.shipBorder);
     }
 
     private calculateToSailValue(targetHexId: ZoneName): DiceSix | false {

@@ -162,10 +162,19 @@ export class GameSession {
 
             if (commandMatch) {
                 // future switch if more commands are added
-                const nameMatch = message.input.match(/(?<=#name )\w.*,*/);
+                const nameMatch = message.input.match(/(?<=#name ).*/);
 
-                if (nameMatch && nameMatch[0].length > 2) {
+                if (nameMatch) {
                     const newName = nameMatch[0];
+
+                    if (lib.estimateWidth(newName, 28) > 424)
+                        return this.issueNominalResponse(lib.errorResponse('Name is too long.'));
+
+                    const nameSegments = newName.split( ' ');
+                    for (const segment of nameSegments) {
+                        if (lib.estimateWidth(segment, 28) > 212)
+                            return this.issueNominalResponse(lib.errorResponse('Name is too long.'));
+                    }
 
                     if (this.isNameTaken(state.players, newName))
                         return this.issueNominalResponse(lib.errorResponse('This name is already taken'));
@@ -180,8 +189,7 @@ export class GameSession {
 
                 } else {
                     return this.issueNominalResponse(lib.errorResponse(
-                        `${commandMatch[0]} parameter must start with a non-space `
-                        + 'character and must contain 3 or more characters',
+                        `${commandMatch[0]} parameter must start with a non-space`,
                     ));
                 }
             }

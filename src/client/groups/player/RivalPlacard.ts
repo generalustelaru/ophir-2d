@@ -9,7 +9,7 @@ import { InfluenceDial, MovesDial } from '../popular';
 import { ShiftMarketButton, ConcludeButton } from '.';
 import clientConstants from '~/client_constants';
 
-const { HUES } = clientConstants;
+const { HUES, PLAYER_HUES } = clientConstants;
 
 export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
 
@@ -39,14 +39,14 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            stroke: HUES.boneWhite,
+            stroke: HUES.Neutral,
             cornerRadius: 5,
             strokeWidth: 0,
         });
 
         this.influenceDial = new InfluenceDial(
             { x: -55, y: 25 },
-            HUES.boneWhite,
+            HUES.Neutral,
         );
 
         this.shiftMarketButton = new ShiftMarketButton(
@@ -85,7 +85,10 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         const mayConclude = this.localPlayerColor === activePlayerColor && isControllable && moves < 2;
         const mayShift = bearings.location === 'market' && mayConclude;
 
-        activePlayerColor && this.background.stroke(isControllable ? HUES[activePlayerColor] : HUES.boneWhite);
+        activePlayerColor && this.background.stroke(isControllable
+            ? PLAYER_HUES[activePlayerColor].vivid.light
+            : HUES.boneWhite,
+        );
         this.background.strokeWidth(isControllable ? 3 : 0);
         this.influenceDial.update({ value: influence, color: null });
         this.concludeButton.update({ isControllable, mayConclude });

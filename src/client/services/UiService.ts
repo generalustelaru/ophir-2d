@@ -208,7 +208,7 @@ export const UserInterface = new class extends Communicator {
         this.chatMessages.innerHTML = chat.map(entry => {
             const name = entry.name ? `${entry.name}: ` : '';
             const message = entry.message;
-            const hue = entry.color ? clientConstants.HUES[entry.color] : 'white';
+            const hue = entry.color ? clientConstants.PLAYER_HUES[entry.color].vivid.light : 'white';
             return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
