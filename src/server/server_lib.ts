@@ -1,11 +1,11 @@
 import { Probable } from './server_types';
 
 function pass<T>(data: T): Probable<T> {
-    return { data };
+    return { err: false, ok: true, data };
 }
 
 function fail<T>(message: string): Probable<T> {
-    return { err: true, message };
+    return { err: true, ok: false,  message };
 }
 
 function checkConditions(arr: Array<boolean>): Probable<true> {

@@ -2,8 +2,8 @@
     "config":{
         "ADMIN_AUTH": "0451",
         "SERVER_NAME": "Laputan Machine",
-        "IDLE_CHECKS": true,
-        "IDLE_TIMEOUT": 3,
+        "PLAYER_IDLE_MINUTES": 1,
+        "SESSION_DELETION_HOURS": 1,
         "SINGLE_PLAYER": false,
         "NO_RIVAL": false,
         "RICH_PLAYERS": false,

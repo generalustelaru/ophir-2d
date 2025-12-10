@@ -2,7 +2,7 @@ import process from 'process';
 import express, { Request, Response } from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import { ServerMessage, ClientRequest, PlayState, Phase, Action } from '~/shared_types';
-import { SessionState } from '~/server_types';
+import { Configuration, SessionState } from '~/server_types';
 import { GameSession } from './GameSession';
 import { randomUUID } from 'crypto';
 import { validator } from './services/validation/ValidatorService';
@@ -11,7 +11,7 @@ import dbService from './services/DatabaseService';
 import readline from 'readline';
 import path from 'path';
 
-import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT } from './configuration';
+import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT } from '../environment';
 
 if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
     console.error('Missing environment variables', {
@@ -20,15 +20,17 @@ if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
     process.exit(1);
 }
 
+var auth: string;
 dbService.getConfig().then(configuration => {
-    if (!configuration){
-        console.error('Missing Configuration object.');
+    if (configuration.err){
+        console.error(configuration.message);
         process.exit(1);
     }
 
-    console.info('DB responded',{ configuration });
-});
+    auth = configuration.data.ADMIN_AUTH;
 
+    startSessionChecks(configuration.data);
+});
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
@@ -71,7 +73,7 @@ app.listen(HTTP_PORT, () => {
 });
 
 app.get('/shutdown', (req: Request, res: Response) => {
-    if (req.query.auth != process.env.ADMIN_AUTH) {
+    if (req.query.auth != auth) {
         console.warn('Unauthorized shutdown attempt');
         res.status(401).send('Unauthorized');
 
@@ -89,14 +91,14 @@ app.get('/probe', (req: Request, res: Response) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-    console.info('Unchecked visitor', { ip: req.ip });
+    console.info('Unknown visitor', { ip: req.ip });
 
     res.sendFile(path.join(__dirname,'public', 'session-check.html'));
 });
 
 app.get('/find', (req: Request, res: Response) => {
     const gameId = String(req.query.gameId);
-    console.info('Visitor returns possible gameId', { ip: req.ip, gameId });
+    console.info('Visitor seeks possible gameId', { ip: req.ip, gameId });
 
     if (playGroups.has(gameId)){
         res.status(200);
@@ -133,7 +135,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/:id', (req: Request, res: Response) => {
     const gameId = req.params.id;
-    console.info(`Visitor seeks session ${gameId}`, { ip: req.ip });
+    console.info('Visitor requests session', { ip: req.ip, gameId });
 
     if (playGroups.has(gameId))
         return res.sendFile(path.join(__dirname,'public', 'index.html'));
@@ -156,32 +158,11 @@ type PlayGroup = {
 type SocketReference = {
     socket: WebSocket,
     gameId: string,
-    timeStamp: number,
 }
 
 const socketServer = new WebSocketServer({ port: WS_PORT });
 const socketRefs: Map<string, SocketReference> = new Map();
 const playGroups: Map<string, PlayGroup> = new Map();
-
-setInterval(() => {
-    const time = Date.now();
-
-    socketRefs.forEach((reference, socketId) => {
-        const { gameId, timeStamp, socket } = reference;
-
-        if (socket.readyState == socket.CLOSED || time - timeStamp > 45000) { // 45 seconds
-            socketRefs.delete(socketId);
-            const playGroup = playGroups.get(gameId);
-            playGroup && playGroup.sockets.delete(socketId);
-
-            if (playGroup?.sockets.size == 0) {
-                playGroup.session.deReference();
-                playGroups.delete(gameId);
-                console.log('deactivated empty session', { gameId });
-            }
-        }
-    });
-}, 60000); // Every minute
 
 socketServer.on('connection', function connection(socket,req) {
     const socketId = randomUUID();
@@ -203,7 +184,7 @@ socketServer.on('connection', function connection(socket,req) {
     playGroup.sockets.set(socketId, socket);
     console.log('websocket added to play group');
 
-    const reference = { gameId, socket, timeStamp: Date.now() };
+    const reference = { gameId, socket };
     socketRefs.set(socketId, reference);
 
     const sessionState = playGroup.session.getCurrentState();
@@ -220,14 +201,10 @@ socketServer.on('connection', function connection(socket,req) {
     }, 2000);
 
     socket.on('message', function incoming(req: string) {
-        reference.timeStamp = Date.now();
         const clientRequest = validator.validateClientRequest(tools.parse(req));
 
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
-
-        if (clientRequest.message.action == Action.ping)
-            return;
 
         logRequest(clientRequest);
 
@@ -239,8 +216,10 @@ socketServer.on('connection', function connection(socket,req) {
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
-                configuration && session.updateConfig(configuration);
+                if (configuration.err)
+                    return console.error(configuration.message);
 
+                session.updateConfig(configuration.data);
                 processAction(session, clientRequest, socket);
             });
         } else {
@@ -250,20 +229,21 @@ socketServer.on('connection', function connection(socket,req) {
 });
 
 async function processAction(session: GameSession, request: ClientRequest, socket: WebSocket) {
-    const response = session.processAction(request);
+    const result = session.processAction(request);
 
-    if (!response)
-        return transmit(socket, { error: 'Session has become corrupt.' });
+    if (request.message.action == Action.end_turn) {
+        const save = await dbService.saveGameState(session.getCurrentState());
 
-    const save = await dbService.saveGameState(session.getCurrentState());
-
-    if (save.ok) {
-        response.senderOnly
-            ? transmit(socket, response.message)
-            : broadcastToGroup(session.getGameId(), response.message);
-    } else {
-        broadcastToGroup(session.getGameId(), { error: 'Action cannot be saved' });
+        if (save.err) {
+            console.error(save.message);
+            return broadcastToGroup(session.getGameId(), { error: 'Action cannot be saved' });
+        }
     }
+
+    result.senderOnly
+        ? transmit(socket, result.message)
+        : broadcastToGroup(session.getGameId(), result.message)
+    ;
 }
 
 // MARK: CALLBACKS
@@ -338,47 +318,103 @@ function broadcastToGroup(gameId: string, message: ServerMessage): void {
     });
 }
 
-async function createGameSession(): Promise<GameSession|null> {
-    return new Promise(async resolve => {
-        const gameSession = await getGameSessionInstance(null);
+function startSessionChecks(configuration: Configuration) {
+    const { SESSION_DELETION_HOURS } = configuration;
+    console.info('Starting session checks');
 
-        if (!gameSession)
-            return resolve(null);
+    const minutes = 60000;
+    setInterval(() => {
+        // free memory
+        socketRefs.forEach(async (reference, socketId) => {
+            const { gameId, socket } = reference;
+            if (
+                socket.readyState == socket.CLOSED
+            ) {
+                socketRefs.delete(socketId);
+                const playGroup = playGroups.get(gameId);
+                playGroup && playGroup.sockets.delete(socketId);
 
-        const post = await dbService.addGameState(gameSession.getCurrentState());
+                if (playGroup?.sockets.size == 0) {
+                    const save = await dbService.saveGameState(playGroup.session.getCurrentState());
 
-        if (post.ok)
-            return resolve(gameSession);
+                    if (save.ok) {
+                        playGroup.session.deReference();
+                        playGroups.delete(gameId);
+                        console.info('deactivated empty session', { gameId });
+                    } else {
+                        console.error('Failed to preserve game state. Session remains active.');
+                    }
+                }
+            }
+        });
+    }, 5 * minutes);
 
-        resolve(null);
-    });
+    const hours = 3600000;
+    setInterval(() => {
+        // free storage
+        dbService.getTimestamps().then(timeStamps => {
+            if (timeStamps.err)
+                return console.error('Corrupt session record found in routine check.');
+
+            const time = Date.now();
+
+            for (const item of timeStamps.data) {
+                if (time - item.timeStamp > (SESSION_DELETION_HOURS * hours) && !playGroups.has(item.id)) {
+                    dbService.deleteGameState(item.id).then(response => {
+
+                        if (response.err)
+                            return console.error(response.message);
+
+                        console.info('deleted abandoned session', { gameId: item.id });
+                    });
+                }
+            }
+        });
+    },1 * hours);
+}
+
+async function createGameSession(): Promise<GameSession | null> {
+    const gameSession = await getGameSessionInstance(null);
+
+    if (!gameSession)
+        return null;
+
+    const result = await dbService.addGameState(gameSession.getCurrentState());
+
+    if (result.err) {
+        console.error(result.message);
+        return null;
+    }
+
+    return gameSession;
 }
 
 async function reviveGameSession(gameId: string): Promise<GameSession|null> {
-    return new Promise(async resolve => {
-        const state = await dbService.loadGameState(gameId);
+    const result = await dbService.loadGameState(gameId);
 
-        if (state) {
-            const session = await getGameSessionInstance(state);
-            session && resolve(session);
-        }
+    if (result.ok)
+        return await getGameSessionInstance(result.data);
 
-        resolve(null);
-    });
+    console.error(result.message);
+    return null;
 }
 
 async function getGameSessionInstance(savedSession: SessionState | null): Promise<GameSession|null> {
-    return new Promise(async resolve => {
-        const configuration = await dbService.getConfig();
+    const result = await dbService.getConfig();
 
-        if (!configuration)
-            resolve(null);
-        else try {
-            const instance = new GameSession(broadcastCallback, transmitCallback, configuration, savedSession);
-            resolve(instance);
-        } catch (error) {
-            console.error({ error });
-            resolve(null);
-        }
-    });
+    if (result.err) {
+        console.error(result.message);
+        return null;
+    }
+
+    try {
+        const configuration = result.data;
+
+        return new GameSession(broadcastCallback, transmitCallback, configuration, savedSession);
+    } catch (error) {
+        console.error(error);
+
+        return null;
+    }
 }
+

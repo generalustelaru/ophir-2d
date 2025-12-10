@@ -12,7 +12,6 @@ import {
 } from '~/server_types';
 import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
-// import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
@@ -66,10 +65,8 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
         );
         this.playState.savePlayer(player.toDto());
-        const { IDLE_CHECKS, IDLE_TIMEOUT } = configuration;
 
-        if (IDLE_CHECKS && IDLE_TIMEOUT)
-            this.startIdleChecks(IDLE_TIMEOUT);
+        this.startIdleChecks(configuration.PLAYER_IDLE_MINUTES);
     }
 
     public getState() {
@@ -1172,7 +1169,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     private determineActionsAndDetails(player: PlayerHandler): ActionsAndDetails {
-        if (!player.isAnchored())
+        if (!player.isAnchored() || player.isFrozen())
             return { actions: [], trades: [], purchases: [] };
 
         const actionsByLocation = (
@@ -1304,8 +1301,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass({ state: this.playState.toDto() });
     }
 
-    private startIdleChecks(IDLE_TIMEOUT: number): void {
-        const limitMinutes = (60 * 1000) * Math.min(IDLE_TIMEOUT, 60);
+    // TODO: convert to a timeout as not to repeat the idle message.
+    private startIdleChecks(timeoutMinutes: number): void {
+        const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
 
         this.idleCheckInterval = setInterval(() => {
             const activePlayer = this.playState.getActivePlayer();

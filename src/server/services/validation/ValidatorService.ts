@@ -30,8 +30,8 @@ class ValidatorService {
             [
                 { key: 'ADMIN_AUTH', type: 'string', nullable: false },
                 { key: 'SERVER_NAME', type: 'string', nullable: false },
-                { key: 'IDLE_CHECKS', type: 'boolean', nullable: false },
-                { key: 'IDLE_TIMEOUT', type: 'number', nullable: false },
+                { key: 'PLAYER_IDLE_MINUTES', type: 'number', nullable: false },
+                { key: 'SESSION_DELETION_HOURS', type: 'number', nullable: false },
                 { key: 'SINGLE_PLAYER', type: 'boolean', nullable: false },
                 { key: 'NO_RIVAL', type: 'boolean', nullable: false },
                 { key: 'RICH_PLAYERS', type: 'boolean', nullable: false },

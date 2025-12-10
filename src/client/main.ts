@@ -4,19 +4,17 @@ import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
-    Action, PlayState, ClientMessage, ResetResponse, EnrolmentState, SetupState, VpTransmission, ClientIdResponse,
-    EnrolmentResponse, NewNameTransmission, ColorChangeResponse, State, Phase,
+    Action, ClientMessage, ResetResponse, VpTransmission, ClientIdResponse, EnrolmentResponse, NewNameTransmission,
+    ColorChangeResponse, State, Phase,
 } from '~/shared_types';
 
-const CLIENT_DEBUG = Boolean(process.env.CLIENT_DEBUG === 'true');
+const SERVER_ADDRESS = process.env.SERVER_ADDRESS;
+const WS_PORT = process.env.WS_PORT;
 
-const serverAddress = process.env.SERVER_ADDRESS;
-const wsPort = process.env.WS_PORT;
-
-if (!wsPort || !serverAddress)
+if (!WS_PORT || !SERVER_ADDRESS)
     throw new Error('Server address and port must be provided in the environment');
 
-const wsAddress = `ws://${serverAddress}:${wsPort}`;
+const wsAddress = `ws://${SERVER_ADDRESS}:${WS_PORT}`;
 
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
@@ -85,34 +83,6 @@ function resetClient(source: string) {
 
     alert(`Client reset ordered by ${source}`);
     window.location.reload();
-}
-
-// Debugging
-function debug(state: PlayState | SetupState | EnrolmentState) {
-    if ('isStatusResponse' in state && state.isStatusResponse)
-        return;
-
-    ['_Red', '_Green', '_Purple', '_Yellow'].forEach((playerColor) => {
-        localStorage.removeItem(playerColor);
-    });
-    localStorage.removeItem('_sessionPhase');
-    localStorage.removeItem('_sharedState');
-    localStorage.removeItem('_client');
-    localStorage.removeItem('_rival');
-
-    if (!CLIENT_DEBUG)
-        return;
-
-    localStorage.setItem('_sessionPhase', state.sessionPhase);
-    localStorage.setItem('_sharedState', JSON.stringify(state));
-    localStorage.setItem('_client', JSON.stringify(localState));
-
-    if ('rival' in state)
-        localStorage.setItem('_rival', JSON.stringify(state.rival));
-
-    for (const player of state.players) {
-        localStorage.setItem(`_${player.color}`, JSON.stringify(player));
-    }
 }
 
 document.fonts.ready.then(() => {
@@ -256,8 +226,6 @@ document.fonts.ready.then(() => {
 
         UserInterface.update(state);
         canvas.drawUpdateElements(state, state.sessionPhase == Phase.play && state.hasGameEnded);
-
-        debug(state);
     });
 
     window.addEventListener(EventType.start_turn, () => {

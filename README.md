@@ -68,14 +68,16 @@ Any page visitor may enrol in the game session by selecting a color card. Visito
  - Examine the included [RULES.md](https://github.com/generalustelaru/ophir-2d/blob/main/RULES.md) document.
  - Follow your intuition. The game rules are enforced. You can't cheat but you can certainly make mistakes.
 
-## Debug options (fun stuff)
-You can edit the "config" values found in `db.json`. The values will only be applied after resetting the game or starting a new one.
+## Configuration options (admin & 'fun' stuff)
+You can edit the "config" values found in `db.json`. The values will only be applied for new sessions or after restarting one.
 
 `SERVER_NAME`: The name that appears in chat for server messages.
 
 `ADMIN_AUTH`: The 'auth' URL parameter value for the GET request to /shutdown.
 
-`IDLE_CHECKS`: Enables other players to force-end the turn of the current player if idle.
+"PLAYER_IDLE_MINUTES": How fast a player can be skipped for not doing anything.
+
+"SESSION_DELETION_HOURS": How quickly an inactive session goes bye-bye.
 
 `IDLE_TIMEOUT`: Time of perceived inactivity (in minutes) for the current player before receiving the idle status.
 

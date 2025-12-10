@@ -1,103 +1,144 @@
-import { DB_PORT } from '../configuration';
-import { Configuration, SessionState } from '../server_types';
+import { DB_PORT } from '../../environment';
+import { Configuration, Probable, SessionState } from '../server_types';
 import { validator } from './validation/ValidatorService';
+import lib from '../action_processors/library';
 
 class DatabaseService {
 
     private dbAddress: string = `http://localhost:${DB_PORT}`;
 
-    public async getConfig(): Promise<Configuration | null> {
+    public async getConfig(): Promise<Probable<Configuration>> {
         try {
             const response = await fetch(`${this.dbAddress}/config`);
 
-            if (!response.ok){
-                throw new Error('Could not find Configuration in DB');
+            if (response.ok) {
+                const record = await response.json();
+
+                if (typeof record != 'object')
+                    return lib.fail('Configuration is not an object.');
+
+                const configuration = validator.validateConfiguration(record);
+
+                return configuration
+                    ? lib.pass(configuration)
+                    : lib.fail('Configuration is not type-compliant')
+                ;
             }
 
-            const record = await response.json();
-
-            if (typeof record != 'object')
-                throw new Error('Db entry for Record is corrupted.');
-
-            const configuration = validator.validateConfiguration(record);
-
-            if (!configuration)
-                throw new Error('Db entry for Record is not type-compliant');
-
-            return configuration;
-
+            return lib.fail('Failed to retrieve configuration.');
         } catch (error) {
-            console.error('DB Error',{ error });
-            return null;
+            return lib.fail(lib.getErrorBrief(error));
         }
     }
 
-    public async addGameState(savedSession: SessionState): Promise<{ok: boolean}> {
+    public async addGameState(savedSession: SessionState): Promise<Probable<true>> {
         const id = savedSession.sharedState.gameId;
 
-        const response = await fetch(
-            `${this.dbAddress}/sessions`,
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, data: savedSession }),
-            },
-        );
+        try {
+            const response = await fetch(
+                `${this.dbAddress}/sessions`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, timeStamp: Date.now(), data: savedSession }),
+                },
+            );
 
-        if (response.ok)
-            return { ok: true };
-
-        console.error('Failed to add game state:', { error: response.status });
-        return { ok: false };
+            return response.ok
+                ? lib.pass(true)
+                : lib.fail('Failed to add game state.')
+            ;
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
     }
 
-    public async saveGameState(savedSession: SessionState): Promise<{ok: boolean}> {
-
+    public async saveGameState(savedSession: SessionState): Promise<Probable<true>> {
         const id = savedSession.sharedState.gameId;
 
-        const response = await fetch(
-            `${this.dbAddress}/sessions/${id}`,
-            {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, data: savedSession }),
-            },
-        );
+        try {
+            const response = await fetch(
+                `${this.dbAddress}/sessions/${id}`,
+                {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, timeStamp: Date.now(), data: savedSession }),
+                },
+            );
 
-        if (response.ok)
-            return { ok: true };
-
-        console.error('Failed to save game state:', { error: response.status });
-        return { ok: false };
+            return response.ok
+                ? lib.pass(true)
+                : lib.fail('Failed to save game state.')
+            ;
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
     }
 
-    public async loadGameState(gameId: string): Promise<SessionState | null> {
+    public async loadGameState(gameId: string): Promise<Probable<SessionState>> {
         try {
             const response = await fetch(`${this.dbAddress}/sessions/${gameId}`);
 
-            if (!response.ok)
-                throw new Error(`DB Error: ${response.status}`);
+            if (response.ok) {
+                const record = await response.json();
+                const gameState = validator.validateState(record.data);
 
-            const record = await response.json();
+                return gameState
+                    ? lib.pass(gameState)
+                    : lib.fail('State record is not type compliant')
+                ;
+            }
 
-            if (typeof record != 'object' || !record.data)
-                throw new Error(`Data Error: ${record}`);
-
-            if (!('data' in record))
-                throw new Error('Db entry is corrupted.');
-
-            const gameState = validator.validateState(record.data);
-
-            if (!gameState)
-                throw new Error('Stored game state is corrupted.');
-
-            return gameState;
-
+            return lib.fail('Failed to retrieve state record.');
         } catch (error) {
-            console.log('Could not resolve data', { error });
+            return lib.fail(lib.getErrorBrief(error));
+        };
+    }
 
-            return null;
-        }
+    public async deleteGameState(gameId: string): Promise<Probable<true>> {
+        try {
+            const response = await fetch(
+                `${this.dbAddress}/sessions/${gameId}`, { method: 'DELETE' },
+            );
+
+            return response.ok
+                ? lib.pass(true)
+                : lib.fail('Failed to delete game state.')
+            ;
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        };
+    }
+
+    public async getTimestamps(): Promise<Probable<Array<{ id: string, timeStamp: number }>>> {
+        try {
+            const response = await fetch(`${this.dbAddress}/sessions`);
+
+            if (response.ok) {
+                const data = await response.json();
+
+                if (!Array.isArray(data))
+                    return lib.fail('Sessions contains malformed data.');
+
+                const timeStamps = data.filter(record => {
+                    const { id, timeStamp } = record;
+
+                    if (typeof id == 'string' && typeof timeStamp == 'number')
+                        return { id, timeStamp };
+
+                    return null;
+                });
+
+                if (timeStamps.includes(null))
+                    return lib.fail('Sessions contains malformed data.');
+
+                return lib.pass(timeStamps);
+            }
+
+            return lib.fail('Could not retreive timeStamp list');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        };
     }
 }
 

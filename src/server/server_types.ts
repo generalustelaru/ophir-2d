@@ -10,7 +10,8 @@ import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 
-export type Probable<T> = { err: true, message: string } | { err?: false, data: T };
+/** Return value wrapper with positive checks */
+export type Probable<T> = { err: true, ok: false, message: string } | { err: false, ok: true, data: T };
 
 export type WsClient = {
     socketId: string,
@@ -134,8 +135,8 @@ export type ServerConstants = {
 export type Configuration = {
     ADMIN_AUTH: string,
     SERVER_NAME: string,
-    IDLE_CHECKS: boolean,
-    IDLE_TIMEOUT: number,
+    PLAYER_IDLE_MINUTES: number,
+    SESSION_DELETION_HOURS: number,
     SINGLE_PLAYER: boolean,
     NO_RIVAL: boolean,
     RICH_PLAYERS: boolean,

@@ -31,7 +31,6 @@ export enum Action {
     buy_metal = 'buy_metal',
     donate_metal = 'donate_metal',
     inquire = 'inquire',
-    ping = 'ping',
     enrol = 'enrol',
     change_color = 'change_color',
     undo = 'undo',
@@ -306,7 +305,7 @@ export type VerboiseAction =
 export type LaconicAction =
     | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
-    | Action.force_turn | Action.sell_specialty | Action.ping
+    | Action.force_turn | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload

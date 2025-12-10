@@ -121,7 +121,7 @@ export class GameSession {
 
         if (!this.transmit)
             return console.error('GameSession was dereferenced but not removed');
-
+        // TODO: preserve player names
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
             this.transmit,
