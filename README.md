@@ -34,19 +34,18 @@ You can set up and run a server fairly easily on your local network.
    - Enter the project folder, *\ophir-2d* (use **Bash** or **Git Bash** to run `make` commands)
    - Run `make install` to have the server set up and ready.
    - If that doesn't work for you, follow these steps:
-      - Create the folder structure named *dist/public* in the root folder.
-      - Copy the contents of *src/client/static/* into the newly created *public* folder.
+      - Create the folders *dist/public* and copy the contents of *src/client/static/* into *public*.
+      - Create a copy of *db_template* and rename it as *db.json*.
       - Create a copy of *.env.example* and rename it as *.env*.
-      - Replace the SERVER_ADDRESS value in .env with your local Ethernet address. How to obtain it:
+      - Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
           - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
           - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
           - Linux: `hostname -I`
-      - Create file `db.json` and copy this content into it: `{\"sessions\": [], \"config\":{}}`.
       - Run `npm ci && npm run build_server && npm run build_client`.
 
 4. Start json-server: Run `make db` or `npx json-server --watch db.json`. (This is a stand-in for a database).
 
-5. Start the game server: Open a new CLI window and run `make run` or `node public/server.cjs`.
+5. Start the game server: Open a new CLI window and run `make run` or `node dist/server.cjs`.
 
 6. Copy the server address and open it in a browser.
 
