@@ -38,7 +38,7 @@ client:
 	npm run build_client
 
 static:
-ifeq ($( -commandO"S),Windows_NT)"
+ifeq ($( -commandO"S),Windows_NT)
 	powershell -command "if (-not (Test-Path 'dist')) { New-Item -ItemType Directory -Path 'dist'; New-Item -ItemType Directory -Path 'dist/public' }"
 	powershell -command "if (Test-Path 'dist/*') { Remove-Item -Recurse -Force dist/* }"
 	powershell -command "Copy-Item -Recurse -Force src/client/static/* dist/public/"
