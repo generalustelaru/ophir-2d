@@ -34,8 +34,8 @@ You can set up and run a server fairly easily on your local network.
    - Enter the project folder, *\ophir-2d* (use **Bash** or **Git Bash** to run `make` commands)
    - Run `make install` to have the server set up and ready.
    - If that doesn't work for you, follow these steps:
-      - Create the folders *dist/public* and copy the contents of *src/client/static/* into *public*.
-      - Create a copy of *db_template* and rename it as *db.json*.
+      - Create folders */dist*, */dist/public*, then copy the contents of *src/client/static/* into *dist/public*.
+      - Create a copy of *db_template.json* and rename it as *db.json*.
       - Create a copy of *.env.example* and rename it as *.env*.
       - Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
           - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
@@ -68,31 +68,30 @@ Any page visitor may enrol in the game session by selecting a color card. Visito
  - Follow your intuition. The game rules are enforced. You can't cheat but you can certainly make mistakes.
 
 ## Configuration options (admin & 'fun' stuff)
-You can edit the "config" values found in `db.json`. The values will only be applied for new sessions or after restarting one.
+You can edit the `"config"` values found in *db.json*. The values will only be applied for new sessions or after restarting one.
 
-`SERVER_NAME`: The name that appears in chat for server messages.
+`"SERVER_NAME"`: The name that appears in chat for server messages.
 
-`ADMIN_AUTH`: The 'auth' URL parameter value for the GET request to /shutdown.
+`"ADMIN_AUTH"`: The 'auth' URL parameter value for the GET request to /shutdown.
 
-"PLAYER_IDLE_MINUTES": How fast a player can be skipped for not doing anything.
+`"PLAYER_IDLE_MINUTES"`: How fast a player can be skipped for not doing anything.
 
-"SESSION_DELETION_HOURS": How quickly an inactive session goes bye-bye.
+`"SESSION_DELETION_HOURS"`: How quickly an inactive session goes bye-bye.
 
-`IDLE_TIMEOUT`: Time of perceived inactivity (in minutes) for the current player before receiving the idle status.
+`IDLE_"TIMEOUT`: Time of perceived inactivity (in minutes) for the current player before receiving the idle status.
 
-`SINGLE_PLAYER`: Allows session to start with a single enrolled player.
+`"SINGLE_PLAYER"`: Allows session to start with a single enrolled player.
 
-`NO_RIVAL`: Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled).
+`"NO_RIVAL"`: Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled).
 
-`RICH_PLAYERS`: Players start with 99 coins.
+`"RICH_PLAYERS"`: Players start with 99 coins.
 
-`FAVORED_PLAYERS`: Players start with maximum favor (6).
+`"FAVORED_PLAYERS"`: Players start with maximum favor (6).
 
-`CARGO_BONUS`: Players start with cargo advantages.
-   - values: 0 (No bonus), 1 (Upgraded cargo), 2 (One of each commodity onboard), 3 (One gold and one silver onboard)
+`"CARGO_BONUS"`: Players start with cargo advantages.
+   - values: `0` (No bonus), `1` (Upgraded cargo), `2` (One of each commodity onboard), `3` (One gold and one silver onboard)
 
-`SHORT_GAME`: Reduces the Temple Track to a single column (the game ends after three metal donations).
+`"SHORT_GAME"`: Reduces the Temple Track to a single column (the game ends after three metal donations).
 
-`INCLUDE`: Ensures selected specialists appear in the draft (from first to last, up to the amount required for the player count).
-   - Values: ambassador, harbormaster, moneychanger, priest, temple_guard, postmaster, navigator, advisor, chancellor, peddler
-   - Format: `["<value>"]`, `["<value>","<value>"]`, etc.
+`"INCLUDE"`: Ensures selected specialists appear in the draft (up to the amount required for the player count).
+   - Values: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`,
