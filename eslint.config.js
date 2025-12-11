@@ -3,7 +3,7 @@ import tsParser from '@typescript-eslint/parser';
 
 export default [
     {
-        ignores: ['public/**', '**/*_constants.ts'],
+        ignores: ['dist/**', '**/*_constants.ts'],
     },
     {
         languageOptions: {
