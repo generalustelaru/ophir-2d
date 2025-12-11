@@ -1,60 +1,55 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
-import { Color, DynamicGroupInterface, ElementList } from '~/client_types';
-import { Coordinates, NeutralColor, PlayerColor, Unique } from '~/shared_types';
+import { HueCombo, StaticGroupInterface } from '~/client_types';
+import { Coordinates, Unique } from '~/shared_types';
 
-const { COLOR, SHIP_DATA } = clientConstants;
-export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
+const { SHIP_DATA } = clientConstants;
+export class ShipToken implements Unique<StaticGroupInterface> {
     private group: Konva.Group | null;
-    private token: Konva.Path | null;
+    private tokenDepth: Konva.Circle;
+    private tokenFace: Konva.Circle;
+    private sticker: Konva.Path;
 
     constructor(
-        color: PlayerColor | NeutralColor,
-        options?: {
-            stroke?: Color
+        options: {
+            combo: HueCombo,
             position?: Coordinates,
-            scale?: number
         },
-        isMapToken: boolean = true,
     ) {
+        const { combo, position } = options;
         this.group = new Konva.Group({
             width: 60,
             height: 60,
-            x: options?.position?.x || 0,
-            y: options?.position?.y || 0,
+            x: position?.x || 0,
+            y: position?.y || 0,
         });
 
-        const mapTokenElements: ElementList = [];
+        const { light, dark, accent } = combo;
 
-        if (isMapToken) {
-            const tokenFace = new Konva.Circle({
-                radius: 30,
-                fill: COLOR[color],
-                stroke: 'black',
-                strokeWidth: 1,
-            });
-            const tokenDepth = new Konva.Circle({
-                radius: 30,
-                y: 8,
-                fill: COLOR[`dark${color}`],
-                stroke: 'black',
-                strokeWidth: 1,
-            });
+        this.tokenDepth = new Konva.Circle({
+            radius: 30,
+            y: 8,
+            fill: dark,
+            stroke: 'black',
+            strokeWidth: 1,
+        });
+        this.tokenFace = new Konva.Circle({
+            radius: 30,
+            fill: light,
+            stroke: accent,
+            strokeWidth: 1,
+        });
 
-            mapTokenElements.push(tokenDepth, tokenFace);
-        }
-
-        const scale = options?.scale || 1.5;
-        this.token = new Konva.Path({
-            x: -24,// 15
+        this.sticker = new Konva.Path({
+            x: -24, // 15
             y: -18, // 5
             data: SHIP_DATA.shape,
-            fill: COLOR[color],
-            scale: { x: scale, y: scale },
-            stroke: options?.stroke || COLOR.shipBorder,
-            strokeWidth: 2,
+            fill: accent,
+            scale: { x: 1.5, y: 1.5 },
+            stroke: dark,
+            strokeWidth: 1,
         });
-        this.group.add(...mapTokenElements, this.token);
+        this.group.add(this.tokenDepth, this.tokenFace, this.sticker);
     }
 
     public getElement(): Konva.Group {
@@ -64,14 +59,7 @@ export class ShipToken implements Unique<DynamicGroupInterface<Color>> {
         return this.group;
     }
 
-    public update(stroke: Color): void {
-        this.token?.stroke(stroke);
-    }
-
     public selfDecomission() {
-        this.token?.destroy();
-        this.token = null;
-
         this.group?.destroy();
         this.group = null;
 

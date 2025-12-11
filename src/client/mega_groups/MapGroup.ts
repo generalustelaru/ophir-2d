@@ -11,7 +11,7 @@ import { MovesDial } from '../groups/popular';
 import localState from '../state';
 import clientConstants from '~/client_constants';
 
-const { COLOR, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA } = clientConstants;
+const { HUES, HEX_OFFSET_DATA, ISLAND_DATA, LOCATION_TOKEN_DATA, SHIP_DATA, TEMPLE_CONSTRUCTION_DATA } = clientConstants;
 
 export class MapGroup implements Unique<MegaGroupInterface> {
     private group: Konva.Group;
@@ -54,7 +54,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                     ISLAND_DATA[hexItem.id],
                     locationData.name,
                     this.getIconData(locationData.name, state),
-                    COLOR.defaultHex,
+                    HUES.defaultHex,
                     state.sessionPhase == Phase.play,
                 );
                 this.seaZones.push(seaZone);
@@ -151,7 +151,6 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 this.stage,
                 shipPosition.x,
                 shipPosition.y,
-                localPlayer.isActive,
                 this.seaZones,
                 state.players,
                 state.rival,
@@ -207,7 +206,6 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             const localShip = this.localShip as PlayerShip;
 
             localShip.switchControl(localPlayer.isActive && !localPlayer.isHandlingRival);
-            localShip.switchHighlight(localPlayer.isActive);
             localShip.update(localPlayer.bearings.position, state.players, state.rival);
         }
     }

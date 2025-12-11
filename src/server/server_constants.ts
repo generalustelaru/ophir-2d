@@ -58,7 +58,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Temple Guard',
             startingFavor: 2,
             specialty: 'ebony',
-            description: 'Adds 1 to influence checks (up to 6).',
+            description: 'Adds 1 to influence checks\n(up to 6).',
         },
         {
             name: SpecialistName.postmaster,
@@ -123,6 +123,7 @@ const serverConstants: ServerConstants = {
         { request: ['gems', 'linen'], reward: { coins: 3, favorAndVp: 2 } },
         { request: ['gems'], reward: { coins: 2, favorAndVp: 1 } },
     ],
+    DEFAULT_NAMES: ['Sargon', 'Ashurbanipal', 'Nebuchadnezzar', 'Naram-Sin', 'Cyrus', 'Semiramis', 'Enheduanna', 'Puabi', 'Naqi’a', 'Serua'],
     DEFAULT_MOVE_RULES: [
         { from: 'center', allowed: ['topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'], blockedBy: [2, 4, 6, 8, 10, 12] },
         { from: 'topRight', allowed: ['center', 'right', 'topLeft'], blockedBy: [1, 2, 3] },
@@ -172,12 +173,7 @@ const serverConstants: ServerConstants = {
         sessionPhase: Phase.enrolment,
         sessionOwner: null,
         chat: [],
-        availableSlots: [
-            'Purple',
-            'Yellow',
-            'Red',
-            'Green',
-        ],
+        mayDraft: false,
         players: [],
     },
     COST_TIERS: [

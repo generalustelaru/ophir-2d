@@ -6,7 +6,7 @@ import { SeaZone } from '.';
 import { defineBobbing } from '~/client/animations';
 import clientConstants from '~/client_constants';
 
-const { COLOR, SEA_ZONE_COUNT } = clientConstants;
+const { HUES, SEA_ZONE_COUNT } = clientConstants;
 
 export type RivalShipUpdate = {
     isControllable: boolean,
@@ -47,7 +47,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
             y: data.bearings.position.y,
         });
 
-        this.ship = new ShipToken('Neutral');
+        this.ship = new ShipToken({ combo: { light: HUES.Neutral, dark: HUES.darkNeutral, accent: HUES.shipBorder } });
 
         this.activeEffect = defineBobbing(
             this.ship.getElement(),
@@ -109,7 +109,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
 
             switch (true) {
                 case targetZone && this.isDestinationValid:
-                    targetZone.setFill(COLOR.activeHex);
+                    targetZone.setFill(HUES.activeHex);
                     this.broadcastAction({
                         action: Action.move_rival,
                         payload: {
@@ -154,7 +154,6 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         this.group.x(bearings.position.x);
         this.group.y(bearings.position.y);
         this.group.draggable(isLocalPlayerActive);
-        this.ship.update(isControllable ? COLOR[activePlayerColor] : COLOR.shipBorder);
         isLocalPlayerActive && isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };
 

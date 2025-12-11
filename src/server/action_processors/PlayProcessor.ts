@@ -1,53 +1,44 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, MetalPurchasePayload,
-    Unique, FeasibleTrade,
+    Unique, FeasibleTrade, ServerMessage,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
 import {
-    ActionsAndDetails, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle, TurnEvent,
+    ActionsAndDetails, Configuration, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle, TurnEvent,
 } from '~/server_types';
 import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
-import { SERVER_NAME, IDLE_CHECKS, IDLE_TIMEOUT } from '../configuration';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
 // TODO: Reduce linecount; extract utility-like functions, move deed composition to dedicated service.
 export class PlayProcessor implements Unique<SessionProcessor> {
     private idleCheckInterval: NodeJS.Timeout | null = null;
+    private serverName: string;
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
-    private autoBroadcast: (state: PlayState) => void;
-    private transmitTurnNotification: (socketId: string) => void;
-    private transmitForceTurnNotification: (socketId: string) => void;
-    private transmitRivalControlNotification: (socketId: string) => void;
-
-    private transmitVp: (vp: number, socketId: string) => void;
+    private broadcast: (state: PlayState) => void;
+    private transmit: (socketId: string, message: ServerMessage) => void;
 
     /** @throws */
     constructor(
         stateBundle: StateBundle,
+        configuration: Configuration,
         broadcastCallback: (state: PlayState) => void,
-        transmitTurnNotification: (socketId: string) => void,
-        transmitForceTurnNotification: (socketId: string) => void,
-        transmitRivalControlNotification: (socketId: string) => void,
-        transmitVp: (vp: number, socketId: string) => void,
+        transmitCallback: (socketId: string, message: ServerMessage) => void,
     ) {
         const { playState, privateState, backupState } = stateBundle;
-
+        this.serverName = configuration.SERVER_NAME;
         this.playState = playState;
         this.privateState = privateState;
         this.backupState = backupState;
-        this.autoBroadcast = broadcastCallback;
-        this.transmitTurnNotification = transmitTurnNotification;
-        this.transmitForceTurnNotification = transmitForceTurnNotification;
-        this.transmitRivalControlNotification = transmitRivalControlNotification;
-        this.transmitVp = transmitVp;
+        this.broadcast = broadcastCallback;
+        this.transmit = transmitCallback;
 
         const players = this.playState.getAllPlayers();
         const activePlayer = players.find(p => p.isActive === true);
@@ -56,7 +47,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (privateState.getGameStats().find(stat => { stat.vp != 0; })) {
             for (const stat of privateState.getGameStats()) {
                 const player = players.find(p => p.color === stat.color);
-                player && this.transmitVp(this.privateState.getPlayerVictoryPoints(player.color), player.socketId);
+                player && this.transmit(
+                    player.socketId,
+                    { vp: this.privateState.getPlayerVictoryPoints(player.color) },
+                );
             }
         }
 
@@ -72,10 +66,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         );
         this.playState.savePlayer(player.toDto());
 
-        this.transmitTurnNotification(player.getIdentity().socketId);
-
-        if (IDLE_CHECKS && IDLE_TIMEOUT)
-            this.startIdleChecks();
+        this.startIdleChecks(configuration.PLAYER_IDLE_MINUTES);
     }
 
     public getState() {
@@ -231,7 +222,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                         description: 'took control of the rival ship',
                     });
                     player.freeze();
-                    this.transmitRivalControlNotification(player.getIdentity().socketId);
+                    this.transmit(player.getIdentity().socketId, { rivalControl: null });
                 }
             }
 
@@ -593,7 +584,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         });
         console.info(this.privateState.getGameStats());
 
-        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), socketId);
+        this.transmit(socketId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
         const marketShift = this.shiftMarketCards(player);
 
@@ -737,9 +728,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             description: `${isMailing ? 'mailed' : 'donated'} ${metal} for ${reward} VP`,
         });
 
-        this.transmitVp(
-            this.privateState.getPlayerVictoryPoints(color),
+        this.transmit(
             player.getIdentity().socketId,
+            { vp: this.privateState.getPlayerVictoryPoints(color) },
         );
 
         const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(metal);
@@ -807,7 +798,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.playState.savePlayer(player.toDto());
 
         if(!isVoluntary)
-            this.transmitForceTurnNotification(socketId);
+            this.transmit(socketId, { forceTurn: null });
 
         const newPlayerResult = ((): Probable<PlayerHandler> => {
             const allPlayers = this.playState.getAllPlayers();
@@ -828,7 +819,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             const { color, socketId } = nextPlayer.getIdentity();
             this.playState.updateRival(color);
 
-            this.transmitTurnNotification(socketId);
+            this.transmit(socketId, { turnStart: null });
 
             return lib.pass(nextPlayer);
         })();
@@ -936,7 +927,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         const { playState, privateState } = backupOperation.data;
 
-        this.playState = new PlayStateHandler(SERVER_NAME, playState);
+        this.playState = new PlayStateHandler(this.serverName, playState);
         this.privateState = new PrivateStateHandler(privateState);
 
         const revertedPlayer = playState.players.find(p => p.color === color);
@@ -944,7 +935,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!revertedPlayer)
             return lib.fail('Could not find active player in backup');
 
-        this.transmitVp(this.privateState.getPlayerVictoryPoints(color), player.getIdentity().socketId);
+        this.transmit(player.getIdentity().socketId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
         const playerHandler = new PlayerHandler(revertedPlayer);
 
@@ -1178,7 +1169,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     private determineActionsAndDetails(player: PlayerHandler): ActionsAndDetails {
-        if (!player.isAnchored())
+        if (!player.isAnchored() || player.isFrozen())
             return { actions: [], trades: [], purchases: [] };
 
         const actionsByLocation = (
@@ -1310,7 +1301,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         return lib.pass({ state: this.playState.toDto() });
     }
 
-    private startIdleChecks(): void {
+    // TODO: convert to a timeout as not to repeat the idle message.
+    private startIdleChecks(timeoutMinutes: number): void {
+        const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
+
         this.idleCheckInterval = setInterval(() => {
             const activePlayer = this.playState.getActivePlayer();
 
@@ -1321,13 +1315,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
             const timeNow = Date.now();
 
-            if (timeNow - activePlayer.timeStamp > IDLE_TIMEOUT && !activePlayer.isIdle) {
+            if (timeNow - activePlayer.timeStamp > limitMinutes && !activePlayer.isIdle) {
                 activePlayer.isIdle = true;
                 this.addServerMessage(`${activePlayer.name} is idle`);
                 this.playState.savePlayer(activePlayer);
 
-                this.transmitTurnNotification(activePlayer.socketId);
-                this.autoBroadcast(this.playState.toDto());
+                this.transmit(activePlayer.socketId, { turnStart: null });
+                this.broadcast(this.playState.toDto());
             }
 
         }, 2000);

@@ -11,7 +11,7 @@ type SetupPanelUpdate = {
     specialists: Array<SelectableSpecialist>,
 }
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate>> {
     private group: Konva.Group | null;
@@ -30,7 +30,7 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
-            fill: COLOR.modalBlue,
+            fill: HUES.modalBlue,
         });
         this.group.add(background);
 

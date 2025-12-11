@@ -229,7 +229,7 @@ export type EnrolmentState = {
     sessionOwner: PlayerColor | null,
     players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,
-    availableSlots: Array<PlayerColor>,
+    mayDraft: boolean,
 }
 export type State = EnrolmentState | SetupState | PlayState;
 
@@ -305,7 +305,7 @@ export type VerboiseAction =
 export type LaconicAction =
     | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
-    | Action.force_turn | Action.sell_specialty;
+    | Action.force_turn | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
@@ -336,7 +336,7 @@ export type ClientMessage =
     | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage | SellAsPeddlerMessage;
 
 export type ClientRequest = {
-    gameId: string | null,
+    gameId: string,
     socketId: string,
     playerColor: PlayerColor | null,
     playerName: string | null,
@@ -345,14 +345,12 @@ export type ClientRequest = {
 
 // MARK: RESPONSE
 export type ClientIdResponse = { socketId: string }
-export type EnrolmentResponse = { approvedColor: PlayerColor }
+export type EnrolmentResponse = { approvedColor: PlayerColor, playerName: string }
 export type ColorChangeResponse = { approvedNewColor: PlayerColor }
 export type StateResponse = { state: State }
-
 export type ResetResponse = { resetFrom: string | PlayerColor }
-
 export type ErrorResponse = { error: string }
-
+export type NotFoundTransmission = { notFound: null }
 export type VpTransmission = { vp: number }
 export type NewNameTransmission = { newName: string }
 export type TurnNotificationTransmission = { turnStart: null }
@@ -366,6 +364,7 @@ export type ServerMessage =
     | ErrorResponse
     | EnrolmentResponse
     | ColorChangeResponse
+    | NotFoundTransmission
     | VpTransmission
     | NewNameTransmission
     | TurnNotificationTransmission

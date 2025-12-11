@@ -4,7 +4,7 @@ import { RequestButton, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
 import { Coordinates, Action, MetalPurchasePayload, Metal, Currency, Unique } from '~/shared_types';
 
-const { COLOR, CARGO_ITEM_DATA } = clientConstants;
+const { HUES, CARGO_ITEM_DATA } = clientConstants;
 
 export class TreasuryCard extends RequestButton implements Unique<DynamicGroupInterface<TreasuryCardUpdate>> {
     private background: Konva.Rect;
@@ -29,8 +29,8 @@ export class TreasuryCard extends RequestButton implements Unique<DynamicGroupIn
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.treasuryDarkGold,
-            stroke: COLOR.boneWhite,
+            fill: HUES.treasuryDarkGold,
+            stroke: HUES.boneWhite,
             strokeWidth: 2,
             cornerRadius: 15,
         });
@@ -65,6 +65,6 @@ export class TreasuryCard extends RequestButton implements Unique<DynamicGroupIn
         ));
 
         this.setEnabled(isFeasible);
-        this.background.fill(isFeasible ? COLOR.treasuryGold : COLOR.treasuryDarkGold);
+        this.background.fill(isFeasible ? HUES.treasuryGold : HUES.treasuryDarkGold);
     }
 }

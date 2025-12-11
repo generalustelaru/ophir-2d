@@ -4,7 +4,7 @@ import { DynamicGroupInterface } from '~/client_types';
 import { FavorIcon } from './FavorIcon';
 import { Coordinates, Unique } from '~/shared_types';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 export class FavorDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
     private favorCount: Konva.Text;
@@ -27,7 +27,7 @@ export class FavorDial implements Unique<DynamicGroupInterface<number>> {
             y: stampCenter - 12,
             text: amount.toString(),
             fontSize: 20,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             fontFamily: 'Calibri',
         });
 

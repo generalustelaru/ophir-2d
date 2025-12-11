@@ -3,14 +3,7 @@ import { ClientConstants } from '~/client_types';
 
 const clientConstants: ClientConstants = {
     STAGE_AREA: { width: 1200, height: 500 },
-    DEFAULT_LOCAL_STATE: {
-        gameId: null,
-        socketId: null,
-        playerColor: null,
-        playerName: null,
-        vp: 0,
-    },
-    COLOR: {
+    HUES: {
         lowRoll: '#FF7F50',
         midRoll: '#FF4500',
         highRoll: '#8B0000',
@@ -18,32 +11,24 @@ const clientConstants: ClientConstants = {
         navigatorAccess: '#FFFDD7',
         activeShipBorder: '#FFFFFF',
         shipBorder: '#000000',
-        Purple: '#A55A9A',
-        Yellow: '#FFC94A',
-        Red: '#FF204E',
-        Green: '#87A922',
-        Neutral: '#EDEDED',
+        Neutral: '#FFF8DC',
         darkNeutral: '#A9A9A9',
         illegal: '#A94438',
         validHex: '#A3FFD6',
         defaultHex: '#3887BE',
         activeHex: '#52D3D8',
         islandGreen: '#0A6847',
-        darkPurple: '#63365C',
-        darkYellow: '#996B00',
-        darkRed: '#990020',
-        darkGreen: '#667F1A',
         ebony: '#8B4513',
         disabled: '#A9A9A9',
         sunset: '#FFA07A',
         boneWhite: '#EDEDED',
         stampEdge: '#850c03',
-        marketOrange: '#ff601e',
-        marketDarkOrange: '#8f2a00',
+        marketOrange: '#F4A460',
+        marketDarkOrange: '#8B4513',
         treasuryGold: '#FFD700',
         treasuryDarkGold: '#8f7800',
-        templeRed: '#1e78c2',
-        templeDarkRed: '#134e7d',
+        templeBlue: '#87CEEB',
+        templeDarkBlue: '#1E3A5F',
         coinSilver: '#C0C0C0',
         upgradeBoxSilver: '#999999',
         darkerSilver: '#666666',
@@ -52,7 +37,24 @@ const clientConstants: ClientConstants = {
         vpCardLightPurple: '#E37AF5',
         modalLightBlue: '#184588ff',
         modalBlue: '#002255',
-
+    },
+    PLAYER_HUES: {
+        Red: {
+            vivid:  { light: '#FFB3A7', dark: '#C1440E', accent: '#FF6347' },
+            muted: { light: '#F5D5D0', dark: '#8B4C3A', accent: '#CD8B7A' },
+        },
+        Green: {
+            vivid:{ light: '#B4F8C8', dark: '#0B6E4F', accent: '#00D084' },
+            muted: { light: '#D4E8DC', dark: '#4A6B5C', accent: '#7FA896' },
+        },
+        Yellow: {
+            vivid:{ light: '#FFE680', dark: '#CC8800', accent: '#FFD700' },
+            muted: { light: '#F5EDD1', dark: '#8B7355', accent: '#D4AF37' },
+        },
+        Purple: {
+            vivid:{ light: '#E6D5F5', dark: '#6A0DAD', accent: '#9D4EDD' },
+            muted: { light: '#E8E0EE', dark: '#5C4A6B', accent: '#9B8AA4' },
+        },
     },
     COLOR_PROFILES: {
         favorStampReady: { primary: '#aa0000', secondary: '#850c03', tertiary: null },
@@ -136,6 +138,6 @@ const clientConstants: ClientConstants = {
             layer_3: null,
         },
     },
-};
+} as const;
 
 export default clientConstants;

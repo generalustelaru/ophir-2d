@@ -2,19 +2,20 @@ import sLib from '../../server_lib';
 
 type TypeReference = Array<string | number> | null;
 
+type Type = 'string' | 'number' | 'boolean' | 'object' | 'array';
 type TestBase = {
     key: string,
     nullable: boolean,
 }
 
 type ScalarTest = TestBase & {
-    type: 'string' | 'number',
+    type: 'string' | 'number' | 'boolean',
     ref?: TypeReference,
 }
 
 type ObjectTest = TestBase & {
     type: 'object' | 'array',
-}
+} // TODO: add ref: TypeReference to array so evaluateObject can validate array children in its logic
 
 export type Test = ScalarTest | ObjectTest
 
@@ -44,12 +45,34 @@ function hasKey(parent: object | null, key: string): ValidationResult {
     return fail(`"${key}" property is missing.`);
 }
 
+function isBoolean(name: string, value: unknown, nullable: boolean = false) {
+    if ((nullable && value === null) || (typeof value === 'boolean'))
+        return pass();
+
+    return fail(`${name} is not a boolean: ${value}`);
+}
+function hasBoolean(parent: object, key: string, nullable: boolean = false) {
+    const keyTest = hasKey(parent, key);
+
+    if (keyTest.passed) {
+        const value = parent[key as keyof object] as unknown;
+        const booleanTest = isBoolean(key, value, nullable);
+
+        if (booleanTest.passed)
+            return pass();
+
+        return fail(`property ${booleanTest.error}`);
+    }
+
+    return fail(keyTest.error);
+}
+
 function isString(name: string, value: unknown, nullable: boolean = false): ValidationResult {
 
     if ((nullable && value === null) || (typeof value === 'string' && value.length))
         return pass();
 
-    return fail(`${name} property is not a valid string: ${value}`);
+    return fail(`${name} is not a valid string: ${value}`);
 }
 function hasString(parent: object, key: string, nullable: boolean, reference: TypeReference = null): ValidationResult {
     const keyTest = hasKey(parent, key);
@@ -67,7 +90,7 @@ function hasString(parent: object, key: string, nullable: boolean, reference: Ty
             return fail(referenceTest.error);
         }
 
-        return fail(stringTest.error);
+        return fail(`property ${stringTest.error}`);
     }
 
     return fail(keyTest.error);
@@ -179,6 +202,7 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
                 case 'number': return hasNumber(object, key, nullable, test.ref);
                 case 'array': return hasArray(object, key, nullable);
                 case 'object': return hasObject(object, key, nullable);
+                case 'boolean': return hasBoolean(object, key, nullable);
                 default: return fail(`${key} is of unknown type: ${type}`);
             }
         });
@@ -187,6 +211,46 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
     }
 
     return [objectTest.error];
+}
+
+function evaluateArray(name: string, value: unknown, type: Type, reference?: TypeReference) {
+    const arrayTest = isArray(name, value);
+
+    if (arrayTest.passed) {
+        const array = value as Array<unknown>;
+
+        const isOfType = (()=> {
+            switch (type) {
+                case 'string': return isString;
+                case 'number': return isNumber;
+                case 'boolean': return isBoolean;
+                case 'array': return isArray;
+                case 'object': return isObject;
+            }
+        })();
+
+        const itemName = `${name} item`;
+        for (let i = 0; i < array.length; i++) {
+            const typeTest = isOfType(itemName, array[i]);
+
+            if (!typeTest.passed)
+                return fail(typeTest.error);
+        }
+
+        if (reference && (type == 'string' || type == 'number')) {
+            for (let i = 0; i < array.length; i++) {
+                const element  = array[i] as string | number;
+                const referenceTest = isOfUnion(itemName, element, false, reference);
+
+                if (!referenceTest.passed)
+                    return fail(referenceTest.error);
+            }
+        }
+
+        return pass();
+    }
+
+    return fail(arrayTest.error);
 }
 
 function isOfUnion(name: string, value: string | number, nullable: boolean, reference: TypeReference): ValidationResult {
@@ -200,4 +264,5 @@ export const lib = {
     ...sLib,
     isObject,
     evaluateObject,
+    evaluateArray,
 };

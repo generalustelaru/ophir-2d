@@ -40,6 +40,7 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
 
     public addChatEntry(chat: ChatEntry) {
         this.chat.addOne(chat);
+        this.trimChatList();
     }
 
     public updateName(color: PlayerColor, newName: string) {
@@ -56,6 +57,7 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
         this.chat.addOne({ color: as, name: this.serverName.get(), message });
+        this.trimChatList();
     }
 
     public isSpecialistAssignable(name: SpecialistName) {
@@ -95,5 +97,9 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
 
     public getNextPlayer() {
         return this.players.get().find(p => p.turnToPick) || null;
+    }
+
+    private trimChatList() {
+        (this.chat.get().length > 10) && this.chat.drawFirst();
     }
 }

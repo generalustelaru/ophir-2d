@@ -1,7 +1,7 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
-    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade,
+    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName,
 } from '~/shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -10,7 +10,8 @@ import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 
-export type Probable<T> = { err: true, message: string } | { err?: false, data: T };
+/** Return value wrapper with positive checks */
+export type Probable<T> = { err: true, ok: false, message: string } | { err: false, ok: true, data: T };
 
 export type WsClient = {
     socketId: string,
@@ -123,11 +124,26 @@ export type ServerConstants = {
     LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
     DEFAULT_NEW_STATE: EnrolmentState,
+    DEFAULT_NAMES: Array<string>
     BARRIER_CHECKS: BarrierChecks,
     PLAYER_IDS: Array<PlayerColor>,
     TRADE_DECK_A: Array<Trade>,
     TRADE_DECK_B: Array<Trade>,
     COST_TIERS: Array<ExchangeTier>,
+}
+
+export type Configuration = {
+    ADMIN_AUTH: string,
+    SERVER_NAME: string,
+    PLAYER_IDLE_MINUTES: number,
+    SESSION_DELETION_HOURS: number,
+    SINGLE_PLAYER: boolean,
+    NO_RIVAL: boolean,
+    RICH_PLAYERS: boolean,
+    FAVORED_PLAYERS: boolean,
+    CARGO_BONUS: 0|1|2|3,
+    SHORT_GAME: boolean,
+    INCLUDE: Array<SpecialistName>
 }
 
 export interface ObjectHandler<T> {
@@ -140,7 +156,7 @@ export interface SessionProcessor {
     updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
 }
 
-export type SavedSession = {
+export type SessionState = {
     sharedState: State,
     privateState: PrivateState | null
     backupStates: Array<BackupState> | null,

@@ -188,7 +188,6 @@ export class CanvasService extends Communicator {
                 this.sellGoodsModal?.update(state);
                 this.donateGoodsModal?.update(state);
                 this.endTurnModal?.update(state);
-                this.rivalControlModal?.update(state);
                 this.advisorModal?.update(state);
                 this.chancellorModal?.update(state);
                 this.peddlerModal?.update(state);

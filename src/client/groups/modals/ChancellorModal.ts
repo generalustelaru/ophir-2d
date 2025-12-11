@@ -7,7 +7,7 @@ import {
 import { CoinDial } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class ChancellorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private description: Konva.Text;
@@ -32,7 +32,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         );
 
         this.description = new Konva.Text({
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
             fontSize: 18,
             width: this.contentGroup.width(),
             align: 'center',
@@ -48,7 +48,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         this.symbolRow = new SymbolRow(
@@ -60,6 +60,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 y: 65,
             },
             (index: number) => this.switchToken(index),
+            true,
         );
 
         this.coinDial = new CoinDial(
@@ -139,7 +140,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             }
         });
 
-        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.chancellor });
+        this.symbolRow.update({ specifications: this.tradeSpecifications });
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
@@ -171,6 +172,6 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             });
         }
 
-        this.symbolRow.update({ specifications: this.tradeSpecifications, specialist: SpecialistName.chancellor });
+        this.symbolRow.update({ specifications: this.tradeSpecifications });
     }
 }

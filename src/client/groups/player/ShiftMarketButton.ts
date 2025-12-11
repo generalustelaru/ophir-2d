@@ -4,7 +4,7 @@ import { Coordinates, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class ShiftMarketButton extends Button implements Unique<DynamicGroupInterface<boolean>> {
 
@@ -24,9 +24,9 @@ export class ShiftMarketButton extends Button implements Unique<DynamicGroupInte
         this.card = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: COLOR.marketDarkOrange,
+            fill: HUES.marketDarkOrange,
             cornerRadius: 11,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 2,
         });
 
@@ -36,7 +36,7 @@ export class ShiftMarketButton extends Button implements Unique<DynamicGroupInte
             radius: 15,
             border: 1,
             borderFill: 'black',
-            fill: COLOR.coinSilver,
+            fill: HUES.coinSilver,
         });
 
         this.group.add(...[
@@ -50,7 +50,7 @@ export class ShiftMarketButton extends Button implements Unique<DynamicGroupInte
     }
 
     public update(mayShift: boolean) {
-        this.card.fill(mayShift ? COLOR.marketOrange : COLOR.marketDarkOrange);
+        this.card.fill(mayShift ? HUES.marketOrange : HUES.marketDarkOrange);
         mayShift ? this.enable() : this.disable();
     }
 }

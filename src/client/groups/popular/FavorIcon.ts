@@ -4,7 +4,7 @@ import clientConstants from '~/client_constants';
 import { ColorProfile, DynamicGroupInterface } from '~/client_types';
 import { Coordinates, Unique } from '~/shared_types';
 
-const { ICON_DATA, COLOR, LOCATION_TOKEN_DATA } = clientConstants;
+const { ICON_DATA, HUES, LOCATION_TOKEN_DATA } = clientConstants;
 
 export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
     private group: Konva.Group;
@@ -28,7 +28,7 @@ export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
         this.outerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_outer.shape,
             fill: ICON_DATA.favor_stamp_outer.fill,
-            stroke: COLOR.stampEdge,
+            stroke: HUES.stampEdge,
             strokeWidth: 2,
             scale: { x: scale, y: scale },
         });
@@ -36,14 +36,14 @@ export class FavorIcon implements Unique<DynamicGroupInterface<ColorProfile>> {
         this.innerStamp = new Konva.Path({
             data: ICON_DATA.favor_stamp_inner.shape,
             fill: ICON_DATA.favor_stamp_inner.fill,
-            stroke: COLOR.stampEdge,
+            stroke: HUES.stampEdge,
             strokeWidth: 1,
             scale: { x: scale, y: scale },
         });
 
         this.templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
-            fill: COLOR.stampEdge,
+            fill: HUES.stampEdge,
             scale: { x: scale + 1/6 * scale, y: 3/4 * scale },
             x: scale * 7,
             y: scale * 7,

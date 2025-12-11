@@ -4,7 +4,7 @@ import { Coordinates, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import clientConstants from '~/client/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class RetainedToken extends Button implements Unique<StaticGroupInterface> {
 
@@ -25,12 +25,12 @@ export class RetainedToken extends Button implements Unique<StaticGroupInterface
         callback && this.group.add(new Konva.Rect({
             width: 30,
             height: 30,
-            stroke: COLOR.boneWhite,
+            stroke: HUES.boneWhite,
             strokeWidth: 1,
             x: -3,
             y: -3,
             cornerRadius: 5,
-            fill: COLOR.modalLightBlue,
+            fill: HUES.modalLightBlue,
         }));
 
         callback && this.enable();

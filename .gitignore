@@ -1,5 +1,6 @@
 node_modules/
-public/
+dist/
 # svg/
 .env
 game-state.json
+db.json

@@ -4,7 +4,7 @@ import { DynamicGroupInterface } from '~/client_types';
 import { Button } from '../popular';
 import constants from '~/client_constants';
 
-const { ICON_DATA, COLOR } = constants;
+const { ICON_DATA, HUES } = constants;
 
 export class EndTurnButton extends Button implements Unique<DynamicGroupInterface<Player>> {
     private anchor: Konva.Path;
@@ -35,7 +35,7 @@ export class EndTurnButton extends Button implements Unique<DynamicGroupInterfac
 
         this.anchor = new Konva.Path({
             data: data.shape,
-            fill: isActivePlayer ? data.fill : COLOR.disabled,
+            fill: isActivePlayer ? data.fill : HUES.disabled,
             scale: { x: 1.5, y: 1.5 },
         });
 
@@ -49,7 +49,7 @@ export class EndTurnButton extends Button implements Unique<DynamicGroupInterfac
     public update(player: Player): void {
         const icon = player.isAnchored && !player.isHandlingRival ? ICON_DATA.anchored : ICON_DATA.not_anchored;
         this.anchor.data(icon.shape);
-        this.anchor.fill(player.isActive ? icon.fill : COLOR.disabled);
+        this.anchor.fill(player.isActive ? icon.fill : HUES.disabled);
         (player.isActive && player.isAnchored && !player.isHandlingRival) ? this.enable() : this.disable();
     }
 }

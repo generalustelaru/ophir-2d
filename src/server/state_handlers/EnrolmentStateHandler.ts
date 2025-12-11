@@ -7,7 +7,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
     private gameId: Readable<string>;
     private sessionPhase: Readable<Phase.enrolment>;
     private sessionOwner: Writable<PlayerColor | null>;
-    private availableSlots: ArrayWritable<PlayerColor>;
+    private mayDraft: Writable<boolean>;
     private players: ArrayWritable<PlayerEntry>;
     private chat: ArrayWritable<ChatEntry>;
 
@@ -16,7 +16,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
         this.gameId = readable(state.gameId);
         this.sessionPhase = readable(state.sessionPhase);
         this.sessionOwner = writable(state.sessionOwner);
-        this.availableSlots = arrayWritable(state.availableSlots);
+        this.mayDraft = writable(state.mayDraft);
         this.players = arrayWritable(state.players, 'color');
         this.chat = arrayWritable(state.chat);
     }
@@ -26,7 +26,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
             gameId: this.gameId.get(),
             sessionPhase: this.sessionPhase.get(),
             sessionOwner: this.sessionOwner.get(),
-            availableSlots: this.availableSlots.get(),
+            mayDraft: this.mayDraft.get(),
             players: this.players.get(),
             chat: this.chat.get(),
         };
@@ -34,6 +34,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
 
     public addChatEntry(chat: ChatEntry) {
         this.chat.addOne(chat);
+        this.trimChatList();
     }
 
     public getAllPlayers() {
@@ -42,7 +43,6 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
 
     public addPlayer(entry: PlayerEntry) {
         this.players.addOne(entry);
-        this.availableSlots.removeOne(entry.color);
     }
 
     public getSessionOwner() {
@@ -53,13 +53,19 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
         return this.sessionOwner.set(color);
     }
 
+    public allowDraft() {
+        this.mayDraft.set(true);
+    }
+
     public isRoomForNewPlayer() {
-        return Boolean(this.availableSlots.get().length);
+        return Boolean(this.players.get().length < 4);
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
         this.chat.addOne({ color: as, name: this.serverName.get(), message });
+        this.trimChatList();
     }
+
     public updateName(color: PlayerColor, newName: string) {
         const player = this.players.getOne(color);
 
@@ -82,5 +88,9 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
             p.color = newColor;
             return p;
         });
+    }
+
+    private trimChatList() {
+        (this.chat.get().length > 10) && this.chat.drawFirst();
     }
 }

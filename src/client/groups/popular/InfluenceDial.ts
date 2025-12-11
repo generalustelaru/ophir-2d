@@ -1,13 +1,13 @@
 import Konva from 'konva';
 import { DiceSix, Unique } from '~/shared_types';
 import { Coordinates } from '~/shared_types';
-import { Color, DynamicGroupInterface } from '~/client_types';
+import { Hue, DynamicGroupInterface } from '~/client_types';
 
 type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle|null }
 type PipData = Array<PipDataElement>
 type InfluenceDialUpdate = {
     value: DiceSix|false,
-    color: Color|null
+    color: Hue|null
 }
 export class InfluenceDial implements Unique<DynamicGroupInterface<InfluenceDialUpdate>> {
     private group: Konva.Group;
@@ -16,7 +16,7 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<InfluenceDial
 
     constructor(
         position: Coordinates,
-        color: Color,
+        hue: Hue,
     ) {
         this.group = new Konva.Group({
             width: 50,
@@ -28,7 +28,7 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<InfluenceDial
         this.body = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
-            fill: color,
+            fill: hue,
             cornerRadius: 10,
         });
         this.group.add(this.body);

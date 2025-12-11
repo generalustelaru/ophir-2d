@@ -2,9 +2,8 @@ import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { ShipToken, SymbolicInfluenceDial } from '../popular';
 import clientConstants from '~/client/client_constants';
-import { PlayState } from '~/shared_types';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class RivalControlModal extends ModalBase {
     private shipToken : ShipToken;
@@ -28,10 +27,10 @@ export class RivalControlModal extends ModalBase {
             fontFamily: 'Custom',
         });
 
-        this.shipToken = new ShipToken(
-            'Neutral',
-            { position: { x: 90, y: 95 } },
-        );
+        this.shipToken = new ShipToken({
+            combo: { light: HUES.Neutral, dark: HUES.darkNeutral, accent: HUES.shipBorder },
+            position: { x: 90, y: 95 },
+        });
 
         const ampersand = new Konva.Text({
             text: '&',
@@ -43,11 +42,11 @@ export class RivalControlModal extends ModalBase {
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         const rivalDie = new SymbolicInfluenceDial({
-            color: 'Neutral',
+            hue: HUES.Neutral,
             symbol: '?',
             position: { x: 190, y: 74 },
         });
@@ -58,12 +57,6 @@ export class RivalControlModal extends ModalBase {
             ampersand,
             rivalDie.getElement(),
         ]);
-    }
-
-    public update(state: PlayState) {
-        const player = state.players.find(p => p.isActive);
-
-        player && this.shipToken.update(COLOR[player.color]);
     }
 
     public show() {

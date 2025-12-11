@@ -9,7 +9,7 @@ type EnrolmentPanelUpdate = {
     localPlayerColor: PlayerColor | null,
 }
 
-const { COLOR } = clientConstants;
+const { HUES, PLAYER_HUES } = clientConstants;
 
 export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPanelUpdate>> {
     private group: Konva.Group | null;
@@ -30,7 +30,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
-            fill: COLOR.modalBlue,
+            fill: HUES.modalBlue,
 
         });
         elements.push(background);
@@ -41,7 +41,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         let drift = margin;
 
         playerColors.forEach(color => {
-            const optionCard = new ColorCard(stage, { x:drift, y:50 }, color);
+            const optionCard = new ColorCard(stage, { x:drift, y:50 }, color, PLAYER_HUES[color]);
 
             this.cards.push(optionCard);
             elements.push(optionCard.getElement());

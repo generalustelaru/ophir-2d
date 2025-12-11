@@ -4,7 +4,7 @@ import { Action, Unique } from '~/shared_types';
 import { RequestButton, CoinDial } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class UpgradeButton extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
 
@@ -20,7 +20,7 @@ export class UpgradeButton extends RequestButton implements Unique<DynamicGroupI
         this.background = new Konva.Rect({
             width: layout.width,
             height: layout.height,
-            fill: COLOR.upgradeBoxSilver,
+            fill: HUES.upgradeBoxSilver,
             cornerRadius: 15,
         });
 
@@ -32,7 +32,7 @@ export class UpgradeButton extends RequestButton implements Unique<DynamicGroupI
             text: '+',
             fontSize: 30,
             fontFamily: 'Calibri',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         const cargoIcon = new Konva.Rect({
@@ -41,7 +41,7 @@ export class UpgradeButton extends RequestButton implements Unique<DynamicGroupI
             height: 30,
             width: 25,
             fill: 'black',
-            stroke: COLOR.stampEdge,
+            stroke: HUES.stampEdge,
             hitStrokeWidth: 2,
             cornerRadius: 5,
             strokeWidth: 1,
@@ -57,7 +57,7 @@ export class UpgradeButton extends RequestButton implements Unique<DynamicGroupI
 
     public update(canUpgrade: boolean): void {
         this.setEnabled(canUpgrade);
-        this.background.fill(canUpgrade ? COLOR.boneWhite : COLOR.upgradeBoxSilver);
+        this.background.fill(canUpgrade ? HUES.boneWhite : HUES.upgradeBoxSilver);
     }
 
     public getElement(): Konva.Group {

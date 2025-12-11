@@ -5,7 +5,7 @@ import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone } from './SeaZone';
 
-const { COLOR, SHIP_DATA } = clientConstants;
+const { PLAYER_HUES, SHIP_DATA } = clientConstants;
 // TODO: Since all ships on the board now share similar logic, check and see if it can be shared/inherited
 type RemoteShipUpdate = {
     remotePlayer: Player,
@@ -40,8 +40,9 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
         )!;
 
         this.ship = new ShipToken(
-            player.color,
-            { stroke: player.isActive ? COLOR.activeShipBorder : COLOR.shipBorder },
+            {
+                combo: PLAYER_HUES[player.color].muted,
+            },
         );
 
         this.group.on('mouseenter', () => {
@@ -115,7 +116,6 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
 
         this.group.x(positionUpdate.x);
         this.group.y(positionUpdate.y);
-        this.ship.update(remotePlayer.isActive ? COLOR.activeShipBorder : COLOR.shipBorder);
         this.group.draggable(isDraggable);
     };
 

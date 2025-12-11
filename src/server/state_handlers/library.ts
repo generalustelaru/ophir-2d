@@ -110,7 +110,7 @@ export type ArrayWritable<T> = {
     updateOne: (reference: string|number, fn: (val: T) => T) => void,
     removeOne: (reference: string|number) => void,
     drawFirst: () => T | null,
-    // drawLast: () => T,
+    drawLast: () => T | null,
     overwrite: (array: Array<T>) => void,
     clear: () => void,
     reset: () => void,
@@ -172,9 +172,14 @@ export function arrayWritable<T>(initialArray: Array<T>, key?: keyof T): ArrayWr
             });
         },
         drawFirst: () => {
-            const first = array.get().length ? array.get()[0] : null;
+            const first = array.get()[0] || null;
             array.update(a => { a.shift(); return a; });
             return first;
+        },
+        drawLast: () => {
+            const last = array.get()[array.get().length - 1] || null;
+            array.update(a => { a.pop(); return a; });
+            return last;
         },
         overwrite: (newArr) => {
             array.set(newArr);

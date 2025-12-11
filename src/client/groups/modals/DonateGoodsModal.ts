@@ -6,7 +6,7 @@ import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
 import localState from '~/client/state';
 
-const { COLOR } = clientConstants;
+const { HUES } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private market: MarketOffer | null = null;
@@ -29,7 +29,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
 
         const description = new Konva.Text({
             text: 'Donate these goods for favor and VP?',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
             fontSize: 18,
             width: this.contentGroup.width(),
             align: 'center',
@@ -46,6 +46,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
                 y: 65,
             },
             null,
+            false,
         );
 
         const colon = new Konva.Text({
@@ -56,7 +57,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             fontSize: 38,
             fontFamily: 'Custom',
             fontStyle: '700',
-            fill: COLOR.boneWhite,
+            fill: HUES.boneWhite,
         });
 
         const rewardX = 195;
@@ -100,7 +101,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
         const specifications = trade.request.map(requested => {
             return { name: requested, isOmited: false, isLocked: true };
         });
-        this.symbolRow.update({ specifications, specialist: null });
+        this.symbolRow.update({ specifications });
         this.victoryPointDial.update(trade.reward.favorAndVp);
 
         this.open({ action: Action.donate_goods, payload: { slot } });

@@ -4,7 +4,7 @@ import { Player, Coordinates, PlayerColor, Action, Unique } from '~/shared_types
 import { RequestButton } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { CARGO_ITEM_DATA, COLOR } = clientConstants;
+const { CARGO_ITEM_DATA, HUES } = clientConstants;
 
 export class SpecialtyGoodButton extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
 
@@ -29,7 +29,7 @@ export class SpecialtyGoodButton extends RequestButton implements Unique<Dynamic
         this.isLocalPlayer = isLocalPlayer;
         this.background = new Konva.Rect({
             ...size,
-            fill: isLocalPlayer ? COLOR[`dark${player.color}`] : undefined,
+            fill: isLocalPlayer ? HUES[`dark${player.color}`] : undefined,
             cornerRadius: 5,
             stroke: isLocalPlayer && specialty ? 'white' : undefined,
             strokeWidth: 2,
@@ -58,8 +58,8 @@ export class SpecialtyGoodButton extends RequestButton implements Unique<Dynamic
     public update(maySell: boolean): void {
         if (this.isLocalPlayer) {
             this.background.fill( maySell
-                ? COLOR.marketOrange
-                : COLOR[`dark${this.playerColor}`],
+                ? HUES.marketOrange
+                : HUES[`dark${this.playerColor}`],
             );
         }
         this.setEnabled(maySell);

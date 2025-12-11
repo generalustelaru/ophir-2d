@@ -4,25 +4,16 @@ import {
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity, Unique,
 } from '~/shared_types';
-import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor, Probable } from '~/server_types';
+import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor, Probable, Configuration } from '~/server_types';
 import serverConstants from '~/server_constants';
 import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
-import {
-    SERVER_NAME, SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION,
-    INCLUDE, NO_RIVAL,
-} from '../configuration';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 import { HexCoordinates } from '~/client_types';
 import { validator } from '../services/validation/ValidatorService';
 import lib from './library';
-
-// @ts-ignore
-const activeKeys = Object.entries({ SINGLE_PLAYER, CARGO_BONUS, RICH_PLAYERS, FAVORED_PLAYERS, SHORT_GAME, IDLE_CHECKS, PERSIST_SESSION, INCLUDE, NO_RIVAL }).reduce((acc, [k, v]) => { if (v) acc[k] = v; return acc; }, {}); // eslint-disable-line max-len
-console.log('Active keys:');
-console.log(activeKeys);
 
 const {
     BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS, SPECIALISTS,
@@ -31,13 +22,17 @@ const {
 export class SetupProcessor implements Unique<SessionProcessor> {
 
     private setupState: SetupStateHandler;
+    private config: Configuration;
 
-    constructor(digest: SetupDigest) {
-
+    constructor(
+        digest: SetupDigest,
+        configuration: Configuration,
+    ) {
+        this.config = { ...configuration };
         const playerEntries = tools.getCopy(digest.players);
         const playerCount = playerEntries.length;
 
-        if (playerCount < 2 && !SINGLE_PLAYER)
+        if (playerCount < 2 && !configuration.SINGLE_PLAYER)
             throw new Error('Not enough players to start a game.');
 
         const barriers = this.determineBarriers();
@@ -51,12 +46,14 @@ export class SetupProcessor implements Unique<SessionProcessor> {
                 throw new Error('Not enough specialist cards!');
 
             const randomized: Array<SpecialistData> = lib.randomize(deck);
+            const { INCLUDE: includees } = configuration;
+
             if (
-                Array.isArray(INCLUDE)
-                && INCLUDE.length
-                && INCLUDE.every((s: unknown) => typeof s == 'string')
+                Array.isArray(includees)
+                && includees.length
+                && includees.every((s: unknown) => typeof s == 'string')
             ) {
-                const toInclude = [...INCLUDE];
+                const toInclude = [...includees];
                 const selectionPool = deck.filter(s => {
                     return toInclude.includes(s.name);
                 });
@@ -84,7 +81,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
 
         const playerDrafts = this.draftPlayers(playerEntries);
         this.setupState = new SetupStateHandler(
-            SERVER_NAME,
+            configuration.SERVER_NAME,
             {
                 gameId: digest.gameId,
                 sessionPhase: Phase.setup,
@@ -211,7 +208,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         const fluctuations = this.getMarketFluctuations();
 
         const playStateHandler = new PlayStateHandler(
-            SERVER_NAME,
+            this.config.SERVER_NAME,
             {
                 gameId: setupState.gameId,
                 sessionPhase: Phase.play,
@@ -226,7 +223,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
                 temple: {
                     maxLevel: privateStateHandler.getTempleLevelCount(),
                     levelCompletion: 0,
-                    currentLevel: SHORT_GAME ? privateStateHandler.getTempleLevelCount() - 1 : 0,
+                    currentLevel: this.config.SHORT_GAME ? privateStateHandler.getTempleLevelCount() - 1 : 0,
                     donations: [],
                 },
                 setup: {
@@ -249,7 +246,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         return lib.pass({
             playState: playStateHandler,
             privateState: privateStateHandler,
-            backupState: new BackupStateHandler(SERVER_NAME, null),
+            backupState: new BackupStateHandler(this.config.SERVER_NAME, null),
         });
     };
 
@@ -408,7 +405,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
 
             return playerDto;
         });
-
+        const { RICH_PLAYERS, FAVORED_PLAYERS, CARGO_BONUS } = this.config;
         return {
             players: players.map(player => {
                 if (RICH_PLAYERS)
@@ -446,7 +443,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         moveRules: Array<DestinationPackage>,
     ): Rival {
 
-        if (!isIncluded || NO_RIVAL)
+        if (!isIncluded || this.config.NO_RIVAL)
             return { isIncluded: false };
 
         const marketZone = mapPairings.zoneByLocation['market'];

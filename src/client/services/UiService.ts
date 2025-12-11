@@ -3,11 +3,9 @@ import { Communicator } from './Communicator';
 import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
-import { PlayerCountables } from '~/server_types';
 import clientConstants from '~/client_constants';
 import { EventType } from '~/client_types';
 
-const SINGLE_PLAYER = Boolean(process.env.SINGLE_PLAYER === 'true');
 export const UserInterface = new class extends Communicator {
 
     private draftButton: Button;
@@ -66,7 +64,7 @@ export const UserInterface = new class extends Communicator {
 
         setTimeout(() => {
             this.chatInput.element.focus();
-        }, 5);
+        }, 1000);
     };
 
     private processDraft = (): void => {
@@ -116,9 +114,9 @@ export const UserInterface = new class extends Communicator {
     }
 
     private updateAsEnrolment(state: EnrolmentState): void {
-        switch (state.availableSlots.length) {
-            case 4: this.handleEmptyState(); break;
-            case 0: this.handleFullState(state); break;
+        switch (state.players.length) {
+            case 0: this.handleEmptyState(); break;
+            case 4: this.handleFullState(state); break;
             default: this.handleCreatedState(state);
         }
     }
@@ -152,14 +150,15 @@ export const UserInterface = new class extends Communicator {
     private handleCreatedState(state: EnrolmentState): void {
 
         if (!localState.playerColor)
-            return this.setInfo('A game is waiting for you');
+            return this.setInfo('Select a color to join this session.');
 
         if (state.sessionOwner === localState.playerColor) {
+            this.resetButton.enable();
 
-            if (state.players.length > 1 || SINGLE_PLAYER) {
-                this.enableElements(this.draftButton, this.resetButton);
+            if (state.mayDraft) {
+                this.draftButton.enable();
 
-                return this.setInfo('You may start whenever you want!');
+                return this.setInfo('You may begin draft whenever you want!');
             }
 
             return this.setInfo('Waiting for more players to join...');
@@ -169,7 +168,7 @@ export const UserInterface = new class extends Communicator {
     }
 
     private handleEmptyState(): void {
-        return this.setInfo('You may create the game');
+        return this.setInfo('You may claim ownership of this session.');
     }
 
     private handleFullState(state: EnrolmentState): void {
@@ -180,7 +179,7 @@ export const UserInterface = new class extends Communicator {
         if (localState.playerColor === state.sessionOwner) {
             this.enableElements(this.draftButton, this.resetButton);
 
-            return this.setInfo('You may start whenever you want');
+            return this.setInfo('You may begin draft whenever you want!');
         }
 
         return this.setInfo('The game might start at any time.');
@@ -209,8 +208,8 @@ export const UserInterface = new class extends Communicator {
         this.chatMessages.innerHTML = chat.map(entry => {
             const name = entry.name ? `${entry.name}: ` : '';
             const message = entry.message;
-            const color = entry.color ? clientConstants.COLOR[entry.color] : 'white';
-            return `<span style="color:${color}; font-weight: bold">${name}</span>${message}</br>`;
+            const hue = entry.color ? clientConstants.PLAYER_HUES[entry.color].vivid.light : 'white';
+            return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }

@@ -1,0 +1,33 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css" />
+    <title>Ophir 2D</title>
+</head>
+<body>
+    <script>
+        (() => {
+            const localData = (() => {
+                const str = localStorage.getItem('localState');
+                if (!str)
+                    return null;
+                try {
+                    return JSON.parse(str);
+                } catch (error) {
+                    console.log({error});
+                    return null;
+                }
+            })();
+
+            if (localData && ('gameId' in localData)) {
+                fetch(`/find?gameId=${localData.gameId}`).then(response => {
+                    window.location.href = response.status == 200 ? `/${localData.gameId}` : '/new';
+                });
+            } else {
+                window.location.href = '/new';
+            }
+        })();
+    </script>
+</body>
+</html>

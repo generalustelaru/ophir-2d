@@ -1,7 +1,7 @@
 import {
     ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission, EnrolmentResponse, NewNameTransmission, TurnNotificationTransmission, RivalControlTransmission,
-    ForceTurnNotificationTransmission, ColorChangeResponse,
+    ForceTurnNotificationTransmission, ColorChangeResponse, NotFoundTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -16,7 +16,7 @@ export class CommunicationService extends Communicator {
     }
 
     public createConnection(url: string) {
-        this.socket = new WebSocket(url);
+        this.socket = new WebSocket(`${url}?gameId=${localState.gameId}`);
 
         this.socket.onopen = () => {
             console.info('Connection established.');
@@ -65,6 +65,9 @@ export class CommunicationService extends Communicator {
                     break;
                 case this.isForceTurnNotification(data):
                     this.createEvent( { type: EventType.force_turn, detail: null });
+                    break;
+                case this.isNotFoundTransmission(data):
+                    this.createEvent({ type: EventType.renew, detail: null });
                     break;
                 case this.isVictoryPointsTransmission(data):
                     this.createEvent({ type: EventType.vp_transmission, detail: data });
@@ -133,6 +136,10 @@ export class CommunicationService extends Communicator {
 
     private isForceTurnNotification(data: ServerMessage): data is ForceTurnNotificationTransmission {
         return 'forceTurn' in data;
+    }
+
+    private isNotFoundTransmission(data: ServerMessage): data is NotFoundTransmission {
+        return 'notFound' in data;
     }
 
     private isEnrolmentApprovalTransmission(data: ServerMessage): data is EnrolmentResponse {
