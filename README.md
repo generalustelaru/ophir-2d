@@ -34,7 +34,7 @@ You can set up and run a server fairly easily on your local network.
    - Enter the project folder, *\ophir-2d* (use **Bash** or **Git Bash** to run `make` commands)
    - Run `make install` to have the server set up and ready.
    - If that doesn't work for you, follow these steps:
-      - Create folders */dist*, */dist/public*, then copy the contents of *src/client/static/* into *dist/public*.
+      - Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
       - Create a copy of *db_template.json* and rename it as *db.json*.
       - Create a copy of *.env.example* and rename it as *.env*.
       - Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:

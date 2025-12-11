@@ -41,11 +41,11 @@ static:
 ifeq ($( -commandO"S),Windows_NT)
 	powershell -command "if (-not (Test-Path 'dist')) { New-Item -ItemType Directory -Path 'dist'; New-Item -ItemType Directory -Path 'dist/public' }"
 	powershell -command "if (Test-Path 'dist/*') { Remove-Item -Recurse -Force dist/* }"
-	powershell -command "Copy-Item -Recurse -Force src/client/static/* dist/public/"
+	powershell -command "Copy-Item -Recurse -Force src/static/* dist/public/"
 else
 	if [ ! -d 'dist' ]; then mkdir 'dist'; mkdir 'dist/public'; fi
 	if [ -f 'dist/*' ]; then rm -r dist/*; fi
-	cp -r src/client/static/* dist/public/
+	cp -r src/static/* dist/public/
 endif
 
 check:
