@@ -6,7 +6,6 @@ import {
 } from '~/shared_types';
 import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor, Probable, Configuration } from '~/server_types';
 import serverConstants from '~/server_constants';
-import tools from '../services/ToolService';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
@@ -29,7 +28,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         configuration: Configuration,
     ) {
         this.config = { ...configuration };
-        const playerEntries = tools.getCopy(digest.players);
+        const playerEntries = lib.getCopy(digest.players);
         const playerCount = playerEntries.length;
 
         if (playerCount < 2 && !configuration.SINGLE_PLAYER)
@@ -39,7 +38,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         const mapPairings = this.determineLocations();
 
         const specialists = ((): Array<SelectableSpecialist> => {
-            const deck = tools.getCopy(SPECIALISTS);
+            const deck = lib.getCopy(SPECIALISTS);
             const required = playerCount + 1;
 
             if (required > deck.length)
@@ -304,7 +303,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
 
     private produceMoveRules(barrierIds: Array<BarrierId>): Array<DestinationPackage> {
 
-        return tools.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
+        return lib.getCopy(DEFAULT_MOVE_RULES).map(moveRule => {
             const navigatorAccess: Array<ZoneName> = [];
 
             barrierIds.forEach(barrierId => {
@@ -362,7 +361,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         players: Array<Player>,
         startingPlayer: Player
     } {
-        const initialRules = tools.getCopy(moveRules[0]);
+        const initialRules = lib.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
 
         const players: Array<Player> = selections.map(s => {
@@ -542,7 +541,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
 
     // MARK: Exchange
     private filterCostTiers(playerCount: number): Array<ExchangeTier> {
-        const tiers = tools.getCopy(COST_TIERS);
+        const tiers = lib.getCopy(COST_TIERS);
 
         return tiers.filter(
             level => !level.skipOnPlayerCounts.includes(playerCount),

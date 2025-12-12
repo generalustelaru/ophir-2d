@@ -1,12 +1,12 @@
 import { DB_PORT } from '../../environment';
-import { Configuration, Probable, SessionState } from '../server_types';
+import { AuthenticationForm, Configuration, Probable, RegistrationForm, SessionState, User } from '../server_types';
 import { validator } from './validation/ValidatorService';
-import lib from '../action_processors/library';
-
+import lib from './library';
 class DatabaseService {
 
     private dbAddress: string = `http://localhost:${DB_PORT}`;
 
+    // MARK: CONFIG
     public async getConfig(): Promise<Probable<Configuration>> {
         try {
             const response = await fetch(`${this.dbAddress}/config`);
@@ -31,6 +31,7 @@ class DatabaseService {
         }
     }
 
+    // MARK: SESSIONS
     public async addGameState(savedSession: SessionState): Promise<Probable<true>> {
         const id = savedSession.sharedState.gameId;
 
@@ -139,6 +140,99 @@ class DatabaseService {
         } catch (error) {
             return lib.fail(lib.getErrorBrief(error));
         };
+    }
+
+    // MARK: USERS
+    public async registerUser(query: RegistrationForm): Promise<Probable<true>> {
+        const { name, email, password, pwRetype } = query;
+
+        if (password !== pwRetype) {
+            return lib.fail('Password fields do not match');
+        }
+
+        try {
+            const userResponse = await fetch(`${this.dbAddress}/users/${email}`);
+
+            if (userResponse.ok) {
+                return lib.fail('User w/ the same email is already registered.');
+            }
+
+            const newUser: User = {
+                id: email,
+                name,
+                hash: lib.toHash(password),
+                sessionToken: null,
+            };
+
+            const response = await fetch(
+                `${this.dbAddress}/users`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newUser),
+                },
+            );
+
+            return response.ok
+                ? lib.pass(true)
+                : lib.fail('Could not save user.');
+
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
+
+    public async authenticateUser(query: AuthenticationForm): Promise<Probable<true>> {
+        try {
+            const response = await fetch(`${this.dbAddress}/users/${query.email}`);
+
+            if (response.ok) {
+                const user = await response.json() as User;
+                const pwHash = lib.toHash(query.password);
+
+                if (pwHash != user.hash)
+                    return lib.fail('Wrong password.');
+
+                return lib.pass(true);
+            }
+
+            return lib.fail('Could not find user.');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
+
+    public async setSessionToken(userEmail: string, token: string): Promise<Probable<true>> {
+        try {
+            const response = await fetch(
+                `${this.dbAddress}/users/${userEmail}`,
+                {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionToken: token }),
+                },
+            );
+
+            return response.ok ? lib.pass(true) : lib.fail('Could not find user.');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
+
+    public async getUser(userEmail: string): Promise<Probable<User>> {
+        try {
+            const response = await fetch(`${this.dbAddress}/users/${userEmail}`);
+
+            if (response.ok) {
+                const user = await response.json();
+
+                return lib.pass(user);
+            }
+
+            return lib.fail('User was not found');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
     }
 }
 

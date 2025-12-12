@@ -1,6 +1,5 @@
 import { ChatEntry, Coordinates, NeutralColor, Player, PlayerColor, Rival } from '~/shared_types';
 import { BackupState, Probable } from '../server_types';
-import tools from '../services/ToolService';
 import lib from '../action_processors/library';
 
 export class BackupStateHandler {
@@ -19,7 +18,7 @@ export class BackupStateHandler {
     }
 
     public addState(bundle: BackupState) {
-        this.backupState.push(tools.getCopy(bundle));
+        this.backupState.push(lib.getCopy(bundle));
     }
 
     public wipeBackup() {
@@ -32,7 +31,7 @@ export class BackupStateHandler {
         if (!bundle)
             return lib.fail('Backup does not exist!');
 
-        return lib.pass(tools.getCopy(bundle));
+        return lib.pass(lib.getCopy(bundle));
     }
 
     public addChat(chat: ChatEntry) {

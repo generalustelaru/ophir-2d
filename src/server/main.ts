@@ -1,14 +1,14 @@
-import process from 'process';
+import { AuthenticationForm, Configuration, CookieName, RegistrationForm, SessionState } from '~/server_types';
+import { ServerMessage, ClientRequest, PlayState, Action } from '~/shared_types';
+import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
+import dbService from './services/DatabaseService';
 import { WebSocketServer, WebSocket } from 'ws';
-import { ServerMessage, ClientRequest, PlayState, Phase, Action } from '~/shared_types';
-import { Configuration, SessionState } from '~/server_types';
 import { GameSession } from './GameSession';
 import { randomUUID } from 'crypto';
-import { validator } from './services/validation/ValidatorService';
-import tools from './services/ToolService';
-import dbService from './services/DatabaseService';
+import sLib from './server_lib';
 import readline from 'readline';
+import process from 'process';
 import path from 'path';
 
 import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT } from '../environment';
@@ -93,40 +93,83 @@ app.get('/probe', (req: Request, res: Response) => {
 app.get('/', (req: Request, res: Response) => {
     console.info('Unknown visitor', { ip: req.ip });
 
-    res.sendFile(path.join(__dirname,'public', 'session-check.html'));
+    res.sendFile(path.join(__dirname,'public', 'index.html'));
 });
 
-app.get('/find', (req: Request, res: Response) => {
-    const gameId = String(req.query.gameId);
-    console.info('Visitor seeks possible gameId', { ip: req.ip, gameId });
+app.get('/register', (req: Request, res: Response) => {
+    const query = req.query as RegistrationForm;
 
-    if (playGroups.has(gameId)){
-        res.status(200);
-    } else {
-        reviveGameSession(gameId).then(session => {
-            if (!session) {
-                res.status(404);
-            } else {
-                playGroups.set(gameId, { session, sockets: new Map() });
-                res.status(200);
-            }
-        });
-    }
-    res.send();
+    dbService.registerUser(query).then(registration => {
+
+        if (registration.err) {
+            res.status(400).send(registration.message);
+        } else {
+            const cookies = sLib.produceCookieArgs(false, query.email);
+            const tokenCookie = cookies[CookieName.authToken];
+            dbService.setSessionToken(query.email, tokenCookie.value).then(patch => {
+
+                if (patch.err) {
+                    res.status(500).send(patch.message);
+                } else {
+                    console.info('New registration',{ email: query.email });
+                    for (const cookieName in cookies) {
+                        const { value, options } = cookies[cookieName as CookieName];
+                        res.cookie(cookieName, value, options);
+                    }
+                    res.redirect('/new');
+                }
+            });
+        }
+    });
+});
+
+app.get('/login', (req: Request, res: Response) => {
+    const query = req.query as AuthenticationForm;
+
+    dbService.authenticateUser(query).then(result => {
+
+        if (result.err) {
+            res.status(400).send(result.message);
+        } else {
+            const cookies = sLib.produceCookieArgs(false, query.email);
+            const tokenCookie = cookies[CookieName.authToken];
+            dbService.setSessionToken(query.email, tokenCookie.value).then(patch => {
+
+                if (patch.err) {
+                    res.status(500).send(patch.message);
+                } else {
+                    console.info('User logged in',{ email: query.email });
+                    for (const cookieName in cookies) {
+                        const { value, options } = cookies[cookieName as CookieName];
+                        res.cookie(cookieName, value, options);
+                    }
+                    res.redirect('/new');
+                }
+            });
+        }
+    });
 });
 
 app.get('/new', (req: Request, res: Response) => {
     console.info('Visitor calls for new session', { ip: req.ip });
 
-    createGameSession().then(session => {
-        if (session) {
-            const gameId = session.getGameId();
-            const group = { session, sockets: new Map() };
-            playGroups.set(gameId, group);
+    verifyAuthenticity(req).then(isAuthenticated => {
 
-            res.redirect(`/${gameId}`);
+        if (isAuthenticated) {
+            createGameSession().then(session => {
+
+                if (session) {
+                    const gameId = session.getGameId();
+                    const group = { session, sockets: new Map() };
+                    playGroups.set(gameId, group);
+
+                    res.redirect(`/${gameId}`);
+                } else {
+                    res.status(500).send('Server has encountered a problem :(');
+                }
+            });
         } else {
-            res.status(500).send('Server has encountered a problem :(');
+            res.redirect('/');
         }
     });
 });
@@ -137,16 +180,26 @@ app.get('/:id', (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
 
-    if (playGroups.has(gameId))
-        return res.sendFile(path.join(__dirname,'public', 'index.html'));
+    verifyAuthenticity(req).then(isAuthenticated => {
 
-    reviveGameSession(gameId).then(session => {
-        if (!session)
-            return res.redirect('/new');
+        if (isAuthenticated) {
 
-        playGroups.set(gameId, { session, sockets: new Map() });
+            if (playGroups.has(gameId)) {
+                res.sendFile(path.join(__dirname,'public', 'game.html'));
+            } else {
+                reviveGameSession(gameId).then(session => {
 
-        return res.sendFile(path.join(__dirname,'public', 'index.html'));
+                    if (session) {
+                        playGroups.set(gameId, { session, sockets: new Map() });
+                        res.sendFile(path.join(__dirname,'public', 'game.html'));
+                    } else {
+                        res.redirect('/new');
+                    }
+                });
+            }
+        } else {
+            res.redirect('/');
+        }
     });
 });
 
@@ -158,16 +211,14 @@ type PlayGroup = {
 type SocketReference = {
     socket: WebSocket,
     gameId: string,
+    authToken: string,
 }
 
 const socketServer = new WebSocketServer({ port: WS_PORT });
 const socketRefs: Map<string, SocketReference> = new Map();
 const playGroups: Map<string, PlayGroup> = new Map();
 
-socketServer.on('connection', function connection(socket,req) {
-    const socketId = randomUUID();
-    socket.send(JSON.stringify({ socketId }));
-
+socketServer.on('connection', function connection(socket, req) {
     const params = req.url ? new URL(req.url, `http://${req.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
 
@@ -181,27 +232,16 @@ socketServer.on('connection', function connection(socket,req) {
     if (!playGroup)
         return transmit(socket, { notFound: null });
 
+    const socketId = randomUUID();
+    const { authToken } = sLib.parseCookies(req.headers.cookie);
+    socketRefs.set(socketId, { gameId, socket, authToken });
     playGroup.sockets.set(socketId, socket);
     console.log('websocket added to play group');
 
-    const reference = { gameId, socket };
-    socketRefs.set(socketId, reference);
-
-    const sessionState = playGroup.session.getCurrentState();
-    const { sharedState: state } = sessionState;
-
-    setTimeout(() => {
-        if (state.sessionPhase == Phase.play) {
-            const { players } = state;
-            const activePlayer = players.find(p => p.isActive);
-
-            if (activePlayer?.socketId == socketId)
-                transmit(socket, { turnStart: null });
-        }
-    }, 2000);
+    socket.send(JSON.stringify({ socketId }));
 
     socket.on('message', function incoming(req: string) {
-        const clientRequest = validator.validateClientRequest(tools.parse(req));
+        const clientRequest = validator.validateClientRequest(JSON.parse(req));
 
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
@@ -416,5 +456,24 @@ async function getGameSessionInstance(savedSession: SessionState | null): Promis
 
         return null;
     }
+}
+
+async function verifyAuthenticity(request: Request): Promise<boolean> {
+    const { authToken, userEmail } = sLib.parseCookies(request.headers.cookie);
+    const result = await dbService.getUser(userEmail);
+
+    if (result.err) {
+        console.error(result.message);
+        return false;
+    }
+
+    const user = result.data;
+
+    if (user.sessionToken != authToken) {
+        console.error('Unauthorized request', { headers: request.headers });
+        return false;
+    }
+
+    return true;
 }
 

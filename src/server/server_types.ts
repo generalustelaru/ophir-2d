@@ -8,13 +8,19 @@ import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
+import { UUID } from 'crypto';
 
 
 /** Return value wrapper with positive checks */
 export type Probable<T> = { err: true, ok: false, message: string } | { err: false, ok: true, data: T };
 
+export enum CookieName {
+    authToken = 'authToken',
+    userEmail = 'userEmail',
+}
+
 export type WsClient = {
-    socketId: string,
+    socketId: UUID,
     gameId: string | null,
     socket: WebSocket
 }
@@ -157,7 +163,26 @@ export interface SessionProcessor {
 }
 
 export type SessionState = {
-    sharedState: State,
+    sharedState: State
     privateState: PrivateState | null
-    backupStates: Array<BackupState> | null,
+    backupStates: Array<BackupState> | null
+}
+
+export type RegistrationForm = {
+    name: string,
+    email: string,
+    password: string,
+    pwRetype: string,
+}
+
+export type AuthenticationForm = {
+    email: string,
+    password: string,
+}
+
+export type User = {
+    id: string,
+    name: string,
+    hash: string,
+    sessionToken: string | null,
 }

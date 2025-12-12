@@ -1,4 +1,6 @@
-import { Probable } from './server_types';
+import { CookieOptions } from 'express';
+import { CookieName, Probable } from './server_types';
+import crypto from 'crypto';
 
 function pass<T>(data: T): Probable<T> {
     return { err: false, ok: true, data };
@@ -22,11 +24,62 @@ function randomize<T>(array: Array<T>): Array<T> {
     );
 }
 
+type CookieArgs = {
+    value: string,
+    options: CookieOptions
+}
+function produceCookieArgs(isSecure: boolean, clientEmail: string): Record<CookieName, CookieArgs> {
+
+    return {
+        [CookieName.authToken]: {
+            value: crypto.randomBytes(32).toString('hex'),
+            options: {
+                httpOnly: true,
+                secure: isSecure,
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/',
+            },
+        },
+        [CookieName.userEmail]: {
+            value: clientEmail,
+            options: {
+                httpOnly: true,
+                secure: isSecure,
+                maxAge: 24 * 60 * 60 * 1000,
+                path: '/',
+            },
+        },
+    };
+}
+/**
+ * @param obj - JSON-compatible object to copy
+*/
+function getCopy<O extends object>(obj: O): O {
+
+    return JSON.parse(JSON.stringify(obj));
+}
+
+function parseCookies(cookieString?: string): Record<string, string> {
+    const cookies: Record<string, string> = {};
+
+    if (cookieString) {
+        cookieString.split(';').forEach(cookie => {
+            const [key, value] = cookie.trim().split('=');
+            cookies[key] = value;
+        });
+    }
+
+    return cookies;
+}
+
 const sLib = { // TODO: Maybe rename this to common_library (file too)
     pass,
     fail,
     checkConditions,
     randomize,
+    produceCookieArgs,
+    parseCookies,
+    getCopy,
 };
 
 export default sLib;
