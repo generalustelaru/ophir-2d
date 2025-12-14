@@ -45,6 +45,8 @@ class DatabaseService {
                 },
             );
 
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             return response.ok
                 ? lib.pass(true)
                 : lib.fail('Failed to add game state.')
@@ -66,6 +68,8 @@ class DatabaseService {
                     body: JSON.stringify({ id, timeStamp: Date.now(), data: savedSession }),
                 },
             );
+
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             return response.ok
                 ? lib.pass(true)
@@ -99,8 +103,11 @@ class DatabaseService {
     public async deleteGameState(gameId: string): Promise<Probable<true>> {
         try {
             const response = await fetch(
-                `${this.dbAddress}/sessions/${gameId}`, { method: 'DELETE' },
+                `${this.dbAddress}/sessions/${gameId}`,
+                { method: 'DELETE' },
             );
+
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             return response.ok
                 ? lib.pass(true)
@@ -161,7 +168,7 @@ class DatabaseService {
                 id: email,
                 name,
                 hash: lib.toHash(password),
-                sessionToken: null,
+                authToken: null,
             };
 
             const response = await fetch(
@@ -172,6 +179,8 @@ class DatabaseService {
                     body: JSON.stringify(newUser),
                 },
             );
+
+            await new Promise(resolve => setTimeout(resolve, 100));
 
             return response.ok
                 ? lib.pass(true)
@@ -202,20 +211,23 @@ class DatabaseService {
         }
     }
 
-    public async setSessionToken(userEmail: string, token: string): Promise<Probable<true>> {
+    public async setAuthToken(userEmail: string, token: string): Promise<Probable<true>> {
         try {
             const response = await fetch(
                 `${this.dbAddress}/users/${userEmail}`,
                 {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionToken: token }),
+                    body: JSON.stringify({ authToken: token }),
                 },
             );
 
+            await new Promise(resolve => setTimeout(resolve, 100));
+
             return response.ok ? lib.pass(true) : lib.fail('Could not find user.');
         } catch (error) {
-            return lib.fail(lib.getErrorBrief(error));
+            console.error(error);
+            return lib.fail(`${lib.getErrorBrief(error)}`);
         }
     }
 

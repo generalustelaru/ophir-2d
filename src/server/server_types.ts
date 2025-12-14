@@ -184,5 +184,5 @@ export type User = {
     id: string,
     name: string,
     hash: string,
-    sessionToken: string | null,
+    authToken: string | null,
 }

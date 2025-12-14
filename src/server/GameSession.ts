@@ -13,7 +13,6 @@ import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';
 import serverConstants from '~/server_constants';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
-// import { SERVER_NAME, SINGLE_PLAYER  } from '../server/configuration';
 import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
@@ -144,7 +143,7 @@ export class GameSession {
         const match = this.matchRequestToPlayer(request);
 
         if (match.err) {
-            console.info('Resetting client;', match.message);
+            console.error(match.message);
 
             return this.issueNominalResponse({ resetFrom: this.config.SERVER_NAME });
         }
@@ -461,21 +460,24 @@ export class GameSession {
     private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch> {
         const { gameId, socketId, playerColor, playerName, message } = request;
 
-        if (!gameId || !socketId || !playerColor || !playerName)
-            return lib.fail('Request data is incomplete');
+        if (!playerColor || !playerName)
+            return lib.fail('Player identity is incomplete');
 
         const state = this.actionProcessor.getState();
 
         if (state.gameId != gameId)
             return lib.fail('Game Id does not match in state');
 
-        const player = state.players.find(p => p.color === playerColor);
+        const player = state.players.find(p => p.socketId === socketId);
 
         if (!player)
-            return lib.fail(`Cannot find player [${playerColor}] in state`);
+            return lib.fail(`Cannot find player [${socketId}] in state`);
 
         if (player.name != playerName)
             return lib.fail(`[${playerName}] does not match name [${player.name}] in state`);
+
+        if (player.color != playerColor)
+            return lib.fail(`[${playerColor}] does not match name [${player.color}] in state`);
 
         return lib.pass({ player: { ...player, socketId }, message });
     }

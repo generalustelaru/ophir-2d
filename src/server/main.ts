@@ -72,6 +72,11 @@ app.listen(HTTP_PORT, () => {
     console.info(`Listening on http://${SERVER_ADDRESS}:${HTTP_PORT}`);
 });
 
+app.use((_, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+});
+
 app.get('/shutdown', (req: Request, res: Response) => {
     if (req.query.auth != auth) {
         console.warn('Unauthorized shutdown attempt');
@@ -96,22 +101,24 @@ app.get('/', (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname,'public', 'index.html'));
 });
 
-app.get('/register', (req: Request, res: Response) => {
-    const query = req.query as RegistrationForm;
+app.use(express.urlencoded({ extended: true }));
 
-    dbService.registerUser(query).then(registration => {
+app.post('/register', (req: Request, res: Response) => {
+    const form = req.body as RegistrationForm;
+
+    dbService.registerUser(form).then(registration => {
 
         if (registration.err) {
             res.status(400).send(registration.message);
         } else {
-            const cookies = sLib.produceCookieArgs(false, query.email);
+            const cookies = sLib.produceCookieArgs(false, form.email);
             const tokenCookie = cookies[CookieName.authToken];
-            dbService.setSessionToken(query.email, tokenCookie.value).then(patch => {
+            dbService.setAuthToken(form.email, tokenCookie.value).then(patch => {
 
                 if (patch.err) {
                     res.status(500).send(patch.message);
                 } else {
-                    console.info('New registration',{ email: query.email });
+                    console.info('New registration',{ email: form.email });
                     for (const cookieName in cookies) {
                         const { value, options } = cookies[cookieName as CookieName];
                         res.cookie(cookieName, value, options);
@@ -123,22 +130,23 @@ app.get('/register', (req: Request, res: Response) => {
     });
 });
 
-app.get('/login', (req: Request, res: Response) => {
-    const query = req.query as AuthenticationForm;
+app.post('/login', (req: Request, res: Response) => {
+    const form = req.body as AuthenticationForm;
 
-    dbService.authenticateUser(query).then(result => {
+    dbService.authenticateUser(form).then(result => {
 
         if (result.err) {
             res.status(400).send(result.message);
         } else {
-            const cookies = sLib.produceCookieArgs(false, query.email);
+            const cookies = sLib.produceCookieArgs(false, form.email);
             const tokenCookie = cookies[CookieName.authToken];
-            dbService.setSessionToken(query.email, tokenCookie.value).then(patch => {
+            dbService.setAuthToken(form.email, tokenCookie.value).then(patch => {
 
                 if (patch.err) {
+                    console.error(patch.message);
                     res.status(500).send(patch.message);
                 } else {
-                    console.info('User logged in',{ email: query.email });
+                    console.info('User logged in',{ email: form.email });
                     for (const cookieName in cookies) {
                         const { value, options } = cookies[cookieName as CookieName];
                         res.cookie(cookieName, value, options);
@@ -153,15 +161,14 @@ app.get('/login', (req: Request, res: Response) => {
 app.get('/new', (req: Request, res: Response) => {
     console.info('Visitor calls for new session', { ip: req.ip });
 
-    verifyAuthenticity(req).then(isAuthenticated => {
+    checkAuthToken(req).then(isAuthenticated => {
 
         if (isAuthenticated) {
             createGameSession().then(session => {
 
                 if (session) {
                     const gameId = session.getGameId();
-                    const group = { session, sockets: new Map() };
-                    playGroups.set(gameId, group);
+                    playGroups.set(gameId, { session, sockets: new Map(), socketIds: new Map() });
 
                     res.redirect(`/${gameId}`);
                 } else {
@@ -180,9 +187,10 @@ app.get('/:id', (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
 
-    verifyAuthenticity(req).then(isAuthenticated => {
+    checkAuthToken(req).then(isAuthenticated => {
 
         if (isAuthenticated) {
+            res.setHeader('X-Content-Type-Options', 'nosniff');
 
             if (playGroups.has(gameId)) {
                 res.sendFile(path.join(__dirname,'public', 'game.html'));
@@ -190,7 +198,7 @@ app.get('/:id', (req: Request, res: Response) => {
                 reviveGameSession(gameId).then(session => {
 
                     if (session) {
-                        playGroups.set(gameId, { session, sockets: new Map() });
+                        playGroups.set(gameId, { session, sockets: new Map(), socketIds: new Map() });
                         res.sendFile(path.join(__dirname,'public', 'game.html'));
                     } else {
                         res.redirect('/new');
@@ -204,19 +212,22 @@ app.get('/:id', (req: Request, res: Response) => {
 });
 
 // MARK: WS
+type SocketId = string
+type GameId = string
+type Email = string
 type PlayGroup = {
-    session: GameSession,
-    sockets: Map<string, WebSocket>,
+    session: GameSession
+    sockets: Map<SocketId, WebSocket>
+    socketIds: Map<Email, SocketId>
 }
 type SocketReference = {
-    socket: WebSocket,
-    gameId: string,
-    authToken: string,
+    socket: WebSocket
+    gameId: GameId
 }
 
 const socketServer = new WebSocketServer({ port: WS_PORT });
-const socketRefs: Map<string, SocketReference> = new Map();
-const playGroups: Map<string, PlayGroup> = new Map();
+const socketRefs: Map<SocketId, SocketReference> = new Map();
+const playGroups: Map<GameId, PlayGroup> = new Map();
 
 socketServer.on('connection', function connection(socket, req) {
     const params = req.url ? new URL(req.url, `http://${req.headers.host}`).searchParams : null;
@@ -232,9 +243,20 @@ socketServer.on('connection', function connection(socket, req) {
     if (!playGroup)
         return transmit(socket, { notFound: null });
 
-    const socketId = randomUUID();
-    const { authToken } = sLib.parseCookies(req.headers.cookie);
-    socketRefs.set(socketId, { gameId, socket, authToken });
+    const socketId = (() => {
+        const { userEmail } = sLib.parseCookies(req.headers.cookie);
+        const oldId = playGroup.socketIds.get(userEmail);
+
+        if (oldId)
+            return oldId;
+
+        const newId = randomUUID();
+        playGroup.socketIds.set(userEmail, newId);
+
+        return newId;
+    })();
+
+    socketRefs.set(socketId, { gameId, socket });
     playGroup.sockets.set(socketId, socket);
     console.log('websocket added to play group');
 
@@ -268,7 +290,11 @@ socketServer.on('connection', function connection(socket, req) {
     });
 });
 
-async function processAction(session: GameSession, request: ClientRequest, socket: WebSocket) {
+async function processAction(
+    session: GameSession,
+    request: ClientRequest,
+    socket: WebSocket,
+) {
     const result = session.processAction(request);
 
     if (request.message.action == Action.end_turn) {
@@ -458,8 +484,10 @@ async function getGameSessionInstance(savedSession: SessionState | null): Promis
     }
 }
 
-async function verifyAuthenticity(request: Request): Promise<boolean> {
+async function checkAuthToken(request: Request): Promise<boolean> {
     const { authToken, userEmail } = sLib.parseCookies(request.headers.cookie);
+    console.info('Validating user', userEmail);
+
     const result = await dbService.getUser(userEmail);
 
     if (result.err) {
@@ -469,7 +497,7 @@ async function verifyAuthenticity(request: Request): Promise<boolean> {
 
     const user = result.data;
 
-    if (user.sessionToken != authToken) {
+    if (user.authToken != authToken) {
         console.error('Unauthorized request', { headers: request.headers });
         return false;
     }

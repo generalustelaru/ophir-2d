@@ -19,7 +19,7 @@ const wsAddress = `ws://${SERVER_ADDRESS}:${WS_PORT}`;
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 const savedState: LocalState | null = (() => {
-    const str = localStorage.getItem('localState');
+    const str = sessionStorage.getItem('localState');
 
     if (!str)
         return null;
@@ -79,7 +79,7 @@ function probe(intervalSeconds: number) {
 }
 
 function resetClient(source: string) {
-    localStorage.clear();
+    sessionStorage.clear();
 
     alert(`Client reset ordered by ${source}`);
     window.location.reload();
@@ -156,7 +156,7 @@ document.fonts.ready.then(() => {
             return signalError('Id response has failed');
 
         localState.socketId = event.detail.socketId;
-        localStorage.setItem('localState', JSON.stringify(localState));
+        sessionStorage.setItem('localState', JSON.stringify(localState));
         comms.sendMessage({ action: Action.inquire, payload: null });
     });
 
@@ -168,7 +168,7 @@ document.fonts.ready.then(() => {
 
         localState.playerColor = approvedColor;
         localState.playerName = playerName;
-        localStorage.setItem('localState', JSON.stringify(localState));
+        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
@@ -177,7 +177,7 @@ document.fonts.ready.then(() => {
 
         const { vp } = event.detail;
         localState.vp = vp;
-        localStorage.setItem('localState', JSON.stringify(localState));
+        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.name_transmission, (event: CustomEventInit<NewNameTransmission>) => {
@@ -186,7 +186,7 @@ document.fonts.ready.then(() => {
 
         const { newName } = event.detail;
         localState.playerName = newName;
-        localStorage.setItem('localState', JSON.stringify(localState));
+        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.rival_control_transmission, () => {
@@ -206,7 +206,7 @@ document.fonts.ready.then(() => {
             return signalError('Missing color approval');
 
         localState.playerColor = event.detail.approvedNewColor;
-        localStorage.setItem('localState', JSON.stringify(localState));
+        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.state_update, (event: CustomEventInit) => {
@@ -218,7 +218,7 @@ document.fonts.ready.then(() => {
         // TODO: investigate and see if this still makes sense in light of gameID as path
         if (!localState.gameId) {
             localState.gameId = state.gameId;
-            localStorage.setItem('localState', JSON.stringify(localState));
+            sessionStorage.setItem('localState', JSON.stringify(localState));
         }
 
         if (localState.gameId != state.gameId)
@@ -238,7 +238,7 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.renew, () => {
         alert('This session is no longer supported.');
-        localStorage.removeItem('localState');
+        sessionStorage.removeItem('localState');
         window.location.href = '/new';
     });
 

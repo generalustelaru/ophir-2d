@@ -29,6 +29,7 @@ button, select {
     font-size: large;
     height: 40px;
     user-select: none;
+    -webkit-user-select: none;
     font-family: 'Custom', 'monospace';
 }
 
