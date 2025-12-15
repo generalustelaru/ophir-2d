@@ -108,114 +108,134 @@ app.get('/', (req: Request, res: Response) => {
 
 app.use(express.urlencoded({ extended: true }));
 
-app.post('/register', (req: Request, res: Response) => {
+app.post('/register', async (req: Request, res: Response) => {
     const form = req.body as RegistrationForm;
 
-    dbService.registerUser(form).then(registration => {
+    const registration = await dbService.registerUser(form);
 
-        if (registration.err) {
-            res.status(400).send(registration.message);
-        } else {
-            const cookies = sLib.produceCookieArgs(false, form.email);
-            const tokenCookie = cookies[CookieName.authToken];
-            dbService.setAuthToken(form.email, tokenCookie.value).then(patch => {
+    if (registration.err) {
+        sLib.printError(registration.message);
+        res.status(400).send('Your account could not be created.');
 
-                if (patch.err) {
-                    res.status(500).send(patch.message);
-                } else {
-                    console.info('New registration',{ email: form.email });
-                    for (const cookieName in cookies) {
-                        const { value, options } = cookies[cookieName as CookieName];
-                        res.cookie(cookieName, value, options);
-                    }
-                    res.redirect('/new');
-                }
-            });
-        }
-    });
+        return;
+    }
+
+    const cookies = sLib.produceCookieArgs(false, form.email);
+    const tokenCookie = cookies[CookieName.authToken];
+    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
+
+    if (patchOp.err) {
+        sLib.printError(patchOp.message);
+        res.status(500).send('Something went wrong.');
+
+        return;
+    }
+
+    console.info('New registration',{ email: form.email });
+
+    for (const cookieName in cookies) {
+        const { value, options } = cookies[cookieName as CookieName];
+        res.cookie(cookieName, value, options);
+    }
+
+    res.redirect('/new');
 });
 
-app.post('/login', (req: Request, res: Response) => {
+app.post('/login', async (req: Request, res: Response) => {
     const form = req.body as AuthenticationForm;
 
-    dbService.authenticateUser(form).then(result => {
+    const authentication = await dbService.authenticateUser(form);
 
-        if (result.err) {
-            res.status(400).send(result.message);
-        } else {
-            const cookies = sLib.produceCookieArgs(false, form.email);
-            const tokenCookie = cookies[CookieName.authToken];
-            dbService.setAuthToken(form.email, tokenCookie.value).then(patch => {
+    if (authentication.err) {
+        sLib.printError(authentication.message);
+        res.status(400).send('Authentication failed.');
 
-                if (patch.err) {
-                    console.error(patch.message);
-                    res.status(500).send(patch.message);
-                } else {
-                    console.info('User logged in',{ email: form.email });
-                    for (const cookieName in cookies) {
-                        const { value, options } = cookies[cookieName as CookieName];
-                        res.cookie(cookieName, value, options);
-                    }
-                    res.redirect('/new');
-                }
-            });
-        }
-    });
+        return;
+    }
+
+    const cookies = sLib.produceCookieArgs(false, form.email);
+    const tokenCookie = cookies[CookieName.authToken];
+
+    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
+
+    if (patchOp.err) {
+        sLib.printError(patchOp.message);
+        res.status(500).send('Something went wrong.');
+
+        return;
+    }
+    console.info('User logged in',{ email: form.email });
+
+    for (const cookieName in cookies) {
+        const { value, options } = cookies[cookieName as CookieName];
+        res.cookie(cookieName, value, options);
+    }
+
+    res.redirect('/new');
 });
 
-app.get('/new', (req: Request, res: Response) => {
+app.get('/new', async (req: Request, res: Response) => {
     console.info('Visitor calls for new session', { ip: req.ip });
 
-    validateClient(req.headers.cookie).then(validation => {
+    const validation = await validateClient(req.headers.cookie);
 
-        if (validation.ok) {
-            createGameSession().then(session => {
+    if (validation.err) {
+        console.error(validation.message);
+        res.redirect('/');
 
-                if (session) {
-                    const gameId = session.getGameId();
-                    activeGames.set(gameId, session);
+        return;
+    }
 
-                    res.redirect(`/${gameId}`);
-                } else {
-                    res.status(500).send('Server has encountered a problem :(');
-                }
-            });
-        } else {
-            console.error(validation.message);
-            res.redirect('/');
-        }
-    });
+    const instantiation = await createGameSession();
+
+    if (instantiation.err) {
+        sLib.printError(instantiation.message);
+        res.status(500).send('Server has encountered a problem :(');
+
+        return;
+    }
+
+    const { data: session } = instantiation;
+
+    const gameId = session.getGameId();
+    activeGames.set(gameId, session);
+    res.redirect(`/${gameId}`);
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get('/:id', (req: Request, res: Response) => {
+app.get('/:id', async (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
 
-    validateClient(req.headers.cookie).then(validation => {
+    const validation = await validateClient(req.headers.cookie);
 
-        if (validation.ok) {
-            res.setHeader('X-Content-Type-Options', 'nosniff');
+    if (validation.err) {
+        sLib.printError(validation.message);
+        res.redirect('/');
 
-            if (activeGames.has(gameId)) {
-                res.sendFile(path.join(__dirname,'public', 'game.html'));
-            } else {
-                reviveGameSession(gameId).then(session => {
+        return;
+    }
 
-                    if (session) {
-                        activeGames.set(gameId, session);
-                        res.sendFile(path.join(__dirname,'public', 'game.html'));
-                    } else {
-                        res.redirect('/new');
-                    }
-                });
-            }
-        } else {
-            console.error(validation.message);
-            res.redirect('/');
-        }
-    });
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    if (activeGames.has(gameId)) {
+        res.sendFile(path.join(__dirname,'public', 'game.html'));
+
+        return;
+    }
+
+    const revival = await reviveGameSession(gameId);
+
+    if (revival.err) {
+        sLib.printError(revival.message);
+        res.redirect('/new');
+
+        return;
+    }
+
+    activeGames.set(gameId, revival.data);
+    res.sendFile(path.join(__dirname,'public', 'game.html'));
 });
 
 // MARK: WS
@@ -230,36 +250,41 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 const connections: Map<Email, Connection> = new Map();
 const activeGames: Map<GameId, GameSession> = new Map();
 
-socketServer.on('connection', function connection(socket, inc) {
+socketServer.on('connection', async (socket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
 
     if (!gameId){
-        console.error('WS connection did not provide gameId.');
+        sLib.printError('WS connection did not provide gameId.');
         transmit(socket, { error: 'Invalid connection data.' });
-        return socket.close();
+        socket.close();
+
+        return;
     }
 
     const game = activeGames.get(gameId);
-    let userEmail: Email;
 
     if (!game) {
-        console.warn('WS requested inexistent play session.');
+        sLib.printWarning('WS requested inexistent play session.');
         transmit(socket, { notFound: null });
-        return socket.close();
+        socket.close();
+
+        return;
     }
 
-    validateClient(inc.headers.cookie).then(validation => {
+    const validation = await validateClient(inc.headers.cookie);
 
-        if (validation.err) {
-            console.error('WS connection has invalid cookie.', { err: validation.message });
-            transmit(socket, { error: 'Invalid connection data.' });
-            return socket.close();
-        }
+    if (validation.err) {
+        sLib.printError(validation.message);
+        sLib.printError('WS connection has invalid cookie.');
+        transmit(socket, { error: 'Invalid connection data.' });
+        socket.close();
 
-        userEmail = validation.data.userEmail;
+        return;
+    }
 
-        const ref = game.getPlayerRef(userEmail);
+    const { userEmail } = validation.data;
+    const ref = game.getPlayerRef(userEmail);
 
     if (!ref) {
         game.setPlayerRef(userEmail);
@@ -270,10 +295,8 @@ socketServer.on('connection', function connection(socket, inc) {
         // TODO: if it's the active player also send turn notification and start idle timeout
     }
 
-        connections.set(userEmail, { gameId, socket });
-
-        transmit(socket, { state: game.getSharedState() });
-    });
+    connections.set(userEmail, { gameId, socket });
+    transmit(socket, { state: game.getSharedState() });
 
     socket.on('message', function incoming(req: string) {
         const clientRequest = validator.validateClientRequest(JSON.parse(req));
@@ -405,6 +428,7 @@ function startSessionChecks(configuration: Configuration) {
             const { gameId, socket } = reference;
 
             if (socket.readyState == socket.CLOSED) {
+                console.log('found CLOSED socket for', email);
                 connections.delete(email);
                 const game = activeGames.get(gameId);
 
@@ -415,6 +439,7 @@ function startSessionChecks(configuration: Configuration) {
                         .filter(email => {
                             connections.has(email) && connections.get(email)!.socket.OPEN;
                         });
+                    console.log('users connected to the same session:', connectedUsers);
 
                     if (connectedUsers.length == 0) {
                         const saveOp = await dbService.saveGameState(game.getSessionState());
@@ -456,48 +481,61 @@ function startSessionChecks(configuration: Configuration) {
     },1 * hours);
 }
 
-async function createGameSession(): Promise<GameSession | null> {
-    const gameSession = await getGameSessionInstance(null);
+async function createGameSession(): Promise<Probable<GameSession>> {
+    const instantiation = await getGameSessionInstance(null);
 
-    if (!gameSession)
-        return null;
-
-    const result = await dbService.addGameState(gameSession.getSessionState());
-
-    if (result.err) {
-        console.error(result.message);
-        return null;
+    if (instantiation.err) {
+        sLib.printError(instantiation.message);
+        return sLib.fail('Could not create game session,');
     }
 
-    return gameSession;
+    const persistence = await dbService.addGameState(instantiation.data.getSessionState());
+
+    if (persistence.err) {
+        sLib.printError(persistence.message);
+        return sLib.fail('Could not persist game session');
+    }
+
+    return instantiation;
 }
 
-async function reviveGameSession(gameId: string): Promise<GameSession|null> {
-    const result = await dbService.loadGameState(gameId);
+async function reviveGameSession(gameId: string): Promise<Probable<GameSession>> {
+    const revival = await dbService.loadGameState(gameId);
 
-    if (result.ok)
-        return await getGameSessionInstance(result.data);
+    if (revival.err) {
+        sLib.printError(revival.message);
 
-    console.error(result.message);
-    return null;
+        return sLib.fail('Could not revive session');
+    }
+
+    const instantiation = await getGameSessionInstance(revival.data);
+
+    if (instantiation.err) {
+        sLib.printError(instantiation.message);
+
+        return sLib.fail('Could not instantiate session.');
+    }
+
+    return instantiation;
 }
 
-async function getGameSessionInstance(savedSession: SessionState | null): Promise<GameSession|null> {
-    const result = await dbService.getConfig();
+async function getGameSessionInstance(savedSession: SessionState | null): Promise<Probable<GameSession>> {
+    const query = await dbService.getConfig();
 
-    if (result.err) {
-        console.error(result.message);
-        return null;
+    if (query.err) {
+        sLib.printError(query.message);
+        return sLib.fail('Could not retreive configuration');
     }
 
     try {
-        const configuration = result.data;
+        const configuration = query.data;
+        const session = new GameSession(broadcastCallback, transmitCallback, configuration, savedSession);
 
-        return new GameSession(broadcastCallback, transmitCallback, configuration, savedSession);
+        return sLib.pass(session);
     } catch (error) {
-        console.error(error);
+        sLib.printError(String(error));
 
-        return null;
+        return sLib.fail('GameSession constructor threw.');
     }
 }
 

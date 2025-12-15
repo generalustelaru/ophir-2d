@@ -9,7 +9,9 @@ import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 /** Return value wrapper with positive checks */
-export type Probable<T> = { err: true, ok: false, message: string } | { err: false, ok: true, data: T };
+export type Probable<T> =
+    | { err: true, ok: false, message: string }
+    | { err: false, ok: true, data: T };
 
 export enum CookieName {
     authToken = 'authToken',
@@ -171,6 +173,7 @@ export interface SessionProcessor {
     getState: () => State;
     addChat: (entry: ChatEntry) => ServerMessage;
     updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
+    getPlayerVP: (color: PlayerColor) => number;
 }
 
 export type SessionState = {

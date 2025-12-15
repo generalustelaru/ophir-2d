@@ -7,7 +7,15 @@ function pass<T>(data: T): Probable<T> {
 }
 
 function fail<T>(message: string): Probable<T> {
-    return { err: true, ok: false,  message };
+    return { err: true, ok: false, message };
+}
+
+function printError(message: string) {
+    console.error(`\x1b[91mERROR:${message}\x1b[0m`);
+}
+
+function printWarning(message: string) {
+    console.warn(`\x1b[93mWARN: ${message}\x1b[0m`);
 }
 
 function checkConditions(arr: Array<boolean>): Probable<true> {
@@ -75,6 +83,8 @@ function parseCookies(cookieString: string): Record<string, string> {
 const sLib = { // TODO: Maybe rename this to common_library (file too)
     pass,
     fail,
+    printError,
+    printWarning,
     checkConditions,
     randomize,
     produceCookieArgs,
