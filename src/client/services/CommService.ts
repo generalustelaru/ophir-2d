@@ -4,7 +4,6 @@ import {
     ForceTurnNotificationTransmission, ColorTransmission, NotFoundTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
-import localState from '../state';
 import { EventType } from '~/client_types';
 
 export class CommunicationService extends Communicator {
@@ -15,8 +14,8 @@ export class CommunicationService extends Communicator {
         super();
     }
 
-    public createConnection(url: string) {
-        this.socket = new WebSocket(`${url}?gameId=${localState.gameId}`);
+    public createConnection(url: string, gameId: string) {
+        this.socket = new WebSocket(`${url}?gameId=${gameId}`);
 
         this.socket.onopen = () => {
             console.info('Connection established.');

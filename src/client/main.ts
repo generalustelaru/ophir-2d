@@ -14,9 +14,9 @@ if (!WS_PORT || !SERVER_ADDRESS)
     throw new Error('Server address and port must be provided in the environment');
 
 const wsAddress = `ws://${SERVER_ADDRESS}:${WS_PORT}`;
-
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
+
 const savedState: LocalState | null = (() => {
     const str = sessionStorage.getItem('localState');
 
@@ -37,12 +37,10 @@ const savedState: LocalState | null = (() => {
     return null;
 })();
 
-if (!savedState || savedState.gameId != requestedGameId) {
-    localState.gameId = requestedGameId;
+if (!savedState) {
     localState.playerColor = null;
     localState.vp = 0;
 } else {
-    localState.gameId = savedState.gameId;
     localState.playerColor = savedState.playerColor;
     localState.vp = savedState.vp;
 }
@@ -169,7 +167,7 @@ document.fonts.ready.then(() => {
 
     window.addEventListener( EventType.identification, (event: CustomEventInit<ColorTransmission>) => {
         if (!event.detail)
-            return signalError('Missing color approval');
+            return signalError('Missing color!');
 
         localState.playerColor = event.detail.color;
         sessionStorage.setItem('localState', JSON.stringify(localState));
@@ -180,15 +178,6 @@ document.fonts.ready.then(() => {
             return signalError('State is missing!');
 
         const state = event.detail as State;
-
-        // TODO: investigate and see if this still makes sense in light of gameID as path
-        if (!localState.gameId) {
-            localState.gameId = state.gameId;
-            sessionStorage.setItem('localState', JSON.stringify(localState));
-        }
-
-        if (localState.gameId != state.gameId)
-            return resetClient('client');
 
         UserInterface.update(state);
         canvas.drawUpdateElements(state, state.sessionPhase == Phase.play && state.hasGameEnded);
@@ -216,5 +205,5 @@ document.fonts.ready.then(() => {
         },
     );
 
-    comms.createConnection(wsAddress);
+    comms.createConnection(wsAddress, requestedGameId);
 });
