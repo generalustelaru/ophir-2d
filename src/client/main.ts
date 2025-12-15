@@ -4,8 +4,7 @@ import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
-    Action, ClientMessage, ResetResponse, VpTransmission, EnrolmentResponse, NewNameTransmission,
-    ColorChangeResponse, State, Phase,
+    Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State, Phase,
 } from '~/shared_types';
 
 const SERVER_ADDRESS = process.env.SERVER_ADDRESS;
@@ -41,12 +40,10 @@ const savedState: LocalState | null = (() => {
 if (!savedState || savedState.gameId != requestedGameId) {
     localState.gameId = requestedGameId;
     localState.playerColor = null;
-    localState.playerName = null;
     localState.vp = 0;
 } else {
     localState.gameId = savedState.gameId;
     localState.playerColor = savedState.playerColor;
-    localState.playerName = savedState.playerName;
     localState.vp = savedState.vp;
 }
 
@@ -133,6 +130,7 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.timeout, () => {
         console.warn('Connection timeout');
+        sessionStorage.clear();
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('Trying to reconnect...');
@@ -141,21 +139,11 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.close, () => {
         console.warn('Connection closed');
+        sessionStorage.clear();
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('The server has entered maintenance.');
         probe(5);
-    });
-
-    window.addEventListener(EventType.enrolment_approval, (event: CustomEventInit<EnrolmentResponse>) => {
-        if (!event.detail)
-            return signalError('Player registration has failed');
-
-        const { approvedColor, playerName } = event.detail;
-
-        localState.playerColor = approvedColor;
-        localState.playerName = playerName;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
@@ -164,15 +152,6 @@ document.fonts.ready.then(() => {
 
         const { vp } = event.detail;
         localState.vp = vp;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
-    });
-
-    window.addEventListener(EventType.name_transmission, (event: CustomEventInit<NewNameTransmission>) => {
-        if (!event.detail || !localState.playerColor)
-            return signalError('Name update failed');
-
-        const { newName } = event.detail;
-        localState.playerName = newName;
         sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
@@ -188,11 +167,11 @@ document.fonts.ready.then(() => {
         resetClient(response.resetFrom);
     });
 
-    window.addEventListener( EventType.new_color_approval, (event: CustomEventInit<ColorChangeResponse>) => {
+    window.addEventListener( EventType.identification, (event: CustomEventInit<ColorTransmission>) => {
         if (!event.detail)
             return signalError('Missing color approval');
 
-        localState.playerColor = event.detail.approvedNewColor;
+        localState.playerColor = event.detail.color;
         sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 

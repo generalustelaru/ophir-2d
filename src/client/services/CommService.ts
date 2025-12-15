@@ -1,7 +1,7 @@
 import {
     ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
-    VpTransmission, EnrolmentResponse, NewNameTransmission, TurnNotificationTransmission, RivalControlTransmission,
-    ForceTurnNotificationTransmission, ColorChangeResponse, NotFoundTransmission,
+    VpTransmission, TurnNotificationTransmission, RivalControlTransmission,
+    ForceTurnNotificationTransmission, ColorTransmission, NotFoundTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
@@ -63,17 +63,11 @@ export class CommunicationService extends Communicator {
                 case this.isVictoryPointsTransmission(data):
                     this.createEvent({ type: EventType.vp_transmission, detail: data });
                     break;
-                case this.isNewNameTransmission(data):
-                    this.createEvent({ type: EventType.name_transmission, detail: data });
-                    break;
                 case this.isRivalControlTransmission(data):
                     this.createEvent( { type: EventType.rival_control_transmission, detail: null });
                     break;
-                case this.isEnrolmentApprovalTransmission(data):
-                    this.createEvent({ type: EventType.enrolment_approval, detail: data });
-                    break;
-                case this.isColorChangeApprovalTransmission(data):
-                    this.createEvent( { type: EventType.new_color_approval, detail: data });
+                case this.isColorTransmission(data):
+                    this.createEvent( { type: EventType.identification, detail: data });
                     break;
                 case this.isResetOrder(data):
                     this.createEvent({ type: EventType.reset, detail: data });
@@ -123,20 +117,12 @@ export class CommunicationService extends Communicator {
         return 'notFound' in data;
     }
 
-    private isEnrolmentApprovalTransmission(data: ServerMessage): data is EnrolmentResponse {
-        return 'approvedColor' in data;
-    }
-
-    private isColorChangeApprovalTransmission(data: ServerMessage): data is ColorChangeResponse {
-        return 'approvedNewColor' in data;
+    private isColorTransmission(data: ServerMessage): data is ColorTransmission {
+        return 'color' in data;
     }
 
     private isVictoryPointsTransmission(data: ServerMessage): data is VpTransmission {
         return 'vp' in data;
-    }
-
-    private isNewNameTransmission(data: ServerMessage): data is NewNameTransmission {
-        return 'newName' in data;
     }
 
     private isRivalControlTransmission(data: ServerMessage): data is RivalControlTransmission {

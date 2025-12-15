@@ -98,6 +98,16 @@ export class GameSession {
         })();
     }
 
+    public getPlayerRef(userEmail: string) {
+        const ref = this.playerReferences.find(r => r.email == userEmail);
+
+        return ref || null;
+    }
+
+    public getAllRefs() {
+        return this.playerReferences;
+    }
+
     public setPlayerRef(userEmail: string, socketId: string) {
         const oldRef = this.playerReferences.find(r => r.email == userEmail);
 
@@ -208,10 +218,8 @@ export class GameSession {
                         return this.issueNominalResponse(lib.errorResponse('Name can no longer be updated.'));
 
                     const response = this.actionProcessor.updatePlayerName(player, newName);
-                    this.transmit && this.transmit(socketId, { newName } );
 
                     return this.issueGroupResponse(response);
-
                 } else {
                     return this.issueNominalResponse(lib.errorResponse(
                         `${commandMatch[0]} parameter must start with a non-space`,
@@ -255,7 +263,6 @@ export class GameSession {
 
     // MARK: ENROL
     private updateReferenceColor(socketId: string, color: PlayerColor) {
-        console.log({refs: this.playerReferences, socketId})
         const ref = this.playerReferences.find(r => r.socketId == socketId);
 
         if (!ref)

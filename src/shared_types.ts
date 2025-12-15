@@ -338,14 +338,12 @@ export type ClientRequest = {
 }
 
 // MARK: RESPONSE
-export type EnrolmentResponse = { approvedColor: PlayerColor, playerName: string }
-export type ColorChangeResponse = { approvedNewColor: PlayerColor }
+export type ColorTransmission = { color: PlayerColor }
 export type StateResponse = { state: State }
 export type ResetResponse = { resetFrom: string | PlayerColor }
 export type ErrorResponse = { error: string }
 export type NotFoundTransmission = { notFound: null }
 export type VpTransmission = { vp: number }
-export type NewNameTransmission = { newName: string }
 export type TurnNotificationTransmission = { turnStart: null }
 export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
@@ -354,11 +352,9 @@ export type ServerMessage =
     | StateResponse
     | ResetResponse
     | ErrorResponse
-    | EnrolmentResponse
-    | ColorChangeResponse
+    | ColorTransmission
     | NotFoundTransmission
     | VpTransmission
-    | NewNameTransmission
     | TurnNotificationTransmission
     | RivalControlTransmission
     | ForceTurnNotificationTransmission

@@ -67,7 +67,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
             return result;
 
         this.reportColorAssignment(socketId, color);
-        this.transmit(socketId, { approvedColor: color, playerName: name });
+        this.transmit(socketId, { color });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
         this.enrolmentState.addServerMessage('Type #name &ltyour new name&gt in the chat to set your name.');
@@ -93,7 +93,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         this.enrolmentState.changeColor(player.color, newColor);
 
         this.reportColorAssignment(match.socketId, newColor);
-        this.transmit(match.socketId, { approvedNewColor: newColor });
+        this.transmit(match.socketId, { color: newColor });
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }

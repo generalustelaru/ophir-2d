@@ -1,7 +1,7 @@
 import {
-    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorChangeResponse,
+    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorTransmission,
     Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State,
-    EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, TradeGood,
+    MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, TradeGood,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -25,7 +25,6 @@ export type IslandData = { x: number, y: number, shape: string };
 export type LocalState = {
     gameId: string,
     playerColor: PlayerColor | null,
-    playerName: string | null,
     vp: number,
 }
 
@@ -151,8 +150,7 @@ export type EventFormat<T extends EventType, D> = {
 }
 
 export enum EventType {
-    enrolment_approval = 'enrolment_approval',
-    new_color_approval = 'new_color_approval',
+    identification = 'identification',
     draft = 'draft',
     start_action = 'start',
     close = 'close',
@@ -164,9 +162,7 @@ export enum EventType {
     reset = 'reset',
     renew = 'renew',
     state_update = 'state_update',
-    identification = 'identification',
     vp_transmission = 'vp_transmission',
-    name_transmission = 'name_transmission',
     rival_control_transmission = 'rival_control_transmission',
     start_turn = 'start_turn',
     force_turn = 'force_turn',
@@ -191,10 +187,8 @@ export type Event =
     | EventFormat<EventType.info, InfoDetail>
     | EventFormat<EventType.reset, ResetResponse>
     | EventFormat<EventType.state_update, State>
-    | EventFormat<EventType.enrolment_approval, EnrolmentResponse>
-    | EventFormat<EventType.new_color_approval, ColorChangeResponse>
+    | EventFormat<EventType.identification, ColorTransmission>
     | EventFormat<EventType.vp_transmission, VpTransmission>
-    | EventFormat<EventType.name_transmission, NewNameTransmission>
 ;
 
 export type InfoDetail = {

@@ -809,7 +809,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             const nextInOrder = turnOrder === allPlayers.length ? 1 : turnOrder + 1;
             const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextInOrder);
             const { socketId: nextPlayerId } = refPool.find(r => r.color == nextPlayerDto?.color) || {};
-            console.log({refPool, color: nextPlayerDto?.color});
+
             if (!nextPlayerDto || !nextPlayerId)
                 return lib.fail('Could not find the next player or reference');
 

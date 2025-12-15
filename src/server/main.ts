@@ -2,7 +2,7 @@ import {
     AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieName, Probable, RegistrationForm, SessionState,
 } from '~/server_types';
 import { validator } from './services/validation/ValidatorService';
-import { ServerMessage, PlayState, Action } from '~/shared_types';
+import { ServerMessage, PlayState, Action, ClientRequest } from '~/shared_types';
 import express, { Request, Response } from 'express';
 import dbService from './services/DatabaseService';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -51,11 +51,15 @@ const rl = readline.createInterface({
 (
     function promptForInput(): void {
         rl.question('\nophir-2d :: ', (input) => {
-
-            switch (input) {
-                case 'shutdown':
+            const [command, option] = input.split(' ');
+            switch (command) {
+                case 'shut':
                     shutDown();
                     return;
+
+                case 'debug':
+                    console.log(debugGameReference(option.trim()));
+                    break;
 
                 default:
                     console.error('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m', input);
@@ -170,7 +174,7 @@ app.get('/new', (req: Request, res: Response) => {
 
                 if (session) {
                     const gameId = session.getGameId();
-                    playGroups.set(gameId, { session, sockets: new Map(), socketIds: new Map() });
+                    playGroups.set(gameId, { session, sockets: new Map() });
 
                     res.redirect(`/${gameId}`);
                 } else {
@@ -200,7 +204,7 @@ app.get('/:id', (req: Request, res: Response) => {
                 reviveGameSession(gameId).then(session => {
 
                     if (session) {
-                        playGroups.set(gameId, { session, sockets: new Map(), socketIds: new Map() });
+                        playGroups.set(gameId, { session, sockets: new Map() });
                         res.sendFile(path.join(__dirname,'public', 'game.html'));
                     } else {
                         res.redirect('/new');
@@ -216,11 +220,9 @@ app.get('/:id', (req: Request, res: Response) => {
 // MARK: WS
 type SocketId = string
 type GameId = string
-type Email = string
 type PlayGroup = {
     session: GameSession
     sockets: Map<SocketId, WebSocket>
-    socketIds: Map<Email, SocketId>
 }
 type SocketReference = {
     socket: WebSocket
@@ -262,23 +264,24 @@ socketServer.on('connection', function connection(socket, inc) {
         userEmail = validation.data.userEmail;
 
         socketId = (() => {
-            const oldId = playGroup.socketIds.get(userEmail);
+            const ref = playGroup.session.getPlayerRef(userEmail);
 
-            if (oldId)
-                return oldId;
+            if (ref) {
+                if (ref.color) {
+                    transmit(socket, { color: ref.color });
+                    console.info('client reconnected to play group');
+                }
+                return ref.socketId;
+            }
 
             const newId = randomUUID();
-
-            playGroup.socketIds.set(userEmail, newId);
             playGroup.session.setPlayerRef(userEmail, newId);
-
+            console.info('client added to play group');
             return newId;
         })();
 
         socketRefs.set(socketId, { gameId, socket });
         playGroup.sockets.set(socketId, socket);
-        console.log('websocket added to play group');
-
         transmit(socket, { state: playGroup.session.getSharedState() });
     });
 
@@ -288,9 +291,9 @@ socketServer.on('connection', function connection(socket, inc) {
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
-        // logRequest(clientRequest);
+        logRequest(clientRequest, userEmail);
 
-        playGroup.socketIds.get(userEmail);
+        // playGroup.socketIds.get(userEmail);
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
@@ -344,26 +347,27 @@ function transmitCallback(socketId: string, message: ServerMessage) {
 
 // MARK: FUNCTIONS
 
-// function logRequest(request: ClientRequest) {
-//     const { playerColor, playerName, message } = request;
-//     const { action, payload } = message;
+function logRequest(request: ClientRequest, email: string) {
+    const { message } = request;
+    const { action, payload } = message;
 
-//     const name = playerName || playerColor || '';
-//     const colorized = {
-//         Purple: `\x1b[95m${name}\x1b[0m`,
-//         Yellow: `\x1b[93m${name}\x1b[0m`,
-//         Red: `\x1b[91m${name}\x1b[0m`,
-//         Green: `\x1b[92m${name}\x1b[0m`,
-//     };
-//     const clientName = playerColor ? colorized[playerColor] : 'anon';
+    console.info(
+        '%s -> %s : {%s}',
+        email,
+        action || '?',
+        payload ? ` ${JSON.stringify(payload)} ` : ' ',
+    );
+}
 
-//     console.info(
-//         '%s -> %s%s',
-//         clientName,
-//         action ?? '?',
-//         payload ? `: ${JSON.stringify(payload)}` : ': { }',
-//     );
-// }
+function debugGameReference(gameId: string): object {
+    const group = playGroups.get(gameId);
+    if (!group)
+        return {};
+
+    return {
+        game_refs: group.session.getAllRefs(),
+    };
+}
 
 function shutDown() {
     rl.close();
