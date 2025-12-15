@@ -106,6 +106,10 @@ export class SetupProcessor implements Unique<SessionProcessor> {
         return this.setupState.toDto();
     }
 
+    public getPlayerVP(_color: PlayerColor) {
+        return 0;
+    }
+
     public addChat(entry: ChatEntry): StateResponse {
         this.setupState.addChatEntry(entry);
 

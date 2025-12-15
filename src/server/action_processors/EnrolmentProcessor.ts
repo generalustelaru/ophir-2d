@@ -28,6 +28,10 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         this.defaultNames = [...serverConstants.DEFAULT_NAMES];
     }
 
+    public getPlayerVP(_color: PlayerColor) {
+        return 0;
+    }
+
     public getState(): EnrolmentState {
         return this.enrolmentState.toDto();
     }

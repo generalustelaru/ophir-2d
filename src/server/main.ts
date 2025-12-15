@@ -261,13 +261,14 @@ socketServer.on('connection', function connection(socket, inc) {
 
         const ref = game.getPlayerRef(userEmail);
 
-        if (ref) {
-            ref.color && transmit(socket, { color: ref.color });
-            console.info('client reconnected to play group');
-        } else {
-            game.setPlayerRef(userEmail);
-            console.info('client added to play group');
-        }
+    if (!ref) {
+        game.setPlayerRef(userEmail);
+    } else if (ref.color) {
+        transmit(socket, { color: ref.color });
+        transmit(socket, { vp: game.getPlayerVP(ref.color) });
+
+        // TODO: if it's the active player also send turn notification and start idle timeout
+    }
 
         connections.set(userEmail, { gameId, socket });
 

@@ -48,17 +48,6 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (activePlayer)
             return;
 
-        // TODO: send VP when player re-connects.
-        // if (privateState.getGameStats().find(stat => { stat.vp != 0; })) {
-        //     for (const stat of privateState.getGameStats()) {
-        //         const player = players.find(p => p.color === stat.color);
-        //         player && this.transmit(
-        //             player.socketId,
-        //             { vp: this.privateState.getPlayerVictoryPoints(player.color) },
-        //         );
-        //     }
-        // }
-
         if (!activationEmail)
             throw new Error('Play phase cannot start. No way to activate first player.');
 
@@ -76,12 +65,15 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         );
         this.playState.savePlayer(player.toDto());
 
-
         // this.startIdleTimeout(configuration.PLAYER_IDLE_MINUTES);
     }
 
     public getState() {
         return this.playState.toDto();
+    }
+
+    public getPlayerVP(color: PlayerColor) {
+        return this.privateState.getPlayerVictoryPoints(color);
     }
 
     public getPrivateState() {
@@ -1320,31 +1312,30 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     // TODO: convert to a timeout as not to repeat the idle message.
+    private startIdleTimeout(_timeoutMinutes: number, _email: Email): void {
+        // const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
 
-    // private startIdleTimeout(timeoutMinutes: number, socketId: string): void {
-    //     const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
+        // this.idleCheckInterval = setInterval(() => {
+        //     const activePlayer = this.playState.getActivePlayer();
 
-    //     this.idleCheckInterval = setInterval(() => {
-    //         const activePlayer = this.playState.getActivePlayer();
+        //     if (!activePlayer) {
+        //         lib.fail('No active player found in idle check!');
+        //         return;
+        //     }
 
-    //         if (!activePlayer) {
-    //             lib.fail('No active player found in idle check!');
-    //             return;
-    //         }
+        //     const timeNow = Date.now();
 
-    //         const timeNow = Date.now();
+        //     if (timeNow - activePlayer.timeStamp > limitMinutes && !activePlayer.isIdle) {
+        //         activePlayer.isIdle = true;
+        //         this.addServerMessage(`${activePlayer.name} is idle`);
+        //         this.playState.savePlayer(activePlayer);
 
-    //         if (timeNow - activePlayer.timeStamp > limitMinutes && !activePlayer.isIdle) {
-    //             activePlayer.isIdle = true;
-    //             this.addServerMessage(`${activePlayer.name} is idle`);
-    //             this.playState.savePlayer(activePlayer);
+        //         this.transmit(activePlayer.socketId, { turnStart: null });
+        //         this.broadcast(this.playState.toDto());
+        //     }
 
-    //             this.transmit(activePlayer.socketId, { turnStart: null });
-    //             this.broadcast(this.playState.toDto());
-    //         }
-
-    //     }, 2000);
-    // }
+        // }, 2000);
+    }
 
     public killIdleChecks() {
         this.idleCheckInterval && clearInterval(this.idleCheckInterval);

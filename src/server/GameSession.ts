@@ -117,6 +117,10 @@ export class GameSession {
             this.playerReferences.push({  email: userEmail, color: null });
     }
 
+    public getPlayerVP(color: PlayerColor) {
+        return this.actionProcessor.getPlayerVP(color);
+    }
+
     public deReference() {
         this.broadcast = null;
         this.transmit = null;
