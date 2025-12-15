@@ -8,7 +8,7 @@ import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } 
 const MAX_FAVOR = 6;
 export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
-    private socketId: Writable<string>;
+    private socketId: Readable<string>;
     private color: Readable<PlayerColor>;
     private timeStamp: Writable<number>;
     private isIdle: Writable<boolean>;
@@ -37,8 +37,8 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     /**
      * @throws Instantiation error
      */
-    constructor(player: Player) {
-        this.socketId = writable(player.socketId);
+    constructor(player: Player, socketId: string) {
+        this.socketId = readable(socketId);
         this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);
         this.isIdle = writable(player.isIdle);
@@ -67,7 +67,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public toDto(): Player {
         return {
-            socketId: this.socketId.get(),
             color: this.color.get(),
             timeStamp: this.timeStamp.get(),
             isIdle: this.isIdle.get(),

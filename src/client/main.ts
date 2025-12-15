@@ -4,7 +4,7 @@ import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
-    Action, ClientMessage, ResetResponse, VpTransmission, ClientIdResponse, EnrolmentResponse, NewNameTransmission,
+    Action, ClientMessage, ResetResponse, VpTransmission, EnrolmentResponse, NewNameTransmission,
     ColorChangeResponse, State, Phase,
 } from '~/shared_types';
 
@@ -31,7 +31,6 @@ const savedState: LocalState | null = (() => {
         && 'gameId' in obj
         && 'playerColor' in obj
         && 'playerName' in obj
-        && 'socketId' in obj
         && 'vp' in obj
     )
         return obj;
@@ -43,13 +42,11 @@ if (!savedState || savedState.gameId != requestedGameId) {
     localState.gameId = requestedGameId;
     localState.playerColor = null;
     localState.playerName = null;
-    localState.socketId = null;
     localState.vp = 0;
 } else {
     localState.gameId = savedState.gameId;
     localState.playerColor = savedState.playerColor;
     localState.playerName = savedState.playerName;
-    localState.socketId = savedState.socketId;
     localState.vp = savedState.vp;
 }
 
@@ -148,16 +145,6 @@ document.fonts.ready.then(() => {
         canvas.disable();
         UserInterface.setInfo('The server has entered maintenance.');
         probe(5);
-    });
-
-    window.addEventListener(EventType.identification, (event: CustomEventInit<ClientIdResponse>) => {
-
-        if (!event.detail)
-            return signalError('Id response has failed');
-
-        localState.socketId = event.detail.socketId;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
-        comms.sendMessage({ action: Action.inquire, payload: null });
     });
 
     window.addEventListener(EventType.enrolment_approval, (event: CustomEventInit<EnrolmentResponse>) => {

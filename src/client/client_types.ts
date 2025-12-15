@@ -1,6 +1,6 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorChangeResponse,
-    Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, ClientIdResponse, VpTransmission, State,
+    Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State,
     EnrolmentResponse, NewNameTransmission, MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, TradeGood,
 } from '~/shared_types';
 import Konva from 'konva';
@@ -24,7 +24,6 @@ export type IslandData = { x: number, y: number, shape: string };
 
 export type LocalState = {
     gameId: string,
-    socketId: string | null,
     playerColor: PlayerColor | null,
     playerName: string | null,
     vp: number,
@@ -194,7 +193,6 @@ export type Event =
     | EventFormat<EventType.state_update, State>
     | EventFormat<EventType.enrolment_approval, EnrolmentResponse>
     | EventFormat<EventType.new_color_approval, ColorChangeResponse>
-    | EventFormat<EventType.identification, ClientIdResponse>
     | EventFormat<EventType.vp_transmission, VpTransmission>
     | EventFormat<EventType.name_transmission, NewNameTransmission>
 ;

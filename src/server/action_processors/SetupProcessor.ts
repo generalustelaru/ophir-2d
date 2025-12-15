@@ -161,12 +161,12 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             const selections = [];
 
             for (let i = 0; i < drafts.length; i++) {
-                const { socketId, color, name, turnOrder, specialist } = drafts[i];
+                const { color, name, turnOrder, specialist } = drafts[i];
 
                 if (!specialist)
                     return null;
 
-                selections.push({ socketId, color, name, turnOrder, specialist });
+                selections.push({ color, name, turnOrder, specialist });
             };
 
             return selections;
@@ -342,7 +342,6 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             const token = orderTokens.shift() || 0;
 
             return {
-                socketId: e.socketId,
                 color: e.color,
                 name: e.name,
                 turnOrder: token,
@@ -368,7 +367,6 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             const { startingFavor, owner, ...specialist } = s.specialist;
 
             const playerDto: Player = {
-                socketId: s.socketId,
                 color: s.color,
                 timeStamp: 0,
                 isIdle: false,

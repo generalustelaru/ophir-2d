@@ -1,10 +1,13 @@
-import { WsDigest, DataDigest, SessionState, Probable, Configuration } from '~/server_types';
+import {
+    WsDigest, DataDigest, SessionState, Probable, Configuration, PlayerReference, RequestMatch, EnrolRequest,
+    AuthenticatedClientRequest,
+    MatchedPlayerRequest,
+} from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
-    ClientRequest, ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor,
-    PlayerEntity,
+    ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor, PlayerEntity,
+    State,
 } from '~/shared_types';
-import { RequestMatch } from '~/server_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library';
 import { PlayProcessor } from './action_processors/PlayProcessor';
@@ -23,6 +26,8 @@ export class GameSession {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private broadcast: ((state: PlayState) => void) | null;
     private transmit: ((socketId: string, message: ServerMessage) => void) | null;
+    private playerReferences: Array<PlayerReference> = [];
+
     constructor(
         broadcastCallback: (state: PlayState) => void,
         transmitCallback: (socketId: string, message: ServerMessage) => void,
@@ -38,6 +43,7 @@ export class GameSession {
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
                 transmitCallback,
+                this.updateReferenceColor.bind(this),
                 configuration,
             );
             console.info('New game session created');
@@ -45,10 +51,11 @@ export class GameSession {
             return;
         }
 
-        const { sharedState, privateState, backupStates } = savedSession;
+        const { sharedState, privateState, backupStates, playerReferences } = savedSession;
         const { gameId, sessionOwner, players, chat } = sharedState;
 
         this.gameId = gameId;
+        this.playerReferences = playerReferences;
 
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
@@ -81,6 +88,7 @@ export class GameSession {
                     return new EnrolmentProcessor(
                         sharedState,
                         transmitCallback,
+                        this.updateReferenceColor.bind(this),
                         configuration,
                     );
 
@@ -88,6 +96,15 @@ export class GameSession {
                     throw new Error('Cannot determine session phase');
             }
         })();
+    }
+
+    public setPlayerRef(userEmail: string, socketId: string) {
+        const oldRef = this.playerReferences.find(r => r.email == userEmail);
+
+        if (oldRef)
+            oldRef.socketId = socketId;
+        else
+            this.playerReferences.push({  email: userEmail,  socketId, color: null });
     }
 
     public deReference() {
@@ -99,10 +116,15 @@ export class GameSession {
         return this.gameId;
     }
 
-    public getCurrentState(): SessionState {
+    public getSharedState(): State {
+        return this.actionProcessor.getState();
+    }
+
+    public getSessionState(): SessionState {
         const state = this.actionProcessor.getState();
         const isPlay = state.sessionPhase === Phase.play;
         return {
+            playerReferences: this.playerReferences,
             sharedState: state,
             backupStates: isPlay ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
             privateState: isPlay ? (this.actionProcessor as PlayProcessor).getPrivateState() : null,
@@ -124,31 +146,35 @@ export class GameSession {
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
             this.transmit,
+            this.updateReferenceColor.bind(this),
             this.config,
         );
         console.log('Session was reset');
     }
 
-    public processAction(request: ClientRequest): WsDigest {
+    public processAction(request: AuthenticatedClientRequest): WsDigest {
+        const reference = this.playerReferences.find(r => r.socketId == request.socketId);
+
+        if (!reference)
+            return this.issueNominalResponse(lib.errorResponse('Player reference is missing'));
+
         const state = this.actionProcessor.getState();
         const { message } = request;
         const { action, payload } = message;
-
-        if (action === Action.inquire)
-            return this.issueNominalResponse({ state });
+        const { socketId, email } = reference;
 
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment)
-            return this.processEnrolmentAction(request);
+            return this.processEnrolmentAction({ message, email, socketId, player: null });
 
-        const match = this.matchRequestToPlayer(request);
+        const matchOperation = this.matchRequestToPlayer(request);
 
-        if (match.err) {
-            console.error(match.message);
-
+        if (matchOperation.err) {
+            console.error(matchOperation.message);
             return this.issueNominalResponse({ resetFrom: this.config.SERVER_NAME });
         }
 
-        const { player } = match.data;
+        const matchedRequest = matchOperation.data;
+        const { player } = matchedRequest;
 
         if (action === Action.chat) {
 
@@ -182,7 +208,7 @@ export class GameSession {
                         return this.issueNominalResponse(lib.errorResponse('Name can no longer be updated.'));
 
                     const response = this.actionProcessor.updatePlayerName(player, newName);
-                    this.transmit && this.transmit(player.socketId, { newName } );
+                    this.transmit && this.transmit(socketId, { newName } );
 
                     return this.issueGroupResponse(response);
 
@@ -217,26 +243,35 @@ export class GameSession {
 
         switch (state.sessionPhase) {
             case Phase.play:
-                return this.processPlayAction(match.data);
+                return this.processPlayAction(matchedRequest);
             case Phase.setup:
-                return this.processSetupAction(match.data);
+                return this.processSetupAction(matchedRequest);
             case Phase.enrolment:
-                return this.processEnrolmentAction(match.data);
+                return this.processEnrolmentAction(matchedRequest);
             default:
                 return this.issueNominalResponse(lib.errorResponse('Unknown game phase!'));
         }
     }
 
     // MARK: ENROL
-    private processEnrolmentAction(data: RequestMatch | ClientRequest): WsDigest {
+    private updateReferenceColor(socketId: string, color: PlayerColor) {
+        console.log({refs: this.playerReferences, socketId})
+        const ref = this.playerReferences.find(r => r.socketId == socketId);
+
+        if (!ref)
+            return console.error('Could not a find reference to update color!!!');
+
+        ref.color = color;
+    };
+    private processEnrolmentAction(request: RequestMatch | EnrolRequest): WsDigest {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
-        if (data.message.action === Action.enrol) {
+        const { message, player } = request;
+        const { action } = message;
 
-            if (!('socketId' in data))
-                return this.issueNominalResponse(lib.errorResponse('socketId missing!'));
+        if (action === Action.enrol && !player) {
 
-            const { socketId, message } = data;
+            const { socketId, message } = request;
 
             const enrolment = processor.processEnrol(socketId, message.payload);
 
@@ -246,21 +281,18 @@ export class GameSession {
             return this.issueGroupResponse(enrolment.data);
         }
 
-        if (!('player' in data)) {
-            return this.issueNominalResponse(lib.errorResponse(
-                `Player [${data.playerColor}] is not enrolled`),
+        if (!player) {
+            return this.issueNominalResponse(
+                lib.errorResponse('Cannot process action, player not enrolled.'),
             );
         }
-
-        const { message, player } = data;
-        const { action } = message;
 
         const state = processor.getState();
 
         const enrolUpdate = ((): Probable<StateResponse> => {
             switch (action) {
                 case Action.change_color: {
-                    return processor.processChangeColor(player, message.payload);
+                    return processor.processChangeColor(player, request);
                 }
                 case Action.start_setup: {
                     const { gameId, sessionOwner, players, chat } = state;
@@ -295,10 +327,10 @@ export class GameSession {
     }
 
     // MARK: SETUP
-    private processSetupAction(match: RequestMatch) {
+    private processSetupAction(request: RequestMatch) {
         const processor = this.actionProcessor as SetupProcessor;
 
-        const { message, player } = match;
+        const { message, player } = request;
         const { action, payload } = message;
 
         if (!('specialist' in player)) {
@@ -349,10 +381,10 @@ export class GameSession {
     }
 
     // MARK: PLAY
-    public processPlayAction(match: RequestMatch): WsDigest {
+    public processPlayAction(request: RequestMatch): WsDigest {
         const processor = this.actionProcessor as PlayProcessor;
 
-        const { player, message } = match;
+        const { player, message, socketId } = request;
         const { action, payload } = message;
 
         if (!('timeStamp' in player)) {
@@ -361,15 +393,16 @@ export class GameSession {
             );
         }
 
-        const playerHandler = new PlayerHandler(player);
+        const playerHandler = new PlayerHandler(player, socketId);
         playerHandler.refreshTimeStamp();
 
-        const digest: DataDigest = { player: playerHandler, payload };
+        const digest: DataDigest = { player: playerHandler, payload, refPool: this.playerReferences };
 
-        if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action))
+        if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action)) {
             return this.issueNominalResponse(lib.errorResponse(
                 `It is not [${playerHandler.getIdentity().name}]'s turn!`,
             ));
+        }
 
         const actionsWhileFrozen: Array<Action> = [
             Action.drop_item,
@@ -457,29 +490,21 @@ export class GameSession {
         return { ...state, gameId };
     }
 
-    private matchRequestToPlayer(request: ClientRequest): Probable<RequestMatch> {
-        const { gameId, socketId, playerColor, playerName, message } = request;
-
-        if (!playerColor || !playerName)
-            return lib.fail('Player identity is incomplete');
+    private matchRequestToPlayer(request: AuthenticatedClientRequest): Probable<MatchedPlayerRequest> {
+        const { socketId } = request;
 
         const state = this.actionProcessor.getState();
+        const ref = this.playerReferences.find( r => r.socketId == socketId);
 
-        if (state.gameId != gameId)
-            return lib.fail('Game Id does not match in state');
+        if (!ref)
+            return lib.fail(`Cannot find reference for socketId: ${socketId}`);
 
-        const player = state.players.find(p => p.socketId === socketId);
+        const player = state.players.find(p => p.color === ref.color);
 
         if (!player)
-            return lib.fail(`Cannot find player [${socketId}] in state`);
+            return lib.fail(`Cannot find player [${ref.color}] in state`);
 
-        if (player.name != playerName)
-            return lib.fail(`[${playerName}] does not match name [${player.name}] in state`);
-
-        if (player.color != playerColor)
-            return lib.fail(`[${playerColor}] does not match name [${player.color}] in state`);
-
-        return lib.pass({ player: { ...player, socketId }, message });
+        return lib.pass({ ...request, player });
     }
 
     private isNameTaken(players: PlayerEntity[], name: string | null): boolean {

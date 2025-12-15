@@ -30,7 +30,6 @@ export enum Action {
     sell_specialty = 'sell_specialty',
     buy_metal = 'buy_metal',
     donate_metal = 'donate_metal',
-    inquire = 'inquire',
     enrol = 'enrol',
     change_color = 'change_color',
     undo = 'undo',
@@ -119,7 +118,6 @@ export type Rival = {
 } | { isIncluded: false }
 
 export type PlayerEntry = {
-    socketId: string,
     color: PlayerColor,
     name: string,
 }
@@ -303,7 +301,7 @@ export type VerboiseAction =
     | Action.sell_goods | Action.donate_goods | Action.buy_metal | Action.donate_metal | Action.pick_specialist
     | Action.enrol | Action.reposition_opponent | Action.change_color | Action.sell_as_chancellor | Action.sell_as_peddler;
 export type LaconicAction =
-    | Action.inquire | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
+    | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
     | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
     | Action.force_turn | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
@@ -336,15 +334,10 @@ export type ClientMessage =
     | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage | SellAsPeddlerMessage;
 
 export type ClientRequest = {
-    gameId: string,
-    socketId: string,
-    playerColor: PlayerColor | null,
-    playerName: string | null,
     message: ClientMessage,
 }
 
 // MARK: RESPONSE
-export type ClientIdResponse = { socketId: string }
 export type EnrolmentResponse = { approvedColor: PlayerColor, playerName: string }
 export type ColorChangeResponse = { approvedNewColor: PlayerColor }
 export type StateResponse = { state: State }
@@ -358,7 +351,6 @@ export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
 
 export type ServerMessage =
-    | ClientIdResponse
     | StateResponse
     | ResetResponse
     | ErrorResponse

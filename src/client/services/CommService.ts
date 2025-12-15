@@ -1,5 +1,5 @@
 import {
-    ClientIdResponse, ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
+    ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
     VpTransmission, EnrolmentResponse, NewNameTransmission, TurnNotificationTransmission, RivalControlTransmission,
     ForceTurnNotificationTransmission, ColorChangeResponse, NotFoundTransmission,
 } from '~/shared_types';
@@ -46,15 +46,6 @@ export class CommunicationService extends Communicator {
         this.socket.onmessage = (event) => {
             const data: ServerMessage = JSON.parse(event.data);
             console.debug('<-', data);
-
-            if (this.isClientIdResponse(data)) {
-                this.createEvent({
-                    type: EventType.identification,
-                    detail: { socketId: data.socketId },
-                });
-
-                return;
-            }
 
             switch (true) {
                 case this.isGameStateResponse(data):
@@ -109,17 +100,7 @@ export class CommunicationService extends Communicator {
             return;
         }
 
-        const { gameId, socketId, playerColor, playerName } = localState;
-
-        if (!socketId) {
-            this.createEvent({
-                type: EventType.error,
-                detail:{ message: 'Cannot send messages without prior Ws registration' },
-            });
-
-            return;
-        }
-        const request: ClientRequest = { gameId, socketId, playerColor, playerName, message };
+        const request: ClientRequest = { message };
 
         console.debug('->', request);
 
@@ -160,10 +141,6 @@ export class CommunicationService extends Communicator {
 
     private isRivalControlTransmission(data: ServerMessage): data is RivalControlTransmission {
         return 'rivalControl' in data;
-    }
-
-    private isClientIdResponse(data: ServerMessage): data is ClientIdResponse {
-        return 'socketId' in data;
     }
 
     private isErrorResponse(data: ServerMessage): data is ErrorResponse {

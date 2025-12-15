@@ -128,10 +128,6 @@ class ValidatorService {
             'ClientRequest',
             request,
             [
-                { key: 'socketId', type: 'string', nullable: false },
-                { key: 'gameId', type: 'string', nullable: false },
-                { key: 'playerName', type: 'string', nullable: true },
-                { key: 'playerColor', type: 'string', nullable: true, ref: refs.playerColor },
                 { key: 'message', type: 'object', nullable: false },
             ],
         );

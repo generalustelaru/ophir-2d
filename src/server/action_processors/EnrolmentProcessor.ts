@@ -4,7 +4,7 @@ import {
 import { validator } from '../services/validation/ValidatorService';
 import lib from './library';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
-import { Configuration, Probable, SessionProcessor } from '~/server_types';
+import { Configuration, Probable, RequestMatch, SessionProcessor } from '~/server_types';
 import serverConstants from '../server_constants';
 
 export class EnrolmentProcessor implements Unique<SessionProcessor> {
@@ -12,15 +12,18 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
     private transmit: (socketId: string, message: ServerMessage) => void;
     private isSinglePlayer: boolean;
     private defaultNames: Array<string>;
+    private reportColorAssignment: (socketId: string, color: PlayerColor) => void;
 
     constructor(
         state: EnrolmentState,
         transmitCallback: (socketId: string, message: ServerMessage) => void,
+        refUpdateCallback: (socketId: string, color: PlayerColor) => void,
         configuration: Configuration,
     ) {
         this.isSinglePlayer = configuration.SINGLE_PLAYER;
         this.enrolmentState = new EnrolmentStateHandler(configuration.SERVER_NAME, state);
         this.transmit = transmitCallback;
+        this.reportColorAssignment = refUpdateCallback;
         this.defaultNames = [...serverConstants.DEFAULT_NAMES];
     }
 
@@ -49,7 +52,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
             if (!this.enrolmentState.isRoomForNewPlayer())
                 return lib.fail('The game is full!');
 
-            this.enrolmentState.addPlayer({ socketId, color, name: name || color });
+            this.enrolmentState.addPlayer({ color, name: name || color });
 
             if (this.enrolmentState.getSessionOwner() === null)
                 this.enrolmentState.setSessionOwner(color);
@@ -63,6 +66,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         if (result.err)
             return result;
 
+        this.reportColorAssignment(socketId, color);
         this.transmit(socketId, { approvedColor: color, playerName: name });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
@@ -71,8 +75,8 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         return lib.pass({ state: this.enrolmentState.toDto() });
     }
 
-    public processChangeColor(player: PlayerEntry, payload: MessagePayload): Probable<StateResponse> {
-        const change = validator.validateColorChangePayload(payload);
+    public processChangeColor(player: PlayerEntry, match: RequestMatch): Probable<StateResponse> {
+        const change = validator.validateColorChangePayload(match.message.payload);
 
         if (!change)
             return lib.fail('Color change payload is malformed!');
@@ -85,8 +89,11 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         if (this.enrolmentState.getSessionOwner() == player.color)
             this.enrolmentState.setSessionOwner(newColor);
 
+
         this.enrolmentState.changeColor(player.color, newColor);
-        this.transmit(player.socketId, { approvedNewColor: newColor });
+
+        this.reportColorAssignment(match.socketId, newColor);
+        this.transmit(match.socketId, { approvedNewColor: newColor });
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }

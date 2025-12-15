@@ -22,14 +22,14 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
-    private broadcast: (state: PlayState) => void;
+    // private broadcast: (state: PlayState) => void;
     private transmit: (socketId: string, message: ServerMessage) => void;
 
     /** @throws */
     constructor(
         stateBundle: StateBundle,
         configuration: Configuration,
-        broadcastCallback: (state: PlayState) => void,
+        _broadcastCallback: (state: PlayState) => void,
         transmitCallback: (socketId: string, message: ServerMessage) => void,
     ) {
         const { playState, privateState, backupState } = stateBundle;
@@ -37,36 +37,39 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.playState = playState;
         this.privateState = privateState;
         this.backupState = backupState;
-        this.broadcast = broadcastCallback;
+        // this.broadcast = broadcastCallback;
         this.transmit = transmitCallback;
 
         const players = this.playState.getAllPlayers();
         const activePlayer = players.find(p => p.isActive === true);
+
+        if (activePlayer)
+            return;
+
+        // TODO: send VP when player re-connects.
+        // if (privateState.getGameStats().find(stat => { stat.vp != 0; })) {
+        //     for (const stat of privateState.getGameStats()) {
+        //         const player = players.find(p => p.color === stat.color);
+        //         player && this.transmit(
+        //             player.socketId,
+        //             { vp: this.privateState.getPlayerVictoryPoints(player.color) },
+        //         );
+        //     }
+        // }
         const firstPlayer = players.find(p => p.turnOrder === 1);
 
-        if (privateState.getGameStats().find(stat => { stat.vp != 0; })) {
-            for (const stat of privateState.getGameStats()) {
-                const player = players.find(p => p.color === stat.color);
-                player && this.transmit(
-                    player.socketId,
-                    { vp: this.privateState.getPlayerVictoryPoints(player.color) },
-                );
-            }
-        }
-
         if (!firstPlayer)
-            throw new Error('Could not find the first player!');
+            throw new Error('Cannot find not find current player!');
 
-        const player = new PlayerHandler(activePlayer || firstPlayer);
+        const player = new PlayerHandler(firstPlayer, '');
         const { seaZone } = player.getBearings();
 
-        !activePlayer && player.activate(
+        player.activate(
             this.privateState.getDestinations(seaZone),
             player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
         );
         this.playState.savePlayer(player.toDto());
-
-        this.startIdleChecks(configuration.PLAYER_IDLE_MINUTES);
+        // this.startIdleTimeout(configuration.PLAYER_IDLE_MINUTES);
     }
 
     public getState() {
@@ -264,7 +267,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     public repositionOpponent(data: DataDigest): Probable<StateResponse> {
-        const { payload } = data;
+        const { payload, refPool } = data;
         const validation = validator.validateOpponentRepositioningPayload(payload);
 
         if (validation.err)
@@ -273,11 +276,12 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const { color, repositioning } = validation.data;
 
         const opponentDto = this.playState.getPlayer(color);
+        const opponentRef = refPool.find(r => r.color == color)?.socketId;
 
-        if (!opponentDto)
-            return lib.fail('Cannot find opponent in state.');
+        if (!opponentDto || !opponentRef)
+            return lib.fail('Cannot find opponent or reference.');
 
-        const opponent = new PlayerHandler(opponentDto);
+        const opponent = new PlayerHandler(opponentDto, opponentRef);
         opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
 
         return this.continueTurn(opponent, false);
@@ -772,9 +776,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: END TURN
     public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
-        const { player } = data;
+        const { player, refPool } = data;
         this.clearUndo(player);
-        const { turnOrder, socketId } = player.getIdentity();
+        const { turnOrder, socketId: playerId } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
             return lib.fail('Ship is not anchored.');
@@ -798,17 +802,18 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.playState.savePlayer(player.toDto());
 
         if(!isVoluntary)
-            this.transmit(socketId, { forceTurn: null });
+            this.transmit(playerId, { forceTurn: null });
 
-        const newPlayerResult = ((): Probable<PlayerHandler> => {
+        const newPlayerOperation = ((): Probable<PlayerHandler> => {
             const allPlayers = this.playState.getAllPlayers();
             const nextInOrder = turnOrder === allPlayers.length ? 1 : turnOrder + 1;
             const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextInOrder);
+            const { socketId: nextPlayerId } = refPool.find(r => r.color == nextPlayerDto?.color) || {};
+            console.log({refPool, color: nextPlayerDto?.color});
+            if (!nextPlayerDto || !nextPlayerId)
+                return lib.fail('Could not find the next player or reference');
 
-            if (!nextPlayerDto)
-                return lib.fail('Could not find the next player');
-
-            const nextPlayer = new PlayerHandler(nextPlayerDto);
+            const nextPlayer = new PlayerHandler(nextPlayerDto, nextPlayerId);
             const { seaZone } = nextPlayer.getBearings();
 
             nextPlayer.activate(
@@ -816,18 +821,18 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
 
-            const { color, socketId } = nextPlayer.getIdentity();
+            const { color } = nextPlayer.getIdentity();
             this.playState.updateRival(color);
 
-            this.transmit(socketId, { turnStart: null });
+            this.transmit(nextPlayerId, { turnStart: null });
 
             return lib.pass(nextPlayer);
         })();
 
-        if (newPlayerResult.err)
-            return lib.fail(newPlayerResult.message);
+        if (newPlayerOperation.err)
+            return lib.fail(newPlayerOperation.message);
 
-        const newPlayer = newPlayerResult.data;
+        const newPlayer = newPlayerOperation.data;
         this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
 
         return this.continueTurn(newPlayer);
@@ -884,15 +889,16 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
     // MARK: FORCED TURN
     public forceTurn(digest: DataDigest): Probable<StateResponse> {
-        const { player } = digest;
+        const { player, refPool } = digest;
 
         if (player.isActivePlayer())
             return lib.fail('Active player cannot force own turn!');
 
         const activePlayer = this.playState.getActivePlayer();
+        const { socketId } = refPool.find(r => r.color == activePlayer?.color) || {};
 
-        if (!activePlayer)
-            return lib.fail('Cannot find active player!');
+        if (!activePlayer || !socketId)
+            return lib.fail('Cannot find active player or reference!');
 
         if (!activePlayer.isIdle)
             return lib.fail('Cannot force turn on non-idle player');
@@ -900,21 +906,24 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (activePlayer.isHandlingRival)
             this.playState.concludeRivalTurn();
 
-        const idlerHandler = new PlayerHandler(
-            { ...activePlayer, locationActions: [], isIdle: false, isAnchored: true, isHandlingRival: false },
-        );
-
         this.addServerMessage(
-            `${player.getIdentity().name} forced ${idlerHandler.getIdentity().name} to end the turn.`,
+            `${player.getIdentity().name} forced ${activePlayer.name} to end the turn.`,
             player.getIdentity().color,
         );
 
-        return this.endTurn({ player: idlerHandler, payload: null }, false);
+        return this.endTurn(
+            {
+                player: new PlayerHandler(activePlayer,socketId),
+                payload: null,
+                refPool,
+            },
+            false,
+        );
     }
 
     // MARK: UNDO
     public undo(digest: DataDigest): Probable<StateResponse> {
-        const { player } = digest;
+        const { player, refPool } = digest;
         const { color } = player.getIdentity();
 
         if (!player.mayUndo)
@@ -931,13 +940,14 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.privateState = new PrivateStateHandler(privateState);
 
         const revertedPlayer = playState.players.find(p => p.color === color);
+        const socketId = refPool.find(r => r.color == color)?.socketId;
 
-        if (!revertedPlayer)
-            return lib.fail('Could not find active player in backup');
+        if (!revertedPlayer || !socketId)
+            return lib.fail('Could not find active player in backup or reference');
 
         this.transmit(player.getIdentity().socketId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
-        const playerHandler = new PlayerHandler(revertedPlayer);
+        const playerHandler = new PlayerHandler(revertedPlayer, socketId);
 
         if (this.backupState.isEmpty())
             playerHandler.disableUndo();
@@ -1302,30 +1312,31 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     // TODO: convert to a timeout as not to repeat the idle message.
-    private startIdleChecks(timeoutMinutes: number): void {
-        const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
 
-        this.idleCheckInterval = setInterval(() => {
-            const activePlayer = this.playState.getActivePlayer();
+    // private startIdleTimeout(timeoutMinutes: number, socketId: string): void {
+    //     const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
 
-            if (!activePlayer) {
-                lib.fail('No active player found in idle check!');
-                return;
-            }
+    //     this.idleCheckInterval = setInterval(() => {
+    //         const activePlayer = this.playState.getActivePlayer();
 
-            const timeNow = Date.now();
+    //         if (!activePlayer) {
+    //             lib.fail('No active player found in idle check!');
+    //             return;
+    //         }
 
-            if (timeNow - activePlayer.timeStamp > limitMinutes && !activePlayer.isIdle) {
-                activePlayer.isIdle = true;
-                this.addServerMessage(`${activePlayer.name} is idle`);
-                this.playState.savePlayer(activePlayer);
+    //         const timeNow = Date.now();
 
-                this.transmit(activePlayer.socketId, { turnStart: null });
-                this.broadcast(this.playState.toDto());
-            }
+    //         if (timeNow - activePlayer.timeStamp > limitMinutes && !activePlayer.isIdle) {
+    //             activePlayer.isIdle = true;
+    //             this.addServerMessage(`${activePlayer.name} is idle`);
+    //             this.playState.savePlayer(activePlayer);
 
-        }, 2000);
-    }
+    //             this.transmit(activePlayer.socketId, { turnStart: null });
+    //             this.broadcast(this.playState.toDto());
+    //         }
+
+    //     }, 2000);
+    // }
 
     public killIdleChecks() {
         this.idleCheckInterval && clearInterval(this.idleCheckInterval);

@@ -1,7 +1,7 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
-    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName,
+    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName, ClientRequest,
 } from '~/shared_types';
 import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -19,10 +19,20 @@ export enum CookieName {
     userEmail = 'userEmail',
 }
 
+export type PlayerReference = { color: PlayerColor | null, socketId: string, email: string }
+
 export type WsClient = {
     socketId: UUID,
     gameId: string | null,
     socket: WebSocket
+}
+
+export type AuthenticatedClientRequest = ClientRequest & {
+    socketId: string,
+}
+
+export type MatchedPlayerRequest = AuthenticatedClientRequest & {
+    player: PlayerEntity
 }
 
 export type WsDigest = {
@@ -67,10 +77,19 @@ export type SetupDigest = {
     chat: Array<ChatEntry>,
 }
 
-export type RequestMatch = {
-    player: PlayerEntity,
+export type EnrolRequest = {
     message: ClientMessage,
+    email: string,
+    socketId: string,
+    player: null,
 }
+
+export type RequestMatch = {
+    message: ClientMessage,
+    socketId: string,
+    player: PlayerEntity,
+}
+
 export type ActionsAndDetails = {
     actions: Array<LocalAction>,
     trades: Array<FeasibleTrade>,
@@ -115,6 +134,7 @@ export type BackupState = {
 export type DataDigest = {
     player: PlayerHandler,
     payload: MessagePayload
+    refPool: Array<PlayerReference>
 }
 
 export type BarrierCheck = {
@@ -163,6 +183,7 @@ export interface SessionProcessor {
 }
 
 export type SessionState = {
+    playerReferences: Array<PlayerReference>
     sharedState: State
     privateState: PrivateState | null
     backupStates: Array<BackupState> | null

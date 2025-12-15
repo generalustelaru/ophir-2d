@@ -59,10 +59,10 @@ function getCopy<O extends object>(obj: O): O {
     return JSON.parse(JSON.stringify(obj));
 }
 
-function parseCookies(cookieString?: string): Record<string, string> {
+function parseCookies(cookieString: string): Record<string, string> {
     const cookies: Record<string, string> = {};
 
-    if (cookieString) {
+    if (cookieString.length) {
         cookieString.split(';').forEach(cookie => {
             const [key, value] = cookie.trim().split('=');
             cookies[key] = value;

@@ -1,6 +1,8 @@
-import { AuthenticationForm, Configuration, CookieName, RegistrationForm, SessionState } from '~/server_types';
-import { ServerMessage, ClientRequest, PlayState, Action } from '~/shared_types';
+import {
+    AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieName, Probable, RegistrationForm, SessionState,
+} from '~/server_types';
 import { validator } from './services/validation/ValidatorService';
+import { ServerMessage, PlayState, Action } from '~/shared_types';
 import express, { Request, Response } from 'express';
 import dbService from './services/DatabaseService';
 import { WebSocketServer, WebSocket } from 'ws';
@@ -161,9 +163,9 @@ app.post('/login', (req: Request, res: Response) => {
 app.get('/new', (req: Request, res: Response) => {
     console.info('Visitor calls for new session', { ip: req.ip });
 
-    checkAuthToken(req).then(isAuthenticated => {
+    validateClient(req.headers.cookie).then(validation => {
 
-        if (isAuthenticated) {
+        if (validation.ok) {
             createGameSession().then(session => {
 
                 if (session) {
@@ -187,9 +189,9 @@ app.get('/:id', (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
 
-    checkAuthToken(req).then(isAuthenticated => {
+    validateClient(req.headers.cookie).then(validation => {
 
-        if (isAuthenticated) {
+        if (validation.ok) {
             res.setHeader('X-Content-Type-Options', 'nosniff');
 
             if (playGroups.has(gameId)) {
@@ -229,38 +231,56 @@ const socketServer = new WebSocketServer({ port: WS_PORT });
 const socketRefs: Map<SocketId, SocketReference> = new Map();
 const playGroups: Map<GameId, PlayGroup> = new Map();
 
-socketServer.on('connection', function connection(socket, req) {
-    const params = req.url ? new URL(req.url, `http://${req.headers.host}`).searchParams : null;
+socketServer.on('connection', function connection(socket, inc) {
+    const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
 
     if (!gameId){
         console.error('WS connection did not provide gameId.');
-        return transmit(socket, { error: 'Invalid connection data.' });
+        transmit(socket, { error: 'Invalid connection data.' });
+        return socket.close();
     }
 
     const playGroup = playGroups.get(gameId);
+    let userEmail: string;
+    let socketId: string;
 
-    if (!playGroup)
-        return transmit(socket, { notFound: null });
+    if (!playGroup) {
+        console.warn('WS requested inexistent play session.');
+        transmit(socket, { notFound: null });
+        return socket.close();
+    }
 
-    const socketId = (() => {
-        const { userEmail } = sLib.parseCookies(req.headers.cookie);
-        const oldId = playGroup.socketIds.get(userEmail);
+    validateClient(inc.headers.cookie).then(validation => {
 
-        if (oldId)
-            return oldId;
+        if (validation.err) {
+            console.error('WS connection has invalid cookie.', { err: validation.message });
+            transmit(socket, { error: 'Invalid connection data.' });
+            return socket.close();
+        }
 
-        const newId = randomUUID();
-        playGroup.socketIds.set(userEmail, newId);
+        userEmail = validation.data.userEmail;
 
-        return newId;
-    })();
+        socketId = (() => {
+            const oldId = playGroup.socketIds.get(userEmail);
 
-    socketRefs.set(socketId, { gameId, socket });
-    playGroup.sockets.set(socketId, socket);
-    console.log('websocket added to play group');
+            if (oldId)
+                return oldId;
 
-    socket.send(JSON.stringify({ socketId }));
+            const newId = randomUUID();
+
+            playGroup.socketIds.set(userEmail, newId);
+            playGroup.session.setPlayerRef(userEmail, newId);
+
+            return newId;
+        })();
+
+        socketRefs.set(socketId, { gameId, socket });
+        playGroup.sockets.set(socketId, socket);
+        console.log('websocket added to play group');
+
+        transmit(socket, { state: playGroup.session.getSharedState() });
+    });
 
     socket.on('message', function incoming(req: string) {
         const clientRequest = validator.validateClientRequest(JSON.parse(req));
@@ -268,37 +288,33 @@ socketServer.on('connection', function connection(socket, req) {
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
-        logRequest(clientRequest);
+        // logRequest(clientRequest);
 
-        const gameId = clientRequest.gameId;
-        const session = playGroups.get(gameId)?.session;
-
-        if (!session)
-            return transmit(socket, { notFound: null });
+        playGroup.socketIds.get(userEmail);
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
                 if (configuration.err)
                     return console.error(configuration.message);
 
-                session.updateConfig(configuration.data);
-                processAction(session, clientRequest, socket);
+                playGroup.session.updateConfig(configuration.data);
+                processAction(playGroup.session, { ...clientRequest, socketId }, socket);
             });
         } else {
-            processAction(session, clientRequest, socket);
+            processAction(playGroup.session, { ...clientRequest, socketId }, socket);
         }
     });
 });
 
 async function processAction(
     session: GameSession,
-    request: ClientRequest,
+    request: AuthenticatedClientRequest,
     socket: WebSocket,
 ) {
     const result = session.processAction(request);
 
     if (request.message.action == Action.end_turn) {
-        const save = await dbService.saveGameState(session.getCurrentState());
+        const save = await dbService.saveGameState(session.getSessionState());
 
         if (save.err) {
             console.error(save.message);
@@ -328,26 +344,26 @@ function transmitCallback(socketId: string, message: ServerMessage) {
 
 // MARK: FUNCTIONS
 
-function logRequest(request: ClientRequest) {
-    const { playerColor, playerName, message } = request;
-    const { action, payload } = message;
+// function logRequest(request: ClientRequest) {
+//     const { playerColor, playerName, message } = request;
+//     const { action, payload } = message;
 
-    const name = playerName || playerColor || '';
-    const colorized = {
-        Purple: `\x1b[95m${name}\x1b[0m`,
-        Yellow: `\x1b[93m${name}\x1b[0m`,
-        Red: `\x1b[91m${name}\x1b[0m`,
-        Green: `\x1b[92m${name}\x1b[0m`,
-    };
-    const clientName = playerColor ? colorized[playerColor] : 'anon';
+//     const name = playerName || playerColor || '';
+//     const colorized = {
+//         Purple: `\x1b[95m${name}\x1b[0m`,
+//         Yellow: `\x1b[93m${name}\x1b[0m`,
+//         Red: `\x1b[91m${name}\x1b[0m`,
+//         Green: `\x1b[92m${name}\x1b[0m`,
+//     };
+//     const clientName = playerColor ? colorized[playerColor] : 'anon';
 
-    console.info(
-        '%s -> %s%s',
-        clientName,
-        action ?? '?',
-        payload ? `: ${JSON.stringify(payload)}` : ': { }',
-    );
-}
+//     console.info(
+//         '%s -> %s%s',
+//         clientName,
+//         action ?? '?',
+//         payload ? `: ${JSON.stringify(payload)}` : ': { }',
+//     );
+// }
 
 function shutDown() {
     rl.close();
@@ -401,7 +417,7 @@ function startSessionChecks(configuration: Configuration) {
                 playGroup && playGroup.sockets.delete(socketId);
 
                 if (playGroup?.sockets.size == 0) {
-                    const save = await dbService.saveGameState(playGroup.session.getCurrentState());
+                    const save = await dbService.saveGameState(playGroup.session.getSessionState());
 
                     if (save.ok) {
                         playGroup.session.deReference();
@@ -445,7 +461,7 @@ async function createGameSession(): Promise<GameSession | null> {
     if (!gameSession)
         return null;
 
-    const result = await dbService.addGameState(gameSession.getCurrentState());
+    const result = await dbService.addGameState(gameSession.getSessionState());
 
     if (result.err) {
         console.error(result.message);
@@ -484,24 +500,28 @@ async function getGameSessionInstance(savedSession: SessionState | null): Promis
     }
 }
 
-async function checkAuthToken(request: Request): Promise<boolean> {
-    const { authToken, userEmail } = sLib.parseCookies(request.headers.cookie);
-    console.info('Validating user', userEmail);
+async function validateClient(cookie: unknown): Promise<Probable<{authToken: string, userEmail: string}>> {
+    console.info('Validating client');
 
+    if (typeof cookie != 'string')
+        return sLib.fail('Cannot parse cookie, not a string');
+
+    const clientData = sLib.parseCookies(cookie);
+
+    if (!('authToken' in clientData) || !('userEmail' in clientData))
+        return sLib.fail('Cookie is missing essential data.');
+
+    const { authToken, userEmail } = clientData;
     const result = await dbService.getUser(userEmail);
 
-    if (result.err) {
-        console.error(result.message);
-        return false;
-    }
+    if (result.err)
+        return sLib.fail(result.message);
 
     const user = result.data;
 
-    if (user.authToken != authToken) {
-        console.error('Unauthorized request', { headers: request.headers });
-        return false;
-    }
+    if (user.authToken != authToken)
+        return sLib.fail('Unauthorized request');
 
-    return true;
+    return sLib.pass({ authToken, userEmail });
 }
 
