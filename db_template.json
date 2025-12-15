@@ -3,6 +3,7 @@
         "ADMIN_AUTH": "0451",
         "SERVER_NAME": "Laputan Machine",
         "PLAYER_IDLE_MINUTES": 1,
+        "ABANDONED_SESSION_LIFETIME_MINUTES": 5,
         "SESSION_DELETION_HOURS": 1,
         "SINGLE_PLAYER": false,
         "NO_RIVAL": false,

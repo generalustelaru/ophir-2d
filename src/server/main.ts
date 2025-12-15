@@ -1,13 +1,12 @@
 import {
     AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieName, Probable, RegistrationForm, SessionState,
 } from '~/server_types';
+import { ServerMessage, PlayState, Action, ClientRequest, Email } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
-import { ServerMessage, PlayState, Action, ClientRequest } from '~/shared_types';
 import express, { Request, Response } from 'express';
 import dbService from './services/DatabaseService';
 import { WebSocketServer, WebSocket } from 'ws';
 import { GameSession } from './GameSession';
-import { randomUUID } from 'crypto';
 import sLib from './server_lib';
 import readline from 'readline';
 import process from 'process';
@@ -102,7 +101,7 @@ app.get('/probe', (req: Request, res: Response) => {
 });
 
 app.get('/', (req: Request, res: Response) => {
-    console.info('Unknown visitor', { ip: req.ip });
+    console.info('Visitor', { ip: req.ip });
 
     res.sendFile(path.join(__dirname,'public', 'index.html'));
 });
@@ -174,7 +173,7 @@ app.get('/new', (req: Request, res: Response) => {
 
                 if (session) {
                     const gameId = session.getGameId();
-                    playGroups.set(gameId, { session, sockets: new Map() });
+                    activeGames.set(gameId, session);
 
                     res.redirect(`/${gameId}`);
                 } else {
@@ -182,6 +181,7 @@ app.get('/new', (req: Request, res: Response) => {
                 }
             });
         } else {
+            console.error(validation.message);
             res.redirect('/');
         }
     });
@@ -198,13 +198,13 @@ app.get('/:id', (req: Request, res: Response) => {
         if (validation.ok) {
             res.setHeader('X-Content-Type-Options', 'nosniff');
 
-            if (playGroups.has(gameId)) {
+            if (activeGames.has(gameId)) {
                 res.sendFile(path.join(__dirname,'public', 'game.html'));
             } else {
                 reviveGameSession(gameId).then(session => {
 
                     if (session) {
-                        playGroups.set(gameId, { session, sockets: new Map() });
+                        activeGames.set(gameId, session);
                         res.sendFile(path.join(__dirname,'public', 'game.html'));
                     } else {
                         res.redirect('/new');
@@ -212,26 +212,23 @@ app.get('/:id', (req: Request, res: Response) => {
                 });
             }
         } else {
+            console.error(validation.message);
             res.redirect('/');
         }
     });
 });
 
 // MARK: WS
-type SocketId = string
 type GameId = string
-type PlayGroup = {
-    session: GameSession
-    sockets: Map<SocketId, WebSocket>
-}
-type SocketReference = {
+
+type Connection = {
     socket: WebSocket
     gameId: GameId
 }
 
 const socketServer = new WebSocketServer({ port: WS_PORT });
-const socketRefs: Map<SocketId, SocketReference> = new Map();
-const playGroups: Map<GameId, PlayGroup> = new Map();
+const connections: Map<Email, Connection> = new Map();
+const activeGames: Map<GameId, GameSession> = new Map();
 
 socketServer.on('connection', function connection(socket, inc) {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
@@ -243,11 +240,10 @@ socketServer.on('connection', function connection(socket, inc) {
         return socket.close();
     }
 
-    const playGroup = playGroups.get(gameId);
-    let userEmail: string;
-    let socketId: string;
+    const game = activeGames.get(gameId);
+    let userEmail: Email;
 
-    if (!playGroup) {
+    if (!game) {
         console.warn('WS requested inexistent play session.');
         transmit(socket, { notFound: null });
         return socket.close();
@@ -263,26 +259,19 @@ socketServer.on('connection', function connection(socket, inc) {
 
         userEmail = validation.data.userEmail;
 
-        socketId = (() => {
-            const ref = playGroup.session.getPlayerRef(userEmail);
+        const ref = game.getPlayerRef(userEmail);
 
-            if (ref) {
-                if (ref.color) {
-                    transmit(socket, { color: ref.color });
-                    console.info('client reconnected to play group');
-                }
-                return ref.socketId;
-            }
-
-            const newId = randomUUID();
-            playGroup.session.setPlayerRef(userEmail, newId);
+        if (ref) {
+            ref.color && transmit(socket, { color: ref.color });
+            console.info('client reconnected to play group');
+        } else {
+            game.setPlayerRef(userEmail);
             console.info('client added to play group');
-            return newId;
-        })();
+        }
 
-        socketRefs.set(socketId, { gameId, socket });
-        playGroup.sockets.set(socketId, socket);
-        transmit(socket, { state: playGroup.session.getSharedState() });
+        connections.set(userEmail, { gameId, socket });
+
+        transmit(socket, { state: game.getSharedState() });
     });
 
     socket.on('message', function incoming(req: string) {
@@ -293,18 +282,17 @@ socketServer.on('connection', function connection(socket, inc) {
 
         logRequest(clientRequest, userEmail);
 
-        // playGroup.socketIds.get(userEmail);
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
                 if (configuration.err)
                     return console.error(configuration.message);
 
-                playGroup.session.updateConfig(configuration.data);
-                processAction(playGroup.session, { ...clientRequest, socketId }, socket);
+                game.updateConfig(configuration.data);
+                processAction(game, { ...clientRequest, email: userEmail }, socket);
             });
         } else {
-            processAction(playGroup.session, { ...clientRequest, socketId }, socket);
+            processAction(game, { ...clientRequest, email: userEmail }, socket);
         }
     });
 });
@@ -336,8 +324,8 @@ function broadcastCallback(state: PlayState) {
     broadcastToGroup(state.gameId, { state });
 }
 
-function transmitCallback(socketId: string, message: ServerMessage) {
-    const reference = socketRefs.get(socketId);
+function transmitCallback(email: Email, message: ServerMessage) {
+    const reference = connections.get(email);
 
     if (!reference)
         return console.error('Cannot deliver message: Missing socket client.', { message });
@@ -360,12 +348,12 @@ function logRequest(request: ClientRequest, email: string) {
 }
 
 function debugGameReference(gameId: string): object {
-    const group = playGroups.get(gameId);
-    if (!group)
+    const game = activeGames.get(gameId);
+    if (!game)
         return {};
 
     return {
-        game_refs: group.session.getAllRefs(),
+        game_refs: game.getAllRefs(),
     };
 }
 
@@ -374,7 +362,7 @@ function shutDown() {
     console.log('Shutting down...');
 
     broadcast({ error: 'The server is entering maintenance.' });
-    socketRefs.forEach(ref => ref.socket.close(1000));
+    connections.forEach(ref => ref.socket.close(1000));
 
     setTimeout(() => {
         socketServer.close();
@@ -384,7 +372,7 @@ function shutDown() {
 }
 
 function broadcast(message: ServerMessage): void {
-    socketRefs.forEach(ref => {
+    connections.forEach(ref => {
         transmit(ref.socket, message);
     });
 }
@@ -394,46 +382,54 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
 }
 
 function broadcastToGroup(gameId: string, message: ServerMessage): void {
-    const groupSockets = playGroups.get(gameId)?.sockets;
+    const userEmails = activeGames.get(gameId)?.getAllRefs().map(r=> r.email);
 
-    if (!groupSockets)
+    if (!userEmails)
         return console.error('Cannot find active GameSession', { gameId });
 
-    groupSockets.forEach(socket => {
-        transmit(socket, message);
-    });
+    for (const email of userEmails) {
+        const socket = connections.get(email)?.socket;
+        socket && transmit(socket, message);
+    }
 }
 
 function startSessionChecks(configuration: Configuration) {
-    const { SESSION_DELETION_HOURS } = configuration;
+    const { SESSION_DELETION_HOURS, ABANDONED_SESSION_LIFETIME_MINUTES } = configuration;
     console.info('Starting session checks');
 
     const minutes = 60000;
     setInterval(() => {
         // free memory
-        socketRefs.forEach(async (reference, socketId) => {
+        connections.forEach(async (reference, email) => {
             const { gameId, socket } = reference;
-            if (
-                socket.readyState == socket.CLOSED
-            ) {
-                socketRefs.delete(socketId);
-                const playGroup = playGroups.get(gameId);
-                playGroup && playGroup.sockets.delete(socketId);
 
-                if (playGroup?.sockets.size == 0) {
-                    const save = await dbService.saveGameState(playGroup.session.getSessionState());
+            if (socket.readyState == socket.CLOSED) {
+                connections.delete(email);
+                const game = activeGames.get(gameId);
 
-                    if (save.ok) {
-                        playGroup.session.deReference();
-                        playGroups.delete(gameId);
-                        console.info('deactivated empty session', { gameId });
-                    } else {
-                        console.error('Failed to preserve game state. Session remains active.');
+                if (game) {
+                    const connectedUsers = game
+                        .getAllRefs()
+                        .map( r => r.email)
+                        .filter(email => {
+                            connections.has(email) && connections.get(email)!.socket.OPEN;
+                        });
+
+                    if (connectedUsers.length == 0) {
+                        const saveOp = await dbService.saveGameState(game.getSessionState());
+
+                        if (saveOp.ok) {
+                            game.deReference();
+                            activeGames.delete(gameId);
+                            console.info('deactivated empty session', { gameId });
+                        } else {
+                            console.error(saveOp.message);
+                        }
                     }
                 }
             }
         });
-    }, 5 * minutes);
+    }, ABANDONED_SESSION_LIFETIME_MINUTES * minutes);
 
     const hours = 3600000;
     setInterval(() => {
@@ -445,7 +441,7 @@ function startSessionChecks(configuration: Configuration) {
             const time = Date.now();
 
             for (const item of timeStamps.data) {
-                if (time - item.timeStamp > (SESSION_DELETION_HOURS * hours) && !playGroups.has(item.id)) {
+                if (time - item.timeStamp > (SESSION_DELETION_HOURS * hours) && !activeGames.has(item.id)) {
                     dbService.deleteGameState(item.id).then(response => {
 
                         if (response.err)
@@ -504,7 +500,7 @@ async function getGameSessionInstance(savedSession: SessionState | null): Promis
     }
 }
 
-async function validateClient(cookie: unknown): Promise<Probable<{authToken: string, userEmail: string}>> {
+async function validateClient(cookie: unknown): Promise<Probable<{authToken: string, userEmail: Email}>> {
     console.info('Validating client');
 
     if (typeof cookie != 'string')
@@ -515,7 +511,16 @@ async function validateClient(cookie: unknown): Promise<Probable<{authToken: str
     if (!('authToken' in clientData) || !('userEmail' in clientData))
         return sLib.fail('Cookie is missing essential data.');
 
-    const { authToken, userEmail } = clientData;
+    const { authToken, userEmail: cookieEmail } = clientData;
+
+    const userEmail = ((): Email | null => {
+        const m = cookieEmail.match(/^\w+@\w+\.\w+$/);
+        return m ? m[0] as Email : null;
+    })();
+
+    if (!userEmail)
+        return sLib.fail('Email string is not an email address');
+
     const result = await dbService.getUser(userEmail);
 
     if (result.err)

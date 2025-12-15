@@ -65,7 +65,7 @@ function parseCookies(cookieString: string): Record<string, string> {
     if (cookieString.length) {
         cookieString.split(';').forEach(cookie => {
             const [key, value] = cookie.trim().split('=');
-            cookies[key] = value;
+            cookies[key] = decodeURIComponent(value);
         });
     }
 

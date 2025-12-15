@@ -1,6 +1,9 @@
 import { HexCoordinates } from "~/client_types";
 import { PlayerCountables } from "~/server_types";
 
+/** Universal identifier */
+export type Email = `${string}@${string}.${string}`
+
 /**
  * @description Interface wrapper hack to prevent the TSS from polluting class method references.
  */

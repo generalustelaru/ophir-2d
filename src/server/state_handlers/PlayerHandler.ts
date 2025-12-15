@@ -1,6 +1,7 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocalAction, Player, PlayerColor, ShipBearings, ZoneName,
     Specialist, SpecialistName, MetalPurchasePayload, Unique, FeasibleTrade,
+    Email,
 } from '~/shared_types';
 import { ActionsAndDetails, ObjectHandler, PlayerIdentity } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
@@ -8,7 +9,7 @@ import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } 
 const MAX_FAVOR = 6;
 export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
-    private socketId: Readable<string>;
+    private email: Readable<Email>;
     private color: Readable<PlayerColor>;
     private timeStamp: Writable<number>;
     private isIdle: Writable<boolean>;
@@ -37,8 +38,8 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     /**
      * @throws Instantiation error
      */
-    constructor(player: Player, socketId: string) {
-        this.socketId = readable(socketId);
+    constructor(player: Player, email: Email) {
+        this.email = readable(email);
         this.color = readable(player.color);
         this.timeStamp = writable(player.timeStamp);
         this.isIdle = writable(player.isIdle);
@@ -103,7 +104,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public getIdentity(): PlayerIdentity {
         return {
-            socketId: this.socketId.get(),
+            email: this.email.get(),
             color: this.color.get(),
             name: this.name.get(),
             turnOrder: this.turnOrder.get(),

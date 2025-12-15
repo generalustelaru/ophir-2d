@@ -1,15 +1,12 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
-    ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
+    ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData, Email,
     StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName, ClientRequest,
 } from '~/shared_types';
-import { WebSocket } from 'ws';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
-import { UUID } from 'crypto';
-
 
 /** Return value wrapper with positive checks */
 export type Probable<T> = { err: true, ok: false, message: string } | { err: false, ok: true, data: T };
@@ -19,16 +16,10 @@ export enum CookieName {
     userEmail = 'userEmail',
 }
 
-export type PlayerReference = { color: PlayerColor | null, socketId: string, email: string }
-
-export type WsClient = {
-    socketId: UUID,
-    gameId: string | null,
-    socket: WebSocket
-}
+export type PlayerReference = { color: PlayerColor | null, email: Email }
 
 export type AuthenticatedClientRequest = ClientRequest & {
-    socketId: string,
+    email: Email,
 }
 
 export type MatchedPlayerRequest = AuthenticatedClientRequest & {
@@ -64,7 +55,7 @@ export type PlayerCountables = {
 }
 
 export type PlayerIdentity = {
-    socketId: string,
+    email: Email,
     color: PlayerColor,
     name: string,
     turnOrder: number,
@@ -79,14 +70,13 @@ export type SetupDigest = {
 
 export type EnrolRequest = {
     message: ClientMessage,
-    email: string,
-    socketId: string,
+    email: Email,
     player: null,
 }
 
 export type RequestMatch = {
     message: ClientMessage,
-    socketId: string,
+    email: Email,
     player: PlayerEntity,
 }
 
@@ -162,6 +152,7 @@ export type Configuration = {
     ADMIN_AUTH: string,
     SERVER_NAME: string,
     PLAYER_IDLE_MINUTES: number,
+    ABANDONED_SESSION_LIFETIME_MINUTES: number,
     SESSION_DELETION_HOURS: number,
     SINGLE_PLAYER: boolean,
     NO_RIVAL: boolean,

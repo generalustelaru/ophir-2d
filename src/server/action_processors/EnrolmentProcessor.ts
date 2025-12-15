@@ -1,23 +1,24 @@
 import {
-    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse, Unique,
+    ChatEntry, Email, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
+    Unique,
 } from '~/shared_types';
-import { validator } from '../services/validation/ValidatorService';
-import lib from './library';
-import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
 import { Configuration, Probable, RequestMatch, SessionProcessor } from '~/server_types';
+import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
+import { validator } from '../services/validation/ValidatorService';
 import serverConstants from '../server_constants';
+import lib from './library';
 
 export class EnrolmentProcessor implements Unique<SessionProcessor> {
     private enrolmentState: EnrolmentStateHandler;
-    private transmit: (socketId: string, message: ServerMessage) => void;
+    private transmit: (email: Email, message: ServerMessage) => void;
     private isSinglePlayer: boolean;
     private defaultNames: Array<string>;
-    private reportColorAssignment: (socketId: string, color: PlayerColor) => void;
+    private reportColorAssignment: (email: Email, color: PlayerColor) => void;
 
     constructor(
         state: EnrolmentState,
-        transmitCallback: (socketId: string, message: ServerMessage) => void,
-        refUpdateCallback: (socketId: string, color: PlayerColor) => void,
+        transmitCallback: (email: Email, message: ServerMessage) => void,
+        refUpdateCallback: (email: Email, color: PlayerColor) => void,
         configuration: Configuration,
     ) {
         this.isSinglePlayer = configuration.SINGLE_PLAYER;
@@ -31,7 +32,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         return this.enrolmentState.toDto();
     }
 
-    public processEnrol(socketId: string, payload: MessagePayload): Probable<StateResponse> {
+    public processEnrol(email: Email, payload: MessagePayload): Probable<StateResponse> {
         const enrolmentPayload = validator.validateEnrolmentPayload(payload);
 
         if(!enrolmentPayload)
@@ -41,8 +42,8 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         const name = nameInput || this.assignDefaultName();
         const players = this.enrolmentState.getAllPlayers();
 
-        if (!socketId)
-            return lib.fail('Cannot enrol in session. socketId is missing.');
+        if (!email)
+            return lib.fail('Cannot enrol in session. Email is missing.');
 
         if (this.isColorTaken(players, color))
             return lib.fail('Color is is already taken');
@@ -66,8 +67,8 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         if (result.err)
             return result;
 
-        this.reportColorAssignment(socketId, color);
-        this.transmit(socketId, { color });
+        this.reportColorAssignment(email, color);
+        this.transmit(email, { color });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
         this.enrolmentState.addServerMessage('Type #name &ltyour new name&gt in the chat to set your name.');
@@ -92,8 +93,8 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
 
         this.enrolmentState.changeColor(player.color, newColor);
 
-        this.reportColorAssignment(match.socketId, newColor);
-        this.transmit(match.socketId, { color: newColor });
+        this.reportColorAssignment(match.email, newColor);
+        this.transmit(match.email, { color: newColor });
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }

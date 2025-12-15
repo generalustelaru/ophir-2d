@@ -5,8 +5,7 @@ import {
 } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
-    ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor, PlayerEntity,
-    State,
+    ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor, PlayerEntity, State, Email, Player,
 } from '~/shared_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library';
@@ -25,12 +24,12 @@ export class GameSession {
     private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private broadcast: ((state: PlayState) => void) | null;
-    private transmit: ((socketId: string, message: ServerMessage) => void) | null;
+    private transmit: ((email: Email, message: ServerMessage) => void) | null;
     private playerReferences: Array<PlayerReference> = [];
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
-        transmitCallback: (socketId: string, message: ServerMessage) => void,
+        transmitCallback: (email: Email, message: ServerMessage) => void,
         configuration: Configuration,
         savedSession: SessionState | null,
     ) {
@@ -76,6 +75,7 @@ export class GameSession {
                         configuration,
                         broadcastCallback,
                         transmitCallback,
+                        this.getActivationEmail(sharedState.players),
                     );
 
                 case Phase.setup:
@@ -95,10 +95,12 @@ export class GameSession {
                 default:
                     throw new Error('Cannot determine session phase');
             }
+
         })();
+        console.info('Game session recreated.');
     }
 
-    public getPlayerRef(userEmail: string) {
+    public getPlayerRef(userEmail: Email) {
         const ref = this.playerReferences.find(r => r.email == userEmail);
 
         return ref || null;
@@ -108,13 +110,11 @@ export class GameSession {
         return this.playerReferences;
     }
 
-    public setPlayerRef(userEmail: string, socketId: string) {
+    public setPlayerRef(userEmail: Email) {
         const oldRef = this.playerReferences.find(r => r.email == userEmail);
 
-        if (oldRef)
-            oldRef.socketId = socketId;
-        else
-            this.playerReferences.push({  email: userEmail,  socketId, color: null });
+        if (!oldRef)
+            this.playerReferences.push({  email: userEmail, color: null });
     }
 
     public deReference() {
@@ -163,7 +163,7 @@ export class GameSession {
     }
 
     public processAction(request: AuthenticatedClientRequest): WsDigest {
-        const reference = this.playerReferences.find(r => r.socketId == request.socketId);
+        const reference = this.playerReferences.find(r => r.email == request.email);
 
         if (!reference)
             return this.issueNominalResponse(lib.errorResponse('Player reference is missing'));
@@ -171,10 +171,10 @@ export class GameSession {
         const state = this.actionProcessor.getState();
         const { message } = request;
         const { action, payload } = message;
-        const { socketId, email } = reference;
+        const { email } = reference;
 
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment)
-            return this.processEnrolmentAction({ message, email, socketId, player: null });
+            return this.processEnrolmentAction({ message, email, player: null });
 
         const matchOperation = this.matchRequestToPlayer(request);
 
@@ -262,14 +262,15 @@ export class GameSession {
     }
 
     // MARK: ENROL
-    private updateReferenceColor(socketId: string, color: PlayerColor) {
-        const ref = this.playerReferences.find(r => r.socketId == socketId);
+    private updateReferenceColor(email: Email, color: PlayerColor) {
+        const ref = this.playerReferences.find(r => r.email == email);
 
         if (!ref)
             return console.error('Could not a find reference to update color!!!');
 
         ref.color = color;
     };
+
     private processEnrolmentAction(request: RequestMatch | EnrolRequest): WsDigest {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
@@ -278,9 +279,9 @@ export class GameSession {
 
         if (action === Action.enrol && !player) {
 
-            const { socketId, message } = request;
+            const { email, message } = request;
 
-            const enrolment = processor.processEnrol(socketId, message.payload);
+            const enrolment = processor.processEnrol(email, message.payload);
 
             if (enrolment.err)
                 return this.issueNominalResponse(lib.errorResponse(enrolment.message));
@@ -361,12 +362,15 @@ export class GameSession {
                         return lib.fail('Cannot start game!');
                     }
 
+                    const stateBundle = bundleResult.data;
+
                     try {
                         this.actionProcessor = new PlayProcessor(
-                            bundleResult.data,
+                            stateBundle,
                             this.config,
                             this.broadcast,
                             this.transmit,
+                            this.getActivationEmail(stateBundle.playState.getAllPlayers()),
                         );
                     } catch (error) {
                         return lib.fail(String(error));
@@ -391,7 +395,7 @@ export class GameSession {
     public processPlayAction(request: RequestMatch): WsDigest {
         const processor = this.actionProcessor as PlayProcessor;
 
-        const { player, message, socketId } = request;
+        const { player, message, email } = request;
         const { action, payload } = message;
 
         if (!('timeStamp' in player)) {
@@ -400,7 +404,7 @@ export class GameSession {
             );
         }
 
-        const playerHandler = new PlayerHandler(player, socketId);
+        const playerHandler = new PlayerHandler(player, email);
         playerHandler.refreshTimeStamp();
 
         const digest: DataDigest = { player: playerHandler, payload, refPool: this.playerReferences };
@@ -498,13 +502,13 @@ export class GameSession {
     }
 
     private matchRequestToPlayer(request: AuthenticatedClientRequest): Probable<MatchedPlayerRequest> {
-        const { socketId } = request;
+        const { email } = request;
 
         const state = this.actionProcessor.getState();
-        const ref = this.playerReferences.find( r => r.socketId == socketId);
+        const ref = this.playerReferences.find( r => r.email == email);
 
         if (!ref)
-            return lib.fail(`Cannot find reference for socketId: ${socketId}`);
+            return lib.fail(`Cannot find reference for email: ${email}`);
 
         const player = state.players.find(p => p.color === ref.color);
 
@@ -519,5 +523,17 @@ export class GameSession {
             return false;
 
         return players.some(player => player.name === name);
+    }
+
+    private getActivationEmail(players: Array<Player>) {
+        const activePlayer = players.find(p => p.isActive);
+
+        if (activePlayer)
+            return null;
+
+        const firstPlayer = players.find(p => p.turnOrder == 1);
+        const ref = this.playerReferences.find(r => r.color == firstPlayer?.color);
+
+        return ref?.email || null;
     }
 }
