@@ -11,7 +11,7 @@ function fail<T>(message: string): Probable<T> {
 }
 
 function printError(message: string) {
-    console.error(`\x1b[91mERROR:${message}\x1b[0m`);
+    console.error(`\x1b[91mERROR: ${message}\x1b[0m`);
 }
 
 function printWarning(message: string) {
