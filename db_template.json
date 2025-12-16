@@ -1,6 +1,5 @@
 {
     "config":{
-        "ADMIN_AUTH": "0451",
         "SERVER_NAME": "Laputan Machine",
         "PLAYER_IDLE_MINUTES": 1,
         "SESSION_DELETION_HOURS": 1,

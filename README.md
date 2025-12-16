@@ -52,7 +52,6 @@ You can set up and run a server fairly easily on your local network.
 Click on a ship card to become the session owner. Then copy the URL address and share it with your local network firends for them to connect to your session. If you want to open multiple clients on the same machine, ensure that each one runs on a different browser or incognito window. The browser storage holds your player identity, so two or more tabs on the same browser will mirror the same user.
 
 To shut down the server gracefully, type `shut` in the server command-line interface (CLI).
-You can also shut it down remotely by making a regular HTTP request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<ADMIN_AUTH>". Use the values in your .env file.
 
 ## Troubleshooting
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
@@ -71,8 +70,6 @@ Any page visitor may enrol in the game session by selecting a color card. Visito
 You can edit the `"config"` values found in *db.json*. The values will only be applied for new sessions or after restarting one.
 
 `"SERVER_NAME"`: The name that appears in chat for server messages.
-
-`"ADMIN_AUTH"`: The 'auth' URL parameter value for the GET request to /shutdown.
 
 `"PLAYER_IDLE_MINUTES"`: How fast a player can be skipped for not doing anything.
 

@@ -28,8 +28,6 @@ dbService.getConfig().then(configuration => {
         process.exit(1);
     }
 
-    auth = configuration.data.ADMIN_AUTH;
-
     startSessionChecks(configuration.data);
 });
 
@@ -80,19 +78,6 @@ app.listen(HTTP_PORT, () => {
 app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
-});
-
-app.get('/shutdown', (req: Request, res: Response) => {
-    if (req.query.auth != auth) {
-        console.warn('Unauthorized shutdown attempt');
-        res.status(401).send('Unauthorized');
-
-        return;
-    }
-
-    console.warn('Remote server shutdown!');
-    res.status(200).send('SHUTDOWN OK');
-    shutDown();
 });
 
 app.get('/probe', (req: Request, res: Response) => {

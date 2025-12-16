@@ -151,7 +151,6 @@ export type ServerConstants = {
 }
 
 export type Configuration = {
-    ADMIN_AUTH: string,
     SERVER_NAME: string,
     PLAYER_IDLE_MINUTES: number,
     SESSION_DELETION_HOURS: number,

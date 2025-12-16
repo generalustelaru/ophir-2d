@@ -28,7 +28,6 @@ class ValidatorService {
             'Configuration',
             db_data,
             [
-                { key: 'ADMIN_AUTH', type: 'string', nullable: false },
                 { key: 'SERVER_NAME', type: 'string', nullable: false },
                 { key: 'PLAYER_IDLE_MINUTES', type: 'number', nullable: false },
                 { key: 'SESSION_DELETION_HOURS', type: 'number', nullable: false },
