@@ -82,10 +82,10 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
 
         this.setEnabled(!Boolean(cardOwner));
 
-        this.updateActionMessage(!cardOwner && localPlayer?.color
-            ? { action: Action.change_color, payload: { color: this.color, name: localPlayer.name } }
-            : { action: Action.enrol, payload: { color: this.color, name: null } },
-        );
+        this.updateActionMessage({
+            action: localPlayer?.color ? Action.change_color : Action.enrol,
+            payload: { color: this.color },
+        });
 
         const { muted: active, vivid: inactive } = this.variation;
 

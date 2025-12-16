@@ -2,7 +2,7 @@ import { HexCoordinates } from '~/client_types';
 import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
     LoadGoodPayload, MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
-    Action, SpecialistName, Phase, EnrolmentPayload, OpponentRepositioningPayload, ColorChangePayload,
+    Action, SpecialistName, Phase, OpponentRepositioningPayload, ColorSelectionPayload,
     ChancellorMarketSalePayload,
     PeddlerMarketPayload,
 } from '~/shared_types';
@@ -150,24 +150,12 @@ class ValidatorService {
         return clientRequest;
     }
 
-    public validateEnrolmentPayload(payload: unknown) {
-        return this.validateObject<EnrolmentPayload>(
-            'EnrolmentPayload',
-            payload,
-            [
-                { key: 'color', type: 'string', nullable: false, ref: refs.playerColor },
-                { key: 'name', type: 'string', nullable: true },
-            ],
-        );
-    }
-
-    public validateColorChangePayload(payload: unknown) {
-        return this.validateObject<ColorChangePayload>(
+    public validateColorSelectionPayload(payload: unknown) {
+        return this.validateObject<ColorSelectionPayload>(
             'ColorChangePayload',
             payload,
             [
                 { key: 'color', type: 'string', nullable: false, ref: refs.playerColor },
-                { key: 'name', type: 'string', nullable: false },
             ],
         );
     }

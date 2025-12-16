@@ -253,8 +253,7 @@ export type GameSetup = {
 export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 
 // MARK: REQUEST
-export type EnrolmentPayload = { color: PlayerColor, name: string | null }
-export type ColorChangePayload = { color: PlayerColor, name: string }
+export type ColorSelectionPayload = { color: PlayerColor }
 export type ChatPayload = { input: string }
 export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
 export type RepositioningPayload = { repositioning: Coordinates }
@@ -311,11 +310,11 @@ export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
     | MarketSalePayload | ChancellorMarketSalePayload | MetalPurchasePayload | PickSpecialistPayload
-    | MetalDonationPayload | EnrolmentPayload | LoadGoodPayload | PeddlerMarketPayload;
+    | MetalDonationPayload | LoadGoodPayload | PeddlerMarketPayload | ColorSelectionPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
-export type EnrolMessage = MessageFormat<Action.enrol, EnrolmentPayload>;
-export type ColorChangeMessage = MessageFormat<Action.change_color, ColorChangePayload>;
+export type EnrolMessage = MessageFormat<Action.enrol, ColorSelectionPayload>;
+export type ColorSelectMessage = MessageFormat<Action.change_color, ColorSelectionPayload>;
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;
 export type MoveMessage = MessageFormat<Action.move | Action.move_rival, MovementPayload>;
@@ -332,9 +331,9 @@ export type BuyMetalsMessage = MessageFormat<Action.buy_metal, MetalPurchasePayl
 export type DonateMetalMessage = MessageFormat<Action.donate_metal, MetalDonationPayload>;
 export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;
 export type ClientMessage =
-    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage
-    | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | ChatMessage | EnrolMessage
-    | PickSpecialistMessage | RepositionOpponentMessage | ColorChangeMessage | SellAsChancellorMessage | SellAsPeddlerMessage;
+    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage | EnrolMessage
+    | PickSpecialistMessage | RepositionOpponentMessage | ColorSelectMessage | SellAsChancellorMessage | ChatMessage
+    | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | SellAsPeddlerMessage
 
 export type ClientRequest = {
     message: ClientMessage,

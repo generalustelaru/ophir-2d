@@ -37,20 +37,21 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
     }
 
     public processEnrol(email: Email, payload: MessagePayload): Probable<StateResponse> {
-        const enrolmentPayload = validator.validateEnrolmentPayload(payload);
-
-        if(!enrolmentPayload)
-            return lib.fail('Cannot enrol in session.');
-
-        const { color, name: nameInput } = enrolmentPayload;
-        const name = nameInput || this.assignDefaultName();
-        const players = this.enrolmentState.getAllPlayers();
 
         if (!email)
-            return lib.fail('Cannot enrol in session. Email is missing.');
+            return failEnrol('Email is missing.');
+
+        const enrolmentPayload = validator.validateColorSelectionPayload(payload);
+
+        if(!enrolmentPayload)
+            return failEnrol('Invalid payload');
+
+        const { color } = enrolmentPayload;
+        const name = email;
+        const players = this.enrolmentState.getAllPlayers();
 
         if (this.isColorTaken(players, color))
-            return lib.fail('Color is is already taken');
+            return failEnrol('Color is is already taken.');
 
         const result = ((): Probable<true> => {
 
@@ -69,7 +70,7 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         })();
 
         if (result.err)
-            return result;
+            return failEnrol(result.message);
 
         this.reportColorAssignment(email, color);
         this.transmit(email, { color });
@@ -78,10 +79,14 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
         this.enrolmentState.addServerMessage('Type #name &ltyour new name&gt in the chat to set your name.');
 
         return lib.pass({ state: this.enrolmentState.toDto() });
+
+        function failEnrol(reason: string): Probable<StateResponse> {
+            return lib.fail(`Cannot enrol: ${reason}`);
+        }
     }
 
     public processChangeColor(player: PlayerEntry, match: RequestMatch): Probable<StateResponse> {
-        const change = validator.validateColorChangePayload(match.message.payload);
+        const change = validator.validateColorSelectionPayload(match.message.payload);
 
         if (!change)
             return lib.fail('Color change payload is malformed!');
@@ -93,7 +98,6 @@ export class EnrolmentProcessor implements Unique<SessionProcessor> {
 
         if (this.enrolmentState.getSessionOwner() == player.color)
             this.enrolmentState.setSessionOwner(newColor);
-
 
         this.enrolmentState.changeColor(player.color, newColor);
 
