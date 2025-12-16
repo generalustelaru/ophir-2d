@@ -154,7 +154,6 @@ export type Configuration = {
     ADMIN_AUTH: string,
     SERVER_NAME: string,
     PLAYER_IDLE_MINUTES: number,
-    ABANDONED_SESSION_LIFETIME_MINUTES: number,
     SESSION_DELETION_HOURS: number,
     SINGLE_PLAYER: boolean,
     NO_RIVAL: boolean,

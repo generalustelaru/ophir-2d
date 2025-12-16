@@ -418,7 +418,7 @@ function broadcastToGroup(gameId: string, message: ServerMessage): void {
 }
 
 function startSessionChecks(configuration: Configuration) {
-    const { SESSION_DELETION_HOURS, ABANDONED_SESSION_LIFETIME_MINUTES } = configuration;
+    const { SESSION_DELETION_HOURS } = configuration;
     console.info('Starting session checks');
 
     const minutes = 60000;
@@ -455,7 +455,7 @@ function startSessionChecks(configuration: Configuration) {
                 }
             }
         });
-    }, ABANDONED_SESSION_LIFETIME_MINUTES * minutes);
+    }, 1 * minutes);
 
     const hours = 3600000;
     setInterval(() => {
