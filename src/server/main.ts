@@ -11,12 +11,13 @@ import sLib from './server_lib';
 import readline from 'readline';
 import process from 'process';
 import path from 'path';
+import http from 'http';
 
-import { SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT } from '../environment';
+import { SERVER_ADDRESS, PORT_NUMBER, DB_PORT } from '../environment';
 
-if (!SERVER_ADDRESS || !HTTP_PORT || !WS_PORT || !DB_PORT) {
+if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
     console.error('Missing environment variables', {
-        SERVER_ADDRESS, HTTP_PORT, WS_PORT, DB_PORT,
+        SERVER_ADDRESS, PORT_NUMBER, DB_PORT,
     });
     process.exit(1);
 }
@@ -68,173 +69,19 @@ const rl = readline.createInterface({
     }
 )();
 
-// MARK: HTTP
+// MARK: WEB
 const app = express();
-
-app.listen(HTTP_PORT, () => {
-    console.info(`Listening on http://${SERVER_ADDRESS}:${HTTP_PORT}`);
-});
-
-app.use((_, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    next();
-});
-
-app.get('/probe', (req: Request, res: Response) => {
-    console.info('Server probed', { ip: req.ip });
-    res.status(200).send('SERVER OK');
-});
-
-app.get('/', (req: Request, res: Response) => {
-    console.info('Visitor', { ip: req.ip });
-
-    res.sendFile(path.join(__dirname,'public', 'index.html'));
-});
-
-app.use(express.urlencoded({ extended: true }));
-
-app.post('/register', async (req: Request, res: Response) => {
-    const form = req.body as RegistrationForm;
-
-    const registration = await dbService.registerUser(form);
-
-    if (registration.err) {
-        sLib.printError(registration.message);
-        res.status(400).send('Your account could not be created.');
-
-        return;
-    }
-
-    const cookies = sLib.produceCookieArgs(false, form.email);
-    const tokenCookie = cookies[CookieName.authToken];
-    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
-
-    if (patchOp.err) {
-        sLib.printError(patchOp.message);
-        res.status(500).send('Something went wrong.');
-
-        return;
-    }
-
-    console.info('New registration',{ email: form.email });
-
-    for (const cookieName in cookies) {
-        const { value, options } = cookies[cookieName as CookieName];
-        res.cookie(cookieName, value, options);
-    }
-
-    res.redirect('/new');
-});
-
-app.post('/login', async (req: Request, res: Response) => {
-    const form = req.body as AuthenticationForm;
-
-    const authentication = await dbService.authenticateUser(form);
-
-    if (authentication.err) {
-        sLib.printError(authentication.message);
-        res.status(400).send('Authentication failed.');
-
-        return;
-    }
-
-    const cookies = sLib.produceCookieArgs(false, form.email);
-    const tokenCookie = cookies[CookieName.authToken];
-
-    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
-
-    if (patchOp.err) {
-        sLib.printError(patchOp.message);
-        res.status(500).send('Something went wrong.');
-
-        return;
-    }
-    console.info('User logged in',{ email: form.email });
-
-    for (const cookieName in cookies) {
-        const { value, options } = cookies[cookieName as CookieName];
-        res.cookie(cookieName, value, options);
-    }
-
-    res.redirect('/new');
-});
-
-app.get('/new', async (req: Request, res: Response) => {
-    console.info('Visitor calls for new session', { ip: req.ip });
-
-    const validation = await validateClient(req.headers.cookie);
-
-    if (validation.err) {
-        console.error(validation.message);
-        res.redirect('/');
-
-        return;
-    }
-
-    const instantiation = await createGameSession();
-
-    if (instantiation.err) {
-        sLib.printError(instantiation.message);
-        res.status(500).send('Server has encountered a problem :(');
-
-        return;
-    }
-
-    const { data: session } = instantiation;
-
-    const gameId = session.getGameId();
-    activeGames.set(gameId, session);
-    res.redirect(`/${gameId}`);
-});
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/:id', async (req: Request, res: Response) => {
-    const gameId = req.params.id;
-    console.info('Visitor requests session', { ip: req.ip, gameId });
-
-    const validation = await validateClient(req.headers.cookie);
-
-    if (validation.err) {
-        sLib.printError(validation.message);
-        res.redirect('/');
-
-        return;
-    }
-
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-
-    if (activeGames.has(gameId)) {
-        res.sendFile(path.join(__dirname,'public', 'game.html'));
-
-        return;
-    }
-
-    const revival = await reviveGameSession(gameId);
-
-    if (revival.err) {
-        sLib.printError(revival.message);
-        res.redirect('/new');
-
-        return;
-    }
-
-    activeGames.set(gameId, revival.data);
-    res.sendFile(path.join(__dirname,'public', 'game.html'));
-});
+const server = http.createServer(app);
+const socketServer = new WebSocketServer({ server, path: '/game' });
 
 // MARK: WS
 type GameId = string
-
 type Connection = {
     socket: WebSocket
     gameId: GameId
 }
-
-const socketServer = new WebSocketServer({ port: WS_PORT });
 const connections: Map<Email, Connection> = new Map();
 const activeGames: Map<GameId, GameSession> = new Map();
-
 socketServer.on('connection', async (socket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
@@ -273,7 +120,6 @@ socketServer.on('connection', async (socket, inc) => {
     } else if (ref.color) {
         transmit(socket, { color: ref.color });
         transmit(socket, { vp: game.getPlayerVP(ref.color) });
-
         // TODO: if it's the active player also send turn notification and start idle timeout
     }
 
@@ -302,6 +148,152 @@ socketServer.on('connection', async (socket, inc) => {
         }
     });
 });
+
+// MARK: HTTP
+app.use((_, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+});
+
+app.get('/probe', (req: Request, res: Response) => {
+    console.info('Server probed', { ip: req.ip });
+    res.status(200).send('SERVER OK');
+});
+app.get('/', (req: Request, res: Response) => {
+    console.info('Visitor', { ip: req.ip });
+
+    res.sendFile(path.join(__dirname,'public', 'index.html'));
+});
+app.use(express.urlencoded({ extended: true }));
+app.post('/register', async (req: Request, res: Response) => {
+    const form = req.body as RegistrationForm;
+
+    const registration = await dbService.registerUser(form);
+
+    if (registration.err) {
+        sLib.printError(registration.message);
+        res.status(400).send('Your account could not be created.');
+
+        return;
+    }
+
+    const cookies = sLib.produceCookieArgs(false, form.email);
+    const tokenCookie = cookies[CookieName.authToken];
+    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
+
+    if (patchOp.err) {
+        sLib.printError(patchOp.message);
+        res.status(500).send('Something went wrong.');
+
+        return;
+    }
+
+    console.info('New registration',{ email: form.email });
+
+    for (const cookieName in cookies) {
+        const { value, options } = cookies[cookieName as CookieName];
+        res.cookie(cookieName, value, options);
+    }
+
+    res.redirect('/new');
+});
+app.post('/login', async (req: Request, res: Response) => {
+    const form = req.body as AuthenticationForm;
+
+    const authentication = await dbService.authenticateUser(form);
+
+    if (authentication.err) {
+        sLib.printError(authentication.message);
+        res.status(400).send('Authentication failed.');
+
+        return;
+    }
+
+    const cookies = sLib.produceCookieArgs(false, form.email);
+    const tokenCookie = cookies[CookieName.authToken];
+
+    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
+
+    if (patchOp.err) {
+        sLib.printError(patchOp.message);
+        res.status(500).send('Something went wrong.');
+
+        return;
+    }
+    console.info('User logged in',{ email: form.email });
+
+    for (const cookieName in cookies) {
+        const { value, options } = cookies[cookieName as CookieName];
+        res.cookie(cookieName, value, options);
+    }
+
+    res.redirect('/new');
+});
+app.get('/new', async (req: Request, res: Response) => {
+    console.info('Visitor calls for new session', { ip: req.ip });
+
+    const validation = await validateClient(req.headers.cookie);
+
+    if (validation.err) {
+        console.error(validation.message);
+        res.redirect('/');
+
+        return;
+    }
+
+    const instantiation = await createGameSession();
+
+    if (instantiation.err) {
+        sLib.printError(instantiation.message);
+        res.status(500).send('Server has encountered a problem :(');
+
+        return;
+    }
+
+    const { data: session } = instantiation;
+
+    const gameId = session.getGameId();
+    activeGames.set(gameId, session);
+    res.redirect(`/${gameId}`);
+});
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/:id', async (req: Request, res: Response) => {
+    const gameId = req.params.id;
+    console.info('Visitor requests session', { ip: req.ip, gameId });
+
+    const validation = await validateClient(req.headers.cookie);
+
+    if (validation.err) {
+        sLib.printError(validation.message);
+        res.redirect('/');
+
+        return;
+    }
+
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+
+    if (activeGames.has(gameId)) {
+        res.sendFile(path.join(__dirname,'public', 'game.html'));
+
+        return;
+    }
+
+    const revival = await reviveGameSession(gameId);
+
+    if (revival.err) {
+        sLib.printError(revival.message);
+        res.redirect('/new');
+
+        return;
+    }
+
+    activeGames.set(gameId, revival.data);
+    res.sendFile(path.join(__dirname,'public', 'game.html'));
+});
+server.listen(PORT_NUMBER, () => {
+    console.info(`Listening on http://${SERVER_ADDRESS}:${PORT_NUMBER}`);
+});
+
 
 async function processAction(
     session: GameSession,

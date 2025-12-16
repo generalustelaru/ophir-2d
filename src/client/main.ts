@@ -8,12 +8,13 @@ import {
 } from '~/shared_types';
 
 const SERVER_ADDRESS = process.env.SERVER_ADDRESS;
-const WS_PORT = process.env.WS_PORT;
+const PORT_NUMBER = process.env.PORT_NUMBER;
 
-if (!WS_PORT || !SERVER_ADDRESS)
+if (!PORT_NUMBER || !SERVER_ADDRESS)
     throw new Error('Server address and port must be provided in the environment');
 
-const wsAddress = `ws://${SERVER_ADDRESS}:${WS_PORT}`;
+const comms = new CommunicationService();
+const gameAdress = `ws://${SERVER_ADDRESS}:${PORT_NUMBER}/game`;
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 
@@ -49,7 +50,6 @@ function resetClient(source: string) {
 
 document.fonts.ready.then(() => {
     const canvas = new CanvasService();
-    const comms = new CommunicationService();
 
     window.addEventListener('resize', () => {
         canvas.fitStageIntoParentContainer();
@@ -170,5 +170,5 @@ document.fonts.ready.then(() => {
         },
     );
 
-    comms.createConnection(wsAddress, requestedGameId);
+    comms.createConnection(gameAdress, requestedGameId);
 });
