@@ -257,7 +257,6 @@ socketServer.on('connection', async (socket, inc) => {
     if (!gameId){
         sLib.printError('WS connection did not provide gameId.');
         transmit(socket, { error: 'Invalid connection data.' });
-        socket.close();
 
         return;
     }
@@ -267,7 +266,6 @@ socketServer.on('connection', async (socket, inc) => {
     if (!game) {
         sLib.printWarning('WS requested inexistent play session.');
         transmit(socket, { notFound: null });
-        socket.close();
 
         return;
     }
@@ -278,7 +276,6 @@ socketServer.on('connection', async (socket, inc) => {
         sLib.printError(validation.message);
         sLib.printError('WS connection has invalid cookie.');
         transmit(socket, { error: 'Invalid connection data.' });
-        socket.close();
 
         return;
     }
