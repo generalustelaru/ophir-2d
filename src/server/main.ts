@@ -50,14 +50,14 @@ const rl = readline.createInterface({
 (
     function promptForInput(): void {
         rl.question('\nophir-2d :: ', (input) => {
-            const [command, option] = input.split(' ');
+            const [command, target, option] = input.split(' ');
             switch (command) {
                 case 'shut':
                     shutDown();
                     return;
 
                 case 'debug':
-                    console.log(debugGameReference(option.trim()));
+                    debugCommand(target, option);
                     break;
 
                 default:
@@ -370,15 +370,40 @@ function logRequest(request: ClientRequest, email: string) {
         payload ? ` ${JSON.stringify(payload)} ` : ' ',
     );
 }
+function debugCommand(target?: string, option?: string): void {
 
-function debugGameReference(gameId: string): object {
-    const game = activeGames.get(gameId);
+    if (!target)
+        return console.error('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m');
+
+    switch (target.trim()) {
+        case 'games':
+            return console.log(activeGames.keys());
+        case 'sockets':
+            return console.log(connections.keys());
+    }
+
+    if (!option)
+        return console.log('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m');
+
+    const game = activeGames.get(target);
+
     if (!game)
-        return {};
+        return sLib.printWarning('Session does not exist or is not active');
 
-    return {
-        game_refs: game.getAllRefs(),
-    };
+    switch (option.trim()) {
+        case 'refs':
+            console.log(game.getAllRefs());
+            break;
+        case 'sockets':
+            console.log(
+                Array.from(connections.entries())
+                    .filter(([, c]) => c.gameId == target)
+                    .map(([k]) => k),
+            );
+            break;
+        default:
+            break;
+    }
 }
 
 function shutDown() {

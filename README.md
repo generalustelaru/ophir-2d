@@ -51,7 +51,7 @@ You can set up and run a server fairly easily on your local network.
 
 Click on a ship card to become the session owner. Then copy the URL address and share it with your local network firends for them to connect to your session. If you want to open multiple clients on the same machine, ensure that each one runs on a different browser or incognito window. The browser storage holds your player identity, so two or more tabs on the same browser will mirror the same user.
 
-To shut down the server gracefully, type `shutdown` in the server command-line interface (CLI).
+To shut down the server gracefully, type `shut` in the server command-line interface (CLI).
 You can also shut it down remotely by making a regular HTTP request to "http://<SERVER_ADDRESS>:<HTTP_PORT>/shutdown?auth=<ADMIN_AUTH>". Use the values in your .env file.
 
 ## Troubleshooting
@@ -95,3 +95,11 @@ You can edit the `"config"` values found in *db.json*. The values will only be a
 
 `"INCLUDE"`: Ensures selected specialists appear in the draft (up to the amount required for the player count).
    - Values: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`,
+
+## Debug command
+
+The `debug <target> <option>` command shows live data as following:
+ - `debug games`: Displays the `gameId`s of active sessions.
+ - `debug sockets`: Displays the user identifiers that have an open WS connection.
+ - `debug <gameId> sockets`: Displays user identifiers connected to the game session.
+ - `debug <gameId> refs`: Displays the session's internal reference for users.
