@@ -754,7 +754,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
             this.playState.registerGameEnd(results.data);
 
-            this.addServerMessage(this.convertDeedsToMessage(player), color);
+            this.addServerMessage(this.convertDeedsToMessage(player), { color, backup: true });
             this.addServerMessage('The temple construction is complete! Game has ended.');
 
             // this.addServerMessage(JSON.stringify(results.data));
@@ -794,7 +794,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             });
             player.gainFavor(1);
         }
-        this.addServerMessage(this.convertDeedsToMessage(player), player.getIdentity().color);
+        this.addServerMessage(
+            this.convertDeedsToMessage(player), { color: player.getIdentity().color, backup: true },
+        );
 
         player.deactivate();
         this.privateState.clearSpentActions();
@@ -833,7 +835,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail(newPlayerOperation.message);
 
         const newPlayer = newPlayerOperation.data;
-        this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, newPlayer.getIdentity().color);
+        this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, { backup: true });
 
         return this.continueTurn(newPlayer);
     }
@@ -908,7 +910,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         this.addServerMessage(
             `${player.getIdentity().name} forced ${activePlayer.name} to end the turn.`,
-            player.getIdentity().color,
+            { color: player.getIdentity().color, backup: true },
         );
 
         return this.endTurn(
@@ -988,7 +990,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
-        this.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
+        this.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, { backup: true });
         this.playState.updateName(player.color, newName);
         this.privateState.updatePlayerName(player.color, newName);
         this.backupState.updatePlayerName(player.color, newName);
@@ -1287,7 +1289,9 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         })();
 
         if (!newTrade) {
-            this.addServerMessage(this.convertDeedsToMessage(player), player.getIdentity().color);
+            this.addServerMessage(
+                this.convertDeedsToMessage(player), { color: player.getIdentity().color, backup: true },
+            );
             this.killIdleChecks();
             const results = this.compileGameResults();
 
@@ -1341,9 +1345,11 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.idleCheckInterval && clearInterval(this.idleCheckInterval);
     }
 
-    private addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.playState.addServerMessage(message, as);
-        this.backupState.addServerMessage(message, as);
+    private addServerMessage(message: string, options?: { color?: PlayerColor, backup?: boolean}) {
+        this.playState.addServerMessage(message, options?.color);
+
+        if (options?.backup)
+            this.backupState.addServerMessage(message, options?.color);
     }
 
     private preserveState(player: PlayerHandler, hasMoved: boolean = false) {
