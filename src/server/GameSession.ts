@@ -5,7 +5,7 @@ import {
 } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
-    ServerMessage, Action, Phase, PlayState, PlayerDraft, StateResponse, PlayerColor, PlayerEntity, State, Email, Player,
+    ServerMessage, Action, Phase, PlayState, StateResponse, PlayerColor, PlayerEntity, State, Email, Player,
 } from '~/shared_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library';
@@ -124,6 +124,7 @@ export class GameSession {
     public deReference() {
         this.broadcast = null;
         this.transmit = null;
+        this.playerReferences = [];
     }
 
     public getGameId(): string {
@@ -150,12 +151,19 @@ export class GameSession {
     }
 
     public reset() {
+        if (!this.transmit) {
+            lib.printError('GameSession was dereferenced but not removed.');
+            return;
+        }
+
+        for (const ref of this.playerReferences) {
+            ref.color = null;
+        }
+
         if ('killIdleChecks' in this.actionProcessor) {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
-        if (!this.transmit)
-            return console.error('GameSession was dereferenced but not removed');
         // TODO: preserve player names
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
@@ -163,14 +171,18 @@ export class GameSession {
             this.updateReferenceColor.bind(this),
             this.config,
         );
-        console.log('Session was reset');
     }
 
     public processAction(request: AuthenticatedClientRequest): WsDigest {
+        const emitError = (reason: string) => {
+            lib.printError(`Cannot process action: ${reason}`);
+            return this.issueNominalResponse( { error: 'Cannot process request' });
+        };
+
         const reference = this.playerReferences.find(r => r.email == request.email);
 
         if (!reference)
-            return this.issueNominalResponse(lib.errorResponse('Player reference is missing'));
+            return emitError('Player reference is missing');
 
         const state = this.actionProcessor.getState();
         const { message } = request;
@@ -182,20 +194,17 @@ export class GameSession {
 
         const matchOperation = this.matchRequestToPlayer(request);
 
-        if (matchOperation.err) {
-            console.error(matchOperation.message);
-            return this.issueNominalResponse({ resetFrom: this.config.SERVER_NAME });
-        }
+        if (matchOperation.err)
+            return emitError(matchOperation.message);
 
         const matchedRequest = matchOperation.data;
         const { player } = matchedRequest;
 
         if (action === Action.chat) {
-
             const message = validator.validateChatPayload(payload);
 
             if (!message)
-                return this.issueNominalResponse(lib.errorResponse('Malformed chat message'));
+                return emitError('Invalid chat message');
 
             const commandMatch = message.input.match(/^#\w*(?=\s)/);
 
@@ -207,27 +216,27 @@ export class GameSession {
                     const newName = nameMatch[0];
 
                     if (lib.estimateWidth(newName, 28) > 424)
-                        return this.issueNominalResponse(lib.errorResponse('Name is too long.'));
+                        return this.issueNominalResponse({ error: 'The name is too long.' });
 
                     const nameSegments = newName.split( ' ');
                     for (const segment of nameSegments) {
                         if (lib.estimateWidth(segment, 28) > 212)
-                            return this.issueNominalResponse(lib.errorResponse('Name is too long.'));
+                            return this.issueNominalResponse({ error: 'A word is too long.' });
                     }
 
                     if (this.isNameTaken(state.players, newName))
-                        return this.issueNominalResponse(lib.errorResponse('This name is already taken'));
+                        return this.issueNominalResponse({ error: 'This name is already taken' });
 
                     if (state.sessionPhase == 'play' && state.hasGameEnded)
-                        return this.issueNominalResponse(lib.errorResponse('Name can no longer be updated.'));
+                        return this.issueNominalResponse({ error: 'Name can no longer be updated.' });
 
                     const response = this.actionProcessor.updatePlayerName(player, newName);
 
                     return this.issueGroupResponse(response);
                 } else {
-                    return this.issueNominalResponse(lib.errorResponse(
-                        `${commandMatch[0]} parameter must start with a non-space`,
-                    ));
+                    return this.issueNominalResponse(
+                        { error: `${commandMatch[0]} parameter must start with a non-space` },
+                    );
                 }
             }
 
@@ -248,9 +257,7 @@ export class GameSession {
                 return this.issueGroupResponse({ resetFrom: player.name });
             }
 
-            return this.issueNominalResponse(
-                lib.errorResponse('Only session owner may reset.'),
-            );
+            return emitError('Non-owner cannot reset.');
         }
 
         switch (state.sessionPhase) {
@@ -261,7 +268,7 @@ export class GameSession {
             case Phase.enrolment:
                 return this.processEnrolmentAction(matchedRequest);
             default:
-                return this.issueNominalResponse(lib.errorResponse('Unknown game phase!'));
+                return emitError('Unknown game phase!');
         }
     }
 
@@ -281,22 +288,23 @@ export class GameSession {
         const { message, player } = request;
         const { action } = message;
 
-        if (action === Action.enrol && !player) {
+        if (!player) {
 
             const { email, message } = request;
 
             const enrolment = processor.processEnrol(email, message.payload);
 
-            if (enrolment.err)
-                return this.issueNominalResponse(lib.errorResponse(enrolment.message));
+            if (enrolment.err) {
+                lib.printError(enrolment.message);
+                return this.issueNominalResponse({ error: 'Cannot enrol in game.' });
+            }
 
             return this.issueGroupResponse(enrolment.data);
         }
 
         if (!player) {
-            return this.issueNominalResponse(
-                lib.errorResponse('Cannot process action, player not enrolled.'),
-            );
+            lib.printError('Cannot process action, player not enrolled.');
+            return this.issueNominalResponse({ error: 'Cannot process request.' });
         }
 
         const state = processor.getState();
@@ -332,10 +340,9 @@ export class GameSession {
         })();
 
         if (enrolUpdate.err)
-            return this.issueNominalResponse(lib.errorResponse(enrolUpdate.message));
+            return this.issueNominalResponse({ error: 'Cannot process request.' });
 
         return this.issueGroupResponse(enrolUpdate.data);
-
     }
 
     // MARK: SETUP
@@ -345,16 +352,15 @@ export class GameSession {
         const { message, player } = request;
         const { action, payload } = message;
 
-        if (!('specialist' in player)) {
-            return this.issueNominalResponse(
-                lib.errorResponse('Player entity is missing properties', { action, player }),
-            );
+        if (!('turnToPick' in player)) {
+            lib.printError('Player entity is missing properties');
+            return this.issueNominalResponse({ error: 'Cannot process request.' });
         }
 
         const setupUpdate = ((): Probable<StateResponse> => {
             switch (action) {
                 case Action.pick_specialist:
-                    return processor.processSpecialistSelection((player as PlayerDraft), payload);
+                    return processor.processSpecialistSelection((player), payload);
                 case Action.start_play: {
                     const bundleResult = processor.processStart(payload);
 
@@ -389,8 +395,10 @@ export class GameSession {
             }
         })();
 
-        if (setupUpdate.err)
-            return this.issueNominalResponse(lib.errorResponse(setupUpdate.message));
+        if (setupUpdate.err) {
+            lib.printError(setupUpdate.message);
+            return this.issueNominalResponse({ error: 'Cannot process request.' });
+        }
 
         return this.issueGroupResponse(setupUpdate.data);
     }
@@ -403,9 +411,8 @@ export class GameSession {
         const { action, payload } = message;
 
         if (!('timeStamp' in player)) {
-            return this.issueNominalResponse(
-                lib.errorResponse('Player entity is missing properties', { action, player }),
-            );
+            lib.printError('Player entity is missing properties');
+            return this.issueNominalResponse({ error: 'Cannot process action' });
         }
 
         const playerHandler = new PlayerHandler(player, email);
@@ -414,9 +421,8 @@ export class GameSession {
         const digest: DataDigest = { player: playerHandler, payload, refPool: this.playerReferences };
 
         if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action)) {
-            return this.issueNominalResponse(lib.errorResponse(
-                `It is not [${playerHandler.getIdentity().name}]'s turn!`,
-            ));
+            lib.printError(`It is not [${playerHandler.getIdentity().name}]'s turn!`);
+            return this.issueNominalResponse({ error: 'Cannot process action' });
         }
 
         const actionsWhileFrozen: Array<Action> = [
@@ -431,9 +437,8 @@ export class GameSession {
         ];
 
         if (playerHandler.isFrozen() && !actionsWhileFrozen.includes(action)) {
-            return this.issueNominalResponse(lib.errorResponse(
-                `[${playerHandler.getIdentity().name}] is handling rival and cannot act.`,
-            ));
+            lib.printError(`[${playerHandler.getIdentity().name}] is handling rival and cannot act.`);
+            return this.issueNominalResponse({ error: 'Cannot process action' });
         }
 
         const playUpdate = ((): Probable<StateResponse> => {
@@ -485,8 +490,10 @@ export class GameSession {
             }
         })();
 
-        if (playUpdate.err)
-            return this.issueNominalResponse(lib.errorResponse(playUpdate.message));
+        if (playUpdate.err) {
+            lib.printError(playUpdate.message);
+            return this.issueNominalResponse({ error: 'Cannot process action' });
+        }
 
         return this.issueGroupResponse(playUpdate.data);
     }
@@ -517,7 +524,7 @@ export class GameSession {
         const player = state.players.find(p => p.color === ref.color);
 
         if (!player)
-            return lib.fail(`Cannot find player [${ref.color}] in state`);
+            return lib.fail(`Cannot find color [${ref.color}] in state`);
 
         return lib.pass({ ...request, player });
     }
