@@ -17,34 +17,6 @@ const wsAddress = `ws://${SERVER_ADDRESS}:${WS_PORT}`;
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 
-const savedState: LocalState | null = (() => {
-    const str = sessionStorage.getItem('localState');
-
-    if (!str)
-        return null;
-
-    const obj = JSON.parse(str);
-
-    if (
-        typeof obj == 'object'
-        && 'gameId' in obj
-        && 'playerColor' in obj
-        && 'playerName' in obj
-        && 'vp' in obj
-    )
-        return obj;
-
-    return null;
-})();
-
-if (!savedState) {
-    localState.playerColor = null;
-    localState.vp = 0;
-} else {
-    localState.playerColor = savedState.playerColor;
-    localState.vp = savedState.vp;
-}
-
 function signalError(message?: string) {
     console.error(message || 'An error occurred');
     alert(message || 'An error occurred');
@@ -71,8 +43,6 @@ function probe(intervalSeconds: number) {
 }
 
 function resetClient(source: string) {
-    sessionStorage.clear();
-
     alert(`Client reset ordered by ${source}`);
     window.location.reload();
 }
@@ -128,7 +98,6 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.timeout, () => {
         console.warn('Connection timeout');
-        sessionStorage.clear();
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('Trying to reconnect...');
@@ -137,7 +106,6 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.close, () => {
         console.warn('Connection closed');
-        sessionStorage.clear();
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('The server has entered maintenance.');
@@ -150,7 +118,6 @@ document.fonts.ready.then(() => {
 
         const { vp } = event.detail;
         localState.vp = vp;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.rival_control_transmission, () => {
@@ -170,7 +137,6 @@ document.fonts.ready.then(() => {
             return signalError('Missing color!');
 
         localState.playerColor = event.detail.color;
-        sessionStorage.setItem('localState', JSON.stringify(localState));
     });
 
     window.addEventListener(EventType.state_update, (event: CustomEventInit) => {
@@ -193,7 +159,6 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.renew, () => {
         alert('This session is no longer supported.');
-        sessionStorage.removeItem('localState');
         window.location.href = '/new';
     });
 
