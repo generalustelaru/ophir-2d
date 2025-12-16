@@ -22,7 +22,6 @@ if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
     process.exit(1);
 }
 
-var auth: string;
 dbService.getConfig().then(configuration => {
     if (configuration.err){
         console.error(configuration.message);
@@ -235,7 +234,7 @@ app.get('/new', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
-        console.error(validation.message);
+        sLib.printError(validation.message);
         res.redirect('/');
 
         return;

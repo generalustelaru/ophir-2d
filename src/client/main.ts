@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventType, SailAttemptArgs, LocalState } from '~/client_types';
+import { InfoDetail, ErrorDetail, EventType, SailAttemptArgs } from '~/client_types';
 import localState from './state';
 import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
@@ -24,6 +24,7 @@ function signalError(message?: string) {
 }
 
 function probe(intervalSeconds: number) {
+    UserInterface.setInfo('Trying to reconnect...');
     const milliseconds = intervalSeconds * 1000;
 
     setInterval(() => {
@@ -33,7 +34,7 @@ function probe(intervalSeconds: number) {
             (res) => {
                 if (res.status === 200) {
                     alert('Connection restored.');
-                    window.location.reload();
+                    comms.createConnection(gameAdress, requestedGameId);
                 }
             },
         ).catch(
@@ -100,7 +101,6 @@ document.fonts.ready.then(() => {
         console.warn('Connection timeout');
         UserInterface.disable();
         canvas.disable();
-        UserInterface.setInfo('Trying to reconnect...');
         probe(5);
     });
 
@@ -109,7 +109,6 @@ document.fonts.ready.then(() => {
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('The server has entered maintenance.');
-        probe(5);
     });
 
     window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
