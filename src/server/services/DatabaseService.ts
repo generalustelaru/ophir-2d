@@ -1,9 +1,12 @@
-import { DB_PORT } from '../../environment';
-import { AuthenticationForm, Configuration, Probable, RegistrationForm, SessionState, User } from '../server_types';
+import {
+    AuthenticationForm, Configuration, Probable, RegistrationForm, SessionState, UserRecord, UserId, UserSession,
+} from '../server_types';
 import { validator } from './validation/ValidatorService';
+import { DB_PORT } from '../../environment';
+import { randomUUID } from 'crypto';
 import lib from './library';
-class DatabaseService {
 
+class DatabaseService {
     private dbAddress: string = `http://localhost:${DB_PORT}`;
 
     // MARK: CONFIG
@@ -37,7 +40,7 @@ class DatabaseService {
 
         try {
             const response = await fetch(
-                `${this.dbAddress}/sessions`,
+                `${this.dbAddress}/games`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -61,7 +64,7 @@ class DatabaseService {
 
         try {
             const response = await fetch(
-                `${this.dbAddress}/sessions/${id}`,
+                `${this.dbAddress}/games/${id}`,
                 {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
@@ -82,7 +85,7 @@ class DatabaseService {
 
     public async loadGameState(gameId: string): Promise<Probable<SessionState>> {
         try {
-            const response = await fetch(`${this.dbAddress}/sessions/${gameId}`);
+            const response = await fetch(`${this.dbAddress}/games/${gameId}`);
 
             if (response.ok) {
                 const record = await response.json();
@@ -103,7 +106,7 @@ class DatabaseService {
     public async deleteGameState(gameId: string): Promise<Probable<true>> {
         try {
             const response = await fetch(
-                `${this.dbAddress}/sessions/${gameId}`,
+                `${this.dbAddress}/games/${gameId}`,
                 { method: 'DELETE' },
             );
 
@@ -120,7 +123,7 @@ class DatabaseService {
 
     public async getTimestamps(): Promise<Probable<Array<{ id: string, timeStamp: number }>>> {
         try {
-            const response = await fetch(`${this.dbAddress}/sessions`);
+            const response = await fetch(`${this.dbAddress}/games`);
 
             if (response.ok) {
                 const data = await response.json();
@@ -150,25 +153,20 @@ class DatabaseService {
     }
 
     // MARK: USERS
-    public async registerUser(query: RegistrationForm): Promise<Probable<true>> {
-        const { name, email, password, pwRetype } = query;
+    public async registerUser(query: RegistrationForm): Promise<Probable<UserRecord>> {
+        const { userName, password, pwRetype } = query;
 
         if (password !== pwRetype) {
             return lib.fail('Password fields do not match');
         }
 
         try {
-            const userResponse = await fetch(`${this.dbAddress}/users/${email}`);
-
-            if (userResponse.ok) {
-                return lib.fail('User w/ the same email is already registered.');
-            }
-
-            const newUser: User = {
-                id: email,
-                name,
+            const userId: UserId = `user-${randomUUID()}`;
+            const newUser: UserRecord = {
+                id: userId,
+                name: userName,
+                displayName: null,
                 hash: lib.toHash(password),
-                authToken: null,
             };
 
             const response = await fetch(
@@ -183,7 +181,7 @@ class DatabaseService {
             await new Promise(resolve => setTimeout(resolve, 100));
 
             return response.ok
-                ? lib.pass(true)
+                ? lib.pass(newUser)
                 : lib.fail('Could not save user.');
 
         } catch (error) {
@@ -191,18 +189,24 @@ class DatabaseService {
         }
     }
 
-    public async authenticateUser(query: AuthenticationForm): Promise<Probable<true>> {
+    public async authenticateUser(query: AuthenticationForm): Promise<Probable<UserRecord>> {
         try {
-            const response = await fetch(`${this.dbAddress}/users/${query.email}`);
+            /// simulating a lookup on userName
+            const response = await fetch(`${this.dbAddress}/users`);
 
             if (response.ok) {
-                const user = await response.json() as User;
-                const pwHash = lib.toHash(query.password);
+                // TODO: have username indexed for direct lookup.
+                const users = await response.json() as Array<UserRecord>;
+                const user = users.find(user => user.name == query.userName);
 
-                if (pwHash != user.hash)
+                if (!user)
+                    return lib.fail('Could not find user.');
+                ///
+
+                if (user.hash != lib.toHash(query.password))
                     return lib.fail('Wrong password.');
 
-                return lib.pass(true);
+                return lib.pass(user);
             }
 
             return lib.fail('Could not find user.');
@@ -211,32 +215,71 @@ class DatabaseService {
         }
     }
 
-    public async setAuthToken(userEmail: string, token: string): Promise<Probable<true>> {
+    // TODO: have session data available independently at the ready (in memory, Redis, or something else)
+    public async setSession(user: UserRecord, token: string, expiresAt: number): Promise<Probable<true>> {
+        const { id: userId, name, displayName } = user;
+        const userSession: UserSession = { id: token, userId, name, displayName, expiresAt };
+
         try {
             const response = await fetch(
-                `${this.dbAddress}/users/${userEmail}`,
+                `${this.dbAddress}/sessions`,
                 {
-                    method: 'PATCH',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ authToken: token }),
+                    body: JSON.stringify( userSession),
                 },
             );
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
-            return response.ok ? lib.pass(true) : lib.fail('Could not find user.');
+            return response.ok ? lib.pass(true) : lib.fail('Could not save session.');
         } catch (error) {
             console.error(error);
             return lib.fail(`${lib.getErrorBrief(error)}`);
         }
     }
 
-    public async getUser(userEmail: string): Promise<Probable<User>> {
+    public async getSession(sessionId: string): Promise<Probable<UserSession>> {
         try {
-            const response = await fetch(`${this.dbAddress}/users/${userEmail}`);
+            const response = await fetch(`${this.dbAddress}/sessions/${sessionId}`);
 
             if (response.ok) {
-                const user = await response.json();
+                const session: UserSession = await response.json();
+
+                return lib.pass(session);
+            }
+
+            return lib.fail('Session was not found.');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
+
+    public async removeSession(sessionId: string): Promise<Probable<true>> {
+        try {
+            const response = await fetch(
+                `${this.dbAddress}/sessions/${sessionId}`,
+                { method: 'DELETE' },
+            );
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            if (response.ok) {
+                return lib.pass(true);
+            }
+
+            return lib.fail('Could not delete session');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
+
+    public async getUser(userId: UserId): Promise<Probable<UserRecord>> {
+        try {
+            const response = await fetch(`${this.dbAddress}/users/${userId}`);
+
+            if (response.ok) {
+                const user: UserRecord = await response.json();
 
                 return lib.pass(user);
             }

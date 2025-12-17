@@ -1,9 +1,6 @@
 import { HexCoordinates } from "~/client_types";
 import { PlayerCountables } from "~/server_types";
 
-/** Universal identifier */
-export type Email = `${string}@${string}.${string}`
-
 /**
  * @description Interface wrapper hack to prevent the TSS from polluting class method references.
  */
@@ -349,7 +346,7 @@ export type VpTransmission = { vp: number }
 export type TurnNotificationTransmission = { turnStart: null }
 export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
-
+export type ExpiredTransmission = { expired: null }
 export type ServerMessage =
     | StateResponse
     | ResetResponse
@@ -360,4 +357,5 @@ export type ServerMessage =
     | TurnNotificationTransmission
     | RivalControlTransmission
     | ForceTurnNotificationTransmission
+    | ExpiredTransmission
 ;

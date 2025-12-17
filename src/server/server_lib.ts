@@ -1,5 +1,4 @@
-import { CookieOptions } from 'express';
-import { CookieName, Probable } from './server_types';
+import { CookieArgs, CookieName, Probable } from './server_types';
 import crypto from 'crypto';
 
 function pass<T>(data: T): Probable<T> {
@@ -32,28 +31,19 @@ function randomize<T>(array: Array<T>): Array<T> {
     );
 }
 
-type CookieArgs = {
-    value: string,
-    options: CookieOptions
-}
-function produceCookieArgs(isSecure: boolean, clientEmail: string): Record<CookieName, CookieArgs> {
+function produceCookieArgs(isSecure: boolean): Record<CookieName, CookieArgs> {
+    const seconds = 1000;
+    const minutes = 60 * seconds;
+    const hours = 60 * minutes;
 
+    const cookieLife = 24 * hours;
     return {
-        [CookieName.authToken]: {
+        [CookieName.token]: {
             value: crypto.randomBytes(32).toString('hex'),
             options: {
                 httpOnly: true,
                 secure: isSecure,
-                maxAge: 24 * 60 * 60 * 1000,
-                path: '/',
-            },
-        },
-        [CookieName.userEmail]: {
-            value: clientEmail,
-            options: {
-                httpOnly: true,
-                secure: isSecure,
-                maxAge: 24 * 60 * 60 * 1000,
+                maxAge: cookieLife,
                 path: '/',
             },
         },

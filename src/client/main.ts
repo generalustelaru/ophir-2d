@@ -111,6 +111,11 @@ document.fonts.ready.then(() => {
         UserInterface.setInfo('The server has entered maintenance.');
     });
 
+    window.addEventListener(EventType.deauthenticate, (): void => {
+        alert('Please log back in again :)');
+        window.location.href ='/';
+    });
+
     window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
         if (!event.detail || !localState.playerColor)
             return signalError('VP update failed');
@@ -156,9 +161,9 @@ document.fonts.ready.then(() => {
         canvas.notifyForForceTurn();
     });
 
-    window.addEventListener(EventType.renew, () => {
+    window.addEventListener(EventType.abandon, () => {
         alert('This session is no longer supported.');
-        window.location.href = '/new';
+        window.location.href = '/';
     });
 
     window.addEventListener(

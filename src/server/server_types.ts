@@ -1,12 +1,15 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
-    ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData, Email,
+    ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
     StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName, ClientRequest,
 } from '~/shared_types';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
+import { CookieOptions } from 'express';
+/** Universal identifier */
+export type UserId = `user-${string}`
 
 /** Return value wrapper with positive checks */
 export type Probable<T> =
@@ -14,14 +17,11 @@ export type Probable<T> =
     | { err: false, ok: true, data: T };
 
 export enum CookieName {
-    authToken = 'authToken',
-    userEmail = 'userEmail',
+    token = 'token',
 }
 
-export type PlayerReference = { color: PlayerColor | null, email: Email }
-
 export type AuthenticatedClientRequest = ClientRequest & {
-    email: Email,
+    userId: UserId,
 }
 
 export type MatchedPlayerRequest = AuthenticatedClientRequest & {
@@ -57,7 +57,7 @@ export type PlayerCountables = {
 }
 
 export type PlayerIdentity = {
-    email: Email,
+    userId: UserId,
     color: PlayerColor,
     name: string,
     turnOrder: number,
@@ -72,13 +72,14 @@ export type SetupDigest = {
 
 export type EnrolRequest = {
     message: ClientMessage,
-    email: Email,
+    userId: UserId,
+    displayName: string | null,
     player: null,
 }
 
 export type RequestMatch = {
     message: ClientMessage,
-    email: Email,
+    userId: UserId,
     player: PlayerEntity,
 }
 
@@ -182,20 +183,37 @@ export type SessionState = {
 }
 
 export type RegistrationForm = {
-    name: string,
-    email: string,
+    userName: string,
     password: string,
     pwRetype: string,
 }
 
 export type AuthenticationForm = {
-    email: string,
+    userName: string,
     password: string,
 }
 
+export type CookieArgs = {
+    value: string,
+    options: CookieOptions
+}
+
+export type PlayerReference = User & {
+    color: PlayerColor | null
+}
+
 export type User = {
-    id: string,
+    id: UserId,
     name: string,
+    displayName: string | null,
+}
+export type UserRecord = User & {
     hash: string,
-    authToken: string | null,
+}
+
+/**@property `id`: The session token also required by the user */
+export type UserSession = Omit<User, 'id'> & {
+    id: string,
+    userId: UserId
+    expiresAt: number,
 }

@@ -1,12 +1,13 @@
 import {
-    AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieName, Probable, RegistrationForm, SessionState,
+    AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieArgs, CookieName, Probable, RegistrationForm,
+    SessionState, UserRecord, UserId, User,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest, Email } from '~/shared_types';
+import { ServerMessage, PlayState, Action, ClientRequest } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import dbService from './services/DatabaseService';
 import { WebSocketServer, WebSocket } from 'ws';
-import { GameSession } from './GameSession';
+import { Game } from './Game';
 import sLib from './server_lib';
 import readline from 'readline';
 import process from 'process';
@@ -79,8 +80,8 @@ type Connection = {
     socket: WebSocket
     gameId: GameId
 }
-const connections: Map<Email, Connection> = new Map();
-const activeGames: Map<GameId, GameSession> = new Map();
+const connections: Map<UserId, Connection> = new Map();
+const activeGames: Map<GameId, Game> = new Map();
 socketServer.on('connection', async (socket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
@@ -106,23 +107,28 @@ socketServer.on('connection', async (socket, inc) => {
     if (validation.err) {
         sLib.printError(validation.message);
         sLib.printError('WS connection has invalid cookie.');
-        transmit(socket, { error: 'Invalid connection data.' });
+        transmit(socket, { expired: null });
 
         return;
     }
 
-    const { userEmail } = validation.data;
-    const ref = game.getPlayerRef(userEmail);
+    if (!validation.data) {
+        transmit(socket, { expired: null });
+
+        return;
+    }
+    const { user, expiresAt } = validation.data;
+    const ref = game.getPlayerRef(user.id);
 
     if (!ref) {
-        game.setPlayerRef(userEmail);
+        game.setPlayerRef({ ...user });
     } else if (ref.color) {
         transmit(socket, { color: ref.color });
         transmit(socket, { vp: game.getPlayerVP(ref.color) });
         // TODO: if it's the active player also send turn notification and start idle timeout
     }
 
-    connections.set(userEmail, { gameId, socket });
+    connections.set(user.id, { gameId, socket });
     transmit(socket, { state: game.getSharedState() });
 
     socket.on('message', function incoming(req: string) {
@@ -131,8 +137,10 @@ socketServer.on('connection', async (socket, inc) => {
         if (!clientRequest)
             return transmit(socket, { error: 'Invalid request data.' });
 
-        logRequest(clientRequest, userEmail);
+        if (expiresAt <= Date.now())
+            return transmit(socket, { expired: null });
 
+        logRequest(clientRequest, user.name);
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
@@ -140,10 +148,10 @@ socketServer.on('connection', async (socket, inc) => {
                     return console.error(configuration.message);
 
                 game.updateConfig(configuration.data);
-                processAction(game, { ...clientRequest, email: userEmail }, socket);
+                processAction(game, { ...clientRequest, userId: user.id }, socket);
             });
         } else {
-            processAction(game, { ...clientRequest, email: userEmail }, socket);
+            processAction(game, { ...clientRequest, userId: user.id }, socket);
         }
     });
 });
@@ -176,19 +184,18 @@ app.post('/register', async (req: Request, res: Response) => {
         return;
     }
 
-    const cookies = sLib.produceCookieArgs(false, form.email);
-    const tokenCookie = cookies[CookieName.authToken];
-    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
+    const sessionOp = await enableSession(registration.data);
 
-    if (patchOp.err) {
-        sLib.printError(patchOp.message);
+    if (sessionOp.err) {
+        sLib.printError(sessionOp.message);
         res.status(500).send('Something went wrong.');
 
         return;
     }
 
-    console.info('New registration',{ email: form.email });
+    console.info('New registration',{ userName: form.userName });
 
+    const cookies = sessionOp.data;
     for (const cookieName in cookies) {
         const { value, options } = cookies[cookieName as CookieName];
         res.cookie(cookieName, value, options);
@@ -198,7 +205,6 @@ app.post('/register', async (req: Request, res: Response) => {
 });
 app.post('/login', async (req: Request, res: Response) => {
     const form = req.body as AuthenticationForm;
-
     const authentication = await dbService.authenticateUser(form);
 
     if (authentication.err) {
@@ -208,19 +214,19 @@ app.post('/login', async (req: Request, res: Response) => {
         return;
     }
 
-    const cookies = sLib.produceCookieArgs(false, form.email);
-    const tokenCookie = cookies[CookieName.authToken];
+    const user = authentication.data;
+    const sessionOp = await enableSession(user);
 
-    const patchOp = await dbService.setAuthToken(form.email, tokenCookie.value);
-
-    if (patchOp.err) {
-        sLib.printError(patchOp.message);
+    if (sessionOp.err) {
+        sLib.printError(sessionOp.message);
         res.status(500).send('Something went wrong.');
 
         return;
     }
-    console.info('User logged in',{ email: form.email });
 
+    console.info('User logged in',{ userName: user.name });
+
+    const cookies = sessionOp.data;
     for (const cookieName in cookies) {
         const { value, options } = cookies[cookieName as CookieName];
         res.cookie(cookieName, value, options);
@@ -240,7 +246,7 @@ app.get('/new', async (req: Request, res: Response) => {
         return;
     }
 
-    const instantiation = await createGameSession();
+    const instantiation = await produceGame();
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
@@ -249,10 +255,10 @@ app.get('/new', async (req: Request, res: Response) => {
         return;
     }
 
-    const { data: session } = instantiation;
+    const { data: game } = instantiation;
 
-    const gameId = session.getGameId();
-    activeGames.set(gameId, session);
+    const gameId = game.getGameId();
+    activeGames.set(gameId, game);
     res.redirect(`/${gameId}`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -277,7 +283,7 @@ app.get('/:id', async (req: Request, res: Response) => {
         return;
     }
 
-    const revival = await reviveGameSession(gameId);
+    const revival = await reviveGame(gameId);
 
     if (revival.err) {
         sLib.printError(revival.message);
@@ -295,7 +301,7 @@ server.listen(PORT_NUMBER, () => {
 
 
 async function processAction(
-    session: GameSession,
+    session: Game,
     request: AuthenticatedClientRequest,
     socket: WebSocket,
 ) {
@@ -321,8 +327,8 @@ function broadcastCallback(state: PlayState) {
     broadcastToGroup(state.gameId, { state });
 }
 
-function transmitCallback(email: Email, message: ServerMessage) {
-    const reference = connections.get(email);
+function transmitCallback(userId: UserId, message: ServerMessage) {
+    const reference = connections.get(userId);
 
     if (!reference)
         return console.error('Cannot deliver message: Missing socket client.', { message });
@@ -332,13 +338,13 @@ function transmitCallback(email: Email, message: ServerMessage) {
 
 // MARK: FUNCTIONS
 
-function logRequest(request: ClientRequest, email: string) {
+function logRequest(request: ClientRequest, userName: string) {
     const { message } = request;
     const { action, payload } = message;
 
     console.info(
         '%s -> %s : {%s}',
-        email,
+        userName,
         action || '?',
         payload ? ` ${JSON.stringify(payload)} ` : ' ',
     );
@@ -404,13 +410,13 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
 }
 
 function broadcastToGroup(gameId: string, message: ServerMessage): void {
-    const userEmails = activeGames.get(gameId)?.getAllRefs().map(r=> r.email);
+    const playGroupIds = activeGames.get(gameId)?.getAllRefs().map(r => r.id);
 
-    if (!userEmails)
+    if (!playGroupIds)
         return console.error('Cannot find active GameSession', { gameId });
 
-    for (const email of userEmails) {
-        const socket = connections.get(email)?.socket;
+    for (const userId of playGroupIds) {
+        const socket = connections.get(userId)?.socket;
         socket && transmit(socket, message);
     }
 }
@@ -422,20 +428,20 @@ function startSessionChecks(configuration: Configuration) {
     const minutes = 60000;
     setInterval(() => {
         // free memory
-        connections.forEach(async (reference, email) => {
+        connections.forEach(async (reference, userId) => {
             const { gameId, socket } = reference;
 
             if (socket.readyState == socket.CLOSED) {
-                console.log('found CLOSED socket for', email);
-                connections.delete(email);
+                console.log('found CLOSED socket for', userId);
+                connections.delete(userId);
                 const game = activeGames.get(gameId);
 
                 if (game) {
                     const connectedUsers = game
                         .getAllRefs()
-                        .map( r => r.email)
-                        .filter(email => {
-                            connections.has(email) && connections.get(email)!.socket.OPEN;
+                        .map( r => r.id)
+                        .filter((userId: UserId) => {
+                            connections.has(userId) && connections.get(userId)!.socket.OPEN;
                         });
                     console.log('users connected to the same session:', connectedUsers);
 
@@ -460,7 +466,7 @@ function startSessionChecks(configuration: Configuration) {
         // free storage
         dbService.getTimestamps().then(timeStamps => {
             if (timeStamps.err)
-                return console.error('Corrupt session record found in routine check.');
+                return console.error('Corrupt game record found in routine check.');
 
             const time = Date.now();
 
@@ -479,8 +485,8 @@ function startSessionChecks(configuration: Configuration) {
     },1 * hours);
 }
 
-async function createGameSession(): Promise<Probable<GameSession>> {
-    const instantiation = await getGameSessionInstance(null);
+async function produceGame(): Promise<Probable<Game>> {
+    const instantiation = await getGameInstance(null);
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
@@ -491,13 +497,33 @@ async function createGameSession(): Promise<Probable<GameSession>> {
 
     if (persistence.err) {
         sLib.printError(persistence.message);
-        return sLib.fail('Could not persist game session');
+        return sLib.fail('Could not persist game state');
     }
 
     return instantiation;
 }
 
-async function reviveGameSession(gameId: string): Promise<Probable<GameSession>> {
+async function enableSession(user: UserRecord): Promise<Probable<Record<CookieName, CookieArgs>>> {
+
+    const cookies = sLib.produceCookieArgs(false);
+    const tokenCookie = cookies[CookieName.token];
+
+    if (!tokenCookie.options.maxAge) {
+        return sLib.fail('Token does not have maxAge set.');
+    }
+
+    const expiresAt = Date.now() + tokenCookie.options.maxAge;
+    const sessionCreation = await dbService.setSession(user, tokenCookie.value, expiresAt);
+
+    if (sessionCreation.err) {
+        sLib.printError(sessionCreation.message);
+        return sLib.fail('Could not enable session');
+    }
+
+    return sLib.pass(cookies);
+}
+
+async function reviveGame(gameId: string): Promise<Probable<Game>> {
     const revival = await dbService.loadGameState(gameId);
 
     if (revival.err) {
@@ -506,7 +532,7 @@ async function reviveGameSession(gameId: string): Promise<Probable<GameSession>>
         return sLib.fail('Could not revive session');
     }
 
-    const instantiation = await getGameSessionInstance(revival.data);
+    const instantiation = await getGameInstance(revival.data);
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
@@ -517,7 +543,7 @@ async function reviveGameSession(gameId: string): Promise<Probable<GameSession>>
     return instantiation;
 }
 
-async function getGameSessionInstance(savedSession: SessionState | null): Promise<Probable<GameSession>> {
+async function getGameInstance(savedSession: SessionState | null): Promise<Probable<Game>> {
     const query = await dbService.getConfig();
 
     if (query.err) {
@@ -527,7 +553,7 @@ async function getGameSessionInstance(savedSession: SessionState | null): Promis
 
     try {
         const configuration = query.data;
-        const session = new GameSession(broadcastCallback, transmitCallback, configuration, savedSession);
+        const session = new Game(broadcastCallback, transmitCallback, configuration, savedSession);
 
         return sLib.pass(session);
     } catch (error) {
@@ -537,37 +563,43 @@ async function getGameSessionInstance(savedSession: SessionState | null): Promis
     }
 }
 
-async function validateClient(cookie: unknown): Promise<Probable<{authToken: string, userEmail: Email}>> {
+async function validateClient(cookie: unknown): Promise<Probable<{user: User, expiresAt: number} | null>> {
     console.info('Validating client');
 
-    if (typeof cookie != 'string')
-        return sLib.fail('Cannot parse cookie, not a string');
+    if (typeof cookie != 'string') {
+        sLib.printWarning('No cookies found');
+        return sLib.pass(null);
+    }
 
-    const clientData = sLib.parseCookies(cookie);
+    const client = sLib.parseCookies(cookie);
 
-    if (!('authToken' in clientData) || !('userEmail' in clientData))
-        return sLib.fail('Cookie is missing essential data.');
+    if (!('token' in client)) {
+        sLib.printWarning('Cookie might have expired.');
+        return sLib.pass(null);
+    }
 
-    const { authToken, userEmail: cookieEmail } = clientData;
+    const retreival = await dbService.getSession(client.token);
 
-    const userEmail = ((): Email | null => {
-        const m = cookieEmail.match(/^\w+@\w+\.\w+$/);
-        return m ? m[0] as Email : null;
-    })();
+    if (retreival.err) {
+        sLib.printWarning(retreival.message);
+        return sLib.pass(null);
+    }
 
-    if (!userEmail)
-        return sLib.fail('Email string is not an email address');
+    const session = retreival.data;
 
-    const result = await dbService.getUser(userEmail);
+    if (session.expiresAt <= Date.now()) {
+        const removal = await dbService.removeSession(session.id);
 
-    if (result.err)
-        return sLib.fail(result.message);
+        if (removal.err) {
+            sLib.printError(removal.message);
+        }
 
-    const user = result.data;
+        return sLib.pass(null);
+    }
 
-    if (user.authToken != authToken)
-        return sLib.fail('Unauthorized request');
+    const { name, displayName, userId } = session;
+    const user = { id: userId, name, displayName };
 
-    return sLib.pass({ authToken, userEmail });
+    return sLib.pass({ user, expiresAt: session.expiresAt });
 }
 

@@ -11,6 +11,7 @@
         "SHORT_GAME": false,
         "INCLUDE": []
     },
+    "games": [],
     "users": [],
     "sessions": []
 }

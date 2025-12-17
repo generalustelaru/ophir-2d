@@ -2,7 +2,6 @@ import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, MetalPurchasePayload,
     Unique, FeasibleTrade, ServerMessage,
-    Email,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -10,6 +9,7 @@ import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
 import {
     ActionsAndDetails, Configuration, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle, TurnEvent,
+    UserId,
 } from '~/server_types';
 import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
@@ -24,15 +24,15 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
     // private broadcast: (state: PlayState) => void;
-    private transmit: (email: Email, message: ServerMessage) => void;
+    private transmit: (userId: UserId, message: ServerMessage) => void;
 
     /** @throws */
     constructor(
         stateBundle: StateBundle,
         configuration: Configuration,
         _broadcastCallback: (state: PlayState) => void,
-        transmitCallback: (email: Email, message: ServerMessage) => void,
-        activationEmail: Email | null,
+        transmitCallback: (userId: UserId, message: ServerMessage) => void,
+        activationId: UserId | null,
     ) {
         const { playState, privateState, backupState } = stateBundle;
         this.serverName = configuration.SERVER_NAME;
@@ -48,7 +48,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (activePlayer)
             return;
 
-        if (!activationEmail)
+        if (!activationId)
             throw new Error('Play phase cannot start. No way to activate first player.');
 
         const firstPlayer = players.find(p => p.turnOrder === 1);
@@ -56,7 +56,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!firstPlayer)
             throw new Error('Cannot find not find active player!');
 
-        const player = new PlayerHandler(firstPlayer, activationEmail);
+        const player = new PlayerHandler(firstPlayer, activationId);
         const { seaZone } = player.getBearings();
 
         player.activate(
@@ -225,7 +225,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                         description: 'took control of the rival ship',
                     });
                     player.freeze();
-                    this.transmit(player.getIdentity().email, { rivalControl: null });
+                    this.transmit(player.getIdentity().userId, { rivalControl: null });
                 }
             }
 
@@ -276,12 +276,12 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const { color, repositioning } = validation.data;
 
         const opponentDto = this.playState.getPlayer(color);
-        const opponentEmail = refPool.find(r => r.color == color)?.email;
+        const opponentId = refPool.find(r => r.color == color)?.id;
 
-        if (!opponentDto || !opponentEmail)
+        if (!opponentDto || !opponentId)
             return lib.fail('Cannot find opponent or reference.');
 
-        const opponent = new PlayerHandler(opponentDto, opponentEmail);
+        const opponent = new PlayerHandler(opponentDto, opponentId);
         opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
 
         return this.continueTurn(opponent, false);
@@ -552,7 +552,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         if (!marketSlotPayload)
             return lib.fail(lib.validationErrorMessage());
 
-        const { name, color, email } = player.getIdentity();
+        const { name, color, userId: userId } = player.getIdentity();
         const { slot } = marketSlotPayload;
 
         if (!player.hasAction(Action.donate_goods))
@@ -588,7 +588,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         });
         console.info(this.privateState.getGameStats());
 
-        this.transmit(email, { vp: this.privateState.getPlayerVictoryPoints(color) });
+        this.transmit(userId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
         const marketShift = this.shiftMarketCards(player);
 
@@ -733,7 +733,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         });
 
         this.transmit(
-            player.getIdentity().email,
+            player.getIdentity().userId,
             { vp: this.privateState.getPlayerVictoryPoints(color) },
         );
 
@@ -778,7 +778,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
     public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
         const { player, refPool } = data;
         this.clearUndo(player);
-        const { turnOrder, email: playerId } = player.getIdentity();
+        const { turnOrder, userId: playerId } = player.getIdentity();
 
         if (isVoluntary && !player.isAnchored())
             return lib.fail('Ship is not anchored.');
@@ -809,13 +809,13 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         const newPlayerOperation = ((): Probable<PlayerHandler> => {
             const allPlayers = this.playState.getAllPlayers();
             const nextInOrder = turnOrder === allPlayers.length ? 1 : turnOrder + 1;
-            const nextPlayerDto = allPlayers.find(player => player.turnOrder === nextInOrder);
-            const { email: nextPlayerEmail } = refPool.find(r => r.color == nextPlayerDto?.color) || {};
+            const nextPlayerDto = allPlayers.find(player => player.turnOrder == nextInOrder);
+            const { id: nextPlayerId } = refPool.find(r => r.color == nextPlayerDto?.color) || {};
 
-            if (!nextPlayerDto || !nextPlayerEmail)
-                return lib.fail('Could not find the next player or email');
+            if (!nextPlayerDto || !nextPlayerId)
+                return lib.fail('Could not find the next player or reference');
 
-            const nextPlayer = new PlayerHandler(nextPlayerDto, nextPlayerEmail);
+            const nextPlayer = new PlayerHandler(nextPlayerDto, nextPlayerId);
             const { seaZone } = nextPlayer.getBearings();
 
             nextPlayer.activate(
@@ -826,7 +826,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             const { color } = nextPlayer.getIdentity();
             this.playState.updateRival(color);
 
-            this.transmit(nextPlayerEmail, { turnStart: null });
+            this.transmit(nextPlayerId, { turnStart: null });
 
             return lib.pass(nextPlayer);
         })();
@@ -897,10 +897,10 @@ export class PlayProcessor implements Unique<SessionProcessor> {
             return lib.fail('Active player cannot force own turn!');
 
         const activePlayer = this.playState.getActivePlayer();
-        const { email } = refPool.find(r => r.color == activePlayer?.color) || {};
+        const { id: userId } = refPool.find(r => r.color == activePlayer?.color) || {};
 
-        if (!activePlayer || !email)
-            return lib.fail('Cannot find active player or email!');
+        if (!activePlayer || !userId)
+            return lib.fail('Cannot find active player or userId!');
 
         if (!activePlayer.isIdle)
             return lib.fail('Cannot force turn on non-idle player');
@@ -915,7 +915,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
 
         return this.endTurn(
             {
-                player: new PlayerHandler(activePlayer, email),
+                player: new PlayerHandler(activePlayer, userId),
                 payload: null,
                 refPool,
             },
@@ -942,14 +942,14 @@ export class PlayProcessor implements Unique<SessionProcessor> {
         this.privateState = new PrivateStateHandler(privateState);
 
         const revertedPlayer = playState.players.find(p => p.color === color);
-        const email = refPool.find(r => r.color == color)?.email;
+        const userId = refPool.find(r => r.color == color)?.id;
 
-        if (!revertedPlayer || !email)
-            return lib.fail('Could not find active player in backup or email');
+        if (!revertedPlayer || !userId)
+            return lib.fail('Could not find active player in backup or reference');
 
-        this.transmit(player.getIdentity().email, { vp: this.privateState.getPlayerVictoryPoints(color) });
+        this.transmit(player.getIdentity().userId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
-        const playerHandler = new PlayerHandler(revertedPlayer, email);
+        const playerHandler = new PlayerHandler(revertedPlayer, userId);
 
         if (this.backupState.isEmpty())
             playerHandler.disableUndo();

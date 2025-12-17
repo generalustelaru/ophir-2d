@@ -1,11 +1,11 @@
 import {
-    WsDigest, DataDigest, SessionState, Probable, Configuration, PlayerReference, RequestMatch, EnrolRequest,
-    AuthenticatedClientRequest,
-    MatchedPlayerRequest,
+    WsDigest, DataDigest, SessionState, Probable, Configuration, PlayerReference, RequestMatch, EnrolRequest, UserId,
+    AuthenticatedClientRequest, MatchedPlayerRequest,
+    User,
 } from '~/server_types';
 import { randomUUID } from 'crypto';
 import {
-    ServerMessage, Action, Phase, PlayState, StateResponse, PlayerColor, PlayerEntity, State, Email, Player,
+    ServerMessage, Action, Phase, PlayState, StateResponse, PlayerColor, PlayerEntity, State, Player,
 } from '~/shared_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library';
@@ -19,17 +19,17 @@ import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 
 /**@throws */
-export class GameSession {
+export class Game {
     private gameId: string;
     private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private broadcast: ((state: PlayState) => void) | null;
-    private transmit: ((email: Email, message: ServerMessage) => void) | null;
+    private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private playerReferences: Array<PlayerReference> = [];
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
-        transmitCallback: (email: Email, message: ServerMessage) => void,
+        transmitCallback: (userId: UserId, message: ServerMessage) => void,
         configuration: Configuration,
         savedSession: SessionState | null,
     ) {
@@ -75,7 +75,7 @@ export class GameSession {
                         configuration,
                         broadcastCallback,
                         transmitCallback,
-                        this.getActivationEmail(sharedState.players),
+                        this.getActivationId(sharedState.players),
                     );
 
                 case Phase.setup:
@@ -100,8 +100,8 @@ export class GameSession {
         console.info('Game session recreated.');
     }
 
-    public getPlayerRef(userEmail: Email) {
-        const ref = this.playerReferences.find(r => r.email == userEmail);
+    public getPlayerRef(userId: UserId) {
+        const ref = this.playerReferences.find(r => r.id == userId);
 
         return ref || null;
     }
@@ -110,11 +110,8 @@ export class GameSession {
         return this.playerReferences;
     }
 
-    public setPlayerRef(userEmail: Email) {
-        const oldRef = this.playerReferences.find(r => r.email == userEmail);
-
-        if (!oldRef)
-            this.playerReferences.push({  email: userEmail, color: null });
+    public setPlayerRef(user: User) {
+        this.playerReferences.push({  ...user, color: null });
     }
 
     public getPlayerVP(color: PlayerColor) {
@@ -179,7 +176,7 @@ export class GameSession {
             return this.issueNominalResponse( { error: 'Cannot process request' });
         };
 
-        const reference = this.playerReferences.find(r => r.email == request.email);
+        const reference = this.playerReferences.find(r => r.id == request.userId);
 
         if (!reference)
             return emitError('Player reference is missing');
@@ -187,10 +184,10 @@ export class GameSession {
         const state = this.actionProcessor.getState();
         const { message } = request;
         const { action, payload } = message;
-        const { email } = reference;
+        const { id: userId, displayName } = reference;
 
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment)
-            return this.processEnrolmentAction({ message, email, player: null });
+            return this.processEnrolmentAction({ message, userId, displayName, player: null });
 
         const matchOperation = this.matchRequestToPlayer(request);
 
@@ -211,7 +208,7 @@ export class GameSession {
             if (commandMatch) {
                 // future switch if more commands are added
                 const nameMatch = message.input.match(/(?<=#name ).*/);
-
+                // TODO: update display name in DB and refs
                 if (nameMatch) {
                     const newName = nameMatch[0];
 
@@ -273,8 +270,8 @@ export class GameSession {
     }
 
     // MARK: ENROL
-    private updateReferenceColor(email: Email, color: PlayerColor) {
-        const ref = this.playerReferences.find(r => r.email == email);
+    private updateReferenceColor(userId: UserId, color: PlayerColor) {
+        const ref = this.playerReferences.find(r => r.id == userId);
 
         if (!ref)
             return console.error('Could not a find reference to update color!!!');
@@ -290,9 +287,9 @@ export class GameSession {
 
         if (!player) {
 
-            const { email, message } = request;
+            const { userId, message, displayName } = request;
 
-            const enrolment = processor.processEnrol(email, message.payload);
+            const enrolment = processor.processEnrol(userId, message.payload, displayName);
 
             if (enrolment.err) {
                 lib.printError(enrolment.message);
@@ -380,7 +377,7 @@ export class GameSession {
                             this.config,
                             this.broadcast,
                             this.transmit,
-                            this.getActivationEmail(stateBundle.playState.getAllPlayers()),
+                            this.getActivationId(stateBundle.playState.getAllPlayers()),
                         );
                     } catch (error) {
                         return lib.fail(String(error));
@@ -407,7 +404,7 @@ export class GameSession {
     public processPlayAction(request: RequestMatch): WsDigest {
         const processor = this.actionProcessor as PlayProcessor;
 
-        const { player, message, email } = request;
+        const { player, message, userId: userId } = request;
         const { action, payload } = message;
 
         if (!('timeStamp' in player)) {
@@ -415,7 +412,7 @@ export class GameSession {
             return this.issueNominalResponse({ error: 'Cannot process action' });
         }
 
-        const playerHandler = new PlayerHandler(player, email);
+        const playerHandler = new PlayerHandler(player, userId);
         playerHandler.refreshTimeStamp();
 
         const digest: DataDigest = { player: playerHandler, payload, refPool: this.playerReferences };
@@ -513,13 +510,13 @@ export class GameSession {
     }
 
     private matchRequestToPlayer(request: AuthenticatedClientRequest): Probable<MatchedPlayerRequest> {
-        const { email } = request;
+        const { userId } = request;
 
         const state = this.actionProcessor.getState();
-        const ref = this.playerReferences.find( r => r.email == email);
+        const ref = this.playerReferences.find( r => r.id == userId);
 
         if (!ref)
-            return lib.fail(`Cannot find reference for email: ${email}`);
+            return lib.fail(`Cannot find reference for id: ${userId}`);
 
         const player = state.players.find(p => p.color === ref.color);
 
@@ -536,7 +533,7 @@ export class GameSession {
         return players.some(player => player.name === name);
     }
 
-    private getActivationEmail(players: Array<Player>) {
+    private getActivationId(players: Array<Player>): UserId | null {
         const activePlayer = players.find(p => p.isActive);
 
         if (activePlayer)
@@ -545,6 +542,6 @@ export class GameSession {
         const firstPlayer = players.find(p => p.turnOrder == 1);
         const ref = this.playerReferences.find(r => r.color == firstPlayer?.color);
 
-        return ref?.email || null;
+        return ref?.id || null;
     }
 }
