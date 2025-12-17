@@ -2,7 +2,7 @@
     "config":{
         "SERVER_NAME": "Laputan Machine",
         "PLAYER_IDLE_MINUTES": 1,
-        "SESSION_DELETION_HOURS": 1,
+        "GAME_DELETION_HOURS": 1,
         "SINGLE_PLAYER": false,
         "NO_RIVAL": false,
         "RICH_PLAYERS": false,
@@ -12,6 +12,5 @@
         "INCLUDE": []
     },
     "games": [],
-    "users": [],
-    "sessions": []
+    "users": []
 }

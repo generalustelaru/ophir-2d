@@ -1,5 +1,5 @@
 import {
-    WsDigest, DataDigest, SessionState, Probable, Configuration, PlayerReference, RequestMatch, EnrolRequest, UserId,
+    WsDigest, DataDigest, GameState, Probable, Configuration, PlayerReference, RequestMatch, EnrolRequest, UserId,
     AuthenticatedClientRequest, MatchedPlayerRequest,
     User,
 } from '~/server_types';
@@ -33,7 +33,7 @@ export class Game {
         transmitCallback: (userId: UserId, message: ServerMessage) => void,
         nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
-        savedSession: SessionState | null,
+        savedSession: GameState | null,
     ) {
         this.config = { ...configuration };
         this.broadcast = broadcastCallback;
@@ -83,7 +83,7 @@ export class Game {
 
                 case Phase.setup:
                     return new SetupProcessor(
-                        { gameId, sessionOwner: (sessionOwner as PlayerColor), players, chat },
+                        { gameId, gameOwner: (sessionOwner as PlayerColor), players, chat },
                         configuration,
                     );
 
@@ -146,7 +146,7 @@ export class Game {
         return this.actionProcessor.getState();
     }
 
-    public getSessionState(): SessionState {
+    public getGameState(): GameState {
         const state = this.actionProcessor.getState();
         const isPlay = state.sessionPhase === Phase.play;
         return {
@@ -336,7 +336,7 @@ export class Game {
 
                     try {
                         this.actionProcessor = new SetupProcessor(
-                            { gameId, sessionOwner, players, chat },
+                            { gameId, gameOwner: sessionOwner, players, chat },
                             this.config,
                         );
                     } catch (error) {

@@ -4,7 +4,7 @@ import {
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity, Unique,
 } from '~/shared_types';
-import { DestinationPackage, StateBundle, SetupDigest, SessionProcessor, Probable, Configuration } from '~/server_types';
+import { DestinationPackage, StateBundle, SetupDigest, ActionProcessor, Probable, Configuration } from '~/server_types';
 import serverConstants from '~/server_constants';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
@@ -18,7 +18,7 @@ const {
     BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS, SPECIALISTS,
 } = serverConstants;
 
-export class SetupProcessor implements Unique<SessionProcessor> {
+export class SetupProcessor implements Unique<ActionProcessor> {
 
     private setupState: SetupStateHandler;
     private config: Configuration;
@@ -84,7 +84,7 @@ export class SetupProcessor implements Unique<SessionProcessor> {
             {
                 gameId: digest.gameId,
                 sessionPhase: Phase.setup,
-                sessionOwner: digest.sessionOwner,
+                sessionOwner: digest.gameOwner,
                 players: playerDrafts,
                 specialists,
                 setup: {

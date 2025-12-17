@@ -73,7 +73,7 @@ You can edit the `"config"` values found in *db.json*. The values will only be a
 
 `"PLAYER_IDLE_MINUTES"`: How fast a player can be skipped for not doing anything.
 
-`"SESSION_DELETION_HOURS"`: How quickly an inactive session goes bye-bye.
+`"GAME_DELETION_HOURS"`: How quickly an inactive session goes bye-bye.
 
 `IDLE_"TIMEOUT`: Time of perceived inactivity (in minutes) for the current player before receiving the idle status.
 

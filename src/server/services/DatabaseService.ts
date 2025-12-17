@@ -1,5 +1,6 @@
 import {
-    AuthenticationForm, Configuration, Probable, RegistrationForm, SessionState, UserRecord, UserId, UserSession,
+    AuthenticationForm, Configuration, Probable, RegistrationForm, GameState, UserRecord, UserId,
+    User,
 } from '../server_types';
 import { validator } from './validation/ValidatorService';
 import { DB_PORT } from '../../environment';
@@ -34,8 +35,8 @@ class DatabaseService {
         }
     }
 
-    // MARK: SESSIONS
-    public async addGameState(savedSession: SessionState): Promise<Probable<true>> {
+    // MARK: GAMES
+    public async addGameState(savedSession: GameState): Promise<Probable<true>> {
         const id = savedSession.sharedState.gameId;
 
         try {
@@ -59,7 +60,7 @@ class DatabaseService {
         }
     }
 
-    public async saveGameState(savedSession: SessionState): Promise<Probable<true>> {
+    public async saveGameState(savedSession: GameState): Promise<Probable<true>> {
         const id = savedSession.sharedState.gameId;
 
         try {
@@ -83,7 +84,7 @@ class DatabaseService {
         }
     }
 
-    public async loadGameState(gameId: string): Promise<Probable<SessionState>> {
+    public async loadGameState(gameId: string): Promise<Probable<GameState>> {
         try {
             const response = await fetch(`${this.dbAddress}/games/${gameId}`);
 
@@ -153,7 +154,7 @@ class DatabaseService {
     }
 
     // MARK: USERS
-    public async registerUser(query: RegistrationForm): Promise<Probable<UserRecord>> {
+    public async registerUser(query: RegistrationForm): Promise<Probable<User>> {
         const { userName, password, pwRetype } = query;
 
         if (password !== pwRetype) {
@@ -162,48 +163,51 @@ class DatabaseService {
 
         try {
             const userId: UserId = `user-${randomUUID()}`;
-            const newUser: UserRecord = {
+            const user: User = {
                 id: userId,
                 name: userName,
                 displayName: null,
-                hash: lib.toHash(password),
             };
+
+            const hash = lib.toHash(password);
+            const record: UserRecord = { ...user, hash };
 
             const response = await fetch(
                 `${this.dbAddress}/users`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(newUser),
+                    body: JSON.stringify(record),
                 },
             );
 
             await new Promise(resolve => setTimeout(resolve, 100));
 
             return response.ok
-                ? lib.pass(newUser)
+                ? lib.pass(user)
                 : lib.fail('Could not save user.');
-
         } catch (error) {
             return lib.fail(lib.getErrorBrief(error));
         }
     }
 
-    public async authenticateUser(query: AuthenticationForm): Promise<Probable<UserRecord>> {
+    public async authenticateUser(query: AuthenticationForm): Promise<Probable<User>> {
         try {
             /// simulating a lookup on userName
             const response = await fetch(`${this.dbAddress}/users`);
 
             if (response.ok) {
                 // TODO: have username indexed for direct lookup.
-                const users = await response.json() as Array<UserRecord>;
-                const user = users.find(user => user.name == query.userName);
+                const records = await response.json() as Array<UserRecord>;
+                const userRecord = records.find(userRecord => userRecord.name == query.userName);
 
-                if (!user)
+                if (!userRecord)
                     return lib.fail('Could not find user.');
                 ///
 
-                if (user.hash != lib.toHash(query.password))
+                const { hash, ...user } = userRecord;
+
+                if (hash != lib.toHash(query.password))
                     return lib.fail('Wrong password.');
 
                 return lib.pass(user);
@@ -215,82 +219,7 @@ class DatabaseService {
         }
     }
 
-    // TODO: have session data available independently at the ready (in memory, Redis, or something else)
-    public async setSession(user: UserRecord, token: string, expiresAt: number): Promise<Probable<true>> {
-        const { id: userId, name, displayName } = user;
-        const userSession: UserSession = { id: token, userId, name, displayName, expiresAt };
-
-        try {
-            const response = await fetch(
-                `${this.dbAddress}/sessions`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify( userSession),
-                },
-            );
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            return response.ok ? lib.pass(true) : lib.fail('Could not save session.');
-        } catch (error) {
-            console.error(error);
-            return lib.fail(`${lib.getErrorBrief(error)}`);
-        }
-    }
-
-    public async getSession(sessionId: string): Promise<Probable<UserSession>> {
-        try {
-            const response = await fetch(`${this.dbAddress}/sessions/${sessionId}`);
-
-            if (response.ok) {
-                const session: UserSession = await response.json();
-
-                return lib.pass(session);
-            }
-
-            return lib.fail('Session was not found.');
-        } catch (error) {
-            return lib.fail(lib.getErrorBrief(error));
-        }
-    }
-
-    public async removeSession(sessionId: string): Promise<Probable<true>> {
-        try {
-            const response = await fetch(
-                `${this.dbAddress}/sessions/${sessionId}`,
-                { method: 'DELETE' },
-            );
-
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            if (response.ok) {
-                return lib.pass(true);
-            }
-
-            return lib.fail('Could not delete session');
-        } catch (error) {
-            return lib.fail(lib.getErrorBrief(error));
-        }
-    }
-
-    public async getUser(userId: UserId): Promise<Probable<UserRecord>> {
-        try {
-            const response = await fetch(`${this.dbAddress}/users/${userId}`);
-
-            if (response.ok) {
-                const user: UserRecord = await response.json();
-
-                return lib.pass(user);
-            }
-
-            return lib.fail('User was not found');
-        } catch (error) {
-            return lib.fail(lib.getErrorBrief(error));
-        }
-    }
-
-    public async saveDisplayName(userId: UserId, name: string): Promise<Probable<true>> {
+    public async updateUserDisplayName(userId: UserId, name: string): Promise<Probable<true>> {
         try {
             const patch = await fetch(
                 `${this.dbAddress}/users/${userId}`,

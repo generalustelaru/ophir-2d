@@ -8,7 +8,7 @@ import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
 import {
-    ActionsAndDetails, Configuration, DataDigest, PlayerCountables, Probable, SessionProcessor, StateBundle, TurnEvent,
+    ActionsAndDetails, Configuration, DataDigest, PlayerCountables, Probable, ActionProcessor, StateBundle, TurnEvent,
     UserId,
 } from '~/server_types';
 import lib from './library';
@@ -17,7 +17,7 @@ import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
 // TODO: Reduce linecount; extract utility-like functions, move deed composition to dedicated service.
-export class PlayProcessor implements Unique<SessionProcessor> {
+export class PlayProcessor implements Unique<ActionProcessor> {
     private idleCheckInterval: NodeJS.Timeout | null = null;
     private serverName: string;
     private playState: PlayStateHandler;

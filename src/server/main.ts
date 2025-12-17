@@ -1,6 +1,6 @@
 import {
     AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieArgs, CookieName, Probable, RegistrationForm,
-    SessionState, UserRecord, UserId, User,
+    GameState, UserId, User, UserSession,
 } from '~/server_types';
 import { ServerMessage, PlayState, Action, ClientRequest } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
@@ -29,7 +29,7 @@ dbService.getConfig().then(configuration => {
         process.exit(1);
     }
 
-    startSessionChecks(configuration.data);
+    startGameChecks(configuration.data);
 });
 
 // MARK: PROCESS
@@ -68,6 +68,11 @@ const rl = readline.createInterface({
         });
     }
 )();
+// MARK: MEMORY
+// TODO: have session data available independently in Redis
+const sessions: Map<string, UserSession> = new Map();
+const connections: Map<UserId, Connection> = new Map();
+const activeGames: Map<GameId, Game> = new Map();
 
 // MARK: WEB
 const app = express();
@@ -80,8 +85,7 @@ type Connection = {
     socket: WebSocket
     gameId: GameId
 }
-const connections: Map<UserId, Connection> = new Map();
-const activeGames: Map<GameId, Game> = new Map();
+
 socketServer.on('connection', async (socket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
@@ -117,7 +121,7 @@ socketServer.on('connection', async (socket, inc) => {
 
         return;
     }
-    const { user, expiresAt } = validation.data;
+    const { expiresAt, ...user } = validation.data;
     const ref = game.getPlayerRef(user.id);
 
     if (!ref) {
@@ -184,7 +188,8 @@ app.post('/register', async (req: Request, res: Response) => {
         return;
     }
 
-    const sessionOp = await enableSession(registration.data);
+    const cookies = sLib.produceCookieArgs(false);
+    const sessionOp = await enableSession(cookies, registration.data);
 
     if (sessionOp.err) {
         sLib.printError(sessionOp.message);
@@ -195,7 +200,6 @@ app.post('/register', async (req: Request, res: Response) => {
 
     console.info('New registration',{ userName: form.userName });
 
-    const cookies = sessionOp.data;
     for (const cookieName in cookies) {
         const { value, options } = cookies[cookieName as CookieName];
         res.cookie(cookieName, value, options);
@@ -214,8 +218,9 @@ app.post('/login', async (req: Request, res: Response) => {
         return;
     }
 
+    const cookies = sLib.produceCookieArgs(false);
     const user = authentication.data;
-    const sessionOp = await enableSession(user);
+    const sessionOp = await enableSession(cookies, user);
 
     if (sessionOp.err) {
         sLib.printError(sessionOp.message);
@@ -226,7 +231,6 @@ app.post('/login', async (req: Request, res: Response) => {
 
     console.info('User logged in',{ userName: user.name });
 
-    const cookies = sessionOp.data;
     for (const cookieName in cookies) {
         const { value, options } = cookies[cookieName as CookieName];
         res.cookie(cookieName, value, options);
@@ -300,25 +304,26 @@ server.listen(PORT_NUMBER, () => {
 });
 
 
+
 async function processAction(
-    session: Game,
+    game: Game,
     request: AuthenticatedClientRequest,
     socket: WebSocket,
 ) {
-    const result = session.processAction(request);
+    const result = game.processAction(request);
 
     if (request.message.action == Action.end_turn) {
-        const save = await dbService.saveGameState(session.getSessionState());
+        const save = await dbService.saveGameState(game.getGameState());
 
         if (save.err) {
             console.error(save.message);
-            return broadcastToGroup(session.getGameId(), { error: 'Action cannot be saved' });
+            return broadcastToGroup(game.getGameId(), { error: 'Action cannot be saved' });
         }
     }
 
     result.senderOnly
         ? transmit(socket, result.message)
-        : broadcastToGroup(session.getGameId(), result.message)
+        : broadcastToGroup(game.getGameId(), result.message)
     ;
 }
 
@@ -337,7 +342,7 @@ function transmitCallback(userId: UserId, message: ServerMessage) {
 }
 
 async function nameUpdateCallback(userId: UserId, name: string) {
-    const op = await dbService.saveDisplayName(userId, name);
+    const op = await dbService.updateUserDisplayName(userId, name);
 
     if (op.err)
         sLib.printError(op.message);
@@ -366,6 +371,8 @@ function debugCommand(target?: string, option?: string): void {
             return console.log(activeGames.keys());
         case 'sockets':
             return console.log(connections.keys());
+        case 'sessions':
+            return console.log(sessions.keys());
     }
 
     if (!option)
@@ -428,8 +435,8 @@ function broadcastToGroup(gameId: string, message: ServerMessage): void {
     }
 }
 
-function startSessionChecks(configuration: Configuration) {
-    const { SESSION_DELETION_HOURS } = configuration;
+function startGameChecks(configuration: Configuration) {
+    const { GAME_DELETION_HOURS } = configuration;
     console.info('Starting session checks');
 
     const minutes = 60000;
@@ -453,7 +460,7 @@ function startSessionChecks(configuration: Configuration) {
                     console.log('users connected to the same session:', connectedUsers);
 
                     if (connectedUsers.length == 0) {
-                        const saveOp = await dbService.saveGameState(game.getSessionState());
+                        const saveOp = await dbService.saveGameState(game.getGameState());
 
                         if (saveOp.ok) {
                             game.deReference();
@@ -478,7 +485,7 @@ function startSessionChecks(configuration: Configuration) {
             const time = Date.now();
 
             for (const item of timeStamps.data) {
-                if (time - item.timeStamp > (SESSION_DELETION_HOURS * hours) && !activeGames.has(item.id)) {
+                if (time - item.timeStamp > (GAME_DELETION_HOURS * hours) && !activeGames.has(item.id)) {
                     dbService.deleteGameState(item.id).then(response => {
 
                         if (response.err)
@@ -500,7 +507,7 @@ async function produceGame(): Promise<Probable<Game>> {
         return sLib.fail('Could not create game session,');
     }
 
-    const persistence = await dbService.addGameState(instantiation.data.getSessionState());
+    const persistence = await dbService.addGameState(instantiation.data.getGameState());
 
     if (persistence.err) {
         sLib.printError(persistence.message);
@@ -510,22 +517,18 @@ async function produceGame(): Promise<Probable<Game>> {
     return instantiation;
 }
 
-async function enableSession(user: UserRecord): Promise<Probable<Record<CookieName, CookieArgs>>> {
+async function enableSession(
+    cookies: Record<CookieName, CookieArgs>,
+    user: User,
+): Promise<Probable<Record<CookieName, CookieArgs>>> {
 
-    const cookies = sLib.produceCookieArgs(false);
     const tokenCookie = cookies[CookieName.token];
 
     if (!tokenCookie.options.maxAge) {
         return sLib.fail('Token does not have maxAge set.');
     }
-
     const expiresAt = Date.now() + tokenCookie.options.maxAge;
-    const sessionCreation = await dbService.setSession(user, tokenCookie.value, expiresAt);
-
-    if (sessionCreation.err) {
-        sLib.printError(sessionCreation.message);
-        return sLib.fail('Could not enable session');
-    }
+    sessions.set( tokenCookie.value, { ...user, expiresAt });
 
     return sLib.pass(cookies);
 }
@@ -550,7 +553,7 @@ async function reviveGame(gameId: string): Promise<Probable<Game>> {
     return instantiation;
 }
 
-async function getGameInstance(savedSession: SessionState | null): Promise<Probable<Game>> {
+async function getGameInstance(savedSession: GameState | null): Promise<Probable<Game>> {
     const query = await dbService.getConfig();
 
     if (query.err) {
@@ -576,11 +579,11 @@ async function getGameInstance(savedSession: SessionState | null): Promise<Proba
     }
 }
 
-async function validateClient(cookie: unknown): Promise<Probable<{user: User, expiresAt: number} | null>> {
+async function validateClient(cookie: unknown): Promise<Probable<UserSession | null>> {
     console.info('Validating client');
 
     if (typeof cookie != 'string') {
-        sLib.printWarning('No cookies found');
+        sLib.printWarning('No cookies found.');
         return sLib.pass(null);
     }
 
@@ -591,28 +594,20 @@ async function validateClient(cookie: unknown): Promise<Probable<{user: User, ex
         return sLib.pass(null);
     }
 
-    const retreival = await dbService.getSession(client.token);
+    const session = sessions.get(client.token);
 
-    if (retreival.err) {
-        sLib.printWarning(retreival.message);
+    if (!session) {
+        sLib.printWarning('Session was wiped.');
         return sLib.pass(null);
     }
-
-    const session = retreival.data;
 
     if (session.expiresAt <= Date.now()) {
-        const removal = await dbService.removeSession(session.id);
-
-        if (removal.err) {
-            sLib.printError(removal.message);
-        }
-
+        sessions.delete(client.token);
+        sLib.printWarning('Session has expired. Deleting.');
         return sLib.pass(null);
     }
 
-    const { name, displayName, userId } = session;
-    const user = { id: userId, name, displayName };
-
-    return sLib.pass({ user, expiresAt: session.expiresAt });
+    console.info('Session is ok.');
+    return sLib.pass(session);
 }
 

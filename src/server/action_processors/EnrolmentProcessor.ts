@@ -2,13 +2,13 @@ import {
     ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
     Unique,
 } from '~/shared_types';
-import { Configuration, Probable, RequestMatch, SessionProcessor, UserId } from '~/server_types';
+import { Configuration, Probable, RequestMatch, ActionProcessor, UserId } from '~/server_types';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
 import { validator } from '../services/validation/ValidatorService';
 import serverConstants from '../server_constants';
 import lib from './library';
 
-export class EnrolmentProcessor implements Unique<SessionProcessor> {
+export class EnrolmentProcessor implements Unique<ActionProcessor> {
     private enrolmentState: EnrolmentStateHandler;
     private transmit: (userId: UserId, message: ServerMessage) => void;
     private isSinglePlayer: boolean;

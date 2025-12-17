@@ -3,20 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/pico.cyan.min.css" />
     <title>Ophir 2D - Login</title>
 </head>
 <body>
     <h2>Ophir 2D</h2>
     <h3>Register</h3>
-    <form method="post" action="/register" style="display: flex; flex-direction: column; width: 150px;">
-        <input type="text" name="userName" placeholder="User Name">
+    <form method="post" action="/register" style="display: flex; flex-direction: column;">
+        <div><input type="text" name="userName" placeholder="User Name">-- will not be displayed</div>
         <input type="text" name="password" placeholder="Pasword">
         <input type="text" name="pwRetype" placeholder="Password, Again">
         <input type="submit" value="Register">
     </form>
     <h3>Login</h3>
-    <form method="post" action="/login" style="display: flex; flex-direction: column; width: 150px;">
+    <form method="post" action="/login" style="display: flex; flex-direction: column;">
         <input type="text" name="userName" placeholder="User Name">
         <input type="text" name="password" placeholder="Pasword">
         <input type="submit" value="Login">

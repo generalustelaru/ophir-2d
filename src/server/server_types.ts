@@ -65,7 +65,7 @@ export type PlayerIdentity = {
 
 export type SetupDigest = {
     gameId: string,
-    sessionOwner: PlayerColor,
+    gameOwner: PlayerColor,
     players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,
 }
@@ -154,7 +154,7 @@ export type ServerConstants = {
 export type Configuration = {
     SERVER_NAME: string,
     PLAYER_IDLE_MINUTES: number,
-    SESSION_DELETION_HOURS: number,
+    GAME_DELETION_HOURS: number,
     SINGLE_PLAYER: boolean,
     NO_RIVAL: boolean,
     RICH_PLAYERS: boolean,
@@ -168,14 +168,14 @@ export interface ObjectHandler<T> {
     toDto: () => T,
 }
 
-export interface SessionProcessor {
+export interface ActionProcessor {
     getState: () => State;
     addChat: (entry: ChatEntry) => ServerMessage;
     updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
     getPlayerVP: (color: PlayerColor) => number;
 }
 
-export type SessionState = {
+export type GameState = {
     playerReferences: Array<PlayerReference>
     sharedState: State
     privateState: PrivateState | null
@@ -212,8 +212,6 @@ export type UserRecord = User & {
 }
 
 /**@property `id`: The session token also required by the user */
-export type UserSession = Omit<User, 'id'> & {
-    id: string,
-    userId: UserId
+export type UserSession = User & {
     expiresAt: number,
 }

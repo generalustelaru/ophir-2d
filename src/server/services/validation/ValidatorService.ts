@@ -7,7 +7,7 @@ import {
     PeddlerMarketPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
-import { BackupState, Configuration, PrivateState, Probable, SessionState } from '~/server_types';
+import { BackupState, Configuration, PrivateState, Probable, GameState } from '~/server_types';
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
@@ -30,7 +30,7 @@ class ValidatorService {
             [
                 { key: 'SERVER_NAME', type: 'string', nullable: false },
                 { key: 'PLAYER_IDLE_MINUTES', type: 'number', nullable: false },
-                { key: 'SESSION_DELETION_HOURS', type: 'number', nullable: false },
+                { key: 'GAME_DELETION_HOURS', type: 'number', nullable: false },
                 { key: 'SINGLE_PLAYER', type: 'boolean', nullable: false },
                 { key: 'NO_RIVAL', type: 'boolean', nullable: false },
                 { key: 'RICH_PLAYERS', type: 'boolean', nullable: false },
@@ -57,7 +57,7 @@ class ValidatorService {
         return null;
     }
     public validateState(db_data: unknown) {
-        const savedSession = this.validateObject<SessionState>(
+        const savedSession = this.validateObject<GameState>(
             'SavedSession',
             db_data,
             [
