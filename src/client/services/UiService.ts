@@ -206,11 +206,21 @@ export const UserInterface = new class extends Communicator {
 
     private updateChat(chat: Array<ChatEntry>): void {
         this.chatMessages.innerHTML = chat.map(entry => {
-            const name = entry.name ? `${entry.name}: ` : '';
-            const message = entry.message;
+            const name = entry.name ? `${this.sanitizeText(entry.name)}: ` : '';
+            const message = this.sanitizeText(entry.message);
             const hue = entry.color ? clientConstants.PLAYER_HUES[entry.color].vivid.light : 'inherit';
             return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
     }
+
+    private sanitizeText(text: string) {
+        return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    }
+
 };
