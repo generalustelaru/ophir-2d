@@ -289,6 +289,26 @@ class DatabaseService {
             return lib.fail(lib.getErrorBrief(error));
         }
     }
+
+    public async saveDisplayName(userId: UserId, name: string): Promise<Probable<true>> {
+        try {
+            const patch = await fetch(
+                `${this.dbAddress}/users/${userId}`,
+                {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ displayName: name }),
+                },
+            );
+
+            if (patch.ok)
+                return lib.pass(true);
+
+            return lib.fail('Could not update user record');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
 }
 
 const dbService = new DatabaseService();

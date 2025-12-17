@@ -25,17 +25,20 @@ export class Game {
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private broadcast: ((state: PlayState) => void) | null;
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
+    private saveDisplayName: ((userId: UserId, name: string) => void) | null;
     private playerReferences: Array<PlayerReference> = [];
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
         transmitCallback: (userId: UserId, message: ServerMessage) => void,
+        nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
         savedSession: SessionState | null,
     ) {
         this.config = { ...configuration };
         this.broadcast = broadcastCallback;
         this.transmit = transmitCallback;
+        this.saveDisplayName = nameUpdateCallback;
 
         if (!savedSession) {
             this.gameId = randomUUID();
@@ -114,6 +117,16 @@ export class Game {
         this.playerReferences.push({  ...user, color: null });
     }
 
+    private preserveName(userId: UserId, name: string) {
+        const ref = this.playerReferences.find(r => r.id == userId);
+
+        if (!ref || !this.saveDisplayName)
+            return lib.printError('Game was dereferenced!');
+
+        ref.displayName = name;
+        this.saveDisplayName(userId, name);
+    };
+
     public getPlayerVP(color: PlayerColor) {
         return this.actionProcessor.getPlayerVP(color);
     }
@@ -121,6 +134,7 @@ export class Game {
     public deReference() {
         this.broadcast = null;
         this.transmit = null;
+        this.saveDisplayName = null;
         this.playerReferences = [];
     }
 
@@ -161,7 +175,6 @@ export class Game {
             (this.actionProcessor as PlayProcessor).killIdleChecks();
         }
 
-        // TODO: preserve player names
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
             this.transmit,
@@ -208,7 +221,7 @@ export class Game {
             if (commandMatch) {
                 // future switch if more commands are added
                 const nameMatch = message.input.match(/(?<=#name ).*/);
-                // TODO: update display name in DB and refs
+
                 if (nameMatch) {
                     const newName = nameMatch[0];
 
@@ -227,6 +240,7 @@ export class Game {
                     if (state.sessionPhase == 'play' && state.hasGameEnded)
                         return this.issueNominalResponse({ error: 'Name can no longer be updated.' });
 
+                    this.preserveName(userId, newName);
                     const response = this.actionProcessor.updatePlayerName(player, newName);
 
                     return this.issueGroupResponse(response);

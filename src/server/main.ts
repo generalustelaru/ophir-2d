@@ -336,6 +336,13 @@ function transmitCallback(userId: UserId, message: ServerMessage) {
     transmit(reference.socket, message);
 }
 
+async function nameUpdateCallback(userId: UserId, name: string) {
+    const op = await dbService.saveDisplayName(userId, name);
+
+    if (op.err)
+        sLib.printError(op.message);
+}
+
 // MARK: FUNCTIONS
 
 function logRequest(request: ClientRequest, userName: string) {
@@ -553,7 +560,13 @@ async function getGameInstance(savedSession: SessionState | null): Promise<Proba
 
     try {
         const configuration = query.data;
-        const session = new Game(broadcastCallback, transmitCallback, configuration, savedSession);
+        const session = new Game(
+            broadcastCallback,
+            transmitCallback,
+            nameUpdateCallback,
+            configuration,
+            savedSession,
+        );
 
         return sLib.pass(session);
     } catch (error) {
