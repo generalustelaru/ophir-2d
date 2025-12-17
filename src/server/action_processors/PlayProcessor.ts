@@ -163,7 +163,7 @@ export class PlayProcessor implements Unique<SessionProcessor> {
                 const roll = player.getInfluence();
 
                 if (player.getSpecialistName() === SpecialistName.temple_guard) {
-                    const bumpedRoll = roll + 1 as DiceSix;
+                    const bumpedRoll = Math.min(roll + 1, 6) as DiceSix;
                     player.setInfluence(bumpedRoll);
 
                     return bumpedRoll;
