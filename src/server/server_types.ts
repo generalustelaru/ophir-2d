@@ -217,7 +217,7 @@ export type UserSession = User & {
 }
 
 export enum LobbyAction {
-    Return = 'Return',
+    Continue = 'Continue',
     Join = 'Join',
     Spectate = 'Spectate',
 }

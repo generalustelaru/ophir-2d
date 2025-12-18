@@ -753,7 +753,7 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
         const action: LobbyAction | null = (() => {
             switch(true) {
                 case !!playerEntry:
-                    return LobbyAction.Return;
+                    return LobbyAction.Continue;
                 case isActiveGame:
                     return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
                 default:

@@ -9,9 +9,9 @@ During the game, you will sail across the archipelago, picking up commodities an
 Work in progress.
 
 - Performance optimizations may still be needed.
+- The net code is not yet fully stable.
 - The interface language is not yet standardized and is missing quality of life features (more utility animations, transitions, tooltips, FTUE screens).
 - The game is fully playable on a local network. I haven't tested deployments yet.
-- There is a planned 'lobby' page for viewing and joining sessions. You currently have to check the database to see what's avaialable, LOL.
 
 Try it out
 
@@ -56,10 +56,14 @@ To shut down the server gracefully, type `shut` in the server command-line inter
 ## Troubleshooting
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
 If your client gets stuck, try refreshing the tab.
-If that doesn't work, replace the UUID in your adress bar with `/new` and press Enter to start a fresh session.
+If that doesn't work, log out and back in again.
+If that doesn't work, try restarting the server.
+If that doesn't work run `make migrate` (wipes all data) and then restart the server.
+If that doesn't work, feel free to make a pull request.
 
 ## How to play
-Any page visitor may enrol in the game session by selecting a color card. Visitors who've chosen a color (up to four) can begin using the built-in chat. There can be any number of spectators.
+Create an account with just a name and password. After logging in, you will reach the "Lobby", a dashboard-like page where you can spectate, join, or start game sessions.
+Games start in the "Enrolment" phase, when any visitor can join by selecting a color card. Visitors who've chosen a color (up to four) can begin using the built-in chat. The first player to have joined may proceed towards setup and then start the game at her discretion. There can be any number of spectators.
 
  There's a decent number of rules in Ophir. To learn how to play, you can:
  - Watch this [how-to-play video](https://youtu.be/pJrDOh6HadI?si=ZOGegm3W-7GWgNP1) from the Dice Tower YouTube channel.
