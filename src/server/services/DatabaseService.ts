@@ -60,6 +60,7 @@ class DatabaseService {
         }
     }
 
+    // TODO: call this more often (i.e during enrolment on color change, and on phase change to setup)
     public async saveGameState(savedSession: GameState): Promise<Probable<true>> {
         const id = savedSession.sharedState.gameId;
 
@@ -96,6 +97,31 @@ class DatabaseService {
                     ? lib.pass(gameState)
                     : lib.fail('State record is not type compliant')
                 ;
+            }
+
+            return lib.fail('Failed to retrieve state record.');
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        };
+    }
+
+    public async loadAllGames(): Promise<Probable<Array<GameState>>> {
+        try {
+            const response = await fetch(`${this.dbAddress}/games`);
+
+            if (response.ok) {
+                const records = await response.json();
+                const gameStates: Array<GameState> = [];
+                for (const record of records) {
+                    const gameState = validator.validateState(record.data);
+
+                    if (!gameState)
+                        return lib.fail('State record is not type compliant');
+
+                    gameStates.push(gameState);
+                }
+
+                return lib.pass(gameStates);
             }
 
             return lib.fail('Failed to retrieve state record.');

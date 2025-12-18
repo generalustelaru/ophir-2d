@@ -1,8 +1,8 @@
 import {
     AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieArgs, CookieName, Probable, RegistrationForm,
-    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus,
+    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest } from '~/shared_types';
+import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import dbService from './services/DatabaseService';
@@ -77,6 +77,9 @@ const activeGames: Map<GameId, Game> = new Map();
 // MARK: WEB
 const app = express();
 const server = http.createServer(app);
+server.timeout = 0;
+server.headersTimeout = 0;
+server.keepAliveTimeout = 0;
 const socketServer = new WebSocketServer({ server, path: '/game' });
 
 // MARK: WS
@@ -158,6 +161,13 @@ socketServer.on('connection', async (socket, inc) => {
             processAction(game, { ...clientRequest, userId: user.id }, socket);
         }
     });
+    socket.on('close', (code, reason) => {
+        console.log(`Connection closed: code=${code}, reason=${reason}`);
+    });
+
+    socket.on('error', (error) => {
+        console.log('WebSocket error:', error);
+    });
 });
 
 // MARK: HTTP
@@ -178,7 +188,9 @@ app.get('/feed', async (req: Request, res: Response) => {
         return;
     }
 
-    res.status(200).json(composeLobbyFeed());
+    const feed = await composeLobbyFeed(validation.data.id);
+
+    res.status(200).json(feed);
 });
 app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
@@ -672,48 +684,63 @@ function extractToken(cookie: unknown): Probable<string> {
     return sLib.pass(items.token);
 }
 
-function composeLobbyFeed(): Array<GameFeed> {
-    const data: Array<GameFeed> = [
-        {
-            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-            action: LobbyAction.Return,
-            players: 4,
-            status: GameStatus.Playing,
-            userInvolvement: 1,
-        },
-        {
-            gameId: 'c6772d86-08e4-46cf-bd1c-553676e8122a',
-            action: LobbyAction.Join,
-            players: 1,
-            status: GameStatus.Enroling,
-            userInvolvement: 0,
-        },
-        {
-            gameId: null,
-        },
-        {
-            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-            action: LobbyAction.Spectate,
-            players: 3,
-            status: GameStatus.Playing,
-            userInvolvement: 0,
-        },
-        {
-            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-            action: LobbyAction.Return,
-            players: 4,
-            status: GameStatus.Dormant,
-            userInvolvement: 2,
-        },
-        {
-            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-            action: null,
-            players: 2,
-            status: GameStatus.Dormant,
-            userInvolvement: 0,
-        },
-    ];
+// TODO: do not call this on every lobby request. chache the data somewhere.
+async function composeLobbyFeed(userId: UserId): Promise<Array<GameFeed>> {
+    const gamesFetch = await dbService.loadAllGames();
 
-    return data;
+    if (gamesFetch.err) {
+        sLib.printError(gamesFetch.message);
+        return [];
+    }
+
+    const allGames = gamesFetch.data;
+    const lobbyFeed: Array<GameFeed> = allGames.map(savedGame => {
+        const gameId = savedGame.sharedState.gameId;
+        const isActiveGame = activeGames.has(gameId);
+        const gameState = isActiveGame ? activeGames.get(gameId)!.getGameState() : savedGame;
+        const { sharedState, playerReferences } = gameState;
+        const { sessionPhase: phase, players } = sharedState;
+
+        const userRef = playerReferences.find(r => r.id == userId);
+        const playerEntry = players.find(p => p.color == userRef?.color);
+
+        const status: GameStatus = (() => {
+            if (isActiveGame) {
+                return phase == Phase.enrolment ? GameStatus.Enroling : GameStatus.Playing;
+            }
+            return GameStatus.Dormant;
+        })();
+
+        const action: LobbyAction | null = (() => {
+            switch(true) {
+                case !!playerEntry:
+                    return LobbyAction.Return;
+                case isActiveGame:
+                    return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
+                default:
+                    return null;
+            }
+        })();
+
+        const userInvolvement: UserInvolvement= (() => {
+            if (!playerEntry)
+                return UserInvolvement.None;
+
+            switch (phase) {
+                case Phase.play:
+                    const player = playerEntry as Player;
+                    return player.isActive ? UserInvolvement.HasTurn : UserInvolvement.Playing;
+                case Phase.setup:
+                    const draft = playerEntry as PlayerDraft;
+                    return draft.turnToPick ? UserInvolvement.HasTurn : UserInvolvement.Playing;
+                default:
+                    return UserInvolvement.None;
+            }
+        })();
+
+        return { gameId, action, players: players.length, status, userInvolvement };
+    });
+
+    return lobbyFeed;
 }
 

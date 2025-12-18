@@ -48,7 +48,7 @@ export class Game {
                 this.updateReferenceColor.bind(this),
                 configuration,
             );
-            console.info('New game session created');
+            console.info('New game created');
 
             return;
         }
@@ -100,7 +100,7 @@ export class Game {
             }
 
         })();
-        console.info('Game session recreated.');
+        console.info('Game revived.');
     }
 
     public getPlayerRef(userId: UserId) {
