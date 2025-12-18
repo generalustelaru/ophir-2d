@@ -1,0 +1,22 @@
+.players {
+    display: flex;
+    height: auto;
+    & div {
+        width: 10px;
+        height: 10px;
+        background-color:chocolate;
+        border-radius: 5px;
+        margin-left: 5px;
+    }
+}
+.turn_mark {
+    font-weight: 600;
+    color: rgb(245, 13, 13);
+}
+.participant_mark {
+    color: aquamarine;
+}
+
+#logout {
+    cursor: pointer;
+}

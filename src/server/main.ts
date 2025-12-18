@@ -165,19 +165,39 @@ app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
 });
-
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
 });
-app.get('/', (req: Request, res: Response) => {
-    console.info('Visitor', { ip: req.ip });
+app.get('/', async (req: Request, res: Response) => {
+    const validation = await validateClient(req.headers.cookie);
 
-    res.sendFile(path.join(__dirname,'public', 'index.html'));
+    if (validation.ok) {
+        res.sendFile(path.join(__dirname,'public', 'lobby.html'));
+    } else {
+        res.sendFile(path.join(__dirname,'public', 'index.html'));
+    }
 });
 app.use(express.urlencoded({ extended: true }));
 app.post('/register', async (req: Request, res: Response) => {
     const form = req.body as RegistrationForm;
+
+    const validation = await dbService.validateRegistrationInput(form);
+
+    if (validation.err) {
+        sLib.printError(validation.message);
+        res.status(400).send('Your account could not be created.');
+
+        return;
+    }
+
+    const validity = validation.data;
+
+    if (validity.invalid) {
+        res.status(401).send(validity.reason);
+
+        return;
+    }
 
     const registration = await dbService.registerUser(form);
 
@@ -205,7 +225,7 @@ app.post('/register', async (req: Request, res: Response) => {
         res.cookie(cookieName, value, options);
     }
 
-    res.redirect('/new');
+    res.status(200).send();
 });
 app.post('/login', async (req: Request, res: Response) => {
     const form = req.body as AuthenticationForm;
@@ -236,7 +256,29 @@ app.post('/login', async (req: Request, res: Response) => {
         res.cookie(cookieName, value, options);
     }
 
-    res.redirect('/new');
+    res.status(200).send();
+});
+app.get('/lobby', async (req: Request, res: Response) => {
+    const validation = await validateClient(req.headers.cookie);
+
+    if (validation.err) {
+        sLib.printError(validation.message);
+        res.redirect('/');
+
+        return;
+    }
+
+    if (!validation.data) {
+        res.redirect('/');
+
+        return;
+    }
+
+    res.sendFile(path.join(__dirname,'public', 'lobby.html'));
+});
+app.get('/logout', async (req: Request, res: Response) => {
+    clearSession(req.headers.cookie);
+    res.status(200).send();
 });
 app.get('/new', async (req: Request, res: Response) => {
     console.info('Visitor calls for new session', { ip: req.ip });
@@ -302,8 +344,6 @@ app.get('/:id', async (req: Request, res: Response) => {
 server.listen(PORT_NUMBER, () => {
     console.info(`Listening on http://${SERVER_ADDRESS}:${PORT_NUMBER}`);
 });
-
-
 
 async function processAction(
     game: Game,
@@ -372,7 +412,7 @@ function debugCommand(target?: string, option?: string): void {
         case 'sockets':
             return console.log(connections.keys());
         case 'sessions':
-            return console.log(sessions.keys());
+            return console.log(sessions.entries());
     }
 
     if (!option)
@@ -579,35 +619,45 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
     }
 }
 
-async function validateClient(cookie: unknown): Promise<Probable<UserSession | null>> {
+function clearSession(cookie: unknown): void {
+    const parsing = extractToken(cookie);
+    parsing.ok && sessions.delete(parsing.data);
+}
+async function validateClient(cookie: unknown): Promise<Probable<UserSession>> {
     console.info('Validating client');
 
-    if (typeof cookie != 'string') {
-        sLib.printWarning('No cookies found.');
-        return sLib.pass(null);
-    }
+    const parsing = extractToken(cookie);
 
-    const client = sLib.parseCookies(cookie);
+    if (parsing.err)
+        return sLib.fail(parsing.message);
 
-    if (!('token' in client)) {
-        sLib.printWarning('Cookie might have expired.');
-        return sLib.pass(null);
-    }
-
-    const session = sessions.get(client.token);
+    const token = parsing.data;
+    const session = sessions.get(token);
 
     if (!session) {
-        sLib.printWarning('Session was wiped.');
-        return sLib.pass(null);
+        return sLib.fail('Session was wiped.');
     }
 
     if (session.expiresAt <= Date.now()) {
-        sessions.delete(client.token);
-        sLib.printWarning('Session has expired. Deleting.');
-        return sLib.pass(null);
+        sessions.delete(token);
+        return sLib.fail('Session has expired');
     }
 
     console.info('Session is ok.');
     return sLib.pass(session);
+}
+
+function extractToken(cookie: unknown): Probable<string> {
+    if (typeof cookie != 'string') {
+        return sLib.fail('No cookie found.');
+    }
+
+    const items = sLib.parseCookies(cookie);
+
+    if (!('token' in items)) {
+        return sLib.fail('Cookie might have expired.');
+    }
+
+    return sLib.pass(items.token);
 }
 

@@ -16,7 +16,6 @@ html, body {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     width: 300px;
-    height: 200px;
     & .form {
         grid-area: 1/1;
     }

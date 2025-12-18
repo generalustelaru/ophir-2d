@@ -18,6 +18,14 @@ export const UserInterface = new class extends Communicator {
 
     constructor() {
         super();
+        const logout = document.querySelector('#logout');
+        logout && logout.addEventListener('click', () => {
+            fetch('/logout').then(response => {
+                if (response.status !== 200)
+                    console.error(response.statusText);
+                window.location.href = '/';
+            });
+        });
         this.draftButton =  new Button('draftButton', this.processDraft);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);

@@ -6,7 +6,7 @@ import { validator } from './validation/ValidatorService';
 import { DB_PORT } from '../../environment';
 import { randomUUID } from 'crypto';
 import lib from './library';
-
+type Validity = { invalid: false } | { invalid: true, reason: string }
 class DatabaseService {
     private dbAddress: string = `http://localhost:${DB_PORT}`;
 
@@ -154,6 +154,37 @@ class DatabaseService {
     }
 
     // MARK: USERS
+
+    public async validateRegistrationInput(query: RegistrationForm): Promise<Probable<Validity>> {
+        const { userName, password, pwRetype } = query;
+
+        switch (true) {
+            case userName.length < 5:
+                return lib.pass({ invalid: true, reason: 'User name must be at least 5 characters long.' });
+            case password.length < 8:
+                return lib.pass({ invalid: true, reason: 'Password must be at least 8 characters long.' });
+            case password !== pwRetype:
+                return lib.pass({ invalid: true, reason: 'Password fields do not match. :(' });
+        }
+
+        try {
+            const userFetch = await fetch(`${this.dbAddress}/users`);
+
+            if (userFetch.ok) {
+                const users: Array<UserRecord> = await userFetch.json();
+
+                if (users.find(r => r.name === userName))
+                    return lib.pass({ invalid: true, reason: 'This username already exists.' });
+
+                return lib.pass({ invalid: false });
+            }
+
+            return lib.fail(userFetch.statusText);
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+
+    }
     public async registerUser(query: RegistrationForm): Promise<Probable<User>> {
         const { userName, password, pwRetype } = query;
 

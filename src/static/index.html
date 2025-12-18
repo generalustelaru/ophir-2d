@@ -12,11 +12,12 @@
         Ophir 2D
     </h2>
     <div id="formbox">
+        <div id="issue" style="color:brown"></div>
         <div class="form" id="registration" style="visibility: hidden;">
             <h3>Register</h3>
             <form method="post" action="/register">
                 <input type="text" name="userName" placeholder="user name (not displayed)">
-                <input type="text" name="password" placeholder="suggested strong password'">
+                <input type="text" name="password" placeholder="suggested strong password">
                 <input type="text" name="pwRetype" placeholder="password again">
                 <input type="submit" value="Register">
             </form>
@@ -33,18 +34,47 @@
         <a id="switch-link">Register</a>
     </div>
     <script>
-        (() => {
-            let isLogin = true;
-            const switchLink = document.querySelector('#switch-link');
-            const registration = document.querySelector('#registration');
-            const login = document.querySelector('#login');
-            switchLink.addEventListener('click', () => {
-                login.style.visibility = isLogin ? 'hidden' : 'visible';
-                registration.style.visibility = isLogin ? 'visible' : 'hidden';
-                isLogin = !isLogin;
-                switchLink.innerText = isLogin ? 'Register' : 'Login';
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted)
+                window.location.reload();
+        });
+
+        let isLogin = true;
+        const switchLink = document.querySelector('#switch-link');
+        const registration = document.querySelector('#registration');
+        const login = document.querySelector('#login');
+        switchLink.addEventListener('click', () => {
+            login.style.visibility = isLogin ? 'hidden' : 'visible';
+            registration.style.visibility = isLogin ? 'visible' : 'hidden';
+            isLogin = !isLogin;
+            switchLink.innerText = isLogin ? 'Register' : 'Login';
+        });
+
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const uri = event.target.action;
+                const init = {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: new URLSearchParams(new FormData(event.target))
+                }
+
+                try {
+                    const response = await fetch(uri, init);
+                    if (response.status === 200) {
+                        window.location.href='/lobby';
+                    } else {
+                        const text = await response.text();
+                        document.querySelector('#issue').innerText = text;
+                    }
+                } catch (error) {
+                    console.error(error)
+                }
             });
-        })();
+        });
+        // (() => {
+        // })();
     </script>
 </body>
 </html>
