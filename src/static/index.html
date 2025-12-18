@@ -14,24 +14,24 @@
     <div id="formbox">
         <div id="issue" style="color:brown"></div>
         <div class="form" id="registration" style="visibility: hidden;">
-            <h3>Register</h3>
+            <h3>Create Account</h3>
             <form method="post" action="/register">
                 <input type="text" name="userName" placeholder="user name (not displayed)">
                 <input type="text" name="password" placeholder="suggested strong password">
                 <input type="text" name="pwRetype" placeholder="password again">
-                <input type="submit" value="Register">
+                <input type="submit" value="Create">
             </form>
         </div>
         <div class="form" id="login" style="visibility: visible;">
-            <h3>Log In</h3>
+            <h3>Login</h3>
             <form method="post" action="/login">
                 <input type="text" name="userName" placeholder="user name">
                 <input type="text" name="password" placeholder="pasword">
                 <input type="text" style="visibility: hidden;">
-                <input type="submit" value="Login">
+                <input type="submit" value="Log in">
             </form>
         </div>
-        <a id="switch-link">Register</a>
+        <a id="switch-link">Create Account</a>
     </div>
     <script>
         window.addEventListener('pageshow', (event) => {
@@ -47,7 +47,7 @@
             login.style.visibility = isLogin ? 'hidden' : 'visible';
             registration.style.visibility = isLogin ? 'visible' : 'hidden';
             isLogin = !isLogin;
-            switchLink.innerText = isLogin ? 'Register' : 'Login';
+            switchLink.innerText = isLogin ? 'Create Account' : 'Login';
         });
 
         document.querySelectorAll('form').forEach(form => {
@@ -73,8 +73,6 @@
                 }
             });
         });
-        // (() => {
-        // })();
     </script>
 </body>
 </html>

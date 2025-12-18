@@ -216,18 +216,18 @@ export type UserSession = User & {
     expiresAt: number,
 }
 
-enum LobbyAction {
+export enum LobbyAction {
     Return = 'Return',
     Join = 'Join',
-    Start = 'Start New Game',
     Spectate = 'Spectate',
 }
-enum GameStatus {
-    Active = 'Active',
+export enum GameStatus {
+    Enroling = 'Enroling',
+    Playing = 'Playing',
     Dormant = 'Dormant',
 }
 
-enum UserInvolvement {
+export enum UserInvolvement {
     None,
     Playing ,
     HasTurn,

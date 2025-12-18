@@ -21,53 +21,7 @@
                 <td>Your Involvement</td>
             </tr>
         </thead>
-        <tbody>
-            <!-- <tr>
-                <td><a>Return</a></td>
-                <td>
-                    <div class="players"><div></div><div></div><div></div><div></div></div>
-                </td>
-                <td>Active</td>
-                <td>playing</td>
-            </tr>
-            <tr>
-                <td><a>Join</a></td>
-                <td>
-                    <div class="players"><div></div></div>
-                </td>
-                <td>Active</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td colspan="4">
-                    <a href="/new">Start New Game</a>
-                </td>
-            </tr>
-            <tr>
-                <td><a>Spectate</a></td>
-                <td>
-                    <div class="players"><div></div><div></div><div></div></div>
-                </td>
-                <td>Active</td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><a>Return</a></td>
-                <td>
-                    <div class="players"><div></div><div></div><div></div><div></div></div>
-                </td>
-                <td>Dormant</td>
-                <td class="turn_mark">Your turn!</td>
-            </tr>
-            <tr>
-                <td>...</td>
-                <td>
-                    <div class="players"><div></div><div></div></div>
-                </td>
-                <td>Dormant</td>
-                <td></td>
-            </tr> -->
-        </tbody>
+        <tbody></tbody>
     </table>
     <script>
         document.querySelector('#logout').addEventListener('click', () => {
@@ -78,88 +32,69 @@
             });
         });
 
-        const data = [
-            {
-                gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-                action: 'Return',
-                players: 4,
-                status: 'Active',
-                userInvolvement: 1,
-            },
-            {
-                gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-                action: 'Join',
-                players: 1,
-                status: 'Active',
-                userInvolvement: 0,
-            },
-            {
-                gameId: null,
-            },
-            {
-                gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-                action: 'Spectate',
-                players: 3,
-                status: 'Active',
-                userInvolvement: 0,
-            },
-            {
-                gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-                action: 'Return',
-                players: 4,
-                status: 'Dormant',
-                userInvolvement: 2,
-            },
-            {
-                gameId: 'fjw349fjsipfsefj98h44fjwhe8',
-                action: null,
-                players: 2,
-                status: 'Dormant',
-                userInvolvement: 0,
-            },
-        ]
+        getTableData().then(data => {
+            drawTable(data);
+        }).catch(error => {
+            console.error(error);
+            alert('Something went wrong.')
+        });
 
-        const tableBody = document.querySelector('tbody');
+        async function getTableData() {
+            const dataFetch = await fetch('/feed');
 
-        const tableContent = data.reduce((acc, current) => {
-            return acc + getRow(current);
-        }, '');
-
-        tableBody.innerHTML = tableContent;
-
-        function getRow(feed) {
-            if (feed.gameId === null) {
-                return '<tr><td colspan="4"><a href="/new">Start New Game</a></td></tr>';
+            if (dataFetch.status !== 200) {
+                throw new Error("Bad Request");
             }
 
-            const { gameId, action, players, status, userInvolvement } = feed;
-            let row = '<tr>';
+            const data = await dataFetch.json();
 
-            row += action
-                ? `<td><a href="/${gameId}">${action}</a></td>`
-                : '<td>...</td>'
-
-            let pips = ''
-            for (let i= 0; i < players; i++)
-                pips += '<div></div>';
-            row += `<td><div class="players">${pips}</div></td>`
-
-            row += `<td>${status}</td>`
-
-            switch (userInvolvement) {
-                case 0:
-                    row += '<td></td>'
-                    break;
-                case 1:
-                    row += '<td>playing</td>'
-                    break;
-                case 2:
-                    row += '<td class="turn_mark">Your Turn!</td>'
-            }
-
-            row += '</tr>'
-
-            return row;
+            return data;
         }
+
+        function drawTable(data) {
+            const tableBody = document.querySelector('tbody');
+
+            const tableContent = data.reduce((acc, current) => {
+                return acc + getRow(current);
+            }, '');
+
+            tableBody.innerHTML = tableContent;
+
+            function getRow(feed) {
+                if (feed.gameId === null) {
+                    return '<tr><td colspan="4"><a href="/new">Start New Game</a></td></tr>';
+                }
+
+                const { gameId, action, players, status, userInvolvement } = feed;
+                let row = '<tr>';
+
+                row += action
+                    ? `<td><a href="/${gameId}">${action}</a></td>`
+                    : '<td>...</td>'
+
+                let pips = ''
+                for (let i= 0; i < players; i++)
+                    pips += '<div></div>';
+                row += `<td><div class="players">${pips}</div></td>`
+
+                row += `<td>${status}</td>`
+
+                switch (userInvolvement) {
+                    case 0:
+                        row += '<td></td>'
+                        break;
+                    case 1:
+                        row += '<td>playing</td>'
+                        break;
+                    case 2:
+                        row += '<td class="turn_mark">Your Turn!</td>'
+                }
+
+                row += '</tr>'
+
+                return row;
+            }
+        }
+
     </script>
 </body>

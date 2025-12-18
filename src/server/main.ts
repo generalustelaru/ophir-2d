@@ -1,6 +1,6 @@
 import {
     AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieArgs, CookieName, Probable, RegistrationForm,
-    GameState, UserId, User, UserSession,
+    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus,
 } from '~/server_types';
 import { ServerMessage, PlayState, Action, ClientRequest } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
@@ -168,6 +168,17 @@ app.use((_, res, next) => {
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
+});
+app.get('/feed', async (req: Request, res: Response) => {
+    const validation = await validateClient(req.headers.cookie);
+
+    if (validation.err) {
+        sLib.printWarning(validation.message);
+        res.status(401).send();
+        return;
+    }
+
+    res.status(200).json(composeLobbyFeed());
 });
 app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
@@ -659,5 +670,50 @@ function extractToken(cookie: unknown): Probable<string> {
     }
 
     return sLib.pass(items.token);
+}
+
+function composeLobbyFeed(): Array<GameFeed> {
+    const data: Array<GameFeed> = [
+        {
+            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
+            action: LobbyAction.Return,
+            players: 4,
+            status: GameStatus.Playing,
+            userInvolvement: 1,
+        },
+        {
+            gameId: 'c6772d86-08e4-46cf-bd1c-553676e8122a',
+            action: LobbyAction.Join,
+            players: 1,
+            status: GameStatus.Enroling,
+            userInvolvement: 0,
+        },
+        {
+            gameId: null,
+        },
+        {
+            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
+            action: LobbyAction.Spectate,
+            players: 3,
+            status: GameStatus.Playing,
+            userInvolvement: 0,
+        },
+        {
+            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
+            action: LobbyAction.Return,
+            players: 4,
+            status: GameStatus.Dormant,
+            userInvolvement: 2,
+        },
+        {
+            gameId: 'fjw349fjsipfsefj98h44fjwhe8',
+            action: null,
+            players: 2,
+            status: GameStatus.Dormant,
+            userInvolvement: 0,
+        },
+    ];
+
+    return data;
 }
 
