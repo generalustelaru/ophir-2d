@@ -215,3 +215,30 @@ export type UserRecord = User & {
 export type UserSession = User & {
     expiresAt: number,
 }
+
+enum LobbyAction {
+    Return = 'Return',
+    Join = 'Join',
+    Start = 'Start New Game',
+    Spectate = 'Spectate',
+}
+enum GameStatus {
+    Active = 'Active',
+    Dormant = 'Dormant',
+}
+
+enum UserInvolvement {
+    None,
+    Playing ,
+    HasTurn,
+}
+
+export type GameFeed = {
+    gameId: string
+    action: LobbyAction | null
+    players: number
+    status: GameStatus
+    userInvolvement: UserInvolvement
+} | {
+    gameId: null
+}
