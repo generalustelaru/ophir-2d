@@ -148,7 +148,7 @@ class DatabaseService {
         };
     }
 
-    public async getTimestamps(): Promise<Probable<Array<{ id: string, timeStamp: number }>>> {
+    public async getTimestamps(): Promise<Probable<Array<{ gameId: string, timeStamp: number }>>> {
         try {
             const response = await fetch(`${this.dbAddress}/games`);
 
@@ -162,7 +162,7 @@ class DatabaseService {
                     const { id, timeStamp } = record;
 
                     if (typeof id == 'string' && typeof timeStamp == 'number')
-                        return { id, timeStamp };
+                        return { gameId: id, timeStamp };
 
                     return null;
                 });

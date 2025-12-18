@@ -1,8 +1,8 @@
 import {
     AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieArgs, CookieName, Probable, RegistrationForm,
-    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement,
+    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, PlayerReference,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft } from '~/shared_types';
+import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import dbService from './services/DatabaseService';
@@ -69,10 +69,11 @@ const rl = readline.createInterface({
     }
 )();
 // MARK: MEMORY
-// TODO: have session data available independently in Redis
+// TODO: have sessions available independently in Redis
 const sessions: Map<string, UserSession> = new Map();
 const connections: Map<UserId, Connection> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
+let stats: Array<GameStats> = [];
 
 // MARK: WEB
 const app = express();
@@ -112,8 +113,7 @@ socketServer.on('connection', async (socket, inc) => {
     const validation = await validateClient(inc.headers.cookie);
 
     if (validation.err) {
-        sLib.printError(validation.message);
-        sLib.printError('WS connection has invalid cookie.');
+        sLib.printWarning(validation.message);
         transmit(socket, { expired: null });
 
         return;
@@ -188,12 +188,16 @@ app.get('/feed', async (req: Request, res: Response) => {
         return;
     }
 
-    const feed = await composeLobbyFeed(validation.data.id);
+    const feed = composeLobbyFeed(validation.data.id);
 
     res.status(200).json(feed);
 });
 app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
+
+    if (stats.length == 0) {
+        await updateStats();
+    }
 
     if (validation.ok) {
         res.sendFile(path.join(__dirname,'public', 'lobby.html'));
@@ -285,7 +289,7 @@ app.get('/lobby', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
-        sLib.printError(validation.message);
+        sLib.printWarning(validation.message);
         res.redirect('/');
 
         return;
@@ -309,7 +313,7 @@ app.get('/new', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
-        sLib.printError(validation.message);
+        sLib.printWarning(validation.message);
         res.redirect('/');
 
         return;
@@ -328,6 +332,7 @@ app.get('/new', async (req: Request, res: Response) => {
 
     const gameId = game.getGameId();
     activeGames.set(gameId, game);
+    await updateStats();
     res.redirect(`/${gameId}`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -338,7 +343,7 @@ app.get('/:id', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
-        sLib.printError(validation.message);
+        sLib.printWarning(validation.message);
         res.redirect('/');
 
         return;
@@ -362,6 +367,8 @@ app.get('/:id', async (req: Request, res: Response) => {
     }
 
     activeGames.set(gameId, revival.data);
+    await updateStats();
+
     res.sendFile(path.join(__dirname,'public', 'game.html'));
 });
 server.listen(PORT_NUMBER, () => {
@@ -411,6 +418,10 @@ async function nameUpdateCallback(userId: UserId, name: string) {
         sLib.printError(op.message);
 }
 
+async function updateStatsCallback() {
+    await updateStats();
+}
+
 // MARK: FUNCTIONS
 
 function logRequest(request: ClientRequest, userName: string) {
@@ -451,11 +462,7 @@ function debugCommand(target?: string, option?: string): void {
             console.log(game.getAllRefs());
             break;
         case 'sockets':
-            console.log(
-                Array.from(connections.entries())
-                    .filter(([, c]) => c.gameId == target)
-                    .map(([k]) => k),
-            );
+            console.log(getActiveGameParticipants(target));
             break;
         default:
             break;
@@ -500,15 +507,17 @@ function broadcastToGroup(gameId: string, message: ServerMessage): void {
 
 function startGameChecks(configuration: Configuration) {
     const { GAME_DELETION_HOURS } = configuration;
-    console.info('Starting session checks');
 
-    const minutes = 60000;
+    const seconds = 1000;
+    const minutes = 60 * seconds;
+    const hours = 60 * minutes;
+
     setInterval(() => {
-        // free memory
+        // delete sockets, delete games
         connections.forEach(async (reference, userId) => {
             const { gameId, socket } = reference;
 
-            if (socket.readyState == socket.CLOSED) {
+            if (socket.readyState == WebSocket.CLOSED) {
                 console.log('found CLOSED socket for', userId);
                 connections.delete(userId);
                 const game = activeGames.get(gameId);
@@ -518,7 +527,10 @@ function startGameChecks(configuration: Configuration) {
                         .getAllRefs()
                         .map( r => r.id)
                         .filter((userId: UserId) => {
-                            connections.has(userId) && connections.get(userId)!.socket.OPEN;
+                            return (
+                                connections.has(userId) &&
+                                connections.get(userId)!.socket.readyState == WebSocket.OPEN
+                            );
                         });
                     console.log('users connected to the same session:', connectedUsers);
 
@@ -528,7 +540,8 @@ function startGameChecks(configuration: Configuration) {
                         if (saveOp.ok) {
                             game.deReference();
                             activeGames.delete(gameId);
-                            console.info('deactivated empty session', { gameId });
+                            await updateStats();
+                            console.info('deactivated abandoned game', { gameId });
                         } else {
                             console.error(saveOp.message);
                         }
@@ -538,28 +551,37 @@ function startGameChecks(configuration: Configuration) {
         });
     }, 1 * minutes);
 
-    const hours = 3600000;
-    setInterval(() => {
-        // free storage
-        dbService.getTimestamps().then(timeStamps => {
-            if (timeStamps.err)
-                return console.error('Corrupt game record found in routine check.');
+    setInterval(async () => {
+        // delete states
+        const timeStamps = await dbService.getTimestamps();
 
-            const time = Date.now();
+        if (timeStamps.err) {
+            sLib.printError('Corrupt game record found in routine check.');
+            return;
+        }
 
-            for (const item of timeStamps.data) {
-                if (time - item.timeStamp > (GAME_DELETION_HOURS * hours) && !activeGames.has(item.id)) {
-                    dbService.deleteGameState(item.id).then(response => {
-
-                        if (response.err)
-                            return console.error(response.message);
-
-                        console.info('deleted abandoned session', { gameId: item.id });
-                    });
+        const time = Date.now();
+        for (const item of timeStamps.data) {
+            if (time - item.timeStamp > (GAME_DELETION_HOURS * hours)) {
+                if (activeGames.has(item.gameId)) {
+                    if (getActiveGameParticipants(item.gameId).length == 0)
+                        activeGames.delete(item.gameId);
+                    else
+                        continue;
                 }
+
+                const deletion = await dbService.deleteGameState(item.gameId);
+
+                if (deletion.err) {
+                    sLib.printError(deletion.message);
+                    return;
+                }
+
+                await updateStats();
+                console.info('deleted abandoned session', { gameId: item.gameId });
             }
-        });
-    },1 * hours);
+        }
+    },1 * minutes);
 }
 
 async function produceGame(): Promise<Probable<Game>> {
@@ -630,6 +652,7 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
             broadcastCallback,
             transmitCallback,
             nameUpdateCallback,
+            updateStatsCallback,
             configuration,
             savedSession,
         );
@@ -647,8 +670,6 @@ function clearSession(cookie: unknown): void {
     parsing.ok && sessions.delete(parsing.data);
 }
 async function validateClient(cookie: unknown): Promise<Probable<UserSession>> {
-    console.info('Validating client');
-
     const parsing = extractToken(cookie);
 
     if (parsing.err)
@@ -666,7 +687,6 @@ async function validateClient(cookie: unknown): Promise<Probable<UserSession>> {
         return sLib.fail('Session has expired');
     }
 
-    console.info('Session is ok.');
     return sLib.pass(session);
 }
 
@@ -684,8 +704,20 @@ function extractToken(cookie: unknown): Probable<string> {
     return sLib.pass(items.token);
 }
 
-// TODO: do not call this on every lobby request. chache the data somewhere.
-async function composeLobbyFeed(userId: UserId): Promise<Array<GameFeed>> {
+type GameStats = {
+    gameId: string
+    isActiveGame: boolean
+    playerReferences: Array<PlayerReference>
+    phase: Phase
+    players: Array<PlayerEntity>
+}
+
+async function updateStats() {
+    stats = await produceStats();
+    console.info('Stats updated');
+}
+async function produceStats(): Promise<Array<GameStats>> {
+    console.info('Creating stats...');
     const gamesFetch = await dbService.loadAllGames();
 
     if (gamesFetch.err) {
@@ -694,13 +726,20 @@ async function composeLobbyFeed(userId: UserId): Promise<Array<GameFeed>> {
     }
 
     const allGames = gamesFetch.data;
-    const lobbyFeed: Array<GameFeed> = allGames.map(savedGame => {
+
+    return allGames.map(savedGame => {
         const gameId = savedGame.sharedState.gameId;
         const isActiveGame = activeGames.has(gameId);
         const gameState = isActiveGame ? activeGames.get(gameId)!.getGameState() : savedGame;
         const { sharedState, playerReferences } = gameState;
         const { sessionPhase: phase, players } = sharedState;
 
+        return { gameId, isActiveGame, playerReferences, phase, players };
+    });
+}
+function composeLobbyFeed(userId: UserId): Array<GameFeed> {
+    const lobbyFeed: Array<GameFeed> = stats.map(stat => {
+        const { gameId, isActiveGame, playerReferences, phase, players } = stat;
         const userRef = playerReferences.find(r => r.id == userId);
         const playerEntry = players.find(p => p.color == userRef?.color);
 
@@ -742,5 +781,11 @@ async function composeLobbyFeed(userId: UserId): Promise<Array<GameFeed>> {
     });
 
     return lobbyFeed;
+}
+
+function getActiveGameParticipants(gameId: string): Array<UserId> {
+    return Array.from(connections.entries())
+        .filter(([, c]) => c.gameId == gameId)
+        .map(([k]) => k);
 }
 

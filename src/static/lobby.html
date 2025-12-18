@@ -24,6 +24,7 @@
         <tbody></tbody>
     </table>
     <script>
+        const seconds = 1000;
         document.querySelector('#logout').addEventListener('click', () => {
             fetch('/logout').then(response => {
                 if (response.status !== 200)
@@ -38,6 +39,16 @@
             console.error(error);
             alert('Something went wrong.')
         });
+
+        const update = setInterval(() => {
+            getTableData().then(data => {
+            drawTable(data);
+        }).catch(error => {
+            console.error(error);
+            clearInterval(update);
+            alert('Connection lost');
+        });
+        },10 * seconds)
 
         async function getTableData() {
             const dataFetch = await fetch('/feed');
@@ -58,7 +69,7 @@
                 return acc + getRow(current);
             }, '');
 
-            tableBody.innerHTML = tableContent;
+            tableBody.innerHTML = tableContent + '<tr><td colspan="4"><a href="/new">New Game</a></td></tr>';
 
             function getRow(feed) {
                 if (feed.gameId === null) {
