@@ -15,10 +15,10 @@
     <table>
         <thead>
             <tr>
-                <td>Action</td>
                 <td>Players</td>
                 <td>Status</td>
                 <td>Are you playing?</td>
+                <td>Action</td>
             </tr>
         </thead>
         <tbody></tbody>
@@ -72,16 +72,12 @@
             tableBody.innerHTML = tableContent + '<tr><td colspan="4"><a href="/new">New Game</a></td></tr>';
 
             function getRow(feed) {
-                if (feed.gameId === null) {
-                    return '<tr><td colspan="4"><a href="/new">Start New Game</a></td></tr>';
-                }
+                // if (feed.gameId === null) {
+                //     return '<tr><td colspan="4"><a href="/new">Start New Game</a></td></tr>';
+                // }
 
                 const { gameId, action, players, status, userInvolvement } = feed;
                 let row = '<tr>';
-
-                row += action
-                    ? `<td><a href="/${gameId}">${action}</a></td>`
-                    : '<td>N/A</td>'
 
                 const style = status == 2 ? 'class="dormant"' : 'class="active"'
 
@@ -110,8 +106,12 @@
                         row += '<td class="active">yes</td>'
                         break;
                     case 2:
-                        row += '<td class="your_turn">Yes and it\'s your turn!</td>'
+                        row += '<td class="your_turn">Yes, it\'s your turn!</td>'
                 }
+
+                row += action
+                    ? `<td><a href="/${gameId}">${action}</a></td>`
+                    : '<td>N/A</td>'
 
                 row += '</tr>'
 
