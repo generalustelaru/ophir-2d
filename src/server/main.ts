@@ -23,14 +23,7 @@ if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
     process.exit(1);
 }
 
-dbService.getConfig().then(configuration => {
-    if (configuration.err){
-        console.error(configuration.message);
-        process.exit(1);
-    }
-
-    startGameChecks(configuration.data);
-});
+startGameChecks();
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
@@ -73,7 +66,7 @@ const rl = readline.createInterface({
 const sessions: Map<string, UserSession> = new Map();
 const connections: Map<UserId, Connection> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
-let stats: Array<GameStats> = [];
+const stats: Map<GameId, GameStats> = new Map();
 
 // MARK: WEB
 const app = express();
@@ -161,12 +154,14 @@ socketServer.on('connection', async (socket, inc) => {
             processAction(game, { ...clientRequest, userId: user.id }, socket);
         }
     });
-    socket.on('close', (code, reason) => {
-        console.log(`Connection closed: code=${code}, reason=${reason}`);
+    socket.on('close', (code) => {
+        sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
+        handleDisconnection(user.id, gameId);
     });
 
     socket.on('error', (error) => {
-        console.log('WebSocket error:', error);
+        sLib.printError(`WebSocket failed: ${JSON.stringify({ id: user.id, error })}`);
+        handleDisconnection(user.id, gameId);
     });
 });
 
@@ -195,8 +190,8 @@ app.get('/feed', async (req: Request, res: Response) => {
 app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
 
-    if (stats.length == 0) {
-        await updateStats();
+    if (stats.size == 0) {
+        await initializeStats();
     }
 
     if (validation.ok) {
@@ -332,7 +327,7 @@ app.get('/new', async (req: Request, res: Response) => {
 
     const gameId = game.getGameId();
     activeGames.set(gameId, game);
-    await updateStats();
+    await updateGameStat(gameId);
     res.redirect(`/${gameId}`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -367,7 +362,7 @@ app.get('/:id', async (req: Request, res: Response) => {
     }
 
     activeGames.set(gameId, revival.data);
-    await updateStats();
+    await updateGameStat(gameId);
 
     res.sendFile(path.join(__dirname,'public', 'game.html'));
 });
@@ -380,6 +375,7 @@ async function processAction(
     request: AuthenticatedClientRequest,
     socket: WebSocket,
 ) {
+    const gameId = game.getGameId();
     const result = game.processAction(request);
 
     if (request.message.action == Action.end_turn) {
@@ -387,13 +383,15 @@ async function processAction(
 
         if (save.err) {
             console.error(save.message);
-            return broadcastToGroup(game.getGameId(), { error: 'Action cannot be saved' });
+            return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
         }
     }
 
+    updateGameStat(gameId);
+
     result.senderOnly
         ? transmit(socket, result.message)
-        : broadcastToGroup(game.getGameId(), result.message)
+        : broadcastToGroup(gameId, result.message)
     ;
 }
 
@@ -416,10 +414,6 @@ async function nameUpdateCallback(userId: UserId, name: string) {
 
     if (op.err)
         sLib.printError(op.message);
-}
-
-async function updateStatsCallback() {
-    await updateStats();
 }
 
 // MARK: FUNCTIONS
@@ -505,83 +499,82 @@ function broadcastToGroup(gameId: string, message: ServerMessage): void {
     }
 }
 
-function startGameChecks(configuration: Configuration) {
-    const { GAME_DELETION_HOURS } = configuration;
-
+function startGameChecks() {
     const seconds = 1000;
     const minutes = 60 * seconds;
     const hours = 60 * minutes;
 
-    setInterval(() => {
-        // delete sockets, delete games
-        connections.forEach(async (reference, userId) => {
-            const { gameId, socket } = reference;
-
-            if (socket.readyState == WebSocket.CLOSED) {
-                console.log('found CLOSED socket for', userId);
-                connections.delete(userId);
-                const game = activeGames.get(gameId);
-
-                if (game) {
-                    const connectedUsers = game
-                        .getAllRefs()
-                        .map( r => r.id)
-                        .filter((userId: UserId) => {
-                            return (
-                                connections.has(userId) &&
-                                connections.get(userId)!.socket.readyState == WebSocket.OPEN
-                            );
-                        });
-                    console.log('users connected to the same session:', connectedUsers);
-
-                    if (connectedUsers.length == 0) {
-                        const saveOp = await dbService.saveGameState(game.getGameState());
-
-                        if (saveOp.ok) {
-                            game.deReference();
-                            activeGames.delete(gameId);
-                            await updateStats();
-                            console.info('deactivated abandoned game', { gameId });
-                        } else {
-                            console.error(saveOp.message);
-                        }
-                    }
-                }
-            }
-        });
-    }, 1 * minutes);
-
     setInterval(async () => {
-        // delete states
-        const timeStamps = await dbService.getTimestamps();
+        const config = await dbService.getConfig();
 
-        if (timeStamps.err) {
+        if (config.err){
+            sLib.printError(config.message);
+            return;
+        }
+
+        const mapping = await dbService.getTimestamps();
+
+        if (mapping.err) {
             sLib.printError('Corrupt game record found in routine check.');
             return;
         }
 
+        const { GAME_DELETION_HOURS: count } = config.data;
+        const timeStamps = mapping.data;
         const time = Date.now();
-        for (const item of timeStamps.data) {
-            if (time - item.timeStamp > (GAME_DELETION_HOURS * hours)) {
-                if (activeGames.has(item.gameId)) {
-                    if (getActiveGameParticipants(item.gameId).length == 0)
-                        activeGames.delete(item.gameId);
+
+        for (const item of timeStamps) {
+            const { gameId, timeStamp } = item;
+
+            if (time - timeStamp > (count * hours)) {
+                if (activeGames.has(gameId)) {
+                    if (getActiveGameParticipants(gameId).length == 0)
+                        activeGames.delete(gameId);
                     else
                         continue;
                 }
 
-                const deletion = await dbService.deleteGameState(item.gameId);
+                const deletion = await dbService.deleteGameState(gameId);
 
                 if (deletion.err) {
                     sLib.printError(deletion.message);
                     return;
                 }
 
-                await updateStats();
-                console.info('deleted abandoned session', { gameId: item.gameId });
+                await updateGameStat(gameId, true);
+                console.info('deleted abandoned session', { gameId });
             }
         }
     },1 * minutes);
+}
+
+async function handleDisconnection(userId: UserId, gameId: GameId) {
+
+    connections.delete(userId);
+
+    if (activeGames.has(gameId)) {
+        const connectedUsers = getActiveGameParticipants(gameId);
+        console.log('users connected to the same session:', connectedUsers);
+
+        if (connectedUsers.length == 0) {
+            const game = activeGames.get(gameId);
+            try {
+                const saveOp = await dbService.saveGameState(game!.getGameState());
+
+                if (saveOp.ok) {
+                    game!.deReference();
+                    activeGames.delete(gameId);
+                    await updateGameStat(gameId);
+                    console.info('deactivated abandoned game', { gameId });
+                } else {
+                    sLib.printError(saveOp.message);
+                }
+            } catch (error) {
+                sLib.printError(sLib.getErrorBrief(error));
+            }
+
+        }
+    }
 }
 
 async function produceGame(): Promise<Probable<Game>> {
@@ -652,7 +645,6 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
             broadcastCallback,
             transmitCallback,
             nameUpdateCallback,
-            updateStatsCallback,
             configuration,
             savedSession,
         );
@@ -712,33 +704,62 @@ type GameStats = {
     players: Array<PlayerEntity>
 }
 
-async function updateStats() {
-    stats = await produceStats();
-    console.info('Stats updated');
+async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promise<void> {
+    if (toRemove) {
+        stats.delete(gameId);
+        return;
+    }
+
+    const { isActiveGame, gameState } = await (async (): Promise<{isActiveGame: boolean, gameState: GameState | null}> => {
+        const isActiveGame = activeGames.has(gameId);
+
+        if (isActiveGame)
+            return { isActiveGame, gameState: activeGames.get(gameId)?.getGameState() || null };
+
+        const gameFetch = await dbService.loadGameState(gameId);
+
+        if (gameFetch.ok)
+            return { isActiveGame, gameState: gameFetch.data };
+
+        sLib.printWarning(gameFetch.message);
+        return { isActiveGame, gameState: null };
+    })();
+
+    if (!gameState) {
+        stats.delete(gameId);
+        return;
+    }
+
+    const { sharedState, playerReferences } = gameState;
+    const { sessionPhase: phase, players } = sharedState;
+
+    stats.set(gameId,{ gameId, isActiveGame, playerReferences, phase, players });
 }
-async function produceStats(): Promise<Array<GameStats>> {
+
+async function initializeStats(): Promise<void> {
     console.info('Creating stats...');
     const gamesFetch = await dbService.loadAllGames();
 
     if (gamesFetch.err) {
         sLib.printError(gamesFetch.message);
-        return [];
+        return;
     }
 
     const allGames = gamesFetch.data;
 
-    return allGames.map(savedGame => {
+    for(const savedGame of allGames) {
         const gameId = savedGame.sharedState.gameId;
-        const isActiveGame = activeGames.has(gameId);
-        const gameState = isActiveGame ? activeGames.get(gameId)!.getGameState() : savedGame;
+        const isActiveGame = false;
+        const gameState = savedGame;
         const { sharedState, playerReferences } = gameState;
         const { sessionPhase: phase, players } = sharedState;
 
-        return { gameId, isActiveGame, playerReferences, phase, players };
-    });
+        stats.set(gameId, { gameId, isActiveGame, playerReferences, phase, players });
+    };
 }
 function composeLobbyFeed(userId: UserId): Array<GameFeed> {
-    const lobbyFeed: Array<GameFeed> = stats.map(stat => {
+    const lobbyFeed: Array<GameFeed> = Array.from(stats).map(([_, stat]) => {
+        // TODO gameId could be removed from GameStat
         const { gameId, isActiveGame, playerReferences, phase, players } = stat;
         const userRef = playerReferences.find(r => r.id == userId);
         const playerEntry = players.find(p => p.color == userRef?.color);

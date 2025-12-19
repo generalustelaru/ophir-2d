@@ -26,14 +26,12 @@ export class Game {
     private broadcast: ((state: PlayState) => void) | null;
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private saveDisplayName: ((userId: UserId, name: string) => void) | null;
-    private updateStats: (() => void) | null;
     private playerReferences: Array<PlayerReference> = [];
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
         transmitCallback: (userId: UserId, message: ServerMessage) => void,
         nameUpdateCallback: (userId: UserId, name: string) => void,
-        updateStatsCallback: () => void,
         configuration: Configuration,
         savedSession: GameState | null,
     ) {
@@ -41,7 +39,6 @@ export class Game {
         this.broadcast = broadcastCallback;
         this.transmit = transmitCallback;
         this.saveDisplayName = nameUpdateCallback;
-        this.updateStats = updateStatsCallback;
 
         if (!savedSession) {
             this.gameId = randomUUID();
@@ -138,7 +135,6 @@ export class Game {
         this.broadcast = null;
         this.transmit = null;
         this.saveDisplayName = null;
-        this.updateStats = null;
         this.playerReferences = [];
     }
 
@@ -166,7 +162,7 @@ export class Game {
     }
 
     public reset() {
-        if (!this.transmit || !this.updateStats) {
+        if (!this.transmit) {
             lib.printError('GameSession was dereferenced but not removed.');
             return;
         }
@@ -205,10 +201,7 @@ export class Game {
 
 
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment) {
-            const earlyDigest = this.processEnrolmentAction({ message, userId, displayName, player: null });
-            this.updateStats && this.updateStats();
-
-            return earlyDigest;
+            return this.processEnrolmentAction({ message, userId, displayName, player: null });
         }
 
         const matchOperation = this.matchRequestToPlayer(request);
@@ -273,32 +266,22 @@ export class Game {
 
             if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
                 this.reset();
-                const earlyDigest = this.issueGroupResponse({ resetFrom: player.name });
-                this.updateStats && this.updateStats();
-
-                return earlyDigest;
+                return this.issueGroupResponse({ resetFrom: player.name });
             }
 
             return emitError('Non-owner cannot reset.');
         }
 
-        const digest = (() => {
-            switch (state.sessionPhase) {
-                case Phase.play:
-                    return this.processPlayAction(matchedRequest);
-                case Phase.setup:
-                    return this.processSetupAction(matchedRequest);
-                case Phase.enrolment:
-                    return this.processEnrolmentAction(matchedRequest);
-                default:
-                    return emitError('Unknown game phase!');
-            }
-        })();
-
-        if ([Action.start_setup, Action.end_turn].includes(action))
-            this.updateStats && this.updateStats();
-
-        return digest;
+        switch (state.sessionPhase) {
+            case Phase.play:
+                return this.processPlayAction(matchedRequest);
+            case Phase.setup:
+                return this.processSetupAction(matchedRequest);
+            case Phase.enrolment:
+                return this.processEnrolmentAction(matchedRequest);
+            default:
+                return emitError('Unknown game phase!');
+        }
     }
 
     // MARK: ENROL

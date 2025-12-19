@@ -158,7 +158,7 @@ class DatabaseService {
                 if (!Array.isArray(data))
                     return lib.fail('Sessions contains malformed data.');
 
-                const timeStamps = data.filter(record => {
+                const timeStamps = data.map(record => {
                     const { id, timeStamp } = record;
 
                     if (typeof id == 'string' && typeof timeStamp == 'number')
@@ -170,7 +170,7 @@ class DatabaseService {
                 if (timeStamps.includes(null))
                     return lib.fail('Sessions contains malformed data.');
 
-                return lib.pass(timeStamps);
+                return lib.pass(timeStamps.filter(st => st != null));
             }
 
             return lib.fail('Could not retreive timeStamp list');

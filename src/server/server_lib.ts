@@ -70,6 +70,17 @@ function parseCookies(cookieString: string): Record<string, string> {
     return cookies;
 }
 
+function getErrorBrief(error: unknown): string {
+    const body = String(error);
+    const line = body.match(/^.*/g);
+
+    if (line)
+        return line[0];
+
+    console.error('Could not extract text from error');
+    return 'Unknown Error';
+}
+
 const sLib = { // TODO: Maybe rename this to common_library (file too)
     pass,
     fail,
@@ -80,6 +91,7 @@ const sLib = { // TODO: Maybe rename this to common_library (file too)
     produceCookieArgs,
     parseCookies,
     getCopy,
+    getErrorBrief,
 };
 
 export default sLib;
