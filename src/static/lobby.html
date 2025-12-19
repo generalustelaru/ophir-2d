@@ -18,7 +18,7 @@
                 <td>Action</td>
                 <td>Players</td>
                 <td>Status</td>
-                <td>Your Involvement</td>
+                <td>Are you playing?</td>
             </tr>
         </thead>
         <tbody></tbody>
@@ -81,24 +81,36 @@
 
                 row += action
                     ? `<td><a href="/${gameId}">${action}</a></td>`
-                    : '<td>...</td>'
+                    : '<td>N/A</td>'
+
+                const style = status == 2 ? 'class="dormant"' : 'class="active"'
 
                 let pips = ''
                 for (let i= 0; i < players; i++)
-                    pips += '<div></div>';
+                    pips += `<div ${style}></div>`;
                 row += `<td><div class="players">${pips}</div></td>`
 
-                row += `<td>${status}</td>`
+                const statusText = (() => {
+                    switch (status) {
+                        case 0:
+                            return 'Enroling'
+                        case 1:
+                            return 'Playing'
+                        default:
+                            return 'Dormant'
+                    }
+                })();
+                row += `<td ${style}>${statusText}</td>`
 
                 switch (userInvolvement) {
                     case 0:
-                        row += '<td></td>'
+                        row += '<td>no</td>'
                         break;
                     case 1:
-                        row += '<td>playing</td>'
+                        row += '<td class="active">yes</td>'
                         break;
                     case 2:
-                        row += '<td class="turn_mark">Your Turn!</td>'
+                        row += '<td class="your_turn">Yes and it\'s your turn!</td>'
                 }
 
                 row += '</tr>'

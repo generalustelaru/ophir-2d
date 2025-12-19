@@ -222,9 +222,9 @@ export enum LobbyAction {
     Spectate = 'Spectate',
 }
 export enum GameStatus {
-    Enroling = 'Enroling',
-    Playing = 'Playing',
-    Dormant = 'Dormant',
+    Enroling,
+    Playing,
+    Dormant,
 }
 
 export enum UserInvolvement {

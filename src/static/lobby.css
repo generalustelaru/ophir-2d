@@ -4,14 +4,25 @@
     & div {
         width: 10px;
         height: 10px;
-        background-color: cyan;
         border-radius: 5px;
         margin-left: 5px;
     }
+    & .active {
+        background-color:chartreuse;
+    }
+    & .dormant {
+        background-color:brown;
+    }
 }
-.turn_mark {
+.your_turn {
     font-weight: 600;
-    color: rgb(245, 13, 13);
+    color:deeppink
+}
+.dormant {
+    font-weight: 100;
+}
+.active {
+    font-weight: 600;
 }
 
 #logout {

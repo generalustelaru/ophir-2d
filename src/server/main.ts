@@ -1,5 +1,5 @@
 import {
-    AuthenticatedClientRequest, AuthenticationForm, Configuration, CookieArgs, CookieName, Probable, RegistrationForm,
+    AuthenticatedClientRequest, AuthenticationForm, CookieArgs, CookieName, Probable, RegistrationForm,
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, PlayerReference,
 } from '~/server_types';
 import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
@@ -697,7 +697,6 @@ function extractToken(cookie: unknown): Probable<string> {
 }
 
 type GameStats = {
-    gameId: string
     isActiveGame: boolean
     playerReferences: Array<PlayerReference>
     phase: Phase
@@ -733,7 +732,7 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
     const { sharedState, playerReferences } = gameState;
     const { sessionPhase: phase, players } = sharedState;
 
-    stats.set(gameId,{ gameId, isActiveGame, playerReferences, phase, players });
+    stats.set(gameId,{ isActiveGame, playerReferences, phase, players });
 }
 
 async function initializeStats(): Promise<void> {
@@ -747,20 +746,16 @@ async function initializeStats(): Promise<void> {
 
     const allGames = gamesFetch.data;
 
-    for(const savedGame of allGames) {
-        const gameId = savedGame.sharedState.gameId;
-        const isActiveGame = false;
-        const gameState = savedGame;
+    for(const gameState of allGames) {
         const { sharedState, playerReferences } = gameState;
-        const { sessionPhase: phase, players } = sharedState;
+        const { sessionPhase: phase, players, gameId } = sharedState;
 
-        stats.set(gameId, { gameId, isActiveGame, playerReferences, phase, players });
+        stats.set(gameId, { isActiveGame: false, playerReferences, phase, players });
     };
 }
 function composeLobbyFeed(userId: UserId): Array<GameFeed> {
-    const lobbyFeed: Array<GameFeed> = Array.from(stats).map(([_, stat]) => {
-        // TODO gameId could be removed from GameStat
-        const { gameId, isActiveGame, playerReferences, phase, players } = stat;
+    const lobbyFeed: Array<GameFeed> = Array.from(stats).map(([gameId, stat]) => {
+        const { isActiveGame, playerReferences, phase, players } = stat;
         const userRef = playerReferences.find(r => r.id == userId);
         const playerEntry = players.find(p => p.color == userRef?.color);
 
