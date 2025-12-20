@@ -5,7 +5,7 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "ommit_revs": "git config blame.ignoreRevsFile .git-blame-ignore-revs || true",
+    "omit_revs": "git config blame.ignoreRevsFile .git-blame-ignore-revs || true",
     "build_client": "webpack --config webpack.config.cjs --env isServer=false",
     "build_server": "webpack --config webpack.config.cjs --env isServer=true",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,12 +15,11 @@
   "license": "ISC",
   "dependencies": {
     "@babel/runtime": "^7.24.4",
-    "@picocss/pico": "^2.1.1",
     "canvas": "^3.2.0",
     "core-js": "^3.37.0",
     "express": "^4.19.2",
-    "json-server": "^0.17.4",
     "konva": "^9.3.6",
+    "mongodb": "^7.0.0",
     "ws": "^8.16.0"
   },
   "devDependencies": {
@@ -28,6 +27,7 @@
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-typescript": "^7.24.1",
     "@types/express": "^5.0.0",
+    "@types/node": "^25.0.3",
     "@types/ws": "^8.5.12",
     "@typescript-eslint/eslint-plugin": "^8.46.1",
     "@typescript-eslint/parser": "^8.46.1",

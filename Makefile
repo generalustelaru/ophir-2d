@@ -1,4 +1,5 @@
 install:
+	docker run -d -p 27017:27017 --name ophir-mongo mongo
 ifeq ($(OS),Windows_NT)
 	powershell -command "cp .env.example .env"
 	powershell.exe -ExecutionPolicy Bypass -File update-ip.ps1
@@ -9,15 +10,10 @@ else
 endif
 	npm ci
 	make build
-	npm run ommit_revs
-	make migrate
+	make seed
 
-migrate:
-ifeq ($(OS),Windows_NT)
-	powershell -command "cp db_template.json db.json"
-else
-	cp db_template.json db.json
-endif
+seed:
+	node seed-db.cjs
 
 db:
 	npx json-server --watch db.json

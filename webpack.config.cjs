@@ -10,6 +10,18 @@ module.exports = (env, argv) => {
     console.info(`Bundling ${label} code...`);
 
     return {
+        ignoreWarnings: [
+            /Can't resolve '@aws-sdk\//,
+            /Can't resolve 'aws4'/,
+            /Can't resolve 'kerberos'/,
+            /Can't resolve '@mongodb-js\/zstd'/,
+            /Can't resolve 'snappy'/,
+            /Can't resolve 'socks'/,
+            /Can't resolve 'gcp-metadata'/,
+            /Can't resolve 'mongodb-client-encryption'/,
+            /Can't resolve 'bson-ext'/,
+            /Can't resolve '@google-cloud\/spanner'/,
+        ],
         plugins: [
             new dotenv(),
         ],

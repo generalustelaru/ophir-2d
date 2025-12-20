@@ -154,7 +154,7 @@ export type ServerConstants = {
 export type Configuration = {
     SERVER_NAME: string,
     PLAYER_IDLE_MINUTES: number,
-    GAME_DELETION_HOURS: number,
+    GAME_PERSIST_HOURS: number,
     SINGLE_PLAYER: boolean,
     NO_RIVAL: boolean,
     RICH_PLAYERS: boolean,

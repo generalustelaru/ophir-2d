@@ -5,7 +5,7 @@ import {
 import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
-import dbService from './services/DatabaseService';
+import { DatabaseService } from './services/DatabaseService';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Game } from './Game';
 import sLib from './server_lib';
@@ -15,6 +15,7 @@ import path from 'path';
 import http from 'http';
 
 import { SERVER_ADDRESS, PORT_NUMBER, DB_PORT } from '../environment';
+import { MongoClient } from 'mongodb';
 
 if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
     console.error('Missing environment variables', {
@@ -23,7 +24,19 @@ if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
     process.exit(1);
 }
 
-startGameChecks();
+let dbService: DatabaseService;
+const dbClient = new MongoClient(`mongodb://localhost:${DB_PORT}`);
+
+dbClient.connect().then(() => {
+    const db = dbClient.db('ophir');
+    dbService = new DatabaseService(db);
+    startGameChecks();
+    console.info('Connected to MongoDB');
+}).catch(error => {
+    sLib.printError(sLib.getErrorBrief(error));
+    sLib.printError('Could not establish DB connection.');
+    process.exit(1);
+});
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
@@ -519,15 +532,20 @@ function startGameChecks() {
             return;
         }
 
-        const { GAME_DELETION_HOURS: count } = config.data;
+        const { GAME_PERSIST_HOURS: count } = config.data;
         const timeStamps = mapping.data;
+
         const time = Date.now();
 
         for (const item of timeStamps) {
             const { gameId, timeStamp } = item;
+            const elapsedTime = time - timeStamp;
+            const persistence = count * hours;
 
-            if (time - timeStamp > (count * hours)) {
+            if (elapsedTime > persistence) {
+
                 if (activeGames.has(gameId)) {
+
                     if (getActiveGameParticipants(gameId).length == 0)
                         activeGames.delete(gameId);
                     else
@@ -542,10 +560,9 @@ function startGameChecks() {
                 }
 
                 await updateGameStat(gameId, true);
-                console.info('deleted abandoned session', { gameId });
             }
         }
-    },1 * minutes);
+    }, 1 * minutes);
 }
 
 async function handleDisconnection(userId: UserId, gameId: GameId) {

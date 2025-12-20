@@ -18,48 +18,36 @@ Try it out
 ## Setup and running
 You can set up and run a server fairly easily on your local network.
 
-0. Take a deep breath.
+### Prerequisites
 
-1. Install [Node](https://nodejs.org/en/download/package-manager).
-   - You may then also install **Make** for a straightforward experience.
+1. Install [Docker Desktop](https://docs.docker.com/desktop/).
+   - Open the app and follow its instructions to update WSL if needed.
+2. Install [Node](https://nodejs.org/en/download/package-manager).
+3. Optional/Recommended: Install **Make**.
       - First, install the [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) package manager.
-      - Then, open a command tool (i.e., Powershell) and run `choco install make`.
-      - Finally, if on **Windows**, install [Git Bash](https://gitforwindows.org/) (it's bundled w/ Git for Windows).
-
-2. Download the project:
-   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` (You can use Git Bash for this).
+      - Then, open a command line (CL) tool (i.e., Powershell) and run `choco install make`.
+4. Optional: If on **Windows**, install [Git Bash](https://gitforwindows.org/) (it's bundled with **Git for Windows**).
+5. Download the project:
+   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` (You can use **Git Bash** for this).
    - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/main.zip) and extract it.
+6. Optional: Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
 
-3. Install the project:
-   - Enter the project folder, *\ophir-2d* (use **Bash** or **Git Bash** to run `make` commands)
-   - Run `make install` to have the server set up and ready.
-   - If that doesn't work for you, follow these steps:
-      - Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
-      - Create a copy of *db_template.json* and rename it as *db.json*.
-      - Create a copy of *.env.example* and rename it as *.env*.
-      - Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
-          - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
-          - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
-          - Linux: `hostname -I`
-      - Run `npm ci && npm run build_server && npm run build_client`.
-
-4. Start json-server: Run `make db` or `npx json-server --watch db.json`. (This is a stand-in for a database).
-
-5. Start the game server: Open a new CLI window and run `make run` or `node dist/server.cjs`.
-
-6. Copy the server address and open it in a browser.
+### Installation
+1. Start **Docker Desktop**
+2. Open the project folder (*\ophir-2d*) and start **Bash** (or **Git Bash**) or another CL tool.
+3. Run `make install` to have the server set up and ready (otherwise refer to the **Manual Installation** chapter)
+4. Start the game server: Open a new CLI window and run `make run` or `node dist/server.cjs`.
+6. Copy the server address that appears in the start-up message and open it in a browser.
 
 Click on a ship card to become the session owner. Then copy the URL address and share it with your local network firends for them to connect to your session. If you want to open multiple clients on the same machine, ensure that each one runs on a different browser or incognito window. The browser storage holds your player identity, so two or more tabs on the same browser will mirror the same user.
 
-To shut down the server gracefully, type `shut` in the server command-line interface (CLI).
+To shut down the server gracefully, type `shut` in the server CL interface.
 
 ## Troubleshooting
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
 If your client gets stuck, try refreshing the tab.
 If that doesn't work, log out and back in again.
 If that doesn't work, try restarting the server.
-If that doesn't work run `make migrate` (wipes all data) and then restart the server.
-If that doesn't work, feel free to make a pull request.
 
 ## How to play
 Create an account with just a name and password. After logging in, you will reach the "Lobby", a dashboard-like page where you can spectate, join, or start game sessions.
@@ -68,39 +56,68 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
  There's a decent number of rules in Ophir. To learn how to play, you can:
  - Watch this [how-to-play video](https://youtu.be/pJrDOh6HadI?si=ZOGegm3W-7GWgNP1) from the Dice Tower YouTube channel.
  - Examine the included [RULES.md](https://github.com/generalustelaru/ophir-2d/blob/main/RULES.md) document.
- - Follow your intuition. The game rules are enforced. You can't cheat but you can certainly make mistakes.
+ - Follow your intuition. The game enforces rules. You can't cheat but you can certainly make mistakes!
 
 ## Configuration options (admin & 'fun' stuff)
-You can edit the `"config"` values found in *db.json*. The values will only be applied for new sessions or after restarting one.
+Open **MongoDB Compass** and create a connection to `mongodb://localhost:27017/`
 
-`"SERVER_NAME"`: The name that appears in chat for server messages.
+You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediatlely for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
+- Open the `_id: "config_0"` record and click on the `UPDATE` button to open a query window.
 
-`"PLAYER_IDLE_MINUTES"`: How fast a player can be skipped for not doing anything.
+### Fields:
+| Field  | Description | Type |
+| - | - | - |
+SERVER_NAME | The name that appears in chat for server messages. | `string` |
+PLAYER_IDLE_MINUTES | How fast a player can be skipped for not doing anything. | `number` |
+GAME_DELETION_HOURS | How quickly an inactive session goes bye-bye. | `number` |
+IDLE_TIMEOUT | Time of perceived inactivity (in minutes) for the current player before receiving the idle status. | `number` |
+SINGLE_PLAYER | Allows session to start with a single enrolled player. | `boolean` |
+NO_RIVAL | Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled). | `boolean` |
+RICH_PLAYERS | Players start with 99 coins. | `boolean` |
+FAVORED_PLAYERS | Players start with maximum favor (6). | `boolean` |
+CARGO_BONUS | Players start with cargo advantages. | * |
+SHORT_GAME | Reduces the Temple Track to a single column (the game ends after three metal donations). | `boolean` |
+INCLUDE | Array of specialists to appear in the draft. | ** `array` |
 
-`"GAME_DELETION_HOURS"`: How quickly an inactive session goes bye-bye.
+- *CARGO_BONUS
+   - `0`: No bonus
+   - `1`: Upgraded cargo
+   - `2` One of each commodity onboard
+   - `3` One gold and one silver onboard
 
-`IDLE_"TIMEOUT`: Time of perceived inactivity (in minutes) for the current player before receiving the idle status.
+- **INCLUDE: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`.
 
-`"SINGLE_PLAYER"`: Allows session to start with a single enrolled player.
-
-`"NO_RIVAL"`: Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled).
-
-`"RICH_PLAYERS"`: Players start with 99 coins.
-
-`"FAVORED_PLAYERS"`: Players start with maximum favor (6).
-
-`"CARGO_BONUS"`: Players start with cargo advantages.
-   - values: `0` (No bonus), `1` (Upgraded cargo), `2` (One of each commodity onboard), `3` (One gold and one silver onboard)
-
-`"SHORT_GAME"`: Reduces the Temple Track to a single column (the game ends after three metal donations).
-
-`"INCLUDE"`: Ensures selected specialists appear in the draft (up to the amount required for the player count).
-   - Values: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`,
-
-## Debug command
+### Example query:
+```
+{
+  $set: {
+      "SERVER_NAME": "HR Loves You",
+      "GAME_PERSIST_HOURS": 36,
+      "INCLUDE": ["advisor", "harbormaster", "chancellor"]
+  },
+}
+```
+## The debug command
 
 The `debug <target> <option>` command shows live data as following:
- - `debug games`: Displays the `gameId`s of active sessions.
+ - `debug games`: Displays the `gameId`s of active games.
  - `debug sockets`: Displays the user identifiers that have an open WS connection.
- - `debug <gameId> sockets`: Displays user identifiers connected to the game session.
- - `debug <gameId> refs`: Displays the session's internal reference for users.
+ - `debug sessions`: Displays current user sessions.
+ - `debug <gameId> sockets`: Displays user identifiers currently connected to an active game.
+ - `debug <gameId> refs`: Displays active game's internal reference for all players and spectators.
+
+## Manual Installation - punishment for the lazies
+0. Don't go back to **Prerequisites**, step **3**.
+1. Run `docker run -d -p 27017:27017 --name ophir-mongo mongo` to instantiate a DB.
+2. Run `node seed-db.cjs` to load the game configuration in the DB.
+3. Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
+4. Create a copy of *db_template.json* and rename it as *db.json*.
+5. Create a copy of *.env.example* and rename it as *.env*.
+6. Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
+   - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
+   - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
+   - Linux: `hostname -I`
+   - Run `npm ci && npm run build_server && npm run build_client`.
+
+## Other hints
+   Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
