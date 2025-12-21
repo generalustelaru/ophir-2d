@@ -15,6 +15,7 @@
     <table>
         <thead>
             <tr>
+                <td>Game</td>
                 <td>Players</td>
                 <td>Status</td>
                 <td>Last Update</td>
@@ -70,7 +71,7 @@
                 return acc + getRow(current);
             }, '');
 
-            tableBody.innerHTML = tableContent + '<tr><td colspan="5"><a href="/new">New Game</a></td></tr>';
+            tableBody.innerHTML = tableContent + '<tr><td colspan="6"><a href="/new">New Game</a></td></tr>';
 
             function getRow(feed) {
 
@@ -84,6 +85,10 @@
                     active: 'class="active"',
                     important: 'class="important"',
                 }
+
+                // MARK: Title
+                const title = gameId.split('-').map(str => str.charAt(0).toUpperCase() + str.slice(1)).join(' ');
+                row += `<td>${title}</td>`;
 
                 // MARK: Players
                 let pips = ''
@@ -112,7 +117,7 @@
                 const ageText = (() => {
                     switch (true) {
                         case seconds < 60:
-                            return `less than a minute ago`
+                            return `Seconds ago`
                         case minutes < 2:
                             return `A minute ago`
                         case minutes < 5:

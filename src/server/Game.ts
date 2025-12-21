@@ -1,9 +1,7 @@
 import {
     WsDigest, DataDigest, GameState, Probable, Configuration, UserReference, RequestMatch, EnrolRequest, UserId,
-    AuthenticatedClientRequest, MatchedPlayerRequest,
-    User,
+    AuthenticatedClientRequest, MatchedPlayerRequest, User,
 } from '~/server_types';
-import { randomUUID } from 'crypto';
 import {
     ServerMessage, Action, Phase, PlayState, StateResponse, PlayerColor, PlayerEntity, State, Player,
 } from '~/shared_types';
@@ -17,6 +15,7 @@ import { PrivateStateHandler } from './state_handlers/PrivateStateHandler';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
+import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
 
 /**@throws */
 export class Game {
@@ -42,7 +41,7 @@ export class Game {
         this.saveDisplayName = nameUpdateCallback;
 
         if (!savedSession) {
-            this.gameId = randomUUID();
+            this.gameId = uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], length: 2, separator: '-' });
             this.timeStamp = Date.now();
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
