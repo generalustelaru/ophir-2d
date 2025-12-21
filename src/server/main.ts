@@ -2,7 +2,7 @@ import {
     AuthenticatedClientRequest, AuthenticationForm, CookieArgs, CookieName, Probable, RegistrationForm,
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity, PlayerEntry } from '~/shared_types';
+import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import { DatabaseService } from './services/DatabaseService';
@@ -566,31 +566,38 @@ function startGameChecks() {
 }
 
 async function handleDisconnection(userId: UserId, gameId: GameId) {
-
     connections.delete(userId);
+
+    let isRedundant = false;
 
     if (activeGames.has(gameId)) {
         const connectedUsers = getGameConnections(gameId);
         console.log('users connected to the same session:', connectedUsers);
 
         if (connectedUsers.length == 0) {
-            const game = activeGames.get(gameId);
-            try {
-                const saveOp = await dbService.saveGameState(game!.getGameState());
+            const game = activeGames.get(gameId) as Game;
+            isRedundant = game.getAllRefs().every(ref => ref.color == null);
 
-                if (saveOp.ok) {
-                    game!.deReference();
+            try {
+                const operation = isRedundant
+                    ? await dbService.deleteGameState(gameId)
+                    : await dbService.saveGameState(game.getGameState());
+
+                if (operation.ok) {
+                    game.deReference();
                     activeGames.delete(gameId);
-                    console.info('deactivated stale game', { gameId });
+                    console.info(
+                        isRedundant ? 'deleted redundant game' : 'deactivated stale game', { gameId },
+                    );
                 } else {
-                    sLib.printError(saveOp.message);
+                    sLib.printError(operation.message);
                 }
             } catch (error) {
                 sLib.printError(sLib.getErrorBrief(error));
             }
         }
     }
-    await updateGameStat(gameId);
+    await updateGameStat(gameId, isRedundant);
 }
 
 async function produceGame(): Promise<Probable<Game>> {
