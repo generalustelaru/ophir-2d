@@ -1,5 +1,6 @@
 install:
 	docker run -d -p 27017:27017 --name ophir-mongo mongo
+	docker run -d -p 6379:6379 --name ophir-redis redis
 ifeq ($(OS),Windows_NT)
 	powershell -command "cp .env.example .env"
 	powershell.exe -ExecutionPolicy Bypass -File update-ip.ps1

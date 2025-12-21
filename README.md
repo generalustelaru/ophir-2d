@@ -108,12 +108,13 @@ The `debug <target> <option>` command shows live data as following:
 
 ## Manual Installation - punishment for the lazies
 0. Don't go back to **Prerequisites**, step **3**.
-1. Run `docker run -d -p 27017:27017 --name ophir-mongo mongo` to instantiate a DB.
-2. Run `node seed-db.cjs` to load the game configuration in the DB.
-3. Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
-4. Create a copy of *db_template.json* and rename it as *db.json*.
-5. Create a copy of *.env.example* and rename it as *.env*.
-6. Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
+1. Run `docker run -d -p 27017:27017 --name ophir-mongo mongo` to instantiate a database.
+2. Run `docker run -d -p 6379:6379 --name ophir-redis redis` to instantiate caching.
+3. Run `node seed-db.cjs` to load the game configuration in the DB.
+4. Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
+5. Create a copy of *db_template.json* and rename it as *db.json*.
+6. Create a copy of *.env.example* and rename it as *.env*.
+7. Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
    - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
    - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
    - Linux: `hostname -I`
