@@ -12,7 +12,7 @@ enum CollectionName {
     users = 'users',
     games = 'games',
 }
-// TODO: see into using Mongo's WithId to reference the games
+
 type GameStateRecord = { id: string, data: GameState }
 
 type Validity = { invalid: false } | { invalid: true, reason: string }
