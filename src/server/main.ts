@@ -1,8 +1,8 @@
 import {
     AuthenticatedClientRequest, AuthenticationForm, CookieArgs, CookieName, Probable, RegistrationForm,
-    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, PlayerReference,
+    GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
+import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity, PlayerEntry } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import { DatabaseService } from './services/DatabaseService';
@@ -142,6 +142,7 @@ socketServer.on('connection', async (socket, inc) => {
     }
 
     connections.set(user.id, { gameId, socket });
+    updateGameStat(gameId);
     transmit(socket, { state: game.getSharedState() });
 
     socket.on('message', function incoming(req: string) {
@@ -369,7 +370,7 @@ app.get('/:id', async (req: Request, res: Response) => {
 
     if (revival.err) {
         sLib.printError(revival.message);
-        res.redirect('/new');
+        res.sendFile(path.join(__dirname,'public', 'lobby.html'));
 
         return;
     }
@@ -391,16 +392,20 @@ async function processAction(
     const gameId = game.getGameId();
     const result = game.processAction(request);
 
-    if (request.message.action == Action.end_turn) {
+    const statsRelevant: Array<Action> = [
+        Action.end_turn, Action.enrol, Action.change_color, Action.force_turn, Action.start_setup,
+    ];
+
+    if (statsRelevant.includes(request.message.action)) {
         const save = await dbService.saveGameState(game.getGameState());
 
         if (save.err) {
             console.error(save.message);
             return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
         }
-    }
 
-    updateGameStat(gameId);
+        updateGameStat(gameId);
+    }
 
     result.senderOnly
         ? transmit(socket, result.message)
@@ -454,6 +459,8 @@ function debugCommand(target?: string, option?: string): void {
             return console.log(connections.keys());
         case 'sessions':
             return console.log(sessions.entries());
+        case 'stats':
+            return console.log(stats.entries());
     }
 
     if (!option)
@@ -469,7 +476,7 @@ function debugCommand(target?: string, option?: string): void {
             console.log(game.getAllRefs());
             break;
         case 'sockets':
-            console.log(getActiveGameParticipants(target));
+            console.log(getGameConnections(target));
             break;
         default:
             break;
@@ -525,32 +532,24 @@ function startGameChecks() {
             return;
         }
 
-        const mapping = await dbService.getTimestamps();
-
-        if (mapping.err) {
-            sLib.printError('Corrupt game record found in routine check.');
-            return;
-        }
-
         const { GAME_PERSIST_HOURS: count } = config.data;
-        const timeStamps = mapping.data;
 
         const time = Date.now();
 
-        for (const item of timeStamps) {
-            const { gameId, timeStamp } = item;
+        stats.forEach(async (stat: GameStats, gameId) => {
+            const { timeStamp } = stat;
             const elapsedTime = time - timeStamp;
             const persistence = count * hours;
 
+            if (activeGames.has(gameId)) {
+
+                if (getGameConnections(gameId).length == 0)
+                    activeGames.delete(gameId);
+                else
+                    return;
+            }
+
             if (elapsedTime > persistence) {
-
-                if (activeGames.has(gameId)) {
-
-                    if (getActiveGameParticipants(gameId).length == 0)
-                        activeGames.delete(gameId);
-                    else
-                        continue;
-                }
 
                 const deletion = await dbService.deleteGameState(gameId);
 
@@ -560,8 +559,9 @@ function startGameChecks() {
                 }
 
                 await updateGameStat(gameId, true);
+                console.info('deleted abandoned game', { gameId });
             }
-        }
+        });
     }, 1 * minutes);
 }
 
@@ -570,7 +570,7 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
     connections.delete(userId);
 
     if (activeGames.has(gameId)) {
-        const connectedUsers = getActiveGameParticipants(gameId);
+        const connectedUsers = getGameConnections(gameId);
         console.log('users connected to the same session:', connectedUsers);
 
         if (connectedUsers.length == 0) {
@@ -581,17 +581,16 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
                 if (saveOp.ok) {
                     game!.deReference();
                     activeGames.delete(gameId);
-                    await updateGameStat(gameId);
-                    console.info('deactivated abandoned game', { gameId });
+                    console.info('deactivated stale game', { gameId });
                 } else {
                     sLib.printError(saveOp.message);
                 }
             } catch (error) {
                 sLib.printError(sLib.getErrorBrief(error));
             }
-
         }
     }
+    await updateGameStat(gameId);
 }
 
 async function produceGame(): Promise<Probable<Game>> {
@@ -714,10 +713,12 @@ function extractToken(cookie: unknown): Probable<string> {
 }
 
 type GameStats = {
+    timeStamp: number
     isActiveGame: boolean
-    playerReferences: Array<PlayerReference>
+    userReferences: Array<UserReference>
     phase: Phase
     players: Array<PlayerEntity>
+    activeCount: number
 }
 
 async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promise<void> {
@@ -737,7 +738,7 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
         if (gameFetch.ok)
             return { isActiveGame, gameState: gameFetch.data };
 
-        sLib.printWarning(gameFetch.message);
+        sLib.printError(gameFetch.message);
         return { isActiveGame, gameState: null };
     })();
 
@@ -746,10 +747,20 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
         return;
     }
 
-    const { sharedState, playerReferences } = gameState;
+    const { sharedState, userReferences: userReferences, timeStamp } = gameState;
     const { sessionPhase: phase, players } = sharedState;
+    const activeCount = (() => {
+        const connections = getGameConnections(gameId);
+        const activePlayers = userReferences.filter(
+            ref => ref.color && connections.includes(ref.id),
+        );
+        return activePlayers.length;
+    })();
 
-    stats.set(gameId,{ isActiveGame, playerReferences, phase, players });
+    stats.set(
+        gameId,
+        { timeStamp, isActiveGame, userReferences: userReferences, phase, players, activeCount },
+    );
 }
 
 async function initializeStats(): Promise<void> {
@@ -764,17 +775,20 @@ async function initializeStats(): Promise<void> {
     const allGames = gamesFetch.data;
 
     for(const gameState of allGames) {
-        const { sharedState, playerReferences } = gameState;
+        const { sharedState, userReferences, timeStamp } = gameState;
         const { sessionPhase: phase, players, gameId } = sharedState;
 
-        stats.set(gameId, { isActiveGame: false, playerReferences, phase, players });
+        stats.set(
+            gameId,
+            { timeStamp, isActiveGame: false, userReferences, phase, players, activeCount: 0 },
+        );
     };
 }
 function composeLobbyFeed(userId: UserId): Array<GameFeed> {
-    const lobbyFeed: Array<GameFeed> = Array.from(stats).map(([gameId, stat]) => {
-        const { isActiveGame, playerReferences, phase, players } = stat;
-        const userRef = playerReferences.find(r => r.id == userId);
-        const playerEntry = players.find(p => p.color == userRef?.color);
+    const lobbyFeed = Array.from(stats).map(([gameId, stat]): GameFeed => {
+        const { isActiveGame, userReferences, phase, players, activeCount, timeStamp } = stat;
+        const userRef = userReferences.find(r => r.id == userId);
+        const playerEntity = players.find(p => p.color == userRef?.color);
 
         const status: GameStatus = (() => {
             if (isActiveGame) {
@@ -785,7 +799,7 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
 
         const action: LobbyAction | null = (() => {
             switch(true) {
-                case !!playerEntry:
+                case !!playerEntity:
                     return LobbyAction.Continue;
                 case isActiveGame:
                     return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
@@ -795,28 +809,30 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
         })();
 
         const userInvolvement: UserInvolvement= (() => {
-            if (!playerEntry)
+            if (!playerEntity)
                 return UserInvolvement.None;
 
             switch (phase) {
                 case Phase.play:
-                    const player = playerEntry as Player;
+                    const player = playerEntity as Player;
                     return player.isActive ? UserInvolvement.HasTurn : UserInvolvement.Playing;
                 case Phase.setup:
-                    const draft = playerEntry as PlayerDraft;
+                    const draft = playerEntity as PlayerDraft;
                     return draft.turnToPick ? UserInvolvement.HasTurn : UserInvolvement.Playing;
                 default:
-                    return UserInvolvement.None;
+                    return UserInvolvement.Playing;
             }
         })();
 
-        return { gameId, action, players: players.length, status, userInvolvement };
+        const activity = { enrolled: players.length, active: activeCount };
+
+        return { timeStamp, gameId, action, activity, status, userInvolvement };
     });
 
     return lobbyFeed;
 }
 
-function getActiveGameParticipants(gameId: string): Array<UserId> {
+function getGameConnections(gameId: string): Array<UserId> {
     return Array.from(connections.entries())
         .filter(([, c]) => c.gameId == gameId)
         .map(([k]) => k);

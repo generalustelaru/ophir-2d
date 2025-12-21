@@ -1,5 +1,5 @@
 import {
-    WsDigest, DataDigest, GameState, Probable, Configuration, PlayerReference, RequestMatch, EnrolRequest, UserId,
+    WsDigest, DataDigest, GameState, Probable, Configuration, UserReference, RequestMatch, EnrolRequest, UserId,
     AuthenticatedClientRequest, MatchedPlayerRequest,
     User,
 } from '~/server_types';
@@ -21,12 +21,13 @@ import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 /**@throws */
 export class Game {
     private gameId: string;
+    private timeStamp: number;
     private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
     private broadcast: ((state: PlayState) => void) | null;
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private saveDisplayName: ((userId: UserId, name: string) => void) | null;
-    private playerReferences: Array<PlayerReference> = [];
+    private userReferences: Array<UserReference> = [];
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
@@ -42,6 +43,7 @@ export class Game {
 
         if (!savedSession) {
             this.gameId = randomUUID();
+            this.timeStamp = Date.now();
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
                 transmitCallback,
@@ -53,11 +55,12 @@ export class Game {
             return;
         }
 
-        const { sharedState, privateState, backupStates, playerReferences } = savedSession;
+        const { sharedState, privateState, backupStates, userReferences, timeStamp } = savedSession;
         const { gameId, sessionOwner, players, chat } = sharedState;
 
+        this.timeStamp = timeStamp;
         this.gameId = gameId;
-        this.playerReferences = playerReferences;
+        this.userReferences = userReferences;
 
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
@@ -104,21 +107,21 @@ export class Game {
     }
 
     public getPlayerRef(userId: UserId) {
-        const ref = this.playerReferences.find(r => r.id == userId);
+        const ref = this.userReferences.find(r => r.id == userId);
 
         return ref || null;
     }
 
     public getAllRefs() {
-        return this.playerReferences;
+        return this.userReferences;
     }
 
     public setPlayerRef(user: User) {
-        this.playerReferences.push({  ...user, color: null });
+        this.userReferences.push({  ...user, color: null });
     }
 
     private preserveName(userId: UserId, name: string) {
-        const ref = this.playerReferences.find(r => r.id == userId);
+        const ref = this.userReferences.find(r => r.id == userId);
 
         if (!ref || !this.saveDisplayName)
             return lib.printError('Game was dereferenced!');
@@ -135,7 +138,7 @@ export class Game {
         this.broadcast = null;
         this.transmit = null;
         this.saveDisplayName = null;
-        this.playerReferences = [];
+        this.userReferences = [];
     }
 
     public getGameId(): string {
@@ -150,7 +153,8 @@ export class Game {
         const state = this.actionProcessor.getState();
         const isPlay = state.sessionPhase === Phase.play;
         return {
-            playerReferences: this.playerReferences,
+            timeStamp: this.timeStamp,
+            userReferences: this.userReferences,
             sharedState: state,
             backupStates: isPlay ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
             privateState: isPlay ? (this.actionProcessor as PlayProcessor).getPrivateState() : null,
@@ -167,7 +171,7 @@ export class Game {
             return;
         }
 
-        for (const ref of this.playerReferences) {
+        for (const ref of this.userReferences) {
             ref.color = null;
         }
 
@@ -184,12 +188,13 @@ export class Game {
     }
 
     public processAction(request: AuthenticatedClientRequest): WsDigest {
+        this.timeStamp = Date.now();
         const emitError = (reason: string) => {
             lib.printError(`Cannot process action: ${reason}`);
             return this.issueNominalResponse( { error: 'Cannot process request' });
         };
 
-        const reference = this.playerReferences.find(r => r.id == request.userId);
+        const reference = this.userReferences.find(r => r.id == request.userId);
 
         if (!reference)
             return emitError('Player reference is missing');
@@ -286,7 +291,7 @@ export class Game {
 
     // MARK: ENROL
     private updateReferenceColor(userId: UserId, color: PlayerColor) {
-        const ref = this.playerReferences.find(r => r.id == userId);
+        const ref = this.userReferences.find(r => r.id == userId);
 
         if (!ref)
             return console.error('Could not a find reference to update color!!!');
@@ -430,7 +435,7 @@ export class Game {
         const playerHandler = new PlayerHandler(player, userId);
         playerHandler.refreshTimeStamp();
 
-        const digest: DataDigest = { player: playerHandler, payload, refPool: this.playerReferences };
+        const digest: DataDigest = { player: playerHandler, payload, refPool: this.userReferences };
 
         if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action)) {
             lib.printError(`It is not [${playerHandler.getIdentity().name}]'s turn!`);
@@ -528,7 +533,7 @@ export class Game {
         const { userId } = request;
 
         const state = this.actionProcessor.getState();
-        const ref = this.playerReferences.find( r => r.id == userId);
+        const ref = this.userReferences.find( r => r.id == userId);
 
         if (!ref)
             return lib.fail(`Cannot find reference for id: ${userId}`);
@@ -555,7 +560,7 @@ export class Game {
             return null;
 
         const firstPlayer = players.find(p => p.turnOrder == 1);
-        const ref = this.playerReferences.find(r => r.color == firstPlayer?.color);
+        const ref = this.userReferences.find(r => r.color == firstPlayer?.color);
 
         return ref?.id || null;
     }

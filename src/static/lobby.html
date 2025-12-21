@@ -17,6 +17,7 @@
             <tr>
                 <td>Players</td>
                 <td>Status</td>
+                <td>Last Update</td>
                 <td>Are you playing?</td>
                 <td>Action</td>
             </tr>
@@ -69,21 +70,25 @@
                 return acc + getRow(current);
             }, '');
 
-            tableBody.innerHTML = tableContent + '<tr><td colspan="4"><a href="/new">New Game</a></td></tr>';
+            tableBody.innerHTML = tableContent + '<tr><td colspan="5"><a href="/new">New Game</a></td></tr>';
 
             function getRow(feed) {
-                // if (feed.gameId === null) {
-                //     return '<tr><td colspan="4"><a href="/new">Start New Game</a></td></tr>';
-                // }
 
-                const { gameId, action, players, status, userInvolvement } = feed;
+                const { gameId, action, activity, status, userInvolvement, timeStamp } = feed;
+                let { enrolled, active } = activity;
+
                 let row = '<tr>';
 
-                const style = status == 2 ? 'class="dormant"' : 'class="active"'
+                const style = {
+                    dormant: 'class="dormant"',
+                    active: 'class="active"',
+                    important: 'class="important"',
+                }
 
+                // MARK: Players
                 let pips = ''
-                for (let i= 0; i < players; i++)
-                    pips += `<div ${style}></div>`;
+                for (let i= 0; i < enrolled; i++)
+                    pips += `<div ${active-- > 0 ? style.active : style.dormant}></div>`;
                 row += `<td><div class="players">${pips}</div></td>`
 
                 const statusText = (() => {
@@ -96,8 +101,32 @@
                             return 'Dormant'
                     }
                 })();
-                row += `<td ${style}>${statusText}</td>`
 
+                // MARK: Status
+                row += `<td ${status == 2 ? style.dormant : style.active}>${statusText}</td>`
+
+                // MARK: Last Update
+                const age = Date.now() - timeStamp;
+                const seconds = age / 1000;
+                const minutes = seconds / 60;
+                const ageText = (() => {
+                    switch (true) {
+                        case seconds < 60:
+                            return `less than a minute ago`
+                        case minutes < 2:
+                            return `A minute ago`
+                        case minutes < 5:
+                            return `${Math.ceil(minutes)} minutes ago`
+                        case minutes < 60:
+                            return `${Math.round(minutes / 5) * 5} minutes ago`
+                        default:
+                            const hours = Math.round(minutes / 60);
+                            return `${hours} ${hours > 1 ? 'hours' : 'hour'} ago`
+                    }
+                })();
+                row +=`<td>${ageText}</td>`
+
+                // Mark: User Involvement
                 switch (userInvolvement) {
                     case 0:
                         row += '<td>no</td>'
@@ -109,6 +138,7 @@
                         row += '<td class="your_turn">Yes, it\'s your turn!</td>'
                 }
 
+                // MARK: Action
                 row += action
                     ? `<td><a href="/${gameId}">${action}</a></td>`
                     : '<td>N/A</td>'

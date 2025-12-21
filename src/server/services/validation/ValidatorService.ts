@@ -1,13 +1,13 @@
 import { HexCoordinates } from '~/client_types';
 import {
     ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
-    LoadGoodPayload, MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, State,
-    Action, SpecialistName, Phase, OpponentRepositioningPayload, ColorSelectionPayload,
+    LoadGoodPayload, MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload,
+    Action, SpecialistName, OpponentRepositioningPayload, ColorSelectionPayload,
     ChancellorMarketSalePayload,
     PeddlerMarketPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
-import { BackupState, Configuration, PrivateState, Probable, GameState, User } from '~/server_types';
+import { Configuration, Probable } from '~/server_types';
 
 const refs = {
     sessionPhase: ['play', 'setup', 'enrolment'],
@@ -55,71 +55,6 @@ class ValidatorService {
             return config;
 
         return null;
-    }
-    public validateState(db_data: unknown) {
-        const savedSession = this.validateObject<GameState>(
-            'SavedSession',
-            db_data,
-            [
-                { key: 'sharedState', type: 'object', nullable: false },
-                { key: 'privateState', type: 'object', nullable: true },
-                { key: 'backupStates', type: 'array', nullable: true },
-            ],
-        );
-
-        if (!savedSession)
-            return null;
-
-        const sharedState = this.validateObject<State>(
-            'State',
-            savedSession.sharedState,
-            [
-                { key: 'gameId', type: 'string', nullable: false },
-                { key: 'sessionPhase', type: 'string', nullable: false, ref: refs.sessionPhase },
-                { key: 'sessionOwner', type: 'string', nullable: true, ref: refs.playerColor },
-                { key: 'players', type: 'array', nullable: false },
-                { key: 'chat', type: 'array', nullable: false },
-            ],
-        );
-
-        if (!sharedState)
-            return null;
-
-        if (sharedState.sessionPhase === Phase.play) {
-
-            const privateState = this.validateObject<PrivateState>(
-                'PrivateState',
-                savedSession.privateState,
-                [
-                    { key: 'destinationPackages', type: 'array', nullable: false }, // Array<DestinationPackage>;
-                    { key: 'tradeDeck', type: 'array', nullable: false }, // Array<Trade>;
-                    { key: 'costTiers', type: 'array', nullable: false }, // Array<ExchangeTier>;
-                    { key: 'gameStats', type: 'array', nullable: false }, // Array<PlayerCountables>;
-                    { key: 'playerSpentActions', type: 'array', 'nullable': false }, // Array<LocalAction>
-                ],
-            );
-
-            if (!privateState)
-                return null;
-
-            if (savedSession.backupStates != null) {
-                const backupStates = savedSession.backupStates.map((state) => {
-                    return this.validateObject<BackupState>(
-                        'BackupState',
-                        state,
-                        [
-                            { key: 'playState', type: 'object', nullable: false },
-                            { key: 'privateState', type: 'object', nullable: false },
-                        ],
-                    );
-                });
-
-                if (backupStates.includes(null))
-                    return null;
-            }
-        }
-
-        return savedSession;
     }
 
     public validateClientRequest(request: unknown) {

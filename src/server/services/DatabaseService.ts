@@ -7,12 +7,14 @@ import { Db } from 'mongodb';
 import { randomUUID } from 'crypto';
 import lib from './library';
 
-enum Name {
+enum CollectionName {
     config = 'config',
     users = 'users',
     games = 'games',
 }
-type Indexed<T> = T & { _id: string }
+// TODO: see into using Mongo's WithId to reference the games
+type GameStateRecord = { id: string, data: GameState }
+
 type Validity = { invalid: false } | { invalid: true, reason: string }
 export class DatabaseService {
     private db: Db;
@@ -23,7 +25,7 @@ export class DatabaseService {
     // MARK: CONFIG
     public async getConfig(): Promise<Probable<Configuration>> {
         try {
-            const record = await this.db.collection<Indexed<Configuration>>(Name.config).findOne(
+            const record = await this.db.collection<{ _id: string } & Configuration>(CollectionName.config).findOne(
                 { _id: 'config_0' },
                 { projection: { _id: 0 } },
             );
@@ -46,11 +48,11 @@ export class DatabaseService {
     // MARK: GAMES
     public async addGameState(state: GameState): Promise<Probable<true>> {
         const id = state.sharedState.gameId;
-        const record = { id, timeStamp: Date.now(), data: lib.getCopy(state) };
+        const record: GameStateRecord = { id, data: lib.getCopy(state) };
 
         try {
             const response = (
-                await this.db.collection(Name.games).insertOne(record)
+                await this.db.collection(CollectionName.games).insertOne(record)
             );
 
             return response
@@ -67,11 +69,11 @@ export class DatabaseService {
         const id = state.sharedState.gameId;
 
         try {
-            const dbState = { id, timeStamp: Date.now(), data: lib.getCopy(state) };
+            const record: GameStateRecord = { id, data: lib.getCopy(state) };
 
             const response = (
-                await this.db.collection(Name.games)
-                    .findOneAndReplace({ id }, dbState)
+                await this.db.collection(CollectionName.games)
+                    .findOneAndReplace({ id }, record)
             );
 
             return response
@@ -85,18 +87,13 @@ export class DatabaseService {
 
     public async loadGameState(gameId: string): Promise<Probable<GameState>> {
         try {
-            const record = await this.db.collection(Name.games).findOne({ id: gameId });
+            const record = await this.db.collection<GameStateRecord>(CollectionName.games).findOne({ id: gameId });
 
-            if (record) {
-                const gameState = validator.validateState(record.data);
+            return record
+                ? lib.pass(record.data)
+                : lib.fail('Failed to retrieve state record.')
+            ;
 
-                return gameState
-                    ? lib.pass(gameState)
-                    : lib.fail('State record is not type compliant')
-                ;
-            }
-
-            return lib.fail('Failed to retrieve state record.');
         } catch (error) {
             return lib.fail(lib.getErrorBrief(error));
         };
@@ -104,20 +101,10 @@ export class DatabaseService {
 
     public async loadAllGames(): Promise<Probable<Array<GameState>>> {
         try {
-            const collection = await this.db.collection(Name.games).find().toArray();
+            const records = await this.db.collection<GameStateRecord>(CollectionName.games).find().toArray();
 
-            if (collection) {
-                const gameStates: Array<GameState> = [];
-                for (const record of collection) {
-                    const gameState = validator.validateState(record.data);
-
-                    if (!gameState)
-                        return lib.fail('State record is not type compliant');
-
-                    gameStates.push(gameState);
-                }
-
-                return lib.pass(gameStates);
+            if (records) {
+                return lib.pass(records.map(r=> r.data));
             }
 
             return lib.fail('Failed to retrieve state record.');
@@ -129,7 +116,7 @@ export class DatabaseService {
     public async deleteGameState(gameId: string): Promise<Probable<true>> {
         try {
             const response = (
-                await this.db.collection(Name.games)
+                await this.db.collection(CollectionName.games)
                     .findOneAndDelete({ id: gameId })
             );
 
@@ -137,26 +124,6 @@ export class DatabaseService {
                 ? lib.pass(true)
                 : lib.fail('Failed to delete game state.')
             ;
-        } catch (error) {
-            return lib.fail(lib.getErrorBrief(error));
-        };
-    }
-
-    public async getTimestamps(): Promise<Probable<Array<{ gameId: string, timeStamp: number }>>> {
-        try {
-            const projection = await this.db.collection(Name.games).find({}, {
-                projection: { id: 1, timeStamp: 1 },
-            }).toArray();
-
-            if (projection) {
-                const timeStamps = projection.map(p => {
-                    return { gameId: p.id, timeStamp: p.timeStamp };
-                });
-
-                return lib.pass(timeStamps);
-            }
-
-            return lib.fail('Could not retreive timeStamp list');
         } catch (error) {
             return lib.fail(lib.getErrorBrief(error));
         };
@@ -177,7 +144,7 @@ export class DatabaseService {
         }
 
         try {
-            const existingUser = await this.db.collection(Name.users).findOne({ name: userName });
+            const existingUser = await this.db.collection(CollectionName.users).findOne({ name: userName });
 
             if (existingUser)
                 return lib.pass({ invalid: true, reason: 'This username already exists.' });
@@ -202,7 +169,7 @@ export class DatabaseService {
             const hash = lib.toHash(form.password);
             const record: UserRecord = { ...user, hash };
 
-            const response = await this.db.collection(Name.users).insertOne(record);
+            const response = await this.db.collection(CollectionName.users).insertOne(record);
 
             return response
                 ? lib.pass(user)
@@ -214,7 +181,7 @@ export class DatabaseService {
 
     public async authenticateUser(query: AuthenticationForm): Promise<Probable<User>> {
         try {
-            const record = await this.db.collection<Indexed<UserRecord>>(Name.users)
+            const record = await this.db.collection<UserRecord>(CollectionName.users)
                 .findOne({ name: query.userName });
 
             if (!record)
@@ -234,7 +201,7 @@ export class DatabaseService {
     public async updateUserDisplayName(userId: UserId, name: string): Promise<Probable<true>> {
         try {
             const patch = (
-                await this.db.collection(Name.users)
+                await this.db.collection(CollectionName.users)
                     .findOneAndUpdate(
                         { id: userId },
                         { $set: { displayName: name } },

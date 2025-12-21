@@ -127,7 +127,7 @@ export type BackupState = {
 export type DataDigest = {
     player: PlayerHandler,
     payload: MessagePayload
-    refPool: Array<PlayerReference>
+    refPool: Array<UserReference>
 }
 
 export type BarrierCheck = {
@@ -176,7 +176,8 @@ export interface ActionProcessor {
 }
 
 export type GameState = {
-    playerReferences: Array<PlayerReference>
+    timeStamp: number
+    userReferences: Array<UserReference>
     sharedState: State
     privateState: PrivateState | null
     backupStates: Array<BackupState> | null
@@ -198,7 +199,7 @@ export type CookieArgs = {
     options: CookieOptions
 }
 
-export type PlayerReference = User & {
+export type UserReference = User & {
     color: PlayerColor | null
 }
 
@@ -236,9 +237,10 @@ export enum UserInvolvement {
 export type GameFeed = {
     gameId: string
     action: LobbyAction | null
-    players: number
+    activity: { enrolled: number, active: number }
     status: GameStatus
     userInvolvement: UserInvolvement
+    timeStamp: number,
 } | {
     gameId: null
 }
