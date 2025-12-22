@@ -72,7 +72,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Peddler',
             startingFavor: 2,
             specialty: null,
-            description: 'May ignore one required commodity when completing a reduced value market trade.',
+            description: 'May ignore one required\ncommodity when completing a\nreduced value market trade.',
         },
     ],
     TRADE_DECK_A: [
