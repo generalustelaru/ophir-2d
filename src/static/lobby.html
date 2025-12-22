@@ -71,7 +71,8 @@
                 return acc + getRow(current);
             }, '');
 
-            tableBody.innerHTML = tableContent + '<tr><td colspan="6"><a href="/new">New Game</a></td></tr>';
+            // tableBody.innerHTML = tableContent + `<tr>${'<td></td>' * 5}<td><a href="/new">New Game</a></td></tr>`;
+            tableBody.innerHTML = tableContent + '<tr><td></td><td></td><td></td><td></td><td></td><td><a href="/new">New Game</a></td></tr>';
 
             function getRow(feed) {
 
