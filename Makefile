@@ -12,13 +12,13 @@ else
 endif
 	npm ci
 	make build
-	make persistence
+	make persist-data
 	make seed
 
-persistence:
+persist-data:
 	docker run -d -p 27017:27017 --name ophir-mongo mongo
 	docker run -d -p 6379:6379 --name ophir-redis redis
-	docker run -d --name redisinsight -p 5540:5540 redis/redisinsight:latest
+	docker run -d -p 5540:5540 --name redisinsight
 
 seed:
 	node seed-db.cjs
