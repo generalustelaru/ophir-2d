@@ -25,33 +25,33 @@ fix:
 
 #Docker
 start:  # Start everything
-	docker-compose up -d
+	docker compose up -d
 
 stop: # Stop everything
-	docker-compose down
+	docker compose down
 
 rebuild: # Rebuilds just the app
-	docker-compose up -d --build
+	docker compose up -d --build
 
 restart:
-	docker-compose restart game-server
+	docker compose restart game-server
 
-logs:
-	docker-compose logs -f game-server
+watch:
+	docker compose logs -f game-server
 
-logs-all:
-	docker-compose logs -f
+watch-all:
+	docker compose logs -f
 
 # Database utilities
 seed:
-	docker-compose exec game-server node seed-db.cjs
+	docker compose exec game-server node seed-db.cjs
 
 shell:
-	docker-compose exec game-server sh
+	docker compose exec game-server sh
 
 # Cleanup
 clean:
-	docker-compose down -v
+	docker compose down -v
 	rm -rf dist node_modules
 
 .PHONY: client server static build run up down rebuild restart logs logs-all seed shell clean
