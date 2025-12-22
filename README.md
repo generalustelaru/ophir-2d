@@ -67,8 +67,8 @@ You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`)
 | - | - | - |
 SERVER_NAME | The name that appears in chat for server messages. | `string` |
 PLAYER_IDLE_MINUTES | How fast a player can be skipped for not doing anything (currently disabled). | `number` |
-GAME_DELETION_HOURS | How quickly an inactive session goes bye-bye. | `number` |
-IDLE_TIMEOUT | Time of perceived inactivity (in minutes) for the current player before receiving the idle status. | `number` |
+USER_SESSION_HOURS | How quickly your session cookie goes bad. | `number` |
+GAME_PERSIST_HOURS | How quickly an inactive session goes bye-bye. | `number` |
 SINGLE_PLAYER | Allows session to start with a single enrolled player. | `boolean` |
 NO_RIVAL | Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled). | `boolean` |
 RICH_PLAYERS | Players start with 99 coins. | `boolean` |
