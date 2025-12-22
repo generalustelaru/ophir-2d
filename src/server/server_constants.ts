@@ -23,7 +23,7 @@ const serverConstants: ServerConstants = {
             displayName: 'Chancellor',
             startingFavor: 1,
             specialty: 'gems',
-            description: 'May substitute commodities with favor when trading at the market.',
+            description: 'May substitute commodities with\nfavor when trading at the market.',
         },
         {
             name: SpecialistName.harbormaster,

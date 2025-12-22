@@ -10,29 +10,28 @@ import { SessionService } from './services/SessionService';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Game } from './Game';
 import sLib from './server_lib';
-import readline from 'readline';
 import process from 'process';
 import path from 'path';
 import http from 'http';
 
-import { SERVER_ADDRESS, PORT_NUMBER, DB_PORT } from '../environment';
+import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
 import { MongoClient } from 'mongodb';
 
-if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
+if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
     console.error('Missing environment variables', {
-        SERVER_ADDRESS, PORT_NUMBER, DB_PORT,
+        PORT_NUMBER, MONGODB_URI, REDIS_URL,
     });
     process.exit(1);
 }
 // TODO: enclose this logic in a dbService.connect()
 let dbService: DatabaseService;
-const dbClient = new MongoClient(`mongodb://localhost:${DB_PORT}`);
+const dbClient = new MongoClient(MONGODB_URI);
 
 dbClient.connect().then(() => {
     const db = dbClient.db('ophir');
     dbService = new DatabaseService(db);
     startGameChecks();
-    console.info('Connected to MongoDB');
+    console.info('✅ Connected to MongoDB');
 }).catch(error => {
     sLib.printError(sLib.getErrorBrief(error));
     sLib.printError('Could not establish DB connection.');
@@ -49,35 +48,6 @@ process.on('SIGINT', () => {
     console.log('Exiting...');
     process.exit(1);
 });
-
-// MARK: CLI
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-});
-
-(
-    function promptForInput(): void {
-        rl.question('\nophir-2d :: ', (input) => {
-            const [command, target, option] = input.split(' ');
-            switch (command) {
-                case 'shut':
-                    shutDown();
-                    return;
-
-                case 'debug':
-                    debugCommand(target, option);
-                    break;
-
-                default:
-                    console.error('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m', input);
-                    break;
-            }
-
-            promptForInput();
-        });
-    }
-)();
 
 // MARK: MEMORY
 const connections: Map<UserId, Connection> = new Map();
@@ -382,7 +352,7 @@ app.get('/:id', async (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname,'public', 'game.html'));
 });
 server.listen(PORT_NUMBER, () => {
-    console.info(`Listening on http://${SERVER_ADDRESS}:${PORT_NUMBER}`);
+    console.info('✅ Server started!');
 });
 
 async function processAction(
@@ -447,53 +417,6 @@ function logRequest(request: ClientRequest, userName: string) {
         action || '?',
         payload ? ` ${JSON.stringify(payload)} ` : ' ',
     );
-}
-function debugCommand(target?: string, option?: string): void {
-
-    if (!target)
-        return console.error('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m');
-
-    switch (target.trim()) {
-        case 'games':
-            return console.log(activeGames.keys());
-        case 'sockets':
-            return console.log(connections.keys());
-        case 'stats':
-            return console.log(stats.entries());
-    }
-
-    if (!option)
-        return console.log('\n\x1b[91m ¯\\_(ツ)_/¯ \x1b[0m');
-
-    const game = activeGames.get(target);
-
-    if (!game)
-        return sLib.printWarning('Session does not exist or is not active');
-
-    switch (option.trim()) {
-        case 'refs':
-            console.log(game.getAllRefs());
-            break;
-        case 'sockets':
-            console.log(getGameConnections(target));
-            break;
-        default:
-            break;
-    }
-}
-
-function shutDown() {
-    rl.close();
-    console.log('Shutting down...');
-
-    broadcast({ error: 'The server is entering maintenance.' });
-    connections.forEach(ref => ref.socket.close(1000));
-
-    setTimeout(() => {
-        socketServer.close();
-        console.log('Server off.');
-        process.exit(0);
-    }, 3000);
 }
 
 function broadcast(message: ServerMessage): void {

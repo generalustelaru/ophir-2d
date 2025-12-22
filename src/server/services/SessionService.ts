@@ -1,13 +1,13 @@
 import { Probable, UserSession } from '../server_types';
 import { createClient, RedisClientType } from 'redis';
-import { REDIS_PORT } from '~/environment';
+import { REDIS_URL } from '~/environment';
 import sLib from '../server_lib';
 export class SessionService {
     private redis: RedisClientType;
 
     constructor() {
         this.redis = createClient({
-            url: `redis://localhost:${REDIS_PORT}`,
+            url: REDIS_URL,
         });
 
         this.redis.on('error', (err) => { sLib.printError(String(err)); });

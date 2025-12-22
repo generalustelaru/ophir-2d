@@ -23,7 +23,10 @@ module.exports = (env, argv) => {
             /Can't resolve '@google-cloud\/spanner'/,
         ],
         plugins: [
-            new dotenv(),
+            new dotenv({
+                silent: true,  // Don't fail if .env is missing
+                systemvars: true,  // Also read from system environment
+            }),
         ],
         entry: {
             [label]: `./src/${label}/main.ts`,

@@ -1,6 +1,3 @@
 node_modules/
 dist/
-# svg/
-.env
-game-state.json
-db.json
+logs.txt

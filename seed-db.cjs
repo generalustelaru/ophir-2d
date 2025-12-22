@@ -1,7 +1,7 @@
 const { MongoClient } = require('mongodb');
 
 (async () => {
-    const client = new MongoClient(`mongodb://localhost:${27017}`);
+    const client = new MongoClient('mongodb://mongo:27017/gamedb');
 
     try {
         await client.connect();
@@ -13,6 +13,7 @@ const { MongoClient } = require('mongodb');
         const config = {
             SERVER_NAME: 'Laputan Machine',
             PLAYER_IDLE_MINUTES: 1,
+            USER_SESSION_HOURS: 1,
             GAME_PERSIST_HOURS: 1,
             SINGLE_PLAYER: false,
             NO_RIVAL: false,

@@ -7,14 +7,8 @@ import {
     Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State, Phase,
 } from '~/shared_types';
 
-const SERVER_ADDRESS = process.env.SERVER_ADDRESS;
-const PORT_NUMBER = process.env.PORT_NUMBER;
-
-if (!PORT_NUMBER || !SERVER_ADDRESS)
-    throw new Error('Server address and port must be provided in the environment');
-
 const comms = new CommunicationService();
-const gameAdress = `ws://${SERVER_ADDRESS}:${PORT_NUMBER}/game`;
+const gameAdress = `ws://${window.location.host}/game`;
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 
