@@ -1,4 +1,4 @@
-import { CookieArgs, CookieName, Probable } from './server_types';
+import { CookieName, Cookies, Probable } from './server_types';
 import crypto from 'crypto';
 
 function pass<T>(data: T): Probable<T> {
@@ -9,6 +9,7 @@ function fail<T>(message: string): Probable<T> {
     return { err: true, ok: false, message };
 }
 
+// TODO: add source parameter, then array to accumulate trace
 function printError(message: string) {
     console.error(`\x1b[91mERROR: ${message}\x1b[0m`);
 }
@@ -31,19 +32,14 @@ function randomize<T>(array: Array<T>): Array<T> {
     );
 }
 
-function produceCookieArgs(isSecure: boolean): Record<CookieName, CookieArgs> {
-    const seconds = 1000;
-    const minutes = 60 * seconds;
-    const hours = 60 * minutes;
-
-    const cookieLife = 24 * hours;
+function produceCookieArgs(isSecure: boolean, lifetime: number): Cookies {
     return {
         [CookieName.token]: {
             value: crypto.randomBytes(32).toString('hex'),
             options: {
                 httpOnly: true,
                 secure: isSecure,
-                maxAge: cookieLife,
+                maxAge: lifetime,
                 path: '/',
             },
         },

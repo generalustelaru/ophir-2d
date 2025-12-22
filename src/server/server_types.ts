@@ -16,10 +16,6 @@ export type Probable<T> =
     | { err: true, ok: false, message: string }
     | { err: false, ok: true, data: T };
 
-export enum CookieName {
-    token = 'token',
-}
-
 export type AuthenticatedClientRequest = ClientRequest & {
     userId: UserId,
 }
@@ -153,6 +149,7 @@ export type ServerConstants = {
 
 export type Configuration = {
     SERVER_NAME: string,
+    USER_SESSION_HOURS: number,
     PLAYER_IDLE_MINUTES: number,
     GAME_PERSIST_HOURS: number,
     SINGLE_PLAYER: boolean,
@@ -194,10 +191,11 @@ export type AuthenticationForm = {
     password: string,
 }
 
-export type CookieArgs = {
-    value: string,
-    options: CookieOptions
+export enum CookieName {
+    token = 'token',
 }
+
+export type Cookies = Record<CookieName, { value: string, options: CookieOptions }>
 
 export type UserReference = User & {
     color: PlayerColor | null

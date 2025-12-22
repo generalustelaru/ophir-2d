@@ -1,6 +1,7 @@
 install:
-	docker run -d -p 27017:27017 --name ophir-mongo mongo
-	docker run -d -p 6379:6379 --name ophir-redis redis
+	docker pull mongo:latest
+	docker pull redis:latest
+	docker pull redis/redisinsight:latest
 ifeq ($(OS),Windows_NT)
 	powershell -command "cp .env.example .env"
 	powershell.exe -ExecutionPolicy Bypass -File update-ip.ps1
@@ -11,13 +12,16 @@ else
 endif
 	npm ci
 	make build
+	make persistence
 	make seed
+
+persistence:
+	docker run -d -p 27017:27017 --name ophir-mongo mongo
+	docker run -d -p 6379:6379 --name ophir-redis redis
+	docker run -d --name redisinsight -p 5540:5540 redis/redisinsight:latest
 
 seed:
 	node seed-db.cjs
-
-db:
-	npx json-server --watch db.json
 
 run:
 	node dist/server.cjs

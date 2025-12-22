@@ -29,6 +29,7 @@ class ValidatorService {
             db_data,
             [
                 { key: 'SERVER_NAME', type: 'string', nullable: false },
+                { key: 'USER_SESSION_HOURS', type: 'number', nullable: false },
                 { key: 'PLAYER_IDLE_MINUTES', type: 'number', nullable: false },
                 { key: 'GAME_PERSIST_HOURS', type: 'number', nullable: false },
                 { key: 'SINGLE_PLAYER', type: 'boolean', nullable: false },

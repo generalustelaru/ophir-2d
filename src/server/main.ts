@@ -1,11 +1,12 @@
 import {
-    AuthenticatedClientRequest, AuthenticationForm, CookieArgs, CookieName, Probable, RegistrationForm,
+    AuthenticatedClientRequest, AuthenticationForm, CookieName, Probable, RegistrationForm, Cookies,
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
 import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import { DatabaseService } from './services/DatabaseService';
+import { SessionService } from './services/SessionService';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Game } from './Game';
 import sLib from './server_lib';
@@ -23,7 +24,7 @@ if (!SERVER_ADDRESS || !PORT_NUMBER || !DB_PORT) {
     });
     process.exit(1);
 }
-
+// TODO: enclose this logic in a dbService.connect()
 let dbService: DatabaseService;
 const dbClient = new MongoClient(`mongodb://localhost:${DB_PORT}`);
 
@@ -37,6 +38,9 @@ dbClient.connect().then(() => {
     sLib.printError('Could not establish DB connection.');
     process.exit(1);
 });
+
+const sessionService = new SessionService();
+sessionService.connect();
 
 // MARK: PROCESS
 process.on('SIGINT', () => {
@@ -74,9 +78,8 @@ const rl = readline.createInterface({
         });
     }
 )();
+
 // MARK: MEMORY
-// TODO: have sessions available independently in Redis
-const sessions: Map<string, UserSession> = new Map();
 const connections: Map<UserId, Connection> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
 const stats: Map<GameId, GameStats> = new Map();
@@ -244,8 +247,7 @@ app.post('/register', async (req: Request, res: Response) => {
         return;
     }
 
-    const cookies = sLib.produceCookieArgs(false);
-    const sessionOp = await enableSession(cookies, registration.data);
+    const sessionOp = await enableSession(registration.data);
 
     if (sessionOp.err) {
         sLib.printError(sessionOp.message);
@@ -256,8 +258,8 @@ app.post('/register', async (req: Request, res: Response) => {
 
     console.info('New registration',{ userName: form.userName });
 
-    for (const cookieName in cookies) {
-        const { value, options } = cookies[cookieName as CookieName];
+    for (const cookieName in sessionOp.data) {
+        const { value, options } = sessionOp.data[cookieName as CookieName];
         res.cookie(cookieName, value, options);
     }
 
@@ -274,9 +276,8 @@ app.post('/login', async (req: Request, res: Response) => {
         return;
     }
 
-    const cookies = sLib.produceCookieArgs(false);
     const user = authentication.data;
-    const sessionOp = await enableSession(cookies, user);
+    const sessionOp = await enableSession(user);
 
     if (sessionOp.err) {
         sLib.printError(sessionOp.message);
@@ -287,8 +288,8 @@ app.post('/login', async (req: Request, res: Response) => {
 
     console.info('User logged in',{ userName: user.name });
 
-    for (const cookieName in cookies) {
-        const { value, options } = cookies[cookieName as CookieName];
+    for (const cookieName in sessionOp.data) {
+        const { value, options } = sessionOp.data[cookieName as CookieName];
         res.cookie(cookieName, value, options);
     }
 
@@ -457,8 +458,6 @@ function debugCommand(target?: string, option?: string): void {
             return console.log(activeGames.keys());
         case 'sockets':
             return console.log(connections.keys());
-        case 'sessions':
-            return console.log(sessions.entries());
         case 'stats':
             return console.log(stats.entries());
     }
@@ -619,19 +618,22 @@ async function produceGame(): Promise<Probable<Game>> {
 }
 
 async function enableSession(
-    cookies: Record<CookieName, CookieArgs>,
     user: User,
-): Promise<Probable<Record<CookieName, CookieArgs>>> {
+): Promise<Probable<Cookies>> {
 
-    const tokenCookie = cookies[CookieName.token];
+    const config = await dbService.getConfig();
 
-    if (!tokenCookie.options.maxAge) {
-        return sLib.fail('Token does not have maxAge set.');
-    }
-    const expiresAt = Date.now() + tokenCookie.options.maxAge;
-    sessions.set( tokenCookie.value, { ...user, expiresAt });
+    if (config.err)
+        return sLib.fail(config.message);
 
-    return sLib.pass(cookies);
+    const lifetime = config.data.USER_SESSION_HOURS * 60 * 60 * 1000;
+    const cookies = sLib.produceCookieArgs(false, lifetime);
+    const { value: token } = cookies[CookieName.token];
+
+    const expiresAt = Date.now() + lifetime;
+    const response = await sessionService.set(token, { ...user, expiresAt });
+
+    return response.ok ? sLib.pass(cookies) : sLib.fail(response.message);
 }
 
 async function reviveGame(gameId: string): Promise<Probable<Game>> {
@@ -682,7 +684,7 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
 
 function clearSession(cookie: unknown): void {
     const parsing = extractToken(cookie);
-    parsing.ok && sessions.delete(parsing.data);
+    parsing.ok && sessionService.delete(parsing.data);
 }
 async function validateClient(cookie: unknown): Promise<Probable<UserSession>> {
     const parsing = extractToken(cookie);
@@ -691,14 +693,15 @@ async function validateClient(cookie: unknown): Promise<Probable<UserSession>> {
         return sLib.fail(parsing.message);
 
     const token = parsing.data;
-    const session = sessions.get(token);
+    const sessionOp = await sessionService.get(token);
 
-    if (!session) {
-        return sLib.fail('Session was wiped.');
-    }
+    if (sessionOp.err)
+        return sLib.fail(sessionOp.message);
+
+    const session = sessionOp.data;
 
     if (session.expiresAt <= Date.now()) {
-        sessions.delete(token);
+        sessionService.delete(token);
         return sLib.fail('Session has expired');
     }
 
@@ -706,15 +709,13 @@ async function validateClient(cookie: unknown): Promise<Probable<UserSession>> {
 }
 
 function extractToken(cookie: unknown): Probable<string> {
-    if (typeof cookie != 'string') {
+    if (typeof cookie != 'string')
         return sLib.fail('No cookie found.');
-    }
 
     const items = sLib.parseCookies(cookie);
 
-    if (!('token' in items)) {
+    if (!('token' in items))
         return sLib.fail('Cookie might have expired.');
-    }
 
     return sLib.pass(items.token);
 }

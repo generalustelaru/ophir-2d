@@ -62,7 +62,7 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
 Open **MongoDB Compass** and create a connection to `mongodb://localhost:27017/`
 
 You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediatlely for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
-- Open the `_id: "config_0"` record and click on the `UPDATE` button to open a query window.
+- Open the `_id: "config_0"` record and click on the Edit icon.
 
 ### Fields:
 | Field  | Description | Type |
@@ -87,16 +87,6 @@ INCLUDE | Array of specialists to appear in the draft. | ** `array` |
 
 - **INCLUDE: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`.
 
-### Example query:
-```
-{
-  $set: {
-      "SERVER_NAME": "HR Loves You",
-      "GAME_PERSIST_HOURS": 36,
-      "INCLUDE": ["advisor", "harbormaster", "chancellor"]
-  },
-}
-```
 ## The debug command
 
 The `debug <target> <option>` command shows live data as following:
@@ -110,15 +100,21 @@ The `debug <target> <option>` command shows live data as following:
 0. Don't go back to **Prerequisites**, step **3**.
 1. Run `docker run -d -p 27017:27017 --name ophir-mongo mongo` to instantiate a database.
 2. Run `docker run -d -p 6379:6379 --name ophir-redis redis` to instantiate caching.
-3. Run `node seed-db.cjs` to load the game configuration in the DB.
-4. Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
-5. Create a copy of *db_template.json* and rename it as *db.json*.
-6. Create a copy of *.env.example* and rename it as *.env*.
-7. Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
+3. Run `docker run -d --name redisinsight -p 5540:5540 redis/redisinsight:latest` for cache monitoring.
+4. Run `node seed-db.cjs` to load the game configuration in the DB.
+5. Create folders */dist*, */dist/public*, then copy the contents of *src/static/* into *dist/public*.
+6. Create a copy of *db_template.json* and rename it as *db.json*.
+7. Create a copy of *.env.example* and rename it as *.env*.
+8. Replace the SERVER_ADDRESS value in *.env* with your local Ethernet address. How to obtain it:
    - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
    - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
    - Linux: `hostname -I`
    - Run `npm ci && npm run build_server && npm run build_client`.
 
 ## Other hints
-   Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
+
+Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
+
+Go to http://localhost:5540 to visualize user sessions:
+- Click **Add Redis database**
+- Go to **Connection Settings** and test the default connection (Use "host.docker.internal" as *Host* if it doesn't work)
