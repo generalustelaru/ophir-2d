@@ -157,7 +157,7 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.abandon, () => {
         alert('This session is no longer supported.');
-        window.location.href = '/';
+        window.location.href = '/lobby';
     });
 
     window.addEventListener(

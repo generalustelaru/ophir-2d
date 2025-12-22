@@ -142,8 +142,16 @@ socketServer.on('connection', async (socket, inc) => {
         }
     });
     socket.on('close', (code) => {
-        sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
-        handleDisconnection(user.id, gameId);
+        connections.delete(user.id);
+
+        setTimeout(() => {
+            if (connections.has(user.id)) {
+                sLib.printWarning(`Connection glitched for ${user.id}`);
+            } else {
+                sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
+                handleDisconnection(user.id, gameId);
+            }
+        },1000);
     });
 
     socket.on('error', (error) => {
@@ -489,7 +497,6 @@ function startGameChecks() {
 
 async function handleDisconnection(userId: UserId, gameId: GameId) {
     connections.delete(userId);
-
     let isRedundant = false;
 
     if (activeGames.has(gameId)) {
@@ -519,7 +526,9 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
             }
         }
     }
+
     await updateGameStat(gameId, isRedundant);
+
 }
 
 async function produceGame(): Promise<Probable<Game>> {
