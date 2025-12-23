@@ -21,12 +21,13 @@ function probe(intervalSeconds: number) {
     UserInterface.setInfo('Trying to reconnect...');
     const milliseconds = intervalSeconds * 1000;
 
-    setInterval(() => {
+    const probe = setInterval(() => {
         fetch(
             '/probe',
         ).then(
             (res) => {
                 if (res.status === 200) {
+                    clearInterval(probe);
                     alert('Connection restored.');
                     comms.createConnection(gameAdress, requestedGameId);
                 }
@@ -103,6 +104,7 @@ document.fonts.ready.then(() => {
         UserInterface.disable();
         canvas.disable();
         UserInterface.setInfo('The server has entered maintenance.');
+        probe(30);
     });
 
     window.addEventListener(EventType.deauthenticate, (): void => {
