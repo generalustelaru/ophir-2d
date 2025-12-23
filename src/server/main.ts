@@ -350,7 +350,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:id', async (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
-
+    // TODO: clear empty enrolment sessions upon visit to make the visitor game owner. (Adopt) 
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
@@ -372,8 +372,9 @@ app.get('/:id', async (req: Request, res: Response) => {
 
     if (activation.err) {
         sLib.printError(activation.message);
-        res.sendFile(path.join(__dirname,'public', 'lobby.html'));
+        updateGameStat(gameId, true);
 
+        res.sendFile(path.join(__dirname,'public', 'lobby.html'));
         return;
     }
 
@@ -403,6 +404,7 @@ async function processAction(
 
         if (save.err) {
             console.error(save.message);
+            updateGameStat(gameId, true);
             return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
         }
 
@@ -520,7 +522,7 @@ function startGameChecks() {
 
 async function handleDisconnection(userId: UserId, gameId: GameId) {
     connections.delete(userId);
-    let isRedundant = false;
+    let toRemove = false;
 
     if (activeGames.has(gameId)) {
         const connectedUsers = getGameConnections(gameId);
@@ -528,10 +530,10 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
 
         if (connectedUsers.length == 0) {
             const game = activeGames.get(gameId) as Game;
-            isRedundant = game.getAllRefs().every(ref => ref.color == null);
+            toRemove = game.getAllRefs().every(ref => ref.color == null);
 
             try {
-                const operation = isRedundant
+                const operation = toRemove
                     ? await dbService.deleteGameState(gameId)
                     : await dbService.saveGameState(game.getGameState());
 
@@ -539,9 +541,10 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
                     game.deReference();
                     activeGames.delete(gameId);
                     console.info(
-                        isRedundant ? 'deleted redundant game' : 'deactivated stale game', { gameId },
+                        toRemove ? 'deleted redundant game' : 'deactivated stale game', { gameId },
                     );
                 } else {
+                    toRemove = true;
                     sLib.printError(operation.message);
                 }
             } catch (error) {
@@ -550,7 +553,7 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
         }
     }
 
-    await updateGameStat(gameId, isRedundant);
+    await updateGameStat(gameId, toRemove);
 
 }
 
