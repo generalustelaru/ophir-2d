@@ -769,7 +769,7 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
                 case isActiveGame:
                     return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
                 default:
-                    return null;
+                    return LobbyAction.Adopt;
             }
         })();
 
