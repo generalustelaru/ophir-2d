@@ -1,16 +1,3 @@
-html, body {
-    overflow: hidden;
-    width: 100%;
-    height: 100%;
-    margin: 0px;
-    padding: 0px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Custom', 'monospace';
-}
-
 #formbox {
     display: grid;
     grid-template-columns: 1fr;
