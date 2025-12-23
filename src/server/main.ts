@@ -343,7 +343,7 @@ app.get('/new', async (req: Request, res: Response) => {
 
     const gameId = game.getGameId();
     activeGames.set(gameId, game);
-    await updateGameStat(gameId);
+
     res.redirect(`/${gameId}`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -378,7 +378,6 @@ app.get('/:id', async (req: Request, res: Response) => {
     }
 
     activeGames.set(gameId, activation.data);
-    await updateGameStat(gameId);
 
     res.sendFile(path.join(__dirname,'public', 'game.html'));
 });
