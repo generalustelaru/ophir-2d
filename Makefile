@@ -30,7 +30,7 @@ start:  # Start everything
 stop: # Stop everything
 	docker compose down
 
-rebuild: # Rebuilds just the app
+image: # Rebuilds the image and runs it
 	docker compose up -d --build
 
 restart:
@@ -42,7 +42,6 @@ watch:
 watch-all:
 	docker compose logs -f
 
-# Database utilities
 seed:
 	docker compose exec game-server node seed-db.cjs
 
