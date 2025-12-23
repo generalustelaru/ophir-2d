@@ -350,7 +350,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:id', async (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
-    // TODO: clear empty enrolment sessions upon visit to make the visitor game owner. (Adopt) 
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
@@ -393,7 +392,12 @@ async function processAction(
     socket: WebSocket,
 ) {
     const gameId = game.getGameId();
-    const result = game.processAction(request);
+    const isAdoption = (
+        game.getGameState().sharedState.sessionPhase == Phase.enrolment &&
+        getGameConnections(gameId).length == 1
+    );
+
+    const result = game.processAction(request, isAdoption);
 
     const statsRelevant: Array<Action> = [
         Action.end_turn, Action.enrol, Action.change_color, Action.force_turn, Action.start_setup,

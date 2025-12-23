@@ -185,7 +185,7 @@ export class Game {
         );
     }
 
-    public processAction(request: AuthenticatedClientRequest): WsDigest {
+    public processAction(request: AuthenticatedClientRequest, isAdoption: boolean): WsDigest {
         this.timeStamp = Date.now();
         const emitError = (reason: string) => {
             lib.printError(`Cannot process action: ${reason}`);
@@ -204,7 +204,7 @@ export class Game {
 
 
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment) {
-            return this.processEnrolmentAction({ message, userId, displayName, player: null });
+            return this.processEnrolmentAction({ message, userId, displayName, player: null }, isAdoption);
         }
 
         const matchOperation = this.matchRequestToPlayer(request);
@@ -281,7 +281,7 @@ export class Game {
             case Phase.setup:
                 return this.processSetupAction(matchedRequest);
             case Phase.enrolment:
-                return this.processEnrolmentAction(matchedRequest);
+                return this.processEnrolmentAction(matchedRequest, false);
             default:
                 return emitError('Unknown game phase!');
         }
@@ -297,7 +297,7 @@ export class Game {
         ref.color = color;
     };
 
-    private processEnrolmentAction(request: RequestMatch | EnrolRequest): WsDigest {
+    private processEnrolmentAction(request: RequestMatch | EnrolRequest, isAdopting: boolean): WsDigest {
         const processor = this.actionProcessor as EnrolmentProcessor;
 
         const { message, player } = request;
@@ -307,7 +307,7 @@ export class Game {
 
             const { userId, message, displayName } = request;
 
-            const enrolment = processor.processEnrol(userId, message.payload, displayName);
+            const enrolment = processor.processEnrol(userId, message.payload, displayName, isAdopting);
 
             if (enrolment.err) {
                 lib.printError(enrolment.message);

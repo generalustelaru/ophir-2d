@@ -36,7 +36,12 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         return this.enrolmentState.toDto();
     }
 
-    public processEnrol(userId: UserId, payload: MessagePayload, displayName: string | null): Probable<StateResponse> {
+    public processEnrol(
+        userId: UserId,
+        payload: MessagePayload,
+        displayName: string | null,
+        isAdopting: boolean,
+    ): Probable<StateResponse> {
 
         if (!userId)
             return failEnrol('User ID is missing.');
@@ -60,7 +65,7 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
 
             this.enrolmentState.addPlayer({ color, name: name || color });
 
-            if (this.enrolmentState.getSessionOwner() === null)
+            if (this.enrolmentState.getSessionOwner() === null || isAdopting)
                 this.enrolmentState.setSessionOwner(color);
 
             if (this.isSinglePlayer || this.enrolmentState.getAllPlayers().length > 1)
