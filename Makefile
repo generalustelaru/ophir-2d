@@ -34,7 +34,10 @@ rebuild: # Rebuilds just the app
 	docker-compose up -d --build
 
 restart:
-	docker-compose restart game-server
+	docker compose restart game-server
+
+ps: # Shows active containers
+	docker compose ps
 
 logs:
 	docker-compose logs -f game-server
