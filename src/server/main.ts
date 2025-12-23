@@ -2,7 +2,9 @@ import {
     AuthenticatedClientRequest, AuthenticationForm, CookieName, Probable, RegistrationForm, Cookies,
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
+import {
+    ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity, PlayerEntry,
+} from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import { DatabaseService } from './services/DatabaseService';
@@ -27,16 +29,21 @@ if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
 let dbService: DatabaseService;
 const dbClient = new MongoClient(MONGODB_URI);
 
-dbClient.connect().then(() => {
+dbClient.connect().then(async () => {
     const db = dbClient.db('ophir');
     dbService = new DatabaseService(db);
-    startGameChecks();
     console.info('✅ Connected to MongoDB');
+
+    await initializeStats();
+
+    startGameChecks();
 }).catch(error => {
     sLib.printError(sLib.getErrorBrief(error));
-    sLib.printError('Could not establish DB connection.');
+    console.info('❌ Db connection failed.');
+
     process.exit(1);
 });
+
 
 const sessionService = new SessionService();
 sessionService.connect();
@@ -80,15 +87,6 @@ socketServer.on('connection', async (socket, inc) => {
         return;
     }
 
-    const game = activeGames.get(gameId);
-
-    if (!game) {
-        sLib.printWarning('WS requested inexistent play session.');
-        transmit(socket, { notFound: null });
-
-        return;
-    }
-
     const validation = await validateClient(inc.headers.cookie);
 
     if (validation.err) {
@@ -98,11 +96,31 @@ socketServer.on('connection', async (socket, inc) => {
         return;
     }
 
-    if (!validation.data) {
-        transmit(socket, { expired: null });
+    const game: Game | null = await ( async () => {
+        const activeGame = activeGames.get(gameId);
+
+        if (activeGame)
+            return activeGame;
+
+        const activation = await activateGame(gameId);
+
+        if (activation.ok) {
+            console.log('Activated', { gameId });
+            activeGames.set(gameId, activation.data);
+            return activation.data;
+        }
+
+        sLib.printError(activation.message);
+        return null;
+    })();
+
+    if (!game) {
+        sLib.printWarning('WS requested inexistent game.');
+        transmit(socket, { notFound: null });
 
         return;
     }
+
     const { expiresAt, ...user } = validation.data;
     const ref = game.getPlayerRef(user.id);
 
@@ -142,8 +160,16 @@ socketServer.on('connection', async (socket, inc) => {
         }
     });
     socket.on('close', (code) => {
-        sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
-        handleDisconnection(user.id, gameId);
+        connections.delete(user.id);
+
+        setTimeout(() => {
+            if (connections.has(user.id)) {
+                sLib.printWarning(`Connection glitched for ${user.id}`);
+            } else {
+                sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
+                handleDisconnection(user.id, gameId);
+            }
+        },1000);
     });
 
     socket.on('error', (error) => {
@@ -156,6 +182,15 @@ socketServer.on('connection', async (socket, inc) => {
 app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
+});
+app.get('/debug', (req: Request, res: Response) => {
+    console.info('Server debuged', { ip: req.ip });
+
+    const command = typeof req.query.command == 'string' ? req.query.command : undefined;
+    const target = typeof req.query.target == 'string' ? req.query.target : undefined;
+    const option = typeof req.query.option == 'string' ? req.query.option : undefined;
+
+    res.json(debugCommand(command, target, option));
 });
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
@@ -176,10 +211,6 @@ app.get('/feed', async (req: Request, res: Response) => {
 });
 app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
-
-    if (stats.size == 0) {
-        await initializeStats();
-    }
 
     if (validation.ok) {
         res.sendFile(path.join(__dirname,'public', 'lobby.html'));
@@ -299,7 +330,7 @@ app.get('/new', async (req: Request, res: Response) => {
         return;
     }
 
-    const instantiation = await produceGame();
+    const instantiation = await createGame();
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
@@ -319,7 +350,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:id', async (req: Request, res: Response) => {
     const gameId = req.params.id;
     console.info('Visitor requests session', { ip: req.ip, gameId });
-
+    // TODO: clear empty enrolment sessions upon visit to make the visitor game owner. (Adopt) 
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
@@ -337,16 +368,17 @@ app.get('/:id', async (req: Request, res: Response) => {
         return;
     }
 
-    const revival = await reviveGame(gameId);
+    const activation = await activateGame(gameId);
 
-    if (revival.err) {
-        sLib.printError(revival.message);
+    if (activation.err) {
+        sLib.printError(activation.message);
+        updateGameStat(gameId, true);
+
         res.sendFile(path.join(__dirname,'public', 'lobby.html'));
-
         return;
     }
 
-    activeGames.set(gameId, revival.data);
+    activeGames.set(gameId, activation.data);
     await updateGameStat(gameId);
 
     res.sendFile(path.join(__dirname,'public', 'game.html'));
@@ -372,6 +404,7 @@ async function processAction(
 
         if (save.err) {
             console.error(save.message);
+            updateGameStat(gameId, true);
             return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
         }
 
@@ -489,8 +522,7 @@ function startGameChecks() {
 
 async function handleDisconnection(userId: UserId, gameId: GameId) {
     connections.delete(userId);
-
-    let isRedundant = false;
+    let toRemove = false;
 
     if (activeGames.has(gameId)) {
         const connectedUsers = getGameConnections(gameId);
@@ -498,10 +530,10 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
 
         if (connectedUsers.length == 0) {
             const game = activeGames.get(gameId) as Game;
-            isRedundant = game.getAllRefs().every(ref => ref.color == null);
+            toRemove = game.getAllRefs().every(ref => ref.color == null);
 
             try {
-                const operation = isRedundant
+                const operation = toRemove
                     ? await dbService.deleteGameState(gameId)
                     : await dbService.saveGameState(game.getGameState());
 
@@ -509,9 +541,10 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
                     game.deReference();
                     activeGames.delete(gameId);
                     console.info(
-                        isRedundant ? 'deleted redundant game' : 'deactivated stale game', { gameId },
+                        toRemove ? 'deleted redundant game' : 'deactivated stale game', { gameId },
                     );
                 } else {
+                    toRemove = true;
                     sLib.printError(operation.message);
                 }
             } catch (error) {
@@ -519,22 +552,24 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
             }
         }
     }
-    await updateGameStat(gameId, isRedundant);
+
+    await updateGameStat(gameId, toRemove);
+
 }
 
-async function produceGame(): Promise<Probable<Game>> {
+async function createGame(): Promise<Probable<Game>> {
     const instantiation = await getGameInstance(null);
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
-        return sLib.fail('Could not create game session,');
+        return sLib.fail('Could not create game.');
     }
 
-    const persistence = await dbService.addGameState(instantiation.data.getGameState());
+    const saveOp = await dbService.addGameState(instantiation.data.getGameState());
 
-    if (persistence.err) {
-        sLib.printError(persistence.message);
-        return sLib.fail('Could not persist game state');
+    if (saveOp.err) {
+        sLib.printError(saveOp.message);
+        return sLib.fail('Could not persist game state.');
     }
 
     return instantiation;
@@ -559,21 +594,21 @@ async function enableSession(
     return response.ok ? sLib.pass(cookies) : sLib.fail(response.message);
 }
 
-async function reviveGame(gameId: string): Promise<Probable<Game>> {
-    const revival = await dbService.loadGameState(gameId);
+async function activateGame(gameId: string): Promise<Probable<Game>> {
+    const recovery = await dbService.loadGameState(gameId);
 
-    if (revival.err) {
-        sLib.printError(revival.message);
+    if (recovery.err) {
+        sLib.printError(recovery.message);
 
-        return sLib.fail('Could not revive session');
+        return sLib.fail('Could not recover game');
     }
 
-    const instantiation = await getGameInstance(revival.data);
+    const instantiation = await getGameInstance(recovery.data);
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
 
-        return sLib.fail('Could not instantiate session.');
+        return sLib.fail('Could not instantiate game.');
     }
 
     return instantiation;
@@ -695,11 +730,11 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
 }
 
 async function initializeStats(): Promise<void> {
-    console.info('Creating stats...');
     const gamesFetch = await dbService.loadAllGames();
 
     if (gamesFetch.err) {
         sLib.printError(gamesFetch.message);
+        console.info('❌ Stats failed.');
         return;
     }
 
@@ -714,6 +749,8 @@ async function initializeStats(): Promise<void> {
             { timeStamp, isActiveGame: false, userReferences, phase, players, activeCount: 0 },
         );
     };
+
+    console.info('✅ Stats initialized.');
 }
 function composeLobbyFeed(userId: UserId): Array<GameFeed> {
     const lobbyFeed = Array.from(stats).map(([gameId, stat]): GameFeed => {
@@ -735,7 +772,7 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
                 case isActiveGame:
                     return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
                 default:
-                    return null;
+                    return LobbyAction.Adopt;
             }
         })();
 
@@ -768,4 +805,92 @@ function getGameConnections(gameId: string): Array<UserId> {
         .filter(([, c]) => c.gameId == gameId)
         .map(([k]) => k);
 }
+
+function debugCommand(command?: string, target?: string, option?: string): object {
+    console.log('debug command', { command, target });
+
+    if (!command)
+        return {
+            overview: {
+                games: activeGames.size,
+                connected: connections.size,
+                stats: stats.size,
+            },
+            commands: ['connected', 'stats', 'game'],
+        };
+
+    switch (command) {
+        case 'connected':
+            return Array.from(connections.keys());
+        case 'game':
+            return debugGame(target, option);
+        case 'stats':
+            return debugStat(target, option);
+        default:
+            return { command: `${command} ¯\\_(ツ)_/¯` };
+    }
+
+    function debugGame(gameId?: string, option?: string) {
+
+        if (!gameId || !activeGames.has(gameId))
+            return Array.from(activeGames.keys());
+
+        const game = activeGames.get(gameId) as Game;
+
+        if (!option) {
+            return {
+                overview: {
+                    refs: game.getAllRefs().length,
+                    connected: getGameConnections(gameId).length,
+                },
+                options: ['refs', 'connected'],
+            };
+        }
+
+        switch (option) {
+            case 'refs':
+                return game.getAllRefs().map(r => r.name);
+            case 'connected':
+                return getGameConnections(gameId).map(userId => game.getAllRefs().filter(r => r.id == userId)[0].name);
+            default:
+                return { option: `${option} ¯\\_(ツ)_/¯` };
+        }
+    }
+
+    function debugStat(gameId?: string, option?: string) {
+        if (!gameId || !stats.has(gameId))
+            return Array.from(stats.keys());
+        const options = ['refs', 'players'];
+        const stat = stats.get(gameId) as GameStats;
+
+        if (!option)
+            return {
+                overview: {
+                    timeStamp: stat.timeStamp,
+                    isActiveGame: stat.isActiveGame,
+                    userReferences_length: stat.userReferences.length,
+                    phase: stat.phase,
+                    players_length: stat.players.length,
+                    activeCount: stat.activeCount,
+                },
+                options,
+            };
+
+        switch(option) {
+            case 'refs':
+                return stat.userReferences;
+            case 'players':
+                return stat.players.map(p => reduceToEntry(p));
+            default:
+                return options;
+        }
+
+        function reduceToEntry(player: PlayerEntity): PlayerEntry {
+            const { color, name } = player;
+            return { color, name };
+        }
+
+    }
+}
+
 

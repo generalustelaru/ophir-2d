@@ -16,40 +16,35 @@ Work in progress.
 Try it out
 
 ## Setup and running
-You can set up and run a server fairly easily on your local network.
+You can set up and run a server quite easily on your local network.
 
 ### Prerequisites
 
 1. Install [Docker Desktop](https://docs.docker.com/desktop/).
    - Open the app and follow its instructions to update WSL if needed.
-2. Install [Node](https://nodejs.org/en/download/package-manager).
-3. Optional: Install **Make**.
-      - First, install the [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) package manager.
-      - Then, open a command line (CL) tool (i.e., Powershell) and run `choco install make`.
-4. Optional: If on **Windows**, install [Git Bash](https://gitforwindows.org/) (it's bundled with **Git for Windows**).
-5. Download the project:
-   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` (You can use **Git Bash** for this).
-   - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/main.zip) and extract it.
-6. Optional: Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
+2. Download the project:
+   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` then `git switch -c dockerization origin/dockerization`.
+   - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/dockerization.zip) and extract it.
 
 ### Running
+
 1. Start **Docker Desktop**
-2. Open the project folder (*\ophir-2d*) and start **Bash** (or **Git Bash**) or another CL tool.
-3. Run `make start` or `docker-compose up -d`.
-4. Run `make seed` or `docker-compose exec game-server node seed-db.cjs`
-5. You can access the server on `localhost:3001`, but if you want to share the address with others on your network you'll need to find your actual address:
+2. Enter the project folder (*\ophir-2d*) and open **Bash** (or **Git Bash**) or another CL tool and:
+   - Run `make start` or `docker compose up -d` and wait for dependencies to download and instantiate.
+   - Run `make seed` or `docker compose exec game-server node seed-db.cjs` to hydrate the database.
+
+You can access the app on `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address:
    - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
-   - Git bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
+   - Git Bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
    - Linux: `hostname -I`
 
-
-To turn it off run `make stop` or `docker-compose down`.
+To turn off all processes run `make stop` or `docker compose down`.
 
 ## Troubleshooting
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
 If your client gets stuck, try refreshing the tab.
 If that doesn't work, log out and back in again.
-If that doesn't work, run `make restart` or `docker-compose restart game-server`
+If that doesn't work, run `make restart` or `docker compose restart game-server`
 
 ## How to play
 Create an account with just a name and password. After logging in, you will reach the "Lobby", a dashboard-like page where you can spectate, join, or start game sessions.
@@ -61,7 +56,8 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
  - Follow your intuition. The game enforces rules. You can't cheat but you can certainly make mistakes!
 
 ## Configuration options (admin & 'fun' stuff)
-Open **MongoDB Compass** and create a connection to `mongodb://localhost:27017/gamedb`
+Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
+Open it and connect to `mongodb://localhost:27017/gamedb`.
 
 You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediatlely for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
 - Open the `_id: "config_0"` record and click on the Edit icon.
@@ -71,8 +67,8 @@ You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`)
 | - | - | - |
 SERVER_NAME | The name that appears in chat for server messages. | `string` |
 PLAYER_IDLE_MINUTES | How fast a player can be skipped for not doing anything (currently disabled). | `number` |
-GAME_DELETION_HOURS | How quickly an inactive session goes bye-bye. | `number` |
-IDLE_TIMEOUT | Time of perceived inactivity (in minutes) for the current player before receiving the idle status. | `number` |
+USER_SESSION_HOURS | How quickly your session cookie goes bad. | `number` |
+GAME_PERSIST_HOURS | How quickly a dormant game goes bye-bye. | `number` |
 SINGLE_PLAYER | Allows session to start with a single enrolled player. | `boolean` |
 NO_RIVAL | Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled). | `boolean` |
 RICH_PLAYERS | Players start with 99 coins. | `boolean` |
@@ -89,17 +85,20 @@ INCLUDE | Array of specialists to appear in the draft. | ** `array` |
 
 - **INCLUDE: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`.
 
-## The debug command
+## Options
+If on **Windows**, install [Git Bash](https://gitforwindows.org/) (it's bundled with **Git for Windows**).
 
-The `debug <target> <option>` command shows live data as following:
- - `debug games`: Displays the `gameId`s of active games.
- - `debug sockets`: Displays the user identifiers that have an open WS connection.
- - `debug <gameId> sockets`: Displays user identifiers currently connected to an active game.
- - `debug <gameId> refs`: Displays active game's internal reference for all players and spectators.
-
-## Other hints
+Install [Node](https://nodejs.org/en/download/package-manager) to be able to fiddle with the project outside of Docker.
 
 Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
+
+Install [JQ](https://jqlang.org/), then run `./debug.sh` to check data in memory:
+   - Response format is usually `{ overview: {}, commands/options: [] }`.
+   - Check progresively with `./debug.sh <command> <target> <option>`.
+
+Install **Make** to make use of the Makefile commands.
+   - First, install the [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) package manager.
+   - Then, open a command line (CL) tool (i.e., Powershell) and run `choco install make`.
 
 Go to http://localhost:5540 to visualize user sessions:
 - Click **Add Redis database**

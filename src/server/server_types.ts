@@ -219,6 +219,7 @@ export enum LobbyAction {
     Continue = 'Continue',
     Join = 'Join',
     Spectate = 'Spectate',
+    Adopt = 'Adopt',
 }
 export enum GameStatus {
     Enroling,

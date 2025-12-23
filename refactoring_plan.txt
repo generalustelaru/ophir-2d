@@ -1,0 +1,54 @@
+// basic idea
+
+class PlayProcessor {
+  constructor(
+    private turnManager: TurnManager,
+    private actionProcessor: ActionProcessor,
+    private tradeProcessor: TradeProcessor,
+    // etc.
+  ) {}
+
+  // Delegates to appropriate service
+  async move(params) {
+    return this.actionProcessor.move(params);
+  }
+}
+
+// rough delegation
+
+// TurnManager
+- endTurn, forceTurn, continueTurn
+- killIdleChecks
+- Turn flow control
+
+// ActionProcessor
+- move, reposition, spendFavor, dropItem
+- loadGoods, unloadGoods, loadItem, unloadItem
+- Basic player actions
+
+// TradeProcessor
+- sellGoods, buyMetal, upgradeCargo
+- pickFeasibleTrades, pickFeasiblePurchases
+- subtractTradeGoods
+- Market mechanics (shiftMarketCards)
+
+// SpecialistProcessor
+- sellAsChancellor, sellAsPeddler
+- updateMovesAsHarbormaster
+- getSpecialistActions
+- All specialist-specific logic
+
+// StateManager
+- getState, getPrivateState, getBackupState
+- preserveState, clearUndo, undo
+- State snapshots and history
+
+// MessagingService
+- addChat, addServerMessage, updatePlayerName
+- convertDeedsToMessage
+- All communication
+
+// GameScoring
+- getPlayerVP, compileGameResults
+- Victory point calculations
+
