@@ -2,7 +2,9 @@ import {
     AuthenticatedClientRequest, AuthenticationForm, CookieName, Probable, RegistrationForm, Cookies,
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
-import { ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity } from '~/shared_types';
+import {
+    ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity, PlayerEntry,
+} from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
 import { DatabaseService } from './services/DatabaseService';
@@ -27,16 +29,21 @@ if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
 let dbService: DatabaseService;
 const dbClient = new MongoClient(MONGODB_URI);
 
-dbClient.connect().then(() => {
+dbClient.connect().then(async () => {
     const db = dbClient.db('ophir');
     dbService = new DatabaseService(db);
-    startGameChecks();
     console.info('✅ Connected to MongoDB');
+
+    await initializeStats();
+
+    startGameChecks();
 }).catch(error => {
     sLib.printError(sLib.getErrorBrief(error));
-    sLib.printError('Could not establish DB connection.');
+    console.info('❌ Db connection failed.');
+
     process.exit(1);
 });
+
 
 const sessionService = new SessionService();
 sessionService.connect();
@@ -80,15 +87,6 @@ socketServer.on('connection', async (socket, inc) => {
         return;
     }
 
-    const game = activeGames.get(gameId);
-
-    if (!game) {
-        sLib.printWarning('WS requested inexistent play session.');
-        transmit(socket, { notFound: null });
-
-        return;
-    }
-
     const validation = await validateClient(inc.headers.cookie);
 
     if (validation.err) {
@@ -98,11 +96,31 @@ socketServer.on('connection', async (socket, inc) => {
         return;
     }
 
-    if (!validation.data) {
-        transmit(socket, { expired: null });
+    const game: Game | null = await ( async () => {
+        const activeGame = activeGames.get(gameId);
+
+        if (activeGame)
+            return activeGame;
+
+        const activation = await activateGame(gameId);
+
+        if (activation.ok) {
+            console.log('Activated', { gameId });
+            activeGames.set(gameId, activation.data);
+            return activation.data;
+        }
+
+        sLib.printError(activation.message);
+        return null;
+    })();
+
+    if (!game) {
+        sLib.printWarning('WS requested inexistent game.');
+        transmit(socket, { notFound: null });
 
         return;
     }
+
     const { expiresAt, ...user } = validation.data;
     const ref = game.getPlayerRef(user.id);
 
@@ -184,10 +202,6 @@ app.get('/feed', async (req: Request, res: Response) => {
 });
 app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
-
-    if (stats.size == 0) {
-        await initializeStats();
-    }
 
     if (validation.ok) {
         res.sendFile(path.join(__dirname,'public', 'lobby.html'));
@@ -307,7 +321,7 @@ app.get('/new', async (req: Request, res: Response) => {
         return;
     }
 
-    const instantiation = await produceGame();
+    const instantiation = await createGame();
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
@@ -345,16 +359,16 @@ app.get('/:id', async (req: Request, res: Response) => {
         return;
     }
 
-    const revival = await reviveGame(gameId);
+    const activation = await activateGame(gameId);
 
-    if (revival.err) {
-        sLib.printError(revival.message);
+    if (activation.err) {
+        sLib.printError(activation.message);
         res.sendFile(path.join(__dirname,'public', 'lobby.html'));
 
         return;
     }
 
-    activeGames.set(gameId, revival.data);
+    activeGames.set(gameId, activation.data);
     await updateGameStat(gameId);
 
     res.sendFile(path.join(__dirname,'public', 'game.html'));
@@ -531,19 +545,19 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
 
 }
 
-async function produceGame(): Promise<Probable<Game>> {
+async function createGame(): Promise<Probable<Game>> {
     const instantiation = await getGameInstance(null);
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
-        return sLib.fail('Could not create game session,');
+        return sLib.fail('Could not create game.');
     }
 
-    const persistence = await dbService.addGameState(instantiation.data.getGameState());
+    const saveOp = await dbService.addGameState(instantiation.data.getGameState());
 
-    if (persistence.err) {
-        sLib.printError(persistence.message);
-        return sLib.fail('Could not persist game state');
+    if (saveOp.err) {
+        sLib.printError(saveOp.message);
+        return sLib.fail('Could not persist game state.');
     }
 
     return instantiation;
@@ -568,21 +582,21 @@ async function enableSession(
     return response.ok ? sLib.pass(cookies) : sLib.fail(response.message);
 }
 
-async function reviveGame(gameId: string): Promise<Probable<Game>> {
-    const revival = await dbService.loadGameState(gameId);
+async function activateGame(gameId: string): Promise<Probable<Game>> {
+    const recovery = await dbService.loadGameState(gameId);
 
-    if (revival.err) {
-        sLib.printError(revival.message);
+    if (recovery.err) {
+        sLib.printError(recovery.message);
 
-        return sLib.fail('Could not revive session');
+        return sLib.fail('Could not recover game');
     }
 
-    const instantiation = await getGameInstance(revival.data);
+    const instantiation = await getGameInstance(recovery.data);
 
     if (instantiation.err) {
         sLib.printError(instantiation.message);
 
-        return sLib.fail('Could not instantiate session.');
+        return sLib.fail('Could not instantiate game.');
     }
 
     return instantiation;
@@ -704,11 +718,11 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
 }
 
 async function initializeStats(): Promise<void> {
-    console.info('Creating stats...');
     const gamesFetch = await dbService.loadAllGames();
 
     if (gamesFetch.err) {
         sLib.printError(gamesFetch.message);
+        console.info('❌ Stats failed.');
         return;
     }
 
@@ -723,6 +737,8 @@ async function initializeStats(): Promise<void> {
             { timeStamp, isActiveGame: false, userReferences, phase, players, activeCount: 0 },
         );
     };
+
+    console.info('✅ Stats initialized.');
 }
 function composeLobbyFeed(userId: UserId): Array<GameFeed> {
     const lobbyFeed = Array.from(stats).map(([gameId, stat]): GameFeed => {

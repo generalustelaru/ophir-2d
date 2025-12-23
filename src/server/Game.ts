@@ -102,7 +102,6 @@ export class Game {
             }
 
         })();
-        console.info('Game revived.');
     }
 
     public getPlayerRef(userId: UserId) {
