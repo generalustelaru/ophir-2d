@@ -23,7 +23,7 @@ You can set up and run a server quite easily on your local network.
 1. Install [Docker Desktop](https://docs.docker.com/desktop/).
    - Open the app and follow its instructions to update WSL if needed.
 2. Download the project:
-   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` (You can use **Git Bash** for this).
+   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` then `git switch -c dockerization origin/dockerization`.
    - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/dockerization.zip) and extract it.
 
 ### Running
@@ -57,7 +57,7 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
 
 ## Configuration options (admin & 'fun' stuff)
 Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
-Open it and connect to `mongodb://localhost:27017/gamedb`. 
+Open it and connect to `mongodb://localhost:27017/gamedb`.
 
 You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediatlely for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
 - Open the `_id: "config_0"` record and click on the Edit icon.
@@ -68,7 +68,7 @@ You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`)
 SERVER_NAME | The name that appears in chat for server messages. | `string` |
 PLAYER_IDLE_MINUTES | How fast a player can be skipped for not doing anything (currently disabled). | `number` |
 USER_SESSION_HOURS | How quickly your session cookie goes bad. | `number` |
-GAME_PERSIST_HOURS | How quickly an inactive session goes bye-bye. | `number` |
+GAME_PERSIST_HOURS | How quickly a dormant game goes bye-bye. | `number` |
 SINGLE_PLAYER | Allows session to start with a single enrolled player. | `boolean` |
 NO_RIVAL | Skips including the rival ship and its rules in 2-player games (and solo if SINGLE_PLAYER is enabled). | `boolean` |
 RICH_PLAYERS | Players start with 99 coins. | `boolean` |
@@ -91,6 +91,10 @@ If on **Windows**, install [Git Bash](https://gitforwindows.org/) (it's bundled 
 Install [Node](https://nodejs.org/en/download/package-manager) to be able to fiddle with the project outside of Docker.
 
 Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
+
+Run `./debug.sh` to check data in memory:
+   - Response format is usually `{ overview: {}, commands/options: [] }`.
+   - Check progresively with `./debug.sh <command> <target> <option>`.
 
 Install **Make** to make use of the Makefile commands.
    - First, install the [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) package manager.

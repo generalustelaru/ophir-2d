@@ -183,6 +183,15 @@ app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
 });
+app.get('/debug', (req: Request, res: Response) => {
+    console.info('Server debuged', { ip: req.ip });
+
+    const command = typeof req.query.command == 'string' ? req.query.command : undefined;
+    const target = typeof req.query.target == 'string' ? req.query.target : undefined;
+    const option = typeof req.query.option == 'string' ? req.query.option : undefined;
+
+    res.json(debugCommand(command, target, option));
+});
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
@@ -793,4 +802,92 @@ function getGameConnections(gameId: string): Array<UserId> {
         .filter(([, c]) => c.gameId == gameId)
         .map(([k]) => k);
 }
+
+function debugCommand(command?: string, target?: string, option?: string): object {
+    console.log('debug command', { command, target });
+
+    if (!command)
+        return {
+            overview: {
+                games: activeGames.size,
+                connected: connections.size,
+                stats: stats.size,
+            },
+            commands: ['connected', 'stats', 'game'],
+        };
+
+    switch (command) {
+        case 'connected':
+            return Array.from(connections.keys());
+        case 'game':
+            return debugGame(target, option);
+        case 'stats':
+            return debugStat(target, option);
+        default:
+            return { command: `${command} ¯\\_(ツ)_/¯` };
+    }
+
+    function debugGame(gameId?: string, option?: string) {
+
+        if (!gameId || !activeGames.has(gameId))
+            return Array.from(activeGames.keys());
+
+        const game = activeGames.get(gameId) as Game;
+
+        if (!option) {
+            return {
+                overview: {
+                    refs: game.getAllRefs().length,
+                    connected: getGameConnections(gameId).length,
+                },
+                options: ['refs', 'connected'],
+            };
+        }
+
+        switch (option) {
+            case 'refs':
+                return game.getAllRefs().map(r => r.name);
+            case 'connected':
+                return getGameConnections(gameId).map(userId => game.getAllRefs().filter(r => r.id == userId)[0].name);
+            default:
+                return { option: `${option} ¯\\_(ツ)_/¯` };
+        }
+    }
+
+    function debugStat(gameId?: string, option?: string) {
+        if (!gameId || !stats.has(gameId))
+            return Array.from(stats.keys());
+        const options = ['refs', 'players'];
+        const stat = stats.get(gameId) as GameStats;
+
+        if (!option)
+            return {
+                overview: {
+                    timeStamp: stat.timeStamp,
+                    isActiveGame: stat.isActiveGame,
+                    userReferences_length: stat.userReferences.length,
+                    phase: stat.phase,
+                    players_length: stat.players.length,
+                    activeCount: stat.activeCount,
+                },
+                options,
+            };
+
+        switch(option) {
+            case 'refs':
+                return stat.userReferences;
+            case 'players':
+                return stat.players.map(p => reduceToEntry(p));
+            default:
+                return options;
+        }
+
+        function reduceToEntry(player: PlayerEntity): PlayerEntry {
+            const { color, name } = player;
+            return { color, name };
+        }
+
+    }
+}
+
 
