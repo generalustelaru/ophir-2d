@@ -49,7 +49,7 @@
         }).catch(error => {
             console.error(error);
             clearInterval(update);
-            alert('Connection lost');
+            window.location.href = '/';
         });
         },10 * seconds)
 
