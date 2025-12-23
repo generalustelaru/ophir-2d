@@ -33,10 +33,11 @@ You can set up and run a server quite easily on your local network.
    - Run `make start` or `docker compose up -d` and wait for dependencies to download and instantiate.
    - Run `make seed` or `docker compose exec game-server node seed-db.cjs` to hydrate the database.
 
-You can access the app on `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address:
+You can access the app on your machine by navigating to `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<local_address>:3001`.
    - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
    - Git Bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
    - Linux: `hostname -I`
+
 
 To turn off all processes run `make stop` or `docker compose down`.
 
@@ -57,6 +58,11 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
 
 ## Configuration options (admin & 'fun' stuff)
 Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
+Linux:
+```
+wget https://downloads.mongodb.com/compass/mongodb-compass_1.43.0_amd64.deb
+sudo apt install ./mongodb-compass_1.43.0_amd64.deb
+```
 Open it and connect to `mongodb://localhost:27017/gamedb`.
 
 You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediatlely for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
@@ -92,7 +98,7 @@ Install [Node](https://nodejs.org/en/download/package-manager) to be able to fid
 
 Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
 
-Install [JQ](https://jqlang.org/), then run `./debug.sh` to check data in memory:
+Install [JQ](https://jqlang.org/) (Linux: `sudo apt install jq`) then run `./debug.sh` to check data in memory:
    - Response format is usually `{ overview: {}, commands/options: [] }`.
    - Check progresively with `./debug.sh <command> <target> <option>`.
 
