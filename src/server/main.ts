@@ -164,7 +164,7 @@ socketServer.on('connection', async (socket, inc) => {
 
         setTimeout(() => {
             if (connections.has(user.id)) {
-                sLib.printWarning(`Connection glitched for ${user.id}`);
+                sLib.printWarning(`Connection reset for ${user.id}`);
             } else {
                 sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
                 handleDisconnection(user.id, gameId);
@@ -399,7 +399,7 @@ async function processAction(
     const result = game.processAction(request, isAdoption);
 
     const statsRelevant: Array<Action> = [
-        Action.end_turn, Action.enrol, Action.change_color, Action.force_turn, Action.start_setup,
+        Action.enrol, Action.change_color, Action.start_setup, Action.start_play, Action.end_turn, Action.force_turn, 
     ];
 
     if (statsRelevant.includes(request.message.action)) {
