@@ -25,7 +25,8 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         this.enrolmentState = new EnrolmentStateHandler(configuration.SERVER_NAME, state);
         this.transmit = transmitCallback;
         this.reportColorAssignment = refUpdateCallback;
-        this.defaultNames = [...serverConstants.DEFAULT_NAMES];
+        const takenNames = state.players.map(p => p.name);
+        this.defaultNames = serverConstants.DEFAULT_NAMES.filter(n => !takenNames.includes(n));
     }
 
     public getPlayerVP(_color: PlayerColor) {
