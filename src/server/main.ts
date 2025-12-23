@@ -815,22 +815,22 @@ function debugCommand(command?: string, target?: string, option?: string): objec
     if (!command)
         return {
             overview: {
-                games: activeGames.size,
-                connected: connections.size,
-                stats: stats.size,
+                active_games: activeGames.size,
+                connected_users: connections.size,
+                game_stats: stats.size,
             },
-            commands: ['connected', 'stats', 'game'],
+            commands: ['users', 'stats', 'game'],
         };
 
     switch (command) {
-        case 'connected':
+        case 'users':
             return Array.from(connections.keys());
         case 'game':
             return debugGame(target, option);
         case 'stats':
             return debugStat(target, option);
         default:
-            return { command: `${command} ¯\\_(ツ)_/¯` };
+            return { command: `${command} ¯\_(ツ)_/¯` };
     }
 
     function debugGame(gameId?: string, option?: string) {
@@ -856,7 +856,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
             case 'connected':
                 return getGameConnections(gameId).map(userId => game.getAllRefs().filter(r => r.id == userId)[0].name);
             default:
-                return { option: `${option} ¯\\_(ツ)_/¯` };
+                return { option: `${option} ¯\_(ツ)_/¯` };
         }
     }
 
