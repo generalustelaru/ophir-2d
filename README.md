@@ -92,7 +92,7 @@ Install [Node](https://nodejs.org/en/download/package-manager) to be able to fid
 
 Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
 
-Run `./debug.sh` to check data in memory:
+Install [JQ](https://jqlang.org/), then run `./debug.sh` to check data in memory:
    - Response format is usually `{ overview: {}, commands/options: [] }`.
    - Check progresively with `./debug.sh <command> <target> <option>`.
 
