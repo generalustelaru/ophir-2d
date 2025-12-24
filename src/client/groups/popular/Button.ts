@@ -19,7 +19,7 @@ export abstract class Button {
             stage.container().style.cursor = 'default';
         });
 
-        this.group.on('click', () => {
+        this.group.on('pointerclick', () => {
             if (this.callback && this.isActive)
                 this.callback();
         });
