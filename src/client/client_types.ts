@@ -9,7 +9,7 @@ export type ElementList = Array<Konva.Group | Konva.Shape>
 export type Hue = `#${string}`;
 
 export enum RawEvents {
-    HOVER = 'HOVER',
+    HOVER = 'mouseenter',
     LEAVE = 'mouseleave',
     CLICK = 'click tap',
     DRAG_START = 'dragstart',
