@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { EventType } from '~/client_types';
+import { EventType, RawEvents } from '~/client_types';
 import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName } from '~/shared_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
@@ -99,23 +99,23 @@ export class PlayerShip extends Communicator {
             },
         );
 
-        this.group.on('mouseenter', () => {
+        this.group.on(RawEvents.HOVER, () => {
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
 
-        this.group.on('mouseleave', () => {
+        this.group.on(RawEvents.LEAVE, () => {
             stage.container().style.cursor = 'default';
         });
 
         // MARK: - Dragging (start)
-        this.group.on('dragstart', () => {
+        this.group.on(RawEvents.DRAG_START, () => {
             this.activeEffect.stop();
             this.group.moveToTop();
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
         // MARK: - Dragging (move)
-        this.group.on('dragmove', () => {
+        this.group.on(RawEvents.DRAG_MOVE, () => {
             this.isDestinationValid = false;
             this.toSailValue = false;
             const position = stage.getPointerPosition();
@@ -160,7 +160,7 @@ export class PlayerShip extends Communicator {
         });
 
         // MARK: - Dragging (end)
-        this.group.on('dragend', () => {
+        this.group.on(RawEvents.DRAG_END, () => {
 
             for (let i = 0; i < SEA_ZONE_COUNT; i++)
                 this.seaZones[i].resetFill();

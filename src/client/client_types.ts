@@ -8,6 +8,15 @@ import Konva from 'konva';
 export type ElementList = Array<Konva.Group | Konva.Shape>
 export type Hue = `#${string}`;
 
+export enum RawEvents {
+    HOVER = 'HOVER',
+    LEAVE = 'mouseleave',
+    CLICK = 'click tap',
+    DRAG_START = 'dragstart',
+    DRAG_MOVE = 'dragmove',
+    DRAG_END = 'dragend',
+};
+
 export type HueCombo = { dark: Hue, light: Hue, accent: Hue }
 export type PlayerHueVariation = { vivid: HueCombo, muted: HueCombo }
 export type HexCoordinates = { id: ZoneName, x: number, y: number };

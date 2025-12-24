@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData } from '~/client_types';
+import { GroupLayoutData, RawEvents } from '~/client_types';
 export abstract class Button {
     protected group: Konva.Group;
     protected isActive: boolean = false;
@@ -11,15 +11,15 @@ export abstract class Button {
 
         this.callback = callback;
 
-        this.group.on('mouseenter', () => {
+        this.group.on(RawEvents.HOVER, () => {
             stage.container().style.cursor = this.isActive ? 'pointer' : 'not-allowed';
         });
 
-        this.group.on('mouseleave', () => {
+        this.group.on(RawEvents.LEAVE, () => {
             stage.container().style.cursor = 'default';
         });
 
-        this.group.on('pointerclick', () => {
+        this.group.on(RawEvents.CLICK, () => {
             if (this.callback && this.isActive)
                 this.callback();
         });

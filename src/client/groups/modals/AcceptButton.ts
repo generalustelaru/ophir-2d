@@ -1,6 +1,7 @@
 import Konva from 'konva';
 import { ClientMessage, Coordinates } from '~/shared_types';
 import { RequestButton } from '../popular';
+import { RawEvents } from '~/client_types';
 
 export class AcceptButton extends RequestButton {
 
@@ -44,7 +45,7 @@ export class AcceptButton extends RequestButton {
 
         this.group.add(this.buttonBackground, buttonLabel);
 
-        this.group.on('click', () => {
+        this.group.on(RawEvents.CLICK, () => {
             if (this.isActive)
                 dismissCallback();
         });
