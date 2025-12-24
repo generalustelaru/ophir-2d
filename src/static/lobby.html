@@ -17,10 +17,10 @@
         <thead>
             <tr>
                 <td>Game</td>
-                <td>Players</td>
-                <td>Status</td>
-                <td>Last Update</td>
-                <td>Are you playing?</td>
+                <td class="players">Players</td>
+                <td class="status">Status</td>
+                <td class="update">Last Update</td>
+                <td>Playing?</td>
                 <td>Action</td>
             </tr>
         </thead>
@@ -73,7 +73,7 @@
             }, '');
 
             // tableBody.innerHTML = tableContent + `<tr>${'<td></td>' * 5}<td><a href="/new">New Game</a></td></tr>`;
-            tableBody.innerHTML = tableContent + '<tr><td></td><td></td><td></td><td></td><td></td><td><a href="/new">New Game</a></td></tr>';
+            tableBody.innerHTML = tableContent + '<tr> <td></td> <td class="players"></td> <td class="status"></td> <td class="update"></td> <td></td> <td><a href="/new">New Game</a></td> </tr>';
 
             function getRow(feed) {
 
@@ -96,7 +96,7 @@
                 let pips = ''
                 for (let i= 0; i < enrolled; i++)
                     pips += `<div ${active-- > 0 ? style.active : style.dormant}></div>`;
-                row += `<td><div class="players">${pips}</div></td>`
+                row += `<td class="players"><div class="pips">${pips}</div></td>`
 
                 const statusText = (() => {
                     switch (status) {
@@ -110,7 +110,7 @@
                 })();
 
                 // MARK: Status
-                row += `<td ${status == 2 ? style.dormant : style.active}>${statusText}</td>`
+                row += `<td  class="status" ${status == 2 ? style.dormant : style.active}>${statusText}</td>`
 
                 // MARK: Last Update
                 const age = Date.now() - timeStamp;
@@ -123,15 +123,15 @@
                         case minutes < 2:
                             return `A minute ago`
                         case minutes < 5:
-                            return `${Math.ceil(minutes)} minutes ago`
+                            return `${Math.ceil(minutes)} mins ago`
                         case minutes < 60:
-                            return `${Math.round(minutes / 5) * 5} minutes ago`
+                            return `${Math.round(minutes / 5) * 5} mins ago`
                         default:
                             const hours = Math.round(minutes / 60);
-                            return `${hours} ${hours > 1 ? 'hours' : 'hour'} ago`
+                            return `${hours} ${hours > 1 ? 'hrs' : 'hr'} ago`
                     }
                 })();
-                row +=`<td>${ageText}</td>`
+                row +=`<td class="update">${ageText}</td>`
 
                 // Mark: User Involvement
                 switch (userInvolvement) {
@@ -139,10 +139,10 @@
                         row += '<td>no</td>'
                         break;
                     case 1:
-                        row += '<td class="active">yes</td>'
+                        row += '<td class="active">Yes</td>'
                         break;
                     case 2:
-                        row += '<td class="your_turn">Yes, it\'s your turn!</td>'
+                        row += '<td class="your_turn">Your turn!</td>'
                 }
 
                 // MARK: Action

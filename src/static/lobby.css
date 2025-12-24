@@ -1,4 +1,4 @@
-.players {
+.pips {
     display: flex;
     height: auto;
     & div {
@@ -24,4 +24,16 @@
 }
 .active {
     font-weight: 600;
+}
+
+/* narrowing */
+@media (max-width: 805px) {
+    .update, .status {
+        display: none;
+    }
+}
+@media (max-width: 505px) {
+    .players {
+        display: none;
+    }
 }
