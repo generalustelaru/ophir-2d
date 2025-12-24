@@ -23,8 +23,8 @@ You can set up and run a server quite easily on your local network.
 1. Install [Docker Desktop](https://docs.docker.com/desktop/).
    - Open the app and follow its instructions to update WSL if needed.
 2. Download the project:
-   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git` then `git switch -c dockerization origin/dockerization`.
-   - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/dockerization.zip) and extract it.
+   - If you have Git, run `git clone https://github.com/generalustelaru/ophir-2d.git`.
+   - Alternatively, get the zip file [here](https://github.com/generalustelaru/ophir-2d/archive/refs/heads/main.zip) and extract it.
 
 ### Running
 
