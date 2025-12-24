@@ -33,13 +33,12 @@ You can set up and run a server quite easily on your local network.
    - Run `make start` or `docker compose up -d` and wait for dependencies to download and instantiate.
    - Run `make seed` or `docker compose exec game-server node seed-db.cjs` to hydrate the database.
 
-You can access the app on your machine by navigating to `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<local_address>:3001`.
-   - PowerShell: `Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like '*Ethernet*'}`
+You can access the app on your machine by navigating to `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<ip_address>:3001`. How to find it:
+   - PowerShell: `(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -eq 'Ethernet'}).IPAddress`
    - Git Bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
-   - Linux: `hostname -I`
+   - Linux: `ip route get 1.1.1.1 | grep -oP 'src \K\S+'`
 
-
-To turn off all processes run `make stop` or `docker compose down`.
+To turn off the server and all adjacent processes run `make stop` or `docker compose down`.
 
 ## Troubleshooting
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
