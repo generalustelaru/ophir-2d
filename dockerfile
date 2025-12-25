@@ -1,20 +1,21 @@
 FROM node:20
 
-# Install make
-RUN apt-get update && apt-get install -y make
-
 # Set project path
 WORKDIR /app
 
-# node_modules are cached in Docker, no risk of reloading.
+#  npm ci not run every time; package is diffed;
 COPY package*.json ./
 RUN npm ci
 
 # Copy source to path
 COPY . .
 
-# Classic build
-RUN make build
+# Full build
+RUN	mkdir -p dist/public && \
+    rm -rf dist/public/* && \
+    cp -r src/static/* dist/public/ && \
+    npm run build_client && \
+    npm run build_server
 
 # Expose port for HTTP/WS
 EXPOSE 3001
