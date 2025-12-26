@@ -68,7 +68,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         );
 
         this.influenceDial = new InfluenceDial(
-            { x: -45, y: 25 },
+            { x: -50, y: 25 },
             this.variation.vivid.light,
         );
 

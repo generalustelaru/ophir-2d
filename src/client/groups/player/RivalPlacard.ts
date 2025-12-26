@@ -32,7 +32,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.group = new Konva.Group({
             width: 250,
             height: 100,
-            x: 25,
+            x: 50,
             y: yOffset,
         });
 
@@ -45,7 +45,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         });
 
         this.influenceDial = new InfluenceDial(
-            { x: -55, y: 25 },
+            { x: -50, y: 25 },
             HUES.Neutral,
         );
 
