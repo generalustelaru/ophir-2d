@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="/common.css" />
     <link rel="stylesheet" href="/lobby.css" />
     <link rel="stylesheet" href="/pico.cyan.min.css" />
@@ -16,12 +16,12 @@
     <table>
         <thead>
             <tr>
-                <td>Game</td>
-                <td class="players">Players</td>
-                <td class="status">Status</td>
-                <td class="update">Last Update</td>
-                <td>Playing?</td>
-                <td>Action</td>
+                <th>Game</th>
+                <th class="players">Players</th>
+                <th class="status">Status</th>
+                <th class="update">Last Update</th>
+                <th>Playing?</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody></tbody>
@@ -45,13 +45,13 @@
 
         const update = setInterval(() => {
             getTableData().then(data => {
-            drawTable(data);
-        }).catch(error => {
-            console.error(error);
-            clearInterval(update);
-            window.location.href = '/';
-        });
-        },10 * seconds)
+                drawTable(data);
+            }).catch(error => {
+                console.error(error);
+                clearInterval(update);
+                window.location.href = '/';
+            });
+        }, 10 * seconds)
 
         async function getTableData() {
             const dataFetch = await fetch('/feed');
@@ -94,7 +94,7 @@
 
                 // MARK: Players
                 let pips = ''
-                for (let i= 0; i < enrolled; i++)
+                for (let i = 0; i < enrolled; i++)
                     pips += `<div ${active-- > 0 ? style.active : style.dormant}></div>`;
                 row += `<td class="players"><div class="pips">${pips}</div></td>`
 
@@ -131,7 +131,7 @@
                             return `${hours} ${hours > 1 ? 'hrs' : 'hr'} ago`
                     }
                 })();
-                row +=`<td class="update">${ageText}</td>`
+                row += `<td class="update">${ageText}</td>`
 
                 // Mark: User Involvement
                 switch (userInvolvement) {
@@ -157,4 +157,13 @@
         }
 
     </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        // CONSOLE DEBUG ON MOBILE
+        eruda.init();
+        console.log('DPR:', window.devicePixelRatio);
+        console.log('screen.width:', window.screen.width);
+        console.log('innerWidth:', window.innerWidth);
+        console.log('Calculated CSS width:', window.screen.width / window.devicePixelRatio);
+    </script> -->
 </body>

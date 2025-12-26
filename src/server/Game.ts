@@ -16,6 +16,7 @@ import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
+import { Font } from 'opentype.js';
 
 /**@throws */
 export class Game {
@@ -27,6 +28,7 @@ export class Game {
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private saveDisplayName: ((userId: UserId, name: string) => void) | null;
     private userReferences: Array<UserReference> = [];
+    private font: Font | null;
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
@@ -34,11 +36,17 @@ export class Game {
         nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
         savedSession: GameState | null,
+        font: Font | null,
     ) {
+
+        if (!font)
+            throw new Error('Missing fonts!');
+
         this.config = { ...configuration };
         this.broadcast = broadcastCallback;
         this.transmit = transmitCallback;
         this.saveDisplayName = nameUpdateCallback;
+        this.font = font;
 
         if (!savedSession) {
             this.gameId = uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], length: 2, separator: '-' });
@@ -228,15 +236,16 @@ export class Game {
                 const nameMatch = message.input.match(/(?<=#name ).*/);
 
                 if (nameMatch) {
+
+                    if (!this.font)
+                        return emitError('Fonts are missing!');
+
                     const newName = nameMatch[0];
 
-                    if (lib.estimateWidth(newName, 28) > 424)
-                        return this.issueNominalResponse({ error: 'The name is too long.' });
+                    const measurement = lib.validateTextLength(newName, this.font, 28, 424, 212);
 
-                    const nameSegments = newName.split( ' ');
-                    for (const segment of nameSegments) {
-                        if (lib.estimateWidth(segment, 28) > 212)
-                            return this.issueNominalResponse({ error: 'A word is too long.' });
+                    if (measurement.err) {
+                        return this.issueNominalResponse({ error: measurement.message });
                     }
 
                     if (this.isNameTaken(state.players, newName))

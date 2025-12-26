@@ -18,6 +18,7 @@ import http from 'http';
 
 import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
 import { MongoClient } from 'mongodb';
+import opentype, { Font } from 'opentype.js';
 
 if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
     console.error('Missing environment variables', {
@@ -28,6 +29,16 @@ if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
 // TODO: enclose this logic in a dbService.connect()
 let dbService: DatabaseService;
 const dbClient = new MongoClient(MONGODB_URI);
+
+let fontCache: Font | null = null;
+opentype.load(path.join(process.cwd(), 'dist/public', 'Laila-Regular.ttf')).then(font => {
+    fontCache = font;
+    console.info('✅ Fonts loaded.');
+}).catch(error => {
+    sLib.printError(String(error));
+    console.info('❌ Could not load fonts.');
+    process.exit(1);
+});
 
 dbClient.connect().then(async () => {
     const db = dbClient.db('ophir');
@@ -396,7 +407,7 @@ async function processAction(
         getGameConnections(gameId).length == 1
     );
 
-    const result = game.processAction(request, isAdoption);
+    const result = await game.processAction(request, isAdoption);
 
     const statsRelevant: Array<Action> = [
         Action.enrol, Action.change_color, Action.start_setup, Action.start_play, Action.end_turn, Action.force_turn, 
@@ -633,6 +644,7 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
             nameUpdateCallback,
             configuration,
             savedSession,
+            fontCache,
         );
 
         return sLib.pass(session);

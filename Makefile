@@ -1,18 +1,15 @@
-# Building
-build: static server client
-
-server:
-	npm run build_server
-
-client:
-	npm run build_client
-
+# Local (outside Docker)
 static:
 	mkdir -p dist/public
 	rm -rf dist/public/*
 	cp -r src/static/* dist/public/
 
-# Local
+client:
+	npm run build_client
+
+server:
+	npm run build_server
+
 run:
 	node dist/server.cjs
 
@@ -23,14 +20,15 @@ check:
 fix:
 	npx eslint . --fix
 
-#Docker
-start:  # Start everything
+
+# Docker
+start:  # Start everything (rebuild if missing)
 	docker compose up -d
 
 stop: # Stop everything
 	docker compose down
 
-image: # Rebuilds the image and runs it
+image: # Rebuild image and start
 	docker compose up -d --build
 
 restart:
@@ -56,4 +54,4 @@ clean:
 	docker compose down -v
 	rm -rf dist node_modules
 
-.PHONY: client server static build run up down rebuild restart logs logs-all seed shell clean
+.PHONY: client server static build run up down image restart watch watch-all seed shell clean
