@@ -132,7 +132,7 @@ export class DatabaseService {
     // MARK: USERS
 
     public async validateRegistrationInput(form: RegistrationForm): Promise<Probable<Validity>> {
-        const { userName, password, pwRetype } = form;
+        const { userName, password, pwRetype } = lib.trimValues(form);
 
         switch (true) {
             case userName.length < 5:
@@ -181,15 +181,17 @@ export class DatabaseService {
 
     public async authenticateUser(query: AuthenticationForm): Promise<Probable<User>> {
         try {
+            const { userName, password } = lib.trimValues(query);
+
             const record = await this.db.collection<UserRecord>(CollectionName.users)
-                .findOne({ name: query.userName });
+                .findOne({ name: userName });
 
             if (!record)
                 return lib.fail('Could not find user.');
 
             const { _id, hash, ...user } = record;
 
-            if (hash != lib.toHash(query.password))
+            if (hash != lib.toHash(password))
                 return lib.fail('Wrong password.');
 
             return lib.pass(user);
