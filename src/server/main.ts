@@ -20,6 +20,9 @@ import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
 import { MongoClient } from 'mongodb';
 import opentype, { Font } from 'opentype.js';
 
+// TODO: use runtime flag to disable log verbosity in production
+// const isDev = process.env.NODE_ENV === 'development';
+
 if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
     console.error('Missing environment variables', {
         PORT_NUMBER, MONGODB_URI, REDIS_URL,

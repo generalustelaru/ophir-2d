@@ -1,23 +1,25 @@
-FROM node:20-alpine
-
+FROM node:20-alpine AS builder
 # Set project path
 WORKDIR /app
-
-#  npm ci not run every time; package is diffed;
+#  Install dependencies (cached)
 COPY package*.json ./
 RUN npm ci
-
-# Copy source to path
+# Copy source
 COPY . .
+# Build
+RUN	mkdir -p dist/public && cp -r src/static/* dist/public/
+RUN npm run build_client & npm run build_server & wait
 
-# Full build
-RUN	mkdir -p dist/public && \
-    rm -rf dist/public/* && \
-    cp -r src/static/* dist/public/ && \
-    npm run build_client && \
-    npm run build_server
-
-# Expose port for HTTP/WS
+FROM builder AS dev
 EXPOSE 3001
+CMD ["node", "dist/server.cjs"]
 
+FROM node:20-alpine AS prod
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3001
 CMD ["node", "dist/server.cjs"]

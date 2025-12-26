@@ -1,4 +1,4 @@
-# Local (outside Docker)
+# Local Development
 static:
 	mkdir -p dist/public
 	rm -rf dist/public/*
@@ -21,37 +21,37 @@ fix:
 	npx eslint . --fix
 
 
-# Docker
-start:  # Start everything (rebuild if missing)
-	docker compose up -d
+# Docker Production
+start:
+	docker compose up game-server-prod -d --build
+
+seed:
+	docker compose exec game-server-prod node seed-db.cjs
+
+# Docker Development / Debugging
+dev:
+	docker compose up game-server-dev -d --build
 
 stop: # Stop everything
-	docker compose down
-
-image: # Rebuild image and start
-	docker compose up -d --build
+	docker compose down --remove-orphans
 
 restart:
-	docker compose restart game-server
+	docker compose restart game-server-dev
 
-ps: # Shows active containers
+containers:
 	docker compose ps
 
 watch:
-	docker compose logs -f game-server
+	docker compose logs -f game-server-dev
 
 watch-all:
 	docker compose logs -f
 
-seed:
-	docker compose exec game-server node seed-db.cjs
-
 shell:
-	docker compose exec game-server sh
+	docker compose exec game-server-dev sh
 
-# Cleanup
 clean:
 	docker compose down -v
 	rm -rf dist node_modules
 
-.PHONY: client server static build run up down image restart watch watch-all seed shell clean
+.PHONY: client server static build run containers start dev restart watch watch-all seed shell clean

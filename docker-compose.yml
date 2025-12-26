@@ -1,8 +1,26 @@
 # version: '3.8'
 
 services:
-  game-server:
-    build: .
+  game-server-dev:
+    build:
+      context: .
+      target: dev
+    ports:
+      - "0.0.0.0:3001:3001"
+    environment:
+      - NODE_ENV=development
+      - MONGODB_URI=mongodb://mongo:27017/gamedb
+      - REDIS_URL=redis://redis:6379
+      - PORT_NUMBER=3001
+    depends_on:
+      - mongo
+      - redis
+    restart: unless-stopped
+
+  game-server-prod:
+    build:
+      context: .
+      target: prod
     ports:
       - "0.0.0.0:3001:3001"
     environment:
@@ -13,7 +31,7 @@ services:
     depends_on:
       - mongo
       - redis
-    restart: unless-stopped
+    restart: always
 
   mongo: # x breaking, x.x security, x.x.x locked
     image: mongo:8.2
