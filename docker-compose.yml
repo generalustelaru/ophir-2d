@@ -15,6 +15,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - redisinsight
     restart: unless-stopped
 
   game-server-prod:
