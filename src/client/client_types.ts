@@ -50,12 +50,19 @@ export enum LayerIds {
     overlay,
 }
 
+export enum Aspect { tall = 'tall', wide = 'wide' }
+
+type AspectData<T> = {
+    [Aspect.wide]: T
+    [Aspect.tall]: T
+}
+
 export type ClientConstants = {
-    STAGE_AREA: { wide: Dimensions, tall: Dimensions },
+    STAGE_AREA: AspectData<Dimensions>,
     GROUP_DIMENSIONS: { location: Dimensions, map: Dimensions, player: Dimensions }
-    LOCATION_PLACEMENT: { wide: Coordinates, tall: Coordinates },
-    MAP_PLACEMENT: { wide: Coordinates, tall: Coordinates },
-    PLAYER_PLACEMENT: { wide: Coordinates, tall: Coordinates },
+    LOCATION_PLACEMENT: AspectData<Coordinates>,
+    MAP_PLACEMENT: AspectData<Coordinates>,
+    PLAYER_PLACEMENT: AspectData<Coordinates>,
     HUES: Record<string, Hue>,
     PLAYER_HUES: Record<PlayerColor, PlayerHueVariation>
     COLOR_PROFILES: Record<string, ColorProfile>,
@@ -92,10 +99,13 @@ export interface DynamicGroupInterface<U> {
 
 export interface DynamicModalInterface<U, S> {
     update(u: U): void,
+    repositionModal(aspect: Aspect): void;
     show(s: S): void,
 }
-export interface StaticModalInterface {
-    show(): void,
+
+export interface StaticModalInterface<S> {
+    repositionModal(aspect: Aspect): void;
+    show(s: S): void,
 }
 
 export interface StaticGroupInterface {

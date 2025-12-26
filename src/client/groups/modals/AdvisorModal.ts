@@ -3,7 +3,7 @@ import { ModalBase } from './ModalBase';
 import { MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
 import { RowDistributor } from '../popular';
 import { TempleMarketCard } from '../location';
-import { DynamicModalInterface } from '~/client/client_types';
+import { Aspect, DynamicModalInterface } from '~/client/client_types';
 
 type DonationItem = {
     slot: MarketSlotKey,
@@ -18,10 +18,12 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
     constructor(
         stage: Konva.Stage,
         donateGoodsCallback: (slot: MarketSlotKey) => void,
+        aspect: Aspect,
     ) {
         super(
             stage,
             { hasSubmit: false, dismissLabel: 'Cancel' },
+            aspect,
             { width: 300, height: 220 },
         );
 
@@ -48,6 +50,10 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
                 return { slot: feasible.slot, trade: state.market[feasible.slot] };
             }) : []
         );
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show() { // TODO: see not to create these on the fly, but update them.

@@ -3,7 +3,7 @@ import {
     Action, ClientMessage, FeasibleTrade, MarketFluctuations, MarketSlotKey, PlayState, SpecialistName, Trade, TradeGood,
     Unique,
 } from '~/shared_types';
-import { DynamicModalInterface, Specification } from '~/client_types';
+import { Aspect, DynamicModalInterface, Specification } from '~/client_types';
 import { CoinDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
@@ -24,6 +24,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
     constructor(
         stage: Konva.Stage,
         marketFluctuations: MarketFluctuations,
+        aspect: Aspect,
     ) {
         super(
             stage,
@@ -33,6 +34,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
                 submitLabel: 'Accept',
                 dismissLabel: 'Close',
             },
+            aspect,
             { width: 340, height: 180 },
         );
 
@@ -108,6 +110,10 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
         this.feasability = peddlerPlayer.feasibleTrades.find(
             t => t.slot == this.slot,
         ) || null;
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show(): void {

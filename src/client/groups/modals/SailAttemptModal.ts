@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, Unique } from '~/shared_types';
-import { DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
+import { Aspect, DynamicModalInterface, SailAttemptArgs } from '~/client/client_types';
 import { InfluenceDial, SymbolicInfluenceDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import clientConstants from '~/client/client_constants';
@@ -10,7 +10,7 @@ const { PLAYER_HUES, HUES } = clientConstants;
 export class SailAttemptModal extends ModalBase implements Unique<DynamicModalInterface<undefined, SailAttemptArgs>> {
     private ownerDie: SymbolicInfluenceDial;
     private toSailDial: InfluenceDial;
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             {
@@ -19,6 +19,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
                 submitLabel: 'Roll',
                 dismissLabel: 'Cancel',
             },
+            aspect,
         );
 
         const offset = { x: 76, y: 24 };
@@ -55,6 +56,10 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
     }
 
     public update() {}
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
+    }
 
     public show(data: SailAttemptArgs) {
         const symbol = (()=> {

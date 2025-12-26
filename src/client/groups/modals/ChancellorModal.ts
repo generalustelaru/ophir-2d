@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { ModalBase, SymbolRow, lib } from '.';
-import { DynamicModalInterface, Specification } from '~/client/client_types';
+import { Aspect, DynamicModalInterface, Specification } from '~/client/client_types';
 import {
     Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
 } from '~/shared_types';
@@ -19,7 +19,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
     private symbolRow: SymbolRow;
     private tradeSpecifications: Array<Specification> = [];
     private coinDial: CoinDial;
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             {
@@ -28,6 +28,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                 submitLabel: 'Accept',
                 dismissLabel: 'Cancel',
             },
+            aspect,
             { width: 340, height: 180 },
         );
 
@@ -91,6 +92,10 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         this.market = state.market;
         this.fluctuations = state.setup.marketFluctuations;
         this.playerFeasibles = chancellorPlayer.feasibleTrades;
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show(slot: MarketSlotKey) {

@@ -6,7 +6,7 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { Dimensions, EventType, LayerIds, SailAttemptArgs } from '~/client_types';
+import { Aspect, Dimensions, EventType, LayerIds, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
@@ -37,14 +37,15 @@ export class CanvasService extends Communicator {
     private chancellorModal: ChancellorModal | null = null;
     private peddlerModal: PeddlerModal | null = null;
 
+    private aspect: Aspect;
     constructor() {
         super();
         // TODO: Reduce group.add() calls.throughout subclasses
 
         const { width, height } = this.getContainerDimensions();
-        const aspect = width > height ? 'wide' : 'tall';
+        this.aspect = width > height ? Aspect.wide : Aspect.tall;;
 
-        const dimensions = clientConstants.STAGE_AREA[aspect];
+        const dimensions = clientConstants.STAGE_AREA[this.aspect];
         this.stage = new Konva.Stage({
             container: 'canvas',
             visible: false,
@@ -60,16 +61,16 @@ export class CanvasService extends Communicator {
         ]);
 
         // Common modals
-        this.endTurnModal = new EndTurnModal(this.stage);
-        this.sailAttemptModal = new SailAttemptModal(this.stage);
-        this.startTurnModal = new StartTurnModal(this.stage);
-        this.forceTurnModal = new ForceTurnModal(this.stage);
+        this.endTurnModal = new EndTurnModal(this.stage, this.aspect);
+        this.sailAttemptModal = new SailAttemptModal(this.stage, this.aspect);
+        this.startTurnModal = new StartTurnModal(this.stage, this.aspect);
+        this.forceTurnModal = new ForceTurnModal(this.stage, this.aspect);
 
         this.locationGroup = new LocationGroup(
             this.stage,
             {
                 ...clientConstants.GROUP_DIMENSIONS.location,
-                ...clientConstants.LOCATION_PLACEMENT[aspect],
+                ...clientConstants.LOCATION_PLACEMENT[this.aspect],
             },
         ); // locationGroup covers 1 segment
 
@@ -77,7 +78,7 @@ export class CanvasService extends Communicator {
             this.stage,
             {
                 ...clientConstants.GROUP_DIMENSIONS.player,
-                ...clientConstants.PLAYER_PLACEMENT[aspect],
+                ...clientConstants.PLAYER_PLACEMENT[this.aspect],
             },
         ); // playerGroup covers 1 segment
 
@@ -85,7 +86,7 @@ export class CanvasService extends Communicator {
             this.stage,
             {
                 ...clientConstants.GROUP_DIMENSIONS.map,
-                ...clientConstants.MAP_PLACEMENT[aspect],
+                ...clientConstants.MAP_PLACEMENT[this.aspect],
             },
             () => { this.endTurnModal.show(); },
         ); // mapGroup covers half the canvas (2 segments)
@@ -213,11 +214,22 @@ export class CanvasService extends Communicator {
         this.stage.height(height);
         this.stage.scale({ x: scale, y: scale });
 
-        const aspect = width > height ? 'wide': 'tall';
+        this.aspect = width > height ? Aspect.wide: Aspect.tall;
 
-        this.locationGroup?.setPlacement(clientConstants.LOCATION_PLACEMENT[aspect]);
-        this.mapGroup.setPlacement(clientConstants.MAP_PLACEMENT[aspect]);
-        this.playerGroup.setPlacement(clientConstants.PLAYER_PLACEMENT[aspect]);
+        this.locationGroup?.setPlacement(clientConstants.LOCATION_PLACEMENT[this.aspect]);
+        this.mapGroup.setPlacement(clientConstants.MAP_PLACEMENT[this.aspect]);
+        this.playerGroup.setPlacement(clientConstants.PLAYER_PLACEMENT[this.aspect]);
+        this.startTurnModal.repositionModal(this.aspect);
+        this.endTurnModal.repositionModal(this.aspect);
+        this.sailAttemptModal.repositionModal(this.aspect);
+        this.forceTurnModal.repositionModal(this.aspect);
+        this.sellGoodsModal?.repositionModal(this.aspect);
+        this.donateGoodsModal?.repositionModal(this.aspect);
+        this.rivalControlModal?.repositionModal(this.aspect);
+        this.endRivalTurnModal?.repositionModal(this.aspect);
+        this.advisorModal?.repositionModal(this.aspect);
+        this.chancellorModal?.repositionModal(this.aspect);
+        this.peddlerModal?.repositionModal(this.aspect);
     }
 
     private calculateDimensions() {
@@ -268,8 +280,8 @@ export class CanvasService extends Communicator {
             return;
 
         if (state.rival.isIncluded) {
-            this.rivalControlModal = new RivalControlModal(this.stage);
-            this.endRivalTurnModal = new EndRivalTurnModal(this.stage);
+            this.rivalControlModal = new RivalControlModal(this.stage, this.aspect);
+            this.endRivalTurnModal = new EndRivalTurnModal(this.stage, this.aspect);
             this.playerGroup.setRivalCallback(
                 (isShiftingMarket: boolean) => { this.endRivalTurnModal!.show(isShiftingMarket);},
             );
@@ -291,11 +303,12 @@ export class CanvasService extends Communicator {
     }
 
     private initializeForAdvisor() {
-        this.sellGoodsModal = new SellGoodsModal(this.stage);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+        this.sellGoodsModal = new SellGoodsModal(this.stage, this.aspect);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
         this.advisorModal = new AdvisorModal(
             this.stage,
             (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+            this.aspect,
         );
 
         this.locationGroup?.setCallbacks({
@@ -305,8 +318,8 @@ export class CanvasService extends Communicator {
     }
 
     private initializeForChancellor() {
-        this.chancellorModal = new ChancellorModal(this.stage);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+        this.chancellorModal = new ChancellorModal(this.stage, this.aspect);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
 
         this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.chancellorModal!.show(slot); },
@@ -319,9 +332,10 @@ export class CanvasService extends Communicator {
         this.peddlerModal = new PeddlerModal(
             this.stage,
             { ...marketFluctuations },
+            this.aspect,
         );
-        this.sellGoodsModal = new SellGoodsModal(this.stage);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+        this.sellGoodsModal = new SellGoodsModal(this.stage, this.aspect);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
 
         this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
@@ -331,8 +345,8 @@ export class CanvasService extends Communicator {
     }
 
     private initializeForOther() {
-        this.sellGoodsModal = new SellGoodsModal(this.stage);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage);
+        this.sellGoodsModal = new SellGoodsModal(this.stage, this.aspect);
+        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
 
         this.locationGroup?.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },

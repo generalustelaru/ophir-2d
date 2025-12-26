@@ -2,16 +2,19 @@ import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { ShipToken, SymbolicInfluenceDial } from '../popular';
 import clientConstants from '~/client/client_constants';
+import { Aspect, StaticModalInterface } from '~/client/client_types';
+import { Unique } from '~/shared_types';
 
 const { HUES } = clientConstants;
 
-export class RivalControlModal extends ModalBase {
+export class RivalControlModal extends ModalBase implements Unique<StaticModalInterface<undefined>> {
     private shipToken : ShipToken;
 
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             { hasSubmit: false, dismissLabel: 'Close' },
+            aspect,
             { width: 310, height: 200 },
         );
 
@@ -57,6 +60,10 @@ export class RivalControlModal extends ModalBase {
             ampersand,
             rivalDie.getElement(),
         ]);
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show() {
