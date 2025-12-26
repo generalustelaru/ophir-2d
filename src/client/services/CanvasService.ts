@@ -227,13 +227,21 @@ export class CanvasService extends Communicator {
             throw new Error('Cannot find canvas container!');
 
         const elementWidth = container.width;
+        const elementHeight = container.height;
+
+        if (elementHeight  == 0 || elementWidth == 0) {
+            console.error({ elementHeight, elementWidth });
+            throw new Error('Container size is incompatible!');
+        }
 
         const {
-            width: sceneWidth ,
+            width: sceneWidth,
             height: sceneHeight,
         } = clientConstants.STAGE_AREA;
 
-        const scale = elementWidth / sceneWidth;
+        const widthScale = elementWidth / sceneWidth;
+        const heightScale = elementHeight / sceneHeight;
+        const scale = Math.min(widthScale, heightScale);
 
         return {
             width: sceneWidth * scale,
