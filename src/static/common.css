@@ -12,6 +12,12 @@ body {
     font-family: 'Custom', 'monospace';
 }
 
+.navbar {
+    max-height: 100px; /* adjust as needed */
+    flex-shrink: 0;
+    background: #333;
+}
+
 @font-face {
     font-family: "Custom";
     src: url("/Laila-Regular.ttf");

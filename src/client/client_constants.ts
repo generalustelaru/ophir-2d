@@ -2,7 +2,11 @@
 import { ClientConstants } from '~/client_types';
 
 const clientConstants: ClientConstants = {
-    STAGE_AREA: { width: 1200, height: 500 },
+    STAGE_AREA: { wide: { width: 1200, height: 500 }, tall: { width: 600, height: 1000 } },
+    LOCATION_PLACEMENT: { wide: { x: 0, y: 0 }, tall: { x: 0, y: 500 } },
+    MAP_PLACEMENT: { wide: { x: 300, y: 0 }, tall: { x: 0, y: 0 } },
+    PLAYER_PLACEMENT: { wide: { x: 900, y: 0 }, tall: { x: 300, y: 500 } },
+    GROUP_DIMENSIONS: { location: { width: 300, height: 500 }, map: { width: 600, height: 500 }, player: { width: 300, height: 500 } },
     HUES: {
         lowRoll: '#FF7F50',
         midRoll: '#FF4500',

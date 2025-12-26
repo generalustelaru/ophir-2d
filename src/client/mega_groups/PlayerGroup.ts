@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
-import { Player, PlayerColor, PlayState, Unique } from '~/shared_types';
+import { Coordinates, Player, PlayerColor, PlayState, Unique } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
 
@@ -24,6 +24,10 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
 
     public setRivalCallback(callback: (p: boolean) => void) {
         this.endRivalTurnCallback = callback;
+    }
+
+    public setPlacement(coordinates: Coordinates) {
+        this.group?.x(coordinates.x).y(coordinates.y);
     }
 
     // MARK: DRAW

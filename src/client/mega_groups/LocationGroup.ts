@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
-import { PlayState, SpecialistName, Unique } from '~/shared_types';
+import { Coordinates, PlayState, SpecialistName, Unique } from '~/shared_types';
 
 type LocationGroupCallbacks = {
     tradeCallback: Function
@@ -27,12 +27,16 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     ) {
         this.group = new Konva.Group({
             width: layout.width,
-            height: layout.height - 20,
-            x: layout.x + 10,
-            y: layout.y + 10,
+            height: layout.height,
+            x: layout.x,
+            y: layout.y,
         });
         stage.getLayers()[LayerIds.board].add(this.group);
         this.stage = stage;
+    }
+
+    public setPlacement(coordinates: Coordinates) {
+        this.group?.x(coordinates.x).y(coordinates.y);
     }
 
     public setCallbacks(selection:LocationGroupCallbacks) {

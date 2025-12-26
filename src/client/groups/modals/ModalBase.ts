@@ -30,7 +30,7 @@ export abstract class ModalBase {
     ) {
         this.isFixedActionMessage = behavior.hasSubmit && !!behavior.actionMessage;
 
-        const { width: stageWidth, height: stageHeight } = STAGE_AREA;
+        const { width: stageWidth, height: stageHeight } = STAGE_AREA.tall;
         const { width: modalWidth, height: modalHeight } = dimensions;
         const offset = { x: stageWidth / 2 - modalWidth / 2, y: stageHeight / 2 - modalHeight / 2 };
 

@@ -6,7 +6,7 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { EventType, LayerIds, SailAttemptArgs } from '~/client_types';
+import { Dimensions, EventType, LayerIds, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
@@ -41,12 +41,15 @@ export class CanvasService extends Communicator {
         super();
         // TODO: Reduce group.add() calls.throughout subclasses
 
+        const { width, height } = this.getContainerDimensions();
+        const aspect = width > height ? 'wide' : 'tall';
+
+        const dimensions = clientConstants.STAGE_AREA[aspect];
         this.stage = new Konva.Stage({
             container: 'canvas',
             visible: false,
             opacity: 1,
-            width: 1200,
-            height: 500,
+            ...dimensions,
         });
 
         this.stage.add(...[
@@ -55,8 +58,6 @@ export class CanvasService extends Communicator {
             new Konva.Layer(), //  modal
             new Konva.Layer(), //  overlay.
         ]);
-
-        const segmentWidth = this.stage.width() / 4;
 
         // Common modals
         this.endTurnModal = new EndTurnModal(this.stage);
@@ -67,34 +68,27 @@ export class CanvasService extends Communicator {
         this.locationGroup = new LocationGroup(
             this.stage,
             {
-                height: this.stage.height(),
-                width: segmentWidth,
-                x: 0,
-                y: 0,
+                ...clientConstants.GROUP_DIMENSIONS.location,
+                ...clientConstants.LOCATION_PLACEMENT[aspect],
             },
-
-        ); // locationGroup covers 1 segment, sitting on the left
+        ); // locationGroup covers 1 segment
 
         this.playerGroup = new PlayerGroup(
             this.stage,
             {
-                height: this.stage.height(),
-                width: segmentWidth,
-                x: segmentWidth * 3,
-                y: 0,
+                ...clientConstants.GROUP_DIMENSIONS.player,
+                ...clientConstants.PLAYER_PLACEMENT[aspect],
             },
-        ); // playerGroup covers 1 segment, sitting on the right
+        ); // playerGroup covers 1 segment
 
         this.mapGroup = new MapGroup(
             this.stage,
             {
-                height: this.stage.height(),
-                width: segmentWidth * 2,
-                x: segmentWidth,
-                y: 0,
+                ...clientConstants.GROUP_DIMENSIONS.map,
+                ...clientConstants.MAP_PLACEMENT[aspect],
             },
             () => { this.endTurnModal.show(); },
-        ); // mapGroup covers half the canvas (2 segments), sitting in the middle
+        ); // mapGroup covers half the canvas (2 segments)
 
         this.setupGroup = new SetupGroup(
             this.stage,
@@ -218,16 +212,19 @@ export class CanvasService extends Communicator {
         this.stage.width(width);
         this.stage.height(height);
         this.stage.scale({ x: scale, y: scale });
+
+        const aspect = width > height ? 'wide': 'tall';
+
+        this.locationGroup?.setPlacement(clientConstants.LOCATION_PLACEMENT[aspect]);
+        this.mapGroup.setPlacement(clientConstants.MAP_PLACEMENT[aspect]);
+        this.playerGroup.setPlacement(clientConstants.PLAYER_PLACEMENT[aspect]);
     }
 
     private calculateDimensions() {
-        const container = document.getElementById('canvas')?.getBoundingClientRect();
-
-        if (!container)
-            throw new Error('Cannot find canvas container!');
-
-        const elementWidth = container.width;
-        const elementHeight = container.height;
+        const {
+            width: elementWidth,
+            height: elementHeight,
+        } = this.getContainerDimensions();
 
         if (elementHeight  == 0 || elementWidth == 0) {
             console.error({ elementHeight, elementWidth });
@@ -237,7 +234,10 @@ export class CanvasService extends Communicator {
         const {
             width: sceneWidth,
             height: sceneHeight,
-        } = clientConstants.STAGE_AREA;
+        } = (elementHeight > elementWidth
+            ? clientConstants.STAGE_AREA.tall
+            : clientConstants.STAGE_AREA.wide
+        );
 
         const widthScale = elementWidth / sceneWidth;
         const heightScale = elementHeight / sceneHeight;
@@ -248,6 +248,17 @@ export class CanvasService extends Communicator {
             height: sceneHeight * scale,
             scale,
         };
+    }
+
+    private getContainerDimensions(): Dimensions {
+        const container = document.getElementById('canvas')?.getBoundingClientRect();
+
+        if (!container)
+            throw new Error('Cannot find canvas container!');
+
+        const { width, height } = container;
+
+        return { width, height };
     }
 
     private initializeModals(state: PlayState) {

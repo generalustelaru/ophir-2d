@@ -11,7 +11,7 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
 
     constructor(state: PlayState) {
         this.group = new Konva.Group();
-        const { width, height } = STAGE_AREA;
+        const { width, height } = STAGE_AREA.tall;
 
         const panelBody = new Konva.Rect({
             width: width / 4,

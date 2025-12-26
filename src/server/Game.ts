@@ -145,6 +145,7 @@ export class Game {
         this.transmit = null;
         this.saveDisplayName = null;
         this.userReferences = [];
+        this.font = null;
     }
 
     public getGameId(): string {
