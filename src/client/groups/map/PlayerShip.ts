@@ -81,7 +81,6 @@ export class PlayerShip extends Communicator {
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
-            draggable: player.isActive,
             id: playerColor,
         });
 
@@ -176,7 +175,11 @@ export class PlayerShip extends Communicator {
 
             if (!departureZone)
                 throw new Error('Missing departure hex data to compute repositioning/moving!');
-
+            console.log({
+                pointer: position,
+                token: { x: this.group.x(), y: this.group.y() },
+                tokenAbsolute: this.group.getAbsolutePosition(),
+            })
             switch (true) {
                 case targetZone && this.isDestinationValid:
 

@@ -38,7 +38,8 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     }
 
     public setPlacement(coordinates: Coordinates) {
-        this.group?.x(coordinates.x).y(coordinates.y);
+        this.group.x(coordinates.x).y(coordinates.y);
+        this.shipGroup.x(coordinates.x).y(coordinates.y);
     }
 
     // MARK: DRAW
