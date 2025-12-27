@@ -52,6 +52,5 @@ shell:
 
 clean:
 	docker compose down -v
-	rm -rf dist node_modules
 
 .PHONY: client server static build run containers start dev restart watch watch-all seed shell clean
