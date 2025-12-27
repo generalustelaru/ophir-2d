@@ -36,14 +36,16 @@ export class CanvasService extends Communicator {
     private advisorModal: AdvisorModal | null = null;
     private chancellorModal: ChancellorModal | null = null;
     private peddlerModal: PeddlerModal | null = null;
-
     private aspect: Aspect;
+    private scale: number;
+
     constructor() {
         super();
         // TODO: Reduce group.add() calls.throughout subclasses
 
-        const { width, height } = this.getContainerDimensions();
-        this.aspect = width > height ? Aspect.wide : Aspect.tall;;
+        const { width, height, scale, aspect } = this.calculateDimensions();
+        this.scale = scale;
+        this.aspect = aspect;
 
         const dimensions = clientConstants.STAGE_AREA[this.aspect];
         this.stage = new Konva.Stage({
@@ -52,6 +54,10 @@ export class CanvasService extends Communicator {
             opacity: 1,
             ...dimensions,
         });
+
+        this.stage.width(width);
+        this.stage.height(height);
+        this.stage.scale({ x: scale, y: scale });
 
         this.stage.add(...[
             new Konva.Layer(), //  base
@@ -147,8 +153,6 @@ export class CanvasService extends Communicator {
             });
         }
 
-        this.fitStageIntoParentContainer();
-
         switch (sessionPhase) {
             case Phase.enrolment:
                 if (!this.isEnrolmentDrawn) {
@@ -207,22 +211,27 @@ export class CanvasService extends Communicator {
         this.playerGroup.disable();
     }
 
-    public fitStageIntoParentContainer() {
-        const { width, height, scale } = this.calculateDimensions();
+    public updateGroupLayouts() {
+        const { width, height, scale, aspect } = this.calculateDimensions();
 
+        if (scale == this.scale && aspect == this.aspect)
+            return;
+
+        this.scale = scale;
+        this.aspect = aspect;
         this.stage.width(width);
         this.stage.height(height);
         this.stage.scale({ x: scale, y: scale });
 
-        this.aspect = width > height ? Aspect.wide: Aspect.tall;
-
         this.locationGroup?.setPlacement(clientConstants.LOCATION_PLACEMENT[this.aspect]);
         this.mapGroup.setPlacement(clientConstants.MAP_PLACEMENT[this.aspect]);
         this.playerGroup.setPlacement(clientConstants.PLAYER_PLACEMENT[this.aspect]);
+
         this.startTurnModal.repositionModal(this.aspect);
         this.endTurnModal.repositionModal(this.aspect);
         this.sailAttemptModal.repositionModal(this.aspect);
         this.forceTurnModal.repositionModal(this.aspect);
+
         this.sellGoodsModal?.repositionModal(this.aspect);
         this.donateGoodsModal?.repositionModal(this.aspect);
         this.rivalControlModal?.repositionModal(this.aspect);
@@ -234,43 +243,34 @@ export class CanvasService extends Communicator {
 
     private calculateDimensions() {
         const {
-            width: elementWidth,
-            height: elementHeight,
-        } = this.getContainerDimensions();
+            width: conainerWidth,
+            height: containerHeight,
+        } = ((): Dimensions => {
+            const container = document.getElementById('canvas')?.getBoundingClientRect();
 
-        if (elementHeight  == 0 || elementWidth == 0) {
-            console.error({ elementHeight, elementWidth });
+            if (!container)
+                throw new Error('Cannot find canvas container!');
+
+            return container;
+        })();
+
+        if (containerHeight  == 0 || conainerWidth == 0) {
+            console.error({ elementHeight: containerHeight, elementWidth: conainerWidth });
             throw new Error('Container size is incompatible!');
         }
 
-        const {
-            width: sceneWidth,
-            height: sceneHeight,
-        } = (elementHeight > elementWidth
-            ? clientConstants.STAGE_AREA.tall
-            : clientConstants.STAGE_AREA.wide
-        );
-
-        const widthScale = elementWidth / sceneWidth;
-        const heightScale = elementHeight / sceneHeight;
+        const aspect = conainerWidth > containerHeight ? Aspect.wide : Aspect.tall;
+        const { width: sceneWidth, height: sceneHeight } = clientConstants.STAGE_AREA[aspect];
+        const widthScale = conainerWidth / sceneWidth;
+        const heightScale = containerHeight / sceneHeight;
         const scale = Math.min(widthScale, heightScale);
 
         return {
+            aspect,
             width: sceneWidth * scale,
             height: sceneHeight * scale,
             scale,
         };
-    }
-
-    private getContainerDimensions(): Dimensions {
-        const container = document.getElementById('canvas')?.getBoundingClientRect();
-
-        if (!container)
-            throw new Error('Cannot find canvas container!');
-
-        const { width, height } = container;
-
-        return { width, height };
     }
 
     private initializeModals(state: PlayState) {

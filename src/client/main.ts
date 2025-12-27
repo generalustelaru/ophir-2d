@@ -48,7 +48,7 @@ document.fonts.ready.then(() => {
     const canvas = new CanvasService();
 
     window.addEventListener('resize', () => {
-        canvas.fitStageIntoParentContainer();
+        canvas.updateGroupLayouts();
     });
 
     //Send player action to server
