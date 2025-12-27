@@ -1,16 +1,4 @@
-.navbar {
-    & .control-row {
-        display: flex;
-        height: auto;
-        width: auto;
 
-        & button {
-            /* font-size: large; */
-            user-select: none;
-            -webkit-user-select: none;
-        }
-    }
-}
 
 #canvas {
     width: 100%;
