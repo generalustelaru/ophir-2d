@@ -1,8 +1,9 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, ElementList } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { PlayerColor, PlayerEntry, Unique } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { ColorCard } from './ColorCard';
+import { RowDistributor } from '../popular';
 
 type EnrolmentPanelUpdate = {
     players: Array<PlayerEntry>,
@@ -19,36 +20,38 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        const elements: ElementList = [];
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
             x: layout.x,
             y: layout.y,
         });
+
         const background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
             cornerRadius: 15,
             fill: HUES.modalBlue,
-
         });
-        elements.push(background);
 
         const playerColors: Array<PlayerColor> = ['Purple' , 'Yellow' , 'Red' , 'Green'];
-        const margin = 60;
-        const offset = 200;
-        let drift = margin;
 
         playerColors.forEach(color => {
-            const optionCard = new ColorCard(stage, { x:drift, y:50 }, color, PLAYER_HUES[color]);
-
-            this.cards.push(optionCard);
-            elements.push(optionCard.getElement());
-            drift += margin + offset;
+            this.cards.push(new ColorCard(
+                stage,
+                { x: 0, y: 0 },
+                color, PLAYER_HUES[color]),
+            );
         });
 
-        this.group.add(...elements);
+        const cardRow = new RowDistributor(
+            { ...layout, x: 0, y: 0 },
+            this.cards.map(c => {
+                return { id: '', node: c.getElement() };
+            }),
+        );
+
+        this.group.add(background, cardRow.getElement());
     }
 
     public getElement() {
