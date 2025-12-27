@@ -26,6 +26,10 @@ export const UserInterface = new class extends Communicator {
                 window.location.href = '/';
             });
         });
+        const toLobby = document.querySelector('#lobby');
+        toLobby && toLobby.addEventListener('click', () => {
+            window.location.href = '/lobby';
+        });
         this.draftButton =  new Button('draftButton', this.processDraft);
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
