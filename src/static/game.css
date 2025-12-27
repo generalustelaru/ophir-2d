@@ -1,7 +1,16 @@
-/* html, body {
-    position: fixed;
-    overflow:hidden;
-} */
+.navbar {
+    & .control-row {
+        display: flex;
+        height: auto;
+        width: auto;
+
+        & button {
+            /* font-size: large; */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+    }
+}
 
 #canvas {
     width: 100%;
@@ -10,8 +19,9 @@
     max-width: 1200px;
     max-height: 500px;
     aspect-ratio: 1200 / 500;
-    flex-shrink: 0;
+    flex-shrink: 1;
 }
+
 @media (max-width: 805px) {
     #canvas {
         max-width: 600px;
@@ -20,16 +30,9 @@
     }
 }
 
-.control-row {
-    display: flex;
-    height: auto;
-    width: auto;
-}
-
-button {
-    font-size: large;
-    user-select: none;
-    -webkit-user-select: none;
+#info {
+    height: 20px;
+    font-size: small;
 }
 
 #chatRoom {
@@ -41,26 +44,30 @@ button {
     flex-direction: column;
     justify-content: flex-start;
     padding: 5px;
+
     & #chatMessages {
         flex: 1;
         overflow-y: auto;
         /* height: 100%; */
     }
+
     & #inputLine {
         flex-shrink: 0;
-        height: 50px;
+        height: 30px;
 
         display: flex;
         justify-content: space-between;
         align-items: left;
+
         & input {
+            flex: 1;
             font-size: large;
             height: auto;
-            width: auto;
+            /* width: 100%; */
         }
+
         & button {
-            height: auto;
-            width: 100px;
+            line-height: 3px;
         }
     }
 }
