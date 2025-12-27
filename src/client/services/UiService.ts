@@ -73,10 +73,6 @@ export const UserInterface = new class extends Communicator {
 
     private handleKeyInput  = (toSubmit: boolean): void => {
         toSubmit && this.sendChatMessage();
-
-        setTimeout(() => {
-            this.chatInput.element.focus();
-        }, 1000);
     };
 
     private processDraft = (): void => {
