@@ -48,7 +48,7 @@ document.fonts.ready.then(() => {
     const canvas = new CanvasService();
 
     window.addEventListener('resize', () => {
-        canvas.updateGroupLayouts();
+        canvas.handleResize();
     });
 
     //Send player action to server

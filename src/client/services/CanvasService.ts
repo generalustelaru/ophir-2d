@@ -38,6 +38,7 @@ export class CanvasService extends Communicator {
     private peddlerModal: PeddlerModal | null = null;
     private aspect: Aspect;
     private scale: number;
+    private delayedResizing: number | null = null;
 
     constructor() {
         super();
@@ -211,7 +212,19 @@ export class CanvasService extends Communicator {
         this.playerGroup.disable();
     }
 
-    public updateGroupLayouts() {
+    public handleResize() {
+
+        if (this.delayedResizing != null) {
+            clearTimeout(this.delayedResizing);
+        }
+
+        this.delayedResizing = window.setTimeout(() => {
+            this.updateGroupLayouts();
+            this.delayedResizing = null;
+        }, 250);
+    }
+
+    private updateGroupLayouts() {
         const { width, height, scale, aspect } = this.calculateDimensions();
 
         if (scale == this.scale && aspect == this.aspect)
