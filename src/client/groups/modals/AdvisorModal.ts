@@ -33,7 +33,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         this.cardRow = new RowDistributor(
             {
                 x: 0,
-                y: 20,
+                y: 0,
                 width: this.contentGroup.width(),
                 height: this.contentGroup.height(),
             },
@@ -70,7 +70,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
             return { id: item.slot, node: card.getElement() };
         });
 
-        this.cardRow.setNodes(rowElements);
+        this.cardRow.distributeNodes(rowElements);
         this.open();
     }
 
