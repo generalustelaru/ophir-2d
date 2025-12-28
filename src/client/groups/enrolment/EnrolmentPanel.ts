@@ -28,8 +28,8 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         });
 
         const background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
+            width: layout.width,
+            height: layout.height,
             cornerRadius: 15,
             fill: HUES.modalBlue,
         });

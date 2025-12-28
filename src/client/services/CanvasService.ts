@@ -100,22 +100,12 @@ export class CanvasService extends Communicator {
 
         this.setupGroup = new SetupGroup(
             this.stage,
-            {
-                height: this.stage.height(),
-                width: this.stage.width(),
-                x: 0,
-                y: 0,
-            },
+            { ...clientConstants.STAGE_AREA[this.aspect], x: 0, y: 0 },
         );
 
         this.enrolmentGroup = new EnrolmentGroup(
             this.stage,
-            {
-                height: this.stage.height(),
-                width: this.stage.width(),
-                x: 0,
-                y: 0,
-            },
+            { ...clientConstants.STAGE_AREA[this.aspect], x: 0, y: 0 },
         );
     }
 
