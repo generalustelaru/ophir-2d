@@ -1,14 +1,14 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, MetalPurchasePayload,
-    Unique, FeasibleTrade, ServerMessage,
+    Unique, FeasibleTrade, ServerMessage, PlayerCountables,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
 import {
-    ActionsAndDetails, Configuration, DataDigest, PlayerCountables, Probable, ActionProcessor, StateBundle, TurnEvent,
+    ActionsAndDetails, Configuration, DataDigest, Probable, ActionProcessor, StateBundle, TurnEvent,
     UserId,
 } from '~/server_types';
 import lib from './library';

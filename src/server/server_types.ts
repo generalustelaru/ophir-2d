@@ -2,6 +2,7 @@ import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
     StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName, ClientRequest,
+    PlayerCountables,
 } from '~/shared_types';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
@@ -39,17 +40,6 @@ export type DestinationPackage = {
     from: ZoneName;
     allowed: Array<ZoneName>;
     navigatorAccess: Array<ZoneName>
-}
-
-export type PlayerCountables = {
-    color: PlayerColor;
-    name: string,
-    specialist: string,
-    vp: number;
-    gold: number;
-    silver: number;
-    favor: number;
-    coins: number;
 }
 
 export type PlayerIdentity = {

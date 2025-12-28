@@ -1,8 +1,9 @@
 import {
     ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor, PlayState,
     TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates, Phase, Unique,
+    PlayerCountables,
 } from '~/shared_types';
-import { PlayerCountables, ObjectHandler } from '~/server_types';
+import { ObjectHandler } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{

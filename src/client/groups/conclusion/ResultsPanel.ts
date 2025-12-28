@@ -1,21 +1,18 @@
 import Konva from 'konva';
-import { StaticGroupInterface } from '~/client_types';
-import { PlayState, Unique } from '~/shared_types';
+import { Dimensions, StaticGroupInterface } from '~/client_types';
+import { PlayerCountables, PlayState, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
-import { PlayerCountables } from '~/server/server_types';
 
-const { HUES, STAGE_AREA } = clientConstants;
+const { HUES } = clientConstants;
 export class ResultsPanel implements Unique<StaticGroupInterface> {
 
     private group: Konva.Group;
 
-    constructor(state: PlayState) {
-        this.group = new Konva.Group();
-        const { width, height } = STAGE_AREA.tall;
+    constructor(state: PlayState, dimensions: Dimensions) {
+        this.group = new Konva.Group({ ...dimensions });
 
         const panelBody = new Konva.Rect({
-            width: width / 4,
-            height,
+            ...dimensions,
             fill: HUES.modalBlue,
             cornerRadius: 10,
             stroke: HUES.boneWhite,
@@ -29,7 +26,7 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
             lineHeight: 1.2,
             x: 10,
             y: 10,
-
+            fontFamily: 'Custom',
         });
 
         this.group.add(panelBody, results);
@@ -44,13 +41,13 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
 
         // add player scores
         for (const player of gameResults) {
-            message += (`${player.name} (${player.color}): ${player.vp}VP\n`);
+            message += (`${player.name} (${player.color}): ${player.vp} vp\n`);
         }
 
         const vpLeaders = this.getLeaders(gameResults, 'vp');
 
         if (vpLeaders.length == 1) {
-            message += (this.addWinner(vpLeaders[0], 'vp'));
+            message += (this.addWinner(vpLeaders[0], gameResults, 'vp'));
             return message;
         }
 
@@ -59,7 +56,7 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
         const favorLeaders = this.getLeaders(vpLeaders, 'favor');
 
         if (favorLeaders.length == 1) {
-            message += (this.addWinner(favorLeaders[0], 'favor'));
+            message += (this.addWinner(favorLeaders[0], gameResults, 'favor'));
             return message;
         }
 
@@ -67,14 +64,14 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
         const coinLeaders = this.getLeaders(favorLeaders, 'coins');
 
         if (coinLeaders.length == 1) {
-            message += (this.addWinner(coinLeaders[0], 'coins'));
+            message += (this.addWinner(coinLeaders[0], gameResults, 'coins'));
             return message;
         }
 
         message += ('\nShared victory:\n');
 
         for (const player of coinLeaders)
-            message += (`${player.color} : ${player.vp}VP\n`);
+            message += (`${player.color}\n`);
 
         return message;
     }
@@ -100,10 +97,13 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
         return `\nTie-break by ${criteria}:\n\n${playerList}`;
     };
 
-    private addWinner(winner: PlayerCountables, criteria: string): string {
-        const key = criteria as keyof PlayerCountables;
-        const tieBreaker = criteria == 'vp' ? '' : ` (and ${winner[key]} ${criteria})`;
+    private addWinner(winner: PlayerCountables, players: Array<PlayerCountables>, criteria: 'vp'|'favor'|'coins'): string {
+        const second = players.sort(
+            (a, b) => a[criteria] - b[criteria],
+        )[1];
 
-        return `\n${winner.name} has won with ${winner.vp}VP${tieBreaker}\n`;
+        const tieBreaker = `${winner[criteria] - second[criteria]} ${criteria}`;
+
+        return `\n${winner.name} has won by ${tieBreaker}\n`;
     };
 }

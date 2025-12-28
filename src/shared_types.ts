@@ -1,5 +1,4 @@
 import { HexCoordinates } from "~/client_types";
-import { PlayerCountables } from "~/server_types";
 
 /**
  * @description Interface wrapper hack to prevent the TSS from polluting class method references.
@@ -195,6 +194,17 @@ export enum Phase {
     enrolment = 'enrolment',
     setup = 'setup',
     play = 'play',
+}
+
+export type PlayerCountables = {
+    color: PlayerColor;
+    name: string,
+    specialist: string,
+    vp: number;
+    gold: number;
+    silver: number;
+    favor: number;
+    coins: number;
 }
 
 export type PlayState = {

@@ -3,6 +3,7 @@ import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerI
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
 import { Coordinates, PlayState, SpecialistName, Unique } from '~/shared_types';
+import { ResultsPanel } from '../groups/conclusion/ResultsPanel';
 
 type LocationGroupCallbacks = {
     tradeCallback: Function
@@ -12,7 +13,8 @@ type LocationGroupCallbacks = {
 }
 export class LocationGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage | null;
-    private group: Konva.Group | null;
+    private group: Konva.Group;
+    private resultsPanel: ResultsPanel | null = null;
     private marketArea: MarketArea | null = null;
     private treasuryArea: TreasuryArea | null = null;
     private templeArea: TempleArea | null = null;
@@ -141,9 +143,9 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         this.templeArea?.disable();
     }
 
-    public selfDecomission(): null {
-        this.group?.destroy();
-        this.group = null;
+    public switchToResults(state: PlayState): void {
+        this.group.destroyChildren();
+
         this.stage = null;
         this.tradeCallback = null;
         this.peddlerCallback = null;
@@ -155,6 +157,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         this.treasuryArea = null;
         this.templeArea = null;
 
-        return null;
+        this.resultsPanel = new ResultsPanel(state, { width: this.group.width(), height: this.group.height() });
+        this.group.add(this.resultsPanel.getElement());
     }
 }
