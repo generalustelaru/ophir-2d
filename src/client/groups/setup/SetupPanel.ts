@@ -46,7 +46,7 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
         });
 
         const cardRow = new RowDistributor(
-            { ...layout, x: 0, y: 50 },
+            { ...layout, x: 0, y: 0 },
             this.specialistCards.map(s => {
                 return { id: s.getCardName(), node: s.getElement() };
             }),

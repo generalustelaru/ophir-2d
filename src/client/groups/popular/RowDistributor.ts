@@ -42,7 +42,9 @@ export class RowDistributor {
         if (!elements.length)
             return;
 
-        const nodeWidth = elements[0].node.width();
+        const sampleNode = elements[0].node;
+        const vPadding = (this.group.height() - sampleNode.height()) / 2;
+        const nodeWidth = sampleNode.width();
         const freeWidth = this.group.width() - (nodeWidth * elements.length);
         const interSpace = freeWidth / (elements.length + 1);
 
@@ -50,6 +52,7 @@ export class RowDistributor {
         let drift = interSpace;
         for (const element of elements) {
             const node = element.node;
+            node.y(vPadding);
             node.x(drift);
             nodes.push(node);
             drift += interSpace + nodeWidth;
