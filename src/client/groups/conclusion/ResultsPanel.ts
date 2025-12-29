@@ -36,74 +36,64 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
         return this.group;
     }
 
-    private composeResults(gameResults: Array<PlayerCountables>): string {
+    private composeResults(playerResults: Array<PlayerCountables>): string {
+        let pool: Array<PlayerCountables> = playerResults.map(r => r);
+        let leaders: Array<PlayerCountables> = [];
         let message = 'Results:\n\n';
 
-        // add player scores
-        for (const player of gameResults) {
-            message += (`${player.name} (${player.color}): ${player.vp} vp\n`);
+        function poolLeaders() {
+            pool = leaders;
+            leaders = [];
         }
 
-        const vpLeaders = this.getLeaders(gameResults, 'vp');
+        function writeRunnerups(criteria: 'vp'|'favor'|'coins') {
+            pool.sort((a, b) => b[criteria] - a[criteria]);
+            const threshold = pool[0][criteria];
+            leaders = pool.filter( r => r[criteria] == threshold);
 
-        if (vpLeaders.length == 1) {
-            message += (this.addWinner(vpLeaders[0], gameResults, 'vp'));
+            for (const countable of pool) {
+                message += (`${countable.name} (${countable.color}): ${countable[criteria]} ${criteria}\n`);
+            }
+        }
+
+        function writeWinner(criteria: 'vp'|'favor'|'coins') {
+            const tieBreaker = pool[0][criteria] - (pool[1] ? pool[1][criteria] : 0);
+            message += `\n${pool[0].name} has won by ${tieBreaker} ${criteria}.\n`;
+        };
+
+        writeRunnerups('vp');
+
+        if (leaders.length == 1) {
+            writeWinner('vp');
+
             return message;
         }
 
-        message += this.addTiedPlayers(vpLeaders, 'favor');
+        poolLeaders();
+        message += '\nTie-breaking by favor...\n';
+        writeRunnerups('favor');
 
-        const favorLeaders = this.getLeaders(vpLeaders, 'favor');
+        if (leaders.length == 1) {
+            writeWinner('favor');
 
-        if (favorLeaders.length == 1) {
-            message += (this.addWinner(favorLeaders[0], gameResults, 'favor'));
             return message;
         }
 
-        message += this.addTiedPlayers(favorLeaders, 'coins');
-        const coinLeaders = this.getLeaders(favorLeaders, 'coins');
+        poolLeaders();
+        message += '\nTie-breaking by coins...\n';
+        writeRunnerups('coins');
 
-        if (coinLeaders.length == 1) {
-            message += (this.addWinner(coinLeaders[0], gameResults, 'coins'));
+        if (leaders.length == 1) {
+            writeWinner('coins');
+
             return message;
         }
 
         message += ('\nShared victory:\n');
 
-        for (const player of coinLeaders)
-            message += (`${player.color}\n`);
+        for (const countable of leaders)
+            message += (`${countable.color}\n`);
 
         return message;
     }
-
-    private getLeaders(tiedPlayers: Array<PlayerCountables>, criteria: string): Array<PlayerCountables> {
-        const key = criteria as keyof PlayerCountables;
-        const topValue = tiedPlayers.reduce((acc, player) => {
-            const value = player[key] as number;
-
-            return value > acc ? value : acc;
-        }, 0);
-
-        return tiedPlayers.filter(player => player[key] === topValue);
-    };
-
-    private addTiedPlayers(players: Array<PlayerCountables>, criteria: string): string {
-        const key = criteria as keyof PlayerCountables;
-
-        const playerList = players.map(
-            player => `${player.name}: ${player[key]} ${criteria}\n`,
-        ).join('');
-
-        return `\nTie-break by ${criteria}:\n\n${playerList}`;
-    };
-
-    private addWinner(winner: PlayerCountables, players: Array<PlayerCountables>, criteria: 'vp'|'favor'|'coins'): string {
-        const second = players.sort(
-            (a, b) => a[criteria] - b[criteria],
-        )[1];
-
-        const tieBreaker = `${winner[criteria] - second[criteria]} ${criteria}`;
-
-        return `\n${winner.name} has won by ${tieBreaker}\n`;
-    };
 }
