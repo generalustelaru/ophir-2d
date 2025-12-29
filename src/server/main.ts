@@ -410,23 +410,17 @@ async function processAction(
         getGameConnections(gameId).length == 1
     );
 
-    const result = await game.processAction(request, isAdoption);
+    const result = game.processAction(request, isAdoption);
 
-    const statsRelevant: Array<Action> = [
-        Action.enrol, Action.change_color, Action.start_setup, Action.start_play, Action.end_turn, Action.force_turn, 
-    ];
+    const save = await dbService.saveGameState(game.getGameState());
 
-    if (statsRelevant.includes(request.message.action)) {
-        const save = await dbService.saveGameState(game.getGameState());
-
-        if (save.err) {
-            console.error(save.message);
-            updateGameStat(gameId, true);
-            return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
-        }
-
-        updateGameStat(gameId);
+    if (save.err) {
+        console.error(save.message);
+        updateGameStat(gameId, true);
+        return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
     }
+
+    updateGameStat(gameId);
 
     result.senderOnly
         ? transmit(socket, result.message)
