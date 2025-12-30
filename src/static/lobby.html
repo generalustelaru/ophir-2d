@@ -55,7 +55,7 @@
                 clearInterval(update);
                 window.location.href = '/';
             });
-        }, 10 * seconds)
+        }, 3 * seconds)
 
         async function getTableData() {
             const dataFetch = await fetch('/feed');
@@ -105,11 +105,14 @@
                 const statusText = (() => {
                     switch (status) {
                         case 0:
-                            return 'Enroling'
+                            return 'Open'
                         case 1:
-                            return 'Playing'
+                        case 2:
+                            return 'Started'
+                        case 3:
+                            return 'Abandoned'
                         default:
-                            return 'Dormant'
+                            return 'N/A'
                     }
                 })();
 

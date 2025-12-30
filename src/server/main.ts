@@ -772,20 +772,10 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
 
         const status: GameStatus = (() => {
             if (isActiveGame) {
-                return phase == Phase.enrolment ? GameStatus.Enroling : GameStatus.Playing;
+                return phase == Phase.enrolment ? GameStatus.Enroling : GameStatus.Ongoing;
             }
-            return GameStatus.Dormant;
-        })();
 
-        const action: LobbyAction | null = (() => {
-            switch(true) {
-                case !!playerEntity:
-                    return LobbyAction.Continue;
-                case isActiveGame:
-                    return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
-                default:
-                    return LobbyAction.Adopt;
-            }
+            return phase == Phase.enrolment ? GameStatus.Abandoned : GameStatus.Paused;
         })();
 
         const userInvolvement: UserInvolvement= (() => {
@@ -801,6 +791,17 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
                     return draft.turnToPick ? UserInvolvement.HasTurn : UserInvolvement.Playing;
                 default:
                     return UserInvolvement.Playing;
+            }
+        })();
+
+        const action: LobbyAction | null = (() => {
+            switch(true) {
+                case Boolean(playerEntity):
+                    return LobbyAction.Rejoin;
+                case phase == Phase.enrolment:
+                    return isActiveGame ? LobbyAction.Join : LobbyAction.Adopt;
+                default:
+                    return LobbyAction.Observe;
             }
         })();
 

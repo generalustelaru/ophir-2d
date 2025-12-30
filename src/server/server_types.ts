@@ -206,15 +206,16 @@ export type UserSession = User & {
 }
 
 export enum LobbyAction {
-    Continue = 'Continue',
+    Rejoin = 'Rejoin',
     Join = 'Join',
-    Spectate = 'Spectate',
+    Observe = 'Observe',
     Adopt = 'Adopt',
 }
 export enum GameStatus {
     Enroling,
-    Playing,
-    Dormant,
+    Ongoing,
+    Paused,
+    Abandoned,
 }
 
 export enum UserInvolvement {
