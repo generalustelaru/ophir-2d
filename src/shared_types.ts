@@ -59,7 +59,7 @@ export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = 'A' | 'B';
-export type ChatEntry = { color: PlayerColor | null, name: string | null, message: string };
+export type ChatEntry = { timeStamp: number, color: PlayerColor | null, name: string | null, message: string };
 
 export type ExchangeTier = {
     templeLevel: number,

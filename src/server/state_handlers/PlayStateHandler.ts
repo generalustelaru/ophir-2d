@@ -86,9 +86,12 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
         this.savePlayer(player);
     }
 
-    public addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.chat.addOne({ color: as, name: this.serverName.get(), message });
+    public addServerMessage(message: string, as: PlayerColor | null = null): ChatEntry {
+        const chatEntry: ChatEntry = { timeStamp: Date.now(), color: as, name: this.serverName.get(), message };
+        this.chat.addOne(chatEntry);
         this.trimChatList();
+
+        return chatEntry;
     }
 
     // MARK: Player

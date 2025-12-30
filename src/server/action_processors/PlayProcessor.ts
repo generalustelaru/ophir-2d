@@ -794,9 +794,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             });
             player.gainFavor(1);
         }
-        this.addServerMessage(
-            this.convertDeedsToMessage(player), { color: player.getIdentity().color, backup: true },
-        );
 
         player.deactivate();
         this.privateState.clearSpentActions();
@@ -835,7 +832,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(newPlayerOperation.message);
 
         const newPlayer = newPlayerOperation.data;
-        this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, { backup: true });
+
+        const deeds = this.convertDeedsToMessage(player);
+        const nextPlayerTurn = `It's ${newPlayer.getIdentity().name}'s turn!`;
+        this.addServerMessage(
+            `${deeds}\n${nextPlayerTurn}`,
+            { color: player.getIdentity().color, backup: true },
+        );
 
         return this.continueTurn(newPlayer);
     }
@@ -1346,10 +1349,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     private addServerMessage(message: string, options?: { color?: PlayerColor, backup?: boolean}) {
-        this.playState.addServerMessage(message, options?.color);
+        const chatEntry = this.playState.addServerMessage(message, options?.color);
 
         if (options?.backup)
-            this.backupState.addServerMessage(message, options?.color);
+            this.backupState.addChatEntry(chatEntry);
     }
 
     private preserveState(player: PlayerHandler, hasMoved: boolean = false) {

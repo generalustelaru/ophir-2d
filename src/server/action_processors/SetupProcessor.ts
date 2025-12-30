@@ -249,7 +249,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         return lib.pass({
             playState: playStateHandler,
             privateState: privateStateHandler,
-            backupState: new BackupStateHandler(this.config.SERVER_NAME, null),
+            backupState: new BackupStateHandler(null),
         });
     };
 

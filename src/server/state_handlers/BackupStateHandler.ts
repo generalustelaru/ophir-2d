@@ -4,10 +4,8 @@ import lib from '../action_processors/library';
 
 export class BackupStateHandler {
     private backupState: Array<BackupState> = [];
-    private serverName: string;
 
-    constructor(serverName: string, initialState: Array<BackupState> | null) {
-        this.serverName = serverName;
+    constructor(initialState: Array<BackupState> | null) {
 
         if (initialState)
             this.backupState = initialState;
@@ -59,8 +57,8 @@ export class BackupStateHandler {
             entityRef.bearings.position = position;
     }
 
-    public addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.addChat({ color: as, name: this.serverName, message });
+    public addChatEntry(chatEntry: ChatEntry) {
+        this.addChat(chatEntry);
     }
 
     public updatePlayerName(color: PlayerColor, name: string ) {

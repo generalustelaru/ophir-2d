@@ -11,10 +11,14 @@ export const UserInterface = new class extends Communicator {
     private draftButton: Button;
     private startButton: Button;
     private resetButton: Button;
+    private popDisplay: HTMLDivElement;
+    private isPopDisplaying: boolean = false;
+    private popCache: Array<{timeStamp: number, hyperText: string}> = [];
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
     private chatSendButton: Button;
     private forceTurnButton: Button;
+
 
     constructor() {
         super();
@@ -26,9 +30,35 @@ export const UserInterface = new class extends Communicator {
         this.startButton = new Button('startButton', this.processStart);
         this.resetButton = new Button('resetButton', this.processReset);
         this.forceTurnButton = new Button('forceTurnButton', this.processForceTurn);
-        this.chatMessages = document.getElementById('chatMessages') as HTMLDivElement;
+        this.popDisplay = document.querySelector('#chatPop') as HTMLDivElement;
+        this.chatMessages = document.querySelector('#chatMessages') as HTMLDivElement;
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
+
+        setInterval(() => {
+            if (this.isPopDisplaying)
+                return;
+
+            if(this.popCache.length == 0)
+                return;
+
+            const { timeStamp, hyperText } = this.popCache.shift()!;
+            this.popDisplay.innerHTML = hyperText;
+            this.isPopDisplaying = true;
+
+            this.popDisplay.style.visibility = 'visible';
+            localStorage.setItem('chatTimeStamp', String(timeStamp));
+
+            setTimeout(() => {
+                this.popDisplay.classList.add('hidden');
+            }, 5000);
+
+            setTimeout(() => {
+                this.popDisplay.style.visibility = 'hidden';
+                this.popDisplay.classList.remove('hidden');
+                this.isPopDisplaying = false;
+            }, 5200);
+        },1000);
     }
 
     public update(state: State) {
@@ -205,6 +235,7 @@ export const UserInterface = new class extends Communicator {
     }
 
     private updateChat(chat: Array<ChatEntry>): void {
+        // TODO: transform into regular loop to have the last formatted message available as a side effect.
         this.chatMessages.innerHTML = chat.map(entry => {
             const name = entry.name ? `${this.sanitizeText(entry.name)}: ` : '';
             const message = this.sanitizeText(entry.message);
@@ -212,6 +243,22 @@ export const UserInterface = new class extends Communicator {
             return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        const lastEntry = chat[chat.length - 1] || null;
+        const lastDisplayed = parseInt(localStorage.getItem('chatTimeStamp') || '0');
+
+        if (
+            lastEntry &&
+            localState.playerColor != lastEntry.color &&
+            (!lastDisplayed || lastEntry.timeStamp > lastDisplayed)
+        ) {
+            const { timeStamp, color, name, message } = lastEntry;
+            const saneName = name ? `${this.sanitizeText(name)}: ` : '';
+            const saneMessage = this.sanitizeText(message);
+            const hue = color ? clientConstants.PLAYER_HUES[color].vivid.light : 'inherit';
+
+            const hyperText = `<span style="color:${hue}; font-weight: bold">${saneName}</span>${saneMessage}</br>`;
+            this.popCache.push({ timeStamp, hyperText });
+        }
     }
 
     private sanitizeText(text: string) {

@@ -81,9 +81,7 @@ export class Game {
                             playState: new PlayStateHandler(
                                 configuration.SERVER_NAME, sharedState,
                             ),
-                            backupState: new BackupStateHandler(
-                                configuration.SERVER_NAME, backupStates,
-                            ),
+                            backupState: new BackupStateHandler(backupStates),
                         },
                         configuration,
                         broadcastCallback,
@@ -267,6 +265,7 @@ export class Game {
             }
 
             return this.issueGroupResponse(this.actionProcessor.addChat({
+                timeStamp: Date.now(),
                 color: player.color,
                 name: player.name,
                 message: message.input,
