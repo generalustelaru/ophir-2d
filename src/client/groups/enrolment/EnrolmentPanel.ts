@@ -10,11 +10,12 @@ type EnrolmentPanelUpdate = {
     localPlayerColor: PlayerColor | null,
 }
 
-const { HUES, PLAYER_HUES } = clientConstants;
+const { PLAYER_HUES } = clientConstants;
 
 export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPanelUpdate>> {
     private group: Konva.Group | null;
     private cards: Array<ColorCard> = [];
+    private colorTableau: RowDistributor | null;
 
     constructor(
         stage: Konva.Stage,
@@ -27,13 +28,6 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             y: layout.y,
         });
 
-        const background = new Konva.Rect({
-            width: layout.width,
-            height: layout.height,
-            cornerRadius: 15,
-            fill: HUES.modalBlue,
-        });
-
         const playerColors: Array<PlayerColor> = ['Purple' , 'Yellow' , 'Red' , 'Green'];
 
         playerColors.forEach(color => {
@@ -44,14 +38,14 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             );
         });
 
-        const cardRow = new RowDistributor(
+        this.colorTableau = new RowDistributor(
             { ...layout, x: 0, y: 0 },
             this.cards.map(c => {
                 return { id: '', node: c.getElement() };
             }),
         );
 
-        this.group.add(background, cardRow.getElement());
+        this.group.add( this.colorTableau.getElement());
     }
 
     public getElement() {
@@ -59,6 +53,12 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             throw new Error('Cannot provide element. EnrolmentPanel was destroyed improperly.');
 
         return this.group;
+    }
+
+    public rearrangeRows(layout: GroupLayoutData) {
+        const { width, height, x ,y } = layout;
+        this.group?.width(width).height(height).x(x).y(y);
+        this.colorTableau?.rearrangeNodes({ width, height, x: 0, y: 0 });
     }
 
     public update(data: EnrolmentPanelUpdate) {
@@ -74,6 +74,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         this.group?.destroy();
         this.group = null;
 
+        this.colorTableau = null;
         this.cards = this.cards.filter(card => {
             card.selfDecomission();
             return false;

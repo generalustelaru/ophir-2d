@@ -99,12 +99,12 @@ export class CanvasService extends Communicator {
 
         this.setupGroup = new SetupGroup(
             this.stage,
-            { ...clientConstants.STAGE_AREA[this.aspect], x: 0, y: 0 },
+            { ...clientConstants.STAGE_AREA[this.aspect] },
         );
 
         this.enrolmentGroup = new EnrolmentGroup(
             this.stage,
-            { ...clientConstants.STAGE_AREA[this.aspect], x: 0, y: 0 },
+            { ...clientConstants.STAGE_AREA[this.aspect] },
         );
     }
 
@@ -223,6 +223,9 @@ export class CanvasService extends Communicator {
         this.stage.height(height);
         this.stage.scale({ x: scale, y: scale });
 
+        this.enrolmentGroup?.adjustDimensions(clientConstants.STAGE_AREA[this.aspect]);
+        this.setupGroup?.adjustDimensions(clientConstants.STAGE_AREA[this.aspect]);
+
         this.locationGroup.setPlacement(clientConstants.LOCATION_PLACEMENT[this.aspect]);
         this.mapGroup.setPlacement(clientConstants.MAP_PLACEMENT[this.aspect]);
         this.playerGroup.setPlacement(clientConstants.PLAYER_PLACEMENT[this.aspect]);
@@ -254,7 +257,7 @@ export class CanvasService extends Communicator {
             return container;
         })();
 
-        if (containerHeight  == 0 || conainerWidth == 0) {
+        if (containerHeight == 0 || conainerWidth == 0) {
             console.error({ elementHeight: containerHeight, elementWidth: conainerWidth });
             throw new Error('Container size is incompatible!');
         }

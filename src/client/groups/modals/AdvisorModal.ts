@@ -70,7 +70,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
             return { id: item.slot, node: card.getElement() };
         });
 
-        this.cardRow.distributeNodes(rowElements);
+        this.cardRow.updateNodes(rowElements);
         this.open();
     }
 

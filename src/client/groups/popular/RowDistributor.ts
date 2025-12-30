@@ -16,7 +16,7 @@ export class RowDistributor {
         this.group = new Konva.Group({ ...layout });
         this.elements = elements || null;
 
-        this.elements && this.distributeNodes(this.elements);
+        this.elements && this.positionNodes();
     }
 
     public getChildNode(id: string) {
@@ -35,14 +35,29 @@ export class RowDistributor {
         return this.group;
     }
 
-    public distributeNodes(elements: Array<RowElement>) {
+    public updateNodes(elements: Array<RowElement>) {
         this.group.destroyChildren();
         this.elements = elements;
+        this.positionNodes();
+    };
 
-        if (!elements.length)
+    public rearrangeNodes(layout: GroupLayoutData) {
+        const { width, height, x, y } = layout;
+        this.group
+            .width(width)
+            .height(height)
+            .x(x)
+            .y(y);
+
+        this.positionNodes();
+    }
+
+    private positionNodes() {
+
+        if (!this.elements || !this.elements.length)
             return;
 
-        const nodes: ElementList = elements.map(e => e.node);
+        const nodes: ElementList = this.elements.map(e => e.node);
 
         const sampleNode = nodes[0];
         const nodeHeight = sampleNode.height();

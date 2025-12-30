@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData, LayerIds, MegaGroupInterface } from '~/client_types';
+import { Dimensions, LayerIds, MegaGroupInterface } from '~/client_types';
 import { SetupState, Unique } from '~/shared_types';
 import { ShowHideButton } from '../groups/setup/ShowHideButton';
 import { SetupPanel } from '../groups/setup/SetupPanel';
@@ -10,13 +10,8 @@ export class SetupGroup implements Unique<MegaGroupInterface> {
     private panel: SetupPanel | null = null;
     private showHideButton: ShowHideButton | null = null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData) {
-        this.group = new Konva.Group({
-            width: layout.width,
-            height: layout.height,
-            x: layout.x,
-            y: layout.y,
-        });
+    constructor(stage: Konva.Stage, dimensions: Dimensions) {
+        this.group = new Konva.Group({ ...dimensions });
         stage.getLayers()[LayerIds.modals].add(this.group);
         this.stage = stage;
     }
@@ -39,15 +34,23 @@ export class SetupGroup implements Unique<MegaGroupInterface> {
 
         this.showHideButton = new ShowHideButton(
             this.stage,
-            { x: 550, y: 450 },
+            this.group.width() / 2,
             '#002255',
-            'Show / Hide',
             () => {
                 this.panel && this.panel.switchVisibility();
             },
         );
         this.showHideButton.enable();
         this.group.add(this.panel.getElement(), this.showHideButton.getElement());
+    }
+
+    public adjustDimensions(dimensions: Dimensions) {
+        const { width, height } = dimensions;
+        this.group?.width(width).height(height);
+        this.panel?.rearrangeRows({
+            x: 50, y: 50, width: width - 100, height:height - 100,
+        });
+        this.showHideButton?.reposition(width / 2);
     }
 
     public update(state: SetupState) {

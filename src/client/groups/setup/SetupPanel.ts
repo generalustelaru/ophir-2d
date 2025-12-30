@@ -17,22 +17,19 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
     private group: Konva.Group | null;
     private specialistCards:  Array<SpecialistCard> = [];
     private localPlayerColor: PlayerColor | null;
+    private specialistTableau: RowDistributor | null;
+    private background: Konva.Rect;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData, specialists: Array<SelectableSpecialist>) {
         this.localPlayerColor = localState.playerColor;
-        this.group = new Konva.Group({
+        this.group = new Konva.Group({ ...layout });
+
+        this.background = new Konva.Rect({
             width: layout.width,
             height: layout.height,
-            x: layout.x,
-            y: layout.y,
-        });
-        const background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
             cornerRadius: 15,
             fill: HUES.modalBlue,
         });
-        this.group.add(background);
 
         specialists.forEach( specialist => {
             const card = new SpecialistCard(
@@ -45,14 +42,14 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
             this.specialistCards.push(card);
         });
 
-        const cardRow = new RowDistributor(
+        this.specialistTableau = new RowDistributor(
             { ...layout, x: 0, y: 0 },
             this.specialistCards.map(s => {
                 return { id: s.getCardName(), node: s.getElement() };
             }),
         );
 
-        this.group.add(cardRow.getElement());
+        this.group.add(this.background, this.specialistTableau.getElement());
     }
 
     public getElement() {
@@ -60,6 +57,13 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
             throw new Error('Cannot provide element. SetupPanel was destroyed improperly.');
 
         return this.group;
+    }
+
+    public rearrangeRows(layout: GroupLayoutData) {
+        const { width, height, x, y } = layout;
+        this.group?.width(width).height(height).x(x).y(y);
+        this.background.width(width).height(height);
+        this.specialistTableau?.rearrangeNodes({ width, height, x: 0, y: 0 });
     }
 
     public update(update: SetupPanelUpdate) {
@@ -92,6 +96,7 @@ export class SetupPanel implements Unique<DynamicGroupInterface<SetupPanelUpdate
         this.group?.destroy();
         this.group = null;
 
+        this.specialistTableau = null;
         this.specialistCards = this.specialistCards.filter( card => {
             card.selfDecomission();
             return false;
