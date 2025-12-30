@@ -18,14 +18,6 @@ export const UserInterface = new class extends Communicator {
 
     constructor() {
         super();
-        const logout = document.querySelector('#logout');
-        logout && logout.addEventListener('click', () => {
-            fetch('/logout').then(response => {
-                if (response.status !== 200)
-                    console.error(response.statusText);
-                window.location.href = '/';
-            });
-        });
         const toLobby = document.querySelector('#lobby');
         toLobby && toLobby.addEventListener('click', () => {
             window.location.href = '/lobby';

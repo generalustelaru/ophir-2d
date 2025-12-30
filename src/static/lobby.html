@@ -11,21 +11,25 @@
 </head>
 
 <body>
-    <a id="logout">Log out</a>
-    <h3>Games</h3>
-    <table>
-        <thead>
-            <tr>
-                <th>Game</th>
-                <th class="players">Players</th>
-                <th class="status">Status</th>
-                <th class="update">Last Update</th>
-                <th>Playing?</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="navbar">
+        <button id="logout">Log Out</button>
+    </div>
+    <div class="content">
+        <h3>Games</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th class="players">Players</th>
+                    <th class="status">Status</th>
+                    <th class="update">Last Update</th>
+                    <th>Playing?</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
     <script>
         const seconds = 1000;
         document.querySelector('#logout').addEventListener('click', () => {
