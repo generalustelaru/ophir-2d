@@ -13,6 +13,7 @@ export const UserInterface = new class extends Communicator {
     private resetButton: Button;
     private popDisplay: HTMLDivElement;
     private isPopDisplaying: boolean = false;
+    private popTimeStamp: number | null = null;
     private popCache: Array<{timeStamp: number, hyperText: string}> = [];
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
@@ -47,7 +48,7 @@ export const UserInterface = new class extends Communicator {
             this.isPopDisplaying = true;
 
             this.popDisplay.style.visibility = 'visible';
-            localStorage.setItem('chatTimeStamp', String(timeStamp));
+            this.popTimeStamp = timeStamp;
 
             setTimeout(() => {
                 this.popDisplay.classList.add('hidden');
@@ -243,13 +244,12 @@ export const UserInterface = new class extends Communicator {
             return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-        const lastEntry = chat[chat.length - 1] || null;
-        const lastDisplayed = parseInt(localStorage.getItem('chatTimeStamp') || '0');
+        const lastEntry = chat[chat.length - 1];
 
         if (
             lastEntry &&
             localState.playerColor != lastEntry.color &&
-            (!lastDisplayed || lastEntry.timeStamp > lastDisplayed)
+            (!this.popTimeStamp || lastEntry.timeStamp > this.popTimeStamp)
         ) {
             const { timeStamp, color, name, message } = lastEntry;
             const saneName = name ? `${this.sanitizeText(name)}: ` : '';
