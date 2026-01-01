@@ -136,6 +136,9 @@ document.fonts.ready.then(() => {
         if (!event.detail)
             return signalError('Missing color!');
 
+        if (!localState.playerColor)
+            UserInterface.addInternalPop('Set a player name by typing #name and then a preferred name.');
+
         localState.playerColor = event.detail.color;
     });
 

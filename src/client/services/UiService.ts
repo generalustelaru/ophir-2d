@@ -237,6 +237,12 @@ export const UserInterface = new class extends Communicator {
         this.forceTurnButton.disable();
     }
 
+    public addInternalPop(message: string) {
+        this.popCache.push({
+            timeStamp: Date.now(),
+            hyperText: `<span style="color:inherit; font-weight: bold">INFO: </span>${message}</br>` });
+    }
+
     private updateChat(chat: Array<ChatEntry>): void {
         // TODO: transform into regular loop to have the last formatted message available as a side effect.
         this.chatMessages.innerHTML = chat.map(entry => {

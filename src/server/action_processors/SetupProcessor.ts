@@ -139,9 +139,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             return lib.fail('Player cannot choose or specialist already assigned');
 
         this.setupState.assignSpecialist(player, name);
-        this.setupState.addServerMessage(
-            `[${player.name}] has picked the ${pickedSpecialist.displayName}`, player.color,
-        );
+
         const nextPlayer = this.setupState.getNextPlayer();
 
         if (nextPlayer)
