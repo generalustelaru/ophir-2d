@@ -45,7 +45,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         });
 
         this.influenceDial = new InfluenceDial(
-            { x: -50, y: 25 },
+            { x: -53, y: 25 },
             HUES.Neutral,
         );
 
@@ -74,6 +74,10 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
 
     public getElement() {
         return this.group;
+    }
+
+    public hideInfluence() {
+        this.influenceDial.selfDestroy();
     }
 
     public update(rival: Rival) {

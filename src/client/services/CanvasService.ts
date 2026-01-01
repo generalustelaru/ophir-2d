@@ -187,6 +187,7 @@ export class CanvasService extends Communicator {
                 if (hasGameEnded) {
                     this.disable();
                     this.locationGroup.switchToResults(state);
+                    this.playerGroup.switchToResults(state);
                 } else {
                     this.locationGroup.update(state);
                 }

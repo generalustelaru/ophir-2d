@@ -231,7 +231,9 @@ export const UserInterface = new class extends Communicator {
 
     private handleEndedState(): void {
         this.setInfo('The game has ended');
-        this.resetButton.enable();
+        if (localState.playerColor) {
+            this.resetButton.enable();
+        }
         this.forceTurnButton.disable();
     }
 

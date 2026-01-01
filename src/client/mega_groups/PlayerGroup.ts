@@ -86,6 +86,16 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         }
     }
 
+    public switchToResults(state: PlayState): void {
+        const results = state.gameResults;
+        for (const placard of this.playerPlacards) {
+            const color = placard.getId();
+            const vp = results.find(r => r.color == color)?.vp || 0;
+            placard.switchToResults(vp);
+        }
+        this.rivalPlacard && this.rivalPlacard.hideInfluence();
+    }
+
     public updatePlayerVp(color: PlayerColor|null, vp: number) {
         const localPlacard = this.playerPlacards.find(placard => placard.getId() === color);
         localPlacard && localPlacard.updateVP(vp);

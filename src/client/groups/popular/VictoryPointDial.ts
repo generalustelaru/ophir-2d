@@ -11,8 +11,11 @@ export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
     constructor(
         position: Coordinates,
         value?: number,
+        isVisible: boolean = true,
     ) {
-        this.group = new Konva.Group({ x: position.x, y: position.y, width: 66, height: 66 });
+        this.group = new Konva.Group({
+            x: position.x, y: position.y, width: 66, height: 66 },
+        ).visible(isVisible);
 
         const disc = new Konva.Circle({
             x: this.group.width() / 2,
@@ -58,6 +61,10 @@ export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
             rightWreath,
             this.vp,
         ]);
+    }
+
+    public appear() {
+        this.group.visible(true);
     }
 
     public update(value: number) {

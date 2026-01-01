@@ -19,7 +19,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
-    private vpDial: VictoryPointDial | null;
+    private vpDial: VictoryPointDial;
     private specialtyGoodButton: SpecialtyGoodButton;
     private color: PlayerColor;
     private variation: PlayerHueVariation;
@@ -68,7 +68,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         );
 
         this.influenceDial = new InfluenceDial(
-            { x: -50, y: 25 },
+            { x: -53, y: 25 },
             this.variation.vivid.light,
         );
 
@@ -80,11 +80,12 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
             this.influenceDial.getElement(),
         );
 
-        this.vpDial = player.color === localColorName ? new VictoryPointDial(
+        this.vpDial = new VictoryPointDial(
             { x:120, y: 33 },
             0,
-        ) : null;
-        this.vpDial && this.group.add(this.vpDial.getElement());
+            player.color === localColorName,
+        );
+        this.group.add(this.vpDial.getElement());
 
         this.specialtyGoodButton = new SpecialtyGoodButton(
             stage,
@@ -134,11 +135,14 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         ));
     }
 
-    public updateVP(vp: number) {
-        if (!this.vpDial)
-            throw new Error('Cannot update VP on opponent placards');
+    public switchToResults(vp: number) {
+        this.influenceDial.selfDestroy();
+        this.vpDial.appear();
+        this.vpDial.update(vp);
+    }
 
-        this.vpDial?.update(vp);
+    public updateVP(vp: number) {
+        this.vpDial.update(vp);
     }
 
     public getId(): PlayerColor {

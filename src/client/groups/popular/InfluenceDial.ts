@@ -82,6 +82,11 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<InfluenceDial
         }
     }
 
+    public selfDestroy() {
+        this.group.destroyChildren();
+        this.group.visible(false);
+    }
+
     public getElement(): Konva.Group {
         return this.group;
     }

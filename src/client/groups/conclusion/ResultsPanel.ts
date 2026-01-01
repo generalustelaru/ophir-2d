@@ -9,10 +9,12 @@ export class ResultsPanel implements Unique<StaticGroupInterface> {
     private group: Konva.Group;
 
     constructor(state: PlayState, dimensions: Dimensions) {
-        this.group = new Konva.Group({ ...dimensions });
+        const { width, height } = dimensions;
+        this.group = new Konva.Group({ width, height });
 
         const panelBody = new Konva.Rect({
-            ...dimensions,
+            width: width + 25,
+            height,
             fill: HUES.modalBlue,
             cornerRadius: 10,
             stroke: HUES.boneWhite,
