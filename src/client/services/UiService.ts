@@ -4,7 +4,7 @@ import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import clientConstants from '~/client_constants';
-import { EventType } from '~/client_types';
+import { EventType, MessageType } from '~/client_types';
 
 export const UserInterface = new class extends Communicator {
 
@@ -237,10 +237,12 @@ export const UserInterface = new class extends Communicator {
         this.forceTurnButton.disable();
     }
 
-    public addInternalPop(message: string) {
+    public addInternalPop(type: MessageType, message: string) {
+        const hue = type == MessageType.ERROR ? 'red' : 'inherit';
         this.popCache.push({
             timeStamp: Date.now(),
-            hyperText: `<span style="color:inherit; font-weight: bold">INFO: </span>${message}</br>` });
+            hyperText: `<span style="color${hue}; font-weight: bold">${type}: </span>${message}</br>`,
+        });
     }
 
     private updateChat(chat: Array<ChatEntry>): void {

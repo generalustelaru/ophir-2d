@@ -7,7 +7,10 @@ import Konva from 'konva';
 
 export type ElementList = Array<Konva.Group | Konva.Shape>
 export type Hue = `#${string}`;
-
+export enum MessageType {
+    INFO = 'INFO',
+    ERROR = 'ERROR',
+}
 export enum RawEvents {
     HOVER = 'mouseenter',
     LEAVE = 'mouseleave',
