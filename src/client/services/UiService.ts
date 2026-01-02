@@ -7,9 +7,7 @@ import clientConstants from '~/client_constants';
 import { EventType, MessageType } from '~/client_types';
 
 export const UserInterface = new class extends Communicator {
-
-    private draftButton: Button;
-    private startButton: Button;
+    private continueButton: Button;
     private resetButton: Button;
     private popDisplay: HTMLDivElement;
     private isPopDisplaying: boolean = false;
@@ -19,7 +17,7 @@ export const UserInterface = new class extends Communicator {
     private chatInput: ChatInput;
     private chatSendButton: Button;
     private forceTurnButton: Button;
-
+    private phase: Phase = Phase.enrolment;
 
     constructor() {
         super();
@@ -27,8 +25,7 @@ export const UserInterface = new class extends Communicator {
         toLobby && toLobby.addEventListener('click', () => {
             window.location.href = '/lobby';
         });
-        this.draftButton =  new Button('draftButton', this.processDraft);
-        this.startButton = new Button('startButton', this.processStart);
+        this.continueButton = new Button('continueButton', this.processContinue);
         this.resetButton = new Button('resetButton', this.processReset);
         this.forceTurnButton = new Button('forceTurnButton', this.processForceTurn);
         this.popDisplay = document.querySelector('#chatPop') as HTMLDivElement;
@@ -98,16 +95,12 @@ export const UserInterface = new class extends Communicator {
         toSubmit && this.sendChatMessage();
     };
 
-    private processDraft = (): void => {
-        this.draftButton.disable();
+    private processContinue = (): void => {
 
-        return this.createEvent({ type: EventType.draft, detail: null });
-    };
-
-    private processStart = (): void => {
-        this.startButton.disable();
-
-        return this.createEvent({ type: EventType.start_action, detail: null });
+        return this.createEvent({
+            type: this.phase == Phase.setup ? EventType.start_play : EventType.start_setup,
+            detail: null,
+        });
     };
 
     private processReset = (): void => {
@@ -136,8 +129,7 @@ export const UserInterface = new class extends Communicator {
     }
 
     private disableButtons(): void {
-        this.draftButton.disable();
-        this.startButton.disable();
+        this.continueButton.disable();
         this.resetButton.disable();
         this.forceTurnButton.disable();
         this.chatSendButton.disable();
@@ -153,15 +145,17 @@ export const UserInterface = new class extends Communicator {
     }
 
     private updateAsSetup(state: SetupState): void {
+        this.phase = Phase.setup;
         if (localState.playerColor === state.sessionOwner) {
             this.resetButton.enable();
 
             if (state.players.every(p => p.specialist))
-                this.startButton.enable();
+                this.continueButton.enable();
         }
     }
 
     private updateAsPlay(state: PlayState): void {
+        this.phase = Phase.play;
         const activePlayer = state.players.find(p => p.isActive);
 
         if (
@@ -187,7 +181,7 @@ export const UserInterface = new class extends Communicator {
             this.resetButton.enable();
 
             if (state.mayDraft) {
-                this.draftButton.enable();
+                this.continueButton.enable();
 
                 return this.setInfo('You may begin draft whenever you want!');
             }
@@ -208,7 +202,7 @@ export const UserInterface = new class extends Communicator {
             return this.setInfo('The game is full, sorry :(');
 
         if (localState.playerColor === state.sessionOwner) {
-            this.enableElements(this.draftButton, this.resetButton);
+            this.enableElements(this.continueButton, this.resetButton);
 
             return this.setInfo('You may begin draft whenever you want!');
         }

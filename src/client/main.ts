@@ -72,7 +72,7 @@ document.fonts.ready.then(() => {
     });
 
     //Send state change message to server
-    window.addEventListener(EventType.draft, () => {
+    window.addEventListener(EventType.start_setup, () => {
         const message: ClientMessage = {
             action: Action.start_setup,
             payload: null,
@@ -80,7 +80,7 @@ document.fonts.ready.then(() => {
         comms.sendMessage(message);
     });
 
-    window.addEventListener(EventType.start_action, () => {
+    window.addEventListener(EventType.start_play, () => {
         const message: ClientMessage = {
             action: Action.start_play,
             payload: canvas.getSetupCoordinates(),

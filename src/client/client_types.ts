@@ -173,8 +173,8 @@ export type EventFormat<T extends EventType, D> = {
 
 export enum EventType {
     identification = 'identification',
-    draft = 'draft',
-    start_action = 'start',
+    start_setup = 'setup',
+    start_play = 'play',
     close = 'close',
     timeout = 'timeout',
     action = 'action',
@@ -192,8 +192,8 @@ export enum EventType {
 }
 
 export type LaconicType =
-    | EventType.draft
-    | EventType.start_action
+    | EventType.start_setup
+    | EventType.start_play
     | EventType.close
     | EventType.timeout
     | EventType.start_turn
