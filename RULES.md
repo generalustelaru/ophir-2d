@@ -4,7 +4,7 @@ Visitors will have to select one of the available colors to join. This is a free
 
 Once you've chosen a color, you can start typing in the included chat. As a special command, you can currently change your player name by typing `#name <your name>`. You can do this any time during the session.
 
-When the owner is satisfied with the player composition, she may click on **Draft**. This will reveal the map layout and present several **specialist** cards. Each specialist provides a unique special ability, some starting **favor** (an alternate currency), and, usually, a **specialty** commodity.
+When the owner is satisfied with the player composition, she may click on **Next**. This will reveal the map layout and present several **specialist** cards. Each specialist provides a unique special ability, some starting **favor** (an alternate currency), and, usually, a **specialty** commodity.
 
 Specialist selection is done in reverse player order. Don't worry, the game will handle rules 100%. Once you've clicked a specialist card, you'll have  to click on it again to select it. You can't change your mind after that.
 
@@ -19,7 +19,7 @@ The map consists of seven sea **zones**, each containing a unique **location**. 
 
 The two grey **barriers** are blocking access between adjacent sea zones. The separated zones are not considered to be adjacent. Your ship has a reach of two zones. However, barriers can considerably hinder zone access. So take that into account when choosing your specialist.
 
-When all players have selected a card, the owner may click on **Start** to start the game.
+When all players have selected a card, the owner may click on **Next** to start the game.
 
 Upon starting, your **ship** will appear in the map's center zone as a disc token in your chosen color . The token is draggable and it is used to indicate your current location on the map. It's actual position is irrelevant as long as it is within the sea zone's hexagonal boundaries. 
 
