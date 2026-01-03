@@ -209,6 +209,9 @@ app.get('/debug', (req: Request, res: Response) => {
 app.get('/about', (_, res: Response) => {
     res.sendFile(path.join(__dirname,'public', 'about.html'));
 });
+app.get('/how-to-play', (_, res: Response) => {
+    res.sendFile(path.join(__dirname,'public', 'how-to-play.html'));
+});
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
