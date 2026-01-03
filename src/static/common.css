@@ -49,6 +49,13 @@ body {
     font-weight: bold;
 }
 
+article {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
 #logout {
     cursor: pointer;
 }
