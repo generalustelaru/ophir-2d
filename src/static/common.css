@@ -54,6 +54,7 @@ article {
     flex-direction: column;
     justify-content: center;
     margin: 1rem 0;
+    max-width: 720px;
 }
 
 #logout {
