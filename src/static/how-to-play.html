@@ -10,6 +10,9 @@
 </head>
 
 <body>
+    <div class="navbar">
+        <button id="back">Back</button>
+    </div>
     <article>
         <h2 id="setup-and-goal">Setup and Goal</h2>
         <p>Visitors will have to select one of the available colors to join. This is a free-for-all state. A player may
@@ -394,6 +397,9 @@
                 will appear as restricted.</li>
         </ul>
     </article>
+    <script>
+        document.querySelector('#back').addEventListener('click', () => { window.history.back() });
+    </script>
 </body>
 
 </html>

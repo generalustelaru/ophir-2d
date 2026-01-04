@@ -13,6 +13,7 @@
 <body>
     <div class="navbar">
         <button id="logout">Log Out</button>
+        <button id="how-to">How to Play</button>
     </div>
     <div class="content">
         <h3>Games</h3>
@@ -39,6 +40,9 @@
                     console.error(response.statusText);
                 window.location.href = '/';
             });
+        });
+        document.querySelector('#how-to').addEventListener('click', () => {
+            window.location.href = '/how-to-play';
         });
 
         getTableData().then(data => {
