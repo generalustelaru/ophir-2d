@@ -13,7 +13,7 @@
 <body>
     <div class="navbar">
         <button id="logout">Log Out</button>
-        <button id="how-to">How to Play</button>
+        <button id="how-to-play">How to Play</button>
     </div>
     <div class="content">
         <h3>Games</h3>
@@ -41,7 +41,8 @@
                 window.location.href = '/';
             });
         });
-        document.querySelector('#how-to').addEventListener('click', () => {
+
+        document.querySelector('#how-to-play').addEventListener('click', () => {
             window.location.href = '/how-to-play';
         });
 
