@@ -16,20 +16,35 @@
     </div>
     <div class="content">
     <article>
-        <h2 id="setup-and-goal">Setup and Goal</h2>
+        <h2 id="the-navbar">The Navbar</h2>
         <img class="picture" src="/pictures/game-navbar.png">
-        <p>Visitors will have to select one of the available colors to join. This is a free-for-all state. A player may
-            select a different color if available. The first player to have selected a color becomes the game owner. The
-            game owner may reset the session at any time.</p>
+        <p>The game-specific navbar contains these buttons:</p>
+        <ul>
+            <li>Back: Return to the Lobby. You will continue being part of the game if you've already picked a color.</li>
+            <li>Next: Transitions to the next game phase. Only available to the game owner. Phases are Enrolment, Specialist Selection, and Play.</li>
+            <li>Reset: Wipes the game state and returns it to the Enrolment state. Only available to the game owner</li>
+            <li>Force: Currently not available.</li>
+        </ul>
+        <h2 id="setup-and-goal">Setup and Goal</h2>
+        <p>During <bold>Enrolment</bold> visitors will have to select one of the available colors to join. This is a
+            free-for-all phase. A player may select a different color if available. The first player to have selected a
+            color becomes the game owner. The game owner may reset the session at any time.</p>
         <img class="picture" src="/pictures/enrolment-panel.png" />
+        <hr/>
         <p>Once you&#39;ve chosen a color, you can start typing in the included chat. As a special command, you can
             currently change your display name by typing <code>#name &lt;some_name&gt;</code>. You can do this any time
             during the game except after its conclusion. </p>
         <img class="picture" src="/pictures/chat-interface.png" />
-        <p>When the owner is satisfied with the player composition, she may click on <strong>Next</strong>. This will
-            reveal the map layout and present several <strong>specialist</strong> cards. Each specialist provides a
-            unique special ability, some starting <strong>favor</strong> (an alternate currency), and, usually, a
-            <strong>specialty</strong> commodity.
+        <hr/>
+        <p>When the owner is satisfied with the player composition, he or she may click on <strong>Next</strong>. This will
+            transition the game to the <bold>Specialist Selection</bold> phase and reveal the <strong>specialist</strong>
+            options along with the map layout. Each specialist provides:
+            <ol type="a">
+                <li>A unique advantage in trade, donations, movement, or capacity.</li>
+                <li>Starting <strong>favor</strong> (<img class="icon" src="/icons/favor.svg"/>).</li>
+                <li>Usually, a <strong>specialty</strong> (affinity for selling one of
+                    <img class="icon" src="/icons/commodities.svg"/>).</li>
+            </ol>
         </p>
         <img class="picture" src="/pictures/setup-panel.png" />
         <p>Specialist selection is done in reverse player order. Don&#39;t worry, the game will handle rules 100%. Once
@@ -38,24 +53,25 @@
         <p>During specialist selection, you can switch between the map and the specialist offer by clicking the
             <strong>show/hide</strong> button.
         </p>
+        <hr/>
         <img class="picture" src="/pictures/setup-map-group.png">
         <p>The map consists of seven sea <strong>zones</strong>, each containing a unique <strong>location</strong>.
             During the game, on your turn, after moving there, a location will enable its specific
             <strong>actions</strong> for you to take.
         </p>
         <ul>
-            <li>The four commodity locations (the mines, quarry, farms, and forest) provide <strong>gems</strong>,
-                <strong>marble</strong>, <strong>linen</strong>, or <strong>ebony</strong>, which you can gather, sell,
+            <li>The four commodity locations (<img class="icon" src="/icons/commodities.svg"/>) provide <strong>gems</strong>,
+                <strong>marble</strong>, <strong>linen</strong>, and <strong>ebony</strong>, which you can gather to sell,
                 or donate.
             </li>
-            <li>The orange house icon is the <strong>market</strong>. There, you can sell your carried commodities for
-                <strong>coins</strong>.
+            <li>At the <strong>market</strong> (<img class="icon" src="/icons/market.svg"/>) you can sell your carried commodities for
+                <strong>coins</strong> (<img class="icon" src="/icons/coin.svg"/>).
             </li>
-            <li>The yellow gold ingot icon is the <strong>treasury</strong>. There, you can purchase
+            <li>At the <strong>treasury</strong> (<img class="icon" src="/icons/treasury.svg"/>) you can purchase
                 <strong>gold</strong> and <strong>silver</strong>.
             </li>
-            <li>The blue dome and obelisks icon is the <strong>temple</strong>. The temple receives donations of gold,
-                silver, and commodities, awarding <strong>victory points</strong> (VP) and <strong>favor</strong> in
+            <li>The <strong>temple</strong> (<img class="icon" src="/icons/temple.svg"/>) receives donations of gold,
+                silver, and commodities, awarding <strong>victory points</strong> (vp) and <strong>favor</strong> in
                 return. </li>
         </ul>
         <p>The two grey <strong>barriers</strong> are blocking access between adjacent sea zones. The separated zones

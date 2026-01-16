@@ -3,4 +3,7 @@ article {
         align-self: center;
         margin-bottom: var(--pico-typography-spacing-vertical);
     }
+    & .icon {
+        height:20px;
+    }
 }
