@@ -60,19 +60,26 @@
             <strong>actions</strong> for you to take.
         </p>
         <ul>
-            <li>The four commodity locations (<img class="icon" src="/icons/commodities.svg"/>) provide <strong>gems</strong>,
-                <strong>marble</strong>, <strong>linen</strong>, and <strong>ebony</strong>, which you can gather to sell,
-                or donate.
+            <li>Each of the four commodity locations provide one <strong>commodity</strong> of its type per visit. This
+                can be either:
+                <ul>
+                    <li><strong>gems</strong> (<img class="icon" src="/icons/gems.svg"/>).</li>
+                    <li><strong>marble</strong> (<img class="icon" src="/icons/marble.svg"/>).</li>
+                    <li><strong>linen</strong> (<img class="icon" src="/icons/linen.svg"/>).</li>
+                    <li><strong>ebony</strong> (<img class="icon" src="/icons/ebony.svg"/>).</li>
+                </ul>
             </li>
-            <li>At the <strong>market</strong> (<img class="icon" src="/icons/market.svg"/>) you can sell your carried commodities for
-                <strong>coins</strong> (<img class="icon" src="/icons/coin.svg"/>).
+            <li>At the <strong>market</strong> (<img class="icon" src="/icons/market.svg"/>) you can sell your carried
+                commodities for <strong>coins</strong> (<img class="icon" src="/icons/coin.svg"/>).
             </li>
             <li>At the <strong>treasury</strong> (<img class="icon" src="/icons/treasury.svg"/>) you can purchase
-                <strong>gold</strong> and <strong>silver</strong>.
+                <strong>gold</strong>(<img class="icon" src="/icons/gold.svg"/>) and <strong>silver</strong>
+                (<img class="icon" src="/icons/silver.svg"/>).
             </li>
             <li>The <strong>temple</strong> (<img class="icon" src="/icons/temple.svg"/>) receives donations of gold,
-                silver, and commodities, awarding <strong>victory points</strong> (vp) and <strong>favor</strong> in
-                return. </li>
+                silver, and commodities, awarding <strong>victory points</strong>
+                (<img class="icon" src="/icons/vp.svg"/>) and <strong>favor</strong>
+                (<img class="icon" src="/icons/favor.svg"/>) in return. </li>
         </ul>
         <p>The two grey <strong>barriers</strong> are blocking access between adjacent sea zones. The separated zones
             are not considered to be adjacent. Your ship has a reach of two zones. However, barriers can considerably
@@ -80,28 +87,41 @@
         <p>When all players have selected a card, the owner may click on <strong>Next</strong> to start the game.</p>
         <img class="picture" src="/pictures/starting-alone-map-group.png">
         <p>Upon starting, your <strong>ship</strong> will appear in the map&#39;s center zone as a disc token in your
-            chosen color . The token is draggable and it is used to indicate your current location on the map. It&#39;s
+            chosen color. The token is draggable and it is used to indicate your current location on the map. It&#39;s
             actual position is irrelevant as long as it is within the sea zone&#39;s hexagonal boundaries. </p>
-        <p>Your goal is to collect as many VP as possible before the end game is triggered. Points are secured via
-            donations of <strong>gold</strong>(10VP), <strong>silver</strong>(5VP), as well as
-            <strong>commodities</strong>(1-4VP) at the <strong>temple</strong>. Leftover gold and silver are also worth
-            5VP and 3VP, respectively. Finally, favor, then coins are compared to break possible ties.
+        <p>Your goal is to donate as much as possible to the <img class="icon" src="/icons/temple.svg"/> before the game
+            ends.
+            <ul>
+                <li>Donating <img class="icon" src="/icons/gold.svg"/> awards <strong>10</strong>
+                    <img class="icon" src="/icons/vp.svg"/>.</li>
+                <li>Donating <img class="icon" src="/icons/silver.svg"/> awards <strong>5</strong>
+                    <img class="icon" src="/icons/vp.svg"/>.</li>
+                <li>Trading <img class="icon" src="/icons/commodities.svg"/> awards <strong>1-4</strong>
+                    <img class="icon" src="/icons/vp.svg"/>.</li>
+            </ul>
         </p>
+        <p>When the game is over, leftover <img class="icon" src="/icons/gold.svg"/> and
+            <img class="icon" src="/icons/silver.svg"/> are also
+            worth <strong>5</strong> <img class="icon" src="/icons/vp.svg"/> and <strong>3</strong>
+            <img class="icon" src="/icons/vp.svg"/> respectively.</p>
+        <p>Finally, ties are broken by remaining <img class="icon" src="/icons/favor.svg"/> then
+            <img class="icon" src="/icons/coin.svg"/>. Further ties result in a shared victory.</p>
         <h2 id="the-play-space">The Play Space</h2>
         <p>Location Area: To the left of the map, you have, from top to bottom, information and action buttons for the
             <bold>market</bold>, the
             <bold>treasury</bold>, and the <bold>temple</bold>.
         </p>
         <img class="picture" src="/pictures/location-group.png" />
-        <p>Map Area: Around the map, from top left going clockwise, you have information relevant to you on your turn:
-        </p>
+        <p>Map Area: Around the map you have information and buttons relevant to you in relation to the current turn:</p>
         <img class="picture" src="/pictures/map-group-buttons.png" />
         <ul>
-            <li>the <strong>moves</strong> counter (two blueish wave icons which get discolored as you move)</li>
-            <li>the <strong>favor button</strong> (a red seal icon button used for spending one favor to obtain turn
-                privileges) </li>
-            <li>the <strong>end turn button</strong> (a red/green anchor icon button for ending your turn)</li>
-            <li>the <strong>undo button</strong> (a circular arrow icon for undoing actions and movements)</li>
+            <li>The <strong>moves counter</strong> wave icons become gray as you spend moves.</li>
+            <li>The <strong>favor button</strong> may be clicked to obtain turn privileges at the expense of 1
+                <img class="icon" src="/icons/favor.svg"/>.It becomes checked if used. Appears appears gray if
+                unavailable.</li>
+            <li>The <strong>end turn button</strong> may be clicked to end/pass the turn. It appears red and slanted if
+                you still have obligatory things to do.</li>
+            <li>The <strong>undo button</strong> may be clicked to revert actions and movements.</li>
         </ul>
         <p>Player Area: To the right of the map, you have the <strong>player cards</strong>. Each card displays:</p>
         <img class="picture" src="/pictures/player-placard.png">
@@ -132,10 +152,14 @@
             submit an action while the white button will only dismiss the dialog.</p>
         <h2 id="game-end">Game End</h2>
         <p>The game can end in two ways:</p>
-        <ul>
-            <li>The temple receives enough gold and silver donations to complete construction.</li>
-            <li>The market deck empties and can no longer supply a full set of trades.</li>
-        </ul>
+        <p>1. The market deck empties and can no longer supply a full set of trades.</p>
+        <p>In the image below, the top card (1 wood for 2 coins) of the market deck is the last one. The label "0(B)"
+            means "Deck B is in play and there are 0 cards left." The game will end when another card would be otherwise
+            revealed.</p>
+        <img class="picture" src="/pictures/near-game-end.png"/>
+        <p>2. The temple receives enough gold and silver donations to complete construction.</p>
+        <p>In the image above, the donations reference area shows that one more metal donation is required for the
+            temple completion. As soon as a player delivers gold or silver, the game will end.</p>
         <h2 id="coins">Coins</h2>
         <p>Coins (appears as a silver coin icon with a value) are the standard currency in the game and are involved in
             most transactions.</p>
