@@ -191,7 +191,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {
         return this.players.get()
-            .filter(p => p.bearings.seaZone === zone);
+            .filter(p => p.bearings.seaZone == zone);
     }
 
     public trimInfluenceByZone(zone: ZoneName, rivalInfluence: number) {
@@ -321,12 +321,12 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
 
         this.temple.update(t => {
             t.donations.push(metal);
-            if ((t.levelCompletion += 1) === 3) {
+            if ((t.levelCompletion += 1) == 3) {
                 t.levelCompletion = 0;
                 t.currentLevel += 1;
                 isNewLevel = true;
             }
-            if (t.currentLevel === t.maxLevel)
+            if (t.currentLevel == t.maxLevel)
                 isTempleComplete = true;
             return t;
         });

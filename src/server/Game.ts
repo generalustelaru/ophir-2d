@@ -106,7 +106,6 @@ export class Game {
                 default:
                     throw new Error('Cannot determine session phase');
             }
-
         })();
     }
 
@@ -121,7 +120,7 @@ export class Game {
     }
 
     public setPlayerRef(user: User) {
-        this.userReferences.push({  ...user, color: null });
+        this.userReferences.push({ ...user, color: null });
     }
 
     private preserveName(userId: UserId, name: string) {
@@ -156,7 +155,7 @@ export class Game {
 
     public getGameState(): GameState {
         const state = this.actionProcessor.getState();
-        const isPlay = state.sessionPhase === Phase.play;
+        const isPlay = state.sessionPhase == Phase.play;
         return {
             timeStamp: this.timeStamp,
             userReferences: this.userReferences,
@@ -176,13 +175,11 @@ export class Game {
             return;
         }
 
-        for (const ref of this.userReferences) {
+        for (const ref of this.userReferences)
             ref.color = null;
-        }
 
-        if ('killIdleChecks' in this.actionProcessor) {
+        if ('killIdleChecks' in this.actionProcessor)
             (this.actionProcessor as PlayProcessor).killIdleChecks();
-        }
 
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
@@ -196,7 +193,7 @@ export class Game {
         this.timeStamp = Date.now();
         const emitError = (reason: string) => {
             lib.printError(`Cannot process action: ${reason}`);
-            return this.issueNominalResponse( { error: 'Cannot process request' });
+            return this.issueNominalResponse({ error: 'Cannot process request' });
         };
 
         const reference = this.userReferences.find(r => r.id == request.userId);
@@ -209,9 +206,11 @@ export class Game {
         const { action, payload } = message;
         const { id: userId, displayName } = reference;
 
-
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment) {
-            return this.processEnrolmentAction({ message, userId, displayName, player: null }, isAdoption);
+            return this.processEnrolmentAction(
+                { message, userId, displayName, player: null },
+                isAdoption,
+            );
         }
 
         const matchOperation = this.matchRequestToPlayer(request);
@@ -243,9 +242,8 @@ export class Game {
 
                     const measurement = lib.validateTextLength(newName, this.font, 28, 424, 212);
 
-                    if (measurement.err) {
+                    if (measurement.err)
                         return this.issueNominalResponse({ error: measurement.message });
-                    }
 
                     if (this.isNameTaken(state.players, newName))
                         return this.issueNominalResponse({ error: 'This name is already taken' });
@@ -273,7 +271,6 @@ export class Game {
         }
 
         if (action === Action.declare_reset) {
-
             const { sessionOwner, sessionPhase } = state;
 
             if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
@@ -300,8 +297,10 @@ export class Game {
     private updateReferenceColor(userId: UserId, color: PlayerColor) {
         const ref = this.userReferences.find(r => r.id == userId);
 
-        if (!ref)
-            return console.error('Could not a find reference to update color!!!');
+        if (!ref) {
+            lib.printError('Could not a find reference to update color!!!');
+            return;
+        }
 
         ref.color = color;
     };
@@ -313,7 +312,6 @@ export class Game {
         const { action } = message;
 
         if (!player) {
-
             const { userId, message, displayName } = request;
 
             const enrolment = processor.processEnrol(userId, message.payload, displayName, isAdopting);
@@ -540,7 +538,7 @@ export class Game {
         const { userId } = request;
 
         const state = this.actionProcessor.getState();
-        const ref = this.userReferences.find( r => r.id == userId);
+        const ref = this.userReferences.find(r => r.id == userId);
 
         if (!ref)
             return lib.fail(`Cannot find reference for id: ${userId}`);
@@ -553,11 +551,8 @@ export class Game {
         return lib.pass({ ...request, player });
     }
 
-    private isNameTaken(players: PlayerEntity[], name: string | null): boolean {
-        if (!name)
-            return false;
-
-        return players.some(player => player.name === name);
+    private isNameTaken(players: PlayerEntity[], name: string): boolean {
+        return players.some(player => player.name == name);
     }
 
     private getActivationId(players: Array<Player>): UserId | null {

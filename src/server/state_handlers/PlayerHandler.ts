@@ -387,11 +387,9 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public hasCargoRoom(req: 1 | 2): boolean {
         const emptySlots = this.getCargo().filter(
-            item => item === 'empty',
+            item => item == 'empty',
         ).length;
 
         return (emptySlots >= req);
     }
-
-    // MARK: PRIVATE
 }
