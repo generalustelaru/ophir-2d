@@ -21,8 +21,10 @@ check:
 	npx tsc --noEmit
 	npx eslint .
 
-rev:
-	git rev-parse HEAD
+m ?= Formatting commit
+ignore:
+	@echo "# $(m)" >> .git-blame-ignore-revs
+	@git rev-parse HEAD >> .git-blame-ignore-revs
 
 fix:
 	npx eslint . --fix
