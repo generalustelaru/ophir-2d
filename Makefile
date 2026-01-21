@@ -1,4 +1,8 @@
 # Local Development
+pull:
+	git pull
+	npm run omit_revs
+
 static:
 	mkdir -p dist/public
 	rm -rf dist/public/*
