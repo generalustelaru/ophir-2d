@@ -49,7 +49,7 @@ export class MarketDeck implements Unique<DynamicGroupInterface<MarketOffer>>
             text: deckId,
             fontSize: 14,
             fontFamily: 'Custom',
-            fill: 'white',
+            fill: 'pink',
         });
 
         this.group.add(
@@ -66,7 +66,7 @@ export class MarketDeck implements Unique<DynamicGroupInterface<MarketOffer>>
     public update(offer: MarketOffer): void {
         const { future, deckId, deckSize } = offer;
         this.marketCard.update({ trade: future, isFeasible: false });
-        this.deckInfo.text(`${deckSize}(${deckId})`);
+        this.deckInfo.text(`+${deckSize}(${deckId})`);
         this.marketCard.getElement().y(this.cardY - deckSize);
     }
 }
