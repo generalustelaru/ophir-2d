@@ -21,6 +21,9 @@ check:
 	npx tsc --noEmit
 	npx eslint .
 
+rev:
+	git rev-parse HEAD
+
 fix:
 	npx eslint . --fix
 
