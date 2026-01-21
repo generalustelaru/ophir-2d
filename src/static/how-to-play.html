@@ -17,78 +17,81 @@
     <div class="content">
     <article>
         <h2 id="the-navbar">The Navbar</h2>
-        <img class="picture" src="/pictures/game-navbar.png">
         <p>The game-specific navbar contains these buttons:</p>
         <ul>
-            <li>Back: Return to the Lobby. You will continue being part of the game if you've already picked a color.</li>
-            <li>Next: Transitions to the next game phase. Only available to the game owner. Phases are Enrolment, Specialist Selection, and Play.</li>
-            <li>Reset: Wipes the game state and returns it to the Enrolment state. Only available to the game owner</li>
-            <li>Force: Currently not available.</li>
+            <li><button disabled>Lobby</button> returns to the Lobby. The game will persist and you will be able to
+                rejoin it.</li>
+            <li><button disabled="disabled">Next</button> transitions to the next game <strong>phase</strong>. Only
+                available to the <strong>game owner</strong>. Phases are <strong>Enrolment</strong>, <strong>Specialist
+                Selection</strong>, and <strong>Play</strong>.</li>
+            <li><button disabled="disabled">Reset</button> The game reverts to the Enrolment phase. Only available to
+                the game owner.</li>
+            <li>Force: Issues a forced end turn command for the current player. Currently not available.</li>
         </ul>
-        <h2 id="setup-and-goal">Setup and Goal</h2>
-        <p>During <bold>Enrolment</bold> visitors will have to select one of the available colors to join. This is a
-            free-for-all phase. A player may select a different color if available. The first player to have selected a
-            color becomes the game owner. The game owner may reset the session at any time.</p>
+        <h2 id="enrolment">Enrolment</h2>
+        <p>During <strong>Enrolment</strong> visitors will have to select one of the available colors to become players.
+            This is a free-for-all phase. A player may still select a different color if available. The first visitor to
+            become a player is also the <strong>game owner</strong>. The game owner may <button disabled="disabled">Reset</button> the session at any time.</p>
         <img class="picture" src="/pictures/enrolment-panel.png" />
-        <hr/>
         <p>Once you&#39;ve chosen a color, you can start typing in the included chat. As a special command, you can
             currently change your display name by typing <code>#name &lt;some_name&gt;</code>. You can do this any time
             during the game except after its conclusion. </p>
         <img class="picture" src="/pictures/chat-interface.png" />
-        <hr/>
-        <p>When the owner is satisfied with the player composition, he or she may click on <strong>Next</strong>. This will
-            transition the game to the <bold>Specialist Selection</bold> phase and reveal the <strong>specialist</strong>
-            options along with the map layout. Each specialist provides:
+        <p>When the owner is satisfied with the player composition, he or she may click on <button disabled="disabled">
+            Next</button>. This will transition the game to the <strong>Specialist Selection</strong> phase.
+        </p>
+        <h2 id="specialist-selection">Specialist Selection</h2>
+        <p>In this phase players will have to select a <strong>specialist</strong> to carry into the <strong>
+            Play</strong> phase. Each specialist provides:
             <ol type="a">
                 <li>A unique advantage in trade, donations, movement, or capacity.</li>
-                <li>Starting <strong>favor</strong> (<img class="icon" src="/icons/favor.svg"/>).</li>
+                <li>Some starting <strong>favor</strong> (<img class="icon" src="/icons/favor.svg"/>).</li>
                 <li>Usually, a <strong>specialty</strong> (affinity for selling one of
                     <img class="icon" src="/icons/commodities.svg"/>).</li>
             </ol>
         </p>
         <img class="picture" src="/pictures/setup-panel.png" />
-        <p>Specialist selection is done in reverse player order. Don&#39;t worry, the game will handle rules 100%. Once
-            you&#39;ve clicked a specialist card, you&#39;ll have to click on it again to select it. You can&#39;t
-            change your mind after that.</p>
-        <p>During specialist selection, you can switch between the map and the specialist offer by clicking the
-            <strong>show/hide</strong> button.
-        </p>
-        <hr/>
+        <p>Clicking the <strong>Show/Hide</strong> label will hide the panel and reveal the game's
+            <strong>locations</strong> and <strong>barriers</strong> placement. It's useful to examine the layout before choosing your specialist.</p>
         <img class="picture" src="/pictures/setup-map-group.png">
-        <p>The map consists of seven sea <strong>zones</strong>, each containing a unique <strong>location</strong>.
-            During the game, on your turn, after moving there, a location will enable its specific
-            <strong>actions</strong> for you to take.
+        <p>Each of the two grey <strong>barriers</strong> is blocking access between two <strong>zones</strong>. The separated zones
+            are not considered to be adjacent and cannot be crossed.</p>
+        <p>Each <strong>zone</strong> containins a unique <strong>location</strong>.
+            During the game, after moving to a location, you will be able to perform its specific
+            <strong>actions</strong>. Here's an overview:
         </p>
         <ul>
-            <li>Each of the four commodity locations provide one <strong>commodity</strong> of its type per visit. This
-                can be either:
+            <li>There are four commodity locations:</li>
                 <ul>
-                    <li><strong>gems</strong> (<img class="icon" src="/icons/gems.svg"/>).</li>
-                    <li><strong>marble</strong> (<img class="icon" src="/icons/marble.svg"/>).</li>
-                    <li><strong>linen</strong> (<img class="icon" src="/icons/linen.svg"/>).</li>
-                    <li><strong>ebony</strong> (<img class="icon" src="/icons/ebony.svg"/>).</li>
+                    <li>The mines provide <strong>gems</strong> (<img class="icon" src="/icons/gems.svg"/>).</li>
+                    <li>The quary provides <strong>marble</strong> (<img class="icon" src="/icons/marble.svg"/>).</li>
+                    <li>The farms provide <strong>linen</strong> (<img class="icon" src="/icons/linen.svg"/>).</li>
+                    <li>The forest provides <strong>ebony</strong> (<img class="icon" src="/icons/ebony.svg"/>).</li>
                 </ul>
             </li>
-            <li>At the <strong>market</strong> (<img class="icon" src="/icons/market.svg"/>) you can sell your carried
-                commodities for <strong>coins</strong> (<img class="icon" src="/icons/coin.svg"/>).
+            <li>The <strong>market</strong> (<img class="icon" src="/icons/market.svg"/>) buys
+                <img class="icon" src="/icons/commodities.svg"/> in various assortments, providing <strong>coins</strong>
+                (<img class="icon" src="/icons/coin.svg"/>) in return.
             </li>
-            <li>At the <strong>treasury</strong> (<img class="icon" src="/icons/treasury.svg"/>) you can purchase
-                <strong>gold</strong>(<img class="icon" src="/icons/gold.svg"/>) and <strong>silver</strong>
-                (<img class="icon" src="/icons/silver.svg"/>).
+            <li>The <strong>treasury</strong> (<img class="icon" src="/icons/treasury.svg"/>) requires payments of
+                <img class="icon" src="/icons/coin.svg"/> to provide <strong>gold</strong> (<img class="icon" src="/icons/gold.svg"/>) and <strong>silver</strong>
+                (<img class="icon" src="/icons/silver.svg"/>). It also accepts <img class="icon" src="/icons/favor.svg"/> as payment.
             </li>
-            <li>The <strong>temple</strong> (<img class="icon" src="/icons/temple.svg"/>) receives donations of gold,
-                silver, and commodities, awarding <strong>victory points</strong>
-                (<img class="icon" src="/icons/vp.svg"/>) and <strong>favor</strong>
-                (<img class="icon" src="/icons/favor.svg"/>) in return. </li>
+            <li>The <strong>temple</strong> (<img class="icon" src="/icons/temple.svg"/>) receives donations of <img class="icon" src="/icons/gold.svg"/> &
+                <img class="icon" src="/icons/silver.svg"/>, awarding <strong>victory points</strong>
+                (<img class="icon" src="/icons/vp.svg"/>). It also accepts <img class="icon" src="/icons/commodities.svg"/> assortments in exchange for some <img class="icon" src="/icons/favor.svg"/> & <img class="icon" src="/icons/vp.svg"/>.</li>
         </ul>
-        <p>The two grey <strong>barriers</strong> are blocking access between adjacent sea zones. The separated zones
-            are not considered to be adjacent. Your ship has a reach of two zones. However, barriers can considerably
-            hinder zone access. So take that into account when choosing your specialist.</p>
-        <p>When all players have selected a card, the owner may click on <strong>Next</strong> to start the game.</p>
+        <p>Specialist selection is done in a randomized order. Available specialist cards will lighten up when it&#39;s
+            your turn to pick. Once you&#39;ve clicked a specialist card, you&#39;ll have to click on it again to select
+            it. You can&#39;t change your mind after that.</p>
+        <p>When all players have selected a card, the owner may click on <button disabled="disabled">Next</button> to start the game.</p>
+        <h2 id="play">Play</h2>
+        <p><strong>Note:</strong> The at-location <strong>temple icon</strong> is depicted differently during the game. It
+            reflects it being constructed as players donate metals.</p>
         <img class="picture" src="/pictures/starting-alone-map-group.png">
         <p>Upon starting, your <strong>ship</strong> will appear in the map&#39;s center zone as a disc token in your
             chosen color. The token is draggable and it is used to indicate your current location on the map. It&#39;s
-            actual position is irrelevant as long as it is within the sea zone&#39;s hexagonal boundaries. </p>
+            actual position is irrelevant as long as it is within the zone&#39;s hexagonal boundaries. </p>
         <p>Your goal is to donate as much as possible to the <img class="icon" src="/icons/temple.svg"/> before the game
             ends.
             <ul>
@@ -178,7 +181,7 @@
         <h2 id="moving-the-ship">Moving the Ship</h2>
         <p>On your turn, you may move (or attempt to move) up to two times into zones that are highlighted in light
             blue. </p>
-        <p>You move by dragging and releasing the ship figure onto an adjacent sea zone. Zones that contain other ship
+        <p>You move by dragging and releasing the ship figure onto an adjacent zone. Zones that contain other ship
             tokens are not guaranteed to be accessible. When hovering your ship token over such a zone, it&#39;s color
             will change depending on how probable it is for you to succesfully move.</p>
         <p>When you drop your token into such a zone, a dialog will inform you of your chances and ask for confirmation
@@ -308,7 +311,7 @@
         <p>Most of the specialists that players can select at the beginning of the game will break the rules in some way
             or another. Consult their descriptions to familiarize yourself with their potential play style.</p>
         <h2 id="two-player-games">Two-player games</h2>
-        <p>When starting a game with two players, a third ship (white) will spawn in the market&#39;s sea zone. This
+        <p>When starting a game with two players, a third ship (white) will spawn in the market&#39;s zone. This
             ship also has an influence die, and may block your movement like any other player ship (trimming its value
             on failed attempts).</p>
         <p>When a player manages to enter the neutral ship&#39;s zone, her turn is paused, gaining control of the

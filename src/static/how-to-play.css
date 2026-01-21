@@ -8,4 +8,9 @@ article {
         height:20px;
         margin-bottom: 2px;
     }
+    & button:disabled {
+        line-height: 3px;
+        user-select: none;
+        opacity: 1;
+    }
 }
