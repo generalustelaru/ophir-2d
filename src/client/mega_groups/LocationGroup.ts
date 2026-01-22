@@ -69,7 +69,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 width: this.group.width(),
                 height: heightSegment * 3,
                 x: 0,
-                y: 0,
+                y: 10,
             },
             this.tradeCallback || null,
             this.peddlerCallback,
