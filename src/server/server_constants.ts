@@ -179,7 +179,7 @@ const serverConstants: ServerConstants = {
     COST_TIERS: [
         {
             templeLevel: 0,
-            skipOnPlayerCounts: [2, 3],
+            skipOnPlayerCounts: [1, 2, 3],
             treasury: { goldCost: { coins: 2, favor: 5 }, silverCost: { coins: 1, favor: 3 } },
         },
         {
@@ -199,12 +199,12 @@ const serverConstants: ServerConstants = {
         },
         {
             templeLevel: 4,
-            skipOnPlayerCounts: [],
+            skipOnPlayerCounts: [1],
             treasury: { goldCost: { coins: 6, favor: 5 }, silverCost: { coins: 3, favor: 3 } },
         },
         {
             templeLevel: 5,
-            skipOnPlayerCounts: [2],
+            skipOnPlayerCounts: [1, 2],
             treasury: { goldCost: { coins: 7, favor: 5 }, silverCost: { coins: 4, favor: 3 } },
         },
     ],
