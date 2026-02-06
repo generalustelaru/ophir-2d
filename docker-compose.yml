@@ -6,7 +6,7 @@ services:
       context: .
       target: dev
     ports:
-      - "0.0.0.0:3001:3001"
+      - "0.0.0.0:80:3001"
     environment:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongo:27017/gamedb
