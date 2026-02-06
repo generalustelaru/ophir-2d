@@ -11,11 +11,11 @@ const { MongoClient } = require('mongodb');
 
         // Seed config
         const config = {
-            SERVER_NAME: 'Laputan Machine',
-            PLAYER_IDLE_MINUTES: 1,
-            USER_SESSION_HOURS: 1,
-            GAME_PERSIST_HOURS: 1,
-            SINGLE_PLAYER: false,
+            SERVER_NAME: 'TempleBot',
+            PLAYER_IDLE_MINUTES: 5,
+            USER_SESSION_HOURS: 2,
+            GAME_PERSIST_HOURS: 36,
+            SINGLE_PLAYER: true,
             NO_RIVAL: false,
             RICH_PLAYERS: false,
             FAVORED_PLAYERS: false,
