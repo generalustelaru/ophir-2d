@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Hue, DynamicGroupInterface } from '~/client_types';
-import { Coordinates, Unique } from '~/shared_types';
+import { Unique } from '~/shared_types';
 import { Button } from '../popular';
 
 export class ShowHideButton extends Button implements Unique<DynamicGroupInterface<string>> {
@@ -9,12 +9,11 @@ export class ShowHideButton extends Button implements Unique<DynamicGroupInterfa
 
     constructor(
         stage: Konva.Stage,
-        position: Coordinates,
+        positionX: number,
         color: Hue,
-        text: string,
         callback: Function,
     ) {
-        const layout = { ...position, height: 50, width: 100 };
+        const layout = { x: positionX - 60, y: 0, height: 50, width: 120 };
         super(stage, layout, callback);
 
         this.background = new Konva.Rect({
@@ -23,16 +22,21 @@ export class ShowHideButton extends Button implements Unique<DynamicGroupInterfa
             fill: color,
             cornerRadius: 15,
         });
-        const scale = 1.4;
+
         this.label = new Konva.Text({
-            text: text,
-            x: 5,
-            y: 20,
+            width: layout.width,
+            y: 18,
+            text: 'Show/Hide',
+            fontSize: 18,
             fill: 'white',
-            scale: { x: scale, y: scale },
             fontFamily: 'Custom',
+            align: 'center',
         });
-        this.group!.add(this.background, this.label);
+        this.group.add(this.background, this.label);
+    }
+
+    public reposition(positionX: number) {
+        this.group.x(positionX - 60);
     }
 
     public getElement() {

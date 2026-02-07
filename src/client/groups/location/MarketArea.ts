@@ -102,7 +102,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             marketFluctuations.slot_3,
             pickCallback('slot_3'),
         );
-
+        //TODO: Move this on the relevant card and under the favor+vp icon.
         const templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: LOCATION_TOKEN_DATA.temple.fill,

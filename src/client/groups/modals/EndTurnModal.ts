@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, PlayState, SpecialistName, Unique } from '~/shared_types';
-import { DynamicModalInterface } from '~/client/client_types';
+import { Aspect, DynamicModalInterface } from '~/client/client_types';
 import { FavorDial } from '../popular';
 import { ModalBase } from './ModalBase';
 import localState from '~/client/state';
@@ -8,7 +8,7 @@ import localState from '~/client/state';
 export class EndTurnModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, undefined>> {
     private text: Konva.Text;
     private favorDial: FavorDial;
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             {
@@ -17,6 +17,7 @@ export class EndTurnModal extends ModalBase implements Unique<DynamicModalInterf
                 submitLabel: 'End',
                 dismissLabel: 'Cancel',
             },
+            aspect,
         );
 
         this.text = new Konva.Text({
@@ -56,6 +57,10 @@ export class EndTurnModal extends ModalBase implements Unique<DynamicModalInterf
             this.text.text('End your turn?');
             this.favorDial.hide();
         }
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show() {

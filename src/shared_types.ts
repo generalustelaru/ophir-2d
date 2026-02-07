@@ -1,5 +1,4 @@
 import { HexCoordinates } from "~/client_types";
-import { PlayerCountables } from "~/server_types";
 
 /**
  * @description Interface wrapper hack to prevent the TSS from polluting class method references.
@@ -60,7 +59,7 @@ export type Trade = { request: Array<TradeGood>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = 'A' | 'B';
-export type ChatEntry = { color: PlayerColor | null, name: string | null, message: string };
+export type ChatEntry = { timeStamp: number, color: PlayerColor | null, name: string | null, message: string };
 
 export type ExchangeTier = {
     templeLevel: number,
@@ -195,6 +194,17 @@ export enum Phase {
     enrolment = 'enrolment',
     setup = 'setup',
     play = 'play',
+}
+
+export type PlayerCountables = {
+    color: PlayerColor;
+    name: string,
+    specialist: string,
+    vp: number;
+    gold: number;
+    silver: number;
+    favor: number;
+    coins: number;
 }
 
 export type PlayState = {

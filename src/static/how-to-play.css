@@ -1,0 +1,16 @@
+article {
+    & .picture {
+        align-self: center;
+        margin-bottom: var(--pico-typography-spacing-vertical);
+        max-height: 370px;
+    }
+    & .icon {
+        height:20px;
+        margin-bottom: 2px;
+    }
+    & button:disabled {
+        line-height: 3px;
+        user-select: none;
+        opacity: 1;
+    }
+}

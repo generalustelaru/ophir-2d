@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventType, SailAttemptArgs } from '~/client_types';
+import { InfoDetail, ErrorDetail, EventType, SailAttemptArgs, MessageType } from '~/client_types';
 import localState from './state';
 import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
@@ -13,8 +13,9 @@ const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 
 function signalError(message?: string) {
-    console.error(message || 'An error occurred');
-    alert(message || 'An error occurred');
+    const errMessage = message || 'An error occurred';
+    console.error(errMessage);
+    UserInterface.addInternalPop(MessageType.ERROR, errMessage);
 }
 
 function probe(intervalSeconds: number) {
@@ -28,7 +29,7 @@ function probe(intervalSeconds: number) {
             (res) => {
                 if (res.status === 200) {
                     clearInterval(probe);
-                    alert('Connection restored.');
+                    UserInterface.addInternalPop(MessageType.INFO, 'Connection restored.');
                     comms.createConnection(gameAdress, requestedGameId);
                 }
             },
@@ -48,7 +49,7 @@ document.fonts.ready.then(() => {
     const canvas = new CanvasService();
 
     window.addEventListener('resize', () => {
-        canvas.fitStageIntoParentContainer();
+        canvas.handleResize();
     });
 
     //Send player action to server
@@ -71,7 +72,7 @@ document.fonts.ready.then(() => {
     });
 
     //Send state change message to server
-    window.addEventListener(EventType.draft, () => {
+    window.addEventListener(EventType.start_setup, () => {
         const message: ClientMessage = {
             action: Action.start_setup,
             payload: null,
@@ -79,7 +80,7 @@ document.fonts.ready.then(() => {
         comms.sendMessage(message);
     });
 
-    window.addEventListener(EventType.start_action, () => {
+    window.addEventListener(EventType.start_play, () => {
         const message: ClientMessage = {
             action: Action.start_play,
             payload: canvas.getSetupCoordinates(),
@@ -94,6 +95,7 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.timeout, () => {
         console.warn('Connection timeout');
+        UserInterface.addInternalPop(MessageType.ERROR, 'Connection was lost.');
         UserInterface.disable();
         canvas.disable();
         probe(5);
@@ -101,9 +103,9 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.close, () => {
         console.warn('Connection closed');
+        UserInterface.addInternalPop(MessageType.INFO, 'The server has entered maintenance.');
         UserInterface.disable();
         canvas.disable();
-        UserInterface.setInfo('The server has entered maintenance.');
         probe(30);
     });
 
@@ -135,6 +137,12 @@ document.fonts.ready.then(() => {
     window.addEventListener( EventType.identification, (event: CustomEventInit<ColorTransmission>) => {
         if (!event.detail)
             return signalError('Missing color!');
+
+        if (!localState.playerColor) {
+            UserInterface.addInternalPop(
+                MessageType.INFO, 'Set a player name by typing #name and then a preferred name.',
+            );
+        }
 
         localState.playerColor = event.detail.color;
     });

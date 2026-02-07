@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, Unique, ZoneName } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { defineBobbing } from '~/client/animations';
@@ -57,22 +57,22 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
             },
         );
 
-        this.group.on('mouseenter', () => {
+        this.group.on(RawEvents.HOVER, () => {
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
 
-        this.group.on('mouseleave', () => {
+        this.group.on(RawEvents.LEAVE, () => {
             stage.container().style.cursor = 'default';
         });
 
-        this.group.on('dragstart', () => {
+        this.group.on(RawEvents.DRAG_START, () => {
             this.activeEffect.stop();
             this.group.moveToTop();
             this.initialPosition = { x: this.group.x(), y: this.group.y() };
         });
 
         // MARK: - MOVE
-        this.group.on('dragmove', () => {
+        this.group.on(RawEvents.DRAG_MOVE, () => {
             this.isDestinationValid = false;
             const position = stage.getPointerPosition();
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(position));
@@ -95,7 +95,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
             }
         });
         // MARK: - END
-        this.group.on('dragend', () => {
+        this.group.on(RawEvents.DRAG_END, () => {
 
             for (let i = 0; i < SEA_ZONE_COUNT; i++)
                 this.seaZones[i].resetFill();

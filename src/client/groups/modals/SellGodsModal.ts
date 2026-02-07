@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, Unique } from '~/shared_types';
-import { DynamicModalInterface } from '~/client_types';
+import { Aspect, DynamicModalInterface } from '~/client_types';
 import { CoinDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
@@ -13,7 +13,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
     private coinDial: CoinDial;
     private symbolRow: SymbolRow;
 
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             {
@@ -22,6 +22,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
                 submitLabel: 'Yes',
                 dismissLabel: 'Cancel',
             },
+            aspect,
             { width: 340, height: 180 },
         );
 
@@ -72,6 +73,10 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
             colon,
             this.coinDial.getElement(),
         ]);
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public update(state: PlayState) {

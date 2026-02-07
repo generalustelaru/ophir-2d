@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
-import { Player, PlayerColor, PlayState, Unique } from '~/shared_types';
+import { Coordinates, Player, PlayerColor, PlayState, Unique } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
 
@@ -24,6 +24,10 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
 
     public setRivalCallback(callback: (p: boolean) => void) {
         this.endRivalTurnCallback = callback;
+    }
+
+    public setPlacement(coordinates: Coordinates) {
+        this.group?.x(coordinates.x).y(coordinates.y);
     }
 
     // MARK: DRAW
@@ -80,6 +84,16 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         if (state.rival.isIncluded && this.rivalPlacard) {
             this.rivalPlacard.update(state.rival);
         }
+    }
+
+    public switchToResults(state: PlayState): void {
+        const results = state.gameResults;
+        for (const placard of this.playerPlacards) {
+            const color = placard.getId();
+            const vp = results.find(r => r.color == color)?.vp || 0;
+            placard.switchToResults(vp);
+        }
+        this.rivalPlacard && this.rivalPlacard.hideInfluence();
     }
 
     public updatePlayerVp(color: PlayerColor|null, vp: number) {

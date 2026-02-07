@@ -1,8 +1,9 @@
 import {
     ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor, PlayState,
     TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates, Phase, Unique,
+    PlayerCountables,
 } from '~/shared_types';
-import { PlayerCountables, ObjectHandler } from '~/server_types';
+import { ObjectHandler } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
@@ -85,9 +86,12 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
         this.savePlayer(player);
     }
 
-    public addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.chat.addOne({ color: as, name: this.serverName.get(), message });
+    public addServerMessage(message: string, as: PlayerColor | null = null): ChatEntry {
+        const chatEntry: ChatEntry = { timeStamp: Date.now(), color: as, name: this.serverName.get(), message };
+        this.chat.addOne(chatEntry);
         this.trimChatList();
+
+        return chatEntry;
     }
 
     // MARK: Player
@@ -187,7 +191,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {
         return this.players.get()
-            .filter(p => p.bearings.seaZone === zone);
+            .filter(p => p.bearings.seaZone == zone);
     }
 
     public trimInfluenceByZone(zone: ZoneName, rivalInfluence: number) {
@@ -317,12 +321,12 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
 
         this.temple.update(t => {
             t.donations.push(metal);
-            if ((t.levelCompletion += 1) === 3) {
+            if ((t.levelCompletion += 1) == 3) {
                 t.levelCompletion = 0;
                 t.currentLevel += 1;
                 isNewLevel = true;
             }
-            if (t.currentLevel === t.maxLevel)
+            if (t.currentLevel == t.maxLevel)
                 isTempleComplete = true;
             return t;
         });

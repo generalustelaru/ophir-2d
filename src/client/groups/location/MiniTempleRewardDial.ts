@@ -24,7 +24,7 @@ export class MiniTempleRewardDial implements Unique<DynamicGroupInterface<number
             x: 0,
             y: 0,
             radius: this.group.width() / 2,
-            fill: ICON_DATA.favor_stamp_inner.fill,
+            fill: HUES.sunset,
             stroke: HUES.templeDarkBlue,
             strokeWidth: 1,
         });

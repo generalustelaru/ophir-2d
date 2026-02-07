@@ -18,6 +18,10 @@ import http from 'http';
 
 import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
 import { MongoClient } from 'mongodb';
+import opentype, { Font } from 'opentype.js';
+
+// TODO: use runtime flag to disable log verbosity in production
+// const isDev = process.env.NODE_ENV === 'development';
 
 if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
     console.error('Missing environment variables', {
@@ -28,6 +32,16 @@ if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
 // TODO: enclose this logic in a dbService.connect()
 let dbService: DatabaseService;
 const dbClient = new MongoClient(MONGODB_URI);
+
+let fontCache: Font | null = null;
+opentype.load(path.join(process.cwd(), 'dist/public', 'Laila-Regular.ttf')).then(font => {
+    fontCache = font;
+    console.info('✅ Fonts loaded.');
+}).catch(error => {
+    sLib.printError(String(error));
+    console.info('❌ Could not load fonts.');
+    process.exit(1);
+});
 
 dbClient.connect().then(async () => {
     const db = dbClient.db('ophir');
@@ -80,7 +94,7 @@ socketServer.on('connection', async (socket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
 
-    if (!gameId){
+    if (!gameId) {
         sLib.printError('WS connection did not provide gameId.');
         transmit(socket, { error: 'Invalid connection data.' });
 
@@ -96,7 +110,7 @@ socketServer.on('connection', async (socket, inc) => {
         return;
     }
 
-    const game: Game | null = await ( async () => {
+    const game: Game | null = await (async () => {
         const activeGame = activeGames.get(gameId);
 
         if (activeGame)
@@ -169,7 +183,7 @@ socketServer.on('connection', async (socket, inc) => {
                 sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
                 handleDisconnection(user.id, gameId);
             }
-        },1000);
+        }, 1000);
     });
 
     socket.on('error', (error) => {
@@ -192,6 +206,12 @@ app.get('/debug', (req: Request, res: Response) => {
 
     res.json(debugCommand(command, target, option));
 });
+app.get('/about', (_, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'about.html'));
+});
+app.get('/how-to-play', (_, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'how-to-play.html'));
+});
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
@@ -213,9 +233,9 @@ app.get('/', async (req: Request, res: Response) => {
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.ok) {
-        res.sendFile(path.join(__dirname,'public', 'lobby.html'));
+        res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
     } else {
-        res.sendFile(path.join(__dirname,'public', 'index.html'));
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
     }
 });
 app.use(express.urlencoded({ extended: true }));
@@ -257,7 +277,7 @@ app.post('/register', async (req: Request, res: Response) => {
         return;
     }
 
-    console.info('New registration',{ userName: form.userName });
+    console.info('New registration', { userName: form.userName });
 
     for (const cookieName in sessionOp.data) {
         const { value, options } = sessionOp.data[cookieName as CookieName];
@@ -287,7 +307,7 @@ app.post('/login', async (req: Request, res: Response) => {
         return;
     }
 
-    console.info('User logged in',{ userName: user.name });
+    console.info('User logged in', { userName: user.name });
 
     for (const cookieName in sessionOp.data) {
         const { value, options } = sessionOp.data[cookieName as CookieName];
@@ -312,7 +332,7 @@ app.get('/lobby', async (req: Request, res: Response) => {
         return;
     }
 
-    res.sendFile(path.join(__dirname,'public', 'lobby.html'));
+    res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
 });
 app.get('/logout', async (req: Request, res: Response) => {
     clearSession(req.headers.cookie);
@@ -362,7 +382,7 @@ app.get('/:id', async (req: Request, res: Response) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
 
     if (activeGames.has(gameId)) {
-        res.sendFile(path.join(__dirname,'public', 'game.html'));
+        res.sendFile(path.join(__dirname, 'public', 'game.html'));
 
         return;
     }
@@ -373,13 +393,13 @@ app.get('/:id', async (req: Request, res: Response) => {
         sLib.printError(activation.message);
         updateGameStat(gameId, true);
 
-        res.sendFile(path.join(__dirname,'public', 'lobby.html'));
+        res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
         return;
     }
 
     activeGames.set(gameId, activation.data);
 
-    res.sendFile(path.join(__dirname,'public', 'game.html'));
+    res.sendFile(path.join(__dirname, 'public', 'game.html'));
 });
 server.listen(PORT_NUMBER, () => {
     console.info('✅ Server started!');
@@ -398,26 +418,17 @@ async function processAction(
 
     const result = game.processAction(request, isAdoption);
 
-    const statsRelevant: Array<Action> = [
-        Action.enrol, Action.change_color, Action.start_setup, Action.start_play, Action.end_turn, Action.force_turn, 
-    ];
+    const save = await dbService.saveGameState(game.getGameState());
 
-    if (statsRelevant.includes(request.message.action)) {
-        const save = await dbService.saveGameState(game.getGameState());
-
-        if (save.err) {
-            console.error(save.message);
-            updateGameStat(gameId, true);
-            return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
-        }
-
-        updateGameStat(gameId);
+    if (save.err) {
+        console.error(save.message);
+        updateGameStat(gameId, true);
+        return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
     }
 
-    result.senderOnly
-        ? transmit(socket, result.message)
-        : broadcastToGroup(gameId, result.message)
-    ;
+    updateGameStat(gameId);
+
+    result.senderOnly ? transmit(socket, result.message) : broadcastToGroup(gameId, result.message);
 }
 
 // MARK: CALLBACKS
@@ -485,7 +496,7 @@ function startGameChecks() {
     setInterval(async () => {
         const config = await dbService.getConfig();
 
-        if (config.err){
+        if (config.err) {
             sLib.printError(config.message);
             return;
         }
@@ -633,6 +644,7 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
             nameUpdateCallback,
             configuration,
             savedSession,
+            fontCache,
         );
 
         return sLib.pass(session);
@@ -696,7 +708,7 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
         return;
     }
 
-    const { isActiveGame, gameState } = await (async (): Promise<{isActiveGame: boolean, gameState: GameState | null}> => {
+    const { isActiveGame, gameState } = await (async (): Promise<{ isActiveGame: boolean, gameState: GameState | null }> => {
         const isActiveGame = activeGames.has(gameId);
 
         if (isActiveGame)
@@ -743,7 +755,7 @@ async function initializeStats(): Promise<void> {
 
     const allGames = gamesFetch.data;
 
-    for(const gameState of allGames) {
+    for (const gameState of allGames) {
         const { sharedState, userReferences, timeStamp } = gameState;
         const { sessionPhase: phase, players, gameId } = sharedState;
 
@@ -762,24 +774,13 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
         const playerEntity = players.find(p => p.color == userRef?.color);
 
         const status: GameStatus = (() => {
-            if (isActiveGame) {
-                return phase == Phase.enrolment ? GameStatus.Enroling : GameStatus.Playing;
-            }
-            return GameStatus.Dormant;
+            if (isActiveGame)
+                return phase == Phase.enrolment ? GameStatus.Enroling : GameStatus.Ongoing;
+
+            return phase == Phase.enrolment ? GameStatus.Abandoned : GameStatus.Paused;
         })();
 
-        const action: LobbyAction | null = (() => {
-            switch(true) {
-                case !!playerEntity:
-                    return LobbyAction.Continue;
-                case isActiveGame:
-                    return phase == Phase.enrolment ? LobbyAction.Join : LobbyAction.Spectate;
-                default:
-                    return LobbyAction.Adopt;
-            }
-        })();
-
-        const userInvolvement: UserInvolvement= (() => {
+        const userInvolvement: UserInvolvement = (() => {
             if (!playerEntity)
                 return UserInvolvement.None;
 
@@ -792,6 +793,17 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
                     return draft.turnToPick ? UserInvolvement.HasTurn : UserInvolvement.Playing;
                 default:
                     return UserInvolvement.Playing;
+            }
+        })();
+
+        const action: LobbyAction | null = (() => {
+            switch (true) {
+                case Boolean(playerEntity):
+                    return LobbyAction.Rejoin;
+                case phase == Phase.enrolment:
+                    return isActiveGame ? LobbyAction.Join : LobbyAction.Adopt;
+                default:
+                    return LobbyAction.Observe;
             }
         })();
 
@@ -819,13 +831,13 @@ function debugCommand(command?: string, target?: string, option?: string): objec
                 connected_users: connections.size,
                 game_stats: stats.size,
             },
-            commands: ['users', 'stats', 'game'],
+            commands: ['users', 'stats', 'games'],
         };
 
     switch (command) {
         case 'users':
             return Array.from(connections.keys());
-        case 'game':
+        case 'games':
             return debugGame(target, option);
         case 'stats':
             return debugStat(target, option);
@@ -879,7 +891,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
                 options,
             };
 
-        switch(option) {
+        switch (option) {
             case 'refs':
                 return stat.userReferences;
             case 'players':

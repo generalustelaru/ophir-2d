@@ -1,18 +1,19 @@
-# Building
-build: static server client
-
-server:
-	npm run build_server
-
-client:
-	npm run build_client
+# Local Development
+pull:
+	git pull
+	npm run omit_revs
 
 static:
 	mkdir -p dist/public
 	rm -rf dist/public/*
 	cp -r src/static/* dist/public/
 
-# Local
+client:
+	npm run build_client
+
+server:
+	npm run build_server
+
 run:
 	node dist/server.cjs
 
@@ -20,40 +21,45 @@ check:
 	npx tsc --noEmit
 	npx eslint .
 
+m ?= Formatting commit
+ignore:
+	@echo "# $(m)" >> .git-blame-ignore-revs
+	@git rev-parse HEAD >> .git-blame-ignore-revs
+
 fix:
 	npx eslint . --fix
 
-#Docker
-start:  # Start everything
-	docker compose up -d
+
+# Docker Production
+start:
+	docker compose up game-server-prod -d --build
+
+seed:
+	docker compose exec game-server-prod node seed-db.cjs
+
+# Docker Development / Debugging
+dev:
+	docker compose up game-server-dev -d --build
 
 stop: # Stop everything
-	docker compose down
-
-image: # Rebuilds the image and runs it
-	docker compose up -d --build
+	docker compose down --remove-orphans
 
 restart:
-	docker compose restart game-server
+	docker compose restart game-server-dev
 
-ps: # Shows active containers
+containers:
 	docker compose ps
 
 watch:
-	docker compose logs -f game-server
+	docker compose logs -f game-server-dev
 
 watch-all:
 	docker compose logs -f
 
-seed:
-	docker compose exec game-server node seed-db.cjs
-
 shell:
-	docker compose exec game-server sh
+	docker compose exec game-server-dev sh
 
-# Cleanup
 clean:
 	docker compose down -v
-	rm -rf dist node_modules
 
-.PHONY: client server static build run up down rebuild restart logs logs-all seed shell clean
+.PHONY: client server static build run containers start dev restart watch watch-all seed shell clean

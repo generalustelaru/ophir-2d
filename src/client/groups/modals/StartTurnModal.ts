@@ -1,11 +1,14 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
+import { Aspect, StaticModalInterface } from '~/client/client_types';
+import { Unique } from '~/shared_types';
 
-export class StartTurnModal extends ModalBase {
-    constructor(stage: Konva.Stage) {
+export class StartTurnModal extends ModalBase implements Unique<StaticModalInterface<undefined>> {
+    constructor(stage: Konva.Stage, aspect:Aspect) {
         super(
             stage,
             { hasSubmit: false, dismissLabel: 'Okay' },
+            aspect,
         );
 
         const text = new Konva.Text({
@@ -20,6 +23,10 @@ export class StartTurnModal extends ModalBase {
         });
 
         this.contentGroup.add(text);
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show() {

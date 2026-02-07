@@ -4,35 +4,59 @@ import localState from '../state';
 import { Button } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import clientConstants from '~/client_constants';
-import { EventType } from '~/client_types';
+import { EventType, MessageType } from '~/client_types';
 
 export const UserInterface = new class extends Communicator {
-
-    private draftButton: Button;
-    private startButton: Button;
+    private continueButton: Button;
     private resetButton: Button;
+    private popDisplay: HTMLDivElement;
+    private isPopDisplaying: boolean = false;
+    private popTimeStamp: number | null = null;
+    private popCache: Array<{timeStamp: number, hyperText: string}> = [];
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
     private chatSendButton: Button;
     private forceTurnButton: Button;
+    private phase: Phase = Phase.enrolment;
 
     constructor() {
         super();
-        const logout = document.querySelector('#logout');
-        logout && logout.addEventListener('click', () => {
-            fetch('/logout').then(response => {
-                if (response.status !== 200)
-                    console.error(response.statusText);
-                window.location.href = '/';
-            });
+        const toLobby = document.querySelector('#lobby');
+        toLobby && toLobby.addEventListener('click', () => {
+            window.location.href = '/lobby';
         });
-        this.draftButton =  new Button('draftButton', this.processDraft);
-        this.startButton = new Button('startButton', this.processStart);
+        this.continueButton = new Button('continueButton', this.processContinue);
         this.resetButton = new Button('resetButton', this.processReset);
         this.forceTurnButton = new Button('forceTurnButton', this.processForceTurn);
-        this.chatMessages = document.getElementById('chatMessages') as HTMLDivElement;
+        this.popDisplay = document.querySelector('#chatPop') as HTMLDivElement;
+        this.chatMessages = document.querySelector('#chatMessages') as HTMLDivElement;
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
         this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
+
+        setInterval(() => {
+            if (this.isPopDisplaying)
+                return;
+
+            if(this.popCache.length == 0)
+                return;
+
+            const { timeStamp, hyperText } = this.popCache.shift()!;
+            this.popDisplay.innerHTML = hyperText;
+            this.isPopDisplaying = true;
+
+            this.popDisplay.style.visibility = 'visible';
+            this.popTimeStamp = timeStamp;
+
+            setTimeout(() => {
+                this.popDisplay.classList.add('hidden');
+            }, 5000);
+
+            setTimeout(() => {
+                this.popDisplay.style.visibility = 'hidden';
+                this.popDisplay.classList.remove('hidden');
+                this.isPopDisplaying = false;
+            }, 5200);
+        },1000);
     }
 
     public update(state: State) {
@@ -69,22 +93,14 @@ export const UserInterface = new class extends Communicator {
 
     private handleKeyInput  = (toSubmit: boolean): void => {
         toSubmit && this.sendChatMessage();
-
-        setTimeout(() => {
-            this.chatInput.element.focus();
-        }, 1000);
     };
 
-    private processDraft = (): void => {
-        this.draftButton.disable();
+    private processContinue = (): void => {
 
-        return this.createEvent({ type: EventType.draft, detail: null });
-    };
-
-    private processStart = (): void => {
-        this.startButton.disable();
-
-        return this.createEvent({ type: EventType.start_action, detail: null });
+        return this.createEvent({
+            type: this.phase == Phase.setup ? EventType.start_play : EventType.start_setup,
+            detail: null,
+        });
     };
 
     private processReset = (): void => {
@@ -113,8 +129,7 @@ export const UserInterface = new class extends Communicator {
     }
 
     private disableButtons(): void {
-        this.draftButton.disable();
-        this.startButton.disable();
+        this.continueButton.disable();
         this.resetButton.disable();
         this.forceTurnButton.disable();
         this.chatSendButton.disable();
@@ -130,15 +145,17 @@ export const UserInterface = new class extends Communicator {
     }
 
     private updateAsSetup(state: SetupState): void {
+        this.phase = Phase.setup;
         if (localState.playerColor === state.sessionOwner) {
             this.resetButton.enable();
 
             if (state.players.every(p => p.specialist))
-                this.startButton.enable();
+                this.continueButton.enable();
         }
     }
 
     private updateAsPlay(state: PlayState): void {
+        this.phase = Phase.play;
         const activePlayer = state.players.find(p => p.isActive);
 
         if (
@@ -164,7 +181,7 @@ export const UserInterface = new class extends Communicator {
             this.resetButton.enable();
 
             if (state.mayDraft) {
-                this.draftButton.enable();
+                this.continueButton.enable();
 
                 return this.setInfo('You may begin draft whenever you want!');
             }
@@ -185,7 +202,7 @@ export const UserInterface = new class extends Communicator {
             return this.setInfo('The game is full, sorry :(');
 
         if (localState.playerColor === state.sessionOwner) {
-            this.enableElements(this.draftButton, this.resetButton);
+            this.enableElements(this.continueButton, this.resetButton);
 
             return this.setInfo('You may begin draft whenever you want!');
         }
@@ -208,11 +225,22 @@ export const UserInterface = new class extends Communicator {
 
     private handleEndedState(): void {
         this.setInfo('The game has ended');
-        this.resetButton.enable();
+        if (localState.playerColor) {
+            this.resetButton.enable();
+        }
         this.forceTurnButton.disable();
     }
 
+    public addInternalPop(type: MessageType, message: string) {
+        const hue = type == MessageType.ERROR ? 'red' : 'inherit';
+        this.popCache.push({
+            timeStamp: Date.now(),
+            hyperText: `<span style="color${hue}; font-weight: bold">${type}: </span>${message}</br>`,
+        });
+    }
+
     private updateChat(chat: Array<ChatEntry>): void {
+        // TODO: transform into regular loop to have the last formatted message available as a side effect.
         this.chatMessages.innerHTML = chat.map(entry => {
             const name = entry.name ? `${this.sanitizeText(entry.name)}: ` : '';
             const message = this.sanitizeText(entry.message);
@@ -220,6 +248,21 @@ export const UserInterface = new class extends Communicator {
             return `<span style="color:${hue}; font-weight: bold">${name}</span>${message}</br>`;
         }).join('');
         this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+        const lastEntry = chat[chat.length - 1];
+
+        if (
+            lastEntry &&
+            localState.playerColor != lastEntry.color &&
+            (!this.popTimeStamp || lastEntry.timeStamp > this.popTimeStamp)
+        ) {
+            const { timeStamp, color, name, message } = lastEntry;
+            const saneName = name ? `${this.sanitizeText(name)}: ` : '';
+            const saneMessage = this.sanitizeText(message);
+            const hue = color ? clientConstants.PLAYER_HUES[color].vivid.light : 'inherit';
+
+            const hyperText = `<span style="color:${hue}; font-weight: bold">${saneName}</span>${saneMessage}</br>`;
+            this.popCache.push({ timeStamp, hyperText });
+        }
     }
 
     private sanitizeText(text: string) {

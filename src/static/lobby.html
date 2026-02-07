@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link rel="stylesheet" href="/common.css" />
     <link rel="stylesheet" href="/lobby.css" />
     <link rel="stylesheet" href="/pico.cyan.min.css" />
@@ -11,21 +11,27 @@
 </head>
 
 <body>
-    <a id="logout">Log out</a>
-    <h3>Games</h3>
-    <table>
-        <thead>
-            <tr>
-                <td>Game</td>
-                <td>Players</td>
-                <td>Status</td>
-                <td>Last Update</td>
-                <td>Are you playing?</td>
-                <td>Action</td>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="navbar">
+        <button id="logout">Log Out</button>
+        <button id="how-to-play">How to Play</button>
+    </div>
+    <div class="content">
+        <h3>Games</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Game</th>
+                    <th class="players">Players</th>
+                    <th class="status">Status</th>
+                    <th class="update">Last Update</th>
+                    <th>Playing?</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <a href="mailto:adrianpope@proton.me">(🐞||🤝)&&✉️</a>
+    </div>
     <script>
         const seconds = 1000;
         document.querySelector('#logout').addEventListener('click', () => {
@@ -34,6 +40,10 @@
                     console.error(response.statusText);
                 window.location.href = '/';
             });
+        });
+
+        document.querySelector('#how-to-play').addEventListener('click', () => {
+            window.location.href = '/how-to-play';
         });
 
         getTableData().then(data => {
@@ -45,13 +55,13 @@
 
         const update = setInterval(() => {
             getTableData().then(data => {
-            drawTable(data);
-        }).catch(error => {
-            console.error(error);
-            clearInterval(update);
-            window.location.href = '/';
-        });
-        },10 * seconds)
+                drawTable(data);
+            }).catch(error => {
+                console.error(error);
+                clearInterval(update);
+                window.location.href = '/';
+            });
+        }, 3 * seconds)
 
         async function getTableData() {
             const dataFetch = await fetch('/feed');
@@ -73,7 +83,7 @@
             }, '');
 
             // tableBody.innerHTML = tableContent + `<tr>${'<td></td>' * 5}<td><a href="/new">New Game</a></td></tr>`;
-            tableBody.innerHTML = tableContent + '<tr><td></td><td></td><td></td><td></td><td></td><td><a href="/new">New Game</a></td></tr>';
+            tableBody.innerHTML = tableContent + '<tr> <td></td> <td class="players"></td> <td class="status"></td> <td class="update"></td> <td></td> <td><a href="/new">New Game</a></td> </tr>';
 
             function getRow(feed) {
 
@@ -94,23 +104,26 @@
 
                 // MARK: Players
                 let pips = ''
-                for (let i= 0; i < enrolled; i++)
+                for (let i = 0; i < enrolled; i++)
                     pips += `<div ${active-- > 0 ? style.active : style.dormant}></div>`;
-                row += `<td><div class="players">${pips}</div></td>`
+                row += `<td class="players"><div class="pips">${pips}</div></td>`
 
                 const statusText = (() => {
                     switch (status) {
                         case 0:
-                            return 'Enroling'
+                            return 'Open'
                         case 1:
-                            return 'Playing'
+                        case 2:
+                            return 'Started'
+                        case 3:
+                            return 'Abandoned'
                         default:
-                            return 'Dormant'
+                            return 'N/A'
                     }
                 })();
 
                 // MARK: Status
-                row += `<td ${status == 2 ? style.dormant : style.active}>${statusText}</td>`
+                row += `<td  class="status" ${status == 2 ? style.dormant : style.active}>${statusText}</td>`
 
                 // MARK: Last Update
                 const age = Date.now() - timeStamp;
@@ -123,15 +136,15 @@
                         case minutes < 2:
                             return `A minute ago`
                         case minutes < 5:
-                            return `${Math.ceil(minutes)} minutes ago`
+                            return `${Math.ceil(minutes)} mins ago`
                         case minutes < 60:
-                            return `${Math.round(minutes / 5) * 5} minutes ago`
+                            return `${Math.round(minutes / 5) * 5} mins ago`
                         default:
                             const hours = Math.round(minutes / 60);
-                            return `${hours} ${hours > 1 ? 'hours' : 'hour'} ago`
+                            return `${hours} ${hours > 1 ? 'hrs' : 'hr'} ago`
                     }
                 })();
-                row +=`<td>${ageText}</td>`
+                row += `<td class="update">${ageText}</td>`
 
                 // Mark: User Involvement
                 switch (userInvolvement) {
@@ -139,10 +152,10 @@
                         row += '<td>no</td>'
                         break;
                     case 1:
-                        row += '<td class="active">yes</td>'
+                        row += '<td class="active">Yes</td>'
                         break;
                     case 2:
-                        row += '<td class="your_turn">Yes, it\'s your turn!</td>'
+                        row += '<td class="your_turn">Your turn!</td>'
                 }
 
                 // MARK: Action
@@ -157,4 +170,13 @@
         }
 
     </script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>
+        // CONSOLE DEBUG ON MOBILE
+        eruda.init();
+        console.log('DPR:', window.devicePixelRatio);
+        console.log('screen.width:', window.screen.width);
+        console.log('innerWidth:', window.innerWidth);
+        console.log('Calculated CSS width:', window.screen.width / window.devicePixelRatio);
+    </script> -->
 </body>

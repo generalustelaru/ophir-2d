@@ -3,7 +3,7 @@ import { ModalBase } from './ModalBase';
 import { MarketSlotKey, PlayState, SpecialistName, Trade, Unique } from '~/shared_types';
 import { RowDistributor } from '../popular';
 import { TempleMarketCard } from '../location';
-import { DynamicModalInterface } from '~/client/client_types';
+import { Aspect, DynamicModalInterface } from '~/client/client_types';
 
 type DonationItem = {
     slot: MarketSlotKey,
@@ -18,10 +18,12 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
     constructor(
         stage: Konva.Stage,
         donateGoodsCallback: (slot: MarketSlotKey) => void,
+        aspect: Aspect,
     ) {
         super(
             stage,
             { hasSubmit: false, dismissLabel: 'Cancel' },
+            aspect,
             { width: 300, height: 220 },
         );
 
@@ -31,7 +33,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         this.cardRow = new RowDistributor(
             {
                 x: 0,
-                y: 20,
+                y: 0,
                 width: this.contentGroup.width(),
                 height: this.contentGroup.height(),
             },
@@ -50,6 +52,10 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         );
     }
 
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
+    }
+
     public show() { // TODO: see not to create these on the fly, but update them.
         const rowElements = this.advisorTrades.map(item => {
             const card = new TempleMarketCard(
@@ -64,7 +70,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
             return { id: item.slot, node: card.getElement() };
         });
 
-        this.cardRow.setNodes(rowElements);
+        this.cardRow.updateNodes(rowElements);
         this.open();
     }
 

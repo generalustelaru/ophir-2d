@@ -1,14 +1,17 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import constants from '~/client_constants';
+import { Aspect, StaticModalInterface } from '~/client/client_types';
+import { Unique } from '~/shared_types';
 
 const { ICON_DATA, HUES } = constants;
 
-export class ForceTurnModal extends ModalBase {
-    constructor(stage: Konva.Stage) {
+export class ForceTurnModal extends ModalBase implements Unique<StaticModalInterface<undefined>> {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             { hasSubmit: false, dismissLabel: 'Close' },
+            aspect,
             { width: 380, height: 160 },
         );
 
@@ -33,6 +36,10 @@ export class ForceTurnModal extends ModalBase {
         });
 
         this.contentGroup.add(text, disabledAnchor);
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show() {

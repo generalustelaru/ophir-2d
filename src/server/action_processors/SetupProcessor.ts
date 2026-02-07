@@ -139,9 +139,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             return lib.fail('Player cannot choose or specialist already assigned');
 
         this.setupState.assignSpecialist(player, name);
-        this.setupState.addServerMessage(
-            `[${player.name}] has picked the ${pickedSpecialist.displayName}`, player.color,
-        );
+
         const nextPlayer = this.setupState.getNextPlayer();
 
         if (nextPlayer)
@@ -249,7 +247,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         return lib.pass({
             playState: playStateHandler,
             privateState: privateStateHandler,
-            backupState: new BackupStateHandler(this.config.SERVER_NAME, null),
+            backupState: new BackupStateHandler(null),
         });
     };
 
@@ -279,7 +277,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
     private determineLocations(): MapPairings {
         const locations = lib.randomize(LOCATION_ACTIONS);
 
-        if (locations.length !== 7) {
+        if (locations.length != 7) {
             throw new Error(`Invalid number of locations! Expected 7, got {${locations.length}}`);
         }
 
@@ -362,7 +360,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         mapPairings: MapPairings,
     ): {
         players: Array<Player>,
-        startingPlayer: Player
+        startingPlayer: Player,
     } {
         const initialRules = lib.getCopy(moveRules[0]);
         const startingZone = initialRules.from;
@@ -394,7 +392,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
                 locationActions: [],
                 destinations: [],
                 navigatorAccess: [],
-                cargo: ['empty', 'empty'],
+                cargo: new Array(2).fill('empty'),
                 feasibleTrades: [],
                 feasiblePurchases: [],
                 coins: 0,
@@ -402,7 +400,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             };
 
             if (playerDto.specialist.name === SpecialistName.ambassador)
-                playerDto.cargo.push('empty', 'empty');
+                playerDto.cargo.push(...playerDto.cargo);
 
             return playerDto;
         });
@@ -417,7 +415,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
 
                 switch (CARGO_BONUS) {
                     case 1:
-                        player.cargo = ['empty', 'empty', 'empty', 'empty'];
+                        player.cargo = new Array(4).fill('empty');
                         break;
                     case 2:
                         player.cargo = ['marble', 'gems', 'ebony', 'linen'];

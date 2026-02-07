@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { MarketOffer, PlayState, MarketSlotKey, Action, Unique } from '~/shared_types';
-import { DynamicModalInterface } from '~/client/client_types';
+import { Aspect, DynamicModalInterface } from '~/client/client_types';
 import { FavorDial, VictoryPointDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
 import clientConstants from '~/client_constants';
@@ -15,7 +15,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
     private favorDial: FavorDial;
     private playerFavor: number = 0;
 
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             {
@@ -24,6 +24,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
                 submitLabel: 'Yes',
                 dismissLabel: 'Cancel',
             },
+            aspect,
             { width: 340, height: 180 },
         );
 
@@ -87,6 +88,10 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
 
         if (player)
             this.playerFavor = player.favor;
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show(slot: MarketSlotKey) {

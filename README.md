@@ -52,8 +52,7 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
 
  There's a decent number of rules in Ophir. To learn how to play, you can:
  - Watch this [how-to-play video](https://youtu.be/pJrDOh6HadI?si=ZOGegm3W-7GWgNP1) from the Dice Tower YouTube channel.
- - Examine the included [RULES.md](https://github.com/generalustelaru/ophir-2d/blob/main/RULES.md) document.
- - Follow your intuition. The game enforces rules. You can't cheat but you can certainly make mistakes!
+ - Read the included rules accessible from the About page and the Lobby. These work better as they reference this implementation and also contain pictures.
 
 ## Configuration options (admin & 'fun' stuff)
 Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
@@ -83,8 +82,8 @@ SHORT_GAME | Reduces the Temple Track to a single column (the game ends after th
 INCLUDE | Array of specialists to appear in the draft. | ** `array` |
 
 - *CARGO_BONUS
-   - `0`: No bonus
-   - `1`: Upgraded cargo
+   - `0`: None
+   - `1`: Upgraded cargo (four slots)
    - `2` One of each commodity onboard
    - `3` One gold and one silver onboard
 

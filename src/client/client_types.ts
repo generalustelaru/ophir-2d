@@ -7,6 +7,18 @@ import Konva from 'konva';
 
 export type ElementList = Array<Konva.Group | Konva.Shape>
 export type Hue = `#${string}`;
+export enum MessageType {
+    INFO = 'INFO',
+    ERROR = 'ERROR',
+}
+export enum RawEvents {
+    HOVER = 'mouseenter',
+    LEAVE = 'mouseleave',
+    CLICK = 'click tap',
+    DRAG_START = 'dragstart',
+    DRAG_MOVE = 'dragmove',
+    DRAG_END = 'dragend',
+};
 
 export type HueCombo = { dark: Hue, light: Hue, accent: Hue }
 export type PlayerHueVariation = { vivid: HueCombo, muted: HueCombo }
@@ -41,8 +53,19 @@ export enum LayerIds {
     overlay,
 }
 
+export enum Aspect { tall = 'tall', wide = 'wide' }
+
+type AspectData<T> = {
+    [Aspect.wide]: T
+    [Aspect.tall]: T
+}
+
 export type ClientConstants = {
-    STAGE_AREA: { width: number, height: number },
+    STAGE_AREA: AspectData<Dimensions>,
+    GROUP_DIMENSIONS: { location: Dimensions, map: Dimensions, player: Dimensions }
+    LOCATION_PLACEMENT: AspectData<Coordinates>,
+    MAP_PLACEMENT: AspectData<Coordinates>,
+    PLAYER_PLACEMENT: AspectData<Coordinates>,
     HUES: Record<string, Hue>,
     PLAYER_HUES: Record<PlayerColor, PlayerHueVariation>
     COLOR_PROFILES: Record<string, ColorProfile>,
@@ -53,7 +76,7 @@ export type ClientConstants = {
     LAYERED_ICONS: Record<IconName, LayeredIconData>
     TEMPLE_CONSTRUCTION_DATA: Array<TempleIconData>
     SHIP_DATA: {
-        dimensions: { width: number, height: number }
+        dimensions: Dimensions
         setupDrifts: Array<Coordinates>,
         shape: string
     },
@@ -79,10 +102,13 @@ export interface DynamicGroupInterface<U> {
 
 export interface DynamicModalInterface<U, S> {
     update(u: U): void,
+    repositionModal(aspect: Aspect): void;
     show(s: S): void,
 }
-export interface StaticModalInterface {
-    show(): void,
+
+export interface StaticModalInterface<S> {
+    repositionModal(aspect: Aspect): void;
+    show(s: S): void,
 }
 
 export interface StaticGroupInterface {
@@ -93,12 +119,9 @@ export interface GroupFactory {
     produceElement(p?: any): Konva.Group,
 }
 
-export type GroupLayoutData = {
-    width: number,
-    height: number,
-    x: number,
-    y: number,
-};
+export type Dimensions = { width: number, height: number }
+
+export type GroupLayoutData = Coordinates & Dimensions
 
 export type ColorProfile = {
     primary: Hue,
@@ -150,8 +173,8 @@ export type EventFormat<T extends EventType, D> = {
 
 export enum EventType {
     identification = 'identification',
-    draft = 'draft',
-    start_action = 'start',
+    start_setup = 'setup',
+    start_play = 'play',
     close = 'close',
     timeout = 'timeout',
     action = 'action',
@@ -169,8 +192,8 @@ export enum EventType {
 }
 
 export type LaconicType =
-    | EventType.draft
-    | EventType.start_action
+    | EventType.start_setup
+    | EventType.start_play
     | EventType.close
     | EventType.timeout
     | EventType.start_turn

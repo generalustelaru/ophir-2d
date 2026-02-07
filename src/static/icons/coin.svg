@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="50"
+   height="50"
+   viewBox="0 0 13.229167 13.229167"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (1:1.3.2+202311252150+091e20ef0f)"
+   sodipodi:docname="coin.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="4.6653429"
+     inkscape:cx="23.04225"
+     inkscape:cy="51.33599"
+     inkscape:window-width="1920"
+     inkscape:window-height="1009"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g37"
+       transform="matrix(1.1913612,0,0,1.1913612,-156.97723,-229.19548)">
+      <circle
+         style="fill:#0b0e02;fill-opacity:1;fill-rule:evenodd;stroke-width:0.0180761"
+         id="circle4"
+         cx="177.80743"
+         cy="-162.90224"
+         r="5.0583653"
+         transform="rotate(97.798392)" />
+      <circle
+         style="fill:#c0c0c0;fill-opacity:1;fill-rule:evenodd;stroke-width:0.0180761"
+         id="circle5"
+         cx="177.13414"
+         cy="-162.90224"
+         transform="rotate(97.798392)"
+         r="5.0583653" />
+      <path
+         id="temple"
+         style="fill:none;fill-opacity:1;stroke:#9e9e9e;stroke-width:0.264583;stroke-dasharray:none;stroke-opacity:1"
+         d="m 134.14128,195.27815 -0.17574,4.17659 h 6.78462 l -0.30135,-4.17659 h -0.72892 v 1.54142 h -0.0451 a 2.4375087,1.6076344 0 0 0 -2.31708,-1.11046 2.4375087,1.6076344 0 0 0 -2.31678,1.11046 h -0.0451 v -1.54142 z" />
+      <circle
+         style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#9e9e9e;stroke-width:0.264583;stroke-dasharray:none;stroke-opacity:1"
+         id="circle36"
+         cx="177.13414"
+         cy="-162.90224"
+         r="4.0466924"
+         transform="rotate(97.798392)" />
+    </g>
+  </g>
+</svg>

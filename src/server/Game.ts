@@ -16,6 +16,7 @@ import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { validator } from './services/validation/ValidatorService';
 import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 import { uniqueNamesGenerator, adjectives, colors, animals } from 'unique-names-generator';
+import { Font } from 'opentype.js';
 
 /**@throws */
 export class Game {
@@ -27,6 +28,7 @@ export class Game {
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private saveDisplayName: ((userId: UserId, name: string) => void) | null;
     private userReferences: Array<UserReference> = [];
+    private font: Font | null;
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
@@ -34,11 +36,17 @@ export class Game {
         nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
         savedSession: GameState | null,
+        font: Font | null,
     ) {
+
+        if (!font)
+            throw new Error('Missing fonts!');
+
         this.config = { ...configuration };
         this.broadcast = broadcastCallback;
         this.transmit = transmitCallback;
         this.saveDisplayName = nameUpdateCallback;
+        this.font = font;
 
         if (!savedSession) {
             this.gameId = uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], length: 2, separator: '-' });
@@ -73,9 +81,7 @@ export class Game {
                             playState: new PlayStateHandler(
                                 configuration.SERVER_NAME, sharedState,
                             ),
-                            backupState: new BackupStateHandler(
-                                configuration.SERVER_NAME, backupStates,
-                            ),
+                            backupState: new BackupStateHandler(backupStates),
                         },
                         configuration,
                         broadcastCallback,
@@ -100,7 +106,6 @@ export class Game {
                 default:
                     throw new Error('Cannot determine session phase');
             }
-
         })();
     }
 
@@ -115,7 +120,7 @@ export class Game {
     }
 
     public setPlayerRef(user: User) {
-        this.userReferences.push({  ...user, color: null });
+        this.userReferences.push({ ...user, color: null });
     }
 
     private preserveName(userId: UserId, name: string) {
@@ -137,6 +142,7 @@ export class Game {
         this.transmit = null;
         this.saveDisplayName = null;
         this.userReferences = [];
+        this.font = null;
     }
 
     public getGameId(): string {
@@ -149,7 +155,7 @@ export class Game {
 
     public getGameState(): GameState {
         const state = this.actionProcessor.getState();
-        const isPlay = state.sessionPhase === Phase.play;
+        const isPlay = state.sessionPhase == Phase.play;
         return {
             timeStamp: this.timeStamp,
             userReferences: this.userReferences,
@@ -169,13 +175,11 @@ export class Game {
             return;
         }
 
-        for (const ref of this.userReferences) {
+        for (const ref of this.userReferences)
             ref.color = null;
-        }
 
-        if ('killIdleChecks' in this.actionProcessor) {
+        if ('killIdleChecks' in this.actionProcessor)
             (this.actionProcessor as PlayProcessor).killIdleChecks();
-        }
 
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
@@ -189,7 +193,7 @@ export class Game {
         this.timeStamp = Date.now();
         const emitError = (reason: string) => {
             lib.printError(`Cannot process action: ${reason}`);
-            return this.issueNominalResponse( { error: 'Cannot process request' });
+            return this.issueNominalResponse({ error: 'Cannot process request' });
         };
 
         const reference = this.userReferences.find(r => r.id == request.userId);
@@ -202,9 +206,11 @@ export class Game {
         const { action, payload } = message;
         const { id: userId, displayName } = reference;
 
-
         if (action === Action.enrol && state.sessionPhase === Phase.enrolment) {
-            return this.processEnrolmentAction({ message, userId, displayName, player: null }, isAdoption);
+            return this.processEnrolmentAction(
+                { message, userId, displayName, player: null },
+                isAdoption,
+            );
         }
 
         const matchOperation = this.matchRequestToPlayer(request);
@@ -228,16 +234,16 @@ export class Game {
                 const nameMatch = message.input.match(/(?<=#name ).*/);
 
                 if (nameMatch) {
+
+                    if (!this.font)
+                        return emitError('Fonts are missing!');
+
                     const newName = nameMatch[0];
 
-                    if (lib.estimateWidth(newName, 28) > 424)
-                        return this.issueNominalResponse({ error: 'The name is too long.' });
+                    const measurement = lib.validateTextLength(newName, this.font, 28, 424, 212);
 
-                    const nameSegments = newName.split( ' ');
-                    for (const segment of nameSegments) {
-                        if (lib.estimateWidth(segment, 28) > 212)
-                            return this.issueNominalResponse({ error: 'A word is too long.' });
-                    }
+                    if (measurement.err)
+                        return this.issueNominalResponse({ error: measurement.message });
 
                     if (this.isNameTaken(state.players, newName))
                         return this.issueNominalResponse({ error: 'This name is already taken' });
@@ -257,6 +263,7 @@ export class Game {
             }
 
             return this.issueGroupResponse(this.actionProcessor.addChat({
+                timeStamp: Date.now(),
                 color: player.color,
                 name: player.name,
                 message: message.input,
@@ -264,7 +271,6 @@ export class Game {
         }
 
         if (action === Action.declare_reset) {
-
             const { sessionOwner, sessionPhase } = state;
 
             if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
@@ -291,8 +297,10 @@ export class Game {
     private updateReferenceColor(userId: UserId, color: PlayerColor) {
         const ref = this.userReferences.find(r => r.id == userId);
 
-        if (!ref)
-            return console.error('Could not a find reference to update color!!!');
+        if (!ref) {
+            lib.printError('Could not a find reference to update color!!!');
+            return;
+        }
 
         ref.color = color;
     };
@@ -304,7 +312,6 @@ export class Game {
         const { action } = message;
 
         if (!player) {
-
             const { userId, message, displayName } = request;
 
             const enrolment = processor.processEnrol(userId, message.payload, displayName, isAdopting);
@@ -531,7 +538,7 @@ export class Game {
         const { userId } = request;
 
         const state = this.actionProcessor.getState();
-        const ref = this.userReferences.find( r => r.id == userId);
+        const ref = this.userReferences.find(r => r.id == userId);
 
         if (!ref)
             return lib.fail(`Cannot find reference for id: ${userId}`);
@@ -544,11 +551,8 @@ export class Game {
         return lib.pass({ ...request, player });
     }
 
-    private isNameTaken(players: PlayerEntity[], name: string | null): boolean {
-        if (!name)
-            return false;
-
-        return players.some(player => player.name === name);
+    private isNameTaken(players: PlayerEntity[], name: string): boolean {
+        return players.some(player => player.name == name);
     }
 
     private getActivationId(players: Array<Player>): UserId | null {

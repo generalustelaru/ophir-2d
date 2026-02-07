@@ -1,22 +1,25 @@
-FROM node:20
-
-# Install make
-RUN apt-get update && apt-get install -y make
-
+FROM node:20-alpine AS builder
 # Set project path
 WORKDIR /app
-
-# node_modules are cached in Docker, no risk of reloading.
+#  Install dependencies (cached)
 COPY package*.json ./
 RUN npm ci
-
-# Copy source to path
+# Copy source
 COPY . .
+# Build
+RUN	mkdir -p dist/public && cp -r src/static/* dist/public/
+RUN npm run build_client & npm run build_server & wait
 
-# Classic build
-RUN make build
-
-# Expose port for HTTP/WS
+FROM builder AS dev
 EXPOSE 3001
+CMD ["node", "dist/server.cjs"]
 
+FROM node:20-alpine AS prod
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci --only=production
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3001
 CMD ["node", "dist/server.cjs"]

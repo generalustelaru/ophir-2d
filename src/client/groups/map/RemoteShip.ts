@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, Player, PlayerColor, Unique } from '~/shared_types';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone } from './SeaZone';
@@ -45,20 +45,20 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
             },
         );
 
-        this.group.on('mouseenter', () => {
+        this.group.on(RawEvents.HOVER, () => {
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
 
-        this.group.on('mouseleave', () => {
+        this.group.on(RawEvents.LEAVE, () => {
             stage.container().style.cursor = 'default';
         });
 
-        this.group.on('dragstart', () => {
+        this.group.on(RawEvents.DRAG_START, () => {
             this.group.moveToTop();
             this.position = { x: this.group.x(), y: this.group.y() };
         });
 
-        this.group.on('dragmove', () => {
+        this.group.on(RawEvents.DRAG_MOVE, () => {
             for (const seaZone of this.seaZones) {
                 seaZone.resetFill();
             }
@@ -72,7 +72,7 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
                 targetZone.setRestricted();
         });
 
-        this.group.on('dragend', () => {
+        this.group.on(RawEvents.DRAG_END, () => {
             const pointer = stage.getPointerPosition();
             const targetZone = this.seaZones.find(hex => hex.isIntersecting(pointer));
 

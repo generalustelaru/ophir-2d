@@ -23,12 +23,7 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
         color: PlayerColor,
         variation: PlayerHueVariation,
     ) {
-        const layout = {
-            x: position.x,
-            y: position.y,
-            width: 230,
-            height: 300,
-        };
+        const layout = { ...position, width: 230, height: 300 };
         super(stage, layout, null);
 
         this.color = color;
@@ -52,13 +47,13 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
 
         this.ownerName = new Konva.Text({
             width: layout.width,
-            height: layout.height,
+            height: 90,
             fontFamily: 'Custom',
             fontSize: 28,
             fontStyle: 'bold',
             ellipsis: true,
             align: 'center',
-            y: 190,
+            offsetY: -190,
             text: 'available',
         });
 

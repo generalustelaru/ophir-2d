@@ -62,7 +62,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
-        this.chat.addOne({ color: as, name: this.serverName.get(), message });
+        this.chat.addOne({ timeStamp: Date.now(), color: as, name: this.serverName.get(), message });
         this.trimChatList();
     }
 

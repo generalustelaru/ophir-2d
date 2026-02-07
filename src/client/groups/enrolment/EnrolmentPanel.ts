@@ -1,54 +1,51 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, ElementList } from '~/client_types';
+import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { PlayerColor, PlayerEntry, Unique } from '~/shared_types';
 import  clientConstants from '~/client_constants';
 import { ColorCard } from './ColorCard';
+import { RowDistributor } from '../popular';
 
 type EnrolmentPanelUpdate = {
     players: Array<PlayerEntry>,
     localPlayerColor: PlayerColor | null,
 }
 
-const { HUES, PLAYER_HUES } = clientConstants;
+const { PLAYER_HUES } = clientConstants;
 
 export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPanelUpdate>> {
     private group: Konva.Group | null;
     private cards: Array<ColorCard> = [];
+    private colorTableau: RowDistributor | null;
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        const elements: ElementList = [];
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
             x: layout.x,
             y: layout.y,
         });
-        const background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
-            cornerRadius: 15,
-            fill: HUES.modalBlue,
-
-        });
-        elements.push(background);
 
         const playerColors: Array<PlayerColor> = ['Purple' , 'Yellow' , 'Red' , 'Green'];
-        const margin = 60;
-        const offset = 200;
-        let drift = margin;
 
         playerColors.forEach(color => {
-            const optionCard = new ColorCard(stage, { x:drift, y:50 }, color, PLAYER_HUES[color]);
-
-            this.cards.push(optionCard);
-            elements.push(optionCard.getElement());
-            drift += margin + offset;
+            this.cards.push(new ColorCard(
+                stage,
+                { x: 0, y: 0 },
+                color, PLAYER_HUES[color]),
+            );
         });
 
-        this.group.add(...elements);
+        this.colorTableau = new RowDistributor(
+            { ...layout, x: 0, y: 0 },
+            this.cards.map(c => {
+                return { id: '', node: c.getElement() };
+            }),
+        );
+
+        this.group.add( this.colorTableau.getElement());
     }
 
     public getElement() {
@@ -56,6 +53,12 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
             throw new Error('Cannot provide element. EnrolmentPanel was destroyed improperly.');
 
         return this.group;
+    }
+
+    public rearrangeRows(layout: GroupLayoutData) {
+        const { width, height, x ,y } = layout;
+        this.group?.width(width).height(height).x(x).y(y);
+        this.colorTableau?.rearrangeNodes({ width, height, x: 0, y: 0 });
     }
 
     public update(data: EnrolmentPanelUpdate) {
@@ -71,6 +74,7 @@ export class EnrolmentPanel implements Unique<DynamicGroupInterface<EnrolmentPan
         this.group?.destroy();
         this.group = null;
 
+        this.colorTableau = null;
         this.cards = this.cards.filter(card => {
             card.selfDecomission();
             return false;

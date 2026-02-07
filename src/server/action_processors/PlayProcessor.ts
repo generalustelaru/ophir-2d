@@ -1,14 +1,14 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, MetalPurchasePayload,
-    Unique, FeasibleTrade, ServerMessage,
+    Unique, FeasibleTrade, ServerMessage, PlayerCountables,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
 import {
-    ActionsAndDetails, Configuration, DataDigest, PlayerCountables, Probable, ActionProcessor, StateBundle, TurnEvent,
+    ActionsAndDetails, Configuration, DataDigest, Probable, ActionProcessor, StateBundle, TurnEvent,
     UserId,
 } from '~/server_types';
 import lib from './library';
@@ -23,7 +23,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
-    // private broadcast: (state: PlayState) => void;
     private transmit: (userId: UserId, message: ServerMessage) => void;
 
     /** @throws */
@@ -39,7 +38,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.playState = playState;
         this.privateState = privateState;
         this.backupState = backupState;
-        // this.broadcast = broadcastCallback;
         this.transmit = transmitCallback;
 
         const players = this.playState.getAllPlayers();
@@ -146,9 +144,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             const playersInZone = this.playState.getPlayersByZone(target);
 
             const rival = this.playState.getRivalData();
-            const rivalInfluence = rival.isIncluded && rival.bearings.seaZone === target
-                ? rival.influence
-                : 0;
+            const rivalInfluence = rival.isIncluded && rival.bearings.seaZone === target ? rival.influence : 0;
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
                 this.privateState.addDeed({ context: Action.move, description: `sailed to the ${locationName}` });
@@ -218,7 +214,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             }
 
             if (this.playState.isRivalIncluded()) {
-                if (this.playState.getRivalBearings()!.seaZone === player.getBearings().seaZone) {
+                if (this.playState.getRivalBearings()!.seaZone == player.getBearings().seaZone) {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
                     this.privateState.addDeed({
                         context: TurnEvent.rival_handling,
@@ -229,7 +225,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 }
             }
 
-        } else if (player.getMoves() === 0) {
+        } else if (player.getMoves() == 0) {
             this.privateState.addDeed({
                 context: TurnEvent.failed_turn,
                 description: 'also being out of moves--cannot act further',
@@ -397,7 +393,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.gainCoins(coins);
         this.privateState.addSpentAction(Action.sell_goods);
 
-        const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location === 'temple';
+        const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location == 'temple';
 
         if (moneyChangerAtTemple)
             this.privateState.addSpentAction(Action.donate_goods);
@@ -407,7 +403,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             description: (
                 moneyChangerAtTemple ? 'accessed the market and ' : ''
                 + `traded ${request.length} goods for `
-                + (coins === 0 ? 'naught' : `${coins} ${coins === 1 ? 'coin' : 'coins'}`)
+                + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
             ),
         });
 
@@ -471,7 +467,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             description: (
                 (omit.length ? `spent ${omit.length} favor to trade ` : 'traded ')
                 + `${delivered} ${delivered == 1 ? 'good' : 'goods'} for `
-                + (coins === 0 ? 'naught' : `${coins} ${coins === 1 ? 'coin' : 'coins'}`)
+                + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
             ),
         });
 
@@ -619,7 +615,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             if (!player.getCargo().includes(specialty))
                 this.privateState.addSpentAction(Action.sell_specialty);
 
-            if (player.isMoneychanger() && player.getBearings().location === 'temple') {
+            if (player.isMoneychanger() && player.getBearings().location == 'temple') {
                 this.privateState.addSpentAction(Action.donate_goods);
                 this.privateState.addDeed({
                     context: Action.sell_specialty,
@@ -657,7 +653,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(`Player ${name} cannot buy metals`);
 
         const metalCost = this.playState.getMetalCosts()[metal];
-        const playerAmount = currency === 'coins' ? player.getCoinAmount() : player.getFavor();
+        const playerAmount = currency == 'coins' ? player.getCoinAmount() : player.getFavor();
 
         const price = metalCost[currency];
         const remainder = playerAmount - price;
@@ -723,7 +719,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         else
             player.clearMoves();
 
-        const reward = metal === 'gold' ? 10 : 5;
+        const reward = metal == 'gold' ? 10 : 5;
         this.privateState.updatePlayerStats(player, reward);
 
         const isMailing = player.isPostmaster() && player.getBearings().location != 'temple';
@@ -757,7 +753,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.addServerMessage(this.convertDeedsToMessage(player), { color, backup: true });
             this.addServerMessage('The temple construction is complete! Game has ended.');
 
-            // this.addServerMessage(JSON.stringify(results.data));
             return lib.pass({ state: this.playState.toDto() });
         }
 
@@ -784,8 +779,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail('Ship is not anchored.');
 
         if (
-            player.getBearings().location === 'temple'
-            && player.getSpecialistName() === SpecialistName.priest
+            player.getBearings().location == 'temple'
+            && player.getSpecialistName() == SpecialistName.priest
             && isVoluntary
         ) {
             this.privateState.addDeed({
@@ -794,9 +789,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             });
             player.gainFavor(1);
         }
-        this.addServerMessage(
-            this.convertDeedsToMessage(player), { color: player.getIdentity().color, backup: true },
-        );
 
         player.deactivate();
         this.privateState.clearSpentActions();
@@ -808,7 +800,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const newPlayerOperation = ((): Probable<PlayerHandler> => {
             const allPlayers = this.playState.getAllPlayers();
-            const nextInOrder = turnOrder === allPlayers.length ? 1 : turnOrder + 1;
+            const nextInOrder = turnOrder == allPlayers.length ? 1 : turnOrder + 1;
             const nextPlayerDto = allPlayers.find(player => player.turnOrder == nextInOrder);
             const { id: nextPlayerId } = refPool.find(r => r.color == nextPlayerDto?.color) || {};
 
@@ -835,7 +827,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(newPlayerOperation.message);
 
         const newPlayer = newPlayerOperation.data;
-        this.addServerMessage(`It's ${newPlayer.getIdentity().name}'s turn!`, { backup: true });
+
+        const deeds = this.convertDeedsToMessage(player);
+        const nextPlayerTurn = `It's ${newPlayer.getIdentity().name}'s turn!`;
+        this.addServerMessage(
+            `${deeds}\n${nextPlayerTurn}`,
+            { color: player.getIdentity().color, backup: true },
+        );
 
         return this.continueTurn(newPlayer);
     }
@@ -861,7 +859,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const rivalLocation = this.playState.getLocationName(rival.bearings.seaZone);
 
         if (isShiftingMarket) {
-            if (rivalLocation !== 'market')
+            if (rivalLocation != 'market')
                 return lib.fail('Cannot shift market from here!');
 
             const marketShift = this.shiftMarketCards(player);
@@ -941,7 +939,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.playState = new PlayStateHandler(this.serverName, playState);
         this.privateState = new PrivateStateHandler(privateState);
 
-        const revertedPlayer = playState.players.find(p => p.color === color);
+        const revertedPlayer = playState.players.find(p => p.color == color);
         const userId = refPool.find(r => r.color == color)?.id;
 
         if (!revertedPlayer || !userId)
@@ -1023,25 +1021,23 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             }
         }
 
-        if (player.isMoneychanger() && currentLocation == 'temple') {
+        if (player.isMoneychanger() && currentLocation == 'temple')
             return [Action.sell_goods, Action.sell_specialty];
-        }
 
-        if (player.isChancellor() && currentLocation == 'market') {
+        if (player.isChancellor() && currentLocation == 'market')
             return [Action.sell_as_chancellor];
-        }
 
         return [];
     }
 
     private loadItem(cargo: Array<ItemName>, item: ItemName): Probable<Array<ItemName>> {
-        const filled = cargo.filter(item => item !== 'empty') as Array<ItemName>;
-        const empty = cargo.filter(item => item === 'empty') as Array<ItemName>;
+        const filled = cargo.filter(item => item != 'empty') as Array<ItemName>;
+        const empty = cargo.filter(item => item == 'empty') as Array<ItemName>;
         const orderedCargo = filled.concat(empty);
 
         const emptyIndex = orderedCargo.indexOf('empty');
 
-        if (emptyIndex === -1)
+        if (emptyIndex == -1)
             return lib.fail('Could not find an empty slot to load item');
 
         const metals: Array<ItemName> = ['gold', 'silver'];
@@ -1053,7 +1049,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             if (supplies.metals[metal] < 1)
                 return lib.fail(`No ${item} available for loading`);
 
-            if (orderedCargo[emptyIndex + 1] !== 'empty')
+            if (orderedCargo[emptyIndex + 1] != 'empty')
                 return lib.fail('Not enough empty slots for storing metal');
 
             orderedCargo[emptyIndex] = item;
@@ -1145,7 +1141,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     feasible.push({ slot: key, missing: unfilledGoods });
                     break;
 
-                case unfilledGoods.length === 0:
+                case unfilledGoods.length == 0:
                     feasible.push({ slot: key, missing: [] });
             }
         });
@@ -1184,12 +1180,11 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!player.isAnchored() || player.isFrozen())
             return { actions: [], trades: [], purchases: [] };
 
-        const actionsByLocation = (
-            this.getDefaultActions(player)
-                .concat(this.getSpecialistActions(player))
-                .filter(a =>
-                    !this.privateState.getSpentActions().includes(a),
-                )
+        const actionsByLocation = (this.getDefaultActions(player)
+            .concat(this.getSpecialistActions(player))
+            .filter(a =>
+                !this.privateState.getSpentActions().includes(a),
+            )
         );
 
         const trades = this.pickFeasibleTrades(player);
@@ -1237,7 +1232,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
                 case Action.load_good:
                     const { location } = player.getBearings();
-                    return (
+                    return ( // TODO: add and use constants instead of this and other examples of hardcoded values.
                         ['quarry', 'forest', 'mines', 'farms'].includes(location)
                         && player.hasCargoRoom(1)
                         && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
@@ -1256,14 +1251,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         for (let i = 0; i < gameStats.length; i++) {
             const playerStat = gameStats[i];
-            const player = players.find(p => p.color === playerStat.color);
+            const player = players.find(p => p.color == playerStat.color);
 
             if (!player) {
                 return lib.fail(`No player found for [${playerStat.color}]`);
             }
 
-            playerStat.gold = player.cargo.filter(item => item === 'gold').length;
-            playerStat.silver = player.cargo.filter(item => item === 'silver').length;
+            playerStat.gold = player.cargo.filter(item => item == 'gold').length;
+            playerStat.silver = player.cargo.filter(item => item == 'silver').length;
             playerStat.vp += (playerStat.gold * 5) + (playerStat.silver * 3);
             playerStat.favor = player.favor;
             playerStat.coins = player.coins;
@@ -1346,10 +1341,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     private addServerMessage(message: string, options?: { color?: PlayerColor, backup?: boolean}) {
-        this.playState.addServerMessage(message, options?.color);
+        const chatEntry = this.playState.addServerMessage(message, options?.color);
 
         if (options?.backup)
-            this.backupState.addServerMessage(message, options?.color);
+            this.backupState.addChatEntry(chatEntry);
     }
 
     private preserveState(player: PlayerHandler, hasMoved: boolean = false) {

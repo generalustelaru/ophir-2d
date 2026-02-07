@@ -1,15 +1,16 @@
 import Konva from 'konva';
 import { ModalBase } from './ModalBase';
 import { SymbolicInfluenceDial } from '../popular';
-import { Action } from '~/shared_types';
+import { Action, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
+import { Aspect, StaticModalInterface } from '~/client/client_types';
 const { LOCATION_TOKEN_DATA, HUES } = clientConstants;
 
-export class EndRivalTurnModal extends ModalBase {
+export class EndRivalTurnModal extends ModalBase implements Unique<StaticModalInterface<boolean>> {
     private confirmationText: Konva.Text;
     private rivalDie: SymbolicInfluenceDial;
     private marketIcon: Konva.Path;
-    constructor(stage: Konva.Stage) {
+    constructor(stage: Konva.Stage, aspect: Aspect) {
         super(
             stage,
             {
@@ -18,6 +19,7 @@ export class EndRivalTurnModal extends ModalBase {
                 submitLabel: 'Yes',
                 dismissLabel: 'Cancel',
             },
+            aspect,
             { width: 310, height: 200 },
         );
 
@@ -52,6 +54,10 @@ export class EndRivalTurnModal extends ModalBase {
             this.marketIcon,
             this.rivalDie.getElement(),
         );
+    }
+
+    public repositionModal(aspect: Aspect): void {
+        this.reposition(aspect);
     }
 
     public show(isShiftingMarket: boolean) {
