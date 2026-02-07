@@ -7,8 +7,9 @@ import {
     Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State, Phase,
 } from '~/shared_types';
 
+const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
 const comms = new CommunicationService();
-const gameAdress = `ws://${window.location.host}/game`;
+const gameAdress = `${protocol}//${window.location.host}/game`;
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 
