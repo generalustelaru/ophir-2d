@@ -11,9 +11,8 @@ Work in progress.
 - Performance optimizations may still be needed.
 - The net code is not yet fully stable.
 - The interface language is not yet standardized and is missing quality of life features (more utility animations, transitions, tooltips, FTUE screens).
-- The game is fully playable on a local network. I haven't tested deployments yet.
 
-Try it out
+Try it out here -> [play-ophir.cloud](http://play-ophir.cloud/)
 
 ## Setup and running
 You can set up and run a server quite easily on your local network.
