@@ -831,13 +831,13 @@ function debugCommand(command?: string, target?: string, option?: string): objec
                 connected_users: connections.size,
                 game_stats: stats.size,
             },
-            commands: ['users', 'stats', 'game'],
+            commands: ['users', 'stats', 'games'],
         };
 
     switch (command) {
         case 'users':
             return Array.from(connections.keys());
-        case 'game':
+        case 'games':
             return debugGame(target, option);
         case 'stats':
             return debugStat(target, option);
