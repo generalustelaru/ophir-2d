@@ -14,8 +14,10 @@ export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
         isVisible: boolean = true,
     ) {
         this.group = new Konva.Group({
-            x: position.x, y: position.y, width: 66, height: 66 },
-        ).visible(isVisible);
+            ...position,
+            width: 66,
+            height: 66,
+        }).visible(isVisible);
 
         const disc = new Konva.Circle({
             x: this.group.width() / 2,
@@ -48,7 +50,7 @@ export class VictoryPointDial implements Unique<DynamicGroupInterface<number>> {
             height: this.group.height(),
             align: 'center',
             verticalAlign: 'middle',
-            text: value ? String(value) : '0',
+            text: value ? String(value) : '?',
             fontSize: 20,
             fill: HUES.vpCardPurple,
             stroke: HUES.vpCardPurple,

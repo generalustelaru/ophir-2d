@@ -1,14 +1,14 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { Coordinates, Unique } from '~/shared_types';
-import { FavorIcon } from '../popular';
+import { FavorIcon, VictoryPointDial } from '../popular';
 import clientConstants from '~/client_constants';
 
-const { ICON_DATA, HUES } = clientConstants;
+const { HUES } = clientConstants;
 
 export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
-    private vpAmount: Konva.Text;
+    private vpDial: VictoryPointDial;
     private favorAmount: Konva.Text;
     constructor(
         position: Coordinates,
@@ -17,57 +17,31 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
         this.group = new Konva.Group({
             x: position.x,
             y: position.y,
-            // width: 66, height: 96,
+            width: 66,
+            height: 66,
         });
 
-        const favorIcon = new FavorIcon({ x: -20, y: -23 });
+        this.vpDial = new VictoryPointDial(
+            { x: -30, y: -35 },
+        );
+        amount && this.vpDial.update(amount);
 
-        const semiDisc = new Konva.Wedge({
-            y: -1,
-            radius: 22,
-            angle: 180,
-            fill: HUES.vpGold,
-            rotation: 90,
-        });
-
-        const semiWreath = new Konva.Path({
-            data: ICON_DATA.half_wreath.shape,
-            fill: ICON_DATA.half_wreath.fill,
-            x: -27,
-            y: -24,
-            scale: { x: 2, y: 2 },
-        });
-
-        const coinCenter = this.group.getClientRect().width / 2;
-
-        this.vpAmount = new Konva.Text({
-            x: coinCenter - 12,
-            y: coinCenter - 10,
-            text: String(amount || ''),
-            fontSize: 20,
-            fill: HUES.vpCardPurple,
-            stroke: HUES.vpCardPurple,
-            // strokeWidth: 2,
-            fontFamily: 'Calibri',
-        });
+        const favorIcon = new FavorIcon({ x: 10, y: -15 }, 'small');
 
         this.favorAmount = new Konva.Text({
-            x: coinCenter + 5,
-            y: coinCenter - 10,
+            x: 20,
+            y: -10,
             text: String(amount || ''),
-            fontSize: 20,
+            fontSize: 15,
             fill: HUES.boneWhite,
             stroke: HUES.boneWhite,
-            // strokeWidth: 2,
             fontFamily: 'Calibri',
 
         });
 
         this.group.add(
+            this.vpDial.getElement(),
             favorIcon.getElement(),
-            semiDisc,
-            semiWreath,
-            this.vpAmount,
             this.favorAmount,
         );
     }
@@ -81,7 +55,7 @@ export class TempleRewardDial implements Unique<DynamicGroupInterface<number>> {
     }
 
     public update(amount: number | null): void {
-        this.vpAmount.text(String(amount || ''));
+        amount && this.vpDial.update(amount);
         this.favorAmount.text(String(amount || ''));
     }
 }

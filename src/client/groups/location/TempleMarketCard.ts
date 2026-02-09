@@ -42,11 +42,9 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
         });
 
         this.rewardDial = new TempleRewardDial(
-            { x: 0, y: 0 },
+            { x: this.group.width() / 2 - 5, y: this.group.height() - 30 },
             opensAdvisorModal ? null : trade.reward.favorAndVp,
         );
-        this.rewardDial.getElement().x((this.background.width() - this.rewardDial.getDiameter()) / 2);
-        this.rewardDial.getElement().y(this.background.height() - this.rewardDial.getDiameter() - 30);
 
         this.goodsAssortment = new GoodsAssortment(
             {
