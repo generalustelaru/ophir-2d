@@ -208,6 +208,6 @@ const serverConstants: ServerConstants = {
             treasury: { goldCost: { coins: 7, favor: 5 }, silverCost: { coins: 4, favor: 3 } },
         },
     ],
-};
+} as const;
 
 export default serverConstants;
