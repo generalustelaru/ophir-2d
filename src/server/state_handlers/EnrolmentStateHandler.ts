@@ -27,8 +27,8 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
             sessionPhase: this.sessionPhase.get(),
             sessionOwner: this.sessionOwner.get(),
             mayDraft: this.mayDraft.get(),
-            players: this.players.get(),
-            chat: this.chat.get(),
+            players: this.players.getAll(),
+            chat: this.chat.getAll(),
         };
     }
 
@@ -38,7 +38,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
     }
 
     public getAllPlayers() {
-        return this.players.get();
+        return this.players.getAll();
     }
 
     public addPlayer(entry: PlayerEntry) {
@@ -58,7 +58,7 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
     }
 
     public isRoomForNewPlayer() {
-        return Boolean(this.players.get().length < 4);
+        return Boolean(this.players.getAll().length < 4);
     }
 
     public addServerMessage(message: string, as: PlayerColor | null = null) {
@@ -91,6 +91,6 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
     }
 
     private trimChatList() {
-        (this.chat.get().length > 10) && this.chat.drawFirst();
+        (this.chat.getAll().length > 10) && this.chat.drawFirst();
     }
 }

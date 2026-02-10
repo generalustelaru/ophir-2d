@@ -31,12 +31,12 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
     public toDto(): PrivateState {
         return {
             destinationPackages: this.destinationPackages.getAll(),
-            tradeDeck: this.tradeDeck.get(),
-            costTiers: this.costTiers.get(),
-            gameStats: this.gameStats.get(),
+            tradeDeck: this.tradeDeck.getAll(),
+            costTiers: this.costTiers.getAll(),
+            gameStats: this.gameStats.getAll(),
             turnSummary: this.turnSummary.get(),
-            playerSpentActions: this.playerSpentActions.get(),
-            playerHasMovedPreviously:this.playerHasMovedPreviously.get(), 
+            playerSpentActions: this.playerSpentActions.getAll(),
+            playerHasMovedPreviously:this.playerHasMovedPreviously.get(),
         };
     }
 
@@ -86,7 +86,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
     }
 
     public getGameStats() {
-        return this.gameStats.get();
+        return this.gameStats.getAll();
     }
 
     public loadTradeDeck(deck: Array<Trade>) {
@@ -120,7 +120,7 @@ export class PrivateStateHandler implements Unique<ObjectHandler<PrivateState>> 
     }
 
     public getSpentActions() {
-        return this.playerSpentActions.get();
+        return this.playerSpentActions.getAll();
     }
 
     public clearSpentActions() {

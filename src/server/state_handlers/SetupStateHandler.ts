@@ -31,10 +31,10 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
             gameId: this.gameId.get(),
             sessionPhase: this.sessionPhase.get(),
             sessionOwner: this.sessionOwner.get(),
-            players: this.players.get(),
-            specialists: this.specialists.get(),
+            players: this.players.getAll(),
+            specialists: this.specialists.getAll(),
             setup: this.setup.get(),
-            chat: this.chat.get(),
+            chat: this.chat.getAll(),
         };
     };
 
@@ -86,7 +86,7 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
             }
             return p;
         });
-        const next = this.players.get().find(p => p.turnOrder == player.turnOrder - 1);
+        const next = this.players.getAll().find(p => p.turnOrder == player.turnOrder - 1);
         if (next) {
             this.players.updateOne(next.color, (p) => {
                 p.turnToPick = true;
@@ -96,10 +96,10 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
     }
 
     public getNextPlayer() {
-        return this.players.get().find(p => p.turnToPick) || null;
+        return this.players.getAll().find(p => p.turnToPick) || null;
     }
 
     private trimChatList() {
-        (this.chat.get().length > 10) && this.chat.drawFirst();
+        (this.chat.getAll().length > 10) && this.chat.drawFirst();
     }
 }

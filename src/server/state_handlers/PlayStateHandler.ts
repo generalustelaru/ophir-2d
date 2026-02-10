@@ -51,11 +51,11 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
             setup: this.setup.get(),
             sessionPhase: this.sessionPhase.get(),
             gameResults: this.gameResults.get(),
-            players: this.players.get(),
+            players: this.players.getAll(),
             market: this.market.get(),
             treasury: this.treasury.get(),
             temple: this.temple.get(),
-            chat: this.chat.get(),
+            chat: this.chat.getAll(),
             itemSupplies: this.itemSupplies.get(),
             rival: this.rival.get(),
         };
@@ -103,11 +103,11 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     }
 
     public getActivePlayer() {
-        return this.players.get().find(p => p.isActive) || null;
+        return this.players.getAll().find(p => p.isActive) || null;
     }
 
     public getAllPlayers() {
-        return this.players.get();
+        return this.players.getAll();
     }
 
     // MARK: Rival
@@ -187,7 +187,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
 
     // MARK: Map
     public getPlayersByZone(zone: ZoneName): Array<Player> {
-        return this.players.get()
+        return this.players.getAll()
             .filter(p => p.bearings.seaZone == zone);
     }
 
@@ -347,6 +347,6 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     }
 
     private trimChatList() {
-        (this.chat.get().length > 10) && this.chat.drawFirst();
+        (this.chat.getAll().length > 10) && this.chat.drawFirst();
     }
 }

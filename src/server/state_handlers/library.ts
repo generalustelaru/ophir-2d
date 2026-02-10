@@ -103,7 +103,7 @@ export function arrayReadable<T>(fixedArray: Array<T>, keyName?: keyof T): Array
 // TODO: Refactor ArrayWritable to take an index and turn the internal structure into a record.
 export type ArrayWritable<T> = {
     count: () => number,
-    get: () => Array<T>,
+    getAll: () => Array<T>,
     includes: (reference: string|number|null) => boolean,
     getOne: (reference: string|number) => T | null,
     addOne: (element: T) => void,
@@ -126,7 +126,7 @@ export function arrayWritable<T>(initialArray: Array<T>, key?: keyof T): ArrayWr
 
     return {
         count: () => array.get().length,
-        get: () => array.get(),
+        getAll: () => array.get(),
         includes: (value) => {
             return key
                 ? !!array.get().find(e => e[key] === value)

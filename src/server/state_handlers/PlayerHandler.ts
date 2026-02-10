@@ -83,12 +83,12 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
             moveActions: this.moveActions.get(),
             isAnchored: this._isAnchored.get(),
             isHandlingRival: this.isHandlingRival.get(),
-            locationActions: this.localActions.get(),
-            destinations: this.destinations.get(),
-            navigatorAccess: this.navigatorAccess.get(),
-            cargo: this.cargo.get(),
-            feasibleTrades: this.feasibleTrades.get(),
-            feasiblePurchases: this.feasiblePurchases.get(),
+            locationActions: this.localActions.getAll(),
+            destinations: this.destinations.getAll(),
+            navigatorAccess: this.navigatorAccess.getAll(),
+            cargo: this.cargo.getAll(),
+            feasibleTrades: this.feasibleTrades.getAll(),
+            feasiblePurchases: this.feasiblePurchases.getAll(),
             coins: this.coins.get(),
             turnPurchases: this.turnPurchases.get(),
         };
@@ -202,7 +202,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public getDestinations() {
-        return this.destinations.get();
+        return this.destinations.getAll();
     }
 
     public setBearings(bearings: ShipBearings) {
@@ -240,7 +240,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public getCargo() {
-        return this.cargo.get();
+        return this.cargo.getAll();
     }
 
     public getSpecialist() {
@@ -308,7 +308,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public getFeasibles() {
-        return this.feasibleTrades.get();
+        return this.feasibleTrades.getAll();
     }
 
     public getCoinAmount() {
@@ -332,7 +332,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public getActions() {
-        return this.localActions.get();
+        return this.localActions.getAll();
     }
 
     public enableUndo() {
