@@ -16,7 +16,7 @@ import process from 'process';
 import path from 'path';
 import http from 'http';
 
-import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
+import { PORT_NUMBER, MONGODB_URI, REDIS_URL, NODE_ENV } from '../environment';
 import { MongoClient } from 'mongodb';
 import opentype, { Font } from 'opentype.js';
 
@@ -198,7 +198,12 @@ app.use((_, res, next) => {
     next();
 });
 app.get('/debug', (req: Request, res: Response) => {
-    console.info('Server debuged', { ip: req.ip });
+
+    if (NODE_ENV == 'production') {
+        res.status(404).send();
+
+        return;
+    }
 
     const command = typeof req.query.command == 'string' ? req.query.command : undefined;
     const target = typeof req.query.target == 'string' ? req.query.target : undefined;
