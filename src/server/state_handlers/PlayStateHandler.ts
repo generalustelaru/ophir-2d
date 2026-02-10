@@ -11,8 +11,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     private gameId: Readable<string>;
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
-    private sessionPhase: Readable<Phase.play>;
-    private hasGameEnded: Writable<boolean>;
+    private sessionPhase: Writable<Phase.play | Phase.conclusion>;
     private gameResults: Writable<Array<PlayerCountables>>;
     private players: ArrayWritable<Player>;
     private market: Writable<MarketOffer>;
@@ -27,14 +26,13 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
 
         const {
             gameId, sessionOwner, setup, sessionPhase, gameResults, players,
-            market, treasury, temple, chat, itemSupplies, rival, hasGameEnded,
+            market, treasury, temple, chat, itemSupplies, rival,
         } = state;
 
         this.gameId = readable(gameId);
         this.sessionOwner = readable(sessionOwner);
         this.setup = readable(setup);
         this.sessionPhase = writable(sessionPhase);
-        this.hasGameEnded = writable(hasGameEnded);
         this.gameResults = writable(gameResults);
         this.players = arrayWritable(players, 'color');
         this.market = writable(market);
@@ -52,7 +50,6 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
             sessionOwner: this.sessionOwner.get(),
             setup: this.setup.get(),
             sessionPhase: this.sessionPhase.get(),
-            hasGameEnded: this.hasGameEnded.get(),
             gameResults: this.gameResults.get(),
             players: this.players.get(),
             market: this.market.get(),
@@ -346,7 +343,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
      */
     public registerGameEnd(results: Array<PlayerCountables>) {
         this.gameResults.set(results);
-        this.hasGameEnded.set(true);
+        this.sessionPhase.set(Phase.conclusion);
     }
 
     private trimChatList() {

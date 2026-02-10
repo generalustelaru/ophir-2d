@@ -774,10 +774,15 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
         const playerEntity = players.find(p => p.color == userRef?.color);
 
         const status: GameStatus = (() => {
-            if (isActiveGame)
-                return phase == Phase.enrolment ? GameStatus.Enroling : GameStatus.Ongoing;
-
-            return phase == Phase.enrolment ? GameStatus.Abandoned : GameStatus.Paused;
+            switch (phase) {
+                case Phase.enrolment:
+                    return isActiveGame ? GameStatus.Open : GameStatus.Abandoned;
+                case Phase.setup:
+                case Phase.play:
+                    return GameStatus.Started;
+                default:
+                    return GameStatus.Ended;
+            }
         })();
 
         const userInvolvement: UserInvolvement = (() => {

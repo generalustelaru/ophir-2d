@@ -4,7 +4,7 @@ import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
-    Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State, Phase,
+    Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State,
 } from '~/shared_types';
 
 const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
@@ -155,7 +155,7 @@ document.fonts.ready.then(() => {
         const state = event.detail as State;
 
         UserInterface.update(state);
-        canvas.drawUpdateElements(state, state.sessionPhase == Phase.play && state.hasGameEnded);
+        canvas.drawUpdateElements(state);
     });
 
     window.addEventListener(EventType.start_turn, () => {

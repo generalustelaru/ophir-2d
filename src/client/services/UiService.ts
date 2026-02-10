@@ -68,6 +68,7 @@ export const UserInterface = new class extends Communicator {
 
         switch (state.sessionPhase) {
             case Phase.play: this.updateAsPlay(state); break;
+            case Phase.conclusion: this.updateAsConcluded(); break;
             case Phase.enrolment: this.updateAsEnrolment(state); break;
             case Phase.setup: this.updateAsSetup(state);
         }
@@ -166,10 +167,15 @@ export const UserInterface = new class extends Communicator {
             this.forceTurnButton.enable();
         }
 
-        if (state.hasGameEnded)
-            this.handleEndedState();
-        else
-            this.handleStartedState(state);
+        this.handleStartedState(state);
+    }
+
+    private updateAsConcluded(): void {
+        this.setInfo('The game has ended');
+        if (localState.playerColor) {
+            this.resetButton.enable();
+        }
+        this.forceTurnButton.disable();
     }
 
     private handleCreatedState(state: EnrolmentState): void {
@@ -221,14 +227,6 @@ export const UserInterface = new class extends Communicator {
         if (localState.playerColor === state.sessionOwner) {
             this.resetButton.enable();
         }
-    }
-
-    private handleEndedState(): void {
-        this.setInfo('The game has ended');
-        if (localState.playerColor) {
-            this.resetButton.enable();
-        }
-        this.forceTurnButton.disable();
     }
 
     public addInternalPop(type: MessageType, message: string) {

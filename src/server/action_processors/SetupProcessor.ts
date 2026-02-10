@@ -213,7 +213,6 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             {
                 gameId: setupState.gameId,
                 sessionPhase: Phase.play,
-                hasGameEnded: false,
                 gameResults: [],
                 sessionOwner: setupState.sessionOwner,
                 chat: setupState.chat,

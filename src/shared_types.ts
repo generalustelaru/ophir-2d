@@ -194,6 +194,7 @@ export enum Phase {
     enrolment = 'enrolment',
     setup = 'setup',
     play = 'play',
+    conclusion = 'conclusion',
 }
 
 export type PlayerCountables = {
@@ -209,12 +210,11 @@ export type PlayerCountables = {
 
 export type PlayState = {
     gameId: string,
-    sessionPhase: Phase.play,
+    sessionPhase: Phase.play | Phase.conclusion,
     sessionOwner: PlayerColor,
     players: Array<Player>,
     chat: Array<ChatEntry>,
     setup: GameSetup,
-    hasGameEnded: boolean,
     gameResults: Array<PlayerCountables>,
     market: MarketOffer,
     treasury: TreasuryOffer,

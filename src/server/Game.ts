@@ -72,6 +72,7 @@ export class Game {
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
                 case Phase.play:
+                case Phase.conclusion:
                     if (!privateState)
                         throw new Error('Cannot resume play session w/o PrivateState object');
 
@@ -155,13 +156,13 @@ export class Game {
 
     public getGameState(): GameState {
         const state = this.actionProcessor.getState();
-        const isPlay = state.sessionPhase == Phase.play;
+        const isPlayState = [Phase.play, Phase.conclusion].includes(state.sessionPhase);
         return {
             timeStamp: this.timeStamp,
             userReferences: this.userReferences,
             sharedState: state,
-            backupStates: isPlay ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
-            privateState: isPlay ? (this.actionProcessor as PlayProcessor).getPrivateState() : null,
+            backupStates: isPlayState ? (this.actionProcessor as PlayProcessor).getBackupState() : null,
+            privateState: isPlayState ? (this.actionProcessor as PlayProcessor).getPrivateState() : null,
         };
     }
 
@@ -238,6 +239,9 @@ export class Game {
                     if (!this.font)
                         return emitError('Fonts are missing!');
 
+                    if (state.sessionPhase == Phase.conclusion)
+                        return this.issueNominalResponse({ error: 'Name cannot be updated after the game ended.' });
+
                     const newName = nameMatch[0];
 
                     const measurement = lib.validateTextLength(newName, this.font, 28, 424, 212);
@@ -247,9 +251,6 @@ export class Game {
 
                     if (this.isNameTaken(state.players, newName))
                         return this.issueNominalResponse({ error: 'This name is already taken' });
-
-                    if (state.sessionPhase == 'play' && state.hasGameEnded)
-                        return this.issueNominalResponse({ error: 'Name can no longer be updated.' });
 
                     this.preserveName(userId, newName);
                     const response = this.actionProcessor.updatePlayerName(player, newName);
@@ -270,10 +271,10 @@ export class Game {
             }));
         }
 
-        if (action === Action.declare_reset) {
+        if (action == Action.declare_reset) {
             const { sessionOwner, sessionPhase } = state;
 
-            if (player.color === sessionOwner || (sessionPhase === Phase.play && state.hasGameEnded)) {
+            if (player.color == sessionOwner || (sessionPhase == Phase.conclusion)) {
                 this.reset();
                 return this.issueGroupResponse({ resetFrom: player.name });
             }
@@ -282,6 +283,8 @@ export class Game {
         }
 
         switch (state.sessionPhase) {
+            case Phase.conclusion:
+                return emitError('Actions can no longer be performed.');
             case Phase.play:
                 return this.processPlayAction(matchedRequest);
             case Phase.setup:

@@ -140,7 +140,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             this.rivalShip = new RivalShip(
                 this.stage,
                 this.seaZones,
-                state.rival,
+                { ...state.rival, isDraggable: false },
                 localState.playerColor,
             );
             shipNodes.push(this.rivalShip.getElement());
@@ -190,12 +190,13 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         }
 
         // MARK: ships
+        const canDrag = localPlayer?.isActive && state.sessionPhase == Phase.play || false;
         this.opponentShips.forEach(ship => {
             const opponentId: PlayerColor = ship.getId();
             const remotePlayer = players.find(player => player.color === opponentId);
 
             if (remotePlayer) {
-                ship.update({ remotePlayer, isDraggable: localPlayer?.isActive || false });
+                ship.update({ remotePlayer, isDraggable: canDrag });
             } else {
                 ship.destroy();
                 // TODO: implement a forfeit action for abandoning a session.
@@ -204,13 +205,15 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         });
 
         if (this.rivalShip && state.rival.isIncluded) {
-            this.rivalShip.update({ ...state.rival });
+            this.rivalShip.update({ ...state.rival, isDraggable: canDrag });
         }
 
         if (localPlayer) {
             const localShip = this.localShip as PlayerShip;
 
-            localShip.switchControl(localPlayer.isActive && !localPlayer.isHandlingRival);
+            localShip.switchControl(
+                state.sessionPhase == Phase.play && localPlayer.isActive && !localPlayer.isHandlingRival,
+            );
             localShip.update(localPlayer.bearings.position, state.players, state.rival);
         }
     }

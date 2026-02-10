@@ -418,7 +418,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(marketShift.message);
 
         if (marketShift.data.hasGameEnded)
-            this.playState.registerGameEnd(marketShift.data.countables);
+            this.concludeGame(player, marketShift.data.countables);
 
         return this.continueTurn(player);
     }
@@ -477,7 +477,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(marketShift.message);
 
         if (marketShift.data.hasGameEnded)
-            this.playState.registerGameEnd(marketShift.data.countables);
+            this.concludeGame(player, marketShift.data.countables);
 
         return this.continueTurn(player);
     }
@@ -534,7 +534,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(marketShift.message);
 
         if (marketShift.data.hasGameEnded)
-            this.playState.registerGameEnd(marketShift.data.countables);
+            this.concludeGame(player, marketShift.data.countables);
 
         return this.continueTurn(player);
     }
@@ -592,7 +592,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(marketShift.message);
 
         if (marketShift.data.hasGameEnded)
-            this.playState.registerGameEnd(marketShift.data.countables);
+            this.concludeGame(player, marketShift.data.countables);
 
         return this.continueTurn(player);
     }
@@ -748,7 +748,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             if (results.err)
                 return lib.fail(results.message);
 
-            this.playState.registerGameEnd(results.data);
+            this.concludeGame(player, results.data);
 
             this.addServerMessage(this.convertDeedsToMessage(player), { color, backup: true });
             this.addServerMessage('The temple construction is complete! Game has ended.');
@@ -872,8 +872,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 description: 'sent it to the market, cycled it',
             });
 
-            if (marketShift.data.hasGameEnded)
-                this.playState.registerGameEnd(marketShift.data.countables);
+            if (marketShift.data.hasGameEnded) {
+                this.concludeGame(player, marketShift.data.countables);
+
+                return this.continueTurn(player);
+            }
+
         } else {
             this.privateState.addDeed({
                 context: Action.end_rival_turn,
@@ -1385,5 +1389,11 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         });
 
         return `${message}.`;
+    }
+
+    private concludeGame(player: PlayerHandler, countables: Array<PlayerCountables>) {
+        this.playState.registerGameEnd(countables);
+        this.privateState.updatePlayerStats(player);
+        player.deactivate();
     }
 }

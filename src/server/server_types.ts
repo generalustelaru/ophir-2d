@@ -212,9 +212,9 @@ export enum LobbyAction {
     Adopt = 'Adopt',
 }
 export enum GameStatus {
-    Enroling,
-    Ongoing,
-    Paused,
+    Open,
+    Started,
+    Ended,
     Abandoned,
 }
 

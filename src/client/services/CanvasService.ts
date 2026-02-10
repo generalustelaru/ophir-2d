@@ -129,7 +129,7 @@ export class CanvasService extends Communicator {
     }
 
     // MARK: UPDATE
-    public drawUpdateElements(state: State, hasGameEnded = false) {
+    public drawUpdateElements(state: State) {
         const { sessionPhase } = state;
 
         if (!localState.playerColor) {
@@ -164,7 +164,7 @@ export class CanvasService extends Communicator {
                 this.setupGroup?.update(state);
                 break;
 
-            case Phase.play:
+            default:
                 this.setupGroup = this.setupGroup?.selfDecomission() || null;
                 if (!this.isPlayDrawn) {
                     this.initializeModals(state);
@@ -184,7 +184,7 @@ export class CanvasService extends Communicator {
                 this.chancellorModal?.update(state);
                 this.peddlerModal?.update(state);
 
-                if (hasGameEnded) {
+                if (sessionPhase == Phase.conclusion) {
                     this.disable();
                     this.locationGroup.switchToResults(state);
                     this.playerGroup.switchToResults(state);

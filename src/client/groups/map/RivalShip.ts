@@ -10,6 +10,7 @@ const { HUES, SEA_ZONE_COUNT } = clientConstants;
 
 export type RivalShipUpdate = {
     isControllable: boolean,
+    isDraggable: boolean,
     bearings: ShipBearings,
     destinations: Array<ZoneName>,
     moves: number,
@@ -145,16 +146,15 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
 
     // MARK: UPDATE
     public update(data: RivalShipUpdate): void {
-        const  { moves, bearings, isControllable, destinations, activePlayerColor } = data;
-        const isLocalPlayerActive = activePlayerColor == this.localPlayerColor;
+        const  { moves, bearings, isControllable, isDraggable, destinations } = data;
         this.isControllable = isControllable;
         this.destinations = destinations;
         this.currentZone = bearings.seaZone;
         this.movesLeft = moves;
         this.group.x(bearings.position.x);
         this.group.y(bearings.position.y);
-        this.group.draggable(isLocalPlayerActive);
-        isLocalPlayerActive && isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
+        this.group.draggable(isDraggable);
+        isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };
 
     private broadcastAction(detail: ClientMessage): void {
