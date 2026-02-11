@@ -90,9 +90,14 @@ type Connection = {
     gameId: GameId
 }
 
-socketServer.on('connection', async (socket, inc) => {
+declare module 'ws' {
+    interface WebSocket { isAlive: boolean }
+}
+
+socketServer.on('connection', async (socket: WebSocket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
     const gameId = params?.get('gameId');
+    socket.isAlive = true;
 
     if (!gameId) {
         sLib.printError('WS connection did not provide gameId.');
@@ -173,6 +178,9 @@ socketServer.on('connection', async (socket, inc) => {
             processAction(game, { ...clientRequest, userId: user.id }, socket);
         }
     });
+    socket.on('pong', () => {
+        socket.isAlive = true;
+    });
     socket.on('close', (code) => {
         connections.delete(user.id);
 
@@ -188,7 +196,6 @@ socketServer.on('connection', async (socket, inc) => {
 
     socket.on('error', (error) => {
         sLib.printError(`WebSocket failed: ${JSON.stringify({ id: user.id, error })}`);
-        handleDisconnection(user.id, gameId);
     });
 });
 
@@ -499,6 +506,19 @@ function startGameChecks() {
     const hours = 60 * minutes;
 
     setInterval(async () => {
+
+        // socket heartbeat check
+        connections.forEach((connection) => {
+            const { socket } = connection;
+
+            if (socket.isAlive == false)
+                return socket.terminate();
+
+            socket.isAlive = false;
+            socket.ping();
+        });
+
+        // stale game check
         const config = await dbService.getConfig();
 
         if (config.err) {
