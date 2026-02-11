@@ -29,8 +29,8 @@ You can set up and run a server quite easily on your local network.
 
 1. Start **Docker Desktop**
 2. Enter the project folder (*\ophir-2d*) and open **Bash** (or **Git Bash**) or another CL tool and:
-   - Run `make start` or `docker compose up -d` and wait for dependencies to download and instantiate.
-   - Run `make seed` or `docker compose exec game-server node seed-db.cjs` to hydrate the database.
+   - Run `make dev` or `docker compose up game-server-dev -d --build` and wait for dependencies to download and instantiate.
+   - Run `make seed` or `docker compose exec game-server-dev node seed-db.cjs` to initialize game configuration.
 
 You can access the app on your machine by navigating to `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<ip_address>:3001`. How to find it:
    - PowerShell: `(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -eq 'Ethernet'}).IPAddress`
@@ -43,7 +43,7 @@ To turn off the server and all adjacent processes run `make stop` or `docker com
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
 If your client gets stuck, try refreshing the tab.
 If that doesn't work, log out and back in again.
-If that doesn't work, run `make restart` or `docker compose restart game-server`
+If that doesn't work, run `make restart` or `docker compose restart game-server-dev`
 
 ## How to play
 Create an account with just a name and password. After logging in, you will reach the "Lobby", a dashboard-like page where you can spectate, join, or start game sessions.
