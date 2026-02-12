@@ -379,8 +379,16 @@ app.get('/new', async (req: Request, res: Response) => {
     res.redirect(`/${gameId}`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
-app.get('/:id', async (req: Request, res: Response) => {
-    const gameId = req.params.id;
+app.get('/:uri', async (req: Request, res: Response) => {
+
+    if (!req.params.uri.match(/^[a-z]+-[a-z]+$/)) {
+        sLib.printWarning(`Unexpected request { uri: ${req.params.uri} }`);
+        res.status(400).send('Unknown address.');
+
+        return;
+    }
+
+    const gameId = req.params.uri;
     console.info('Visitor requests session', { ip: req.ip, gameId });
     const validation = await validateClient(req.headers.cookie);
 
