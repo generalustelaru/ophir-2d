@@ -3,7 +3,7 @@ import { Coordinates, Unique } from '~/shared_types';
 import { DynamicGroupInterface } from '~/client_types';
 import clientConstants from '~/client_constants';
 
-const { HUES, ICON_DATA } = clientConstants;
+const { HUES } = clientConstants;
 
 export class MiniTempleRewardDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;

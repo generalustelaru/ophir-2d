@@ -26,7 +26,6 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
     private initialPosition: Coordinates = { x: 0, y: 0 };
     private isDestinationValid: boolean = false;
     private group: Konva.Group;
-    private localPlayerColor: PlayerColor | null;
     private destinations: Array<ZoneName>;
     private isControllable: boolean = false;
     private activeEffect: Konva.Animation;
@@ -35,12 +34,10 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         stage: Konva.Stage,
         seaZones: Array<SeaZone>,
         data: RivalShipUpdate,
-        localPlayerColor: PlayerColor | null,
     ) {
         this.seaZones = seaZones;
         this.currentZone = data.bearings.seaZone;
         this.movesLeft = data.moves;
-        this.localPlayerColor = localPlayerColor;
         this.destinations = data.destinations;
 
         this.group = new Konva.Group({

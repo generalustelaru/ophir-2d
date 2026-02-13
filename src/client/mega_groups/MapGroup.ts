@@ -141,7 +141,6 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 this.stage,
                 this.seaZones,
                 { ...state.rival, isDraggable: false },
-                localState.playerColor,
             );
             shipNodes.push(this.rivalShip.getElement());
         }
