@@ -204,20 +204,6 @@ app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
 });
-app.get('/debug', (req: Request, res: Response) => {
-
-    if (NODE_ENV == 'production') {
-        res.status(404).send();
-
-        return;
-    }
-
-    const command = typeof req.query.command == 'string' ? req.query.command : undefined;
-    const target = typeof req.query.target == 'string' ? req.query.target : undefined;
-    const option = typeof req.query.option == 'string' ? req.query.option : undefined;
-
-    res.json(debugCommand(command, target, option));
-});
 app.get('/about', (_, res: Response) => {
     res.sendFile(path.join(__dirname, 'public', 'about.html'));
 });
@@ -399,6 +385,7 @@ app.get('/:uri', async (req: Request, res: Response) => {
         return;
     }
 
+    console.info(`${validation.data.name} connecting...`);
     res.setHeader('X-Content-Type-Options', 'nosniff');
 
     if (activeGames.has(gameId)) {
@@ -859,6 +846,16 @@ function getGameConnections(gameId: string): Array<UserId> {
         .map(([k]) => k);
 }
 
+// MARK: DEBUG
+const debugApp = express();
+debugApp.get('/debug', (req: Request, res: Response) => {
+    const command = typeof req.query.command == 'string' ? req.query.command : undefined;
+    const target = typeof req.query.target == 'string' ? req.query.target : undefined;
+    const option = typeof req.query.option == 'string' ? req.query.option : undefined;
+
+    res.json(debugCommand(command, target, option));
+});
+debugApp.listen(3013, '127.0.0.1'); // Localhost only
 function debugCommand(command?: string, target?: string, option?: string): object {
     console.log('debug command', { command, target });
 

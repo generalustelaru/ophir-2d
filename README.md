@@ -95,9 +95,9 @@ Install [Node](https://nodejs.org/en/download/package-manager) to be able to fid
 
 Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
 
-Install [JQ](https://jqlang.org/) (Linux: `sudo apt install jq`) then run `./debug.sh` to check data in memory:
-   - Response format is usually `{ overview: {}, commands/options: [] }`.
-   - Check progresively with `./debug.sh <command> <target> <option>`.
+To use in memory debug:
+   - Enter the server's Docker container (`docker exec -it ophir-2d-game-server-dev-1 sh`);
+   - Run `sh debug.sh <command> <target> <option>` (parameters are optional).
 
 Install **Make** to make use of the Makefile commands.
    - First, install the [Chocolatey](https://docs.chocolatey.org/en-us/chocolatey-components-dependencies-and-support-lifecycle/#supported-windows-versions) package manager.
