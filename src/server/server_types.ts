@@ -11,6 +11,7 @@ import { BackupStateHandler } from './state_handlers/BackupStateHandler';
 import { CookieOptions } from 'express';
 /** Universal identifier */
 export type UserId = `user-${string}`
+export type GameId = `${string}-${string}`
 
 /** Return value wrapper with positive checks */
 export type Probable<T> =
@@ -50,7 +51,7 @@ export type PlayerIdentity = {
 }
 
 export type SetupDigest = {
-    gameId: string,
+    gameId: GameId,
     gameOwner: PlayerColor,
     players: Array<PlayerEntry>,
     chat: Array<ChatEntry>,

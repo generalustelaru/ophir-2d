@@ -1,6 +1,7 @@
 import {
     WsDigest, DataDigest, GameState, Probable, Configuration, UserReference, RequestMatch, EnrolRequest, UserId,
     AuthenticatedClientRequest, MatchedPlayerRequest, User,
+    GameId,
 } from '~/server_types';
 import {
     ServerMessage, Action, Phase, PlayState, StateResponse, PlayerColor, PlayerEntity, State, Player,
@@ -20,7 +21,7 @@ import { Font } from 'opentype.js';
 
 /**@throws */
 export class Game {
-    private gameId: string;
+    private gameId: GameId;
     private timeStamp: number;
     private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
@@ -32,7 +33,7 @@ export class Game {
 
     constructor(
         broadcastCallback: (state: PlayState) => void,
-        transmitCallback: (userId: UserId, message: ServerMessage) => void,
+        transmitCallback: (userId: UserId, gameId: GameId, message: ServerMessage) => void,
         nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
         savedSession: GameState | null,
@@ -44,16 +45,26 @@ export class Game {
 
         this.config = { ...configuration };
         this.broadcast = broadcastCallback;
-        this.transmit = transmitCallback;
         this.saveDisplayName = nameUpdateCallback;
         this.font = font;
 
+        this.gameId = savedSession
+            ? savedSession.sharedState.gameId
+            : uniqueNamesGenerator({
+                dictionaries: [adjectives, colors, animals],
+                length: 2,
+                separator: '-',
+            }) as GameId;
+
+        this.transmit = (userId: UserId, message: ServerMessage) => {
+            transmitCallback(userId, this.gameId, message);
+        };
+
         if (!savedSession) {
-            this.gameId = uniqueNamesGenerator({ dictionaries: [adjectives, colors, animals], length: 2, separator: '-' });
             this.timeStamp = Date.now();
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
-                transmitCallback,
+                this.transmit,
                 this.updateReferenceColor.bind(this),
                 configuration,
             );
@@ -63,10 +74,9 @@ export class Game {
         }
 
         const { sharedState, privateState, backupStates, userReferences, timeStamp } = savedSession;
-        const { gameId, sessionOwner, players, chat } = sharedState;
+        const { sessionOwner, players, chat } = sharedState;
 
         this.timeStamp = timeStamp;
-        this.gameId = gameId;
         this.userReferences = userReferences;
 
         this.actionProcessor = (() => {
@@ -86,20 +96,20 @@ export class Game {
                         },
                         configuration,
                         broadcastCallback,
-                        transmitCallback,
+                        this.transmit,
                         this.getActivationId(sharedState.players),
                     );
 
                 case Phase.setup:
                     return new SetupProcessor(
-                        { gameId, gameOwner: (sessionOwner as PlayerColor), players, chat },
+                        { gameId: this.gameId, gameOwner: (sessionOwner as PlayerColor), players, chat },
                         configuration,
                     );
 
                 case Phase.enrolment:
                     return new EnrolmentProcessor(
                         sharedState,
-                        transmitCallback,
+                        this.transmit,
                         this.updateReferenceColor.bind(this),
                         configuration,
                     );
@@ -146,7 +156,7 @@ export class Game {
         this.font = null;
     }
 
-    public getGameId(): string {
+    public getGameId(): GameId {
         return this.gameId;
     }
 

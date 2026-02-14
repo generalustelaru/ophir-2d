@@ -169,7 +169,7 @@ const serverConstants: ServerConstants = {
         farms: 'linen',
     },
     DEFAULT_NEW_STATE: {
-        gameId: 'default',
+        gameId: 'default-default',
         sessionPhase: Phase.enrolment,
         sessionOwner: null,
         chat: [],

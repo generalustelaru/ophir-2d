@@ -1,5 +1,5 @@
 import {
-    AuthenticatedClientRequest, AuthenticationForm, CookieName, Probable, RegistrationForm, Cookies,
+    AuthenticatedClientRequest, AuthenticationForm, CookieName, Probable, RegistrationForm, Cookies, GameId,
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
 import {
@@ -71,7 +71,7 @@ process.on('SIGINT', () => {
 });
 
 // MARK: MEMORY
-const connections: Map<UserId, Connection> = new Map();
+const connections: Map<UserId, Map<GameId, WebSocket>> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
 const stats: Map<GameId, GameStats> = new Map();
 
@@ -84,11 +84,6 @@ server.keepAliveTimeout = 0;
 const socketServer = new WebSocketServer({ server, path: '/game' });
 
 // MARK: WS
-type GameId = string
-type Connection = {
-    socket: WebSocket
-    gameId: GameId
-}
 
 declare module 'ws' {
     interface WebSocket { isAlive: boolean }
@@ -96,16 +91,15 @@ declare module 'ws' {
 
 socketServer.on('connection', async (socket: WebSocket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
-    const gameId = params?.get('gameId');
-    socket.isAlive = true;
+    const gameId = extractGameId(params?.get('gameId'));
 
     if (!gameId) {
-        sLib.printError('WS connection did not provide gameId.');
         transmit(socket, { error: 'Invalid connection data.' });
 
         return;
     }
 
+    socket.isAlive = true;
     const validation = await validateClient(inc.headers.cookie);
 
     if (validation.err) {
@@ -151,7 +145,14 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         // TODO: if it's the active player also send turn notification and start idle timeout
     }
 
-    connections.set(user.id, { gameId, socket });
+    {
+        const userConnections = connections.get(user.id);
+
+        userConnections
+            ? userConnections.set(gameId, socket)
+            : connections.set(user.id, new Map([[gameId, socket]]));
+    }
+
     updateGameStat(gameId);
     transmit(socket, { state: game.getSharedState() });
 
@@ -367,14 +368,15 @@ app.get('/new', async (req: Request, res: Response) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:uri', async (req: Request, res: Response) => {
 
-    if (!req.params.uri.match(/^[a-z]+-[a-z]+$/)) {
+    const gameId = extractGameId(req.params.uri);
+
+    if (!gameId) {
         sLib.printWarning(`Unexpected request { uri: ${req.params.uri} }`);
         res.status(400).send('Unknown address.');
 
         return;
     }
 
-    const gameId = req.params.uri;
     console.info('Visitor requests session', { ip: req.ip, gameId });
     const validation = await validateClient(req.headers.cookie);
 
@@ -443,13 +445,14 @@ function broadcastCallback(state: PlayState) {
     broadcastToGroup(state.gameId, { state });
 }
 
-function transmitCallback(userId: UserId, message: ServerMessage) {
-    const reference = connections.get(userId);
+function transmitCallback(userId: UserId, gameId: GameId, message: ServerMessage) {
+    const userConnections = connections.get(userId);
 
-    if (!reference)
-        return console.error('Cannot deliver message: Missing socket client.', { message });
+    if (!userConnections)
+        return;
 
-    transmit(reference.socket, message);
+    const socket = userConnections.get(gameId);
+    socket && transmit(socket, message);
 }
 
 async function nameUpdateCallback(userId: UserId, name: string) {
@@ -474,8 +477,10 @@ function logRequest(request: ClientRequest, userName: string) {
 }
 
 function broadcast(message: ServerMessage): void {
-    connections.forEach(ref => {
-        transmit(ref.socket, message);
+    connections.forEach(userConnections => {
+        userConnections.forEach(socket => {
+            transmit(socket, message);
+        });
     });
 }
 
@@ -483,14 +488,14 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
     socket.send(JSON.stringify(message));
 }
 
-function broadcastToGroup(gameId: string, message: ServerMessage): void {
+function broadcastToGroup(gameId: GameId, message: ServerMessage): void {
     const playGroupIds = activeGames.get(gameId)?.getAllRefs().map(r => r.id);
 
     if (!playGroupIds)
         return console.error('Cannot find active GameSession', { gameId });
 
     for (const userId of playGroupIds) {
-        const socket = connections.get(userId)?.socket;
+        const socket = connections.get(userId)?.get(gameId);
         socket && transmit(socket, message);
     }
 }
@@ -503,14 +508,15 @@ function startGameChecks() {
     setInterval(async () => {
 
         // socket heartbeat check
-        connections.forEach((connection) => {
-            const { socket } = connection;
+        connections.forEach((userConnections) => {
+            userConnections.forEach(socket => {
 
-            if (socket.isAlive == false)
-                return socket.terminate();
+                if (socket.isAlive == false)
+                    return socket.terminate();
 
-            socket.isAlive = false;
-            socket.ping();
+                socket.isAlive = false;
+                socket.ping();
+            });
         });
 
         // stale game check
@@ -713,6 +719,21 @@ function extractToken(cookie: unknown): Probable<string> {
     return sLib.pass(items.token);
 }
 
+function extractGameId(parameter?: string | null): GameId | null {
+
+    if (!parameter) {
+        sLib.printError('gameId was not provided.');
+        return null;
+    }
+
+    if (!parameter.match(/^[a-z]+-[a-z]+$/)) {
+        sLib.printError(`gameId is malformed!, { gameId: ${parameter} }`);
+        return null;
+    }
+
+    return parameter as GameId;
+}
+
 type GameStats = {
     timeStamp: number
     isActiveGame: boolean
@@ -840,10 +861,10 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
     return lobbyFeed;
 }
 
-function getGameConnections(gameId: string): Array<UserId> {
+function getGameConnections(gameId: GameId): Array<UserId> {
     return Array.from(connections.entries())
-        .filter(([, c]) => c.gameId == gameId)
-        .map(([k]) => k);
+        .filter(([, userConnection]) => userConnection.has(gameId))
+        .map(([userId]) => userId);
 }
 
 // MARK: DEBUG
@@ -881,17 +902,18 @@ function debugCommand(command?: string, target?: string, option?: string): objec
     }
 
     function debugGame(gameId?: string, option?: string) {
+        const probableGameId = gameId as GameId | undefined;
 
-        if (!gameId || !activeGames.has(gameId))
+        if (!probableGameId || !activeGames.has(probableGameId))
             return Array.from(activeGames.keys());
 
-        const game = activeGames.get(gameId) as Game;
+        const game = activeGames.get(probableGameId) as Game;
 
         if (!option) {
             return {
                 overview: {
                     refs: game.getAllRefs().length,
-                    connected: getGameConnections(gameId).length,
+                    connected: getGameConnections(probableGameId).length,
                 },
                 options: ['refs', 'connected'],
             };
@@ -901,17 +923,22 @@ function debugCommand(command?: string, target?: string, option?: string): objec
             case 'refs':
                 return game.getAllRefs().map(r => r.name);
             case 'connected':
-                return getGameConnections(gameId).map(userId => game.getAllRefs().filter(r => r.id == userId)[0].name);
+                return getGameConnections(probableGameId).map(userId =>
+                    game.getAllRefs().filter(r => r.id == userId)[0].name,
+                );
             default:
                 return { option: `${option} ¯\_(ツ)_/¯` };
         }
     }
 
     function debugStat(gameId?: string, option?: string) {
-        if (!gameId || !stats.has(gameId))
+        const probableGameId = gameId as GameId | undefined;
+
+        if (!probableGameId || !stats.has(probableGameId))
             return Array.from(stats.keys());
+
         const options = ['refs', 'players'];
-        const stat = stats.get(gameId) as GameStats;
+        const stat = stats.get(probableGameId) as GameStats;
 
         if (!option)
             return {

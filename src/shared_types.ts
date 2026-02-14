@@ -1,4 +1,5 @@
 import { HexCoordinates } from "~/client_types";
+import { GameId } from "./server/server_types";
 
 /**
  * @description Interface wrapper hack to prevent the TSS from polluting class method references.
@@ -209,7 +210,7 @@ export type PlayerCountables = {
 }
 
 export type PlayState = {
-    gameId: string,
+    gameId: GameId,
     sessionPhase: Phase.play | Phase.conclusion,
     sessionOwner: PlayerColor,
     players: Array<Player>,
@@ -223,7 +224,7 @@ export type PlayState = {
     rival: Rival,
 }
 export type SetupState = {
-    gameId: string,
+    gameId: GameId,
     sessionPhase: Phase.setup,
     sessionOwner: PlayerColor,
     players: Array<PlayerDraft>,
@@ -232,7 +233,7 @@ export type SetupState = {
     specialists: Array<SelectableSpecialist>,
 }
 export type EnrolmentState = {
-    gameId: string,
+    gameId: GameId,
     sessionPhase: Phase.enrolment,
     sessionOwner: PlayerColor | null,
     players: Array<PlayerEntry>,

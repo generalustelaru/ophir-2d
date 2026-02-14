@@ -3,12 +3,12 @@ import {
     TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates, Phase, Unique,
     PlayerCountables,
 } from '~/shared_types';
-import { ObjectHandler } from '~/server_types';
+import { GameId, ObjectHandler } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     private serverName: Readable<string>;
-    private gameId: Readable<string>;
+    private gameId: Readable<GameId>;
     private sessionOwner: Readable<PlayerColor>;
     private setup: Readable<GameSetup>;
     private sessionPhase: Writable<Phase.play | Phase.conclusion>;

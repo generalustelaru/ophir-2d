@@ -1,10 +1,10 @@
 import { ChatEntry, EnrolmentState, Phase, PlayerColor, PlayerEntry, Unique } from '~/shared_types';
-import { ObjectHandler } from '~/server_types';
+import { GameId, ObjectHandler } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
 
 export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentState>> {
     private serverName: Readable<string>;
-    private gameId: Readable<string>;
+    private gameId: Readable<GameId>;
     private sessionPhase: Readable<Phase.enrolment>;
     private sessionOwner: Writable<PlayerColor | null>;
     private mayDraft: Writable<boolean>;
