@@ -70,14 +70,13 @@ process.on('SIGINT', () => {
     process.exit(1);
 });
 
+declare module 'ws' {
+    interface WebSocket { isAlive: boolean }
+}
+type GameConnection = { isSwitching: boolean, socket: WebSocket }
+
 // MARK: MEMORY
-const connections: Map<
-    UserId,
-    Map<
-        GameId,
-        WebSocket
-    >
-> = new Map();
+const allConnections: Map<UserId, Map<GameId, GameConnection>> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
 const stats: Map<GameId, GameStats> = new Map();
 
@@ -90,10 +89,6 @@ server.keepAliveTimeout = 0;
 const socketServer = new WebSocketServer({ server, path: '/game' });
 
 // MARK: WS
-
-declare module 'ws' {
-    interface WebSocket { isAlive: boolean }
-}
 
 socketServer.on('connection', async (socket: WebSocket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
@@ -126,10 +121,12 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         if (activation.ok) {
             console.log('Activated', { gameId });
             activeGames.set(gameId, activation.data);
+
             return activation.data;
         }
 
         sLib.printError(activation.message);
+
         return null;
     })();
 
@@ -151,15 +148,26 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         // TODO: if it's the active player also send turn notification and start idle timeout
     }
 
-    const userConnections = (() => {
-        let userConnections = connections.get(user.id);
+    const userConnections = ((): Map<GameId, GameConnection> => {
+        const userConnections = allConnections.get(user.id);
 
-        if (userConnections) {
-            userConnections.set(gameId, socket);
+        if (!userConnections) {
+            const newConnections = new Map([[gameId, { isSwitching: false, socket }]]);
+            allConnections.set(user.id, newConnections);
 
+            return newConnections;
+        }
+
+        const gameConnection = userConnections.get(gameId);
+
+        if (gameConnection) {
+            const abandonedSocket = gameConnection.socket;
+            gameConnection.socket = socket;
+            gameConnection.isSwitching = true;
+
+            transmit(abandonedSocket, { switch: null });
         } else {
-            userConnections = new Map([[gameId, socket]]);
-            connections.set(user.id, userConnections);
+            userConnections.set(gameId, { isSwitching: false, socket });
         }
 
         return userConnections;
@@ -195,15 +203,17 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         socket.isAlive = true;
     });
     socket.on('close', (code) => {
-        userConnections.delete(gameId);
+        const gameConnection = userConnections.get(gameId);
+
+        if (gameConnection?.isSwitching) {
+            gameConnection.isSwitching = false;
+        } else {
+            userConnections.delete(gameId);
+        }
 
         setTimeout(() => {
-            if (userConnections.has(gameId)) {
-                sLib.printWarning(`Connection reset for ${user.id} on ${gameId}`);
-            } else {
-                sLib.printWarning(`Connection closed for ${user.id} on ${gameId}, code: ${code}`);
+            if (!userConnections.has(gameId))
                 handleDisconnection(gameId);
-            }
         }, 1000);
     });
 
@@ -458,12 +468,12 @@ function broadcastCallback(state: PlayState) {
 }
 
 function transmitCallback(userId: UserId, gameId: GameId, message: ServerMessage) {
-    const userConnections = connections.get(userId);
+    const userConnections = allConnections.get(userId);
 
     if (!userConnections)
         return;
 
-    const socket = userConnections.get(gameId);
+    const socket = userConnections.get(gameId)?.socket;
     socket && transmit(socket, message);
 }
 
@@ -490,9 +500,9 @@ function logRequest(request: ClientRequest, userName: string, gameId: GameId) {
 }
 
 function broadcast(message: ServerMessage): void {
-    connections.forEach(userConnections => {
-        userConnections.forEach(socket => {
-            transmit(socket, message);
+    allConnections.forEach(userConnections => {
+        userConnections.forEach(connection => {
+            transmit(connection.socket, message);
         });
     });
 }
@@ -503,24 +513,13 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
 
 function broadcastToGroup(gameId: GameId, message: ServerMessage): void {
     const playGroupIds = activeGames.get(gameId)?.getAllRefs().map(r => r.id);
-    // console.log({
-    //     broadcast: {
-    //         gameId,
-    //         playGroupIds,
-    //     },
-    // });
+
     if (!playGroupIds)
         return console.error('Cannot find active GameSession', { gameId });
 
     for (const userId of playGroupIds) {
-        const socket = connections.get(userId)?.get(gameId);
+        const socket = allConnections.get(userId)?.get(gameId)?.socket;
         socket && transmit(socket, message);
-
-        // if (socket) {
-        //     console.log(`OK ${userId}`)
-        // } else {
-        //     console.log(`NO SOCKET!!! ${userId}`)
-        // }
     }
 }
 
@@ -532,8 +531,9 @@ function startGameChecks() {
     setInterval(async () => {
 
         // socket heartbeat check
-        connections.forEach((userConnections) => {
-            userConnections.forEach(socket => {
+        allConnections.forEach((userConnections) => {
+            userConnections.forEach(connection => {
+                const { socket } = connection;
 
                 if (socket.isAlive == false)
                     return socket.terminate();
@@ -884,7 +884,7 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
 }
 
 function getGameConnections(gameId: GameId): Array<UserId> {
-    return Array.from(connections.entries())
+    return Array.from(allConnections.entries())
         .filter(([, userConnection]) => userConnection.has(gameId))
         .map(([userId]) => userId);
 }
@@ -906,7 +906,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
         return {
             overview: {
                 active_games: activeGames.size,
-                connected_users: connections.size,
+                connected_users: allConnections.size,
                 game_stats: stats.size,
             },
             commands: ['users', 'stats', 'games'],
@@ -914,7 +914,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
 
     switch (command) {
         case 'users':
-            return Array.from(connections.keys());
+            return Array.from(allConnections.keys());
         case 'games':
             return debugGame(target, option);
         case 'stats':

@@ -183,6 +183,7 @@ export enum EventType {
     info = 'info',
     reset = 'reset',
     abandon = 'abandon',
+    client_switch = 'client_switch',
     deauthenticate = 'deauthenticate',
     state_update = 'state_update',
     vp_transmission = 'vp_transmission',
@@ -201,6 +202,7 @@ export type LaconicType =
     | EventType.force_turn
     | EventType.abandon
     | EventType.deauthenticate
+    | EventType.client_switch
 ;
 
 export type Event =

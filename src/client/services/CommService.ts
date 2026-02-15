@@ -1,8 +1,7 @@
 import {
-    ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse,
-    VpTransmission, TurnNotificationTransmission, RivalControlTransmission,
-    ForceTurnNotificationTransmission, ColorTransmission, NotFoundTransmission,
-    ExpiredTransmission,
+    ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse, VpTransmission,
+    TurnNotificationTransmission, RivalControlTransmission, ForceTurnNotificationTransmission, ColorTransmission,
+    NotFoundTransmission, ExpiredTransmission, SocketSwitchTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { EventType } from '~/client_types';
@@ -78,6 +77,9 @@ export class CommunicationService extends Communicator {
                 case this.isExpiredTransmission(data):
                     this.createEvent( { type: EventType.deauthenticate, detail: null });
                     break;
+                case this.isClientSwitchTransmission(data):
+                    this.createEvent({ type: EventType.client_switch, detail: null });
+                    break;
                 default:
                     this.createEvent({ type: EventType.error, detail: { message: 'Could not determine message type.' } });
                     break;
@@ -142,6 +144,10 @@ export class CommunicationService extends Communicator {
 
     private isExpiredTransmission(data: ServerMessage): data is ExpiredTransmission {
         return 'expired' in data;
+    }
+
+    private isClientSwitchTransmission(data: ServerMessage): data is SocketSwitchTransmission {
+        return 'switch' in data;
     }
 
     private createStateEvent(data: StateResponse) {

@@ -171,6 +171,11 @@ document.fonts.ready.then(() => {
         window.location.href = '/lobby';
     });
 
+    window.addEventListener(EventType.client_switch, () => {
+        alert('Control of this session has been switched to a different window.');
+        window.location.href = '/lobby';
+    });
+
     window.addEventListener(
         EventType.info,
         (event: CustomEventInit) => {

@@ -358,6 +358,7 @@ export type TurnNotificationTransmission = { turnStart: null }
 export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
 export type ExpiredTransmission = { expired: null }
+export type SocketSwitchTransmission = { switch: null }
 export type ServerMessage =
     | StateResponse
     | ResetResponse
@@ -369,4 +370,5 @@ export type ServerMessage =
     | RivalControlTransmission
     | ForceTurnNotificationTransmission
     | ExpiredTransmission
+    | SocketSwitchTransmission
 ;
