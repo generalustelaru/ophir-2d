@@ -13,6 +13,7 @@ services:
     depends_on:
       - mongo
       - redis
+      - redisinsight
     restart: unless-stopped
 
   game-server-prod:
@@ -50,7 +51,7 @@ services:
   redisinsight:
     image: redis/redisinsight:latest
     ports:
-      - "127.0.0.1:5540:5540"  # Only accessible via SSH tunnel
+      - "127.0.0.1:5540:5540"
     restart: unless-stopped
 
 volumes:

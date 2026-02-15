@@ -31,15 +31,17 @@ fix:
 
 
 # Docker Production
-start:
-	docker compose up game-server-prod -d --build
 
-seed:
-	docker compose exec game-server-prod node seed-db.cjs
 
 # Docker Development / Debugging
-dev:
-	docker compose up game-server-dev -d --build
+seed:
+	docker compose exec game-server-dev node seed-db.cjs
+
+build:
+	docker compose up -d game-server-dev --build
+
+start:
+	docker compose up -d game-server-dev
 
 stop: # Stop everything
 	docker compose down --remove-orphans
