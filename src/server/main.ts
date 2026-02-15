@@ -71,7 +71,13 @@ process.on('SIGINT', () => {
 });
 
 // MARK: MEMORY
-const connections: Map<UserId, Map<GameId, WebSocket>> = new Map();
+const connections: Map<
+    UserId,
+    Map<
+        GameId,
+        WebSocket
+    >
+> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
 const stats: Map<GameId, GameStats> = new Map();
 
@@ -145,13 +151,19 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         // TODO: if it's the active player also send turn notification and start idle timeout
     }
 
-    {
-        const userConnections = connections.get(user.id);
+    const userConnections = (() => {
+        let userConnections = connections.get(user.id);
 
-        userConnections
-            ? userConnections.set(gameId, socket)
-            : connections.set(user.id, new Map([[gameId, socket]]));
-    }
+        if (userConnections) {
+            userConnections.set(gameId, socket);
+
+        } else {
+            userConnections = new Map([[gameId, socket]]);
+            connections.set(user.id, userConnections);
+        }
+
+        return userConnections;
+    })();
 
     updateGameStat(gameId);
     transmit(socket, { state: game.getSharedState() });
@@ -165,7 +177,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         if (expiresAt <= Date.now())
             return transmit(socket, { expired: null });
 
-        logRequest(clientRequest, user.name);
+        logRequest(clientRequest, user.name, gameId);
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
@@ -183,14 +195,14 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         socket.isAlive = true;
     });
     socket.on('close', (code) => {
-        connections.delete(user.id);
+        userConnections.delete(gameId);
 
         setTimeout(() => {
-            if (connections.has(user.id)) {
-                sLib.printWarning(`Connection reset for ${user.id}`);
+            if (userConnections.has(gameId)) {
+                sLib.printWarning(`Connection reset for ${user.id} on ${gameId}`);
             } else {
-                sLib.printWarning(`Connection closed for ${user.id}, code: ${code}`);
-                handleDisconnection(user.id, gameId);
+                sLib.printWarning(`Connection closed for ${user.id} on ${gameId}, code: ${code}`);
+                handleDisconnection(gameId);
             }
         }, 1000);
     });
@@ -464,12 +476,13 @@ async function nameUpdateCallback(userId: UserId, name: string) {
 
 // MARK: FUNCTIONS
 
-function logRequest(request: ClientRequest, userName: string) {
+function logRequest(request: ClientRequest, userName: string, gameId: GameId) {
     const { message } = request;
     const { action, payload } = message;
 
     console.info(
-        '%s -> %s : {%s}',
+        '%s | %s -> %s : {%s}',
+        gameId,
         userName,
         action || '?',
         payload ? ` ${JSON.stringify(payload)} ` : ' ',
@@ -490,13 +503,24 @@ function transmit(socket: WebSocket, message: ServerMessage): void {
 
 function broadcastToGroup(gameId: GameId, message: ServerMessage): void {
     const playGroupIds = activeGames.get(gameId)?.getAllRefs().map(r => r.id);
-
+    // console.log({
+    //     broadcast: {
+    //         gameId,
+    //         playGroupIds,
+    //     },
+    // });
     if (!playGroupIds)
         return console.error('Cannot find active GameSession', { gameId });
 
     for (const userId of playGroupIds) {
         const socket = connections.get(userId)?.get(gameId);
         socket && transmit(socket, message);
+
+        // if (socket) {
+        //     console.log(`OK ${userId}`)
+        // } else {
+        //     console.log(`NO SOCKET!!! ${userId}`)
+        // }
     }
 }
 
@@ -560,8 +584,7 @@ function startGameChecks() {
     }, 1 * minutes);
 }
 
-async function handleDisconnection(userId: UserId, gameId: GameId) {
-    connections.delete(userId);
+async function handleDisconnection(gameId: GameId) {
     let toRemove = false;
 
     if (activeGames.has(gameId)) {
@@ -584,8 +607,8 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
                         toRemove ? 'deleted redundant game' : 'deactivated stale game', { gameId },
                     );
                 } else {
-                    toRemove = true;
                     sLib.printError(operation.message);
+                    toRemove = true;
                 }
             } catch (error) {
                 sLib.printError(sLib.getErrorBrief(error));
@@ -594,7 +617,6 @@ async function handleDisconnection(userId: UserId, gameId: GameId) {
     }
 
     await updateGameStat(gameId, toRemove);
-
 }
 
 async function createGame(): Promise<Probable<Game>> {
