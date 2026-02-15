@@ -202,7 +202,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
     socket.on('pong', () => {
         socket.isAlive = true;
     });
-    socket.on('close', (code) => {
+    socket.on('close', (_code) => {
         const gameConnection = userConnections.get(gameId);
 
         if (gameConnection?.isSwitching) {
