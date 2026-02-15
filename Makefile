@@ -46,6 +46,11 @@ start:
 stop: # Stop everything
 	docker compose down --remove-orphans
 
+rebuild:
+	docker compose down --remove-orphans
+	docker compose up -d game-server-dev --build
+	docker compose logs -f game-server-dev
+
 restart:
 	docker compose restart game-server-dev
 
