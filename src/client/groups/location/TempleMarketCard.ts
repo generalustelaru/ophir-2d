@@ -78,9 +78,18 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
     public update(data: MarketCardUpdate): void {
         this.rewardDial.update(this.opensModal ? null : data.trade.reward.favorAndVp);
         this.goodsAssortment.update(this.opensModal ? null : data.trade.request);
-        this.background.fill(data.isFeasible ? HUES.templeBlue : HUES.templeDarkBlue);
-        this.background.stroke(data.isFeasible ? HUES.treasuryGold : HUES.boneWhite);
         data.isFeasible ? this.enable() : this.disable();
+    }
+
+    public enable(): void {
+        this.background.fill(HUES.templeBlue);
+        this.background.stroke(HUES.treasuryGold);
+        super.enable();
+    }
+    public disable(): void {
+        this.background.fill(HUES.templeDarkBlue);
+        this.background.stroke(HUES.boneWhite);
+        super.disable();
     }
 
     public getElement(): Konva.Group {

@@ -56,7 +56,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
         this.reposition(aspect);
     }
 
-    public show() { // TODO: see not to create these on the fly, but update them.
+    public show() {
         const rowElements = this.advisorTrades.map(item => {
             const card = new TempleMarketCard(
                 this.stage,
