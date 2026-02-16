@@ -178,7 +178,6 @@ export enum EventType {
     close = 'close',
     timeout = 'timeout',
     action = 'action',
-    sail_attempt = 'sail_attempt',
     error = 'error',
     info = 'info',
     reset = 'reset',
@@ -208,7 +207,6 @@ export type LaconicType =
 export type Event =
     | EventFormat<LaconicType, null>
     | EventFormat<EventType.action, ClientMessage>
-    | EventFormat<EventType.sail_attempt, SailAttemptArgs>
     | EventFormat<EventType.error, ErrorDetail>
     | EventFormat<EventType.info, InfoDetail>
     | EventFormat<EventType.reset, ResetResponse>

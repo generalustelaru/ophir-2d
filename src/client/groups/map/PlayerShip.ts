@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { EventType, RawEvents } from '~/client_types';
+import { EventType, RawEvents, SailAttemptArgs } from '~/client_types';
 import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName } from '~/shared_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
@@ -23,6 +23,7 @@ export class PlayerShip extends Communicator {
     private player: Player;
     private inControl: boolean = false;
     private activeEffect: Konva.Animation;
+    private attemptSailing: (data: SailAttemptArgs) => void;
 
     public switchControl(isControllable: boolean) {
         this.inControl = isControllable;
@@ -59,9 +60,10 @@ export class PlayerShip extends Communicator {
         seaZones: Array<SeaZone>,
         players: Array<Player>,
         rival: Rival,
+        sailAttemptCallback: (data: SailAttemptArgs) => void,
     ) {
         super();
-
+        this.attemptSailing = sailAttemptCallback;
         this.seaZones = seaZones;
         this.players = players;
         this.rival = rival;
@@ -180,19 +182,16 @@ export class PlayerShip extends Communicator {
                 case targetZone && this.isDestinationValid:
 
                     if (this.toSailValue && !player.privilegedSailing) {
-                        this.createEvent({
-                            type: EventType.sail_attempt,
-                            detail: {
-                                playerColor,
-                                moveActions: player.moveActions,
-                                origin: this.initialPosition,
-                                destination: {
-                                    zoneId: targetZone.getZoneName(),
-                                    position: { x: this.group.x(), y: this.group.y() },
-                                },
-                                toSail: this.toSailValue,
-                                isTempleGuard: player.specialist.name === SpecialistName.temple_guard,
+                        this.attemptSailing({
+                            playerColor,
+                            moveActions: player.moveActions,
+                            origin: this.initialPosition,
+                            destination: {
+                                zoneId: targetZone.getZoneName(),
+                                position: { x: this.group.x(), y: this.group.y() },
                             },
+                            toSail: this.toSailValue,
+                            isTempleGuard: player.specialist.name === SpecialistName.temple_guard,
                         });
                         // TODO: Make coords-reset actionable from modal (when canceling attempt)
                         this.group.x(this.initialPosition.x);

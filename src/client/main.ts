@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventType, SailAttemptArgs, MessageType } from '~/client_types';
+import { InfoDetail, ErrorDetail, EventType, MessageType } from '~/client_types';
 import localState from './state';
 import { CommunicationService } from './services/CommService';
 import { CanvasService } from './services/CanvasService';
@@ -61,15 +61,6 @@ document.fonts.ready.then(() => {
             return signalError('Action message is missing!');
 
         comms.sendMessage(message);
-    });
-
-    window.addEventListener(EventType.sail_attempt, (event: CustomEventInit<SailAttemptArgs>) => {
-        const sailAttemptArgs = event.detail;
-
-        if (!sailAttemptArgs)
-            return signalError('Sail attempt data is missing!');
-
-        canvas.openSailAttemptModal(sailAttemptArgs);
     });
 
     //Send state change message to server

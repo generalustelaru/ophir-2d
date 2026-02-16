@@ -95,6 +95,7 @@ export class CanvasService extends Communicator {
                 ...clientConstants.MAP_PLACEMENT[this.aspect],
             },
             () => { this.endTurnModal.show(); },
+            (data: SailAttemptArgs) => { this.sailAttemptModal.show(data); },
         ); // mapGroup covers half the canvas (2 segments)
 
         this.setupGroup = new SetupGroup(
@@ -111,10 +112,6 @@ export class CanvasService extends Communicator {
     public getSetupCoordinates(): GameSetupPayload {
         return this.mapGroup.createSetupPayload();
     }
-
-    public openSailAttemptModal(data: SailAttemptArgs) {
-        this.sailAttemptModal?.show(data);
-    };
 
     public notifyForTurn(): void {
         this.startTurnModal?.show();

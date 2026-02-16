@@ -3,7 +3,7 @@ import {
     Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState,
     Unique,
 } from '~/shared_types';
-import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs } from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
 } from '../groups/map';
@@ -20,6 +20,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private movesDial: MovesDial | null = null;
     private endTurnButton: EndTurnButton | null = null;
     private endTurnCallback: Function;
+    private sailAttemptCallback: (data: SailAttemptArgs) => void;
     private undoButton: UndoButton | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
@@ -27,8 +28,15 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private localShip: PlayerShip | null = null;
     private rivalShip: RivalShip | null = null;
 
-    constructor(stage: Konva.Stage, layout: GroupLayoutData, endTurnCallback: Function) {
+    constructor(
+        stage: Konva.Stage,
+        layout: GroupLayoutData,
+        endTurnCallback: Function,
+        sailAttemptCallback: (data: SailAttemptArgs) => void,
+        // TODO: add dropBeforeLoadCallback,
+    ) {
         this.endTurnCallback = endTurnCallback;
+        this.sailAttemptCallback = sailAttemptCallback;
         this.group = new Konva.Group({ ...layout });
         stage.getLayers()[LayerIds.board].add(this.group);
 
@@ -158,6 +166,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 this.seaZones,
                 state.players,
                 state.rival,
+                this.sailAttemptCallback,
             );
             this.localShip.switchControl(localPlayer.isActive);
             shipNodes.push(this.localShip.getElement());
