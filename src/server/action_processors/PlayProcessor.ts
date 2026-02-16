@@ -1228,17 +1228,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                         .length;
 
                 case Action.buy_metal:
-                    return (
-                        player.hasPurchaseAllowance()
-                        && player.hasCargoRoom(2)
-                        && purchases.length
-                    );
+                    return (player.hasPurchaseAllowance() && purchases.length);
 
                 case Action.load_good:
                     const { location } = player.getBearings();
                     return ( // TODO: add and use constants instead of this and other examples of hardcoded values.
                         ['quarry', 'forest', 'mines', 'farms'].includes(location)
-                        && player.hasCargoRoom(1)
                         && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
                     );
                 default:

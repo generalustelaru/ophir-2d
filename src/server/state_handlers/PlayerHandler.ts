@@ -385,7 +385,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.overnightZone.set(this.getBearings().seaZone);
     }
 
-    public hasCargoRoom(req: 1 | 2): boolean {
+    private hasCargoRoom(req: 1 | 2): boolean {
         const emptySlots = this.getCargo().filter(
             item => item == 'empty',
         ).length;
