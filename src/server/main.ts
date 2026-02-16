@@ -92,7 +92,7 @@ const socketServer = new WebSocketServer({ server, path: '/game' });
 
 socketServer.on('connection', async (socket: WebSocket, inc) => {
     const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
-    const gameId = extractGameId(params?.get('gameId'));
+    const gameId = extractGameId(params?.get('gameId') || '', true);
 
     if (!gameId) {
         transmit(socket, { error: 'Invalid connection data.' });
@@ -741,15 +741,10 @@ function extractToken(cookie: unknown): Probable<string> {
     return sLib.pass(items.token);
 }
 
-function extractGameId(parameter?: string | null): GameId | null {
-
-    if (!parameter) {
-        sLib.printError('gameId was not provided.');
-        return null;
-    }
+function extractGameId(parameter: string, isWSConnection: boolean = false): GameId | null {
 
     if (!parameter.match(/^[a-z]+-[a-z]+$/)) {
-        sLib.printError(`gameId is malformed!, { gameId: ${parameter} }`);
+        isWSConnection && sLib.printError(`gameId is malformed!, { gameId: ${parameter} }`);
         return null;
     }
 
