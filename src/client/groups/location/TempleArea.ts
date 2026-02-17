@@ -41,7 +41,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
                 width: 80,
                 height: 30 + 10,
                 x: layout.width - 85,
-                y: layout.height - 51,
+                y: layout.height - 65,
             },
         );
 
