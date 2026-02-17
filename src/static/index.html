@@ -23,16 +23,16 @@
                 <h3>Create Account</h3>
                 <form method="post" action="/register">
                     <input type="text" name="userName" placeholder="user name (not displayed)">
-                    <input type="text" name="password" placeholder="suggested strong password">
-                    <input type="text" name="pwRetype" placeholder="password again">
+                    <input type="password" name="password" placeholder="suggested strong password">
+                    <input type="password" name="pwRetype" placeholder="password again">
                     <input type="submit" value="Create">
                 </form>
             </div>
             <div class="form" id="login" style="visibility: visible;">
                 <h3>Login</h3>
                 <form method="post" action="/login">
-                    <input type="text" name="userName" placeholder="user name">
-                    <input type="text" name="password" placeholder="pasword">
+                    <input autocomplete="username" type="text" name="userName" placeholder="user name">
+                    <input autocomplete="current-password" type="password" name="password" placeholder="pasword">
                     <input type="text" style="visibility: hidden;">
                     <input type="submit" value="Log in">
                 </form>
