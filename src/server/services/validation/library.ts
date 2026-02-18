@@ -14,10 +14,17 @@ type ScalarTest = TestBase & {
 }
 
 type ObjectTest = TestBase & {
-    type: 'object' | 'array',
-} // TODO: add ref: TypeReference to array so evaluateObject can validate array children in its logic
+    type: 'object',
+}
 
-export type Test = ScalarTest | ObjectTest
+type ArrayTest = TestBase & {
+    type: 'array',
+    ofTypeName: string,
+    ofType: Type,
+    ref?: TypeReference,
+}
+
+export type Test = ScalarTest | ObjectTest | ArrayTest
 
 export type ObjectTests = Array<Test>
 
@@ -165,12 +172,17 @@ function isArray(name: string, value: unknown, nullable: boolean = false): Valid
     return fail(`${name} is not a valid array: ${value}`);
 }
 
-function hasArray(parent: object | null, key: string, nullable: boolean = false): ValidationResult {
+function hasArray(parent: object | null, key: string, test: ArrayTest): ValidationResult {
     const keyTest = hasKey(parent, key);
 
     if (keyTest.passed) {
+        const { nullable, ofTypeName, ofType, ref } = test;
         const value = (parent as object)[key as keyof object] as unknown;
-        const arrayTest = isArray(key, value, nullable);
+
+        if (nullable && value == null)
+            return pass();
+
+        const arrayTest = evaluateArray(ofTypeName, value, ofType, ref);
 
         if (arrayTest.passed)
             return pass();
@@ -200,7 +212,7 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
             switch (type) {
                 case 'string': return hasString(object, key, nullable, test.ref);
                 case 'number': return hasNumber(object, key, nullable, test.ref);
-                case 'array': return hasArray(object, key, nullable);
+                case 'array': return hasArray(object, key, test);
                 case 'object': return hasObject(object, key, nullable);
                 case 'boolean': return hasBoolean(object, key, nullable);
                 default: return fail(`${key} is of unknown type: ${type}`);
@@ -213,8 +225,8 @@ function evaluateObject(objectType: string, value: unknown, tests: ObjectTests):
     return [objectTest.error];
 }
 
-function evaluateArray(name: string, value: unknown, type: Type, reference?: TypeReference) {
-    const arrayTest = isArray(name, value);
+function evaluateArray(typeName: string, value: unknown, type: Type, reference?: TypeReference) {
+    const arrayTest = isArray(typeName, value);
 
     if (arrayTest.passed) {
         const array = value as Array<unknown>;
@@ -229,7 +241,7 @@ function evaluateArray(name: string, value: unknown, type: Type, reference?: Typ
             }
         })();
 
-        const itemName = `${name} item`;
+        const itemName = `${typeName} item`;
         for (let i = 0; i < array.length; i++) {
             const typeTest = isOfType(itemName, array[i]);
 

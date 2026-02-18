@@ -1,10 +1,8 @@
 import { HexCoordinates } from '~/client_types';
 import {
-    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, DropItemPayload,
-    LoadGoodPayload, MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload,
-    Action, SpecialistName, OpponentRepositioningPayload, ColorSelectionPayload,
-    ChancellorMarketSalePayload,
-    PeddlerMarketPayload,
+    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, LoadGoodPayload,
+    MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, Action, SpecialistName,
+    OpponentRepositioningPayload, ColorSelectionPayload, ChancellorMarketSalePayload, PeddlerMarketPayload, DropItemPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { Configuration, Probable } from '~/server_types';
@@ -38,24 +36,18 @@ class ValidatorService {
                 { key: 'FAVORED_PLAYERS', type: 'boolean', nullable: false },
                 { key: 'CARGO_BONUS', type: 'number', nullable: false, ref: [0,1,2,3] },
                 { key: 'SHORT_GAME', type: 'boolean', nullable: false },
-                { key: 'INCLUDE', type: 'array', nullable: false },
+                {
+                    key: 'INCLUDE',
+                    type: 'array',
+                    nullable: false,
+                    ofTypeName: 'INCLUDE',
+                    ofType: 'string',
+                    ref: refs.specialistName,
+                },
             ],
         );
 
-        if (!config)
-            return null;
-
-        const includeTest = lib.evaluateArray(
-            'INCLUDE',
-            config.INCLUDE,
-            'string',
-            refs.specialistName,
-        );
-
-        if (includeTest.passed)
-            return config;
-
-        return null;
+        return config;
     }
 
     public validateClientRequest(request: unknown) {
@@ -171,8 +163,8 @@ class ValidatorService {
             'GameSetupPayload',
             payload,
             [
-                { key: 'hexPositions', type: 'array', nullable: false },
-                { key: 'startingPositions', type: 'array', nullable: false },
+                { key: 'hexPositions', type: 'array', nullable: false, ofTypeName: 'HexCoordinates', ofType: 'object' },
+                { key: 'startingPositions', type: 'array', nullable: false, ofTypeName: 'Coordinates', ofType: 'object' },
             ],
         );
 
@@ -229,19 +221,16 @@ class ValidatorService {
             payload,
             [
                 { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
-                { key: 'omit', type: 'array', nullable: false }, //TODO: add refs to array maybe?
+                {
+                    key: 'omit',
+                    type: 'array',
+                    nullable: false,
+                    ofTypeName: 'TradeGood',
+                    ofType: 'string',
+                    ref: refs.tradeGood,
+                },
             ],
         );
-
-        if (!chancellorPayload)
-            return null;
-
-        const isTradeGoods = chancellorPayload.omit.every(item => { //instead of this
-            return refs.tradeGood.includes(item);},
-        );
-
-        if (!isTradeGoods)
-            return null;
 
         return chancellorPayload;
     }
@@ -257,14 +246,17 @@ class ValidatorService {
     }
 
     public validateMetalPurchasePayload(payload: unknown) {
-        return this.validateObject<MetalPurchasePayload>(
+        const metalPurchasePayload = this.validateObject<MetalPurchasePayload>(
             'MetalPurchasePayload',
             payload,
             [
                 { key: 'metal', type: 'string', nullable: false, ref: refs.metal },
                 { key: 'currency', type: 'string', nullable: false, ref: refs.currency },
+                { key: 'drop', type: 'array', nullable: true, ofTypeName: 'ItemName', ofType: 'string', ref: refs.itemName },
             ],
         );
+
+        return metalPurchasePayload;
     }
 
     public validateMetalDonationPayload(payload: unknown) {
