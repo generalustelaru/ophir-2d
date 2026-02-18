@@ -1,8 +1,8 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
-    StateResponse, PlayState, LocalAction, MetalPurchasePayload, Action, FeasibleTrade, SpecialistName, ClientRequest,
-    PlayerCountables,
+    StateResponse, PlayState, LocalAction, Action, FeasibleTrade, SpecialistName, ClientRequest, PlayerCountables,
+    FeasiblePurchase,
 } from '~/shared_types';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
@@ -73,7 +73,7 @@ export type RequestMatch = {
 export type ActionsAndDetails = {
     actions: Array<LocalAction>,
     trades: Array<FeasibleTrade>,
-    purchases: Array<MetalPurchasePayload>
+    purchases: Array<FeasiblePurchase>
 }
 
 export enum TurnEvent {

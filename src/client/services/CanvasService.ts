@@ -1,16 +1,16 @@
 import Konva from 'konva';
-import { GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State } from '~/shared_types';
+import { GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { Aspect, Dimensions, EventType, SailAttemptArgs } from '~/client_types';
+import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
-    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal,
+    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal,
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
 
@@ -28,6 +28,7 @@ export class CanvasService extends Communicator {
     private endTurnModal: EndTurnModal;
     private sailAttemptModal: SailAttemptModal;
     private forceTurnModal: ForceTurnModal;
+    private dropBeforeLoadModal: DropBeforeLoadModal;
     private sellGoodsModal: SellGoodsModal | null = null;
     private donateGoodsModal: DonateGoodsModal | null = null;
     private rivalControlModal: RivalControlModal | null = null;
@@ -71,6 +72,7 @@ export class CanvasService extends Communicator {
         this.sailAttemptModal = new SailAttemptModal(this.stage, this.aspect);
         this.startTurnModal = new StartTurnModal(this.stage, this.aspect);
         this.forceTurnModal = new ForceTurnModal(this.stage, this.aspect);
+        this.dropBeforeLoadModal = new DropBeforeLoadModal(this.stage, this.aspect);
 
         this.locationGroup = new LocationGroup(
             this.stage,
@@ -78,6 +80,7 @@ export class CanvasService extends Communicator {
                 ...clientConstants.GROUP_DIMENSIONS.location,
                 ...clientConstants.LOCATION_PLACEMENT[this.aspect],
             },
+            (data: DropBeforeLoadMessage) => this.dropBeforeLoad(data),
         ); // locationGroup covers 1 segment
 
         this.playerGroup = new PlayerGroup(
@@ -95,7 +98,8 @@ export class CanvasService extends Communicator {
                 ...clientConstants.MAP_PLACEMENT[this.aspect],
             },
             () => { this.endTurnModal.show(); },
-            (data: SailAttemptArgs) => { this.sailAttemptModal.show(data); },
+            (data: SailAttemptArgs) => this.sailAttemptModal.show(data),
+            (data: DropBeforeLoadMessage) => this.dropBeforeLoad(data),
         ); // mapGroup covers half the canvas (2 segments)
 
         this.setupGroup = new SetupGroup(
@@ -174,6 +178,7 @@ export class CanvasService extends Communicator {
                 this.mapGroup.update(state);
                 this.playerGroup.update(state);
                 this.playerGroup.updatePlayerVp(localState.playerColor, localState.vp);
+                this.dropBeforeLoadModal.update(state);
                 this.sellGoodsModal?.update(state);
                 this.donateGoodsModal?.update(state);
                 this.endTurnModal?.update(state);
@@ -353,6 +358,18 @@ export class CanvasService extends Communicator {
             tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
             donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
         });
+    }
+
+    private dropBeforeLoad(message: DropBeforeLoadMessage) {
+
+        if (this.dropBeforeLoadModal.hasCargoRoom(message.action == Action.buy_metal ? 2 : 1)) {
+            window.dispatchEvent(new CustomEvent(
+                EventType.action,
+                { detail: message },
+            ));
+        } else {
+            this.dropBeforeLoadModal.show(message);
+        }
     }
 };
 

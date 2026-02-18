@@ -1,6 +1,6 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocalAction, Player, PlayerColor, ShipBearings, ZoneName,
-    Specialist, SpecialistName, MetalPurchasePayload, Unique, FeasibleTrade,
+    Specialist, SpecialistName, FeasiblePurchase, Unique, FeasibleTrade,
 } from '~/shared_types';
 import { ActionsAndDetails, ObjectHandler, PlayerIdentity, UserId } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
@@ -30,7 +30,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     private navigatorAccess: ArrayWritable<ZoneName>;
     private cargo: ArrayWritable<ItemName>;
     private feasibleTrades: ArrayWritable<FeasibleTrade>;
-    private feasiblePurchases: ArrayWritable<MetalPurchasePayload>;
+    private feasiblePurchases: ArrayWritable<FeasiblePurchase>;
     private coins: Writable<number>;
     private turnPurchases: Writable<number>;
 

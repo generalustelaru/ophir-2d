@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { Action, Unique } from '~/shared_types';
+import { Action, MetalPurchasePayload, Unique } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
 
 const { HUES } = clientConstants;
@@ -18,6 +18,7 @@ export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
+        purchaseMetalCallback: (payload: MetalPurchasePayload) => void,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -40,25 +41,29 @@ export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate
         this.goldForFavorCard = new TreasuryCard(
             stage,
             { x: 0, y: 0 },
-            { currency: 'favor', metal: 'gold' },
+            { currency: 'favor', metal: 'gold', drop: null },
+            purchaseMetalCallback,
         );
 
         this.silverForFavorCard = new TreasuryCard(
             stage,
             { x: cardWidth + leftmargin, y: 0 },
-            { currency: 'favor', metal: 'silver' },
+            { currency: 'favor', metal: 'silver', drop: null },
+            purchaseMetalCallback,
         );
 
         this.goldForCoinsCard = new TreasuryCard(
             stage,
             { x: cardWidth * 2 + leftmargin * 2, y: 0 },
-            { currency: 'coins', metal: 'gold' },
+            { currency: 'coins', metal: 'gold', drop: null },
+            purchaseMetalCallback,
         );
 
         this.silverForCoinsCard = new TreasuryCard(
             stage,
             { x: cardWidth * 3 + leftmargin * 3, y: 0 },
-            { currency: 'coins', metal: 'silver' },
+            { currency: 'coins', metal: 'silver', drop: null },
+            purchaseMetalCallback,
         );
 
         this.group.add(

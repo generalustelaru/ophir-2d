@@ -3,6 +3,7 @@ export { ModalBase } from './ModalBase';
 export { SellGoodsModal } from './SellGodsModal';
 export { StartTurnModal } from './StartTurnModal';
 export { DonateGoodsModal } from './DonateGoodsModal';
+export { DropBeforeLoadModal } from './DropBeforeLoadModal';
 export { EndTurnModal } from './EndTurnModal';
 export { SailAttemptModal } from './SailAttemptModal';
 export { RivalControlModal } from './RivalControlModal';

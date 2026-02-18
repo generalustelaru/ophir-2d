@@ -1,11 +1,13 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds } from '~/client_types';
+import {
+    MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds, DropBeforeLoadMessage,
+} from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
-import { Coordinates, PlayState, SpecialistName, Unique } from '~/shared_types';
+import { Action, Coordinates, MetalPurchasePayload, PlayState, SpecialistName, Unique } from '~/shared_types';
 import { ResultsPanel } from '../groups/conclusion/ResultsPanel';
 
-type LocationGroupCallbacks = {
+type VariableLocationGroupCallbacks = {
     tradeCallback: Function
     donateGoodsCallback?: Function,
     advisorCallback?: Function,
@@ -18,6 +20,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private marketArea: MarketArea | null = null;
     private treasuryArea: TreasuryArea | null = null;
     private templeArea: TempleArea | null = null;
+    private purchaseActionCallback: (data: DropBeforeLoadMessage) => void;
     private tradeCallback: Function | null = null;
     private peddlerCallback: Function | null = null;
     private donateGoodsCallback: Function | null = null;
@@ -26,7 +29,9 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
+        dropBeforeLoadCallback: (data: DropBeforeLoadMessage) => void,
     ) {
+        this.purchaseActionCallback = dropBeforeLoadCallback;
         this.group = new Konva.Group({
             width: layout.width,
             height: layout.height,
@@ -41,7 +46,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         this.group?.x(coordinates.x).y(coordinates.y);
     }
 
-    public setCallbacks(selection:LocationGroupCallbacks) {
+    public setCallbacks(selection:VariableLocationGroupCallbacks) {
         const { tradeCallback, donateGoodsCallback, advisorCallback, peddlerCallback } = selection;
         this.tradeCallback = tradeCallback;
         donateGoodsCallback && (this.donateGoodsCallback = donateGoodsCallback);
@@ -82,6 +87,9 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
                 height: heightSegment * 2,
                 x: 0,
                 y: this.marketArea.getElement().height(),
+            },
+            (payload: MetalPurchasePayload) => {
+                this.purchaseActionCallback(this.formatPurchaseMessage(payload));
             },
         );
 
@@ -159,5 +167,9 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
 
         this.resultsPanel = new ResultsPanel(state, { width: this.group.width(), height: this.group.height() });
         this.group.add(this.resultsPanel.getElement());
+    }
+
+    private formatPurchaseMessage(payload: MetalPurchasePayload): DropBeforeLoadMessage {
+        return { action: Action.buy_metal, payload };
     }
 }

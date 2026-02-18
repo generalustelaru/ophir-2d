@@ -1,12 +1,12 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, TreasuryCardUpdate } from '~/client_types';
-import { RequestButton, CoinDial, FavorDial } from '../popular';
+import { CoinDial, FavorDial, Button } from '../popular';
 import clientConstants from '~/client_constants';
-import { Coordinates, Action, MetalPurchasePayload, Metal, Currency, Unique } from '~/shared_types';
+import { Coordinates, MetalPurchasePayload, Metal, Currency, Unique } from '~/shared_types';
 
 const { HUES, CARGO_ITEM_DATA } = clientConstants;
 
-export class TreasuryCard extends RequestButton implements Unique<DynamicGroupInterface<TreasuryCardUpdate>> {
+export class TreasuryCard extends Button implements Unique<DynamicGroupInterface<TreasuryCardUpdate>> {
     private background: Konva.Rect;
     private currencyDial: CoinDial | FavorDial;
     private metalType: Metal;
@@ -16,11 +16,12 @@ export class TreasuryCard extends RequestButton implements Unique<DynamicGroupIn
         stage: Konva.Stage,
         position: Coordinates,
         payload: MetalPurchasePayload,
+        purchaseCallback: (payload: MetalPurchasePayload) => void,
     ) {
         super(
             stage,
             { width: 66, height: 96, x: position.x, y: position.y },
-            { action: Action.buy_metal, payload },
+            () => { purchaseCallback(payload); },
         );
 
         this.metalType = payload.metal;
@@ -64,7 +65,7 @@ export class TreasuryCard extends RequestButton implements Unique<DynamicGroupIn
             req => req.metal == this.metalType && req.currency == this.currencyType,
         ));
 
-        this.setEnabled(isFeasible);
+        isFeasible ? super.enable() : super.disable();
         this.background.fill(isFeasible ? HUES.treasuryGold : HUES.treasuryDarkGold);
     }
 }

@@ -1,7 +1,7 @@
 import {
-    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorTransmission,
-    Metal, TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State,
-    MovementPayload, DiceSix, MetalPurchasePayload, MetalCost, TradeGood,
+    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorTransmission, Metal,
+    TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix,
+    MetalCost, TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -38,6 +38,8 @@ export type LocalState = {
     playerColor: PlayerColor | null,
     vp: number,
 }
+
+export type DropBeforeLoadMessage = LoadGoodMessage | BuyMetalsMessage
 
 export type TradeGoodSymbol = TradeGood | 'other';
 export type Specification = {
@@ -146,7 +148,7 @@ export type TreasuryUpdate = {
 }
 
 export type TreasuryCardUpdate = {
-    feasiblePurchases: Array<MetalPurchasePayload>,
+    feasiblePurchases: Array<FeasiblePurchase>,
     price: MetalCost,
     supply: number,
 }

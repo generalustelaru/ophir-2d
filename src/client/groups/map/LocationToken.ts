@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { IconLayer, DynamicGroupInterface, ElementList } from '~/client_types';
-import { Action, LocationName, TradeGood, Unique } from '~/shared_types';
-import { RequestButton } from '../popular';
+import { LocationName, TradeGood, Unique } from '~/shared_types';
+import { Button } from '../popular';
 import { EmptyLocationToken } from '.';
 
 type LocationTokenUpdate = {
@@ -10,7 +10,7 @@ type LocationTokenUpdate = {
     templeIcon: IconLayer
 };
 
-export class LocationToken extends RequestButton implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
+export class LocationToken extends Button implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
     private icon: Konva.Path;
     private id: LocationName;
     private emptyLocation: EmptyLocationToken;
@@ -21,6 +21,7 @@ export class LocationToken extends RequestButton implements Unique<DynamicGroupI
         locationId: LocationName,
         iconData: IconLayer,
         isPlay: boolean,
+        loadGoodCallback: (tradeGood: TradeGood) => void,
     ) {
         const elements: ElementList = [];
         const goodToPickup = ((): TradeGood | null => {
@@ -39,7 +40,7 @@ export class LocationToken extends RequestButton implements Unique<DynamicGroupI
             stage,
             { width: 100, height: 100, x: 0, y: 0 },
             goodToPickup
-                ? { action: Action.load_good, payload: { tradeGood: goodToPickup } }
+                ? () => { loadGoodCallback(goodToPickup); }
                 : null,
         );
 
@@ -92,7 +93,7 @@ export class LocationToken extends RequestButton implements Unique<DynamicGroupI
         if (this.tradeGood) {
             const supply = update.tradeGoodSupplies[this.tradeGood];
 
-            this.setEnabled(supply > 0 && update.mayPickup);
+            (supply > 0 && update.mayPickup) ? super.enable() : super.disable();
             this.emptyLocation.update(supply > 0);
         }
 

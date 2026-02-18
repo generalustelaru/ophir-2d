@@ -1,7 +1,7 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
-    StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, MetalPurchasePayload,
-    Unique, FeasibleTrade, ServerMessage, PlayerCountables,
+    StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, Unique, FeasibleTrade,
+    ServerMessage, PlayerCountables, FeasiblePurchase,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -1153,12 +1153,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return feasible;
     }
 
-    private pickFeasiblePurchases(player: PlayerHandler): Array<MetalPurchasePayload> {
+    private pickFeasiblePurchases(player: PlayerHandler): Array<FeasiblePurchase> {
         const { silver: silverCost, gold: goldCost } = this.playState.getMetalCosts();
         const playerCoins = player.getCoinAmount();
         const playerFavor = player.getFavor();
 
-        const available: MetalPurchasePayload[] = [];
+        const available: FeasiblePurchase[] = [];
         const { silver, gold } = this.playState.getItemSupplies().metals;
 
         if (silver) {

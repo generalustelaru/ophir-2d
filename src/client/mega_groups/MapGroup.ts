@@ -1,9 +1,12 @@
 import Konva from 'konva';
 import {
     Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState,
+    TradeGood,
     Unique,
 } from '~/shared_types';
-import { MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs } from '~/client_types';
+import {
+    MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs, DropBeforeLoadMessage,
+} from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
 } from '../groups/map';
@@ -21,6 +24,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private endTurnButton: EndTurnButton | null = null;
     private endTurnCallback: Function;
     private sailAttemptCallback: (data: SailAttemptArgs) => void;
+    private loadActionCallback: (data: DropBeforeLoadMessage) => void;
     private undoButton: UndoButton | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
@@ -33,10 +37,11 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         layout: GroupLayoutData,
         endTurnCallback: Function,
         sailAttemptCallback: (data: SailAttemptArgs) => void,
-        // TODO: add dropBeforeLoadCallback,
+        dropBeforeLoadCallback: (data: DropBeforeLoadMessage) => void,
     ) {
         this.endTurnCallback = endTurnCallback;
         this.sailAttemptCallback = sailAttemptCallback;
+        this.loadActionCallback = dropBeforeLoadCallback;
         this.group = new Konva.Group({ ...layout });
         stage.getLayers()[LayerIds.board].add(this.group);
 
@@ -69,6 +74,9 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                     this.getIconData(locationData.name, state),
                     HUES.defaultHex,
                     state.sessionPhase == Phase.play,
+                    (tradeGood: TradeGood) => {
+                        this.loadActionCallback(this.formatLoadMessage(tradeGood));
+                    },
                 );
                 this.seaZones.push(seaZone);
                 this.group.add(seaZone.getElement());
@@ -282,5 +290,9 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             return templeData.icon;
 
         return LOCATION_TOKEN_DATA[locationName];
+    }
+
+    private formatLoadMessage(tradeGood: TradeGood): DropBeforeLoadMessage {
+        return { action: Action.load_good, payload: { tradeGood, drop: null } };
     }
 }

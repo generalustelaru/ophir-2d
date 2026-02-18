@@ -1,7 +1,9 @@
 
 import Konva from 'konva';
 import { Vector2d } from 'konva/lib/types';
-import { Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival, Unique } from '~/shared_types';
+import {
+    Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival, Unique, TradeGood,
+} from '~/shared_types';
 import { Hue, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
 import { LocationToken } from '.';
 import clientConstants from '~/client_constants';
@@ -35,6 +37,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         iconData: IconLayer,
         fill: Hue,
         isPlay: boolean,
+        loadGoodCallback: (tradeGood: TradeGood) => void,
     ) {
         this.group = new Konva.Group({
             width: 100,
@@ -64,7 +67,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             strokeWidth: 1,
         });
 
-        this.location = new LocationToken(stage, locationId, iconData, isPlay);
+        this.location = new LocationToken(stage, locationId, iconData, isPlay, loadGoodCallback);
 
         this.restrictedIcon = new Konva.Path({
             x: -75,

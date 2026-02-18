@@ -156,7 +156,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     navigatorAccess: Array<ZoneName>,
     cargo: Array<ItemName>,
     feasibleTrades: Array<FeasibleTrade>,
-    feasiblePurchases: Array<MetalPurchasePayload>,
+    feasiblePurchases: Array<FeasiblePurchase>,
     coins: number,
     turnPurchases: number,
 }
@@ -270,12 +270,13 @@ export type GameSetupPayload = {
     hexPositions: Array<HexCoordinates>,
     startingPositions: Array<Coordinates>,
 }
-export type LoadGoodPayload = { tradeGood: TradeGood }
+export type LoadGoodPayload = { tradeGood: TradeGood, drop: Array<ItemName> | null }
 export type DropItemPayload = { item: ItemName }
 export type MarketSalePayload = { slot: MarketSlotKey }
 export type ChancellorMarketSalePayload = { slot: MarketSlotKey, omit: Array<TradeGood> }
 export type PeddlerMarketPayload = { omit: TradeGood }
-export type MetalPurchasePayload = { metal: Metal, currency: Currency }
+export type FeasiblePurchase = { metal: Metal, currency: Currency }
+export type MetalPurchasePayload = FeasiblePurchase & { drop: Array<ItemName> | null }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
 
