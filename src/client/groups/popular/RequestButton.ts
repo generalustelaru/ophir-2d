@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData } from '~/client_types';
+import { GroupLayoutData, EventType } from '~/client_types';
 import { ClientMessage } from '~/shared_types';
 import { Button } from './Button';
 
@@ -11,7 +11,7 @@ export abstract class RequestButton extends Button {
             layout,
             (
                 actionMessage ? () => window.dispatchEvent(new CustomEvent(
-                    'action',
+                    EventType.action,
                     { detail: actionMessage },
                 )): null
             ),

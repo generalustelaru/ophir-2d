@@ -16,7 +16,7 @@ import process from 'process';
 import path from 'path';
 import http from 'http';
 
-import { PORT_NUMBER, MONGODB_URI, REDIS_URL, NODE_ENV } from '../environment';
+import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
 import { MongoClient } from 'mongodb';
 import opentype, { Font } from 'opentype.js';
 
