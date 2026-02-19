@@ -67,4 +67,12 @@ export class CoinDial implements Unique<DynamicGroupInterface<number>> {
         this.amount.text(value.toString());
         this.amount.x(value > 9 ? this.coinCenter - 10 : this.coinCenter - 5);
     }
+
+    public show() {
+        this.group.visible(true);
+    }
+
+    public hide() {
+        this.group.visible(false);
+    }
 }

@@ -33,7 +33,7 @@ export abstract class Button {
         this.isActive = true;
     }
 
-    public updateFunction(newCallback: Function) {
+    protected updateFunction(newCallback: Function) {
         this.callback = newCallback;
     }
 

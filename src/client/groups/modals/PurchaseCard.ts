@@ -1,0 +1,115 @@
+import Konva from 'konva';
+import { DynamicGroupInterface } from '~/client_types';
+import { CoinDial, FavorDial, RequestButton } from '../popular';
+import clientConstants from '~/client_constants';
+import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer } from '~/shared_types';
+
+const { HUES, CARGO_ITEM_DATA } = clientConstants;
+type Update = {
+    message: BuyMetalsMessage
+    treasury: TreasuryOffer
+}
+export class PurchaseCard extends RequestButton implements Unique<DynamicGroupInterface<Update>> {
+    private background: Konva.Rect;
+    private coinDial: CoinDial;
+    private favorDial: FavorDial;
+    private goldIcon: Konva.Path;
+    private silverIcon: Konva.Path;
+
+    constructor(
+        stage: Konva.Stage,
+        position: Coordinates,
+    ) {
+        super(
+            stage,
+            { width: 66, height: 96, x: position.x, y: position.y },
+            null,
+        );
+
+        this.background = new Konva.Rect({
+            width: this.group.width(),
+            height: this.group.height(),
+            fill: HUES.treasuryDarkGold,
+            stroke: HUES.boneWhite,
+            strokeWidth: 2,
+            cornerRadius: 15,
+        });
+
+        this.coinDial = new CoinDial({ x: this.group.width() / 2, y: 32 }, 0);
+        this.favorDial = new FavorDial({ x: 7, y: 7 }, 0);
+
+        const iconConfig = {
+            x: 1,
+            y: 60,
+            scaleX: 2.75,
+            scaleY: 2.75,
+        };
+
+        this.goldIcon = new Konva.Path({
+            ...iconConfig,
+            data: CARGO_ITEM_DATA['gold'].shape,
+            fill: CARGO_ITEM_DATA['gold'].fill,
+        });
+
+        this.silverIcon = new Konva.Path({
+            ...iconConfig,
+            data: CARGO_ITEM_DATA['silver'].shape,
+            fill: CARGO_ITEM_DATA['silver'].fill,
+        });
+
+        this.group.add(
+            this.background,
+            this.goldIcon,
+            this.silverIcon,
+            this.coinDial.getElement(),
+            this.favorDial.getElement(),
+        );
+
+        this.hideElements();
+    }
+
+    public getElement(): Konva.Group {
+        return this.group;
+    }
+
+    public update(data?: Update): void {
+        this.group.visible(!!data);
+
+        if (!data)
+            return;
+
+        this.hideElements();
+
+        const { message, treasury } = data;
+        const { currency, metal } = message.payload;
+        const dialRef = currency == 'coins' ? this.coinDial : this.favorDial;
+        const { iconRef, cost } = (() => {
+            return metal == 'silver'
+                ? { iconRef: this.silverIcon, cost: treasury.silverCost }
+                : { iconRef: this.goldIcon, cost: treasury.goldCost };
+        })();
+
+        dialRef.update(cost[currency]);
+        dialRef.show();
+        iconRef.visible(true);
+
+        super.disable();
+        this.background.fill(HUES.treasuryDarkGold);
+    }
+
+    public setFeasable(isFeasable: boolean) {
+        isFeasable ? super.enable() : super.disable();
+        this.background.fill(isFeasable ? HUES.treasuryGold : HUES.treasuryDarkGold);
+    }
+
+    public updateMessage(message: BuyMetalsMessage) {
+        this.updateActionMessage(message);
+    }
+
+    private hideElements() {
+        this.favorDial.hide();
+        this.coinDial.hide();
+        this.goldIcon.visible(false);
+        this.silverIcon.visible(false);
+    }
+}

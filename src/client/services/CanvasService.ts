@@ -237,6 +237,7 @@ export class CanvasService extends Communicator {
         this.endTurnModal.repositionModal(this.aspect);
         this.sailAttemptModal.repositionModal(this.aspect);
         this.forceTurnModal.repositionModal(this.aspect);
+        this.dropBeforeLoadModal.repositionModal(this.aspect);
 
         this.sellGoodsModal?.repositionModal(this.aspect);
         this.donateGoodsModal?.repositionModal(this.aspect);
