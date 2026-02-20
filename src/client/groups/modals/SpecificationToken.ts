@@ -80,7 +80,7 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
         const { type, isClickable } = data;
 
         type != 'none' && this.tokens.get(type)?.show();
-        
+
         if (isClickable) {
             this.enable();
             this.activeBackground.visible(true);

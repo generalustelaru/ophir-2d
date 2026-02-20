@@ -10,6 +10,7 @@ type LocationTokenUpdate = {
     templeIcon: IconLayer
 };
 
+// TODO: Refactor this as a non-button. Make the SeaZone clickable
 export class LocationToken extends Button implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
     private icon: Konva.Path;
     private id: LocationName;
