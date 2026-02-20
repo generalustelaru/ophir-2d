@@ -2,13 +2,13 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { Button, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
-import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer } from '~/shared_types';
+import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer, LoadGoodMessage } from '~/shared_types';
 
 const { HUES, CARGO_ITEM_DATA } = clientConstants;
 type Update = {
-    message: BuyMetalsMessage
     treasury: TreasuryOffer
-}
+    message: BuyMetalsMessage
+} | { message: LoadGoodMessage }
 export class PurchaseCard extends Button implements Unique<DynamicGroupInterface<Update>> {
     private background: Konva.Rect;
     private coinDial: CoinDial;
@@ -73,29 +73,29 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
         return this.group;
     }
 
-    public update(data?: Update): void {
-        this.group.visible(!!data);
-
-        if (!data)
-            return;
-
+    public update(data: Update): void {
         this.hideElements();
 
-        const { message, treasury } = data;
-        const { currency, metal } = message.payload;
-        const dialRef = currency == 'coins' ? this.coinDial : this.favorDial;
-        const { iconRef, cost } = (() => {
-            return metal == 'silver'
-                ? { iconRef: this.silverIcon, cost: treasury.silverCost }
-                : { iconRef: this.goldIcon, cost: treasury.goldCost };
-        })();
+        if ('treasury' in data) {
+            const { message, treasury } = data;
+            const { currency, metal } = message.payload;
+            const dialRef = currency == 'coins' ? this.coinDial : this.favorDial;
+            const { iconRef, cost } = (() => {
+                return metal == 'silver'
+                    ? { iconRef: this.silverIcon, cost: treasury.silverCost }
+                    : { iconRef: this.goldIcon, cost: treasury.goldCost };
+            })();
 
-        dialRef.update(cost[currency]);
-        dialRef.show();
-        iconRef.visible(true);
+            dialRef.update(cost[currency]);
+            dialRef.show();
+            iconRef.visible(true);
+            this.background.fill(HUES.treasuryDarkGold);
+        } else {
+            // const { tradeGood } = data.message.payload;
+            this.background.fill(HUES.islandGreen);
+        }
 
         super.disable();
-        this.background.fill(HUES.treasuryDarkGold);
     }
 
     public setFeasable(isFeasable: boolean) {

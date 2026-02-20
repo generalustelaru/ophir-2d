@@ -92,11 +92,9 @@ export class DropBeforeLoadModal
         })();
         this.cargoRow.update({ specifications: this.dropSpecs });
 
-        if (message.action == Action.buy_metal) {
-            this.purchaseCard.update({ message, treasury: this.treasury });
-        } else {
-            this.purchaseCard.update();
-        }
+        message.action == Action.buy_metal
+            ? this.purchaseCard.update({ message, treasury: this.treasury })
+            : this.purchaseCard.update({ message });
 
         super.open();
     }
@@ -127,10 +125,7 @@ export class DropBeforeLoadModal
 
         const isFeasible = dropped.length >= this.dropReq;
 
-        if (this.message.action == Action.buy_metal) {
-            // this.purchaseCard.updateActionMessage(this.message);
-            this.purchaseCard.setFeasable(isFeasible);
-        }
+        this.purchaseCard.setFeasable(isFeasible);
     }
 
     private dropAndLoadItems() {

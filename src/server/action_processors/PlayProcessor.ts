@@ -330,7 +330,21 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!loadGoodPayload)
             return lib.fail(lib.validationErrorMessage());
 
-        const { tradeGood } = loadGoodPayload;
+
+        const { tradeGood, drop } = loadGoodPayload;
+
+        if (drop) {
+            for (const item of drop) {
+                const result = this.unloadItem(player.getCargo(), item);
+
+                if (result.err)
+                    return lib.fail(result.message);
+
+                player.setCargo(result.data);
+                this.privateState.addDeed({ context: Action.drop_item, description: `ditched ${item} from cargo` });
+            }
+        }
+
         if (!player.mayLoadGood())
             return lib.fail(`${color} Cannot load good`);
 
