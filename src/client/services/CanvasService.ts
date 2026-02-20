@@ -362,14 +362,15 @@ export class CanvasService extends Communicator {
     }
 
     private dropBeforeLoad(message: DropBeforeLoadMessage) {
+        const detachedMessage = structuredClone(message);
 
-        if (this.dropBeforeLoadModal.hasCargoRoom(message.action == Action.buy_metal ? 2 : 1)) {
+        if (this.dropBeforeLoadModal.hasCargoRoom(detachedMessage.action == Action.buy_metal ? 2 : 1)) {
             window.dispatchEvent(new CustomEvent(
                 EventType.action,
-                { detail: message },
+                { detail: detachedMessage },
             ));
         } else {
-            this.dropBeforeLoadModal.show(message);
+            this.dropBeforeLoadModal.show(detachedMessage);
         }
     }
 };
