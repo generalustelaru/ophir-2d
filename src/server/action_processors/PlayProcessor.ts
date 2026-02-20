@@ -647,7 +647,19 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!purchasePayload)
             return lib.fail(lib.validationErrorMessage());
 
-        const { metal, currency } = purchasePayload;
+        const { metal, currency, drop } = purchasePayload;
+
+        if (drop) {
+            for (const item of drop) {
+                const result = this.unloadItem(player.getCargo(), item);
+
+                if (result.err)
+                    return lib.fail(result.message);
+
+                player.setCargo(result.data);
+                this.privateState.addDeed({ context: Action.drop_item, description: `ditched ${item} from cargo` });
+            }
+        }
 
         if (!player.mayBuyMetal())
             return lib.fail(`Player ${name} cannot buy metals`);
@@ -1190,7 +1202,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 !this.privateState.getSpentActions().includes(a),
             )
         );
-
+        const replaceableRef = ['empty', 'marble', 'ebony', 'gems', 'linen'];
         const trades = this.pickFeasibleTrades(player);
         const purchases = this.pickFeasiblePurchases(player);
         const actions = actionsByLocation.filter(action => {
@@ -1228,13 +1240,22 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                         .length;
 
                 case Action.buy_metal:
-                    return (player.hasPurchaseAllowance() && purchases.length);
+                    return (
+                        player.hasPurchaseAllowance()
+                        && purchases.length
+                        && player.getCargo().filter(
+                            item => replaceableRef.includes(item),
+                        ).length >= 2
+                    );
 
                 case Action.load_good:
                     const { location } = player.getBearings();
                     return ( // TODO: add and use constants instead of this and other examples of hardcoded values.
                         ['quarry', 'forest', 'mines', 'farms'].includes(location)
                         && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
+                        && player.getCargo().filter(
+                            item => replaceableRef.includes(item),
+                        ).length >= 1
                     );
                 default:
                     return false;

@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { CoinDial, FavorDial, RequestButton } from '../popular';
+import { Button, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
 import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer } from '~/shared_types';
 
@@ -9,7 +9,7 @@ type Update = {
     message: BuyMetalsMessage
     treasury: TreasuryOffer
 }
-export class PurchaseCard extends RequestButton implements Unique<DynamicGroupInterface<Update>> {
+export class PurchaseCard extends Button implements Unique<DynamicGroupInterface<Update>> {
     private background: Konva.Rect;
     private coinDial: CoinDial;
     private favorDial: FavorDial;
@@ -19,11 +19,12 @@ export class PurchaseCard extends RequestButton implements Unique<DynamicGroupIn
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
+        callback: Function | null,
     ) {
         super(
             stage,
             { width: 66, height: 96, x: position.x, y: position.y },
-            null,
+            callback,
         );
 
         this.background = new Konva.Rect({
@@ -100,10 +101,6 @@ export class PurchaseCard extends RequestButton implements Unique<DynamicGroupIn
     public setFeasable(isFeasable: boolean) {
         isFeasable ? super.enable() : super.disable();
         this.background.fill(isFeasable ? HUES.treasuryGold : HUES.treasuryDarkGold);
-    }
-
-    public updateMessage(message: BuyMetalsMessage) {
-        this.updateActionMessage(message);
     }
 
     private hideElements() {

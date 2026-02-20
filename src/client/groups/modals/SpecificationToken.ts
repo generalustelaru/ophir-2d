@@ -20,7 +20,7 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
         stage: Konva.Stage,
         position: Coordinates,
         callback: ((index: number) => void) | null,
-        isChancellor: boolean,
+        switchToFavor: boolean,
     ) {
         const layout = {
             x: position.x,
@@ -52,7 +52,7 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
             );
         }
 
-        if (isChancellor) {
+        if (switchToFavor) {
             const favorFactory = new FavorFactory({ x: -1, y: -1 });
             this.tokens.set('favor', favorFactory.produceElement());
         }

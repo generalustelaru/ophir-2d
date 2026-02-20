@@ -18,9 +18,9 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
         stage: Konva.Stage,
         layout: GroupLayoutData,
         switchCallback: ((index: number) => void) | null,
-        isChancellor: boolean,
+        switchToFavor: boolean,
     ) {
-        this.omitSymbol = isChancellor ? 'favor' : 'none';
+        this.omitSymbol = switchToFavor ? 'favor' : 'none';
         this.group = new Konva.Group({ ...layout });
         this.referenceX = layout.x;
 
@@ -36,7 +36,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
                 stage,
                 { ...position },
                 switchCallback ? () => switchCallback(index) : null,
-                isChancellor,
+                switchToFavor,
             );
         });
 
