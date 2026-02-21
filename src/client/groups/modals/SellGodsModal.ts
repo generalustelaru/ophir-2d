@@ -38,12 +38,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
 
         this.symbolRow = new SymbolRow(
             stage,
-            {
-                width: 50,
-                height: 30,
-                x: 30,
-                y: 65,
-            },
+            { x: 30, y: 65 },
             null,
             false,
         );

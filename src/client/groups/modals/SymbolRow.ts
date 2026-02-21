@@ -16,13 +16,13 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
 
     constructor(
         stage: Konva.Stage,
-        layout: GroupLayoutData,
+        position: Coordinates,
         switchCallback: ((index: number) => void) | null,
         switchToFavor: boolean,
     ) {
         this.omitSymbol = switchToFavor ? 'favor' : 'none';
-        this.group = new Konva.Group({ ...layout });
-        this.referenceX = layout.x;
+        this.group = new Konva.Group({ ...position });
+        this.referenceX = position.x;
 
         const vOffset = 4;
         const tokenPositions: Array<Coordinates> = [

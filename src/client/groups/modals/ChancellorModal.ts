@@ -54,12 +54,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
 
         this.symbolRow = new SymbolRow(
             stage,
-            {
-                width: 50,
-                height: 30,
-                x: 30,
-                y: 65,
-            },
+            { x: 30, y: 65 },
             (index: number) => this.switchToken(index),
             true,
         );

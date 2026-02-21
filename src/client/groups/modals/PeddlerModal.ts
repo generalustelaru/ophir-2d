@@ -58,12 +58,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
 
         this.symbolRow = new SymbolRow(
             stage,
-            {
-                width: 50,
-                height: 30,
-                x: 30,
-                y: 65,
-            },
+            { x: 30, y: 65 },
             (index: number) => this.switchToken(index),
             false,
         );
