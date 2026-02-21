@@ -2,7 +2,8 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { Button, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
-import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer, LoadGoodMessage } from '~/shared_types';
+import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer, LoadGoodMessage, TradeGood } from '~/shared_types';
+import { TradeGoodFactory } from '.';
 
 const { HUES, CARGO_ITEM_DATA } = clientConstants;
 type Update = {
@@ -11,6 +12,8 @@ type Update = {
 } | { message: LoadGoodMessage }
 export class PurchaseCard extends Button implements Unique<DynamicGroupInterface<Update>> {
     private background: Konva.Rect;
+    private useTreasuryColor: boolean = true;
+    private tradeGoodTokens: Map<TradeGood, Konva.Group>;
     private coinDial: CoinDial;
     private favorDial: FavorDial;
     private goldIcon: Konva.Path;
@@ -36,6 +39,25 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
             cornerRadius: 15,
         });
 
+        this.tradeGoodTokens = new Map();
+        const symbols: Array<TradeGood> = ['linen', 'ebony', 'gems', 'marble'];
+        const tradeGoodFactory = new TradeGoodFactory();
+
+        for (const symbol of symbols) {
+            this.tradeGoodTokens.set(
+                symbol,
+                tradeGoodFactory.produceElement(symbol, 3),
+            );
+        }
+
+        const tokenGroup = new Konva.Group({ x: 16, y: 40 }).add(...(()=> {
+            const nodes: Array<Konva.Group> = [];
+            this.tradeGoodTokens.forEach(token => {
+                nodes.push(token);
+            });
+            return nodes;
+        })());
+
         this.coinDial = new CoinDial({ x: this.group.width() / 2, y: 32 }, 0);
         this.favorDial = new FavorDial({ x: 7, y: 7 }, 0);
 
@@ -60,6 +82,7 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
 
         this.group.add(
             this.background,
+            tokenGroup,
             this.goldIcon,
             this.silverIcon,
             this.coinDial.getElement(),
@@ -90,9 +113,11 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
             dialRef.show();
             iconRef.visible(true);
             this.background.fill(HUES.treasuryDarkGold);
+            this.useTreasuryColor = true;
         } else {
-            // const { tradeGood } = data.message.payload;
             this.background.fill(HUES.islandGreen);
+            this.tradeGoodTokens.get(data.message.payload.tradeGood)?.show();
+            this.useTreasuryColor = false;
         }
 
         super.disable();
@@ -100,7 +125,11 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
 
     public setFeasable(isFeasable: boolean) {
         isFeasable ? super.enable() : super.disable();
-        this.background.fill(isFeasable ? HUES.treasuryGold : HUES.treasuryDarkGold);
+
+        if (this.useTreasuryColor)
+            this.background.fill(isFeasable ? HUES.treasuryGold : HUES.treasuryDarkGold);
+        else
+            this.background.fill(isFeasable ? HUES.islandLightGreen: HUES.islandGreen);
     }
 
     private hideElements() {
@@ -108,5 +137,6 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
         this.coinDial.hide();
         this.goldIcon.visible(false);
         this.silverIcon.visible(false);
+        this.tradeGoodTokens.forEach(token => token.hide());
     }
 }

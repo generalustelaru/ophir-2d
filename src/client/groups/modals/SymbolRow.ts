@@ -29,6 +29,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
             { x: segmentWidth, y: vOffset },
             { x: segmentWidth * 2, y: vOffset },
             { x: segmentWidth * 3, y: vOffset },
+            { x: segmentWidth * 4, y: vOffset },
         ];
 
         this.tokens = tokenPositions.map((position, index) => {
