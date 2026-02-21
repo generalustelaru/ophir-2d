@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Coordinates, Unique } from '~/shared_types';
-import { DynamicGroupInterface, Specification, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, Specification } from '~/client_types';
 import { SpecificationToken } from './SpecificationToken';
 
 type Update = { specifications: Array<Specification> }
