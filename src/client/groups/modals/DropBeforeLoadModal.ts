@@ -24,7 +24,7 @@ export class DropBeforeLoadModal
     constructor(stage: Stage, aspect: Aspect) {
         super(
             stage,
-            { hasSubmit: false, dismissLabel: 'Close' },
+            { hasSubmit: false, dismissLabel: 'Cancel' },
             aspect,
             { width: 300, height: 200 },
         );
@@ -41,14 +41,14 @@ export class DropBeforeLoadModal
 
         this.cargoRow = new SymbolRow(
             stage,
-            { x: 30, y: 65 },
+            { x: 30, y: 80 },
             (index) => { this.updatePlayerChoice(index); },
             false,
         );
 
         this.purchaseCard = new PurchaseCard(
             stage,
-            { x: 220, y: 50 },
+            { x: 180, y: 50 },
             () => { this.dropAndLoadItems(); },
         );
 

@@ -50,7 +50,7 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
             );
         }
 
-        const tokenGroup = new Konva.Group({ x: 16, y: 40 }).add(...(()=> {
+        const tokenGroup = new Konva.Group({ x: 16, y: 30 }).add(...(()=> {
             const nodes: Array<Konva.Group> = [];
             this.tradeGoodTokens.forEach(token => {
                 nodes.push(token);

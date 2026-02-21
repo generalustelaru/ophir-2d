@@ -22,7 +22,7 @@ const clientConstants: ClientConstants = {
         defaultHex: '#3887BE',
         activeHex: '#52D3D8',
         islandGreen: '#0A6847',
-        islandLightGreen: '#08d18b',
+        islandLightGreen: '#17a573',
         ebony: '#8B4513',
         disabled: '#A9A9A9',
         sunset: '#FFA07A',
