@@ -12,15 +12,15 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
     private group: Konva.Group;
     private tokens: Array<SpecificationToken>;
     private referenceX: number;
-    private omitSymbol: 'favor' | 'none';
+    private omitSymbol: 'favor' | 'unavailable' | 'none';
 
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
         switchCallback: ((index: number) => void) | null,
-        switchToFavor: boolean,
+        omitSymbol: 'favor' | 'unavailable' | 'none',
     ) {
-        this.omitSymbol = switchToFavor ? 'favor' : 'none';
+        this.omitSymbol = omitSymbol;
         this.group = new Konva.Group({ ...position });
         this.referenceX = position.x;
 
@@ -37,7 +37,7 @@ export class SymbolRow implements Unique<DynamicGroupInterface<Update>> {
                 stage,
                 { ...position },
                 switchCallback ? () => switchCallback(index) : null,
-                switchToFavor,
+                omitSymbol,
             );
         });
 

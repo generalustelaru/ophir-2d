@@ -60,7 +60,7 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             stage,
             { x: 30, y: 65 },
             (index: number) => this.switchToken(index),
-            false,
+            'none',
         );
 
         const colon = new Konva.Text({

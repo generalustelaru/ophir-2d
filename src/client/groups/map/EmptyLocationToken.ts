@@ -12,7 +12,7 @@ export class EmptyLocationToken implements Unique<DynamicGroupInterface<boolean>
     ) {
         this.group = new Konva.Group();
 
-        const iconData = LAYERED_ICONS.empty_location;
+        const iconData = LAYERED_ICONS.unavailable;
         const scale = 3;
         const drift = { x: -21, y: -21 };
 

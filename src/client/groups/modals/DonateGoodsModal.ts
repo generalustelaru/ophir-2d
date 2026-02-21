@@ -42,7 +42,7 @@ export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalIn
             stage,
             { x: 30, y: 65 },
             null,
-            false,
+            'none',
         );
 
         const colon = new Konva.Text({

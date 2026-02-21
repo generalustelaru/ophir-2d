@@ -43,7 +43,7 @@ export class DropBeforeLoadModal
             stage,
             { x: 30, y: 80 },
             (index) => { this.updatePlayerChoice(index); },
-            false,
+            'unavailable',
         );
 
         this.purchaseCard = new PurchaseCard(

@@ -56,7 +56,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
             stage,
             { x: 30, y: 65 },
             (index: number) => this.switchToken(index),
-            true,
+            'favor',
         );
 
         this.coinDial = new CoinDial(

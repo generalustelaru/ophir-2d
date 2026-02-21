@@ -24,7 +24,7 @@ export type HueCombo = { dark: Hue, light: Hue, accent: Hue }
 export type PlayerHueVariation = { vivid: HueCombo, muted: HueCombo }
 export type HexCoordinates = { id: ZoneName, x: number, y: number };
 export type IconLayer = { shape: string, fill: Hue }
-export type IconName = 'empty_location'
+export type IconName = 'unavailable'
 export type LayeredIconData = {
     layer_1: IconLayer,
     layer_2: IconLayer,

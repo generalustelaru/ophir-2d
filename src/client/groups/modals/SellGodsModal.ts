@@ -40,7 +40,7 @@ export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInte
             stage,
             { x: 30, y: 65 },
             null,
-            false,
+            'none',
         );
 
         const colon = new Konva.Text({

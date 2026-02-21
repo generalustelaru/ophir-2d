@@ -4,23 +4,24 @@ import { Coordinates, TradeGood, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import clientConstants from '~/client/client_constants';
 import { FavorFactory, TradeGoodFactory } from '.';
+import { UnavailableFactory } from './UnavalableFactory';
 
 const { HUES } = clientConstants;
 
 type Update = {
-    type: TradeGood | 'favor' | 'none',
+    type: TradeGood | 'favor' | 'unavailable' | 'none',
     isClickable: boolean;
 }
 
 export class SpecificationToken extends Button implements Unique<DynamicGroupInterface<Update>> {
-    private tokens: Map<TradeGood|'favor', Konva.Group> = new Map();
+    private tokens: Map<TradeGood|'favor'|'unavailable', Konva.Group> = new Map();
     private activeBackground: Konva.Rect;
 
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
         callback: ((index: number) => void) | null,
-        switchToFavor: boolean,
+        omitSymbol: 'favor' | 'unavailable' | 'none',
     ) {
         const layout = {
             x: position.x,
@@ -52,9 +53,21 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
             );
         }
 
-        if (switchToFavor) {
-            const favorFactory = new FavorFactory({ x: -1, y: -1 });
-            this.tokens.set('favor', favorFactory.produceElement());
+        switch (omitSymbol) {
+            case 'favor':
+                const favorFactory = new FavorFactory({ x: -1, y: -1 });
+                this.tokens.set('favor', favorFactory.produceElement());
+                break;
+            case 'unavailable':
+                const unavailableFactory = new UnavailableFactory({ x: -1, y: -1 });
+                this.tokens.set('unavailable', unavailableFactory.produceElement());
+                break;
+            case 'none':
+            default:
+                break;
+        }
+
+        if (omitSymbol) {
         }
 
         const tokenGroup = new Konva.Group().add(...(()=> {
