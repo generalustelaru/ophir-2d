@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/pico.cyan.min.css" />
+    <link rel="stylesheet" href="/common.css" />
+    <link rel="stylesheet" href="/authentication.css" />
+    <title>Ophir 2D - Login</title>
+</head>
+
+<body>
+    <div class="content">
+        <h2>
+            Ophir 2D
+        </h2>
+        <div id="formbox">
+            <div class="form" id="registration" style="visibility: hidden;">
+                <h3>Create Account</h3>
+                <form method="post" action="/register">
+                    <input type="text" name="userName" placeholder="user name (not displayed)">
+                    <input type="password" name="password" placeholder="suggested strong password">
+                    <input type="password" name="pwRetype" placeholder="password again">
+                    <input type="submit" value="Create">
+                </form>
+            </div>
+            <div class="form" id="login" style="visibility: visible;">
+                <h3>Login</h3>
+                <form method="post" action="/authenticate">
+                    <input autocomplete="username" type="text" name="userName" placeholder="user name">
+                    <input autocomplete="current-password" type="password" name="password" placeholder="pasword">
+                    <input type="text" style="visibility: hidden;">
+                    <input type="submit" value="Log in">
+                </form>
+            </div>
+            <a id="switch-link">Create Account</a>
+        </div>
+        <div id="issue" style="color:pink"></div>
+    </div>
+    <script>
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted)
+                window.location.reload();
+        });
+
+        let isLogin = true;
+        const switchLink = document.querySelector('#switch-link');
+        const registration = document.querySelector('#registration');
+        const login = document.querySelector('#login');
+        const issueText = document.querySelector('#issue');
+        switchLink.addEventListener('click', () => {
+            login.style.visibility = isLogin ? 'hidden' : 'visible';
+            registration.style.visibility = isLogin ? 'visible' : 'hidden';
+            isLogin = !isLogin;
+            switchLink.innerText = isLogin ? 'Create Account' : 'Login';
+            issueText.innerText = '';
+        });
+
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const uri = event.target.action;
+                const init = {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams(new FormData(event.target))
+                }
+
+                try {
+                    const response = await fetch(uri, init);
+                    if (response.status === 200) {
+                        window.location.href = '/lobby';
+                    } else {
+                        const text = await response.text();
+                        issueText.innerText = text;
+                    }
+                } catch (error) {
+                    console.error(error)
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

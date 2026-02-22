@@ -1,14 +1,8 @@
-#formbox {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
+.button-row {
     width: 300px;
-    & .form {
-        grid-area: 1/1;
-    }
-}
 
-#switch-link {
-    text-align: center;
-    cursor: pointer;
+    & button {
+        margin: 20px 0;
+        width: 100%;
+    }
 }

@@ -1,6 +1,7 @@
 import { InfoDetail, ErrorDetail, EventType, MessageType } from '~/client_types';
 import localState from './state';
-import { CommunicationService } from './services/CommService';
+import { WebSocketService } from './services/CommService';
+import { TourService } from './services/TourService';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
@@ -8,10 +9,14 @@ import {
 } from '~/shared_types';
 
 const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
-const comms = new CommunicationService();
-const gameAdress = `${protocol}//${window.location.host}/game`;
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
+
+if (requestedGameId == 'tour-game')
+    alert('Tour Game');
+
+const controller = requestedGameId == 'tour-game' ? new TourService : new WebSocketService();
+const gameAdress = `${protocol}//${window.location.host}/game`;
 
 function signalError(message?: string) {
     const errMessage = message || 'An error occurred';
@@ -31,7 +36,7 @@ function probe(intervalSeconds: number) {
                 if (res.status === 200) {
                     clearInterval(probe);
                     UserInterface.addInternalPop(MessageType.INFO, 'Connection restored.');
-                    comms.createConnection(gameAdress, requestedGameId);
+                    controller.createConnection(gameAdress, requestedGameId);
                 }
             },
         ).catch(
@@ -60,7 +65,7 @@ document.fonts.ready.then(() => {
         if (!message)
             return signalError('Action message is missing!');
 
-        comms.sendMessage(message);
+        controller.sendMessage(message);
     });
 
     //Send state change message to server
@@ -69,7 +74,7 @@ document.fonts.ready.then(() => {
             action: Action.start_setup,
             payload: null,
         };
-        comms.sendMessage(message);
+        controller.sendMessage(message);
     });
 
     window.addEventListener(EventType.start_play, () => {
@@ -77,7 +82,7 @@ document.fonts.ready.then(() => {
             action: Action.start_play,
             payload: canvas.getSetupCoordinates(),
         };
-        comms.sendMessage(message);
+        controller.sendMessage(message);
     });
 
     window.addEventListener(EventType.error, (event: CustomEventInit) => {
@@ -175,5 +180,5 @@ document.fonts.ready.then(() => {
         },
     );
 
-    comms.createConnection(gameAdress, requestedGameId);
+    controller.createConnection(gameAdress, requestedGameId);
 });

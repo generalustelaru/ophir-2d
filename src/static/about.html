@@ -11,6 +11,9 @@
 </head>
 
 <body>
+    <div class="navbar">
+        <button id="back">Back</button>
+    </div>
     <div class="content">
     <article>
         <h2>What is Ophir 2D</h2>
@@ -40,9 +43,10 @@
             app requiring any other identifier.</p>
         <p>Anonimity is preserved:
         <ul>
+            <li>No personal information is requested.</li>
+            <li>No device information is extracted.</li>
             <li>Local stored data is reduced to a temporary <b>session cookie</b>.</li>
-            <li>No device information is transmitted.</li>
-            <li>Your user name is not displayed anywhere.</li>
+            <li>You get a random name in every game (<i>username</i> is not displayed).</li>
             <li>You can choose a persistent name to display and change it during any game.</li>
         </ul>
         </p>
@@ -56,5 +60,8 @@
         <p>My name is Adrian. You can reach me at <a href="mailto:adrianpope@proton.me">adrianpope@proton.me</a>.</p>
     </article>
     </div>
+    <script>
+        document.querySelector('#back').addEventListener('click', () => { window.history.back() });
+    </script>
 </body>
 </html>

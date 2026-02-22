@@ -91,16 +91,6 @@ const socketServer = new WebSocketServer({ server, path: '/game' });
 // MARK: WS
 
 socketServer.on('connection', async (socket: WebSocket, inc) => {
-    const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
-    const gameId = extractGameId(params?.get('gameId') || '', true);
-
-    if (!gameId) {
-        transmit(socket, { error: 'Invalid connection data.' });
-
-        return;
-    }
-
-    socket.isAlive = true;
     const validation = await validateClient(inc.headers.cookie);
 
     if (validation.err) {
@@ -110,6 +100,17 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         return;
     }
 
+    const params = inc.url ? new URL(inc.url, `http://${inc.headers.host}`).searchParams : null;
+    const extraction = extractGameId(params?.get('gameId') || '');
+
+    if (extraction.err) {
+        transmit(socket, { error: 'Invalid connection data.' });
+
+        return;
+    }
+
+    socket.isAlive = true;
+    const gameId = extraction.data;
     const game: Game | null = await (async () => {
         const activeGame = activeGames.get(gameId);
 
@@ -233,6 +234,9 @@ app.get('/about', (_, res: Response) => {
 app.get('/how-to-play', (_, res: Response) => {
     res.sendFile(path.join(__dirname, 'public', 'how-to-play.html'));
 });
+app.get('/tour-game', (_, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'game.html'));
+});
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');
@@ -242,7 +246,7 @@ app.get('/feed', async (req: Request, res: Response) => {
 
     if (validation.err) {
         sLib.printWarning(validation.message);
-        res.status(401).send();
+        res.status(403).send();
         return;
     }
 
@@ -258,6 +262,9 @@ app.get('/', async (req: Request, res: Response) => {
     } else {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     }
+});
+app.get('/authentication', async (_, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'authentication.html'));
 });
 app.use(express.urlencoded({ extended: true }));
 app.post('/register', async (req: Request, res: Response) => {
@@ -307,7 +314,7 @@ app.post('/register', async (req: Request, res: Response) => {
 
     res.status(200).send();
 });
-app.post('/login', async (req: Request, res: Response) => {
+app.post('/authenticate', async (req: Request, res: Response) => {
     const form = req.body as AuthenticationForm;
     const authentication = await dbService.authenticateUser(form);
 
@@ -385,21 +392,31 @@ app.get('/new', async (req: Request, res: Response) => {
     const gameId = game.getGameId();
     activeGames.set(gameId, game);
 
-    res.redirect(`/${gameId}`);
+    res.redirect(`/game-${gameId}`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:uri', async (req: Request, res: Response) => {
+    const uri = req.params.uri;
 
-    const gameId = extractGameId(req.params.uri);
-
-    if (!gameId) {
-        sLib.printWarning(`Unexpected request { uri: ${req.params.uri} }`);
+    if (!uri.match(/^game-.+/)) {
+        sLib.printWarning(`Unexpected request { uri: ${req.params.uri}, ip: ${req.ip} }`);
         res.status(400).send('Unknown address.');
 
         return;
     }
 
-    console.info('Visitor requests session', { ip: req.ip, gameId });
+    const extraction = extractGameId(uri);
+
+    if (extraction.err) {
+        sLib.printWarning(`issue: ${extraction.message}, ip: ${req.ip}`);
+        res.status(400).send('Unknown address.');
+
+        return;
+    }
+
+    const gameId = extraction.data;
+    console.info('Visitor requests session', { gameId });
+
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
@@ -741,14 +758,13 @@ function extractToken(cookie: unknown): Probable<string> {
     return sLib.pass(items.token);
 }
 
-function extractGameId(parameter: string, isWSConnection: boolean = false): GameId | null {
+function extractGameId(parameter: string): Probable<GameId> {
+    const [exactMath, _, gameId] = parameter.match(/^(game-)([a-z]+-[a-z]+)$/) || [null, null, null];
 
-    if (!parameter.match(/^[a-z]+-[a-z]+$/)) {
-        isWSConnection && sLib.printError(`gameId is malformed!, { gameId: ${parameter} }`);
-        return null;
-    }
+    if (!exactMath)
+        return sLib.fail(`gameId is malformed!, { gameId: ${parameter} }`);
 
-    return parameter as GameId;
+    return sLib.pass(gameId as GameId);
 }
 
 type GameStats = {

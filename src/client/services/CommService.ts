@@ -6,7 +6,7 @@ import {
 import { Communicator } from './Communicator';
 import { EventType } from '~/client_types';
 
-export class CommunicationService extends Communicator {
+export class WebSocketService extends Communicator {
 
     private socket: WebSocket | null = null;
 
