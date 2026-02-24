@@ -1,4 +1,4 @@
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 # Set project path
 WORKDIR /app
 #  Install dependencies (cached)
@@ -16,7 +16,7 @@ COPY --from=builder /app/debug.sh ./debug.sh
 EXPOSE 3001
 CMD ["node", "dist/server.cjs"]
 
-FROM node:20-alpine AS prod
+FROM node:22-alpine AS prod
 WORKDIR /app
 
 COPY package*.json ./
