@@ -3,6 +3,7 @@
         "target": "es2015",
         "downlevelIteration": true,
         "noImplicitAny": true,
+        "skipLibCheck": true,
         "strict": true,
         "strictNullChecks": true,
         "strictPropertyInitialization": true,

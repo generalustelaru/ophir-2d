@@ -390,7 +390,7 @@ app.get('/new', async (req: Request, res: Response) => {
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:uri', async (req: Request, res: Response) => {
 
-    const gameId = extractGameId(req.params.uri);
+    const gameId = extractGameId(req.params.uri as string);
 
     if (!gameId) {
         sLib.printWarning(`Unexpected request { uri: ${req.params.uri} }`);
