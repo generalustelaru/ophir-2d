@@ -11,18 +11,19 @@ import {
 const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
-
-const controller = requestedGameId == 'tour-game' ? new TourService() : new WebSocketService();
+const isTourGame = requestedGameId == 'tour-game';
+const uiService = new UserInterface(isTourGame);
+const controller = isTourGame ? new TourService() : new WebSocketService();
 const gameAdress = `${protocol}//${window.location.host}/game`;
 
 function signalError(message?: string) {
     const errMessage = message || 'An error occurred';
     console.error(errMessage);
-    UserInterface.addInternalPop(MessageType.ERROR, errMessage);
+    uiService.addInternalPop(MessageType.ERROR, errMessage);
 }
 
 function probe(intervalSeconds: number) {
-    UserInterface.setInfo('Trying to reconnect...');
+    uiService.setInfo('Trying to reconnect...');
     const milliseconds = intervalSeconds * 1000;
 
     const probe = setInterval(() => {
@@ -32,7 +33,7 @@ function probe(intervalSeconds: number) {
             (res) => {
                 if (res.status === 200) {
                     clearInterval(probe);
-                    UserInterface.addInternalPop(MessageType.INFO, 'Connection restored.');
+                    uiService.addInternalPop(MessageType.INFO, 'Connection restored.');
                     controller.createConnection(gameAdress, requestedGameId);
                 }
             },
@@ -89,16 +90,16 @@ document.fonts.ready.then(() => {
 
     window.addEventListener(EventType.timeout, () => {
         console.warn('Connection timeout');
-        UserInterface.addInternalPop(MessageType.ERROR, 'Connection was lost.');
-        UserInterface.disable();
+        uiService.addInternalPop(MessageType.ERROR, 'Connection was lost.');
+        uiService.disable();
         canvas.disable();
         probe(5);
     });
 
     window.addEventListener(EventType.close, () => {
         console.warn('Connection closed');
-        UserInterface.addInternalPop(MessageType.INFO, 'The server has entered maintenance.');
-        UserInterface.disable();
+        uiService.addInternalPop(MessageType.INFO, 'The server has entered maintenance.');
+        uiService.disable();
         canvas.disable();
         probe(30);
     });
@@ -133,7 +134,7 @@ document.fonts.ready.then(() => {
             return signalError('Missing color!');
 
         if (!localState.playerColor) {
-            UserInterface.addInternalPop(
+            uiService.addInternalPop(
                 MessageType.INFO, 'Set a player name by typing #name and then a preferred name.',
             );
         }
@@ -147,7 +148,7 @@ document.fonts.ready.then(() => {
 
         const state = event.detail as State;
 
-        UserInterface.update(state);
+        uiService.update(state);
         canvas.drawUpdateElements(state);
     });
 
@@ -156,7 +157,7 @@ document.fonts.ready.then(() => {
             return signalError('State is missing!');
 
         const { state, instructions } = event.detail as TourState;
-        UserInterface.update(state);
+        uiService.update(state, true);
         canvas.drawUpdateElements(state);
         canvas.updateTour(instructions);
     });
@@ -183,7 +184,7 @@ document.fonts.ready.then(() => {
         EventType.info,
         (event: CustomEventInit) => {
             const payload: InfoDetail = event.detail;
-            UserInterface.setInfo(payload.text);
+            uiService.setInfo(payload.text);
         },
     );
 

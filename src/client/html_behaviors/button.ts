@@ -1,13 +1,14 @@
 import { HTMLHandlerInterface } from '~/client_types';
 import { Unique } from '~/shared_types';
 
-export class Button implements Unique<HTMLHandlerInterface> {
+export class HtmlButton implements Unique<HTMLHandlerInterface> {
 
     private element: HTMLButtonElement;
     private callback: () => void;
 
-    constructor(id: string, callback: () => void) {
+    constructor(id: string, callback: () => void, isHidden: boolean = false) {
         this.element = document.getElementById(id) as HTMLButtonElement;
+        this.element.hidden = isHidden;
         this.callback = callback.bind(this);
     }
 

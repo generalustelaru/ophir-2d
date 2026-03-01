@@ -1,37 +1,43 @@
 import { EnrolmentState, ChatEntry, Action, PlayState, SetupState, State, Phase } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
-import { Button } from '../html_behaviors/button';
+import { HtmlButton } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import clientConstants from '~/client_constants';
 import { EventType, MessageType } from '~/client_types';
 
-export const UserInterface = new class extends Communicator {
-    private continueButton: Button;
-    private resetButton: Button;
+export class UserInterface extends Communicator {
+    private continueButton: HtmlButton;
+    private resetButton: HtmlButton;
     private popDisplay: HTMLDivElement;
     private isPopDisplaying: boolean = false;
     private popTimeStamp: number | null = null;
     private popCache: Array<{timeStamp: number, hyperText: string}> = [];
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
-    private chatSendButton: Button;
-    private forceTurnButton: Button;
+    private chatSendButton: HtmlButton;
+    private forceTurnButton: HtmlButton;
     private phase: Phase = Phase.enrolment;
 
-    constructor() {
+    constructor(isTour: boolean = false) {
         super();
-        const toLobby = document.querySelector('#lobby');
-        toLobby && toLobby.addEventListener('click', () => {
-            window.location.href = '/lobby';
-        });
-        this.continueButton = new Button('continueButton', this.processContinue);
-        this.resetButton = new Button('resetButton', this.processReset);
-        this.forceTurnButton = new Button('forceTurnButton', this.processForceTurn);
+
+        new HtmlButton('lobby', () => { window.location.href = '/lobby'; }, isTour);
+        this.continueButton = new HtmlButton('continueButton', this.processContinue, isTour);
+        this.resetButton = new HtmlButton('resetButton', this.processReset, isTour);
+        this.forceTurnButton = new HtmlButton('forceTurnButton', this.processForceTurn, isTour);
         this.popDisplay = document.querySelector('#chatPop') as HTMLDivElement;
         this.chatMessages = document.querySelector('#chatMessages') as HTMLDivElement;
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
-        this.chatSendButton = new Button('chatSendButton', this.sendChatMessage);
+        this.chatSendButton = new HtmlButton('chatSendButton', this.sendChatMessage, isTour);
+
+        if(isTour) {
+            new HtmlButton('tourBack', () => { window.location.href = '/'; }, false);
+            const chatRoom = document.querySelector('#chatRoom') as HTMLDivElement;
+            chatRoom.hidden = true;
+
+            return;
+        }
 
         setInterval(() => {
             if (this.isPopDisplaying)
@@ -59,7 +65,11 @@ export const UserInterface = new class extends Communicator {
         },1000);
     }
 
-    public update(state: State) {
+    public update(state: State, isTour: boolean = false) {
+
+        if (isTour)
+            return;
+
         this.disableButtons();
         this.updateChat(state.chat);
 
