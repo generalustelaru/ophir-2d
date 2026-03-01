@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, LayerIds, TargetMapping, Target } from '~/client_types';
 import { Coordinates, Player, PlayerColor, PlayState, Unique } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
@@ -10,6 +10,7 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
     private playerPlacards: Array<PlayerPlacard> = [];
     private rivalPlacard: RivalPlacard | null = null;
     private endRivalTurnCallback: ((isShiftingMarket: boolean) => void) | null = null;
+    private mapping: TargetMapping = {};
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -105,5 +106,9 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         this.playerPlacards.forEach(placard => {
             placard.isLocal() && placard.disable();
         });
+    }
+
+    public updateHighlights(targets: Array<Target>): void {
+        console.log({ received: targets, defined: this.mapping });
     }
 }

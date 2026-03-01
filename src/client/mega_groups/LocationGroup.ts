@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import {
-    MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds, DropBeforeLoadMessage,
+    MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds, DropBeforeLoadMessage, Target, TargetMapping,
 } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
@@ -25,6 +25,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private peddlerCallback: Function | null = null;
     private donateGoodsCallback: Function | null = null;
     private advisorOptionsCallback: Function | null = null;
+    private mapping: TargetMapping = {};
 
     constructor(
         stage: Konva.Stage,
@@ -167,6 +168,10 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
 
         this.resultsPanel = new ResultsPanel(state, { width: this.group.width(), height: this.group.height() });
         this.group.add(this.resultsPanel.getElement());
+    }
+
+    public updateHighlights(targets: Array<Target>): void {
+        console.log({ received: targets, defined: this.mapping });
     }
 
     private formatPurchaseMessage(payload: MetalPurchasePayload): DropBeforeLoadMessage {

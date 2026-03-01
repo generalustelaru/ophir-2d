@@ -5,7 +5,7 @@ import {
     Unique,
 } from '~/shared_types';
 import {
-    MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs, DropBeforeLoadMessage,
+    MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs, DropBeforeLoadMessage, Target, TargetMapping,
 } from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
@@ -31,6 +31,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private opponentShips: Array<RemoteShip> = [];
     private localShip: PlayerShip | null = null;
     private rivalShip: RivalShip | null = null;
+    private mapping: TargetMapping = {};
 
     constructor(
         stage: Konva.Stage,
@@ -239,6 +240,10 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         this.endTurnButton?.disable();
         this.favorButton?.disable();
         this.undoButton?.disable();
+    }
+
+    public updateHighlights(targets: Array<Target>): void {
+        console.log({ received: targets, defined: this.mapping });
     }
 
     // MARK: SETUP

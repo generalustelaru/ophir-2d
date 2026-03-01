@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorTransmission, Metal,
-    TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix,
-    MetalCost, TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase,
+    TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
+    TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase, PlayState,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -95,6 +95,7 @@ export interface MegaGroupInterface {
     drawElements(state: State): void,
     update(state: State): void,
     disable(): void,
+    updateHighlights?(targets: Array<Target>): void,
 }
 
 export interface DynamicGroupInterface<U> {
@@ -187,6 +188,7 @@ export enum EventType {
     client_switch = 'client_switch',
     deauthenticate = 'deauthenticate',
     state_update = 'state_update',
+    tour_update = 'tour_update',
     vp_transmission = 'vp_transmission',
     rival_control_transmission = 'rival_control_transmission',
     start_turn = 'start_turn',
@@ -213,6 +215,7 @@ export type Event =
     | EventFormat<EventType.info, InfoDetail>
     | EventFormat<EventType.reset, ResetResponse>
     | EventFormat<EventType.state_update, State>
+    | EventFormat<EventType.tour_update, TourState>
     | EventFormat<EventType.identification, ColorTransmission>
     | EventFormat<EventType.vp_transmission, VpTransmission>
 ;
@@ -224,3 +227,36 @@ export type InfoDetail = {
 export type ErrorDetail = {
     message: string,
 }
+
+// MARK: TOUR
+
+// UI element identification
+export enum Target {
+    topLeftZone, topRightZone, rightZone, bottomRightZone, bottomLeftZone, leftZone, centerZone,
+    movesCounter, favorButton, endTurnButton, undoButton,
+    marketArea, deck,slot_1, slot_2, slot_3, fluctuation_up, fluctuation_down, temple_mark,
+    treasuryArea, goldForFavor, silverForFavor, goldForCoin, silverForCoin,
+    templeArea, goldCard, silverCard, marketCard, upgradeButton, donationsDisplay,
+    playerPlacard, influenceDie, cargoBand, specialistBand, favorDial, coinDial, vpDial, specialtyButton,
+}
+
+// a single 'page' to be displayed (the container should display a next button if more instructions are to be displayed)
+export type Instruction = {
+    text: string, // Stays in CanvasService to update the tour modal
+    highlights: Array<Target> // Sent to every MegaGroup for activating element highlights
+}
+
+// the data bundle that TourService must feed the client per turn.
+export type ActionScenario = {
+    mutate: (state: PlayState) => void, // produces a new state that trickles to every element in regular fashion
+    instructions: Array<Instruction>, // updates CanvasService via dedicated method
+    expecting: ClientMessage, // stays in TourService for validation
+}
+
+export type TourState = {
+    state: PlayState,
+    instructions: Array<Instruction>, // updates CanvasService via dedicated method
+}
+
+// Data declared in each PlayMegaGroupInterface for drawing game tour UI elements.
+export type TargetMapping = Partial<Record<Target, GroupLayoutData>>

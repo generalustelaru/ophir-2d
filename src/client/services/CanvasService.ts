@@ -6,7 +6,7 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, SailAttemptArgs } from '~/client_types';
+import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, SailAttemptArgs } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
@@ -194,6 +194,14 @@ export class CanvasService extends Communicator {
                     this.locationGroup.update(state);
                 }
         }
+    }
+
+    public updateTour(instructions: Array<Instruction>) {
+        //TODO: create state handling for multiple instructions
+        const { highlights } = instructions[0];
+        this.mapGroup.updateHighlights(highlights);
+        this.locationGroup.updateHighlights(highlights);
+        this.playerGroup.updateHighlights(highlights);
     }
 
     public disable(): void {

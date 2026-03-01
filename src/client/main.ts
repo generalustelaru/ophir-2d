@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventType, MessageType } from '~/client_types';
+import { InfoDetail, ErrorDetail, EventType, MessageType, TourState } from '~/client_types';
 import localState from './state';
 import { WebSocketService } from './services/CommService';
 import { TourService } from './services/TourService';
@@ -12,10 +12,7 @@ const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 
-if (requestedGameId == 'tour-game')
-    alert('Tour Game');
-
-const controller = requestedGameId == 'tour-game' ? new TourService : new WebSocketService();
+const controller = requestedGameId == 'tour-game' ? new TourService() : new WebSocketService();
 const gameAdress = `${protocol}//${window.location.host}/game`;
 
 function signalError(message?: string) {
@@ -152,6 +149,16 @@ document.fonts.ready.then(() => {
 
         UserInterface.update(state);
         canvas.drawUpdateElements(state);
+    });
+
+    window.addEventListener(EventType.tour_update, (event: CustomEventInit) => {
+        if (!event.detail)
+            return signalError('State is missing!');
+
+        const { state, instructions } = event.detail as TourState;
+        UserInterface.update(state);
+        canvas.drawUpdateElements(state);
+        canvas.updateTour(instructions);
     });
 
     window.addEventListener(EventType.start_turn, () => {
