@@ -208,7 +208,7 @@ export type PlayerCountables = {
     favor: number;
     coins: number;
 }
-
+// TODO: revise PlayState and see if the setup sub-object can be reduced
 export type PlayState = {
     gameId: GameId,
     sessionPhase: Phase.play | Phase.conclusion,

@@ -4,9 +4,9 @@ import {
     NotFoundTransmission, ExpiredTransmission, SocketSwitchTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
-import { EventType } from '~/client_types';
+import { Controller, EventType } from '~/client_types';
 
-export class WebSocketService extends Communicator {
+export class GameController extends Communicator implements Controller {
 
     private socket: WebSocket | null = null;
 
@@ -14,7 +14,7 @@ export class WebSocketService extends Communicator {
         super();
     }
 
-    public createConnection(url: string, gameId: string) {
+    public initialize(url: string, gameId: string) {
         this.socket = new WebSocket(`${url}?gameId=${gameId}`);
 
         this.socket.onopen = () => {
@@ -87,7 +87,7 @@ export class WebSocketService extends Communicator {
         };
     }
 
-    public sendMessage(message: ClientMessage) {
+    public processMessage(message: ClientMessage) {
 
         if (!this.socket || !this.socket.readyState) {
             this.socket?.close();

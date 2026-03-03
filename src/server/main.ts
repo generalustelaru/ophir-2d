@@ -237,6 +237,9 @@ app.get('/how-to-play', (_, res: Response) => {
 app.get('/tour-game', (_, res: Response) => {
     res.sendFile(path.join(__dirname, 'public', 'game.html'));
 });
+app.get('/tour-state', (_, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'tourState.json'));
+});
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
     res.status(200).send('SERVER OK');

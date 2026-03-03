@@ -5,6 +5,10 @@ import {
 } from '~/shared_types';
 import Konva from 'konva';
 
+export interface Controller {
+    initialize: (url: string, gameId: string) => void
+    processMessage: (message: ClientMessage) => void
+}
 export type ElementList = Array<Konva.Group | Konva.Shape>
 export type Hue = `#${string}`;
 export enum MessageType {
@@ -240,10 +244,13 @@ export enum Target {
     playerPlacard, influenceDie, cargoBand, specialistBand, favorDial, coinDial, vpDial, specialtyButton,
 }
 
-// a single 'page' to be displayed (the container should display a next button if more instructions are to be displayed)
-export type Instruction = {
-    text: string, // Stays in CanvasService to update the tour modal
+export type Highlights = {
     highlights: Array<Target> // Sent to every MegaGroup for activating element highlights
+}
+
+// a single 'page' to be displayed (the container should display a next button if more instructions are to be displayed)
+export type Instruction = Highlights & {
+    text: string,
 }
 
 // the data bundle that TourService must feed the client per turn.
@@ -260,3 +267,15 @@ export type TourState = {
 
 // Data declared in each PlayMegaGroupInterface for drawing game tour UI elements.
 export type TargetMapping = Partial<Record<Target, GroupLayoutData>>
+
+// Sourced from server JSON
+export type ScenarioTextSource = {
+    step: number,
+    textComponent: Array<string>,
+}
+
+// In-memory object, to be combined with TextComponent
+export type ScenarioPartial = Omit<ActionScenario, 'instructions'> & {
+    step: number
+    highlightComponent: Array<Highlights>
+}

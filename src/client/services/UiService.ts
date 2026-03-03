@@ -18,21 +18,23 @@ export class UserInterface extends Communicator {
     private chatSendButton: HtmlButton;
     private forceTurnButton: HtmlButton;
     private phase: Phase = Phase.enrolment;
-
-    constructor(isTour: boolean = false) {
+    private toLobby: HtmlButton;
+    private toIndex: HtmlButton;
+    constructor(isTutorial: boolean = false) {
         super();
 
-        new HtmlButton('lobby', () => { window.location.href = '/lobby'; }, isTour);
-        this.continueButton = new HtmlButton('continueButton', this.processContinue, isTour);
-        this.resetButton = new HtmlButton('resetButton', this.processReset, isTour);
-        this.forceTurnButton = new HtmlButton('forceTurnButton', this.processForceTurn, isTour);
+        this.toLobby = new HtmlButton('lobby', () => { window.location.href = '/lobby'; }, isTutorial);
+        this.continueButton = new HtmlButton('continueButton', this.processContinue, isTutorial);
+        this.resetButton = new HtmlButton('resetButton', this.processReset, isTutorial);
+        this.forceTurnButton = new HtmlButton('forceTurnButton', this.processForceTurn, isTutorial);
         this.popDisplay = document.querySelector('#chatPop') as HTMLDivElement;
         this.chatMessages = document.querySelector('#chatMessages') as HTMLDivElement;
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
-        this.chatSendButton = new HtmlButton('chatSendButton', this.sendChatMessage, isTour);
+        this.chatSendButton = new HtmlButton('chatSendButton', this.sendChatMessage, isTutorial);
+        this.toIndex = new HtmlButton('toIndex', () => { window.location.href = '/'; }, !isTutorial);
 
-        if(isTour) {
-            new HtmlButton('tourBack', () => { window.location.href = '/'; }, false);
+        if(isTutorial) {
+            this.toIndex.enable();
             const chatRoom = document.querySelector('#chatRoom') as HTMLDivElement;
             chatRoom.hidden = true;
 
@@ -70,6 +72,7 @@ export class UserInterface extends Communicator {
         if (isTour)
             return;
 
+        this.toLobby.enable();
         this.disableButtons();
         this.updateChat(state.chat);
 

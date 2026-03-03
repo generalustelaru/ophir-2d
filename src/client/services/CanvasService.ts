@@ -196,8 +196,10 @@ export class CanvasService extends Communicator {
         }
     }
 
-    public updateTour(instructions: Array<Instruction>) {
+    public updateInstructions(instructions: Array<Instruction>) {
         //TODO: create state handling for multiple instructions
+        console.log({ instructions });
+
         const { highlights } = instructions[0];
         this.mapGroup.updateHighlights(highlights);
         this.locationGroup.updateHighlights(highlights);

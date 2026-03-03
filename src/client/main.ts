@@ -1,7 +1,7 @@
 import { InfoDetail, ErrorDetail, EventType, MessageType, TourState } from '~/client_types';
 import localState from './state';
-import { WebSocketService } from './services/CommService';
-import { TourService } from './services/TourService';
+import { GameController } from './services/GameController';
+import { TutorialController } from './services/TutorialController';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
@@ -13,7 +13,7 @@ const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 const isTourGame = requestedGameId == 'tour-game';
 const uiService = new UserInterface(isTourGame);
-const controller = isTourGame ? new TourService() : new WebSocketService();
+const controller = isTourGame ? new TutorialController() : new GameController();
 const gameAdress = `${protocol}//${window.location.host}/game`;
 
 function signalError(message?: string) {
@@ -34,7 +34,7 @@ function probe(intervalSeconds: number) {
                 if (res.status === 200) {
                     clearInterval(probe);
                     uiService.addInternalPop(MessageType.INFO, 'Connection restored.');
-                    controller.createConnection(gameAdress, requestedGameId);
+                    controller.initialize(gameAdress, requestedGameId);
                 }
             },
         ).catch(
@@ -63,7 +63,7 @@ document.fonts.ready.then(() => {
         if (!message)
             return signalError('Action message is missing!');
 
-        controller.sendMessage(message);
+        controller.processMessage(message);
     });
 
     //Send state change message to server
@@ -72,7 +72,7 @@ document.fonts.ready.then(() => {
             action: Action.start_setup,
             payload: null,
         };
-        controller.sendMessage(message);
+        controller.processMessage(message);
     });
 
     window.addEventListener(EventType.start_play, () => {
@@ -80,7 +80,7 @@ document.fonts.ready.then(() => {
             action: Action.start_play,
             payload: canvas.getSetupCoordinates(),
         };
-        controller.sendMessage(message);
+        controller.processMessage(message);
     });
 
     window.addEventListener(EventType.error, (event: CustomEventInit) => {
@@ -159,7 +159,7 @@ document.fonts.ready.then(() => {
         const { state, instructions } = event.detail as TourState;
         uiService.update(state, true);
         canvas.drawUpdateElements(state);
-        canvas.updateTour(instructions);
+        canvas.updateInstructions(instructions);
     });
 
     window.addEventListener(EventType.start_turn, () => {
@@ -188,5 +188,5 @@ document.fonts.ready.then(() => {
         },
     );
 
-    controller.createConnection(gameAdress, requestedGameId);
+    controller.initialize(gameAdress, requestedGameId);
 });
