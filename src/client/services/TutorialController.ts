@@ -1,21 +1,24 @@
-import { ClientMessage, Action, PlayState, MovementPayload } from '~/shared_types';
+import { ClientMessage, Action, PlayState, MovementPayload, PositioningPayload } from '~/shared_types';
 import { Communicator } from './Communicator';
 import {
-    EventType, ActionScenario, Target, Instruction, ScenarioPartial, ScenarioTextSource, Controller,
+    EventType, TutorialScenarioStep, Target, Instruction, ScenarioStepPartial, ScenarioStepText, Controller,
 } from '~/client_types';
+import { TutorialStepProvider } from './TutorialStepProvider';
 
 export class TutorialController extends Communicator implements Controller {
+    private stepProvider: TutorialStepProvider;
     private currentState: PlayState | null = null;
     private expectedMessage: ClientMessage;
-    private textSources: Array<ScenarioTextSource> = [];
+    private textSources: Array<ScenarioStepText> = [];
 
     constructor() {
         super();
         this.expectedMessage = { action: Action.move, payload: { zoneId: 'topLeft', position: { x:0,y:0 } } };
+        this.stepProvider = new TutorialStepProvider();
     }
 
     public async initialize(_url: string, _gameId: string) {
-        const response = await fetch('/tour-state');
+        const response = await fetch('/tutorial-data');
         const data = await response.json();
 
         if (typeof data != 'object' || !('state' in data) || !('text' in data)) {
@@ -24,9 +27,9 @@ export class TutorialController extends Communicator implements Controller {
         }
 
         this.currentState = data.state as PlayState;
-        this.textSources = data.text as Array<ScenarioTextSource>;
+        this.textSources = data.text as Array<ScenarioStepText>;
         this.createEvent( { type: EventType.identification, detail: { color: this.currentState.players[0].color } });
-        const initialScenario = this.buildScenario(this.partials.shift());
+        const initialScenario = this.buildStep(this.stepProvider.getNextPartial());
 
         if (!initialScenario) {
             console.error('Scenarios are incomplete.');
@@ -40,35 +43,31 @@ export class TutorialController extends Communicator implements Controller {
 
     public processMessage(message: ClientMessage) {
         if (!this.currentState)
-            throw new Error('');
+            throw new Error('No state to modify!');
 
         const { action, payload } = message;
 
         if (action == Action.reposition) {
-            this.currentState.players[0].bearings.position = payload.repositioning;
+            this.currentState.players[0].bearings.position = payload.position;
             this.createEvent({ type: EventType.state_update, detail: this.currentState });
+
             return;
         }
 
-        // TODO: implement a detached system that compares messages to expectations
-        if (action != this.expectedMessage.action) {
+        if (action == Action.move && this.expectedMessage.action == Action.move)
+            this.expectedMessage.payload.position = payload.position;
+
+        if (this.isSame(this.expectedMessage, message)) {
+            if (this.expectedMessage.action == Action.move)
+                this.currentState.players[0].bearings.position = (payload as MovementPayload).position;
+        } else {
             this.createEvent({ type: EventType.state_update, detail: this.currentState });
+
             return;
-        }
-
-        if (this.expectedMessage.action == Action.move) {
-            const p = payload as MovementPayload;
-
-            if (p.zoneId != this.expectedMessage.payload.zoneId) {
-                this.createEvent({ type: EventType.state_update, detail: this.currentState });
-                return;
-            }
-
-            this.currentState.players[0].bearings.position = p.position;
         }
 
         const newInstructions = ((): Array<Instruction> => {
-            const scenario = this.buildScenario(this.partials.shift());
+            const scenario = this.buildStep(this.stepProvider.getNextPartial());
 
             if (!scenario)
                 throw new Error('Scenarios are incomplete.');
@@ -86,59 +85,56 @@ export class TutorialController extends Communicator implements Controller {
         } });
     }
 
-    private partials: Array<ScenarioPartial> = [
-        {
-            step: 0,
-            mutate: (_state: PlayState) => {},
-            highlightComponent: [
-                { highlights: [] },
-                { highlights: [Target.centerZone] },
-                { highlights: [Target.bottomRightZone] },
-                { highlights: [Target.topLeftZone] },
-            ],
-            expecting: { action: Action.move, payload: { zoneId: 'topLeft', position: { x:0,y:0 } } },
-        },
-        {
-            step: 1,
-            mutate: (state) => {
-                const player = state.players[0];
-                player.bearings.seaZone = 'topLeft';
-                player.bearings.location = 'forest';
-                player.moveActions = 1;
-                player.mayUndo = true;
-                player.isAnchored = true;
-                player.locationActions.push(Action.load_good);
-            },
-            highlightComponent: [
-                { highlights: [Target.movesCounter] },
-                { highlights: [Target.topLeftZone] },
-            ],
-            expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: [] } },
-        },
-    ];
-
-    private buildScenario(partial?: ScenarioPartial): ActionScenario | null {
+    private buildStep(partial?: ScenarioStepPartial): TutorialScenarioStep | null {
 
         if (!partial)
             return null;
 
-        const { step, highlightComponent, mutate, expecting } = partial;
+        const { step, visuals: stepHighlights, mutate, expecting } = partial;
         const textSource = this.textSources.find(c => c.step == step);
 
         if (!textSource)
             return null;
 
-        const { textComponent } = textSource;
-
-        if (textComponent.length != highlightComponent.length)
+        const { stepText } = textSource;
+        if (stepText.length != stepHighlights.length)
             return null;
 
-        const instructions: Array<Instruction> = highlightComponent.map(
+        const instructions: Array<Instruction> = stepHighlights.map(
             (highlights, index): Instruction => {
-                return { ...highlights, text: textComponent[index] };
+                return { ...highlights, text: stepText[index] };
             },
         );
 
         return { mutate, instructions, expecting };
+    }
+
+    private isSame(reference: any, tested: any): boolean {
+        console.log({reference, tested})
+        if (typeof reference != typeof tested)
+            return false;
+
+        if (typeof reference == 'object' && reference !== null) {
+
+            if (tested === null)
+                return false;
+
+            if (Array.isArray(reference)) {
+                return Array.isArray(tested)
+                    && reference.length == tested.length
+                    && reference.every(
+                        (item, index) => this.isSame(item, tested[index]),
+                    );
+            }
+
+            const refKeys = Object.keys(reference);
+
+            return refKeys.length == Object.keys(tested).length
+                && refKeys.every(
+                    key => key in tested && this.isSame(reference[key], tested[key]),
+                );
+        }
+
+        return reference == tested;
     }
 };

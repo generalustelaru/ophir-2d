@@ -1,8 +1,8 @@
 import { HexCoordinates } from '~/client_types';
 import {
-    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, RepositioningPayload, LoadGoodPayload,
+    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, PositioningPayload, LoadGoodPayload,
     MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, Action, SpecialistName,
-    OpponentRepositioningPayload, ColorSelectionPayload, ChancellorMarketSalePayload, PeddlerMarketPayload, DropItemPayload,
+    OpponentPositioningPayload, ColorSelectionPayload, ChancellorMarketSalePayload, PeddlerMarketPayload, DropItemPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { Configuration, Probable } from '~/server_types';
@@ -123,15 +123,15 @@ class ValidatorService {
     }
 
     public validateRepositioningPayload(payload: unknown) {
-        const repositioningPayload = this.validateObject<RepositioningPayload>(
+        const repositioningPayload = this.validateObject<PositioningPayload>(
             'RepositioningPayload',
             payload,
-            [{ key: 'repositioning', type: 'object', nullable: false }],
+            [{ key: 'position', type: 'object', nullable: false }],
         );
 
         if (
             !repositioningPayload
-            || !this.validateCoordinates(repositioningPayload.repositioning)
+            || !this.validateCoordinates(repositioningPayload.position)
         ) {
             return null;
         }
@@ -139,20 +139,20 @@ class ValidatorService {
         return repositioningPayload;
     }
 
-    public validateOpponentRepositioningPayload(payload: unknown): Probable<OpponentRepositioningPayload> {
-        const opponentRepositioningPayload = this.validateObject<OpponentRepositioningPayload>(
+    public validateOpponentRepositioningPayload(payload: unknown): Probable<OpponentPositioningPayload> {
+        const opponentRepositioningPayload = this.validateObject<OpponentPositioningPayload>(
             'OpponentRepositioningPayload',
             payload,
             [
                 { key: 'color', type: 'string', nullable: false },
-                { key: 'repositioning', type: 'object', nullable: false },
+                { key: 'position', type: 'object', nullable: false },
             ],
         );
 
         if (!opponentRepositioningPayload)
             return lib.fail('object structure does not match.');
 
-        if (!this.validateCoordinates(opponentRepositioningPayload.repositioning))
+        if (!this.validateCoordinates(opponentRepositioningPayload.position))
             return lib.fail('repositioning is missing coordinates.');
 
         return lib.pass(opponentRepositioningPayload);

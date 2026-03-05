@@ -1,11 +1,12 @@
 import Konva from 'konva';
 import {
-    MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds, DropBeforeLoadMessage, Target, TargetMapping,
+    MegaGroupInterface, GroupLayoutData, TempleUpdate, MarketUpdate, LayerIds, DropBeforeLoadMessage, Target,
 } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
 import { Action, Coordinates, MetalPurchasePayload, PlayState, SpecialistName, Unique } from '~/shared_types';
 import { ResultsPanel } from '../groups/conclusion/ResultsPanel';
+import { Highlight } from '../groups/tutorial';
 
 type VariableLocationGroupCallbacks = {
     tradeCallback: Function
@@ -25,7 +26,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private peddlerCallback: Function | null = null;
     private donateGoodsCallback: Function | null = null;
     private advisorOptionsCallback: Function | null = null;
-    private mapping: TargetMapping = {};
+    private highlights: Map<Target, Highlight> | null = null;
 
     constructor(
         stage: Konva.Stage,
@@ -171,7 +172,51 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     }
 
     public updateHighlights(targets: Array<Target>): void {
-        console.log({ received: targets, defined: this.mapping });
+
+        if (!this.highlights) {
+            this.highlights = new Map();
+            const layouts = [
+                { target: Target.marketArea, layout: { x: 2, y: 5, width: 293, height: 158 } },
+                { target: Target.deck, layout: { x: 2, y: 5, width: 66, height: 160 } },
+                { target: Target.slot_1, layout: { x: 75, y: 5, width: 66, height: 150 } },
+                { target: Target.slot_2, layout: { x: 152, y: 5, width: 66, height: 150 } },
+                { target: Target.slot_3, layout: { x: 227, y: 5, width: 66, height: 150 } },
+                { target: Target.fluctuation_up, layout: { x: 230, y: 125, width: 23, height: 25 } },
+                { target: Target.fluctuation_down, layout: { x: 78, y: 125, width: 23, height: 25 } },
+                { target: Target.temple_mark, layout: { x: 169, y: 5, width: 32, height: 32 } },
+
+                { target: Target.treasuryArea, layout: { x: 2, y: 165, width: 293, height: 100 } },
+                { target: Target.goldForFavor, layout: { x: 2, y: 165, width: 66, height: 100 } },
+                { target: Target.silverForFavor, layout: { x: 75, y: 165, width: 66, height: 100 } },
+                { target: Target.goldForCoin, layout: { x: 152, y: 165, width: 66, height: 100 } },
+                { target: Target.silverForCoin, layout: { x: 227, y: 165, width: 66, height: 100 } },
+
+                { target: Target.templeArea, layout: { x: 2, y: 285, width: 293, height: 200 } },
+                { target: Target.goldCard, layout: { x: 35, y: 285, width: 66, height: 100 } },
+                { target: Target.silverCard, layout: { x: 111, y: 285, width: 66, height: 100 } },
+                { target: Target.marketCard, layout: { x: 227, y: 285, width: 66, height: 130 } },
+                { target: Target.upgradeButton, layout: { x: 207, y: 435, width: 86, height: 40 } },
+                { target: Target.donationsDisplay, layout: { x: 25, y: 395, width: 162, height: 85 } },
+            ];
+            for (const item of layouts) {
+                const { target, layout } = item;
+                this.highlights.set(target, new Highlight(layout));
+            }
+
+            const nodes: Konva.Shape[] = [];
+            this.highlights.forEach(highlight => {
+                nodes.push(highlight.getElement());
+            });
+            this.group.add(...nodes);
+        } else {
+            this.highlights.forEach(highlight => {
+                highlight.hide();
+            });
+        }
+
+        for (const target of targets) {
+            this.highlights.get(target)?.show();
+        }
     }
 
     private formatPurchaseMessage(payload: MetalPurchasePayload): DropBeforeLoadMessage {

@@ -1,7 +1,8 @@
 import Konva from 'konva';
-import { MegaGroupInterface, GroupLayoutData, LayerIds, TargetMapping, Target } from '~/client_types';
+import { MegaGroupInterface, GroupLayoutData, LayerIds, Target } from '~/client_types';
 import { Coordinates, Player, PlayerColor, PlayState, Unique } from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
+import { Highlight } from '../groups/tutorial';
 import localState from '../state';
 
 export class PlayerGroup implements Unique<MegaGroupInterface> {
@@ -10,7 +11,7 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
     private playerPlacards: Array<PlayerPlacard> = [];
     private rivalPlacard: RivalPlacard | null = null;
     private endRivalTurnCallback: ((isShiftingMarket: boolean) => void) | null = null;
-    private mapping: TargetMapping = {};
+    private highlights: Map<Target, Highlight> | null = null;
 
     constructor(stage: Konva.Stage, layout: GroupLayoutData) {
         this.group = new Konva.Group({
@@ -109,6 +110,42 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
     }
 
     public updateHighlights(targets: Array<Target>): void {
-        console.log({ received: targets, defined: this.mapping });
+        if (!this.highlights) {
+            this.highlights = new Map();
+            const layouts = [
+                { target: Target.playerPlacard, layout: { x: 0, y: 20, width: 300, height: 100 } },
+                { target: Target.influenceDie, layout: { x: -5, y: 42, width: 55, height: 55 } },
+                { target: Target.cargoBand, layout: { x: 55, y: 20, width: 108, height: 40 } },
+                { target: Target.specialistBand, layout: { x: 165, y: 20, width: 130, height: 40 } },
+                { target: Target.favorDial, layout: { x: 58, y: 60, width: 55, height: 55 } },
+                { target: Target.coinDial, layout: { x: 108, y: 60, width: 55, height: 55 } },
+                { target: Target.vpDial, layout: { x: 175, y: 60, width: 55, height: 55 } },
+                { target: Target.specialtyButton, layout: { x: 237, y: 60, width: 55, height: 55 } },
+
+                { target: Target.rivalPlacard, layout: { x: 0, y: 140, width: 300, height: 100 } },
+                { target: Target.rivalInfluence, layout: { x: -5, y: 162, width: 55, height: 55 } },
+                { target: Target.cycleMarket, layout: { x: 65, y: 140, width: 66, height: 100 } },
+                { target: Target.concludeRival, layout: { x: 143, y: 155, width: 66, height: 66 } },
+                { target: Target.rivalMoves, layout: { x: 143 + 66 + 5 + 3, y: 155, width: 66, height: 66 } },
+            ];
+            for (const item of layouts) {
+                const { target, layout } = item;
+                this.highlights.set(target, new Highlight(layout));
+            }
+
+            const nodes: Konva.Shape[] = [];
+            this.highlights.forEach(highlight => {
+                nodes.push(highlight.getElement());
+            });
+            this.group.add(...nodes);
+        } else {
+            this.highlights.forEach(highlight => {
+                highlight.hide();
+            });
+        }
+
+        for (const target of targets) {
+            this.highlights.get(target)?.show();
+        }
     }
 }

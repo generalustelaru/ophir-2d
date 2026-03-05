@@ -6,13 +6,14 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, SailAttemptArgs } from '~/client_types';
+import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, SailAttemptArgs, Target } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
     EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal,
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
+import { InstructionPanel } from '../groups/tutorial/InstructionPanel';
 
 export class CanvasService extends Communicator {
     private stage: Konva.Stage;
@@ -36,6 +37,7 @@ export class CanvasService extends Communicator {
     private advisorModal: AdvisorModal | null = null;
     private chancellorModal: ChancellorModal | null = null;
     private peddlerModal: PeddlerModal | null = null;
+    private tutorialPanel: InstructionPanel | null = null;
     private aspect: Aspect;
     private scale: number;
     private delayedResizing: number | null = null;
@@ -197,13 +199,22 @@ export class CanvasService extends Communicator {
     }
 
     public updateInstructions(instructions: Array<Instruction>) {
-        //TODO: create state handling for multiple instructions
-        console.log({ instructions });
 
-        const { highlights } = instructions[0];
-        this.mapGroup.updateHighlights(highlights);
-        this.locationGroup.updateHighlights(highlights);
-        this.playerGroup.updateHighlights(highlights);
+        if (!this.tutorialPanel) {
+            this.tutorialPanel = new InstructionPanel(
+                this.stage,
+                (h) => { this.updateHighlights(h); },
+            );
+        }
+
+        this.tutorialPanel.updateContent(instructions);
+        this.updateHighlights(instructions[0].highlights);
+    }
+
+    private updateHighlights(targets: Array<Target>) {
+        this.mapGroup.updateHighlights(targets);
+        this.locationGroup.updateHighlights(targets);
+        this.playerGroup.updateHighlights(targets);
     }
 
     public disable(): void {

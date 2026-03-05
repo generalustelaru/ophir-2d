@@ -1,16 +1,15 @@
 import Konva from 'konva';
 import {
-    Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState,
-    TradeGood,
-    Unique,
+    Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState, TradeGood, Unique,
 } from '~/shared_types';
 import {
-    MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs, DropBeforeLoadMessage, Target, TargetMapping,
+    MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs, DropBeforeLoadMessage, Target,
 } from '~/client_types';
 import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
 } from '../groups/map';
 import { MovesDial } from '../groups/popular';
+import { Highlight, ZoneHighlight } from '../groups/tutorial';
 import localState from '../state';
 import clientConstants from '~/client_constants';
 
@@ -31,7 +30,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private opponentShips: Array<RemoteShip> = [];
     private localShip: PlayerShip | null = null;
     private rivalShip: RivalShip | null = null;
-    private mapping: TargetMapping = {};
+    private highlights: Map<Target, Highlight|ZoneHighlight> | null = null;
 
     constructor(
         stage: Konva.Stage,
@@ -243,7 +242,53 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     }
 
     public updateHighlights(targets: Array<Target>): void {
-        console.log({ received: targets, defined: this.mapping });
+
+        if (!this.highlights) {
+            this.highlights = new Map<Target, Highlight|ZoneHighlight>();
+
+            const zoneDrifts = [
+                { target: Target.topLeftZone, x: 86, y: 150 },
+                { target: Target.topRightZone, x: -86, y: 150 },
+                { target: Target.rightZone, x: -172, y: 0 },
+                { target: Target.bottomRightZone, x: -86, y: -150 },
+                { target: Target.bottomLeftZone, x: 86, y: -150 },
+                { target: Target.leftZone, x: 172, y: 0 },
+                { target: Target.centerZone, x: 0, y: 0 },
+            ];
+            const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
+            for (const item of zoneDrifts) {
+                const { target, x, y } = item;
+                this.highlights.set(target, new ZoneHighlight(centerPoint, { x, y }));
+            }
+
+            const layouts = (() => {
+                const length = 55;
+                return [
+                    { target: Target.movesCounter, layout: { x: 43, y: 70, width: length, height: length } },
+                    { target: Target.favorButton, layout: { x: 500, y: 67, width: length, height: length } },
+                    { target: Target.endTurnButton, layout: { x: 497, y: 367, width: length, height: length } },
+                    { target: Target.undoButton, layout: { x: 37, y : 375, width: length, height: length } },
+                ];
+            })();
+            for (const item of layouts) {
+                const { target, layout } = item;
+                this.highlights.set(target, new Highlight(layout));
+            }
+
+            const nodes: Konva.Shape[] = [];
+            this.highlights.forEach(highlight => {
+                nodes.push(highlight.getElement());
+            });
+            this.group.add(...nodes);
+        } else {
+            this.highlights.forEach(highlight => {
+                highlight.hide();
+            });
+        }
+
+        for (const target of targets) {
+            this.highlights.get(target)?.show();
+        }
     }
 
     // MARK: SETUP

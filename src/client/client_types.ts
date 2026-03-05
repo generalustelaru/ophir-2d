@@ -219,7 +219,7 @@ export type Event =
     | EventFormat<EventType.info, InfoDetail>
     | EventFormat<EventType.reset, ResetResponse>
     | EventFormat<EventType.state_update, State>
-    | EventFormat<EventType.tour_update, TourState>
+    | EventFormat<EventType.tour_update, TutorialState>
     | EventFormat<EventType.identification, ColorTransmission>
     | EventFormat<EventType.vp_transmission, VpTransmission>
 ;
@@ -232,50 +232,67 @@ export type ErrorDetail = {
     message: string,
 }
 
-// MARK: TOUR
+// MARK: TUTORIAL
 
 // UI element identification
 export enum Target {
+    // Map Group
     topLeftZone, topRightZone, rightZone, bottomRightZone, bottomLeftZone, leftZone, centerZone,
     movesCounter, favorButton, endTurnButton, undoButton,
+    // Location Group
     marketArea, deck,slot_1, slot_2, slot_3, fluctuation_up, fluctuation_down, temple_mark,
     treasuryArea, goldForFavor, silverForFavor, goldForCoin, silverForCoin,
     templeArea, goldCard, silverCard, marketCard, upgradeButton, donationsDisplay,
+    // PlayerGroup
     playerPlacard, influenceDie, cargoBand, specialistBand, favorDial, coinDial, vpDial, specialtyButton,
+    rivalPlacard, rivalInfluence, cycleMarket, concludeRival, rivalMoves
 }
 
-export type Highlights = {
-    highlights: Array<Target> // Sent to every MegaGroup for activating element highlights
+export enum Panel { mapCenter, locationTop, locationBottom, playerTop, playerBottom }
+
+/**
+ * @property `highlights` Sent to every MegaGroup for activating tutorial highlights.
+ */
+export type Visuals = {
+    highlights: Array<Target>
+    panel: Panel | null,
 }
 
-// a single 'page' to be displayed (the container should display a next button if more instructions are to be displayed)
-export type Instruction = Highlights & {
+/**
+ * @description a single tutorial 'page' with associated highlights
+ */
+export type Instruction = Visuals & {
     text: string,
 }
-
-// the data bundle that TourService must feed the client per turn.
-export type ActionScenario = {
+/**
+ * @description Bundled data for handling a tutorial step
+ * @property `expecting` Condition for advancing to the next TutorialScenarioStep
+ */
+export type TutorialScenarioStep = {
     mutate: (state: PlayState) => void, // produces a new state that trickles to every element in regular fashion
     instructions: Array<Instruction>, // updates CanvasService via dedicated method
-    expecting: ClientMessage, // stays in TourService for validation
+    expecting: ClientMessage, // stays in TourService for advancing validation
 }
 
-export type TourState = {
+/**
+ * @description Resulting digest for CanvasService
+ */
+export type TutorialState = {
     state: PlayState,
-    instructions: Array<Instruction>, // updates CanvasService via dedicated method
+    instructions: Array<Instruction>,
 }
-
-// Data declared in each PlayMegaGroupInterface for drawing game tour UI elements.
-export type TargetMapping = Partial<Record<Target, GroupLayoutData>>
-
-// Sourced from server JSON
-export type ScenarioTextSource = {
+/**
+ * Sourced from server JSON, to be combined with ScenarioPartial
+*/
+export type ScenarioStepText = {
     step: number,
-    textComponent: Array<string>,
+    stepText: Array<string>,
 }
 
-// In-memory object, to be combined with TextComponent
-export type ScenarioPartial = Omit<ActionScenario, 'instructions'> & {
+/**
+ * In-memory object, to be combined with ScenarioTextSource
+*/
+export type ScenarioStepPartial = Omit<TutorialScenarioStep, 'instructions'> & {
     step: number
-    highlightComponent: Array<Highlights>
+    visuals: Array<Visuals>
 }

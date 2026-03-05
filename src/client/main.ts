@@ -1,4 +1,4 @@
-import { InfoDetail, ErrorDetail, EventType, MessageType, TourState } from '~/client_types';
+import { InfoDetail, ErrorDetail, EventType, MessageType, TutorialState } from '~/client_types';
 import localState from './state';
 import { GameController } from './services/GameController';
 import { TutorialController } from './services/TutorialController';
@@ -11,9 +11,9 @@ import {
 const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
 const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
-const isTourGame = requestedGameId == 'tour-game';
-const uiService = new UserInterface(isTourGame);
-const controller = isTourGame ? new TutorialController() : new GameController();
+const isTutorial = requestedGameId == 'tutorial';
+const uiService = new UserInterface(isTutorial);
+const controller = isTutorial ? new TutorialController() : new GameController();
 const gameAdress = `${protocol}//${window.location.host}/game`;
 
 function signalError(message?: string) {
@@ -156,7 +156,7 @@ document.fonts.ready.then(() => {
         if (!event.detail)
             return signalError('State is missing!');
 
-        const { state, instructions } = event.detail as TourState;
+        const { state, instructions } = event.detail as TutorialState;
         uiService.update(state, true);
         canvas.drawUpdateElements(state);
         canvas.updateInstructions(instructions);

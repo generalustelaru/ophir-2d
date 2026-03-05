@@ -263,9 +263,9 @@ export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 // MARK: REQUEST
 export type ColorSelectionPayload = { color: PlayerColor }
 export type ChatPayload = { input: string }
-export type MovementPayload = { zoneId: ZoneName, position: Coordinates }
-export type RepositioningPayload = { repositioning: Coordinates }
-export type OpponentRepositioningPayload = { color: PlayerColor, repositioning: Coordinates }
+export type PositioningPayload = { position: Coordinates }
+export type OpponentPositioningPayload = PositioningPayload & { color: PlayerColor }
+export type MovementPayload = PositioningPayload & { zoneId: ZoneName }
 export type GameSetupPayload = {
     hexPositions: Array<HexCoordinates>,
     startingPositions: Array<Coordinates>,
@@ -317,7 +317,7 @@ export type LaconicAction =
     | Action.force_turn | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
-    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | RepositioningPayload
+    | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | PositioningPayload
     | MarketSalePayload | ChancellorMarketSalePayload | MetalPurchasePayload | PickSpecialistPayload
     | MetalDonationPayload | LoadGoodPayload | PeddlerMarketPayload | ColorSelectionPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
@@ -330,8 +330,8 @@ export type MoveMessage = MessageFormat<Action.move | Action.move_rival, Movemen
 export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>;
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
-export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, RepositioningPayload>;
-export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentRepositioningPayload>;
+export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, PositioningPayload>;
+export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentPositioningPayload>;
 export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSalePayload>;
 export type SellAsChancellorMessage = MessageFormat<Action.sell_as_chancellor, ChancellorMarketSalePayload>
 export type SellAsPeddlerMessage = MessageFormat<Action.sell_as_peddler, PeddlerMarketPayload>

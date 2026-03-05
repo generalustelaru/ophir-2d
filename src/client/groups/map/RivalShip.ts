@@ -120,7 +120,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
                     this.broadcastAction({
                         action: Action.reposition_rival,
                         payload: {
-                            repositioning: { x: this.group.x(), y: this.group.y() },
+                            position: { x: this.group.x(), y: this.group.y() },
                         },
                     });
                     break;

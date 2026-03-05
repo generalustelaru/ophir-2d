@@ -85,7 +85,7 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
                     action: Action.reposition_opponent,
                     payload: {
                         color: player.color,
-                        repositioning: { x: this.group.x(), y: this.group.y() },
+                        position: { x: this.group.x(), y: this.group.y() },
                     },
                 });
             }

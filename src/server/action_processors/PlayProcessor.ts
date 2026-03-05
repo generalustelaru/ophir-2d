@@ -248,7 +248,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!repositioningPayload)
             return lib.fail(lib.validationErrorMessage());
 
-        const position = repositioningPayload.repositioning;
+        const position = repositioningPayload.position;
 
         if (isRivalShip) {
             this.playState.repositionRivalShip(position);
@@ -269,7 +269,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (validation.err)
             return lib.fail(lib.validationErrorMessage());
 
-        const { color, repositioning } = validation.data;
+        const { color, position: repositioning } = validation.data;
 
         const opponentDto = this.playState.getPlayer(color);
         const opponentId = refPool.find(r => r.color == color)?.id;

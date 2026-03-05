@@ -216,7 +216,7 @@ export class PlayerShip extends Communicator {
                         detail: {
                             action: Action.reposition,
                             payload: {
-                                repositioning: { x: this.group.x(), y: this.group.y() },
+                                position: { x: this.group.x(), y: this.group.y() },
                             },
                         },
                     });

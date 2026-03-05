@@ -234,11 +234,11 @@ app.get('/about', (_, res: Response) => {
 app.get('/how-to-play', (_, res: Response) => {
     res.sendFile(path.join(__dirname, 'public', 'how-to-play.html'));
 });
-app.get('/tour-game', (_, res: Response) => {
+app.get('/tutorial', (_, res: Response) => {
     res.sendFile(path.join(__dirname, 'public', 'game.html'));
 });
-app.get('/tour-state', (_, res: Response) => {
-    res.sendFile(path.join(__dirname, 'public', 'tourState.json'));
+app.get('/tutorial-data', (_, res: Response) => {
+    res.sendFile(path.join(__dirname, 'public', 'tutorial_data.json'));
 });
 app.get('/probe', (req: Request, res: Response) => {
     console.info('Server probed', { ip: req.ip });
