@@ -18,6 +18,7 @@ export class NavigationButton extends Button {
             width: layout.width,
             height: layout.height,
             fill: 'white',
+            cornerRadius: 7,
         });
 
         const buttonLabel = new Konva.Text({

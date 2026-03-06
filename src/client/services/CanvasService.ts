@@ -203,6 +203,7 @@ export class CanvasService extends Communicator {
         if (!this.tutorialPanel) {
             this.tutorialPanel = new InstructionPanel(
                 this.stage,
+                this.aspect,
                 (h) => { this.updateHighlights(h); },
             );
         }
@@ -267,6 +268,8 @@ export class CanvasService extends Communicator {
         this.advisorModal?.repositionModal(this.aspect);
         this.chancellorModal?.repositionModal(this.aspect);
         this.peddlerModal?.repositionModal(this.aspect);
+
+        this.tutorialPanel?.repositionPanel(this.aspect);
     }
 
     private calculateDimensions() {

@@ -1,10 +1,9 @@
 import Konva from 'konva';
-import { Instruction, LayerIds, RawEvents, Target } from '~/client_types';
+import { Aspect, Instruction, LayerIds, Target } from '~/client_types';
 import clientConstants from '../../client_constants';
 import { NavigationButton } from './NavigationButton';
 
-const { HUES } = clientConstants;
-// TODO: handle screen rearrangement
+const { HUES, PLAYER_PLACEMENT } = clientConstants;
 export class InstructionPanel {
     private group: Konva.Group;
     private content: Konva.Text;
@@ -17,6 +16,7 @@ export class InstructionPanel {
 
     constructor(
         stage: Konva.Stage,
+        aspect: Aspect,
         highlightsCallback: (highlights: Array<Target>) => void,
     ) {
         this.sendHighlights = highlightsCallback;
@@ -26,15 +26,11 @@ export class InstructionPanel {
             height: 250,
         };
 
-        this.group = new Konva.Group({
-            draggable: true,
-        });
+        const { x, y } = PLAYER_PLACEMENT[aspect];
 
-        this.group.on(RawEvents.HOVER, () => {
-            stage.container().style.cursor = 'grab';
-        });
-        this.group.on(RawEvents.LEAVE, () => {
-            stage.container().style.cursor = 'default';
+        this.group = new Konva.Group({
+            x: x,
+            y: y + 235,
         });
 
         const background = new Konva.Rect({
@@ -42,7 +38,7 @@ export class InstructionPanel {
             fill: HUES.stampEdge,
             cornerRadius: 10,
             stroke: HUES.boneWhite,
-            strokeWidth: 4,
+            strokeWidth: 2,
         });
 
         this.content = new Konva.Text({
@@ -59,13 +55,13 @@ export class InstructionPanel {
         this.backButton = new NavigationButton(
             stage,
             () => { this.flip(-1); },
-            { x: 10, y: 200 },
+            { x: 10, y: 195 },
             'Back',
         );
         this.nextButton = new NavigationButton(
             stage,
             () => { this.flip(1); },
-            { x: 70, y: 200 },
+            { x: 70, y: 195 },
             'Next',
         );
 
@@ -108,5 +104,10 @@ export class InstructionPanel {
         const instruction = this.instructions[this.currentPage];
         this.content.text(instruction.text);
         this.sendHighlights(instruction.highlights);
+    }
+
+    public repositionPanel(aspect: Aspect) {
+        const { x, y } = PLAYER_PLACEMENT[aspect];
+        this.group.x( x).y(y + 235);
     }
 }
