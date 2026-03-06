@@ -1,6 +1,5 @@
 import { PlayState, Action } from '~/shared_types';
 import { Panel, ScenarioStepPartial, Target } from '../client_types';
-import { execPath } from 'node:process';
 
 export class TutorialStepProvider {
     private currentStep: number = 0;

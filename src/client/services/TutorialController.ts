@@ -1,7 +1,7 @@
-import { ClientMessage, Action, PlayState, MovementPayload, PositioningPayload } from '~/shared_types';
+import { ClientMessage, Action, PlayState, MovementPayload } from '~/shared_types';
 import { Communicator } from './Communicator';
 import {
-    EventType, TutorialScenarioStep, Target, Instruction, ScenarioStepPartial, ScenarioStepText, Controller,
+    EventType, TutorialScenarioStep, Instruction, ScenarioStepPartial, ScenarioStepText, Controller,
 } from '~/client_types';
 import { TutorialStepProvider } from './TutorialStepProvider';
 
@@ -110,7 +110,7 @@ export class TutorialController extends Communicator implements Controller {
     }
 
     private isSame(reference: any, tested: any): boolean {
-        console.log({reference, tested})
+
         if (typeof reference != typeof tested)
             return false;
 

@@ -9,7 +9,7 @@ import {
     SeaZone, BarrierToken, RemoteShip, PlayerShip, EndTurnButton, UndoButton, FavorButton, RivalShip,
 } from '../groups/map';
 import { MovesDial } from '../groups/popular';
-import { Highlight, ZoneHighlight } from '../groups/tutorial';
+import { Highlight } from '../groups/tutorial';
 import localState from '../state';
 import clientConstants from '~/client_constants';
 
@@ -30,7 +30,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private opponentShips: Array<RemoteShip> = [];
     private localShip: PlayerShip | null = null;
     private rivalShip: RivalShip | null = null;
-    private highlights: Map<Target, Highlight|ZoneHighlight> | null = null;
+    private highlights: Map<Target, Highlight> | null = null;
 
     constructor(
         stage: Konva.Stage,
@@ -244,7 +244,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     public updateHighlights(targets: Array<Target>): void {
 
         if (!this.highlights) {
-            this.highlights = new Map<Target, Highlight|ZoneHighlight>();
+            this.highlights = new Map<Target, Highlight>();
 
             const zoneDrifts = [
                 { target: Target.topLeftZone, x: 86, y: 150 },
@@ -258,7 +258,10 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
             for (const item of zoneDrifts) {
                 const { target, x, y } = item;
-                this.highlights.set(target, new ZoneHighlight(centerPoint, { x, y }));
+                this.highlights.set(target, new Highlight({
+                    isRectangle: false,
+                    coords: { position: centerPoint, offset: { x, y } },
+                }));
             }
 
             const layouts = (() => {
@@ -272,7 +275,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             })();
             for (const item of layouts) {
                 const { target, layout } = item;
-                this.highlights.set(target, new Highlight(layout));
+                this.highlights.set(target, new Highlight({ isRectangle: true, layout }));
             }
 
             const nodes: Konva.Shape[] = [];

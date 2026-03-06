@@ -130,7 +130,7 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
             ];
             for (const item of layouts) {
                 const { target, layout } = item;
-                this.highlights.set(target, new Highlight(layout));
+                this.highlights.set(target, new Highlight({ isRectangle: true, layout }));
             }
 
             const nodes: Konva.Shape[] = [];
