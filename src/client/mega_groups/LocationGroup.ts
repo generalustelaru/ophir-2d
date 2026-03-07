@@ -176,6 +176,8 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         if (!this.highlights) {
             this.highlights = new Map();
             const layouts = [
+                { target: Target.locationGroup, layout: { x:0, y:0, width: 300, height: 500 } },
+
                 { target: Target.marketArea, layout: { x: 2, y: 5, width: 293, height: 158 } },
                 { target: Target.deck, layout: { x: 2, y: 5, width: 66, height: 160 } },
                 { target: Target.slot_1, layout: { x: 75, y: 5, width: 66, height: 150 } },

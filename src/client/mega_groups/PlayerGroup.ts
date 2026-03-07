@@ -113,6 +113,8 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         if (!this.highlights) {
             this.highlights = new Map();
             const layouts = [
+                { target: Target.playerGroup, layout: { x:0, y:0, width: 300, height: 250 } },
+
                 { target: Target.playerPlacard, layout: { x: 0, y: 20, width: 300, height: 100 } },
                 { target: Target.influenceDie, layout: { x: -5, y: 42, width: 55, height: 55 } },
                 { target: Target.cargoBand, layout: { x: 55, y: 20, width: 108, height: 40 } },

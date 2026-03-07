@@ -42,7 +42,7 @@ export class TutorialController extends Communicator implements Controller {
     }
 
     public processMessage(message: ClientMessage) {
-        if (!this.currentState)
+        if (null == this.currentState)
             throw new Error('No state to modify!');
 
         const { action, payload } = message;
@@ -85,24 +85,24 @@ export class TutorialController extends Communicator implements Controller {
         } });
     }
 
-    private buildStep(partial?: ScenarioStepPartial): TutorialScenarioStep | null {
+    private buildStep(data?: {step: number, partial: ScenarioStepPartial}): TutorialScenarioStep | null {
 
-        if (!partial)
+        if (!data)
             return null;
 
-        const { step, visuals: stepHighlights, mutate, expecting } = partial;
-        const textSource = this.textSources.find(c => c.step == step);
+        const { step, partial } = data;
+        const { visuals: stepHighlights, mutate, expecting } = partial;
+        const textSource = this.textSources[step];
 
         if (!textSource)
             return null;
 
-        const { stepText } = textSource;
-        if (stepText.length != stepHighlights.length)
+        if (textSource.length != stepHighlights.length)
             return null;
 
         const instructions: Array<Instruction> = stepHighlights.map(
             (highlights, index): Instruction => {
-                return { ...highlights, text: stepText[index] };
+                return { ...highlights, text: textSource[index] };
             },
         );
 

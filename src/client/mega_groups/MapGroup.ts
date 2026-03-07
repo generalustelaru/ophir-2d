@@ -245,6 +245,8 @@ export class MapGroup implements Unique<MegaGroupInterface> {
 
         if (!this.highlights) {
             this.highlights = new Map<Target, Highlight>();
+            const groupWidth = this.group.width();
+            const groupHeight = this.group.height();
 
             const zoneDrifts = [
                 { target: Target.topLeftZone, x: 86, y: 150 },
@@ -255,7 +257,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 { target: Target.leftZone, x: 172, y: 0 },
                 { target: Target.centerZone, x: 0, y: 0 },
             ];
-            const centerPoint = { x: this.group.width() / 2, y: this.group.height() / 2 };
+            const centerPoint = { x: groupWidth / 2, y: groupHeight / 2 };
             for (const item of zoneDrifts) {
                 const { target, x, y } = item;
                 this.highlights.set(target, new Highlight({
@@ -267,6 +269,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             const layouts = (() => {
                 const length = 55;
                 return [
+                    { target: Target.mapGroup, layout: { x: 0, y: 0, width: groupWidth, height: groupHeight } },
                     { target: Target.movesCounter, layout: { x: 43, y: 70, width: length, height: length } },
                     { target: Target.favorButton, layout: { x: 500, y: 67, width: length, height: length } },
                     { target: Target.endTurnButton, layout: { x: 497, y: 367, width: length, height: length } },

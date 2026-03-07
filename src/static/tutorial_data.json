@@ -218,29 +218,22 @@
         }
     },
     "text": [
-        {
-            "step": 0,
-            "stepText": [
-                "Hello and welcome to Ophir 2D! This is a faithful digital implementation of the physical board game realeased around 2014.\n\nThanks for trying it out.\n\nClick on [Next] to proceed.",
-                "This tutorial will introduce the main game cocepts by guiding you through the usual first turns\n\nNote that this is not the actual game, but a staged scenario.",
-                "The purple ship token in the center sea zone represents your current location.\n\nThe purple placard is your player board.",
-                "Let's get down to holy business!\n\nYour goal is to donate precious metals and commodities towards the temple's construction.\n\nThe large blue icon represents the Temple (it'll will look more like one once construction progresses).",
-                "You can start by picking up some commodities. Drag your ship into the gems sea zone."
-            ]
-        },
-        {
-            "step": 1,
-            "stepText": [
-                "You've just spent a move. You only get 2 moves per turn.\n\nThe Moves Counter keeps track of them.",
-                "You may now pick up the local commodity.\n\nClick on the red gem icon to load a gem into your cargo hold."
-            ]
-        },
-        {
-            "step": 2,
-            "stepText": [
-                "The gems are now in your cargo. They take up one space out of two.\n\nNote that interacting with a location spends your remaining moves. (You can only move before interacting)",
-                "Since you've already done all you can do in this sea zone, you can safely end your turn.\n\nClick on the green anchor button."
-            ]
-        }
+        [
+            "Hello and welcome to Ophir 2D! This is a faithful digital implementation of the board game Ophir, realeased around 2014. Thanks for trying it out.\n\n\nClick on Next to proceed.",
+            "This tutorial will introduce the main concepts by guiding you through the usual first turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
+            "This is the map. It shows where every location is situated and where ships are currently anchored.",
+            "The rows of cards here represent specific transactions you can make when anchored at the appropriate location.\n\nWe'll examine them in detail later.",
+            "This area contains the player cards.\n\nIt also contains the rival ship controls. The rival ship is in play only in games with fewer than 3 players.",
+            "Let's get down to holy business!\n\nThe temple in Ophir is under construction. It needs a lot of gold and silver. Here is where you'll want to bring in these precious metals to gain great boosts of Victory Points.",
+            "Here is where you start. Your ship token (now purple) always shows your current location.\n\nTry repositioning it within the hexagonal borders."
+        ],
+        [
+            "You've just spent a move. You only get 2 moves per turn.\n\nThe Moves Counter keeps track of them.",
+            "You may now pick up the local commodity.\n\nClick on the red gem icon to load a gem into your cargo hold."
+        ],
+        [
+            "The gems are now in your cargo. They take up one space out of two.\n\nNote that interacting with a location spends your remaining moves. (You can only move before interacting)",
+            "Since you've already done all you can do in this sea zone, you can safely end your turn.\n\nClick on the green anchor button."
+        ]
     ]
 }

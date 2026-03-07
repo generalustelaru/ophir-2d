@@ -237,33 +237,27 @@ export type ErrorDetail = {
 // UI element identification
 export enum Target {
     // Map Group
-    topLeftZone, topRightZone, rightZone, bottomRightZone, bottomLeftZone, leftZone, centerZone,
+    mapGroup, topLeftZone, topRightZone, rightZone, bottomRightZone, bottomLeftZone, leftZone, centerZone,
     movesCounter, favorButton, endTurnButton, undoButton,
     // Location Group
-    marketArea, deck,slot_1, slot_2, slot_3, fluctuation_up, fluctuation_down, temple_mark,
+    locationGroup, marketArea, deck,slot_1, slot_2, slot_3, fluctuation_up, fluctuation_down, temple_mark,
     treasuryArea, goldForFavor, silverForFavor, goldForCoin, silverForCoin,
     templeArea, goldCard, silverCard, marketCard, upgradeButton, donationsDisplay,
     // PlayerGroup
-    playerPlacard, influenceDie, cargoBand, specialistBand, favorDial, coinDial, vpDial, specialtyButton,
+    playerGroup, playerPlacard, influenceDie, cargoBand, specialistBand, favorDial, coinDial, vpDial, specialtyButton,
     rivalPlacard, rivalInfluence, cycleMarket, concludeRival, rivalMoves
 }
-
-export enum Panel { mapCenter, locationTop, locationBottom, playerTop, playerBottom }
 
 /**
  * @property `highlights` Sent to every MegaGroup for activating tutorial highlights.
  */
-export type Visuals = {
-    highlights: Array<Target>
-    panel: Panel | null,
-}
+export type InstructionHighlights = { highlights: Array<Target> }
 
 /**
  * @description a single tutorial 'page' with associated highlights
  */
-export type Instruction = Visuals & {
-    text: string,
-}
+export type Instruction = InstructionHighlights & { text: string }
+
 /**
  * @description Bundled data for handling a tutorial step
  * @property `expecting` Condition for advancing to the next TutorialScenarioStep
@@ -284,15 +278,11 @@ export type TutorialState = {
 /**
  * Sourced from server JSON, to be combined with ScenarioPartial
 */
-export type ScenarioStepText = {
-    step: number,
-    stepText: Array<string>,
-}
+export type ScenarioStepText = Array<string>
 
 /**
  * In-memory object, to be combined with ScenarioTextSource
 */
-export type ScenarioStepPartial = Omit<TutorialScenarioStep, 'instructions'> & {
-    step: number
-    visuals: Array<Visuals>
-}
+export type ScenarioStepPartial =
+    Omit<TutorialScenarioStep, 'instructions'>
+    & { visuals: Array<InstructionHighlights> }
