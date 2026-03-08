@@ -42,6 +42,10 @@ export class Highlight {
         return this.highlight;
     };
 
+    public isVisible() {
+        return this.highlight.visible();
+    }
+
     public show() {
         this.highlight.visible(true);
         this.tweenToColor(HUES.vpCardLightPurple, 'white');

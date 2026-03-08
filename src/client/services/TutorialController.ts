@@ -1,4 +1,4 @@
-import { ClientMessage, Action, PlayState, MovementPayload } from '~/shared_types';
+import { ClientMessage, Action, PlayState, Coordinates } from '~/shared_types';
 import { Communicator } from './Communicator';
 import {
     EventType, TutorialScenarioStep, Instruction, ScenarioStepPartial, ScenarioStepText, Controller,
@@ -8,12 +8,11 @@ import { TutorialStepProvider } from './TutorialStepProvider';
 export class TutorialController extends Communicator implements Controller {
     private stepProvider: TutorialStepProvider;
     private currentState: PlayState | null = null;
-    private expectedMessage: ClientMessage;
+    private expectedMessage: ClientMessage | null = null;
     private textSources: Array<ScenarioStepText> = [];
 
     constructor() {
         super();
-        this.expectedMessage = { action: Action.move, payload: { zoneId: 'topLeft', position: { x:0,y:0 } } };
         this.stepProvider = new TutorialStepProvider();
     }
 
@@ -36,35 +35,50 @@ export class TutorialController extends Communicator implements Controller {
             return;
         }
 
-        const { instructions } = initialScenario;
+        const { instructions, expecting } = initialScenario;
 
+        this.expectedMessage = expecting;
         this.createEvent({ type: EventType.tour_update, detail: { instructions, state: this.currentState } });
     }
 
     public processMessage(message: ClientMessage) {
-        if (null == this.currentState)
+        if (null == this.currentState || null == this.expectedMessage)
             throw new Error('No state to modify!');
 
         const { action, payload } = message;
+
+        if (action == Action.reposition_rival && this.currentState.rival.isIncluded && payload) {
+            this.currentState.rival.bearings.position = payload.position;
+            this.createEvent({ type: EventType.state_update, detail: this.currentState });
+
+            return;
+        }
 
         if (action == Action.reposition) {
             this.currentState.players[0].bearings.position = payload.position;
             this.createEvent({ type: EventType.state_update, detail: this.currentState });
 
-            return;
+            if (this.expectedMessage.action != Action.reposition)
+                return;
+            else
+                this.expectedMessage.payload.position = payload.position;
         }
 
-        if (action == Action.move && this.expectedMessage.action == Action.move)
-            this.expectedMessage.payload.position = payload.position;
+        let movePosition: Coordinates | null = null;
 
-        if (this.isSame(this.expectedMessage, message)) {
-            if (this.expectedMessage.action == Action.move)
-                this.currentState.players[0].bearings.position = (payload as MovementPayload).position;
-        } else {
+        if (action == Action.move && this.expectedMessage.action == Action.move) {
+            this.expectedMessage.payload.position = payload.position;
+            movePosition = payload.position;
+        }
+
+        if (false == this.isSame(this.expectedMessage, message)) {
             this.createEvent({ type: EventType.state_update, detail: this.currentState });
 
             return;
         }
+
+        if (movePosition)
+            this.currentState.players[0].bearings.position = movePosition;
 
         const newInstructions = ((): Array<Instruction> => {
             const scenario = this.buildStep(this.stepProvider.getNextPartial());

@@ -140,14 +140,14 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
                 nodes.push(highlight.getElement());
             });
             this.group.add(...nodes);
-        } else {
-            this.highlights.forEach(highlight => {
-                highlight.hide();
-            });
         }
 
-        for (const target of targets) {
-            this.highlights.get(target)?.show();
-        }
+        this.highlights.forEach((highlight, key) => {
+            if (targets.includes(key)) {
+                highlight.isVisible() == false && highlight.show();
+            } else {
+                highlight.hide();
+            }
+        });
     }
 }
