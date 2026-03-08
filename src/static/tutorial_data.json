@@ -5,7 +5,7 @@
         "setup": {
             "barriers": [
                 4,
-                7
+                2
             ],
             "mapPairings": {
                 "locationByZone": {
@@ -23,9 +23,9 @@
                         ]
                     },
                     "right": {
-                        "name": "forest",
+                        "name": "treasury",
                         "actions": [
-                            "load_good"
+                            "buy_metal"
                         ]
                     },
                     "bottomRight": {
@@ -43,9 +43,9 @@
                         ]
                     },
                     "left": {
-                        "name": "treasury",
+                        "name": "forest",
                         "actions": [
-                            "buy_metal"
+                            "load_good"
                         ]
                     },
                     "topLeft": {
@@ -107,7 +107,6 @@
                 "isHandlingRival": false,
                 "locationActions": [],
                 "destinations": [
-                    "topRight",
                     "bottomRight",
                     "bottomLeft",
                     "left",
@@ -148,21 +147,21 @@
             },
             "slot_2": {
                 "request": [
-                    "ebony"
+                    "marble",
+                    "marble"
                 ],
                 "reward": {
-                    "coins": 1,
-                    "favorAndVp": 1
+                    "coins": 3,
+                    "favorAndVp": 4
                 }
             },
             "slot_3": {
                 "request": [
-                    "ebony",
-                    "marble"
+                    "gems"
                 ],
                 "reward": {
                     "coins": 2,
-                    "favorAndVp": 3
+                    "favorAndVp": 1
                 }
             },
             "deckSize": 35
@@ -201,7 +200,6 @@
             "isControllable": false,
             "activePlayerColor": "Purple",
             "destinations": [
-                "center",
                 "right",
                 "topLeft"
             ],
@@ -214,26 +212,55 @@
                 },
                 "location": "market"
             },
-            "influence": 1
+            "influence": 3
         }
     },
     "text": [
         [
-            "Hello and welcome to Ophir 2D! This is a faithful digital implementation of the board game Ophir, realeased around 2014. Thanks for trying it out.\n\n\nClick on Next to proceed.",
-            "This tutorial will introduce the main concepts by guiding you through the usual first turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
-            "This is the map. It shows where every location is situated and where ships are currently anchored.",
-            "The rows of cards here represent specific transactions you can make when anchored at the appropriate location.\n\nWe'll examine them in detail later.",
-            "This area contains the player cards.\n\nIt also contains the rival ship controls. The rival ship is in play only in games with fewer than 3 players.",
-            "Let's get down to holy business!\n\nThe temple in Ophir is under construction. It needs a lot of gold and silver. Here is where you'll want to bring in these precious metals to gain great boosts of Victory Points.",
+            "Hello and welcome to Ophir 2D!\n\nThis is a faithful digital implementation of the board game Ophir, released around 2014. Thanks for trying it out.\n\n\nClick on Next to proceed.",
+            "This tutorial will explain the main concepts by guiding you through the usual first turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
+            "This is the map. It shows where every location is situated and where ships are currently located.",
+            "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
+            "This area contains the player cards.\n\nIn this scenario it also contains the rival ship controls.",
+            "Let's get down to holy business!\n\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nHere is where you'll want to bring in these precious metals to gain great boosts of Victory Points.",
             "Here is where you start. Your ship token (now purple) always shows your current location.\n\nTry repositioning it within the hexagonal borders."
         ],
         [
-            "You've just spent a move. You only get 2 moves per turn.\n\nThe Moves Counter keeps track of them.",
-            "You may now pick up the local commodity.\n\nClick on the red gem icon to load a gem into your cargo hold."
+            "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship.",
+            "On your turn you get two moves. The moves counter keeps track of how many you have.",
+            "All directly adjacent zones are possible move destinations (shown in lighter blue).",
+            "These other two zones (darker blue) are out of reach, being blocked behind barriers.\n\nBarriers remain fixed during the game.",
+            "Notice that your current location is also in dark blue.\nThis is because you must move at least once before doing anything.",
+            "To continue, drag your ship token into the highlighted zone.\n\nKeep an eye on the moves counter."
         ],
         [
-            "The gems are now in your cargo. They take up one space out of two.\n\nNote that interacting with a location spends your remaining moves. (You can only move before interacting)",
-            "Since you've already done all you can do in this sea zone, you can safely end your turn.\n\nClick on the green anchor button."
+            "You've just spent a move. It's reflected in the moves counter having a discolored wave.\n\nYou have one move left.",
+            "After moving, your zone of origin always becomes innaccessible, even though it's adjacent.",
+            "On the flip-side new zones may become reachable, such as this one. It contains the Market, which currently pays well for delivering gems.",
+            "Since you moved, you can now also perform actions at your current location.\n\nThe warm color indicates that there are available actions.",
+            "Pick up the local commodity.\n\nClick on the red gem icon to load a gem into your cargo hold."
+        ],
+        [
+            "The gems are now in your cargo. They take up one space out of two.\n\nNotice that your cargo capacity is only half the size it could be (2 slots out of 4).",
+            "Now you'd want to head on to the Market but you're not allowed to move after having interacted with a location.\n\nNotice that you've lost your second move.",
+            "Your current location is also now dark blue because there are no actions left. You can only pick one commodity type from a location per turn.",
+            "Since there's nothing left to do, you should end your turn.\n\nClick on the green anchor button and confirm the dialog that follows."
+        ],
+        [
+            "Oh, it's your turn again!\n\nThis is expected, since you're the only one playing. (╥‸╥)",
+            "Now it's time to sell those gems, but moving to the Market right now is a special case.\n\nWhenever you try moving into a zone that contains other ships, you'll have to deal with the uncertainty of an Influence Roll.",
+            "The Rival Ship present there is setting the roll difficulty to 3.\n\nThat's not the end of the world, so try moving there and confirming your intention to roll for influence."
+        ],
+        [
+            "Oops! You only rolled a 2 and managed to waste one move.\n\nBut all's not lost.",
+            "Notice that the Rival's influence has decreased from 3 to 2.\n\nWhenever a player fails an influence check, the ships that prevented its movement lose one influence.",
+            "While failing a second time would mean losing your turn, a roll difficulty of 2 offers much better odds.\n\n Try moving again."
+        ],
+        [
+            "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily lost control of your ship.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
+            "The Rival controls contain the influence die, two buttons with similar functions, and a moves counter.",
+            "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn'",
+            "Move the Rival Ship towards the Treasury."
         ]
     ]
 }

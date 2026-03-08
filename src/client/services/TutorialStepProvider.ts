@@ -5,6 +5,7 @@ export class TutorialStepProvider {
     private currentStep: number = 0;
     private partials: Array<ScenarioStepPartial> = [
         {
+            transmission: null,
             mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
@@ -18,13 +19,20 @@ export class TutorialStepProvider {
             expecting: { action: Action.reposition, payload: { position: { x: 0, y: 0 } } },
         },
         {
+            transmission: null,
             mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
+                { highlights: [Target.movesCounter] },
+                { highlights: [Target.topLeftZone, Target.leftZone, Target.bottomLeftZone, Target.bottomRightZone] },
+                { highlights: [Target.rightZone, Target.topRightZone] },
+                { highlights: [Target.centerZone] },
+                { highlights: [Target.movesCounter, Target.topLeftZone] },
             ],
             expecting: { action: Action.move, payload: { zoneId: 'topLeft', position: { x: 0, y: 0 } } },
         },
         {
+            transmission: null,
             mutate: (state: PlayState) => {
                 const player = state.players[0];
                 player.bearings.seaZone = 'topLeft';
@@ -37,11 +45,15 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.movesCounter] },
+                { highlights: [Target.centerZone] },
+                { highlights: [Target.topRightZone, Target.slot_3] },
+                { highlights: [Target.topLeftZone] },
                 { highlights: [Target.topLeftZone] },
             ],
             expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
         },
         {
+            transmission: null,
             mutate: (state: PlayState) => {
                 const player = state.players[0];
                 player.moveActions = 0;
@@ -49,12 +61,84 @@ export class TutorialStepProvider {
                 player.locationActions = [];
             },
             visuals: [
-                { highlights: [Target.cargoBand, Target.movesCounter] },
+                { highlights: [Target.cargoBand] },
+                { highlights: [] },
+                { highlights: [Target.topLeftZone] },
                 { highlights: [Target.endTurnButton] },
             ],
-            expecting: { action: Action.move , payload: { zoneId: 'left', position: { x:0, y:0 } } },
+            expecting: { action: Action.end_turn , payload: null },
+        },
+        {
+            transmission: 'turnStart',
+            mutate: (state: PlayState) => {
+                const player = state.players[0];
+                player.overnightZone = 'topLeft';
+                player.mayUndo = false;
+                player.isAnchored = false;
+                player.moveActions = 2;
+                player.destinations = ['left', 'center', 'topRight'];
+            },
+            visuals: [
+                { highlights: [] },
+                { highlights: [Target.topRightZone] },
+                { highlights: [Target.rivalInfluence] },
+            ],
+            expecting: { action: Action.move, payload: { zoneId: 'topRight', position: { x: 0, y: 0 } } },
+        },
+        {
+            transmission: 'failedMove',
+            mutate: (state: PlayState) => {
+                const player = state.players[0];
+                player.influence = 2;
+                player.moveActions = 1;
+
+                if (state.rival.isIncluded)
+                    state.rival.influence = 2;
+            },
+            visuals: [
+                { highlights: [Target.movesCounter, Target.influenceDie] },
+                { highlights: [Target.rivalInfluence] },
+                { highlights: [Target.topRightZone] },
+            ],
+            expecting: { action: Action.move, payload: { zoneId: 'topRight', position: { x: 0, y: 0 } } },
+        },
+        {
+            transmission: 'rivalControl',
+            mutate: (state: PlayState) => {
+                const player = state.players[0];
+                player.influence = 6;
+                player.moveActions = 0;
+                player.bearings.seaZone = 'topRight';
+                player.bearings.location = 'market';
+                player.destinations = [];
+                player.isAnchored = true;
+                player.isHandlingRival = true;
+
+                if (state.rival.isIncluded) {
+                    const rival = state.rival;
+                    rival.activePlayerColor = 'Purple',
+                    rival.isControllable = true;
+
+                }
+            },
+            visuals: [
+                { highlights: [] },
+                { highlights: [Target.rivalPlacard] },
+                { highlights: [Target.rivalMoves] },
+                { highlights: [Target.rightZone] },
+            ],
+            expecting: { action: Action.move_rival, payload: { zoneId: 'right', position: { x: 0, y: 0 } } },
         },
     ];
+
+    // {
+    //         mutate: (state: PlayState) => { },
+    //         visuals: [
+    //             { highlights: [] },
+    //         ],
+    //         expecting: null,
+    //         willFailMove: false,
+    //     },
 
     public getNextPartial() {
         return {

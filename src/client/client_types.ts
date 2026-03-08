@@ -257,15 +257,16 @@ export type InstructionHighlights = { highlights: Array<Target> }
  * @description a single tutorial 'page' with associated highlights
  */
 export type Instruction = InstructionHighlights & { text: string }
-
+export type TransmissionType = 'failedMove' | 'rivalControl' | 'vpIncrease' | 'turnStart' | null
 /**
  * @description Bundled data for handling a tutorial step
  * @property `expecting` Condition for advancing to the next TutorialScenarioStep
  */
 export type TutorialScenarioStep = {
-    mutate: (state: PlayState) => void, // produces a new state that trickles to every element in regular fashion
-    instructions: Array<Instruction>, // updates CanvasService via dedicated method
-    expecting: ClientMessage, // stays in TourService for advancing validation
+    mutate: (state: PlayState) => void // produces a new state that trickles to every element in regular fashion
+    transmission: TransmissionType // simulates additional server transmissions
+    instructions: Array<Instruction> // updates CanvasService via dedicated method
+    expecting: ClientMessage | null // stays in TourService for advancing validation
 }
 
 /**

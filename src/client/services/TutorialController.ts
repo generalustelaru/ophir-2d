@@ -42,8 +42,11 @@ export class TutorialController extends Communicator implements Controller {
     }
 
     public processMessage(message: ClientMessage) {
-        if (null == this.currentState || null == this.expectedMessage)
+        if (null == this.currentState)
             throw new Error('No state to modify!');
+
+        if (null == this.expectedMessage)
+            return;
 
         const { action, payload } = message;
 
@@ -64,48 +67,56 @@ export class TutorialController extends Communicator implements Controller {
                 this.expectedMessage.payload.position = payload.position;
         }
 
-        let movePosition: Coordinates | null = null;
-
-        if (action == Action.move && this.expectedMessage.action == Action.move) {
+        if (action == Action.move && action == this.expectedMessage.action) {
             this.expectedMessage.payload.position = payload.position;
-            movePosition = payload.position;
         }
 
-        if (false == this.isSame(this.expectedMessage, message)) {
-            this.createEvent({ type: EventType.state_update, detail: this.currentState });
-
-            return;
-        }
-
-        if (movePosition)
-            this.currentState.players[0].bearings.position = movePosition;
-
-        const newInstructions = ((): Array<Instruction> => {
-            const scenario = this.buildStep(this.stepProvider.getNextPartial());
+        if (this.isSame(this.expectedMessage, message)) {
+            const scenario = action == Action.move
+                ? this.buildStep({ ...this.stepProvider.getNextPartial(), newPosition: payload.position })
+                : this.buildStep(this.stepProvider.getNextPartial());
 
             if (!scenario)
                 throw new Error('Scenarios are incomplete.');
 
             scenario.mutate(this.currentState);
-            const { instructions, expecting } = scenario;
+            const { instructions, expecting, transmission } = scenario;
             this.expectedMessage = expecting;
 
-            return instructions;
-        })();
+            this.createEvent({ type: EventType.tour_update, detail: {
+                state: this.currentState,
+                instructions,
+            } });
 
-        this.createEvent({ type: EventType.tour_update, detail: {
-            state: this.currentState,
-            instructions: newInstructions,
-        } });
+            switch (transmission) {
+                case 'turnStart':
+                    this.createEvent({ type: EventType.start_turn, detail: null });
+                    break;
+                case 'rivalControl':
+                    this.createEvent( { type: EventType.rival_control_transmission, detail: null });
+                    break;
+                case 'vpIncrease':
+                    this.createEvent({ type: EventType.vp_transmission, detail: { vp: 99 } });
+                    break;
+                default:
+                    break;
+            }
+        } else {
+            this.createEvent({ type: EventType.state_update, detail: this.currentState });
+        }
     }
 
-    private buildStep(data?: {step: number, partial: ScenarioStepPartial}): TutorialScenarioStep | null {
+    private buildStep(data?: {
+        step: number,
+        partial: ScenarioStepPartial,
+        newPosition?: Coordinates,
+    }): TutorialScenarioStep | null {
 
         if (!data)
             return null;
 
-        const { step, partial } = data;
-        const { visuals: stepHighlights, mutate, expecting } = partial;
+        const { step, partial, newPosition } = data;
+        const { visuals: stepHighlights, mutate, expecting, transmission: serverWillTransmit } = partial;
         const textSource = this.textSources[step];
 
         if (!textSource)
@@ -120,7 +131,14 @@ export class TutorialController extends Communicator implements Controller {
             },
         );
 
-        return { mutate, instructions, expecting };
+        const ammendedMutate = newPosition && serverWillTransmit != 'failedMove'
+            ? (state: PlayState): void => {
+                state.players[0].bearings.position = newPosition;
+                mutate(state);
+            }
+            : mutate;
+
+        return { mutate: ammendedMutate, instructions, expecting, transmission: serverWillTransmit };
     }
 
     private isSame(reference: any, tested: any): boolean {
