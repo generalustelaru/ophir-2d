@@ -129,16 +129,40 @@ export class TutorialStepProvider {
             ],
             expecting: { action: Action.move_rival, payload: { zoneId: 'right', position: { x: 0, y: 0 } } },
         },
+        {
+            transmission: null,
+            mutate: (state: PlayState) => {
+                if(state.rival.isIncluded) {
+                    const rival = state.rival;
+                    rival.bearings.seaZone = 'right';
+                    rival.bearings.location = 'treasury';
+                    rival.moves = 1;
+                    rival.destinations = ['bottomRight'];
+                }
+            },
+            visuals: [
+                { highlights: [] },
+                { highlights: [Target.concludeRival] },
+            ],
+            expecting: { action: Action.end_rival_turn, payload: null },
+        },
+        {
+            transmission: null,
+            mutate: (state: PlayState) => { },
+            visuals: [
+                { highlights: [] },
+            ],
+            expecting: null,
+        },
     ];
-
     // {
-    //         mutate: (state: PlayState) => { },
-    //         visuals: [
-    //             { highlights: [] },
-    //         ],
-    //         expecting: null,
-    //         willFailMove: false,
-    //     },
+    //     transmission: null,
+    //     mutate: (state: PlayState) => { },
+    //     visuals: [
+    //         { highlights: [] },
+    //     ],
+    //     expecting: null,
+    // },
 
     public getNextPartial() {
         return {

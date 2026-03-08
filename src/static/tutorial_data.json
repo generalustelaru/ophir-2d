@@ -261,6 +261,13 @@
             "The Rival controls contain the influence die, two buttons with similar functions, and a moves counter.",
             "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn'",
             "Move the Rival Ship towards the Treasury."
+        ],
+        [
+            "Great! You could move it further towards the Temple but we want to leave it here for now.",
+            "Click on the its anchor button to leave the Rival ship and return controlling your ship.\n\n You'll be asked to confirm this."
+        ],
+        [
+            "Not handled."
         ]
     ]
 }

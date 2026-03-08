@@ -280,41 +280,13 @@ export type MetalPurchasePayload = FeasiblePurchase & { drop: Array<ItemName> | 
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
 
-/*
-undoable
-    load_good
-    drop_item
-    buy_metal
-    donate_metals
-    spend_favor
-    move_rival
-    sell_specialty
-
-not undoable
-    sell_goods
-    donate_goods
-
-it depends
-    move (on rolling or not)
-    end_rival_turn (on having shifted market)
-
-should persist
-    reposition
-    reposition_rival
-    chat
-
-    singleState; action
-
-*/
-
 export type VerboiseAction =
-    | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition
+    | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition | Action.move_rival
     | Action.sell_goods | Action.donate_goods | Action.buy_metal | Action.donate_metal | Action.pick_specialist
     | Action.enrol | Action.reposition_opponent | Action.change_color | Action.sell_as_chancellor | Action.sell_as_peddler;
 export type LaconicAction =
-    | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.move_rival
-    | Action.upgrade_cargo | Action.shift_market | Action.end_rival_turn | Action.reposition_rival | Action.start_setup
-    | Action.force_turn | Action.sell_specialty
+    | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.upgrade_cargo | Action.shift_market
+    | Action.end_rival_turn | Action.reposition_rival | Action.start_setup | Action.force_turn | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | PositioningPayload
@@ -327,7 +299,6 @@ export type ColorSelectMessage = MessageFormat<Action.change_color, ColorSelecti
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;
 export type MoveMessage = MessageFormat<Action.move | Action.move_rival, MovementPayload>;
-export type MoveRivalMessage = MessageFormat<Action.move_rival, MovementPayload>;
 export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, PositioningPayload>;

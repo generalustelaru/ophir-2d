@@ -49,6 +49,7 @@ export class TutorialController extends Communicator implements Controller {
             return;
 
         const { action, payload } = message;
+        const { action: expectedAction, payload: expectedPayload } = this.expectedMessage;
 
         if (action == Action.reposition_rival && this.currentState.rival.isIncluded && payload) {
             this.currentState.rival.bearings.position = payload.position;
@@ -61,20 +62,26 @@ export class TutorialController extends Communicator implements Controller {
             this.currentState.players[0].bearings.position = payload.position;
             this.createEvent({ type: EventType.state_update, detail: this.currentState });
 
-            if (this.expectedMessage.action != Action.reposition)
-                return;
+            if (expectedAction == Action.reposition)
+                expectedPayload.position = payload.position;
             else
-                this.expectedMessage.payload.position = payload.position;
+                return;
         }
 
-        if (action == Action.move && action == this.expectedMessage.action) {
-            this.expectedMessage.payload.position = payload.position;
-        }
+        if ((action == Action.move || action == Action.move_rival) && action == expectedAction)
+            expectedPayload.position = payload.position;
 
         if (this.isSame(this.expectedMessage, message)) {
-            const scenario = action == Action.move
-                ? this.buildStep({ ...this.stepProvider.getNextPartial(), newPosition: payload.position })
-                : this.buildStep(this.stepProvider.getNextPartial());
+            const scenario = (() => {
+                switch (action) {
+                    case Action.move:
+                        return this.buildStep({ ...this.stepProvider.getNextPartial(), newPosition: payload.position });
+                    case Action.move_rival:
+                        return this.buildStep({ ...this.stepProvider.getNextPartial(), newRivalPosition: payload.position });
+                    default:
+                        return this.buildStep(this.stepProvider.getNextPartial());
+                }
+            })();
 
             if (!scenario)
                 throw new Error('Scenarios are incomplete.');
@@ -110,13 +117,14 @@ export class TutorialController extends Communicator implements Controller {
         step: number,
         partial: ScenarioStepPartial,
         newPosition?: Coordinates,
+        newRivalPosition?: Coordinates,
     }): TutorialScenarioStep | null {
 
         if (!data)
             return null;
 
-        const { step, partial, newPosition } = data;
-        const { visuals: stepHighlights, mutate, expecting, transmission: serverWillTransmit } = partial;
+        const { step, partial, newPosition, newRivalPosition } = data;
+        const { visuals: stepHighlights, mutate: originalMutate, expecting, transmission: serverWillTransmit } = partial;
         const textSource = this.textSources[step];
 
         if (!textSource)
@@ -131,14 +139,25 @@ export class TutorialController extends Communicator implements Controller {
             },
         );
 
-        const ammendedMutate = newPosition && serverWillTransmit != 'failedMove'
-            ? (state: PlayState): void => {
-                state.players[0].bearings.position = newPosition;
-                mutate(state);
+        const mutate: (state: PlayState) => void = (() => {
+            switch (true) {
+                case newPosition && serverWillTransmit != 'failedMove':
+                    return (state: PlayState): void => {
+                        state.players[0].bearings.position = newPosition;
+                        originalMutate(state);
+                    };
+                case !!newRivalPosition:
+                    return (state: PlayState): void => {
+                        if (state.rival.isIncluded)
+                            state.rival.bearings.position = newRivalPosition;
+                        originalMutate(state);
+                    };
+                default:
+                    return originalMutate;
             }
-            : mutate;
+        })();
 
-        return { mutate: ammendedMutate, instructions, expecting, transmission: serverWillTransmit };
+        return { mutate, instructions, expecting, transmission: serverWillTransmit };
     }
 
     private isSame(reference: any, tested: any): boolean {
