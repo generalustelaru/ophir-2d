@@ -266,6 +266,7 @@ export type TransmissionType = 'failedMove' | 'rivalControl' | 'vpIncrease' | 't
 export type TutorialScenarioStep = {
     mutate: (state: PlayState) => void // produces a new state that trickles to every element in regular fashion
     transmission: TransmissionType // simulates additional server transmissions
+    vpDetail?: VpTransmission // provision for payload on gaining vp
     instructions: Array<Instruction> // updates CanvasService via dedicated method
     expecting: ClientMessage | null // stays in TourService for advancing validation
 }

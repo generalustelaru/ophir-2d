@@ -87,7 +87,7 @@ export class TutorialController extends Communicator implements Controller {
                 throw new Error('Scenarios are incomplete.');
 
             scenario.mutate(this.currentState);
-            const { instructions, expecting, transmission } = scenario;
+            const { instructions, expecting, transmission, vpDetail } = scenario;
             this.expectedMessage = expecting;
 
             this.createEvent({ type: EventType.tour_update, detail: {
@@ -103,7 +103,7 @@ export class TutorialController extends Communicator implements Controller {
                     this.createEvent( { type: EventType.rival_control_transmission, detail: null });
                     break;
                 case 'vpIncrease':
-                    this.createEvent({ type: EventType.vp_transmission, detail: { vp: 99 } });
+                    vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
                     break;
                 default:
                     break;
