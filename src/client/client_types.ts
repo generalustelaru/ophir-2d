@@ -257,7 +257,8 @@ export type InstructionHighlights = { highlights: Array<Target> }
  * @description a single tutorial 'page' with associated highlights
  */
 export type Instruction = InstructionHighlights & { text: string }
-export type TransmissionType = 'failedMove' | 'rivalControl' | 'vpIncrease' | 'turnStart' | null
+export type TransmissionType = 'failedMove' | 'rivalControl' | 'vpIncrease' | 'turnStart' | 'forcedTurn' | null
+
 /**
  * @description Bundled data for handling a tutorial step
  * @property `expecting` Condition for advancing to the next TutorialScenarioStep

@@ -118,7 +118,6 @@ export class TutorialStepProvider {
                     const rival = state.rival;
                     rival.activePlayerColor = 'Purple',
                     rival.isControllable = true;
-
                 }
             },
             visuals: [

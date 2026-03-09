@@ -223,10 +223,10 @@
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
             "This area contains the player cards.\n\nIn this scenario it also contains the rival ship controls.",
             "Let's get down to holy business!\n\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nHere is where you'll want to bring in these precious metals to gain great boosts of Victory Points.",
-            "Here is where you start. Your ship token (now purple) always shows your current location.\n\nTry repositioning it within the hexagonal borders."
+            "This is your current location. On your turn, your ship token (now purple) will bob if it can move.\n\nTry repositioning it within the hexagonal borders."
         ],
         [
-            "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship.",
+            "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship (the white ship token).",
             "On your turn you get two moves. The moves counter keeps track of how many you have.",
             "All directly adjacent zones are possible move destinations (shown in lighter blue).",
             "These other two zones (darker blue) are out of reach, being blocked behind barriers.\n\nBarriers remain fixed during the game.",
@@ -259,7 +259,7 @@
         [
             "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily lost control of your ship.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
             "The Rival controls contain the influence die, two buttons with similar functions, and a moves counter.",
-            "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn'",
+            "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn.'",
             "Move the Rival Ship towards the Treasury."
         ],
         [
