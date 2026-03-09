@@ -267,7 +267,24 @@
             "Click on the its anchor button to leave the Rival ship and return controlling your ship.\n\n You'll be asked to confirm this."
         ],
         [
-            "Not handled."
+            "Note that the rival automatically makes an influence roll after being handled.",
+            "But now that it's out of the way, you can interact with the Market.\n\nThe deck and row of orange cards represent the Market.",
+            "This last card is now active (in bright orange) because the gems in your cargo can satisfy its requirements.",
+            "But look, the Specialty button on your placard has also become active.\n\nThis is because your Specialist, the Captain may sell any number of gems at one coin apiece when at the Market, irrespective of what deals are available.",
+            "To learn more about your Specialist, you can click on its name band.\n\nClick again to switch back.",
+            "The Captain has no special ability, but at the start of a regular game, you get to select an actual Specialist.",
+            "Sell your gems as Specialty now.\n\nDon't worry about missing the better deal."
+        ],
+        [
+            "You have unloaded your gems and gained a coin. Indeed, not very lucrative.\n\nAs a rule-of-thumb, you should aim for a better ratio than 1-to-1.",
+            "Fortunately, you can take back that action.\n\nThe Undo button allows you to revert your actions.\nClick on it now."
+        ],
+        [
+            "Your gems are back!\n\nDuring a game, on your turn, you can use the Undo button to revert any number of actions and movements as long as they did not involve an undetermined result (such as rolling influence).",
+            "Whenever you're about to perform an un-revertible action you'll be asked to confirm it (green button).\n\nTake the better deal. Click on the market card."
+        ],
+        [
+            "Not implemented"
         ]
     ]
 }

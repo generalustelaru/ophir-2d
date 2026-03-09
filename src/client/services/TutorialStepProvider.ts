@@ -131,6 +131,8 @@ export class TutorialStepProvider {
         {
             transmission: null,
             mutate: (state: PlayState) => {
+                state.players[0].mayUndo = true;
+
                 if(state.rival.isIncluded) {
                     const rival = state.rival;
                     rival.bearings.seaZone = 'right';
@@ -147,21 +149,69 @@ export class TutorialStepProvider {
         },
         {
             transmission: null,
-            mutate: (state: PlayState) => { },
+            mutate: (state: PlayState) => {
+                if(state.rival.isIncluded) {
+                    const r = state.rival;
+                    r.isControllable = false;
+                    r.influence = 6;
+                    r.moves = 2;
+                }
+                const p = state.players[0];
+                p.isHandlingRival = false;
+                p.locationActions = [Action.sell_goods, Action.sell_specialty];
+                p.feasibleTrades = [{ slot: 'slot_3', missing: [] }];
+            },
+            visuals: [
+                { highlights: [Target.rivalInfluence] },
+                { highlights: [Target.marketArea] },
+                { highlights: [Target.slot_3] },
+                { highlights: [Target.specialtyButton] },
+                { highlights: [Target.specialistBand] },
+                { highlights: [] },
+                { highlights: [Target.specialtyButton] },
+            ],
+            expecting: { action: Action.sell_specialty, payload: null },
+        },
+        {
+            transmission: null,
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.cargo = ['empty', 'empty'];
+                p.coins = 1;
+                p.mayUndo = true;
+                p.locationActions = [];
+                // p.feasibleTrades = [];
+            },
+            visuals: [
+                { highlights: [Target.cargoBand, Target.coinDial] },
+                { highlights: [Target.undoButton] },
+            ],
+            expecting: { action: Action.undo, payload: null },
+        },
+        {
+            transmission: null,
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.cargo = ['gems', 'empty'];
+                p.coins = 0;
+                p.mayUndo = false;
+                p.locationActions = [Action.sell_goods, Action.sell_specialty];
+            },
+            visuals: [
+                { highlights: [] },
+                { highlights: [Target.slot_3] },
+            ],
+            expecting: { action: Action.sell_goods, payload: { slot: 'slot_3' } },
+        },
+        {
+            transmission: null,
+            mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
             ],
             expecting: null,
         },
     ];
-    // {
-    //     transmission: null,
-    //     mutate: (state: PlayState) => { },
-    //     visuals: [
-    //         { highlights: [] },
-    //     ],
-    //     expecting: null,
-    // },
 
     public getNextPartial() {
         return {
