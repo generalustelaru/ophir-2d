@@ -135,16 +135,7 @@
                     "favorAndVp": 3
                 }
             },
-            "slot_1": {
-                "request": [
-                    "ebony",
-                    "gems"
-                ],
-                "reward": {
-                    "coins": 3,
-                    "favorAndVp": 2
-                }
-            },
+            "slot_1": { "request": ["gems", "linen"], "reward": { "coins": 3, "favorAndVp": 2 } },
             "slot_2": {
                 "request": [
                     "marble",
@@ -223,11 +214,11 @@
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
             "This area contains the player cards.\n\nIn this scenario it also contains the rival ship controls.",
             "Let's get down to holy business!\n\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nHere is where you'll want to bring in these precious metals to gain great boosts of Victory Points.",
-            "This is your current location. On your turn, your ship token (now purple) will bob if it can move.\n\nTry repositioning it within the hexagonal borders."
+            "This is your current location. The purple disc token represents your ship.\n\nTry repositioning it within the hexagonal borders."
         ],
         [
             "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship (the white ship token).",
-            "On your turn you get two moves. The moves counter keeps track of how many you have.",
+            "On your turn, your ship token will bob if it can move. You get two moves per turn. The moves counter keeps track of how many you have.",
             "All directly adjacent zones are possible move destinations (shown in lighter blue).",
             "These other two zones (darker blue) are out of reach, being blocked behind barriers.\n\nBarriers remain fixed during the game.",
             "Notice that your current location is also in dark blue.\nThis is because you must move at least once before doing anything.",
@@ -284,7 +275,46 @@
             "Whenever you're about to perform an un-revertible action you'll be asked to confirm it (green button).\n\nTake the better deal. Click on the market card."
         ],
         [
-            "Not implemented"
+            "Ah, much better!\n\nWith 3 coins you could even buy a gold bar!\n\nBut first, let's focus on the Market a bit.",
+            "Notice that the Market has changed.\n\nThe gems for 3 coins card has been replaced by the one next to it.\n\nHowever, this isn't because you picked it.",
+            "Whenever such a deal is transacted, all cards shift to the right, pushing the last one out of the game and revealing a new card from the deck on the left.",
+            "This means that a deal can be transacted multiple times,\nbut also that it may disappear before you manage to profit from it.\n\nThis all depends on how often your opponents transact with the market.",
+            "You might have noticed some extra symbols on and around these cards.\n\nLet's clarify them in order.",
+            "The green upwards arrow is a bonus modifier. It means that the deal offers 1 more coin than usual.",
+            "As you might expect, the red downwards arrow means the opposite.\nAs such, a deal offering 1 coin would be modified to 0.",
+            "These modifiers remain fixed throughout the game.\n\nThis means you can predict how much coins deals would offer depending on turn order and what your opponents are carrying in their cargo.",
+            "We'll touch on the temple mark a little later.",
+            "For now, just end your turn."
+        ],
+        [
+            "Alright. You now might want to move to the treasury and buy some gold or silver.\n\nBut there might be a problem.",
+            "The Rival ship is now setting a whopping difficulty of 6 for an influence roll.\n\nIndeed, if you don't roll a 6, you might still roll a 5 in a second attempt.",
+            "Still, there's a good chance you'll fail both rolls and lose your current turn.\n\nIn a busy multiplayer game (3-4 players) you run the risk of falling behind on deliveries.",
+            "Instead of taking risks, you can become more versatile.\n\nThere are two aspects you can improve for this: Gaining Favor and increasing your cargo capacity.",
+            "You obtain both at the Temple.",
+            "Let's go around the barriers and towards the Temple."
+        ],
+        [
+            "If you haven't noticed already. The Temple also features a commodity transaction.\n\nIt'd be a good idea to pick up some gems and linen on the way.",
+            "For now, pick up gems and end your turn."
+        ],
+        [
+            "For now, pick up gems and end your turn."
+        ],
+        [
+            "Good. Now go for linen."
+        ],
+        [
+            "Good. Now go for linen."
+        ],
+        [
+            "You have a full cargo."
+        ],
+        [
+            "It's time to visit the Temple."
+        ],
+        [
+            "--At the temple.--"
         ]
     ]
 }
