@@ -87,23 +87,21 @@ export class TutorialController extends Communicator implements Controller {
                 throw new Error('Scenarios are incomplete.');
 
             scenario.mutate(this.currentState);
-            const { instructions, expecting, transmission, vpDetail } = scenario;
+            const { instructions, expecting, notification, vpDetail } = scenario;
             this.expectedMessage = expecting;
 
+            vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
             this.createEvent({ type: EventType.tour_update, detail: {
                 state: this.currentState,
                 instructions,
             } });
 
-            switch (transmission) {
+            switch (notification) {
                 case 'turnStart':
                     this.createEvent({ type: EventType.start_turn, detail: null });
                     break;
                 case 'rivalControl':
                     this.createEvent( { type: EventType.rival_control_transmission, detail: null });
-                    break;
-                case 'vpIncrease':
-                    vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
                     break;
                 default:
                     break;
@@ -124,7 +122,13 @@ export class TutorialController extends Communicator implements Controller {
             return null;
 
         const { step, partial, newPosition, newRivalPosition } = data;
-        const { visuals: stepHighlights, mutate: originalMutate, expecting, transmission: serverWillTransmit } = partial;
+        const {
+            expecting,
+            vpDetail,
+            notification,
+            visuals: stepHighlights,
+            mutate: originalMutate,
+        } = partial;
         const textSource = this.textSources[step];
 
         if (!textSource)
@@ -141,7 +145,7 @@ export class TutorialController extends Communicator implements Controller {
 
         const mutate: (state: PlayState) => void = (() => {
             switch (true) {
-                case newPosition && serverWillTransmit != 'failedMove':
+                case newPosition && notification != 'failedMove':
                     return (state: PlayState): void => {
                         state.players[0].bearings.position = newPosition;
                         originalMutate(state);
@@ -157,7 +161,7 @@ export class TutorialController extends Communicator implements Controller {
             }
         })();
 
-        return { mutate, instructions, expecting, transmission: serverWillTransmit };
+        return { mutate, instructions, expecting, notification, vpDetail };
     }
 
     private isSame(reference: any, tested: any): boolean {

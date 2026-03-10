@@ -257,7 +257,7 @@ export type InstructionHighlights = { highlights: Array<Target> }
  * @description a single tutorial 'page' with associated highlights
  */
 export type Instruction = InstructionHighlights & { text: string }
-export type TransmissionType = 'failedMove' | 'rivalControl' | 'vpIncrease' | 'turnStart' | 'forcedTurn' | null
+export type NotificationType = 'failedMove' | 'rivalControl' | 'turnStart' | 'forcedTurn' | null
 
 /**
  * @description Bundled data for handling a tutorial step
@@ -265,7 +265,7 @@ export type TransmissionType = 'failedMove' | 'rivalControl' | 'vpIncrease' | 't
  */
 export type TutorialScenarioStep = {
     mutate: (state: PlayState) => void // produces a new state that trickles to every element in regular fashion
-    transmission: TransmissionType // simulates additional server transmissions
+    notification: NotificationType // simulates additional server transmissions
     vpDetail?: VpTransmission // provision for payload on gaining vp
     instructions: Array<Instruction> // updates CanvasService via dedicated method
     expecting: ClientMessage | null // stays in TourService for advancing validation
