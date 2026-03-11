@@ -2,16 +2,17 @@ import Konva from 'konva';
 import { GroupLayoutData, HighlightGroupInterface, LayerIds, Target } from '~/client_types';
 import { Coordinates, Unique } from '~/shared_types';
 import { Highlight } from './Highlight';
+import { GroupHighlight } from './GroupHighlight';
 
-export class MapHighlightsGroup implements Unique<HighlightGroupInterface> {
+
+export class MapHighlightsGroup extends GroupHighlight {
     private group: Konva.Group;
-    private highlights: Map<Target, Highlight>;
+    // private highlights: Map<Target, Highlight>;
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        this.group = new Konva.Group({ ...layout });
-        stage.getLayers()[LayerIds.highlights].add(this.group);
+        super(stage, layout)
 
         this.highlights = new Map<Target, Highlight>();
         const groupWidth = this.group.width();
@@ -57,17 +58,5 @@ export class MapHighlightsGroup implements Unique<HighlightGroupInterface> {
         this.group.add(...nodes);
     }
 
-    public setPlacement(coordinates: Coordinates): void {
-        this.group.x(coordinates.x).y(coordinates.y);
-    }
 
-    public update(targets: Array<Target>): void {
-        this.highlights.forEach((highlight, key) => {
-            if (targets.includes(key)) {
-                highlight.isVisible() == false && highlight.show();
-            } else {
-                highlight.hide();
-            }
-        });
-    }
 }
