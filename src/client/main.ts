@@ -50,7 +50,7 @@ function resetClient(source: string) {
 }
 
 document.fonts.ready.then(() => {
-    const canvas = new CanvasService();
+    const canvas = new CanvasService(isTutorial);
 
     window.addEventListener('resize', () => {
         canvas.handleResize();

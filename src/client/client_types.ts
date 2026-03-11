@@ -95,11 +95,16 @@ export interface HTMLHandlerInterface {
     disable(): void,
 }
 
+export interface HighlightGroupInterface {
+    setPlacement(position: Coordinates): void;
+    update(targets: Array<Target>): void,
+}
+
 export interface MegaGroupInterface {
+    setPlacement?(position: Coordinates): void;
     drawElements(state: State): void,
     update(state: State): void,
     disable(): void,
-    updateHighlights?(targets: Array<Target>): void,
 }
 
 export interface DynamicGroupInterface<U> {

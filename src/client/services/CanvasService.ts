@@ -14,6 +14,7 @@ import {
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
 import { InstructionPanel } from '../groups/tutorial/InstructionPanel';
+import { MapHighlightsGroup } from '../groups/tutorial';
 
 export class CanvasService extends Communicator {
     private stage: Konva.Stage;
@@ -38,11 +39,12 @@ export class CanvasService extends Communicator {
     private chancellorModal: ChancellorModal | null = null;
     private peddlerModal: PeddlerModal | null = null;
     private tutorialPanel: InstructionPanel | null = null;
+    private mapHighlights: MapHighlightsGroup | null = null;
     private aspect: Aspect;
     private scale: number;
     private delayedResizing: number | null = null;
 
-    constructor() {
+    constructor(isTutorial: boolean) {
         super();
         // TODO: Reduce group.add() calls.throughout subclasses
 
@@ -103,6 +105,16 @@ export class CanvasService extends Communicator {
             (data: SailAttemptArgs) => this.sailAttemptModal.show(data),
             (data: DropBeforeLoadMessage) => this.dropBeforeLoad(data),
         ); // mapGroup covers half the canvas (2 segments)
+
+        if (isTutorial) {
+            this.mapHighlights = new MapHighlightsGroup(
+                this.stage,
+                {
+                    ...clientConstants.GROUP_DIMENSIONS.map,
+                    ...clientConstants.MAP_PLACEMENT[this.aspect],
+                },
+            );
+        }
 
         this.setupGroup = new SetupGroup(
             this.stage,
@@ -213,7 +225,7 @@ export class CanvasService extends Communicator {
     }
 
     private updateHighlights(targets: Array<Target>) {
-        this.mapGroup.updateHighlights(targets);
+        this.mapHighlights?.update(targets);
         this.locationGroup.updateHighlights(targets);
         this.playerGroup.updateHighlights(targets);
     }
@@ -270,6 +282,7 @@ export class CanvasService extends Communicator {
         this.peddlerModal?.repositionModal(this.aspect);
 
         this.tutorialPanel?.repositionPanel(this.aspect);
+        this.mapHighlights?.setPlacement(clientConstants.MAP_PLACEMENT[this.aspect]);
     }
 
     private calculateDimensions() {
