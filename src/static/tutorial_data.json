@@ -86,7 +86,7 @@
                     "name": "captain",
                     "displayName": "Captain",
                     "specialty": "gems",
-                    "description": "No special ability."
+                    "description": "No other special ability."
                 },
                 "isActive": true,
                 "mayUndo": false,
@@ -209,69 +209,69 @@
     "text": [
         [
             "Hello and welcome to Ophir 2D!\n\nThis is a faithful digital implementation of the board game Ophir, released around 2014. Thanks for trying it out.\n\n\nClick on Next to proceed.",
-            "This tutorial will explain the main concepts by guiding you through the usual first turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
+            "This tutorial will explain the main concepts by guiding you through a few turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
             "This is the map. It shows where every location is situated and where ships are currently located.",
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
             "This area contains the player cards.\n\nIn this scenario it also contains the rival ship controls.",
-            "Let's get down to holy business!\n\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nHere is where you'll want to bring in these precious metals to gain great boosts of Victory Points.",
-            "This is your current location. The purple disc token represents your ship.\n\nTry repositioning it within the hexagonal borders."
+            "Context:\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nThrough donations players gain Victory Points (VP).\n\nYour goal is to gain a bit more VP than any other player.",
+            "This is your current location. The purple disc token represents your ship. You can reposition it by dragging it.\n\nTry repositioning it now."
         ],
         [
             "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship (the white ship token).",
-            "On your turn, your ship token will bob if it can move. You get two moves per turn. The moves counter keeps track of how many you have.",
-            "All directly adjacent zones are possible move destinations (shown in lighter blue).",
-            "These other two zones (darker blue) are out of reach, being blocked behind barriers.\n\nBarriers remain fixed during the game.",
-            "Notice that your current location is also in dark blue.\nThis is because you must move at least once before doing anything.",
+            "On your turn, your ship token will bob if it can also move. Moving implies dragging the ship into an adjacent zone.\n\nYou get two moves per turn. The moves counter keeps track of how many you have.",
+            "All possible move destinations appear in a lighter blue.",
+            "Inaccessible zones appear in darker blue.\n\n These two in particular are behind barriers. Barriers remain fixed during the game.",
+            "Notice that your current location is also in dark blue.\n\nThis is because the first thing you must do on your turn is move away.",
             "To continue, drag your ship token into the highlighted zone.\n\nKeep an eye on the moves counter."
         ],
         [
             "You've just spent a move. It's reflected in the moves counter having a discolored wave.\n\nYou have one move left.",
             "After moving, your zone of origin always becomes innaccessible, even though it's adjacent.",
-            "On the flip-side new zones may become reachable, such as this one. It contains the Market, which currently pays well for delivering gems.",
+            "On the flip-side new zones may become reachable, such as this one.\n\nThis zone contains the Market, which currently pays well for delivering gems.",
             "Since you moved, you can now also perform actions at your current location.\n\nThe warm color indicates that there are available actions.",
-            "Pick up the local commodity.\n\nClick on the red gem icon to load a gem into your cargo hold."
+            "Pick up the local commodity.\n\nClick on the red gem icon inside the zone to load a unit of gems into your cargo hold."
         ],
         [
             "The gems are now in your cargo. They take up one space out of two.\n\nNotice that your cargo capacity is only half the size it could be (2 slots out of 4).",
-            "Now you'd want to head on to the Market but you're not allowed to move after having interacted with a location.\n\nNotice that you've lost your second move.",
-            "Your current location is also now dark blue because there are no actions left. You can only pick one commodity type from a location per turn.",
+            "Now you'd want to head on to the Market. However, you're not allowed to move after having interacted with a location.\n\nNotice that you've lost your second move.",
+            "Your current location is also now dark blue because there are no actions left.\n\nYou can only pick one commodity type from a location per turn.",
             "Since there's nothing left to do, you should end your turn.\n\nClick on the green anchor button and confirm the dialog that follows."
         ],
         [
             "Oh, it's your turn again!\n\nThis is expected, since you're the only one playing. (╥‸╥)",
-            "Now it's time to sell those gems, but moving to the Market right now is a special case.\n\nWhenever you try moving into a zone that contains other ships, you'll have to deal with the uncertainty of an Influence Roll.",
-            "The Rival Ship present there is setting the roll difficulty to 3.\n\nThat's not the end of the world, so try moving there and confirming your intention to roll for influence."
+            "Now it's time to sell those gems, but the Rival ship is hindering movement to the Market right now.\n\nWhenever you try moving into a zone that contains other ships, you'll have to deal with the uncertainty of an influence roll.",
+            "The Rival Ship present there is setting the roll difficulty to 3 (roll on a 6-sided die).\n\nThose are decent chances, so try moving there and confirming your intention to roll for influence."
         ],
         [
-            "Oops! You only rolled a 2 and managed to waste one move.\n\nBut all's not lost.",
+            "Oof! You only rolled a 2 and managed to waste one move.\n\nBut all's not lost.",
             "Notice that the Rival's influence has decreased from 3 to 2.\n\nWhenever a player fails an influence check, the ships that prevented its movement lose one influence.",
             "While failing a second time would mean losing your turn, a roll difficulty of 2 offers much better odds.\n\n Try moving again."
         ],
         [
-            "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily lost control of your ship.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
+            "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily gained control control of the Rival.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
             "The Rival controls contain the influence die, two buttons with similar functions, and a moves counter.",
             "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn.'",
             "Move the Rival Ship towards the Treasury."
         ],
         [
             "Great! You could move it further towards the Temple but we want to leave it here for now.",
-            "Click on the its anchor button to leave the Rival ship and return controlling your ship.\n\n You'll be asked to confirm this."
+            "Click on its anchor button to leave the Rival ship and return controlling your ship.\n\n You'll be asked to confirm this."
         ],
         [
             "Note that the rival automatically makes an influence roll after being handled.",
             "But now that it's out of the way, you can interact with the Market.\n\nThe deck and row of orange cards represent the Market.",
             "This last card is now active (in bright orange) because the gems in your cargo can satisfy its requirements.",
-            "But look, the Specialty button on your placard has also become active.\n\nThis is because your Specialist, the Captain may sell any number of gems at one coin apiece when at the Market, irrespective of what deals are available.",
+            "But look, the Specialty button on your player card has also become active.\n\nThis is because your Specialist, the Captain, may sell any number of gems at one coin apiece when at the Market, irrespective of what deals are available.",
             "To learn more about your Specialist, you can click on its name band.\n\nClick again to switch back.",
-            "The Captain has no special ability, but at the start of a regular game, you get to select an actual Specialist.",
+            "The Captain has no special ability.\n\nIn a regular game though, you get to select an actual Specialist before play starts.",
             "Sell your gems as Specialty now.\n\nDon't worry about missing the better deal."
         ],
         [
             "You have unloaded your gems and gained a coin. Indeed, not very lucrative.\n\nAs a rule-of-thumb, you should aim for a better ratio than 1-to-1.",
-            "Fortunately, you can take back that action.\n\nThe Undo button allows you to revert your actions.\nClick on it now."
+            "Fortunately, you can take back that action.\n\nThe Undo button allows you to revert your actions.\n\nClick on it now."
         ],
         [
-            "Your gems are back!\n\nDuring a game, on your turn, you can use the Undo button to revert any number of actions and movements as long as they did not involve an undetermined result (such as rolling influence).",
+            "Your gems are back!\n\nDuring a game, on your turn, you can use the Undo button to revert any number of actions and movements as long as they did not involve a non-deterministic result (such as rolling influence).",
             "Whenever you're about to perform an un-revertible action you'll be asked to confirm it (green button).\n\nTake the better deal. Click on the market card."
         ],
         [
@@ -281,21 +281,21 @@
             "This means that a deal can be transacted multiple times,\nbut also that it may disappear before you manage to profit from it.\n\nThis all depends on how often your opponents transact with the market.",
             "You might have noticed some extra symbols on and around these cards.\n\nLet's clarify them in order.",
             "The green upwards arrow is a bonus modifier. It means that the deal offers 1 more coin than usual.",
-            "As you might expect, the red downwards arrow means the opposite.\nAs such, a deal offering 1 coin would be modified to 0.",
-            "These modifiers remain fixed throughout the game.\n\nThis means you can predict how much coins deals would offer depending on turn order and what your opponents are carrying in their cargo.",
-            "We'll touch on the temple mark a little later.",
+            "As you might expect, the red downwards arrow means the opposite.\n\nAs such, a deal offering 1 coin would be modified to 0.",
+            "These modifiers remain fixed throughout the game.\n\nThis means you can predict how many coins deals would be worth for you depending on turn order and what your opponents are carrying in their cargo.",
+            "The temple mark is also fixed, but it concerns the Temple.\n\nWe'll touch on it a little later.",
             "For now, just end your turn."
         ],
         [
-            "Alright. You now might want to move to the treasury and buy some gold or silver.\n\nBut there might be a problem.",
-            "The Rival ship is now setting a whopping difficulty of 6 for an influence roll.\n\nIndeed, if you don't roll a 6, you might still roll a 5 in a second attempt.",
+            "Alright. You now might want to move to the treasury and buy some gold or silver.\n\nBut the Rival now poses a bigger problem.",
+            "The Rival ship is now setting a whopping difficulty of 6 for an influence roll (your current influence does not matter).\n\nGranted, if you don't roll a 6, you might still roll a 5 in a second attempt.",
             "Still, there's a good chance you'll fail both rolls and lose your current turn.\n\nIn a busy multiplayer game (3-4 players) you run the risk of falling behind on deliveries.",
-            "Instead of taking risks, you can become more versatile.\n\nThere are two aspects you can improve for this: Gaining Favor and increasing your cargo capacity.",
+            "Instead of taking risks, you can become more versatile.\n\nThere are two aspects you can improve for this:\n\n- Gather Favor\n- Increase your cargo capacity.",
             "You obtain both at the Temple.",
             "Let's go around the barriers and towards the Temple."
         ],
         [
-            "If you haven't noticed already. The Temple also features a commodity transaction.\n\nIt'd be a good idea to pick up some gems and linen on the way.",
+            "If you haven't noticed already, the Temple also features a commodity transaction.\n\nIt'd be a good idea to pick up some gems and linen on the way.",
             "For now, pick up gems and end your turn."
         ],
         [
@@ -329,35 +329,35 @@
             "We're throughly done here so let's end the turn."
         ],
         [
-            "That Rival ship is still there and bearing maximum influence.\n\nBut that's why we saught Favor.",
+            "That Rival ship is still there and bearing maximum influence.\n\nBut new you're equipped with Favor.",
             "You can spend 1 Favor to ignore other ships when moving.\n\nClick on the Favor button."
         ],
         [
             "You're all set!\n\nNow you can move without a worry to the Treasury."
         ],
         [
-            "Isn't that nice!. Notice that you did not have to roll for influence, despite the Rival ship's presence.",
-            "Since you have to move the rival first, know that you can use it not only to block access for your opponents, but also to manipulate the Market.\n\nMove the Rival ship to the Market."
+            "That was smooth! Notice that you did not have to roll for influence, despite the Rival ship's presence.",
+            "Since you have to move the rival first, you should test out its special interaction with the Market.\n\nMove the Rival ship to the Market."
         ],
         [
-            "Now, shift the Market remotely."
+            "If you dismiss the Rival at the Market, you may chose to also shift the Market.\n\nClick on the card button instead of the anchor."
         ],
         [
             "The Market supplies new deals but it also acts as a game clock.",
             "The supply is limited.\n\nWhenever the deck becomes empty (including the top card) the game will end.\n\nBut that's a secondary game end condition.",
-            "The primary focus is on the Temple getting built\n\nLet's get to that and buy some silver."
+            "The primary focus is on the Temple getting built.\n\nLet's get to that and buy some silver (as it's all we can afford)."
         ],
         [
             "Ah, here's another reason why upgrading is important. Gold and silver fill two slots in your cargo.",
-            "This is the donations display. It keeps track of every donated siler and gold.",
-            "Let's return end the turn."
+            "This is the donations display. It's were your silver must end up.",
+            "Let's the turn."
         ],
         [
-            "Let's move to the Temple. In the meantime we'll pretend it already received two metal donations."
+            "Now move to the Temple.\n\nIn the meantime we'll pretend it already received two metal donations."
         ],
         [
             "When the black section of the donations display is filled, the game will end. This is the second and most common end condition.\n\nNote that the metal icons there are for counting, not for showing occupied cargo space.",
-            "As players donate metals, the icons accumulate in stacks of three.\n\nThis is important:\nFor every complete stack, the coin cost of metals increases.\nGold gets more expensive by 1 coin for every stack. Silver about half as fast.",
+            "As players donate metals, the icons accumulate in stacks of three.\n\nThis is important:\nFor every complete stack, metals cost more coins. Gold gets more expensive by 1 coin for every stack. Silver about half as fast.",
             "Make the donation and watch the prices."
         ],
         [
@@ -365,10 +365,8 @@
             "You must have noticed that you could also use Favor to buy metals.\n\nWhile the cost in Favor looks prohibitive, the increasing coin prices will make these options, in time, appealing.",
             "Donating silver has gained you 5VP.",
             "And the Temple has completed an obelisk it seems.",
-            "This is the end of the tutorial. Thanks for taking the time to complete it.\n\nIf you want to play with your friends or the occasional wanderer, click Back and consider creating a persistent Multiplayer account."
-        ],
-        [
-            "Template"
+            "This is the end of the tutorial. Thanks for taking the time to complete it.\n\nThis explanation was not exhaustive. You should probably also read the game rules (link on the front page)",
+            "If you want to play with your friends or the occasional wanderer, click Back and consider creating a persistent Multiplayer account.\n\nCheers!"
         ]
     ]
 }

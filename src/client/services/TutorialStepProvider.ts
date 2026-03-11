@@ -1,6 +1,5 @@
 import { PlayState, Action } from '~/shared_types';
 import { ScenarioStepPartial, Target } from '../client_types';
-import { EmptyLocationToken } from '../groups/map';
 
 const position = { x: 0, y: 0 } as const;
 export class TutorialStepProvider {
@@ -83,7 +82,7 @@ export class TutorialStepProvider {
             visuals: [
                 { highlights: [] },
                 { highlights: [Target.topRightZone] },
-                { highlights: [Target.rivalInfluence] },
+                { highlights: [Target.topRightZone, Target.rivalInfluence] },
             ],
             expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
         },
@@ -223,8 +222,8 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.goldForCoin] },
+                { highlights: [Target.marketArea, Target.slot_1] },
                 { highlights: [Target.marketArea] },
-                { highlights: [Target.marketArea, Target.deck] },
                 { highlights: [Target.marketArea] },
                 { highlights: [Target.fluctuation_up, Target.fluctuation_down, Target.temple_mark] },
                 { highlights: [Target.fluctuation_up] },
@@ -267,7 +266,7 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.marketCard] },
-                { highlights: [Target.topLeftZone] },
+                { highlights: [Target.marketCard, Target.topLeftZone] },
             ],
             expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
         },
@@ -359,7 +358,7 @@ export class TutorialStepProvider {
             visuals: [
                 { highlights: [Target.templeArea] },
                 { highlights: [Target.marketCard, Target.temple_mark] },
-                { highlights: [Target.marketArea] },
+                { highlights: [Target.marketCard] },
             ],
             expecting: { action: Action.donate_goods, payload: { slot: 'slot_2' } },
         },
@@ -479,7 +478,9 @@ export class TutorialStepProvider {
                 m.slot_1 = m.future;
                 m.future = { request: ['ebony'], reward: { coins: 1, favorAndVp: 1 } };
                 if (state.rival.isIncluded) {
-                    state.rival.isControllable = false;
+                    const r = state.rival;
+                    r.influence = 4;
+                    r.isControllable = false;
                 }
                 const p = state.players[0];
                 p.isHandlingRival = false;
@@ -566,13 +567,6 @@ export class TutorialStepProvider {
                 { highlights: [Target.vpDial] },
                 { highlights: [Target.bottomRightZone] },
                 { highlights: [] },
-            ],
-            expecting: null,
-        },
-        { // TEMPLATE!
-            notification: null,
-            mutate: (_state: PlayState) => {},
-            visuals: [
                 { highlights: [] },
             ],
             expecting: null,
