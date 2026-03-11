@@ -63,10 +63,10 @@ export class CanvasService extends Communicator {
         this.stage.scale({ x: scale, y: scale });
 
         this.stage.add(...[
-            new Konva.Layer(), //  base
-            new Konva.Layer(), //  map
-            new Konva.Layer(), //  modal
-            new Konva.Layer(), //  overlay.
+            new Konva.Layer(), //  board
+            new Konva.Layer(), //  ships
+            new Konva.Layer(), //  modals
+            new Konva.Layer(), //  highlights.
         ]);
 
         // Common modals

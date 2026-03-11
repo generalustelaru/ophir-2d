@@ -56,7 +56,7 @@ export enum LayerIds {
     board,
     ships,
     modals,
-    overlay,
+    highlights,
 }
 
 export enum Aspect { tall = 'tall', wide = 'wide' }

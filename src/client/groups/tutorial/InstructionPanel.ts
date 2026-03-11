@@ -67,7 +67,7 @@ export class InstructionPanel {
 
         this.group.add(background, this.content, this.backButton.getElement(), this.nextButton.getElement());
 
-        stage.getLayers()[LayerIds.overlay].add(this.group);
+        stage.getLayers()[LayerIds.board].add(this.group);
     }
 
     public updateContent(instructions: Array<Instruction>) {
