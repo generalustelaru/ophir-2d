@@ -314,7 +314,61 @@
             "It's time to visit the Temple."
         ],
         [
-            "--At the temple.--"
+            "Welcome to the Temple.\n\nFirst time visiting? There are three things one can do here:\n- Donate precious metals.\n- Donate commodities.\n- Upgrade the ship's cargo hold.",
+            "The deal at the Temple is mirroring one at the Market (whichever sits under the temple marker).\n\nThe only difference is that the transaction implies Vitory Points and Favor instead of coins.",
+            "Click on the donation card to perform the transaction.\n\nNote that this will also shift cards in the Market."
+        ],
+        [
+            "Wonderful!\n\nNot only that you've finally got your hands on some Favor, but have also gained 2 VP.",
+            "2VP might not feel like a lot, but donating commodities consistently will trickle VP faster than going through the Market and Treasury.\n\nIt can be an opportunistic choice or an alternative path to victory.",
+            "Notice that market deals can come with three commodity requirements. Your cargo can only accomodate two.\n\nThat's why you should not wait too long for an upgrade.",
+            "Click on the Upgrade button."
+        ],
+        [
+            "Those were 2 coins well spent.",
+            "We're throughly done here so let's end the turn."
+        ],
+        [
+            "That Rival ship is still there and bearing maximum influence.\n\nBut that's why we saught Favor.",
+            "You can spend 1 Favor to ignore other ships when moving.\n\nClick on the Favor button."
+        ],
+        [
+            "You're all set!\n\nNow you can move without a worry to the Treasury."
+        ],
+        [
+            "Isn't that nice!. Notice that you did not have to roll for influence, despite the Rival ship's presence.",
+            "Since you have to move the rival first, know that you can use it not only to block access for your opponents, but also to manipulate the Market.\n\nMove the Rival ship to the Market."
+        ],
+        [
+            "Now, shift the Market remotely."
+        ],
+        [
+            "The Market supplies new deals but it also acts as a game clock.",
+            "The supply is limited.\n\nWhenever the deck becomes empty (including the top card) the game will end.\n\nBut that's a secondary game end condition.",
+            "The primary focus is on the Temple getting built\n\nLet's get to that and buy some silver."
+        ],
+        [
+            "Ah, here's another reason why upgrading is important. Gold and silver fill two slots in your cargo.",
+            "This is the donations display. It keeps track of every donated siler and gold.",
+            "Let's return end the turn."
+        ],
+        [
+            "Let's move to the Temple. In the meantime we'll pretend it already received two metal donations."
+        ],
+        [
+            "When the black section of the donations display is filled, the game will end. This is the second and most common end condition.\n\nNote that the metal icons there are for counting, not for showing occupied cargo space.",
+            "As players donate metals, the icons accumulate in stacks of three.\n\nThis is important:\nFor every complete stack, the coin cost of metals increases.\nGold gets more expensive by 1 coin for every stack. Silver about half as fast.",
+            "Make the donation and watch the prices."
+        ],
+        [
+            "Look! The cost of silver has doubled.\n\nFor a brief time, it'll be much more efficient to buy gold since it's twice the value without requiring twice the cargo space.",
+            "You must have noticed that you could also use Favor to buy metals.\n\nWhile the cost in Favor looks prohibitive, the increasing coin prices will make these options, in time, appealing.",
+            "Donating silver has gained you 5VP.",
+            "And the Temple has completed an obelisk it seems.",
+            "This is the end of the tutorial. Thanks for taking the time to complete it.\n\nIf you want to play with your friends or the occasional wanderer, click Back and consider creating a persistent Multiplayer account."
+        ],
+        [
+            "Template"
         ]
     ]
 }

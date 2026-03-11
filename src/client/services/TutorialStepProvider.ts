@@ -1,12 +1,13 @@
 import { PlayState, Action } from '~/shared_types';
 import { ScenarioStepPartial, Target } from '../client_types';
+import { EmptyLocationToken } from '../groups/map';
 
 const position = { x: 0, y: 0 } as const;
 export class TutorialStepProvider {
     private currentStep: number = 0;
     private partials: Array<ScenarioStepPartial> = [
         {
-            transmission: null,
+            notification: null,
             mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
@@ -20,7 +21,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.reposition, payload: { position } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
@@ -33,7 +34,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topLeft', position } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.bearings.seaZone = 'topLeft';
@@ -54,7 +55,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
@@ -70,7 +71,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn , payload: null },
         },
         {
-            transmission: 'turnStart',
+            notification: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.overnightZone = 'topLeft';
@@ -87,7 +88,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
         },
         {
-            transmission: 'failedMove',
+            notification: 'failedMove',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 2;
@@ -104,7 +105,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
         },
         {
-            transmission: 'rivalControl',
+            notification: 'rivalControl',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 6;
@@ -130,7 +131,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move_rival, payload: { zoneId: 'right', position } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 state.players[0].mayUndo = true;
 
@@ -149,7 +150,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_rival_turn, payload: null },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 if(state.rival.isIncluded) {
                     const r = state.rival;
@@ -175,7 +176,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.sell_specialty, payload: null },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo = ['empty', 'empty'];
@@ -191,7 +192,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.undo, payload: null },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo = ['gems', 'empty'];
@@ -206,7 +207,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.sell_goods, payload: { slot: 'slot_3' } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo = ['empty', 'empty'];
@@ -235,7 +236,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            transmission: 'turnStart',
+            notification: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.isAnchored = false;
@@ -253,7 +254,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topLeft', position } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.isAnchored = true;
@@ -271,7 +272,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
@@ -285,7 +286,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            transmission: 'turnStart',
+            notification: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.isAnchored = false;
@@ -299,7 +300,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'center', position } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 1;
@@ -316,7 +317,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.load_good, payload: { tradeGood: 'linen', drop: null } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
@@ -329,7 +330,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            transmission: 'turnStart',
+            notification: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = false;
@@ -343,7 +344,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'bottomRight', position } },
         },
         {
-            transmission: null,
+            notification: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = true;
@@ -353,14 +354,223 @@ export class TutorialStepProvider {
                 p.bearings.location = 'temple';
                 p.destinations = ['bottomLeft', 'right'];
                 p.locationActions = [Action.donate_goods, Action.upgrade_cargo];
+                p.feasibleTrades = [{ slot: 'slot_2', missing: [] }];
             },
             visuals: [
+                { highlights: [Target.templeArea] },
+                { highlights: [Target.marketCard, Target.temple_mark] },
+                { highlights: [Target.marketArea] },
+            ],
+            expecting: { action: Action.donate_goods, payload: { slot: 'slot_2' } },
+        },
+        {
+            notification: null,
+            vpDetail: { vp: 2 },
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.favor = 2;
+                p.moveActions = 0;
+                p.cargo = ['empty', 'empty'];
+                p.locationActions = [Action.upgrade_cargo];
+                p.mayUndo = false;
+                const m = state.market;
+                m.deckSize -= 1;
+                m.slot_3 = m.slot_2;
+                m.slot_2 = m.slot_1;
+                m.slot_1 = m.future;
+                m.future = { request: ['ebony', 'marble', 'linen'], reward: { coins: 4, favorAndVp: 4 } };
+            },
+            visuals: [
+                { highlights: [Target.favorDial, Target.vpDial] },
+                { highlights: [Target.marketArea, Target.treasuryArea] },
+                { highlights: [Target.deck] },
+                { highlights: [Target.upgradeButton] },
+            ],
+            expecting: { action: Action.upgrade_cargo, payload: null },
+        },
+        {
+            notification: null,
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.cargo.push('empty');
+                p.coins -= 2;
+                p.locationActions = [];
+                p.mayUndo = true;
+            },
+            visuals: [
+                { highlights: [Target.cargoBand] },
+                { highlights: [Target.endTurnButton] },
+            ],
+            expecting: { action: Action.end_turn, payload: null },
+        },
+        {
+            notification: 'turnStart',
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.mayUndo = false;
+                p.isAnchored = false;
+                p.moveActions = 2;
+                p.destinations = ['bottomLeft', 'center', 'right'];
+            },
+            visuals: [
+                { highlights: [Target.rightZone] },
+                { highlights: [Target.favorButton] },
+            ],
+            expecting: { action: Action.spend_favor, payload: null },
+        },
+        {
+            notification: null,
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.privilegedSailing = true;
+                p.isAnchored = true;
+                p.favor -= 1;
+            },
+            visuals: [
+                { highlights: [Target.rightZone] },
+            ],
+            expecting: { action: Action.move, payload: { zoneId: 'right', position } },
+        },
+        {
+            notification: 'rivalControl',
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.moveActions = 1;
+                p.bearings.seaZone = 'right';
+                p.bearings.location = 'treasury';
+                p.isHandlingRival = true;
+                p.destinations = ['topRight'];
+                p.feasiblePurchases = [{ metal: 'silver', currency: 'coins' }];
+                if (state.rival.isIncluded) {
+                    const r = state.rival;
+                    r.isControllable = true;
+                    r.destinations = ['topRight', 'bottomRight'];
+                }
+            },
+            visuals: [
+                { highlights: [Target.influenceDie] },
+                { highlights: [Target.topRightZone] },
+            ],
+            expecting: { action: Action.move_rival, payload: { zoneId: 'topRight', position } },
+        },
+        {
+            notification: null,
+            mutate: (state: PlayState) => {
+                if (state.rival.isIncluded) {
+                    const r = state.rival;
+                    r.bearings.seaZone = 'topRight';
+                    r.bearings.location = 'market';
+                    r.destinations = ['topLeft'];
+                    r.moves = 1;
+                }
+            },
+            visuals: [
+                { highlights: [Target.cycleMarket, Target.marketArea] },
+            ],
+            expecting: { action: Action.shift_market, payload: null },
+        },
+        {
+            notification: null,
+            mutate: (state: PlayState) => {
+                const m = state.market;
+                m.deckSize -= 1;
+                m.slot_3 = m.slot_2;
+                m.slot_2 = m.slot_1;
+                m.slot_1 = m.future;
+                m.future = { request: ['ebony'], reward: { coins: 1, favorAndVp: 1 } };
+                if (state.rival.isIncluded) {
+                    state.rival.isControllable = false;
+                }
+                const p = state.players[0];
+                p.isHandlingRival = false;
+                p.locationActions = [Action.buy_metal];
+            },
+            visuals: [
+                { highlights: [Target.marketArea] },
+                { highlights: [Target.deck] },
+                { highlights: [Target.silverForCoin] },
+            ],
+            expecting: { action: Action.buy_metal, payload: { metal: 'silver', currency: 'coins', drop: null } },
+        },
+        {
+            notification: null,
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.mayUndo = true;
+                p.moveActions = 0;
+                p.coins = 0;
+                p.cargo = ['silver', 'silver_extra', 'empty'];
+                p.feasiblePurchases = [];
+                p.locationActions = [];
+                p.destinations = [];
+            },
+            visuals: [
+                { highlights: [Target.cargoBand] },
+                { highlights: [Target.donationsDisplay] },
+                { highlights: [Target.endTurnButton] },
+            ],
+            expecting: { action: Action.end_turn, payload: null },
+        },
+        {
+            notification: 'turnStart',
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.privilegedSailing = false;
+                p.isAnchored = false;
+                p.mayUndo = false;
+                p.moveActions = 2;
+                p.destinations = ['topRight', 'bottomRight'];
+                state.temple.donations = ['gold', 'silver'];
+            },
+            visuals: [
+                { highlights: [Target.bottomRightZone] },
+            ],
+            expecting: { action: Action.move, payload: { zoneId: 'bottomRight', position } },
+        },
+        {
+            notification: null,
+            mutate: (state: PlayState) => {
+                const p = state.players[0];
+                p.mayUndo = true;
+                p.moveActions = 1;
+                p.bearings.seaZone = 'bottomRight';
+                p.bearings.location = 'temple';
+                p.destinations = ['bottomLeft', 'center'];
+                p.isAnchored = true;
+                p.locationActions = [Action.donate_metal];
+            },
+            visuals: [
+                { highlights: [Target.donationsDisplay] },
+                { highlights: [Target.donationsDisplay, Target.goldForCoin, Target.silverForCoin] },
+                { highlights: [Target.silverCard, Target.goldForCoin, Target.silverForCoin] },
+            ],
+            expecting: { action: Action.donate_metal, payload: { metal: 'silver' } },
+        },
+        {
+            notification: null,
+            vpDetail: { vp: 7 },
+            mutate: (state: PlayState) => {
+                state.temple.donations.push('silver');
+                state.temple.currentLevel += 1;
+                state.treasury.goldCost.coins += 1;
+                state.treasury.silverCost.coins += 1;
+                const p = state.players[0];
+                p.cargo = ['empty', 'empty', 'empty'];
+                p.moveActions = 0;
+                p.locationActions = [];
+
+            },
+            visuals: [
+                { highlights: [Target.goldForCoin, Target.silverForCoin] },
+                { highlights: [Target.goldForFavor, Target.silverForFavor] },
+                { highlights: [Target.vpDial] },
+                { highlights: [Target.bottomRightZone] },
                 { highlights: [] },
             ],
             expecting: null,
         },
         { // TEMPLATE!
-            transmission: null,
+            notification: null,
             mutate: (_state: PlayState) => {},
             visuals: [
                 { highlights: [] },
