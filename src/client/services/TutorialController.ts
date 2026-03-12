@@ -87,14 +87,16 @@ export class TutorialController extends Communicator implements Controller {
                 throw new Error('Scenarios are incomplete.');
 
             scenario.mutate(this.currentState);
-            const { instructions, expecting, notification, vpDetail } = scenario;
+            const { instructions, expecting, laconic: notification, vpDetail, failedRollDetail } = scenario;
             this.expectedMessage = expecting;
 
             vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
+            failedRollDetail && this.createEvent({ type: EventType.failed_roll, detail: failedRollDetail });
             this.createEvent({ type: EventType.tour_update, detail: {
                 state: this.currentState,
                 instructions,
             } });
+
 
             switch (notification) {
                 case 'turnStart':
@@ -125,7 +127,8 @@ export class TutorialController extends Communicator implements Controller {
         const {
             expecting,
             vpDetail,
-            notification,
+            failedRollDetail,
+            laconic,
             visuals: stepHighlights,
             mutate: originalMutate,
         } = partial;
@@ -145,7 +148,7 @@ export class TutorialController extends Communicator implements Controller {
 
         const mutate: (state: PlayState) => void = (() => {
             switch (true) {
-                case newPosition && notification != 'failedMove':
+                case newPosition && !failedRollDetail:
                     return (state: PlayState): void => {
                         state.players[0].bearings.position = newPosition;
                         originalMutate(state);
@@ -161,7 +164,7 @@ export class TutorialController extends Communicator implements Controller {
             }
         })();
 
-        return { mutate, instructions, expecting, notification, vpDetail };
+        return { mutate, instructions, expecting, laconic, vpDetail, failedRollDetail };
     }
 
     private isSame(reference: any, tested: any): boolean {

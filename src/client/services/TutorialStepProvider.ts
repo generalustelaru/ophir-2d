@@ -6,7 +6,7 @@ export class TutorialStepProvider {
     private currentStep: number = 0;
     private partials: Array<ScenarioStepPartial> = [
         {
-            notification: null,
+            laconic: null,
             mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
@@ -20,7 +20,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.reposition, payload: { position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (_state: PlayState) => { },
             visuals: [
                 { highlights: [] },
@@ -33,7 +33,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topLeft', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.bearings.seaZone = 'topLeft';
@@ -54,7 +54,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
@@ -70,7 +70,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn , payload: null },
         },
         {
-            notification: 'turnStart',
+            laconic: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.overnightZone = 'topLeft';
@@ -87,7 +87,8 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
         },
         {
-            notification: 'failedMove',
+            laconic: null,
+            failedRollDetail: { rolled: 2, toHit: 3 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 2;
@@ -104,7 +105,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
         },
         {
-            notification: 'rivalControl',
+            laconic: 'rivalControl',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 6;
@@ -130,7 +131,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move_rival, payload: { zoneId: 'right', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 state.players[0].mayUndo = true;
 
@@ -149,7 +150,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_rival_turn, payload: null },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 if(state.rival.isIncluded) {
                     const r = state.rival;
@@ -175,7 +176,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.sell_specialty, payload: null },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo = ['empty', 'empty'];
@@ -191,7 +192,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.undo, payload: null },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo = ['gems', 'empty'];
@@ -206,7 +207,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.sell_goods, payload: { slot: 'slot_3' } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo = ['empty', 'empty'];
@@ -235,7 +236,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            notification: 'turnStart',
+            laconic: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.isAnchored = false;
@@ -253,7 +254,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'topLeft', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.isAnchored = true;
@@ -271,7 +272,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
@@ -285,7 +286,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            notification: 'turnStart',
+            laconic: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.isAnchored = false;
@@ -299,7 +300,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'center', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 1;
@@ -316,7 +317,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.load_good, payload: { tradeGood: 'linen', drop: null } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
@@ -329,7 +330,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            notification: 'turnStart',
+            laconic: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = false;
@@ -343,7 +344,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'bottomRight', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = true;
@@ -363,7 +364,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.donate_goods, payload: { slot: 'slot_2' } },
         },
         {
-            notification: null,
+            laconic: null,
             vpDetail: { vp: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
@@ -388,7 +389,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.upgrade_cargo, payload: null },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.cargo.push('empty');
@@ -403,7 +404,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            notification: 'turnStart',
+            laconic: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = false;
@@ -418,7 +419,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.spend_favor, payload: null },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.privilegedSailing = true;
@@ -431,7 +432,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'right', position } },
         },
         {
-            notification: 'rivalControl',
+            laconic: 'rivalControl',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 1;
@@ -453,7 +454,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move_rival, payload: { zoneId: 'topRight', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 if (state.rival.isIncluded) {
                     const r = state.rival;
@@ -469,7 +470,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.shift_market, payload: null },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const m = state.market;
                 m.deckSize -= 1;
@@ -494,7 +495,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.buy_metal, payload: { metal: 'silver', currency: 'coins', drop: null } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = true;
@@ -513,7 +514,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.end_turn, payload: null },
         },
         {
-            notification: 'turnStart',
+            laconic: 'turnStart',
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.privilegedSailing = false;
@@ -529,7 +530,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.move, payload: { zoneId: 'bottomRight', position } },
         },
         {
-            notification: null,
+            laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.mayUndo = true;
@@ -548,7 +549,7 @@ export class TutorialStepProvider {
             expecting: { action: Action.donate_metal, payload: { metal: 'silver' } },
         },
         {
-            notification: null,
+            laconic: null,
             vpDetail: { vp: 7 },
             mutate: (state: PlayState) => {
                 state.temple.donations.push('silver');
