@@ -222,7 +222,7 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.goldForCoin] },
-                { highlights: [Target.marketArea, Target.slot_1] },
+                { highlights: [Target.marketArea, Target.slot_3] },
                 { highlights: [Target.marketArea] },
                 { highlights: [Target.marketArea] },
                 { highlights: [Target.fluctuation_up, Target.fluctuation_down, Target.temple_mark] },

@@ -55,8 +55,8 @@ export type Specification = {
 export enum LayerIds {
     board,
     ships,
-    modals,
     highlights,
+    modals,
 }
 
 export enum Aspect { tall = 'tall', wide = 'wide' }
