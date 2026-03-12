@@ -224,6 +224,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
 });
 
 // MARK: HTTP
+app.set('trust proxy', 1); // trust first proxy (Nginx)
 app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
