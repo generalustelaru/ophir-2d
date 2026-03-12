@@ -47,6 +47,7 @@ export class InstructionPanel {
             fill: 'white',
             fontSize: 18,
             verticalAlign: 'top',
+            lineHeight: 1.3,
             x: 10,
             y: 10,
             fontFamily: 'Custom',

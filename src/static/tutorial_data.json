@@ -208,26 +208,26 @@
     },
     "text": [
         [
-            "Hello and welcome to Ophir 2D!\n\nThis is a faithful digital implementation of the board game Ophir, released around 2014. Thanks for trying it out.\n\n\nClick on Next to proceed.",
-            "This tutorial will explain the main concepts by guiding you through a few turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
-            "This is the map. It shows where every location is situated and where ships are currently located.",
+            "Hello and welcome to Ophir 2D!\n\nThis is a non-official digital implementation of an existing board game called Ophir. Thanks for trying it out.\n\nClick on Next to proceed.",
+            "This tutorial will explain the main game concepts by guiding you through a few turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
+            "This is the map.\nIt shows where every location is situated and where ships are currently located.",
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
-            "This area contains the player cards.\n\nIn this scenario it also contains the rival ship controls.",
-            "Context:\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nPlayers gain Victory Points (VP) through donations.\n\nYour goal is to gain a bit more VP than any other player.",
+            "This area contains the player cards.\n\nThe second row of butons and icons is for the Rival.",
+            "Goal: The temple in Ophir is under construction. It needs a lot of gold and silver. Players gain Victory Points (VP) through donations.\n\nYour goal is to gain a bit more VP than any other player.",
             "This is your current location. The purple disc token represents your ship. You can reposition it by dragging it.\n\nTry repositioning it now."
         ],
         [
-            "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship (the white ship token).",
-            "On your turn, your ship token will bob if it can also move. Moving implies dragging the ship into an adjacent zone.\n\nYou get two moves per turn. The moves counter keeps track of how many you have.",
-            "All possible move destinations appear in a lighter blue.",
+            "You can always reposition ships during your turn, be it yours, your opponents' or the Rival ship (the white ship token).",
+            "On your turn, your ship token will bob if it can move. Moving implies dragging the ship into an adjacent zone.\n\nYou get two moves per turn. The moves counter keeps track of how many you have.",
+            "All possible move destinations appear in lighter blue.",
             "Inaccessible zones appear in darker blue.\n\nThese two in particular are behind barriers. Barriers remain fixed during the game.",
-            "Notice that your current location is also in dark blue.\n\nThis is because the first thing you must do on your turn is move away.",
+            "Note that your current location is also in dark blue.\n\nThis is because there's no action available there at the start of your turn.",
             "To continue, drag your ship token into the highlighted zone.\n\nKeep an eye on the moves counter."
         ],
         [
             "You've just spent a move. It's reflected in the moves counter having a discolored wave.\n\nYou have one move left.",
             "After moving, your zone of origin always becomes innaccessible, even though it's adjacent.",
-            "On the flip-side new zones may become reachable, such as this one.\n\nThis zone contains the Market, which currently pays well for delivering gems.",
+            "But new zones may become reachable, such as this one.\n\nThis zone contains the Market, which currently pays well for delivering gems.",
             "Since you moved, you can now also perform actions at your current location.\n\nThe warm color indicates that there are available actions.",
             "Pick up the local commodity.\n\nClick on the red gem icon inside the zone to load a unit of gems into your cargo hold."
         ],
@@ -239,7 +239,7 @@
         ],
         [
             "Oh, it's your turn again!\n\nThis is expected, since you're the only one playing. (╥‸╥)",
-            "Now it's time to sell those gems, but the Rival ship is hindering movement to the Market right now.\n\nWhenever you try moving into a zone that contains other ships, you'll have to deal with the uncertainty of an influence roll.",
+            "You want to move to the Market but the Rival ship could block you.\n\nWhenever you move into a zone containing other ships you'll have to deal with the uncertainty of an influence roll.",
             "The Rival Ship present there is setting the roll difficulty to 3 (roll on a 6-sided die).\n\nThose are decent chances, so try moving there and confirming your intention to roll for influence."
         ],
         [
@@ -248,7 +248,7 @@
             "While failing a second time would mean losing your turn, a roll difficulty of 2 offers much better odds.\n\n Try moving again."
         ],
         [
-            "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily gained control of the Rival.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
+            "Success! The notification you got was to inform you that you're temporarily in control of the Rival.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
             "The Rival controls contain the influence die, two buttons with similar functions, and a moves counter.",
             "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn.'",
             "Move the Rival Ship towards the Treasury."
@@ -261,7 +261,7 @@
             "Note that the rival automatically makes an influence roll after being handled.",
             "But now that it's out of the way, you can interact with the Market.\n\nThe deck and row of orange cards represent the Market.",
             "This last card is now active (in bright orange) because the gems in your cargo can satisfy its requirements.",
-            "But look, the Specialty button on your player card has also become active.\n\nThis is because your Specialist, the Captain, may sell any number of gems at one coin apiece when at the Market, irrespective of what deals are available.",
+            "But look, the Specialty button on your player card has also become active.\n\nThis is because your Specialist, the Captain, may sell gems at one coin apiece when at the Market",
             "To learn more about your Specialist, you can click on its name band.\n\nClick again to switch back.",
             "The Captain has no special ability.\n\nIn a regular game though, you get to select an actual Specialist before play starts.",
             "Sell your gems as Specialty now.\n\nDon't worry about missing the better deal."
@@ -275,10 +275,10 @@
             "Whenever you're about to perform an un-revertible action you'll be asked to confirm it (green button).\n\nTake the better deal. Click on the market card."
         ],
         [
-            "Ah, much better!\n\nWith 3 coins you could even buy a gold bar!\n\nBut first, let's focus on the Market a bit.",
-            "Notice that the Market has changed.\n\nThe gems for 3 coins card has been replaced by the one next to it.\n\nHowever, this isn't because you picked it.",
+            "Ah, much better. With 3 coins you could even buy a gold bar!\n\nBut first, let's focus on the Market a bit.",
+            "Notice that the Market has changed. The gems deal has been replaced by the one next to it.\n\nHowever, this isn't because you picked it.",
             "Whenever such a deal is transacted, all cards shift to the right, pushing the last one out of the game and revealing a new card from the deck on the left.",
-            "This means that a deal can be transacted multiple times,\nbut also that it may disappear before you manage to profit from it.\n\nThis all depends on how often your opponents transact with the market.",
+            "This means that any particular deal persists over three transactions before going away.\n\nNote that the card on the top of the deck is a future deal.",
             "You might have noticed some extra symbols on and around these cards.\n\nLet's clarify them in order.",
             "The green upwards arrow is a bonus modifier. It means that the deal offers 1 more coin than usual.",
             "As you might expect, the red downwards arrow means the opposite.\n\nAs such, a deal offering 1 coin would be modified to 0.",
@@ -290,7 +290,7 @@
             "Alright. You now might want to move to the treasury and buy some gold or silver.\n\nBut the Rival now poses a bigger problem.",
             "The Rival ship is now setting a whopping difficulty of 6 for an influence roll (your current influence does not matter).\n\nGranted, if you don't roll a 6, you might still roll a 5 in a second attempt.",
             "Still, there's a good chance you'll fail both rolls and lose your current turn.\n\nIn a busy multiplayer game (3-4 players) you run the risk of falling behind on deliveries.",
-            "Instead of taking risks, you can become more versatile.\n\nThere are two aspects you can improve for this:\n\n- Gather Favor\n- Increase your cargo capacity.",
+            "Instead of taking risks, you can become more versatile.\n\nThere are two aspects you can improve for this:\n- Gather Favor\n- Increase your cargo capacity.",
             "You obtain both at the Temple.",
             "Let's go around the barriers and towards the Temple."
         ],
@@ -357,7 +357,7 @@
         ],
         [
             "When the black section of the donations display is filled, the game will end. This is the second and most common end condition.\n\nNote that the metal icons there are for counting, not for showing occupied cargo space.",
-            "As players donate metals, the icons accumulate in stacks of three.\n\nThis is important:\nFor every complete stack, metals cost more coins. Gold gets more expensive by 1 coin for every stack. Silver about half as fast.",
+            "Donated metals accumulate in stacks of three.\n\nImportant: For every complete stack, metals cost more coins. Gold gets more expensive by 1 coin for every stack. Silver about half as fast.",
             "Make the donation and watch the prices."
         ],
         [
@@ -365,7 +365,7 @@
             "You must have noticed that you could also use Favor to buy metals.\n\nWhile the cost in Favor looks prohibitive, the increasing coin prices will make these options, in time, appealing.",
             "Donating silver has gained you 5VP.",
             "And the Temple has completed an obelisk it seems.",
-            "This is the end of the tutorial. Thanks for taking the time to complete it.\n\nThis explanation was not exhaustive. You should probably also read the game rules (link on the front page)",
+            "This is the end of the tutorial. Thanks for taking the time to complete it.\n\nThis explanation was not exhaustive. You should probably also read the game rules (link on the front page).",
             "If you want to play with your friends or the occasional wanderer, click Back and consider creating a persistent Multiplayer account.\n\nCheers!"
         ]
     ]
