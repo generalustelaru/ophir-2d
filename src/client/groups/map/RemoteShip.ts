@@ -1,9 +1,11 @@
 import Konva from 'konva';
-import { Action, ClientMessage, Coordinates, Player, PlayerColor, Unique } from '~/shared_types';
-import { DynamicGroupInterface, RawEvents } from '~/client_types';
+import { Action, Coordinates, Player, PlayerColor, Unique } from '~/shared_types';
+import { DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone } from './SeaZone';
+import { slide } from '~/client/animations';
+import { Communicator } from '~/client/services/Communicator';
 
 const { PLAYER_HUES, SHIP_DATA } = clientConstants;
 // TODO: Since all ships on the board now share similar logic, check and see if it can be shared/inherited
@@ -11,7 +13,7 @@ type RemoteShipUpdate = {
     remotePlayer: Player,
     isDraggable: boolean,
 }
-export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate>> {
+export class RemoteShip extends Communicator implements Unique<DynamicGroupInterface<RemoteShipUpdate>> {
 
     private ship: ShipToken;
     private localZone: SeaZone;
@@ -26,6 +28,7 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
         player: Player,
         seaZones: Array<SeaZone>,
     ) {
+        super();
         this.group = new Konva.Group({
             x: offsetX,
             y: offsetY,
@@ -81,11 +84,14 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
                 this.group.y(this.position.y);
                 targetZone && targetZone.resetFill();
             } else {
-                this.broadcastAction({
-                    action: Action.reposition_opponent,
-                    payload: {
-                        color: player.color,
-                        position: { x: this.group.x(), y: this.group.y() },
+                this.createEvent({
+                    type: EventType.action,
+                    detail: {
+                        action: Action.reposition_opponent,
+                        payload: {
+                            color: player.color,
+                            position: { x: this.group.x(), y: this.group.y() },
+                        },
                     },
                 });
             }
@@ -112,21 +118,13 @@ export class RemoteShip implements Unique<DynamicGroupInterface<RemoteShipUpdate
         if (positionUpdate.x != this.position.x && positionUpdate.y != this.position.y) {
             this.position = positionUpdate;
             this.group.moveToTop();
+            slide(this.group, positionUpdate);
         }
 
-        this.group.x(positionUpdate.x);
-        this.group.y(positionUpdate.y);
         this.group.draggable(isDraggable);
     };
 
     public destroy(): void {
         this.group.destroy();
-    }
-
-    private broadcastAction(detail: ClientMessage): void {
-        window.dispatchEvent(new CustomEvent(
-            'action',
-            { detail: detail },
-        ));
     }
 }

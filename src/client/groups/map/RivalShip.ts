@@ -3,7 +3,7 @@ import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, Unique, 
 import { DynamicGroupInterface, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
-import { defineBobbing } from '~/client/animations';
+import { defineBobbing, slide } from '~/client/animations';
 import clientConstants from '~/client_constants';
 
 const { HUES, SEA_ZONE_COUNT } = clientConstants;
@@ -18,7 +18,6 @@ export type RivalShipUpdate = {
 }
 export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>> {
 
-    // private stage: Konva.Stage;
     private seaZones: Array<SeaZone>;
     private currentZone: ZoneName;
     private movesLeft: number;
@@ -144,12 +143,15 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
     // MARK: UPDATE
     public update(data: RivalShipUpdate): void {
         const  { moves, bearings, isControllable, isDraggable, destinations } = data;
+        const { position } = bearings;
         this.isControllable = isControllable;
         this.destinations = destinations;
         this.currentZone = bearings.seaZone;
         this.movesLeft = moves;
-        this.group.x(bearings.position.x);
-        this.group.y(bearings.position.y);
+
+        if (this.group.x() != position.x || this.group.y() != position.y)
+            slide(this.group, position);
+
         this.group.draggable(isDraggable);
         isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };

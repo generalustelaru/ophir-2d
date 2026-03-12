@@ -4,7 +4,7 @@ import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, Spe
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { Communicator } from '~/client/services/Communicator';
-import { defineBobbing } from '~/client/animations';
+import { defineBobbing, slide } from '~/client/animations';
 import localState from '../../state';
 import clientConstants from '~/client_constants';
 
@@ -41,6 +41,7 @@ export class PlayerShip extends Communicator {
 
         if (coordinates.x != this.group.x() && coordinates.y != this.group.y()) {
             this.group.moveToTop();
+            slide(this.group, coordinates);
         }
 
         this.players = players;
