@@ -214,10 +214,7 @@
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
             "This area contains the player cards.\n\nThe second row of butons and icons is for the Rival.",
             "Goal: The temple in Ophir is under construction. It needs a lot of gold and silver. Players gain Victory Points (VP) through donations.\n\nYour goal is to gain a bit more VP than any other player.",
-            "This is your current location. The purple disc token represents your ship. You can reposition it by dragging it.\n\nTry repositioning it now."
-        ],
-        [
-            "You can always reposition ships during your turn, be it yours, your opponents' or the Rival ship (the white ship token).",
+            "This hexagonal zone is your current location. The purple disc token represents your ship.",
             "On your turn, your ship token will bob if it can move. Moving implies dragging the ship into an adjacent zone.\n\nYou get two moves per turn. The moves counter keeps track of how many you have.",
             "All possible move destinations appear in lighter blue.",
             "Inaccessible zones appear in darker blue.\n\nThese two in particular are behind barriers. Barriers remain fixed during the game.",

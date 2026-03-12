@@ -16,14 +16,6 @@ export class TutorialStepProvider {
                 { highlights: [Target.playerGroup] },
                 { highlights: [Target.bottomRightZone] },
                 { highlights: [Target.centerZone] },
-            ],
-            expecting: { action: Action.reposition, payload: { position } },
-        },
-        {
-            laconic: null,
-            mutate: (_state: PlayState) => { },
-            visuals: [
-                { highlights: [] },
                 { highlights: [Target.movesCounter] },
                 { highlights: [Target.topLeftZone, Target.leftZone, Target.bottomLeftZone, Target.bottomRightZone] },
                 { highlights: [Target.rightZone, Target.topRightZone] },
