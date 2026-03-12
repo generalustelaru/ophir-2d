@@ -191,12 +191,10 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
             .filter(p => p.bearings.seaZone == zone);
     }
 
-    public trimInfluenceByZone(zone: ZoneName, rivalInfluence: number) {
+    public trimInfluenceByZone(zone: ZoneName, threshold: number,  rivalInfluence: number) {
         const players = this.getPlayersByZone(zone).sort(
             (a, b) => b.influence - a.influence,
         );
-        const playerThreshold = players.length ? players[0].influence : 0;
-        const threshold = playerThreshold || rivalInfluence;
 
         const affectedPlayers = players.filter(p => p.influence == threshold);
         const trimmedInfluence = threshold - 1 as DiceSix;

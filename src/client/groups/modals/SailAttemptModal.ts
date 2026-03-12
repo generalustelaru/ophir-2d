@@ -22,7 +22,19 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
             aspect,
         );
 
-        const offset = { x: 76, y: 24 };
+        const attemptText = new Konva.Text({
+            text: 'Roll for passage?',
+            fill: 'white',
+            fontSize: 18,
+            width: this.contentGroup.width(),
+            height: this.contentGroup.height(),
+            align: 'center',
+            verticalAlign: 'top',
+            y: 10,
+            fontFamily: 'Custom',
+        });
+
+        const offset = { x: 76, y: 34 };
 
         this.ownerDie = new SymbolicInfluenceDial( { position: offset });
 
@@ -49,6 +61,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
         );
 
         this.contentGroup.add(
+            attemptText,
             this.ownerDie.getElement(),
             greaterEqual,
             this.toSailDial.getElement(),
@@ -65,7 +78,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
         const symbol = (()=> {
             switch (true) {
                 case data.toSail <= (data.isTempleGuard ? 2 : 1) : return '✓';
-                case data.moveActions === 1 : return '!!';
+                case data.moveActions === 1 : return '!';
                 default: return '?';
             }
         })();

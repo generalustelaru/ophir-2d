@@ -3,7 +3,6 @@ import { GroupLayoutData, Target } from '~/client_types';
 import { Highlight } from './Highlight';
 import { GroupHighlight } from './GroupHighlight';
 
-
 export class MapHighlightGroup extends GroupHighlight {
 
     constructor(

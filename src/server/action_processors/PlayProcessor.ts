@@ -179,7 +179,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 return true;
             }
 
-            this.playState.trimInfluenceByZone(target, rivalInfluence);
+            const opponentThreshold = blockingPlayers.reduce((topInfluencer, player) =>
+                player.influence > topInfluencer.influence ? player : topInfluencer,
+            ).influence;
+
+            const threshold = opponentThreshold || rivalInfluence as DiceSix;
+            this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
+
+            this.playState.trimInfluenceByZone(target, threshold, rivalInfluence);
             this.privateState.addDeed({
                 context: TurnEvent.failed_move,
                 description: `was blocked from sailing towards the ${locationName}`,

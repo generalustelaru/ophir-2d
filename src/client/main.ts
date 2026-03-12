@@ -166,6 +166,10 @@ document.fonts.ready.then(() => {
         canvas.notifyForTurn();
     });
 
+    window.addEventListener( EventType.failed_roll, (event: CustomEventInit) => {
+        canvas.notifyFailedRoll(event.detail);
+    });
+
     window.addEventListener(EventType.force_turn, () => {
         canvas.notifyForForceTurn();
     });

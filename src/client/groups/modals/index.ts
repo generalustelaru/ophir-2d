@@ -7,6 +7,7 @@ export { DropBeforeLoadModal } from './DropBeforeLoadModal';
 export { EndTurnModal } from './EndTurnModal';
 export { SailAttemptModal } from './SailAttemptModal';
 export { RivalControlModal } from './RivalControlModal';
+export { SailFailureModal } from './SailFailureModal';
 export { ForceTurnModal } from './ForceTurnModal';
 export { EndRivalTurnModal } from './EndRivalTurnModal';
 export { AdvisorModal } from './AdvisorModal';

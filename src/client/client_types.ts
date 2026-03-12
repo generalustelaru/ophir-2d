@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorTransmission, Metal,
     TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
-    TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase, PlayState,
+    TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase, PlayState, FailedInfluenceRollTransmission,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -201,6 +201,7 @@ export enum EventType {
     vp_transmission = 'vp_transmission',
     rival_control_transmission = 'rival_control_transmission',
     start_turn = 'start_turn',
+    failed_roll = 'failed_roll',
     force_turn = 'force_turn',
 }
 
@@ -227,6 +228,7 @@ export type Event =
     | EventFormat<EventType.tour_update, TutorialState>
     | EventFormat<EventType.identification, ColorTransmission>
     | EventFormat<EventType.vp_transmission, VpTransmission>
+    | EventFormat<EventType.failed_roll, FailedInfluenceRollTransmission>
 ;
 
 export type InfoDetail = {

@@ -1,5 +1,7 @@
 import Konva from 'konva';
-import { GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action } from '~/shared_types';
+import {
+    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action, FailedInfluenceRollTransmission,
+} from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
 import { MapGroup } from '../mega_groups/MapGroup';
@@ -10,7 +12,7 @@ import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, Sail
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
-    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal,
+    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal, SailFailureModal,
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
 import { InstructionPanel } from '../groups/tutorial/InstructionPanel';
@@ -29,6 +31,7 @@ export class CanvasService extends Communicator {
     private startTurnModal: StartTurnModal;
     private endTurnModal: EndTurnModal;
     private sailAttemptModal: SailAttemptModal;
+    private sailFailureModal: SailFailureModal | null = null;
     private forceTurnModal: ForceTurnModal;
     private dropBeforeLoadModal: DropBeforeLoadModal;
     private sellGoodsModal: SellGoodsModal | null = null;
@@ -151,6 +154,10 @@ export class CanvasService extends Communicator {
 
     public notifyForTurn(): void {
         this.startTurnModal?.show();
+    }
+
+    public notifyFailedRoll(data: FailedInfluenceRollTransmission): void {
+        this.sailFailureModal?.show(data);
     }
 
     public notifyForForceTurn(): void {
@@ -288,6 +295,7 @@ export class CanvasService extends Communicator {
         this.startTurnModal.repositionModal(this.aspect);
         this.endTurnModal.repositionModal(this.aspect);
         this.sailAttemptModal.repositionModal(this.aspect);
+        this.sailFailureModal?.repositionModal(this.aspect);
         this.forceTurnModal.repositionModal(this.aspect);
         this.dropBeforeLoadModal.repositionModal(this.aspect);
 
@@ -342,6 +350,9 @@ export class CanvasService extends Communicator {
 
         if (!localPlayer)
             return;
+
+        //TODO: move all modal initializations here and absolve their updates from constantly getting local player
+        this.sailFailureModal = new SailFailureModal(this.stage, this.aspect, localPlayer);
 
         if (state.rival.isIncluded) {
             this.rivalControlModal = new RivalControlModal(this.stage, this.aspect);
