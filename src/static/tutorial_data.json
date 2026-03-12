@@ -213,14 +213,14 @@
             "This is the map. It shows where every location is situated and where ships are currently located.",
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
             "This area contains the player cards.\n\nIn this scenario it also contains the rival ship controls.",
-            "Context:\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nThrough donations players gain Victory Points (VP).\n\nYour goal is to gain a bit more VP than any other player.",
+            "Context:\nThe temple in Ophir is under construction. It needs a lot of gold and silver.\n\nPlayers gain Victory Points (VP) through donations.\n\nYour goal is to gain a bit more VP than any other player.",
             "This is your current location. The purple disc token represents your ship. You can reposition it by dragging it.\n\nTry repositioning it now."
         ],
         [
             "You can always reposition ships during your turn, be it yours, your opponents' or the rival ship (the white ship token).",
             "On your turn, your ship token will bob if it can also move. Moving implies dragging the ship into an adjacent zone.\n\nYou get two moves per turn. The moves counter keeps track of how many you have.",
             "All possible move destinations appear in a lighter blue.",
-            "Inaccessible zones appear in darker blue.\n\n These two in particular are behind barriers. Barriers remain fixed during the game.",
+            "Inaccessible zones appear in darker blue.\n\nThese two in particular are behind barriers. Barriers remain fixed during the game.",
             "Notice that your current location is also in dark blue.\n\nThis is because the first thing you must do on your turn is move away.",
             "To continue, drag your ship token into the highlighted zone.\n\nKeep an eye on the moves counter."
         ],
@@ -248,7 +248,7 @@
             "While failing a second time would mean losing your turn, a roll difficulty of 2 offers much better odds.\n\n Try moving again."
         ],
         [
-            "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily gained control control of the Rival.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
+            "Success!\n\nThe notification you're seeing/have seen is to inform you that you've temporarily gained control of the Rival.\n\nYou're controling the Rival Ship right now and the map visuals are relative to it.",
             "The Rival controls contain the influence die, two buttons with similar functions, and a moves counter.",
             "This is how the Rival Ship works.\n\nTo regain control of your ship and turn you must move the Rival Ship once or twice before concluding its 'turn.'",
             "Move the Rival Ship towards the Treasury."
