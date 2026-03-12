@@ -14,7 +14,7 @@ import {
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
 import { InstructionPanel } from '../groups/tutorial/InstructionPanel';
-import { MapHighlightsGroup } from '../groups/tutorial';
+import { LocationHighlightGroup, MapHighlightsGroup, PlayerHighlightsGroup } from '../groups/tutorial';
 
 export class CanvasService extends Communicator {
     private stage: Konva.Stage;
@@ -40,6 +40,8 @@ export class CanvasService extends Communicator {
     private peddlerModal: PeddlerModal | null = null;
     private tutorialPanel: InstructionPanel | null = null;
     private mapHighlights: MapHighlightsGroup | null = null;
+    private playerHighlights: PlayerHighlightsGroup | null = null;
+    private locationHighlights: LocationHighlightGroup | null = null;
     private aspect: Aspect;
     private scale: number;
     private delayedResizing: number | null = null;
@@ -112,6 +114,22 @@ export class CanvasService extends Communicator {
                 {
                     ...clientConstants.GROUP_DIMENSIONS.map,
                     ...clientConstants.MAP_PLACEMENT[this.aspect],
+                },
+            );
+
+            this.playerHighlights = new PlayerHighlightsGroup(
+                this.stage,
+                {
+                    ...clientConstants.GROUP_DIMENSIONS.player,
+                    ...clientConstants.PLAYER_PLACEMENT[this.aspect],
+                },
+            );
+
+            this.locationHighlights = new LocationHighlightGroup(
+                this.stage,
+                {
+                    ...clientConstants.GROUP_DIMENSIONS.location,
+                    ...clientConstants.LOCATION_PLACEMENT[this.aspect],
                 },
             );
         }
@@ -226,8 +244,8 @@ export class CanvasService extends Communicator {
 
     private updateHighlights(targets: Array<Target>) {
         this.mapHighlights?.update(targets);
-        this.locationGroup.updateHighlights(targets);
-        this.playerGroup.updateHighlights(targets);
+        this.locationHighlights?.update(targets);
+        this.playerHighlights?.update(targets);
     }
 
     public disable(): void {
@@ -283,6 +301,8 @@ export class CanvasService extends Communicator {
 
         this.tutorialPanel?.repositionPanel(this.aspect);
         this.mapHighlights?.setPlacement(clientConstants.MAP_PLACEMENT[this.aspect]);
+        this.playerHighlights?.setPlacement(clientConstants.PLAYER_PLACEMENT[this.aspect]);
+        this.locationHighlights?.setPlacement(clientConstants.LOCATION_PLACEMENT[this.aspect]);
     }
 
     private calculateDimensions() {

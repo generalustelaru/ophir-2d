@@ -1,22 +1,18 @@
 import Konva from 'konva';
-import { GroupLayoutData, HighlightGroupInterface, LayerIds, Target } from '~/client_types';
-import { Coordinates, Unique } from '~/shared_types';
+import { GroupLayoutData, Target } from '~/client_types';
 import { Highlight } from './Highlight';
 import { GroupHighlight } from './GroupHighlight';
 
 
-export class MapHighlightsGroup extends GroupHighlight {
-    private group: Konva.Group;
-    // private highlights: Map<Target, Highlight>;
+export class MapHighlightGroup extends GroupHighlight {
+
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        super(stage, layout)
-
-        this.highlights = new Map<Target, Highlight>();
-        const groupWidth = this.group.width();
-        const groupHeight = this.group.height();
+        const highlights = new Map<Target, Highlight>();
+        const groupWidth = layout.width;
+        const groupHeight = layout.height;
 
         const zoneDrifts = [
             { target: Target.topLeftZone, x: 86, y: 150 },
@@ -28,9 +24,10 @@ export class MapHighlightsGroup extends GroupHighlight {
             { target: Target.centerZone, x: 0, y: 0 },
         ];
         const centerPoint = { x: groupWidth / 2, y: groupHeight / 2 };
+
         for (const item of zoneDrifts) {
             const { target, x, y } = item;
-            this.highlights.set(target, new Highlight({
+            highlights.set(target, new Highlight({
                 isRectangle: false,
                 coords: { position: centerPoint, offset: { x, y } },
             }));
@@ -46,17 +43,12 @@ export class MapHighlightsGroup extends GroupHighlight {
                 { target: Target.undoButton, layout: { x: 37, y : 375, width: length, height: length } },
             ];
         })();
+
         for (const item of layouts) {
             const { target, layout } = item;
-            this.highlights.set(target, new Highlight({ isRectangle: true, layout }));
+            highlights.set(target, new Highlight({ isRectangle: true, layout }));
         }
 
-        const nodes: Konva.Shape[] = [];
-        this.highlights.forEach(highlight => {
-            nodes.push(highlight.getElement());
-        });
-        this.group.add(...nodes);
+        super(stage, layout, highlights);
     }
-
-
 }

@@ -1,22 +1,17 @@
 import Konva from 'konva';
-import { GroupLayoutData, HighlightGroupInterface, LayerIds, Target } from '~/client/client_types';
-import { Unique } from '~/shared_types';
+import { GroupLayoutData, Target } from '~/client/client_types';
 import { Highlight } from './Highlight';
+import { GroupHighlight } from './GroupHighlight';
 
-export class PlayerHighlightsGroup implements Unique<HighlightGroupInterface> {
-    private group: Konva.Group;
-    private highlights: Map<Target, Highlight>;
+export class PlayerHighlightGroup extends GroupHighlight {
 
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
     ) {
-        this.group = new Konva.Group({ ...layout });
-        stage.getLayers()[LayerIds.highlights].add(this.group);
-
-        this.highlights = new Map<Target, Highlight>();
+        const highlights = new Map<Target, Highlight>();
         const layouts = [
-            { target: Target.playerGroup, layout: { x: 0, y: 0, width: 300, height: 250 } },
+            { target: Target.playerGroup, layout: { x: -3, y: 15, width: 302, height: 222 } },
 
             { target: Target.playerPlacard, layout: { x: 0, y: 20, width: 300, height: 100 } },
             { target: Target.influenceDie, layout: { x: -5, y: 42, width: 55, height: 55 } },
@@ -33,15 +28,12 @@ export class PlayerHighlightsGroup implements Unique<HighlightGroupInterface> {
             { target: Target.concludeRival, layout: { x: 143, y: 155, width: 66, height: 66 } },
             { target: Target.rivalMoves, layout: { x: 143 + 66 + 5 + 3, y: 155, width: 66, height: 66 } },
         ];
+
         for (const item of layouts) {
             const { target, layout } = item;
-            this.highlights.set(target, new Highlight({ isRectangle: true, layout }));
+            highlights.set(target, new Highlight({ isRectangle: true, layout }));
         }
 
-        const nodes: Konva.Shape[] = [];
-        this.highlights.forEach(highlight => {
-            nodes.push(highlight.getElement());
-        });
-        this.group.add(...nodes);
+        super(stage, layout, highlights);
     }
 }
