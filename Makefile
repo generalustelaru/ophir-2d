@@ -51,6 +51,14 @@ rebuild:
 	docker compose up -d game-server-dev --build
 	docker compose logs -f game-server-dev
 
+rebuild-prod:
+	docker compose down --remove-orphans
+	docker compose up -d game-server-prod --build
+	docker compose logs -f game-server-prod
+
+watch-prod:
+	docker compose logs -f game-server-prod
+
 restart:
 	docker compose restart game-server-dev
 
