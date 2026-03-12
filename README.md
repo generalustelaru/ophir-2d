@@ -9,8 +9,7 @@ During the game, you will sail across the archipelago, picking up commodities an
 Work in progress.
 
 - Performance optimizations may still be needed.
-- The net code is not yet fully stable.
-- The interface language is not yet standardized and is missing quality of life features (more utility animations, transitions, tooltips, FTUE screens).
+- The interface language is not yet standardized and is missing quality of life features (more utility animations, transitions).
 
 Try it out here -> [play-ophir.cloud](http://play-ophir.cloud/)
 
