@@ -3,7 +3,7 @@ import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, Unique, 
 import { DynamicGroupInterface, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
-import { defineBobbing, slide } from '~/client/animations';
+import { defineBobbing, slideToPosition } from '~/client/animations';
 import clientConstants from '~/client_constants';
 
 const { HUES, SEA_ZONE_COUNT } = clientConstants;
@@ -150,7 +150,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         this.movesLeft = moves;
 
         if (this.group.x() != position.x || this.group.y() != position.y)
-            slide(this.group, position);
+            slideToPosition(this.group, position);
 
         this.group.draggable(isDraggable);
         isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();

@@ -11,7 +11,7 @@ export function defineBobbing(node: Konva.Node, constraints: { pixelAmplitude: n
     }, null);
 }
 
-export function slide(node: Konva.Node, towards: Coordinates) {
+export function slideToPosition(node: Konva.Node, towards: Coordinates) {
     const tween = new Konva.Tween({
         node,
         duration: .66,           // seconds

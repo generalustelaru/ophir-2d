@@ -4,7 +4,7 @@ import { DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone } from './SeaZone';
-import { slide } from '~/client/animations';
+import { slideToPosition } from '~/client/animations';
 import { Communicator } from '~/client/services/Communicator';
 
 const { PLAYER_HUES, SHIP_DATA } = clientConstants;
@@ -118,7 +118,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
         if (positionUpdate.x != this.position.x && positionUpdate.y != this.position.y) {
             this.position = positionUpdate;
             this.group.moveToTop();
-            slide(this.group, positionUpdate);
+            slideToPosition(this.group, positionUpdate);
         }
 
         this.group.draggable(isDraggable);
