@@ -18,6 +18,10 @@ function printWarning(message: string) {
     console.warn(`\x1b[93mWARN: ${message}\x1b[0m`);
 }
 
+function printInfo(message: string) {
+    console.info(`INFO: ${message}`);
+}
+
 function checkConditions(arr: Array<boolean>): Probable<true> {
     if (arr.includes(false))
         return fail('Condition failed');
@@ -82,6 +86,7 @@ const sLib = { // TODO: Maybe rename this to common_library (file too)
     fail,
     printError,
     printWarning,
+    printInfo,
     checkConditions,
     randomize,
     produceCookieArgs,

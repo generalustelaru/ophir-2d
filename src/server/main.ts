@@ -228,13 +228,16 @@ app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     next();
 });
-app.get('/about', (_, res: Response) => {
+app.get('/about', (req: Request, res: Response) => {
+    sLib.printInfo(`/about -> ${req.ip}`);
     res.sendFile(path.join(__dirname, 'public', 'about.html'));
 });
-app.get('/how-to-play', (_, res: Response) => {
+app.get('/how-to-play', (req: Request, res: Response) => {
+    sLib.printInfo(`/how-to-play -> ${req.ip}`);
     res.sendFile(path.join(__dirname, 'public', 'how-to-play.html'));
 });
-app.get('/tutorial', (_, res: Response) => {
+app.get('/tutorial', (req: Request, res: Response) => {
+    sLib.printInfo(`/tutorial -> ${req.ip}`);
     res.sendFile(path.join(__dirname, 'public', 'game.html'));
 });
 app.get('/tutorial-data', (_, res: Response) => {
@@ -258,6 +261,7 @@ app.get('/feed', async (req: Request, res: Response) => {
     res.status(200).json(feed);
 });
 app.get('/', async (req: Request, res: Response) => {
+    sLib.printInfo(`/ -> ${req.ip}`);
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.ok) {
