@@ -16,8 +16,8 @@ export class LocationHighlightGroup extends GroupHighlight {
             { target: Target.slot_1, layout: { x: 75, y: 35, width: 66, height: 115 } },
             { target: Target.slot_2, layout: { x: 152, y: 35, width: 66, height: 115 } },
             { target: Target.slot_3, layout: { x: 227, y: 35, width: 66, height: 115 } },
-            { target: Target.fluctuation_up, layout: { x: 230, y: 125, width: 23, height: 25 } },
-            { target: Target.fluctuation_down, layout: { x: 78, y: 125, width: 23, height: 25 } },
+            { target: Target.fluctuation_up, layout: { x: 249, y: 12, width: 23, height: 25 } },
+            { target: Target.fluctuation_down, layout: { x: 97, y: 12, width: 23, height: 25 } },
             { target: Target.temple_mark, layout: { x: 169, y: 5, width: 32, height: 32 } },
 
             { target: Target.treasuryArea, layout: { x: 2, y: 165, width: 293, height: 100 } },

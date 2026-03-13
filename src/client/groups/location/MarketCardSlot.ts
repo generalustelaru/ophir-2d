@@ -17,6 +17,7 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
         trade: Trade,
         fluctuation: Fluctuation,
         tradeCallback: Function | null,
+        shouldFade: boolean,
     ) {
         this.group = new Konva.Group({
             width: layout.width,
@@ -32,6 +33,7 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
             tradeCallback ? () => tradeCallback(marketKey) : null,
             trade,
             fluctuation,
+            shouldFade,
         );
         const elements: ElementList = [this.marketCard.getElement()];
 
@@ -48,6 +50,10 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
 
     public update(data: MarketCardUpdate): void {
         this.marketCard.update(data);
+    }
+
+    public disable(): void {
+        this.marketCard.disable();
     }
 
     private getFluctuationSymbol(fluctuation: Fluctuation): Konva.Path {
@@ -69,12 +75,8 @@ export class MarketCardSlot implements Unique<DynamicGroupInterface<MarketCardUp
             stroke: 'black',
             strokeWidth: 1,
             scale: { x: 2, y: 2 },
-            x: 5,
-            y: this.group.height() - 48,
+            x: 24,
+            y: 5,
         });
-    }
-
-    public disable(): void {
-        this.marketCard.disable();
     }
 }

@@ -11,15 +11,51 @@ export function defineBobbing(node: Konva.Node, constraints: { pixelAmplitude: n
     }, null);
 }
 
-export function slideToPosition(node: Konva.Node, towards: Coordinates) {
-    const tween = new Konva.Tween({
-        node,
-        duration: .66,           // seconds
-        x: towards.x,
-        y: towards.y,
-        easing: Konva.Easings.EaseInOut,
-        onFinish: () => { tween.destroy(); },
-    });
+export async function slideToPosition(
+    node: Konva.Node,
+    towards: Coordinates,
+    duration: number,
+    effect?: string,
+): Promise<true> {
+    return new Promise(resolve => {
+        const easing = (() => {
+            switch (effect) {
+                case 'EaseIn':
+                    return Konva.Easings.EaseIn;
+                case 'Linear':
+                    return Konva.Easings.Linear;
+                default:
+                    return Konva.Easings.EaseInOut;
+            }
+        })();
+        const tween = new Konva.Tween({
+            node,
+            duration,
+            x: towards.x,
+            y: towards.y,
+            easing,
+            onFinish: () => {
+                tween.destroy();
+                resolve(true);
+            },
+        });
+        tween.play();
 
-    tween.play();
+    });
+}
+
+export async function fade(node: Konva.Node, duration: number, opacity: number): Promise<void> {
+    return new Promise(resolve => {
+        const tween = new Konva.Tween({
+            node,
+            duration,
+            opacity,
+            easing: Konva.Easings.EaseOut,
+            onFinish: () => {
+                tween.destroy();
+                resolve();
+            },
+        });
+        tween.play();
+    });
 }

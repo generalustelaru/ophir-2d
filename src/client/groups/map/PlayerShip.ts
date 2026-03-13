@@ -41,7 +41,7 @@ export class PlayerShip extends Communicator {
 
         if (coordinates.x != this.group.x() && coordinates.y != this.group.y()) {
             this.group.moveToTop();
-            slideToPosition(this.group, coordinates);
+            slideToPosition(this.group, coordinates, 0.66);
         }
 
         this.players = players;

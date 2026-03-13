@@ -5,6 +5,7 @@ import { CoinDial, Button } from '../popular';
 import { GoodsAssortment } from '.';
 import clientConstants from '~/client_constants';
 import { MiniTempleRewardDial } from './MiniTempleRewardDial';
+import { slideToPosition, fade } from '~/client/animations';
 
 const { HUES } = clientConstants;
 export class MarketCard extends Button implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
@@ -13,12 +14,16 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
     private background: Konva.Rect;
     private fluctuation: Fluctuation | null = null;
     private miniRewardDial: MiniTempleRewardDial;
+    private originalPosition: Coordinates;
+    private fadeOnShift: boolean;
+
     constructor(
         stage: Konva.Stage,
         position: Coordinates,
         tradeCallback: Function | null,
         trade: Trade,
         fluctuation: Fluctuation | null,
+        shouldFade: boolean,
     ) {
         super(
             stage,
@@ -31,7 +36,9 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
             tradeCallback,
         );
 
+        this.originalPosition = position;
         this.fluctuation = fluctuation;
+        this.fadeOnShift = shouldFade;
 
         this.background = new Konva.Rect({
             width: this.group.width(),
@@ -69,16 +76,36 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
         ]);
     }
 
-    public update(data: MarketCardUpdate): void {
-        this.coinDial.update(data.trade.reward.coins + (this.fluctuation ?? 0));
-        this.miniRewardDial.update(data.trade.reward.favorAndVp);
-        this.goodsAssortment.update(data.trade.request);
-        this.background.fill(data.isFeasible ? HUES.marketOrange : HUES.marketDarkOrange);
-        this.background.stroke(data.isFeasible ? HUES.treasuryGold : HUES.boneWhite);
-        data.isFeasible ? this.enable() : this.disable();
+    public async update(data: MarketCardUpdate): Promise<void> {
+        const { isFeasible, isShift, trade } = data;
+
+        await this.animateShift(isShift);
+
+        this.group.x(this.originalPosition.x).y(this.originalPosition.y);
+        this.coinDial.update(trade.reward.coins + (this.fluctuation ?? 0));
+        this.miniRewardDial.update(trade.reward.favorAndVp);
+        this.goodsAssortment.update(trade.request);
+        this.background.fill(isFeasible ? HUES.marketOrange : HUES.marketDarkOrange);
+        this.background.stroke(isFeasible ? HUES.treasuryGold : HUES.boneWhite);
+        isFeasible ? this.enable() : this.disable();
+
+        fade(this.group, .5, 1);
     }
 
     public getElement(): Konva.Group {
         return this.group;
+    }
+
+    private async animateShift(isShift: boolean) {
+
+        if(!isShift)
+            return;
+
+        if (this.fadeOnShift) {
+            return await fade(this.group, 1.5, 0);
+        } else {
+            await slideToPosition(this.group, { x: 76, y: 28 }, 1);
+            return await fade(this.group, .5, 0);;
+        }
     }
 }

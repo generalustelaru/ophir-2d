@@ -142,6 +142,7 @@ export type ColorProfile = {
 }
 
 export type MarketCardUpdate = {
+    isShift: boolean,
     trade: Trade,
     isFeasible: boolean,
 }

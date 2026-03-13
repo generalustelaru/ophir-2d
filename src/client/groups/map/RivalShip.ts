@@ -150,7 +150,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         this.movesLeft = moves;
 
         if (this.group.x() != position.x || this.group.y() != position.y)
-            slideToPosition(this.group, position);
+            slideToPosition(this.group, position, 0.66);
 
         this.group.draggable(isDraggable);
         isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();

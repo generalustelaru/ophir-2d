@@ -98,6 +98,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
         this.marketCard.update({
             trade: data.trade,
             isFeasible: !!player?.locationActions.includes(Action.donate_goods),
+            isShift: false,
         });
 
         this.upgradeButton.update(

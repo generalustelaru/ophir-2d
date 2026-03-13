@@ -118,7 +118,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
         if (positionUpdate.x != this.position.x && positionUpdate.y != this.position.y) {
             this.position = positionUpdate;
             this.group.moveToTop();
-            slideToPosition(this.group, positionUpdate);
+            slideToPosition(this.group, positionUpdate, 0.66);
         }
 
         this.group.draggable(isDraggable);

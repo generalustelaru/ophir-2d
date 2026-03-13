@@ -276,10 +276,10 @@
             "Notice that the Market has changed. The gems deal has been replaced by the one next to it.\n\nHowever, this isn't because you picked it.",
             "Whenever such a deal is transacted, all cards shift to the right, pushing the last one out of the game and revealing a new card from the deck on the left.",
             "This means that any particular deal persists over three transactions before going away.\n\nNote that the card on the top of the deck is a future deal.",
-            "You might have noticed some extra symbols on and around these cards.\n\nLet's clarify them in order.",
+            "You might have noticed the extra symbols sittiong above the cards.\n\nLet's clarify them in order.",
             "The green upwards arrow is a bonus modifier. It means that the deal offers 1 more coin than usual.",
             "As you might expect, the red downwards arrow means the opposite.\n\nAs such, a deal offering 1 coin would be modified to 0.",
-            "These modifiers remain fixed throughout the game.\n\nThis means you can predict how many coins deals would be worth for you depending on turn order and what your opponents are carrying in their cargo.",
+            "This means values change with every transaction.\n\nKeep track of what your opponents are carrying in their cargo to get the most of what the market has while sabotaging their plans.",
             "The temple mark is also fixed, but it concerns the Temple.\n\nWe'll touch on it a little later.",
             "For now, just end your turn."
         ],

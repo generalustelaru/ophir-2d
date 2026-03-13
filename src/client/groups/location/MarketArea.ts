@@ -8,6 +8,7 @@ const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
 
 export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
 
+    private deckSize: number;
     private group: Konva.Group;
     private background: Konva.Rect;
     private marketDeck: MarketDeck;
@@ -42,7 +43,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         const leftmargin = 10;
         const totalHeight = this.group.height();
         const cardWidth = 66;
-
+        this.deckSize = market.deckSize;
         this.marketDeck = new MarketDeck(
             stage,
             {
@@ -53,6 +54,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             },
             market,
             market.deckId,
+            false,
         );
 
         const pickCallback = (slot: MarketSlotKey): Function | null =>  {
@@ -73,6 +75,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             market.slot_1,
             marketFluctuations.slot_1,
             pickCallback('slot_1'),
+            false,
         );
 
         this.slot_2 = new MarketCardSlot(
@@ -87,6 +90,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             market.slot_2,
             marketFluctuations.slot_2,
             pickCallback('slot_2'),
+            false,
         );
 
         this.slot_3 = new MarketCardSlot(
@@ -101,8 +105,9 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             market.slot_3,
             marketFluctuations.slot_3,
             pickCallback('slot_3'),
+            true,
         );
-        //TODO: Move this on the relevant card and under the favor+vp icon.
+
         const templeIcon = new Konva.Path({
             data: LOCATION_TOKEN_DATA.temple.shape,
             fill: LOCATION_TOKEN_DATA.temple.fill,
@@ -113,20 +118,22 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
 
         this.group.add(
             this.background,
-            this.marketDeck.getElement(),
-            this.slot_1.getElement(),
-            this.slot_2.getElement(),
-            this.slot_3.getElement(),
             templeIcon,
+            this.slot_3.getElement(),
+            this.slot_2.getElement(),
+            this.slot_1.getElement(),
+            this.marketDeck.getElement(),
         );
     }
 
     public update(data: MarketUpdate): void {
-        this.marketDeck.update(data.marketOffer);
+        const { market, localPlayer } = data;
+        const isShift = market.deckSize < this.deckSize;
+        this.deckSize = market.deckSize;
 
-        const localPlayer = data.localPlayer;
+        this.marketDeck.update({ market, isShift });
 
-        const localPLayerMaySell = !!(
+        const localPlayerMaySell = !!(
             localPlayer?.isActive
             && localPlayer.isAnchored
             && localPlayer.locationActions.filter(
@@ -138,10 +145,11 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
 
         cardSlots.forEach(slot => {
             const isFeasible =
-                localPLayerMaySell
-                && localPlayer.feasibleTrades.map(f => f.slot).includes(slot);
+                localPlayerMaySell
+                && !!localPlayer.feasibleTrades.find(f => f.slot == slot);
             this[slot].update({
-                trade: data.marketOffer[slot],
+                isShift,
+                trade: market[slot],
                 isFeasible,
             });
         });
