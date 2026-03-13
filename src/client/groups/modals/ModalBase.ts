@@ -87,6 +87,7 @@ export abstract class ModalBase {
             y: offset.y,
             width: modalWidth,
             height: modalHeight,
+            draggable: true,
         }).add(...modalElements);
 
         this.screenGroup = new Konva.Group({
