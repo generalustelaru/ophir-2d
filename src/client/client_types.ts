@@ -1,5 +1,5 @@
 import {
-    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketOffer, Player, ColorTransmission, Metal,
+    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, ColorTransmission, Metal,
     TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
     TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase, PlayState, FailedInfluenceRollTransmission,
 } from '~/shared_types';
@@ -148,7 +148,7 @@ export type MarketCardUpdate = {
 
 export type MarketUpdate = {
     localPlayer: Player | null,
-    marketOffer: MarketOffer,
+    market: MarketState,
 }
 
 export type TreasuryUpdate = {

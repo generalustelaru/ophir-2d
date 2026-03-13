@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
+import { MarketSlotKey, MarketState, Action, Unique } from '~/shared_types';
 import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from '.';
 
 const { HUES } = clientConstants;
@@ -19,7 +19,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
     constructor(
         stage: Konva.Stage,
         marketSlot: MarketSlotKey,
-        market: MarketOffer,
+        market: MarketState,
         layout: GroupLayoutData,
         maxLevel: number,
         isAdvisor: boolean,

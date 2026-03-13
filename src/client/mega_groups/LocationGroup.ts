@@ -128,7 +128,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         const localPlayer = state.players.find(player => player.color === localState.playerColor);
         const marketUpdate: MarketUpdate = {
             localPlayer: localPlayer ?? null,
-            marketOffer: state.market,
+            market: state.market,
         };
         const templeUpdate: TempleUpdate = {
             localPlayer: localPlayer ?? null,

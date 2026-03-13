@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
-import { MarketFluctuations, MarketSlotKey, MarketOffer, Action, Unique } from '~/shared_types';
+import { MarketFluctuations, MarketSlotKey, MarketState, Action, Unique } from '~/shared_types';
 import { MarketDeck, MarketCardSlot } from '.';
 
 const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
@@ -19,7 +19,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
         stage: Konva.Stage,
         marketFluctuations: MarketFluctuations,
         templeTradeSlot: MarketSlotKey,
-        market: MarketOffer,
+        market: MarketState,
         layout: GroupLayoutData,
         defaultCallback: Function | null,
         peddlerCallback: Function | null,

@@ -163,7 +163,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
 
 export type PlayerEntity = PlayerEntry | PlayerDraft | PlayerSelection | Player;
 
-export type MarketOffer = {
+export type MarketState = {
     deckSize: number,
     deckId: MarketDeckKey,
     future: Trade,
@@ -217,7 +217,7 @@ export type PlayState = {
     chat: Array<ChatEntry>,
     setup: GameSetup,
     gameResults: Array<PlayerCountables>,
-    market: MarketOffer,
+    market: MarketState,
     treasury: TreasuryOffer,
     temple: TempleState,
     itemSupplies: ItemSupplies,

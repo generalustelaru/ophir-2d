@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { MarketOffer, PlayState, MarketSlotKey, Action, Unique } from '~/shared_types';
+import { MarketState, PlayState, MarketSlotKey, Action, Unique } from '~/shared_types';
 import { Aspect, DynamicModalInterface } from '~/client/client_types';
 import { FavorDial, VictoryPointDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
@@ -9,7 +9,7 @@ import localState from '~/client/state';
 const { HUES } = clientConstants;
 
 export class DonateGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
-    private market: MarketOffer | null = null;
+    private market: MarketState | null = null;
     private symbolRow: SymbolRow;
     private victoryPointDial: VictoryPointDial;
     private favorDial: FavorDial;

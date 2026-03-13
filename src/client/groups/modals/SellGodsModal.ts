@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { Action, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, Unique } from '~/shared_types';
+import { Action, MarketFluctuations, MarketState, MarketSlotKey, PlayState, Unique } from '~/shared_types';
 import { Aspect, DynamicModalInterface } from '~/client_types';
 import { CoinDial } from '../popular';
 import { ModalBase, SymbolRow, lib } from '.';
@@ -9,7 +9,7 @@ const { HUES } = clientConstants;
 
 export class SellGoodsModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private fluctuations: MarketFluctuations | null = null;
-    private market: MarketOffer | null = null;
+    private market: MarketState | null = null;
     private coinDial: CoinDial;
     private symbolRow: SymbolRow;
 

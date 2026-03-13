@@ -1,5 +1,5 @@
 import {
-    BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketOffer, MarketSlotKey, LocationData,
+    BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketState, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity, Unique,
@@ -494,7 +494,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         };
     }
 
-    private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketOffer } {
+    private prepareDeckAndGetOffer(): { tradeDeck: Array<Trade>, marketOffer: MarketState } {
         const tradeDeck = lib.randomize(TRADE_DECK_A);
 
         function drawTrade(): Trade {
@@ -506,7 +506,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             drawTrade();
         }
 
-        const marketOffer: MarketOffer = {
+        const marketOffer: MarketState = {
             deckId: 'A',
             future: drawTrade(),
             slot_1: drawTrade(),

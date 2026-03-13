@@ -1,5 +1,5 @@
 import {
-    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketOffer, MarketSlotKey, Player, PlayerColor, PlayState,
+    ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketState, MarketSlotKey, Player, PlayerColor, PlayState,
     TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates, Phase, Unique,
     PlayerCountables,
 } from '~/shared_types';
@@ -14,7 +14,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     private sessionPhase: Writable<Phase.play | Phase.conclusion>;
     private gameResults: Writable<Array<PlayerCountables>>;
     private players: ArrayWritable<Player>;
-    private market: Writable<MarketOffer>;
+    private market: Writable<MarketState>;
     private treasury: Writable<TreasuryOffer>;
     private temple: Writable<TempleState>;
     private chat: ArrayWritable<ChatEntry>;

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
 import { MarketCard } from '.';
-import { MarketDeckKey, MarketOffer, Unique } from '~/shared_types';
+import { Coordinates, MarketDeckKey, MarketState, Unique } from '~/shared_types';
 
 export class MarketDeck implements Unique<DynamicGroupInterface<MarketOffer>>
 {
@@ -13,7 +13,7 @@ export class MarketDeck implements Unique<DynamicGroupInterface<MarketOffer>>
     constructor(
         stage: Konva.Stage,
         layout: GroupLayoutData,
-        offer: MarketOffer,
+        offer: MarketState,
         deckId: MarketDeckKey,
     ) {
         this.group = new Konva.Group({

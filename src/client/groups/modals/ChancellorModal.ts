@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { ModalBase, SymbolRow, lib } from '.';
 import { Aspect, DynamicModalInterface, Specification } from '~/client/client_types';
 import {
-    Action, FeasibleTrade, MarketFluctuations, MarketOffer, MarketSlotKey, PlayState, SpecialistName, Unique,
+    Action, FeasibleTrade, MarketFluctuations, MarketState, MarketSlotKey, PlayState, SpecialistName, Unique,
 } from '~/shared_types';
 import { CoinDial } from '../popular';
 import clientConstants from '~/client_constants';
@@ -12,7 +12,7 @@ const { HUES } = clientConstants;
 export class ChancellorModal extends ModalBase implements Unique<DynamicModalInterface<PlayState, MarketSlotKey>> {
     private description: Konva.Text;
     private fluctuations: MarketFluctuations | null = null;
-    private market: MarketOffer | null = null;
+    private market: MarketState | null = null;
     private marketSlot: MarketSlotKey | null = null;
     private playerFavor: number = 0;
     private playerFeasibles: Array<FeasibleTrade> = [];
