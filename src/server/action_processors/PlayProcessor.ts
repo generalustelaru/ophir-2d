@@ -179,7 +179,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             if (threshold) {
                 this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
 
-                this.playState.trimInfluenceByZone(target, threshold, rivalInfluence);
+                this.playState.trimInfluenceByZone(target, threshold);
                 this.privateState.addDeed({
                     context: TurnEvent.failed_move,
                     description: `was blocked from sailing towards the ${locationName}`,

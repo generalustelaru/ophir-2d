@@ -191,26 +191,19 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
             .filter(p => p.bearings.seaZone == zone);
     }
 
-    // TODO: simplify method as blocking players are already determined upstream.
-    public trimInfluenceByZone(zone: ZoneName, threshold: number,  rivalInfluence: number) {
-        const players = this.getPlayersByZone(zone).sort(
-            (a, b) => b.influence - a.influence,
-        );
-
-        const affectedPlayers = players.filter(p => p.influence == threshold);
+    public trimInfluenceByZone(zone: ZoneName, threshold: number) {
+        const affectedPlayers = this.getPlayersByZone(zone).filter(p => p.influence == threshold);
         const trimmedInfluence = threshold - 1 as DiceSix;
 
         for (const player of affectedPlayers) {
             this.savePlayer({ ...player, influence: trimmedInfluence });
         }
 
-        if (rivalInfluence === threshold) {
-            this.rival.update(r => {
-                if (r.isIncluded)
-                    r.influence -= 1;
-                return r;
-            });
-        }
+        this.rival.update(r => {
+            if (r.isIncluded && r.bearings.seaZone == zone && r.influence == threshold)
+                r.influence -= 1;
+            return r;
+        });
     }
 
     public getLocalActions(seaZone: ZoneName) {
