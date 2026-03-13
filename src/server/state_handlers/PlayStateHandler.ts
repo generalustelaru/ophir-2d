@@ -191,6 +191,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
             .filter(p => p.bearings.seaZone == zone);
     }
 
+    // TODO: simplify method as blocking players are already determined upstream.
     public trimInfluenceByZone(zone: ZoneName, threshold: number,  rivalInfluence: number) {
         const players = this.getPlayersByZone(zone).sort(
             (a, b) => b.influence - a.influence,

@@ -168,31 +168,32 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 return roll;
             })();
 
-            const blockingPlayers = playersInZone.filter(p => p.influence > influenceRoll);
+            const rivalThreshold = rivalInfluence > influenceRoll ? rivalInfluence : 0;
+            const blockingOpponents = playersInZone.filter(p => p.influence > influenceRoll);
+            const opponentThreshold = blockingOpponents.length ? blockingOpponents.reduce((topBlocker, player) =>
+                player.influence > topBlocker.influence ? player : topBlocker,
+            ).influence : 0;
 
-            if (!blockingPlayers.length && influenceRoll >= rivalInfluence) {
+            const threshold = opponentThreshold || rivalThreshold;
+
+            if (threshold) {
+                this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
+
+                this.playState.trimInfluenceByZone(target, threshold, rivalInfluence);
                 this.privateState.addDeed({
-                    context: Action.move,
-                    description: `exerted influence to reach the ${locationName}`,
+                    context: TurnEvent.failed_move,
+                    description: `was blocked from sailing towards the ${locationName}`,
                 });
 
-                return true;
+                return false;
             }
 
-            const opponentThreshold = blockingPlayers.reduce((topInfluencer, player) =>
-                player.influence > topInfluencer.influence ? player : topInfluencer,
-            ).influence;
-
-            const threshold = opponentThreshold || rivalInfluence as DiceSix;
-            this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
-
-            this.playState.trimInfluenceByZone(target, threshold, rivalInfluence);
             this.privateState.addDeed({
-                context: TurnEvent.failed_move,
-                description: `was blocked from sailing towards the ${locationName}`,
+                context: Action.move,
+                description: `exerted influence to reach the ${locationName}`,
             });
 
-            return false;
+            return true;
         })();
 
         if (hasSailed) {
