@@ -282,7 +282,7 @@ export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
 
 export enum BubbleDeed {
-    wave, rollMove, rollFail, privilege,
+    move, rollMove, rollFail, privilege,
     gems, ebony, linen, marble,
     coin, silver, gold, vpFavor,
 }

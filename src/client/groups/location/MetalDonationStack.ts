@@ -5,7 +5,7 @@ import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 const UNIT = 27;
-export class TempleLevelDial implements Unique<StaticGroupInterface> {
+export class MetalDonationStack implements Unique<StaticGroupInterface> {
     private group: Konva.Group;
 
     constructor(

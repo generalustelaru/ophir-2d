@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import { Coordinates, TempleState, Unique } from '~/shared_types';
 import { DynamicGroupInterface, ElementList } from '~/client_types';
-import { TempleLevelDial } from './TempleLevelDial';
+import { MetalDonationStack } from './MetalDonationStack';
 import clientConstants from '~/client_constants';
 
 const SHORT_GAME = Boolean(process.env.SHORT_GAME === 'true');
@@ -20,7 +20,7 @@ export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleSt
 
     private group: Konva.Group;
     private cargoDisplayGroup: Konva.Group;
-    private levelDials: Array<TempleLevelDial> = [];
+    private stacks: Array<MetalDonationStack> = [];
 
     constructor(
         position: Coordinates,
@@ -68,18 +68,18 @@ export class MetalDonationsBand implements Unique<DynamicGroupInterface<TempleSt
     }
 
     public update(status: TempleState): void {
-        this.levelDials.forEach(dial => dial.getElement().destroy());
-        this.levelDials = [];
+        this.stacks.forEach(dial => dial.getElement().destroy());
+        this.stacks = [];
         const donationsCount = status.donations.length;
         const levelDialCount = (donationsCount - status.levelCompletion) / 3 + 1;
         const elements: ElementList = [];
         for (let i = 0; i < levelDialCount; i++) {
-            const dial = new TempleLevelDial(
+            const dial = new MetalDonationStack(
                 { x: LEVEL_DIAL_DRIFTS[i].x, y: 0 },
                 status.donations.slice(i * 3, i * 3 + 3),
             );
             elements.push(dial.getElement());
-            this.levelDials.push(dial);
+            this.stacks.push(dial);
         }
 
         this.cargoDisplayGroup.add(...elements);

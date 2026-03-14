@@ -137,7 +137,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     context: Action.move,
                     description: `used hidden passage to reach the ${locationName}`,
                 });
-                player.addBubbleDeed(BubbleDeed.wave);
+                player.addBubbleDeed(BubbleDeed.move);
 
                 return true;
             }
@@ -149,7 +149,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
                 this.privateState.addDeed({ context: Action.move, description: `sailed to the ${locationName}` });
-                player.addBubbleDeed(BubbleDeed.wave);
+                player.addBubbleDeed(BubbleDeed.move);
 
                 return true;
             }
@@ -186,7 +186,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     context: TurnEvent.failed_move,
                     description: `was blocked from sailing towards the ${locationName}`,
                 });
-                player.addBubbleDeed(BubbleDeed.rollMove);
+                player.addBubbleDeed(BubbleDeed.rollFail);
 
                 return false;
             }
