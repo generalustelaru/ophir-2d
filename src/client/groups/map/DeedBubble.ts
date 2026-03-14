@@ -2,6 +2,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client/client_types';
 import { Coordinates, BubbleDeed, Unique } from '~/shared_types';
 import clientConstants from '~/client/client_constants';
+import { DeedIconFactory } from './DeedIconFactory';
 
 type Update = {
     isVisible: boolean
@@ -11,20 +12,19 @@ const { HUES } = clientConstants;
 const unit = { width: 30, height: 30 } as const;
 export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
     private group: Konva.Group;
-    private deeds: Array<BubbleDeed> = [];
+    private factory: DeedIconFactory;
+    private nodes: Array<Konva.Group> = [];
     private bubble: Konva.Rect;
 
     constructor(
         position: Coordinates,
     ) {
+        this.factory = new DeedIconFactory();
         const realPosition = {
             x: position.x - unit.width / 2,
             y: position.y,
         };
-
-        this.group = new Konva.Group({
-            ...realPosition,
-        });
+        this.group = new Konva.Group({ ...realPosition });
 
         this.bubble = new Konva.Rect({
             fill: HUES.boneWhite,
@@ -53,13 +53,26 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
 
     public update(data: Update) {
         const { deeds, isVisible } = data;
-        this.deeds = deeds;
         this.group.visible(isVisible);
 
-        if (isVisible) {
-            const width = unit.width * deeds.length || unit.width;
-            this.bubble.width(width);
-            this.bubble.x((width / 2 * -1) + (unit.width / 2));
+        if (false == isVisible)
+            return;
+
+        const width = unit.width * deeds.length || unit.width;
+        this.bubble.width(width);
+        this.bubble.x((width / 2 * -1) + (unit.width / 2));
+
+        if (deeds.length == this.nodes.length)
+            return;
+
+        this.nodes.forEach(node => node.destroy());
+        this.nodes = [];
+
+        for (const deed of deeds) {
+            const node = this.factory.getIcon(deed);
+            node.x(this.bubble.x() + (this.nodes.length * unit.width));
+            this.nodes.push(node);
         }
+        this.group.add(...this.nodes);
     }
 }
