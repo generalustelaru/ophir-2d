@@ -186,7 +186,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     context: TurnEvent.failed_move,
                     description: `was blocked from sailing towards the ${locationName}`,
                 });
-                player.addBubbleDeed(BubbleDeed.roll);
+                player.addBubbleDeed(BubbleDeed.rollMove);
 
                 return false;
             }
@@ -195,7 +195,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 context: Action.move,
                 description: `exerted influence to reach the ${locationName}`,
             });
-            player.addBubbleDeed(BubbleDeed.roll);
+            player.addBubbleDeed(BubbleDeed.rollMove);
 
             return true;
         })();
@@ -618,7 +618,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             context: Action.donate_goods,
             description: `donated ${count} ${count == 1 ? 'good' : 'goods'} for ${donationReward} favor and VP`,
         });
-        player.addBubbleDeed(BubbleDeed.vp);
+        player.addBubbleDeed(BubbleDeed.vpFavor);
 
         this.transmit(userId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
@@ -776,7 +776,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             context: Action.donate_metal,
             description: `${isMailing ? 'mailed' : 'donated'} ${metal} for ${reward} VP`,
         });
-        player.addBubbleDeed(BubbleDeed.vp);
+        player.addBubbleDeed(BubbleDeed.vpFavor);
 
         this.transmit(
             player.getIdentity().userId,
