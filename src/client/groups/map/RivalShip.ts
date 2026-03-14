@@ -153,7 +153,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
             slideToPosition(this.group, position, 0.66);
 
         this.group.draggable(isDraggable);
-        isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
+        isDraggable && this.isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };
 
     private broadcastAction(detail: ClientMessage): void {
