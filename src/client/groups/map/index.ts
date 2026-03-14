@@ -9,3 +9,4 @@ export { RemoteShip } from './RemoteShip';
 export { MovesDial } from '../popular/MovesDial';
 export { FavorButton } from './FavorButton';
 export { RivalShip } from './RivalShip';
+export { DeedBubble } from './DeedBubble';

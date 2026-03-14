@@ -1,6 +1,6 @@
 import {
     Action, CargoMetal, DiceSix, ItemName, LocalAction, Player, PlayerColor, ShipBearings, ZoneName,
-    Specialist, SpecialistName, FeasiblePurchase, Unique, FeasibleTrade,
+    Specialist, SpecialistName, FeasiblePurchase, Unique, FeasibleTrade, BubbleDeed,
 } from '~/shared_types';
 import { ActionsAndDetails, ObjectHandler, PlayerIdentity, UserId } from '~/server_types';
 import { writable, Writable, readable, Readable, arrayWritable, ArrayWritable } from './library';
@@ -16,6 +16,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     private turnOrder: Readable<number>;
     private specialist: Readable<Specialist>;
     private isActive: Writable<boolean>;
+    private bubbleDeeds: Writable<Array<BubbleDeed>>;
     private _mayUndo: Writable<boolean>;
     private bearings: Writable<ShipBearings>;
     private overnightZone: Writable<ZoneName>;
@@ -46,6 +47,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.turnOrder = readable(player.turnOrder);
         this.specialist = readable(player.specialist);
         this.isActive = writable(player.isActive);
+        this.bubbleDeeds = writable(player.bubbleDeeds);
         this._mayUndo = writable(player.mayUndo);
         this.bearings = writable(player.bearings);
         this.overnightZone = writable(player.overnightZone);
@@ -74,6 +76,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
             turnOrder: this.turnOrder.get(),
             specialist: this.specialist.get(),
             isActive: this.isActive.get(),
+            bubbleDeeds: this.bubbleDeeds.get(),
             mayUndo: this._mayUndo.get(),
             bearings: this.bearings.get(),
             overnightZone: this.overnightZone.get(),
@@ -112,6 +115,13 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public isActivePlayer() {
         return this.isActive.get();
+    }
+
+    public addBubbleDeed(deed: BubbleDeed) {
+        this.bubbleDeeds.update(arr => {
+            arr.push(deed);
+            return arr;
+        });
     }
 
     public hasAction(action: LocalAction) {
@@ -376,6 +386,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public deactivate() {
         this.isActive.set(false);
+        this.bubbleDeeds.set([]);
         this._isAnchored.set(true);
         this.privilegedSailing.set(false);
         this.moveActions.set(0);

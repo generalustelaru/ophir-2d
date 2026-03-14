@@ -141,6 +141,7 @@ export type Player = Omit<PlayerSelection, 'specialist'> & {
     timeStamp: number,
     isIdle: boolean,
     isActive: boolean,
+    bubbleDeeds: Array<BubbleDeed>,
     mayUndo: boolean,
     bearings: ShipBearings,
     overnightZone: ZoneName,
@@ -279,6 +280,12 @@ export type FeasiblePurchase = { metal: Metal, currency: Currency }
 export type MetalPurchasePayload = FeasiblePurchase & { drop: Array<ItemName> | null }
 export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
+
+export enum BubbleDeed {
+    wave, roll, privilege,
+    gems, ebony, linen, marble,
+    coin, silver, gold, vp, drop,
+}
 
 export type VerboiseAction =
     | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition | Action.move_rival

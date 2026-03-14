@@ -375,6 +375,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
                 turnOrder: s.turnOrder,
                 specialist,
                 isActive: false,
+                bubbleDeeds: [],
                 mayUndo: false,
                 bearings: {
                     seaZone: startingZone,

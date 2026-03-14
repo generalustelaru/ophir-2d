@@ -1,7 +1,7 @@
 import {
     LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, Unique, FeasibleTrade,
-    ServerMessage, PlayerCountables, FeasiblePurchase,
+    ServerMessage, PlayerCountables, FeasiblePurchase, BubbleDeed,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
@@ -137,6 +137,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     context: Action.move,
                     description: `used hidden passage to reach the ${locationName}`,
                 });
+                player.addBubbleDeed(BubbleDeed.wave);
 
                 return true;
             }
@@ -148,6 +149,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
                 this.privateState.addDeed({ context: Action.move, description: `sailed to the ${locationName}` });
+                player.addBubbleDeed(BubbleDeed.wave);
 
                 return true;
             }
@@ -184,6 +186,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     context: TurnEvent.failed_move,
                     description: `was blocked from sailing towards the ${locationName}`,
                 });
+                player.addBubbleDeed(BubbleDeed.roll);
 
                 return false;
             }
@@ -192,6 +195,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 context: Action.move,
                 description: `exerted influence to reach the ${locationName}`,
             });
+            player.addBubbleDeed(BubbleDeed.roll);
 
             return true;
         })();
@@ -301,6 +305,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         player.enablePrivilege();
         this.privateState.addDeed({ context: Action.spend_favor, description: 'spent favor to obtain privileges' });
+        player.addBubbleDeed(BubbleDeed.privilege);
 
         return this.continueTurn(player);
     }
@@ -375,6 +380,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.setCargo(loadItem.data);
         this.privateState.addSpentAction(Action.load_good);
         this.privateState.addDeed({ context: Action.load_good, description: `picked up ${localGood}` });
+        player.addBubbleDeed(((): BubbleDeed => {
+            switch (localGood) {
+                case 'gems': return BubbleDeed.gems;
+                case 'ebony': return BubbleDeed.ebony;
+                case 'linen': return BubbleDeed.linen;
+                default: return BubbleDeed.marble;
+            }
+        })());
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -428,6 +441,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
             ),
         });
+        player.addBubbleDeed(BubbleDeed.coin);
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -604,7 +618,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             context: Action.donate_goods,
             description: `donated ${count} ${count == 1 ? 'good' : 'goods'} for ${donationReward} favor and VP`,
         });
-        console.info(this.privateState.getGameStats());
+        player.addBubbleDeed(BubbleDeed.vp);
 
         this.transmit(userId, { vp: this.privateState.getPlayerVictoryPoints(color) });
 
@@ -722,6 +736,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             context: Action.buy_metal,
             description: `bought ${metal} for ${metalCost[currency]} ${currency}`,
         });
+        player.addBubbleDeed(metal == 'gold' ? BubbleDeed.gold : BubbleDeed.silver);
 
         return this.continueTurn(player);
     }
@@ -761,6 +776,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             context: Action.donate_metal,
             description: `${isMailing ? 'mailed' : 'donated'} ${metal} for ${reward} VP`,
         });
+        player.addBubbleDeed(BubbleDeed.vp);
 
         this.transmit(
             player.getIdentity().userId,

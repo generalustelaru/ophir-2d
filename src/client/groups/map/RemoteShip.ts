@@ -3,7 +3,7 @@ import { Action, Coordinates, Player, PlayerColor, Unique } from '~/shared_types
 import { DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
-import { SeaZone } from './SeaZone';
+import { SeaZone, DeedBubble } from '.';
 import { slideToPosition } from '~/client/animations';
 import { Communicator } from '~/client/services/Communicator';
 
@@ -15,11 +15,12 @@ type RemoteShipUpdate = {
 }
 export class RemoteShip extends Communicator implements Unique<DynamicGroupInterface<RemoteShipUpdate>> {
 
+    private group: Konva.Group;
     private ship: ShipToken;
+    private deedBubble: DeedBubble;
     private localZone: SeaZone;
     private seaZones: Array<SeaZone>;
     private position: Coordinates = { x: 0, y: 0 };
-    private group: Konva.Group;
 
     constructor(
         stage: Konva.Stage,
@@ -47,6 +48,8 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
                 combo: PLAYER_HUES[player.color].muted,
             },
         );
+
+        this.deedBubble = new DeedBubble({ x: 0, y: -90 });
 
         this.group.on(RawEvents.HOVER, () => {
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
@@ -97,7 +100,10 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             }
         });
 
-        this.group.add(this.ship.getElement());
+        this.group.add(
+            this.ship.getElement(),
+            this.deedBubble.getElement(),
+        );
     }
 
     public getElement(): Konva.Group {
@@ -120,6 +126,11 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             this.group.moveToTop();
             slideToPosition(this.group, positionUpdate, 0.66);
         }
+
+        this.deedBubble.update({
+            isVisible: remotePlayer.isActive,
+            deeds: remotePlayer.bubbleDeeds,
+        });
 
         this.group.draggable(isDraggable);
     };
