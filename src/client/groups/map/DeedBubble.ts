@@ -35,11 +35,11 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
         const pointer = new Konva.Line({
             points: [
                 0, 0,      // tip (bottom center)
-                -15, -35,  // top left
-                15, -35,   // top right
+                -14, -30,  // top left
+                14, -30,   // top right
             ],
             x: 15,
-            y: 50,
+            y: 51,
             closed: true,
             fill: HUES.boneWhite,
         });
