@@ -19,7 +19,7 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
     constructor(
         position: Coordinates,
     ) {
-        this.factory = new DeedIconFactory();
+        this.factory = new DeedIconFactory(unit);
         const realPosition = {
             x: position.x - unit.width / 2,
             y: position.y,

@@ -441,7 +441,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
             ),
         });
-        player.addBubbleDeed(BubbleDeed.coin);
+        player.addBubbleDeed(BubbleDeed.marketCoin);
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -507,6 +507,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             ),
         });
 
+        player.addBubbleDeed(BubbleDeed.marketCoin);
         const marketShift = this.shiftMarketCards(player);
 
         if (marketShift.err)
@@ -564,6 +565,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             ),
         });
 
+        player.addBubbleDeed(BubbleDeed.marketCoin);
         const marketShift = this.shiftMarketCards(player);
 
         if (marketShift.err)
@@ -661,6 +663,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 this.privateState.addDeed({ context: Action.sell_specialty, description: `sold ${specialty} for 1 coin` });
             }
 
+            player.addBubbleDeed(BubbleDeed.coin);
 
             if (player.isHarbormaster())
                 this.updateMovesAsHarbormaster(player);
@@ -776,7 +779,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             context: Action.donate_metal,
             description: `${isMailing ? 'mailed' : 'donated'} ${metal} for ${reward} VP`,
         });
-        player.addBubbleDeed(BubbleDeed.vpFavor);
+        player.addBubbleDeed(BubbleDeed.metalVp);
 
         this.transmit(
             player.getIdentity().userId,
@@ -922,6 +925,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 description: 'sent it to the market, cycled it',
             });
 
+            player.addBubbleDeed(BubbleDeed.marketRival);
+
             if (marketShift.data.hasGameEnded) {
                 this.concludeGame(player, marketShift.data.countables);
 
@@ -933,6 +938,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 context: Action.end_rival_turn,
                 description: `sent it to the ${rivalLocation}`,
             });
+            player.addBubbleDeed(BubbleDeed.rival);
         }
 
         this.clearUndo(player);
@@ -1021,6 +1027,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 context: Action.upgrade_cargo,
                 description: 'bought a cargo slot',
             });
+            player.addBubbleDeed(BubbleDeed.upgrade);
             this.privateState.addSpentAction(Action.upgrade_cargo);
 
             if (player.isHarbormaster())

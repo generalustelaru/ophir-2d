@@ -1,11 +1,14 @@
 import { BubbleDeed, Metal, TradeGood } from '~/shared_types';
-import clientConstants from '~/client/client_constants';
+import clientConstants from '~/client_constants';
 import Konva from 'konva';
+import { Dimensions } from '~/client_types';
 
-const { ICON_DATA, HUES, CARGO_ITEM_DATA } = clientConstants;
+const { ICON_DATA, HUES, CARGO_ITEM_DATA, LOCATION_TOKEN_DATA } = clientConstants;
 export class DeedIconFactory {
-
-    constructor() { }
+    private readonly unit: Dimensions;
+    constructor(unit: Dimensions) {
+        this.unit = unit;
+    }
 
     public getIcon(deed: BubbleDeed) {
         const icon = (() => {
@@ -26,17 +29,23 @@ export class DeedIconFactory {
                 case BubbleDeed.privilege:
                     return this.getPrivilegeIcon();
                 case BubbleDeed.coin:
+                    return this.getCoinIcon();
+                case BubbleDeed.marketCoin:
+                case BubbleDeed.marketRival:
+                    return this.getMarketIcon(deed);
+                case BubbleDeed.rival:
+                    return this.getRivalCharacter();
+                case BubbleDeed.metalVp:
                 case BubbleDeed.vpFavor:
+                    return this.getVpIcon(deed);
+                case BubbleDeed.upgrade:
+                    return this.getUpgradeIcon();
                 default:
                     return new Konva.Group();
             }
         })();
 
-        const debug = new Konva.Rect({
-            width: 30, height: 30, stroke: 'red', strokeWidth: 2,
-        });
-
-        return new Konva.Group().add(debug, icon);
+        return new Konva.Group().add(icon);
     }
 
     private getWaveIcon() {
@@ -138,5 +147,92 @@ export class DeedIconFactory {
         });
 
         return new Konva.Group().add(stamp, check);
+    }
+
+    private getCoinIcon() {
+        const coinTop = new Konva.Circle({
+            radius: 7,
+            y: -1,
+            border: 1,
+            borderFill: 'black',
+            fill: HUES.coinSilver,
+        });
+        const coinSide = new Konva.Circle({
+            radius: 7,
+            fill: 'black',
+        });
+
+        return new Konva.Group({ x: 15, y: 15 }).add(coinSide, coinTop);
+    }
+
+    private getMarketIcon(deed: BubbleDeed.marketCoin | BubbleDeed.marketRival) {
+        const card = this.produceCardShape(LOCATION_TOKEN_DATA.market.fill);
+        const icon = deed == BubbleDeed.marketCoin ? this.getCoinIcon() : this.getRivalCharacter();
+
+        return new Konva.Group().add(card, icon);
+    }
+
+    private getVpIcon(deed: BubbleDeed.metalVp | BubbleDeed.vpFavor) {
+        const card = this.produceCardShape(LOCATION_TOKEN_DATA.temple.fill);
+        const vpDisc = new Konva.Circle({
+            x: 15,
+            y: 15,
+            radius: 7,
+            fill: HUES.vpGold,
+        });
+
+        if (deed == BubbleDeed.metalVp) {
+            return new Konva.Group().add(card, vpDisc);
+        }
+
+        const favorSemiDisc = new Konva.Wedge({
+            x: 15,
+            y: 15,
+            radius: 7,
+            angle: 180,
+            rotation: -90,
+            fill: ICON_DATA.favor_stamp_outer.fill,
+        });
+
+        return new Konva.Group().add(card,vpDisc, favorSemiDisc);
+    }
+
+    private getRivalCharacter() {
+        return this.produceCharacter('R');
+    }
+
+    private getUpgradeIcon() {
+        const card = this.produceCardShape('black');
+        const sign = this.produceCharacter('+', 'white');
+
+        return new Konva.Group().add(card, sign);
+    }
+
+    private produceCardShape(hue: string) {
+        return new Konva.Rect({
+            width: 18,
+            height: 22,
+            x: 6,
+            y: 4,
+            cornerRadius: 3,
+            fill: hue,
+            stroke: 'black',
+            strokeWidth: 1,
+        });
+    }
+
+    private produceCharacter(char: string, hue?: string) {
+        return new Konva.Text({
+            text: char,
+            width: this.unit.width,
+            height: this.unit.height,
+            fill: hue,
+            fontFamily: 'Custom',
+            fontSize: 16,
+            fontStyle: 'bold',
+            align: 'center',
+            verticalAlign: 'middle',
+            y: 2,
+        });
     }
 }
