@@ -117,6 +117,9 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
     public update(data: RemoteShipUpdate): void {
         const { remotePlayer, isDraggable } = data;
         const { seaZone, position: positionUpdate } = remotePlayer.bearings;
+
+        remotePlayer.isActive && this.group.moveToTop();
+
         this.localZone = this.seaZones.find(
             z => z.getZoneName() == seaZone,
         )!;
@@ -131,6 +134,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             isVisible: remotePlayer.isActive,
             deeds: remotePlayer.bubbleDeeds,
         });
+
 
         this.group.draggable(isDraggable);
     };
