@@ -91,7 +91,7 @@ export class MarketDeck implements Unique<DynamicGroupInterface<Update>>
             text: deckId,
             fontSize: 14,
             fontFamily: 'Custom',
-            fill: 'pink',
+            fill: HUES.boneWhite,
         });
 
         this.group.add(
