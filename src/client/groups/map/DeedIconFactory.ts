@@ -42,7 +42,7 @@ export class DeedIconFactory {
         const data = ICON_DATA.ocean_wave;
         return new Konva.Path({
             data: data.shape,
-            fill: data.fill,
+            fill: HUES.activeHex,
             x: 2,
             y: -13,
             scale: { x: .5, y: 1.5 },
