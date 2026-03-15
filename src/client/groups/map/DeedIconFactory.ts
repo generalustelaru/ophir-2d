@@ -5,25 +5,26 @@ import Konva from 'konva';
 const { ICON_DATA, HUES, CARGO_ITEM_DATA } = clientConstants;
 export class DeedIconFactory {
 
-    constructor() {}
+    constructor() { }
 
     public getIcon(deed: BubbleDeed) {
         const icon = (() => {
             switch (deed) {
                 case BubbleDeed.move:
-                    return this.getWave();
+                    return this.getWaveIcon();
                 case BubbleDeed.rollMove:
                 case BubbleDeed.rollFail:
-                    return this.getRoll(deed);
+                    return this.getDieIcon(deed);
                 case BubbleDeed.ebony:
                 case BubbleDeed.gems:
                 case BubbleDeed.linen:
                 case BubbleDeed.marble:
-                    return this.getCommodity(deed);
+                    return this.getCommodityIcon(deed);
                 case BubbleDeed.gold:
                 case BubbleDeed.silver:
-                    return this.getMetal(deed);
+                    return this.getMetalIcon(deed);
                 case BubbleDeed.privilege:
+                    return this.getPrivilegeIcon();
                 case BubbleDeed.coin:
                 case BubbleDeed.vpFavor:
                 default:
@@ -38,7 +39,7 @@ export class DeedIconFactory {
         return new Konva.Group().add(debug, icon);
     }
 
-    private getWave() {
+    private getWaveIcon() {
         const data = ICON_DATA.ocean_wave;
         return new Konva.Path({
             data: data.shape,
@@ -51,12 +52,12 @@ export class DeedIconFactory {
         });
     }
 
-    private getCommodity(
+    private getCommodityIcon(
         deed:
-        | BubbleDeed.ebony
-        | BubbleDeed.gems
-        | BubbleDeed.linen
-        | BubbleDeed.marble,
+            | BubbleDeed.ebony
+            | BubbleDeed.gems
+            | BubbleDeed.linen
+            | BubbleDeed.marble,
     ) {
         const type = ((): TradeGood => {
             switch (deed) {
@@ -78,7 +79,7 @@ export class DeedIconFactory {
         });
     }
 
-    private getRoll(deed: BubbleDeed.rollMove | BubbleDeed.rollFail) {
+    private getDieIcon(deed: BubbleDeed.rollMove | BubbleDeed.rollFail) {
         const face = new Konva.Rect({
             width: 18,
             height: 18,
@@ -104,7 +105,7 @@ export class DeedIconFactory {
         return roll;
     }
 
-    private getMetal(deed: BubbleDeed.silver | BubbleDeed.gold) {
+    private getMetalIcon(deed: BubbleDeed.silver | BubbleDeed.gold) {
         const type: Metal = deed == BubbleDeed.gold ? 'gold' : 'silver';
         const data = CARGO_ITEM_DATA[type];
         return new Konva.Path({
@@ -118,4 +119,24 @@ export class DeedIconFactory {
         });
     }
 
+    private getPrivilegeIcon() {
+        const stamp = new Konva.Path({
+            data: ICON_DATA.favor_stamp_outer.shape,
+            fill: ICON_DATA.favor_stamp_outer.fill,
+            stroke: HUES.stampEdge,
+            strokeWidth: 2,
+            scale: { x: .8, y: .8 },
+            x: 5,
+            y: 5,
+        });
+
+        const check = new Konva.Path({
+            data: ICON_DATA.active_favor_check.shape,
+            fill: ICON_DATA.active_favor_check.fill,
+            scale: { x: 1.2, y: 1.2 },
+            y: -5,
+        });
+
+        return new Konva.Group().add(stamp, check);
+    }
 }
