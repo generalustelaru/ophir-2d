@@ -75,4 +75,8 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
         }
         this.group.add(...this.nodes);
     }
+
+    public setPositionMode(mode: 'above' | 'on') {
+
+    }
 }

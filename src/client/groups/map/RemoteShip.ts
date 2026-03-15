@@ -142,4 +142,8 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
     public destroy(): void {
         this.group.destroy();
     }
+
+    private adjustBubble() {
+        
+    }
 }
