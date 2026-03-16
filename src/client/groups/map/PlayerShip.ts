@@ -33,22 +33,20 @@ export class PlayerShip extends Communicator {
         return this.group;
     };
 
-    public update(coordinates: Coordinates, players: Array<Player>, rival: Rival) {
+    public update(newPosition: Coordinates, players: Array<Player>, rival: Rival) {
         const player = players.find(p => p.color === localState.playerColor);
 
         if (!player)
             throw new Error('Cannot update player ship w/o participating color');
 
-        if (coordinates.x != this.group.x() && coordinates.y != this.group.y()) {
+        if (newPosition.x != this.group.x() || newPosition.y != this.group.y()) {
             this.group.moveToTop();
-            slideToPosition(this.group, coordinates, 0.66);
+            slideToPosition( this.group, newPosition, 0.66);
         }
 
         this.players = players;
         this.player = player;
         this.rival = rival;
-        this.group.x(coordinates.x);
-        this.group.y(coordinates.y);
         this.group.draggable(player.isActive);
         this.inControl && player.moveActions ? this.activeEffect.start() : this.activeEffect.stop();
     };
@@ -194,7 +192,6 @@ export class PlayerShip extends Communicator {
                             toSail: this.toSailValue,
                             isTempleGuard: player.specialist.name === SpecialistName.temple_guard,
                         });
-                        // TODO: Make coords-reset actionable from modal (when canceling attempt)
                         this.group.x(this.initialPosition.x);
                         this.group.y(this.initialPosition.y);
                     } else {

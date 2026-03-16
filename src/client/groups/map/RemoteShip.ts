@@ -116,7 +116,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
 
     public update(data: RemoteShipUpdate): void {
         const { remotePlayer, isDraggable } = data;
-        const { seaZone, position: positionUpdate } = remotePlayer.bearings;
+        const { seaZone, position: newPosition } = remotePlayer.bearings;
 
         remotePlayer.isActive && this.group.moveToTop();
 
@@ -124,10 +124,10 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             z => z.getZoneName() == seaZone,
         )!;
 
-        if (positionUpdate.x != this.position.x && positionUpdate.y != this.position.y) {
-            this.position = positionUpdate;
+        if (newPosition.x != this.position.x || newPosition.y != this.position.y) {
+            this.position = newPosition;
             this.group.moveToTop();
-            slideToPosition(this.group, positionUpdate, 0.66);
+            slideToPosition(this.group, newPosition, 0.66);
         }
 
         if (this.position.y < 75)
@@ -139,7 +139,6 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             isVisible: remotePlayer.isActive,
             deeds: remotePlayer.bubbleDeeds,
         });
-
 
         this.group.draggable(isDraggable);
     };
