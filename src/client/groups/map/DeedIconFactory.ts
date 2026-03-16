@@ -14,7 +14,7 @@ export class DeedIconFactory {
         const icon = (() => {
             switch (deed) {
                 case BubbleDeed.move:
-                    return this.getWaveIcon();
+                    return this.getHexIcon();
                 case BubbleDeed.rollMove:
                 case BubbleDeed.rollFail:
                     return this.getDieIcon(deed);
@@ -50,14 +50,13 @@ export class DeedIconFactory {
         return new Konva.Group().add(icon);
     }
 
-    private getWaveIcon() {
-        const data = ICON_DATA.ocean_wave;
-        return new Konva.Path({
-            data: data.shape,
+    private getHexIcon() {
+        return new Konva.RegularPolygon({
+            sides: 6,
+            radius: 13,
             fill: HUES.activeHex,
-            x: 2,
-            y: -13,
-            scale: { x: .5, y: 1.5 },
+            x: 15,
+            y: 15,
             stroke: 'black',
             strokeWidth: 1,
         });
@@ -91,18 +90,21 @@ export class DeedIconFactory {
     }
 
     private getDieIcon(deed: BubbleDeed.rollMove | BubbleDeed.rollFail) {
+        const hex = this.getHexIcon();
         const face = new Konva.Rect({
             width: 18,
             height: 18,
             cornerRadius: 3,
+            x: 6,
+            y: 6,
             fill: HUES.Neutral,
             stroke: 'black',
             strokeWidth: 1,
         });
         const pip = new Konva.Circle({
             radius: 3,
-            x: 9,
-            y: 9,
+            x: 15,
+            y: 15,
             fill: 'black',
         });
 
@@ -111,7 +113,7 @@ export class DeedIconFactory {
             pip.fill('white');
         }
 
-        const roll = new Konva.Group({ x: 6, y: 6 }).add(face, pip);
+        const roll = new Konva.Group().add(hex, face, pip);
 
         return roll;
     }
