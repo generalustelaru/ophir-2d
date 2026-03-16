@@ -130,6 +130,11 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             slideToPosition(this.group, positionUpdate, 0.66);
         }
 
+        if (this.position.y < 75)
+            this.deedBubble.setVertical(-30, false);
+        else
+            this.deedBubble.setVertical(-90, true);
+
         this.deedBubble.update({
             isVisible: remotePlayer.isActive,
             deeds: remotePlayer.bubbleDeeds,
@@ -141,9 +146,5 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
 
     public destroy(): void {
         this.group.destroy();
-    }
-
-    private adjustBubble() {
-        
     }
 }

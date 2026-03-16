@@ -15,6 +15,7 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
     private factory: DeedIconFactory;
     private nodes: Array<Konva.Group> = [];
     private bubble: Konva.Rect;
+    private pointer : Konva.Line;
 
     constructor(
         position: Coordinates,
@@ -32,7 +33,7 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
             height: unit.height,
         });
 
-        const pointer = new Konva.Line({
+        this.pointer = new Konva.Line({
             points: [
                 0, 0,      // tip (bottom center)
                 -14, -30,  // top left
@@ -44,7 +45,7 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
             fill: HUES.boneWhite,
         });
 
-        this.group.add(pointer, this.bubble);
+        this.group.add(this.pointer, this.bubble);
     }
 
     public getElement(): Konva.Group {
@@ -76,7 +77,8 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
         this.group.add(...this.nodes);
     }
 
-    public setPositionMode(mode: 'above' | 'on') {
-
+    public setVertical(y: number, collapse: boolean) {
+        this.group.y(y);
+        this.pointer.visible(collapse);
     }
 }
