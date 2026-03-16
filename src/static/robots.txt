@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /how-to-play
+Disallow: /tutorial
+Disallow: /tutorial-data
+Disallow: /authentication
+Disallow: /lobby
+Disallow: /logout
+Disallow: /new
+Disallow: /game-
