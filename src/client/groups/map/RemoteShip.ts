@@ -87,6 +87,8 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
                 this.group.y(this.position.y);
                 targetZone && targetZone.resetFill();
             } else {
+                this.position.x = this.group.x();
+                this.position.y = this.group.y();
                 this.createEvent({
                     type: EventType.action,
                     detail: {
