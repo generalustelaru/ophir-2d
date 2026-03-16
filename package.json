@@ -6,8 +6,10 @@
   "main": "main.ts",
   "scripts": {
     "omit_revs": "git config blame.ignoreRevsFile .git-blame-ignore-revs || true",
-    "build_client": "webpack --config webpack.config.cjs --env isServer=false",
+    "build_client": "webpack --config webpack.config.cjs",
     "build_server": "webpack --config webpack.config.cjs --env isServer=true",
+    "build_client_prod": "webpack --config webpack.config.cjs --env isProd=true",
+    "build_server_prod": "webpack --config webpack.config.cjs --env isServer=true --env isProd=true",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -37,7 +39,6 @@
     "babel-loader": "^9.1.3",
     "dotenv-webpack": "^8.1.0",
     "eslint": "^10.0.2",
-    "terser-webpack-plugin": "^5.3.10",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.97.1",
