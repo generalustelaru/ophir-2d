@@ -119,6 +119,8 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public addBubbleDeed(deed: BubbleDeed) {
         this.bubbleDeeds.update(arr => {
+            if (arr.length == 1 && arr[0] == BubbleDeed.undecided)
+                arr = [];
             arr.push(deed);
             return arr;
         });
@@ -382,11 +384,11 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.destinations.overwrite(destinations);
         this.navigatorAccess.overwrite(navigatorAccess);
         this.turnPurchases.set(0);
+        this.bubbleDeeds.set([BubbleDeed.undecided]);
     }
 
     public deactivate() {
         this.isActive.set(false);
-        this.bubbleDeeds.set([]);
         this._isAnchored.set(true);
         this.privilegedSailing.set(false);
         this.moveActions.set(0);

@@ -299,6 +299,7 @@ export enum BubbleDeed {
     vpFavor,
     metalVp,
     upgrade,
+    undecided,
 }
 
 export type VerboiseAction =

@@ -59,11 +59,11 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
         if (false == isVisible)
             return;
 
-        const width = unit.width * deeds.length || unit.width;
+        const width = unit.width * deeds.length;
         this.bubble.width(width);
         this.bubble.x((width / 2 * -1) + (unit.width / 2));
 
-        if (deeds.length == this.nodes.length)
+        if (deeds.length == this.nodes.length && deeds.length != 1)
             return;
 
         this.nodes.forEach(node => node.destroy());

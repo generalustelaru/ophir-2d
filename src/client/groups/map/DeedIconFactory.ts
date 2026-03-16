@@ -40,6 +40,8 @@ export class DeedIconFactory {
                     return this.getVpIcon(deed);
                 case BubbleDeed.upgrade:
                     return this.getUpgradeIcon();
+                case BubbleDeed.undecided:
+                    return this.produceCharacter('...');
                 default:
                     return new Konva.Group();
             }
