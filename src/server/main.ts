@@ -423,7 +423,7 @@ app.post('/tutolytics/:step', (req: Request, res: Response) => {
         return;
     }
 
-    sLib.printInfo(`Visitor reached turorial step: [${parseInt(step)}]`);
+    sLib.printInfo(`Visitor reached tutorial step: [${parseInt(step)}]`);
 });
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:uri', async (req: Request, res: Response) => {
