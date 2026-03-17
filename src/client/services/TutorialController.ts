@@ -28,17 +28,17 @@ export class TutorialController extends Communicator implements Controller {
         this.currentState = data.state as PlayState;
         this.textSources = data.text as Array<ScenarioStepText>;
         this.createEvent( { type: EventType.identification, detail: { color: this.currentState.players[0].color } });
-        const initialScenario = this.buildStep(this.stepProvider.getNextPartial());
+        const initialScenario = this.buildStep({ partial: this.stepProvider.getNextPartial() });
 
         if (!initialScenario) {
             console.error('Scenarios are incomplete.');
             return;
         }
 
-        const { instructions, expecting } = initialScenario;
+        const { instructions, expecting, index: key } = initialScenario;
 
         this.expectedMessage = expecting;
-        this.createEvent({ type: EventType.tour_update, detail: { instructions, state: this.currentState } });
+        this.createEvent({ type: EventType.tour_update, detail: { index: key, instructions, state: this.currentState } });
     }
 
     public processMessage(message: ClientMessage) {
@@ -75,11 +75,15 @@ export class TutorialController extends Communicator implements Controller {
             const scenario = (() => {
                 switch (action) {
                     case Action.move:
-                        return this.buildStep({ ...this.stepProvider.getNextPartial(), newPosition: payload.position });
+                        return this.buildStep({
+                            partial: this.stepProvider.getNextPartial(), newPosition: payload.position,
+                        });
                     case Action.move_rival:
-                        return this.buildStep({ ...this.stepProvider.getNextPartial(), newRivalPosition: payload.position });
+                        return this.buildStep({
+                            partial: this.stepProvider.getNextPartial(), newRivalPosition: payload.position,
+                        });
                     default:
-                        return this.buildStep(this.stepProvider.getNextPartial());
+                        return this.buildStep({ partial: this.stepProvider.getNextPartial() });
                 }
             })();
 
@@ -87,12 +91,13 @@ export class TutorialController extends Communicator implements Controller {
                 throw new Error('Scenarios are incomplete.');
 
             scenario.mutate(this.currentState);
-            const { instructions, expecting, laconic: notification, vpDetail, failedRollDetail } = scenario;
+            const { instructions, expecting, laconic: notification, vpDetail, failedRollDetail, index } = scenario;
             this.expectedMessage = expecting;
 
             vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
             failedRollDetail && this.createEvent({ type: EventType.failed_roll, detail: failedRollDetail });
             this.createEvent({ type: EventType.tour_update, detail: {
+                index,
                 state: this.currentState,
                 instructions,
             } });
@@ -114,7 +119,6 @@ export class TutorialController extends Communicator implements Controller {
     }
 
     private buildStep(data?: {
-        step: number,
         partial: ScenarioStepPartial,
         newPosition?: Coordinates,
         newRivalPosition?: Coordinates,
@@ -123,8 +127,9 @@ export class TutorialController extends Communicator implements Controller {
         if (!data)
             return null;
 
-        const { step, partial, newPosition, newRivalPosition } = data;
+        const { partial, newPosition, newRivalPosition } = data;
         const {
+            index,
             expecting,
             vpDetail,
             failedRollDetail,
@@ -132,7 +137,7 @@ export class TutorialController extends Communicator implements Controller {
             visuals: stepHighlights,
             mutate: originalMutate,
         } = partial;
-        const textSource = this.textSources[step];
+        const textSource = this.textSources[index];
 
         if (!textSource)
             return null;
@@ -164,7 +169,7 @@ export class TutorialController extends Communicator implements Controller {
             }
         })();
 
-        return { mutate, instructions, expecting, laconic, vpDetail, failedRollDetail };
+        return { index, mutate, instructions, expecting, laconic, vpDetail, failedRollDetail };
     }
 
     private isSame(reference: any, tested: any): boolean {

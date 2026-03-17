@@ -272,6 +272,7 @@ export type NotificationType = 'rivalControl' | 'turnStart' | 'forcedTurn' | nul
  * @property `expecting` Condition for advancing to the next TutorialScenarioStep
  */
 export type TutorialScenarioStep = {
+    index: number,
     mutate: (state: PlayState) => void // produces a new state that trickles to every element in regular fashion
     laconic: NotificationType // simulates additional server transmissions for laconic events
     vpDetail?: VpTransmission // provision for payload on gaining vp
@@ -284,6 +285,7 @@ export type TutorialScenarioStep = {
  * @description Resulting digest for CanvasService
  */
 export type TutorialState = {
+    index: number,
     state: PlayState,
     instructions: Array<Instruction>,
 }

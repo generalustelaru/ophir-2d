@@ -4,7 +4,7 @@ import { ScenarioStepPartial, Target } from '../client_types';
 const position = { x: 0, y: 0 } as const;
 export class TutorialStepProvider {
     private currentStep: number = 0;
-    private partials: Array<ScenarioStepPartial> = [
+    private partials: Array<Omit<ScenarioStepPartial, 'index'>> = [
         {
             laconic: null,
             mutate: (_state: PlayState) => { },
@@ -566,10 +566,7 @@ export class TutorialStepProvider {
         },
     ];
 
-    public getNextPartial() {
-        return {
-            partial: this.partials[this.currentStep],
-            step: this.currentStep++,
-        };
+    public getNextPartial(): ScenarioStepPartial {
+        return { ...this.partials[this.currentStep], index: this.currentStep++ };
     }
 }

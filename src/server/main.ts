@@ -16,16 +16,16 @@ import process from 'process';
 import path from 'path';
 import http from 'http';
 
-import { PORT_NUMBER, MONGODB_URI, REDIS_URL } from '../environment';
+import { PORT_NUMBER, MONGODB_URI, REDIS_URL, NODE_ENV } from '../environment';
 import { MongoClient } from 'mongodb';
 import opentype, { Font } from 'opentype.js';
 
 // TODO: use runtime flag to disable log verbosity in production
 // const isDev = process.env.NODE_ENV === 'development';
 
-if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL) {
-    console.error('Missing environment variables', {
-        PORT_NUMBER, MONGODB_URI, REDIS_URL,
+if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL || !NODE_ENV) {
+    console.error('❌ Missing environment variables', {
+        PORT_NUMBER, MONGODB_URI, REDIS_URL, NODE_ENV,
     });
     process.exit(1);
 }
@@ -39,7 +39,7 @@ opentype.load(path.join(process.cwd(), 'dist/public', 'Laila-Regular.ttf')).then
     console.info('✅ Fonts loaded.');
 }).catch(error => {
     sLib.printError(String(error));
-    console.info('❌ Could not load fonts.');
+    console.error('❌ Could not load fonts.');
     process.exit(1);
 });
 
@@ -104,6 +104,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
     const extraction = extractGameId(params?.get('gameId') || '');
 
     if (extraction.err) {
+        sLib.printError(extraction.message);
         transmit(socket, { error: 'Invalid connection data.' });
 
         return;
@@ -120,7 +121,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         const activation = await activateGame(gameId);
 
         if (activation.ok) {
-            console.log('Activated', { gameId });
+            sLib.printInfo(`Activated: [${gameId}]`);
             activeGames.set(gameId, activation.data);
 
             return activation.data;
@@ -132,7 +133,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
     })();
 
     if (!game) {
-        sLib.printWarning('WS requested inexistent game.');
+        sLib.printWarning(`Could not find: [${gameId}]`);
         transmit(socket, { notFound: null });
 
         return;
@@ -177,6 +178,8 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
     updateGameStat(gameId);
     transmit(socket, { state: game.getSharedState() });
 
+    sLib.printInfo(`[${user.name}] connected to [${gameId}]`);
+
     socket.on('message', function incoming(req: string) {
         const clientRequest = validator.validateClientRequest(JSON.parse(req));
 
@@ -186,7 +189,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         if (expiresAt <= Date.now())
             return transmit(socket, { expired: null });
 
-        logRequest(clientRequest, user.name, gameId);
+        NODE_ENV == 'development' && logRequest(clientRequest, user.name, gameId);
 
         if (clientRequest.message.action == Action.declare_reset) {
             dbService.getConfig().then(configuration => {
@@ -241,11 +244,12 @@ app.get('/tutorial', (req: Request, res: Response) => {
     sLib.printInfo(`/tutorial -> ${req.ip}`);
     res.sendFile(path.join(__dirname, 'public', 'game.html'));
 });
-app.get('/tutorial-data', (_, res: Response) => {
+app.get('/tutorial-data', (req: Request, res: Response) => {
+    sLib.printInfo(`/tutorial-data -> ${req.ip}`);
     res.sendFile(path.join(__dirname, 'public', 'tutorial_data.json'));
 });
 app.get('/probe', (req: Request, res: Response) => {
-    console.info('Server probed', { ip: req.ip });
+    sLib.printInfo(`/probe -> ${req.ip}`);
     res.status(200).send('SERVER OK');
 });
 app.get('/feed', async (req: Request, res: Response) => {
@@ -271,11 +275,13 @@ app.get('/', async (req: Request, res: Response) => {
         res.sendFile(path.join(__dirname, 'public', 'index.html'));
     }
 });
-app.get('/authentication', async (_, res: Response) => {
+app.get('/authentication', async (req: Request, res: Response) => {
+    sLib.printInfo(`/authentication -> ${req.ip}`);
     res.sendFile(path.join(__dirname, 'public', 'authentication.html'));
 });
 app.use(express.urlencoded({ extended: true }));
 app.post('/register', async (req: Request, res: Response) => {
+    sLib.printInfo(`POST /register -> ${req.ip}`);
     const form = req.body as RegistrationForm;
 
     const validation = await dbService.validateRegistrationInput(form);
@@ -291,6 +297,7 @@ app.post('/register', async (req: Request, res: Response) => {
 
     if (validity.invalid) {
         res.status(401).send(validity.reason);
+        sLib.printWarning(validity.reason);
 
         return;
     }
@@ -313,7 +320,7 @@ app.post('/register', async (req: Request, res: Response) => {
         return;
     }
 
-    console.info('New registration', { userName: form.userName });
+    sLib.printInfo(`New user: [${form.userName}]`);
 
     for (const cookieName in sessionOp.data) {
         const { value, options } = sessionOp.data[cookieName as CookieName];
@@ -323,6 +330,7 @@ app.post('/register', async (req: Request, res: Response) => {
     res.status(200).send();
 });
 app.post('/authenticate', async (req: Request, res: Response) => {
+    sLib.printInfo(`POST /authenticate -> ${req.ip}`);
     const form = req.body as AuthenticationForm;
     const authentication = await dbService.authenticateUser(form);
 
@@ -343,7 +351,7 @@ app.post('/authenticate', async (req: Request, res: Response) => {
         return;
     }
 
-    console.info('User logged in', { userName: user.name });
+    sLib.printInfo(`[${user.name}] has logged in.`);
 
     for (const cookieName in sessionOp.data) {
         const { value, options } = sessionOp.data[cookieName as CookieName];
@@ -353,6 +361,7 @@ app.post('/authenticate', async (req: Request, res: Response) => {
     res.status(200).send();
 });
 app.get('/lobby', async (req: Request, res: Response) => {
+    sLib.printInfo(`/lobby -> ${req.ip}`);
     const validation = await validateClient(req.headers.cookie);
 
     if (validation.err) {
@@ -371,11 +380,12 @@ app.get('/lobby', async (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
 });
 app.get('/logout', async (req: Request, res: Response) => {
+    sLib.printInfo(`/logout -> ${req.ip}`);
     clearSession(req.headers.cookie);
     res.status(200).send();
 });
 app.get('/new', async (req: Request, res: Response) => {
-    console.info('Visitor calls for new session', { ip: req.ip });
+    sLib.printInfo(`/new -> ${req.ip}`);
 
     const validation = await validateClient(req.headers.cookie);
 
@@ -402,28 +412,42 @@ app.get('/new', async (req: Request, res: Response) => {
 
     res.redirect(`/game-${gameId}`);
 });
+app.post('/tutolytics/:step', (req: Request, res: Response) => {
+    sLib.printInfo(`POST /tutolytics -> ${req.ip}`);
+    const { step } = req.params;
+
+    res.sendStatus(200);
+
+    if (typeof step != 'string') {
+        sLib.printError(`Malformed parameter: [${step}]`);
+        return;
+    }
+
+    sLib.printInfo(`Visitor reached turorial step: [${parseInt(step)}]`);
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/:uri', async (req: Request, res: Response) => {
     const uri = req.params.uri as string;
 
     if (!uri.match(/^game-.+/)) {
-        sLib.printWarning(`Unexpected request { uri: ${req.params.uri}, ip: ${req.ip} }`);
+        sLib.printWarning(`Unexpected: { uri: ${req.params.uri}, ip: ${req.ip} }`);
         res.status(400).send('Unknown address.');
 
         return;
     }
 
+    sLib.printInfo(`/${uri} -> ${req.ip}`);
+
     const extraction = extractGameId(uri);
 
     if (extraction.err) {
-        sLib.printWarning(`issue: ${extraction.message}, ip: ${req.ip}`);
+        sLib.printWarning(`Issue: [${extraction.message}]`);
         res.status(400).send('Unknown address.');
 
         return;
     }
 
     const gameId = extraction.data;
-    console.info('Visitor requests session', { gameId });
 
     const validation = await validateClient(req.headers.cookie);
 
@@ -434,7 +458,6 @@ app.get('/:uri', async (req: Request, res: Response) => {
         return;
     }
 
-    console.info(`${validation.data.name} connecting...`);
     res.setHeader('X-Content-Type-Options', 'nosniff');
 
     if (activeGames.has(gameId)) {
@@ -443,6 +466,7 @@ app.get('/:uri', async (req: Request, res: Response) => {
         return;
     }
 
+    sLib.printInfo(`[${validation.data.name}] is requesting [${gameId}].`);
     const activation = await activateGame(gameId);
 
     if (activation.err) {
@@ -614,7 +638,6 @@ async function handleDisconnection(gameId: GameId) {
 
     if (activeGames.has(gameId)) {
         const connectedUsers = getGameConnections(gameId);
-        console.log('users connected to the same session:', connectedUsers);
 
         if (connectedUsers.length == 0) {
             const game = activeGames.get(gameId) as Game;
@@ -628,9 +651,6 @@ async function handleDisconnection(gameId: GameId) {
                 if (operation.ok) {
                     game.deReference();
                     activeGames.delete(gameId);
-                    console.info(
-                        toRemove ? 'deleted redundant game' : 'deactivated stale game', { gameId },
-                    );
                 } else {
                     sLib.printError(operation.message);
                     toRemove = true;

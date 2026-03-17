@@ -156,10 +156,12 @@ document.fonts.ready.then(() => {
         if (!event.detail)
             return signalError('State is missing!');
 
-        const { state, instructions } = event.detail as TutorialState;
+        const { index, state, instructions } = event.detail as TutorialState;
         uiService.update(state, true);
         canvas.drawUpdateElements(state);
         canvas.updateInstructions(instructions);
+
+        fetch(`/tutolytics/${index}`, { method: 'POST' });
     });
 
     window.addEventListener(EventType.start_turn, () => {
