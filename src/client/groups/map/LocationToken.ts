@@ -1,52 +1,33 @@
 import Konva from 'konva';
 import { IconLayer, DynamicGroupInterface, ElementList } from '~/client_types';
 import { LocationName, TradeGood, Unique } from '~/shared_types';
-import { Button } from '../popular';
 import { EmptyLocationToken } from '.';
 
 type LocationTokenUpdate = {
     tradeGoodSupplies: Record<TradeGood, number>
-    mayPickup: boolean
     templeIcon: IconLayer
 };
 
-// TODO: Refactor this as a non-button. Make the SeaZone clickable
-export class LocationToken extends Button implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
+export class LocationToken implements Unique<DynamicGroupInterface<LocationTokenUpdate>> {
+    private group: Konva.Group;
     private icon: Konva.Path;
     private id: LocationName;
     private emptyLocation: EmptyLocationToken;
     private tradeGood: TradeGood | null;
 
     constructor(
-        stage: Konva.Stage,
         locationId: LocationName,
         iconData: IconLayer,
         isPlay: boolean,
-        loadGoodCallback: (tradeGood: TradeGood) => void,
+        tradeGood: TradeGood | null,
     ) {
+        this.group = new Konva.Group({ width: 100, height: 100, x: 0, y: 0 });
         const elements: ElementList = [];
-        const goodToPickup = ((): TradeGood | null => {
-            switch (locationId) {
-                case 'mines': return 'gems';
-                case 'quarry': return 'marble';
-                case 'forest': return 'ebony';
-                case 'farms': return 'linen';
-                default: return null;
-            }
-        })();
 
         const scale = 3;
 
-        super(
-            stage,
-            { width: 100, height: 100, x: 0, y: 0 },
-            goodToPickup
-                ? () => { loadGoodCallback(goodToPickup); }
-                : null,
-        );
-
         this.id = locationId;
-        this.tradeGood = goodToPickup;
+        this.tradeGood = tradeGood;
 
         const verticalDrift = ((): number => {
             switch (locationId) {
@@ -79,7 +60,7 @@ export class LocationToken extends Button implements Unique<DynamicGroupInterfac
         if (this.tradeGood)
             elements.push(this.emptyLocation.getElement());
 
-        this.group.add( ...elements);
+        this.group.add(...elements);
     }
 
     public getElement() {
@@ -93,8 +74,6 @@ export class LocationToken extends Button implements Unique<DynamicGroupInterfac
     public update(update: LocationTokenUpdate): void {
         if (this.tradeGood) {
             const supply = update.tradeGoodSupplies[this.tradeGood];
-
-            (supply > 0 && update.mayPickup) ? super.enable() : super.disable();
             this.emptyLocation.update(supply > 0);
         }
 

@@ -6,6 +6,7 @@ import {
 } from '~/shared_types';
 import { Hue, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
 import { LocationToken } from '.';
+import { Button } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { HUES, ICON_DATA } = clientConstants;
@@ -17,14 +18,14 @@ type SeaZoneUpdate = {
     itemSupplies: ItemSupplies,
 }
 
-export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
+export class SeaZone extends Button implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
 
-    private group: Konva.Group;
     private hexagon: Konva.RegularPolygon;
     private island: Konva.Path;
     private location: LocationToken;
     private restrictedIcon: Konva.Path;
     private staticFill: Hue;
+    private tradeGood: TradeGood | null;
 
     constructor(
         stage: Konva.Stage,
@@ -39,17 +40,29 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         isPlay: boolean,
         loadGoodCallback: (tradeGood: TradeGood) => void,
     ) {
-        this.group = new Konva.Group({
-            width: 100,
-            height: 100,
-            x: center.x,
-            y: center.y,
-            offsetX,
-            offsetY,
-            id: name,
-        });
+        const goodToPickup = ((): TradeGood | null => {
+            switch (locationId) {
+                case 'mines': return 'gems';
+                case 'quarry': return 'marble';
+                case 'forest': return 'ebony';
+                case 'farms': return 'linen';
+                default: return null;
+            }
+        })();
+
+        super(
+            stage,
+            { width: 100, height: 100, x: center.x, y: center.y },
+            goodToPickup ? () => loadGoodCallback(goodToPickup) : null,
+        );
+
+        this.group.offsetX(offsetX);
+        this.group.offsetY(offsetY);
+        this.group.id(name);
 
         this.staticFill = fill;
+        this.tradeGood = goodToPickup;
+
         this.hexagon = new Konva.RegularPolygon({
             sides: 6,
             radius: 100,
@@ -67,7 +80,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
             strokeWidth: 1,
         });
 
-        this.location = new LocationToken(stage, locationId, iconData, isPlay, loadGoodCallback);
+        this.location = new LocationToken(locationId, iconData, isPlay, goodToPickup);
 
         this.restrictedIcon = new Konva.Path({
             x: -75,
@@ -91,12 +104,18 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
 
         const { localPlayer, rival } = update;
 
+        const mayPickup = (
+            localPlayer?.bearings.seaZone == this.getZoneName()
+            && localPlayer.locationActions.includes(Action.load_good)
+        );
+
+        if (this.tradeGood) {
+            const supply = update.itemSupplies.goods[this.tradeGood];
+            (supply > 0 && mayPickup) ? this.enable() : this.disable();
+        }
+
         this.location.update({
             tradeGoodSupplies: update.itemSupplies.goods,
-            mayPickup: (
-                localPlayer?.bearings.seaZone == this.getZoneName()
-                && localPlayer.locationActions.includes(Action.load_good)
-            ),
             templeIcon: update.templeIcon,
         });
 
@@ -156,7 +175,7 @@ export class SeaZone implements Unique<DynamicGroupInterface<SeaZoneUpdate>> {
         return this.group;
     }
     public getZoneName(): ZoneName {
-        return this.group.attrs.id as ZoneName;
+        return this.group.id() as ZoneName;
     }
 
     public getLocationName(): LocationName {
