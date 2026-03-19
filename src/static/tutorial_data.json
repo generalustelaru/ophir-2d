@@ -223,10 +223,10 @@
         ],
         [
             "You've just spent a move. It's reflected in the moves counter having a discolored wave.\n\nYou have one move left.",
-            "After moving, your zone of origin always becomes inaccessible, even though it's adjacent.",
+            "After moving, your zone of origin is left inaccessible. Backtracking is not allowed.",
             "But new zones may become reachable, such as this one.\n\nThis zone contains the Market, which currently pays well for delivering gems.",
             "Since you moved, you can now also perform actions at your current location.\n\nThe warm color indicates that there are available actions.",
-            "Pick up the local commodity.\n\nClick on the red gem icon inside the zone to load a unit of gems into your cargo hold."
+            "Pick up the local commodity.\n\nClick inside the zone to load a unit of gems into your cargo hold."
         ],
         [
             "The gems are now in your cargo. They take up one space out of two.\n\nNotice that your cargo capacity is only half the size it could be (2 slots out of 4).",
