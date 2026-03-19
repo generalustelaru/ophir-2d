@@ -109,6 +109,7 @@ export class CanvasService extends Communicator {
             () => { this.endTurnModal.show(); },
             (data: SailAttemptArgs) => this.sailAttemptModal.show(data),
             (data: DropBeforeLoadMessage) => this.dropBeforeLoad(data),
+            (locationName) => this.locationGroup.flash(locationName),
         ); // mapGroup covers half the canvas (2 segments)
 
         if (isTutorial) {

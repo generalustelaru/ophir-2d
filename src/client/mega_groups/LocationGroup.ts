@@ -4,7 +4,7 @@ import {
 } from '~/client_types';
 import { MarketArea, TreasuryArea, TempleArea } from '../groups/location';
 import localState from '../state';
-import { Action, Coordinates, MetalPurchasePayload, PlayState, SpecialistName, Unique } from '~/shared_types';
+import { Action, Coordinates, LocationName, MetalPurchasePayload, PlayState, SpecialistName, Unique } from '~/shared_types';
 import { ResultsPanel } from '../groups/conclusion/ResultsPanel';
 
 type VariableLocationGroupCallbacks = {
@@ -143,6 +143,14 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             metalSupplies: state.itemSupplies.metals,
         });
         this.templeArea?.update(templeUpdate);
+    }
+
+    public flash(locationName: LocationName): void {
+        switch (locationName) {
+            case 'market': this.marketArea?.flash(); break;
+            case 'treasury': this.treasuryArea?.flash(); break;
+            case 'temple': this.templeArea?.flash(); break;
+        }
     }
 
     public disable(): void {

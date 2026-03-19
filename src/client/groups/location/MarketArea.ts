@@ -1,12 +1,13 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, MarketUpdate } from '~/client_types';
+import { DynamicGroupInterface, Flashable, GroupLayoutData, MarketUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { MarketFluctuations, MarketSlotKey, MarketState, Action, Unique } from '~/shared_types';
 import { MarketDeck, MarketCardSlot } from '.';
+import { fade } from '~/client/animations';
 
 const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
 
-export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
+export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, Flashable {
 
     private deckSize: number;
     private group: Konva.Group;
@@ -32,17 +33,20 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
             y: layout.y,
         });
 
-        this.background = new Konva.Rect({
-            width: this.group.width(),
-            height: this.group.height(),
-            fill: HUES.marketDarkOrange,
-            cornerRadius: 10,
-            visible: false,
-        });
-
         const leftmargin = 10;
         const totalHeight = this.group.height();
         const cardWidth = 66;
+        const cardPad = 8;
+
+        this.background = new Konva.Rect({
+            x: cardWidth + leftmargin,
+            y: totalHeight / 6 - cardPad,
+            width: this.group.width() - cardWidth - leftmargin,
+            height: 108 + cardPad * 2,
+            fill: HUES.marketDarkOrange,
+            cornerRadius: 10,
+            opacity: 0,
+        });
         this.deckSize = market.deckSize;
         this.marketDeck = new MarketDeck(
             stage,
@@ -157,6 +161,11 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>> {
 
     public getElement(): Konva.Group {
         return this.group;
+    }
+
+    public async flash(): Promise<void> {
+        this.background.opacity(1);
+        await fade(this.background, 0.3, 0);
     }
 
     public disable(): void {

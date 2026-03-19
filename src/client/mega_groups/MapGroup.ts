@@ -23,6 +23,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
     private endTurnCallback: Function;
     private sailAttemptCallback: (data: SailAttemptArgs) => void;
     private loadActionCallback: (data: DropBeforeLoadMessage) => void;
+    private locationFlashCallback: (locationName: LocationName) => void;
     private undoButton: UndoButton | null = null;
     private favorButton: FavorButton | null = null;
     private seaZones: Array<SeaZone> = [];
@@ -36,10 +37,12 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         endTurnCallback: Function,
         sailAttemptCallback: (data: SailAttemptArgs) => void,
         dropBeforeLoadCallback: (data: DropBeforeLoadMessage) => void,
+        locationFlashCallback: (locationName: LocationName) => void,
     ) {
         this.endTurnCallback = endTurnCallback;
         this.sailAttemptCallback = sailAttemptCallback;
         this.loadActionCallback = dropBeforeLoadCallback;
+        this.locationFlashCallback = locationFlashCallback;
         this.group = new Konva.Group({ ...layout });
         stage.getLayers()[LayerIds.board].add(this.group);
 
@@ -75,6 +78,9 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                     (tradeGood: TradeGood) => {
                         this.loadActionCallback(this.formatLoadMessage(tradeGood));
                     },
+                    ['market', 'treasury', 'temple'].includes(locationData.name)
+                        ? () => this.locationFlashCallback(locationData.name)
+                        : null,
                 );
                 this.seaZones.push(seaZone);
                 this.group.add(seaZone.getElement());

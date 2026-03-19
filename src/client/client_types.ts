@@ -112,6 +112,10 @@ export interface DynamicGroupInterface<U> {
     update(update: U): void,
 }
 
+export interface Flashable {
+    flash(): Promise<void>,
+}
+
 export interface DynamicModalInterface<U, S> {
     update(u: U): void,
     repositionModal(aspect: Aspect): void;

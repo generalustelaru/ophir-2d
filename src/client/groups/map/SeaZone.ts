@@ -4,7 +4,7 @@ import { Vector2d } from 'konva/lib/types';
 import {
     Coordinates, ZoneName, DiceSix, Player, LocationName, Action, ItemSupplies, Rival, Unique, TradeGood,
 } from '~/shared_types';
-import { Hue, DynamicGroupInterface, IslandData, IconLayer } from '~/client_types';
+import { Hue, DynamicGroupInterface, IslandData, IconLayer, RawEvents } from '~/client_types';
 import { LocationToken } from '.';
 import { Button } from '../popular';
 import clientConstants from '~/client_constants';
@@ -39,6 +39,7 @@ export class SeaZone extends Button implements Unique<DynamicGroupInterface<SeaZ
         fill: Hue,
         isPlay: boolean,
         loadGoodCallback: (tradeGood: TradeGood) => void,
+        onAnchorClick: (() => void) | null = null,
     ) {
         const goodToPickup = ((): TradeGood | null => {
             switch (locationId) {
@@ -90,6 +91,9 @@ export class SeaZone extends Button implements Unique<DynamicGroupInterface<SeaZ
             scale: { x: 2, y: 2 },
             visible: false,
         });
+
+        if (onAnchorClick)
+            this.group.on(RawEvents.CLICK, onAnchorClick);
 
         this.group.add(
             this.hexagon,

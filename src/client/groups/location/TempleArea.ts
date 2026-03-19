@@ -1,12 +1,13 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData, TempleUpdate } from '~/client_types';
+import { DynamicGroupInterface, Flashable, GroupLayoutData, TempleUpdate } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { MarketSlotKey, MarketState, Action, Unique } from '~/shared_types';
+import { fade } from '~/client/animations';
 import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand } from '.';
 
 const { HUES } = clientConstants;
 
-export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
+export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, Flashable {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -32,7 +33,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
             height: this.group.height(),
             fill: HUES.templeDarkBlue,
             cornerRadius: 15,
-            visible: false,
+            opacity: 0,
         });
 
         this.upgradeButton = new UpgradeButton(
@@ -124,6 +125,11 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>> {
 
     public getElement(): Konva.Group {
         return this.group;
+    }
+
+    public async flash(): Promise<void> {
+        this.background.opacity(1);
+        await fade(this.background, 0.3, 0);
     }
 
     public disable(): void {

@@ -1,12 +1,13 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, TreasuryUpdate, GroupLayoutData } from '~/client_types';
+import { DynamicGroupInterface, Flashable, TreasuryUpdate, GroupLayoutData } from '~/client_types';
 import clientConstants from '~/client_constants';
 import { Action, MetalPurchasePayload, Unique } from '~/shared_types';
 import { TreasuryCard } from './TreasuryCard';
+import { fade } from '~/client/animations';
 
 const { HUES } = clientConstants;
 
-export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate>> {
+export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate>>, Flashable {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -30,9 +31,10 @@ export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate
         this.background = new Konva.Rect({
             width: this.group.width(),
             height: this.group.height(),
+            y: -(this.group.height() - 96) / 2,
             fill: HUES.treasuryDarkGold,
             cornerRadius: 15,
-            visible: false,
+            opacity: 0,
         });
 
         const leftmargin = 10;
@@ -105,6 +107,11 @@ export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate
 
     public getElement(): Konva.Group {
         return this.group;
+    }
+
+    public async flash(): Promise<void> {
+        this.background.opacity(1);
+        await fade(this.background, 0.3, 0);
     }
 
     public disable(): void {
