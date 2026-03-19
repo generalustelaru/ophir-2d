@@ -73,7 +73,7 @@ export class ColorCard extends RequestButton implements Unique<DynamicGroupInter
 
         const { localPlayer, players } = update;
         const cardOwner = players.find(p => p.color == this.color);
-        const localPlayerIsOwner = !!localPlayer && localPlayer.name === cardOwner?.name;
+        const localPlayerIsOwner = localPlayer?.color === this.color;
 
         this.setEnabled(!Boolean(cardOwner));
 
