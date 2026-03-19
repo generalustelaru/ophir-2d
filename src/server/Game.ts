@@ -77,7 +77,7 @@ export class Game {
         const { sessionOwner, players, chat } = sharedState;
 
         this.timeStamp = timeStamp;
-        this.userReferences = userReferences;
+        this.userReferences = userReferences; //FIXME: suspicious behavior concerning this property. userReferences is supposed to keep track of user identities relative to the game instance
 
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
