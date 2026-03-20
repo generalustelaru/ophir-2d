@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import {
-    Action, ClientMessage, FeasibleTrade, MarketFluctuations, MarketSlotKey, PlayState, SpecialistName, Trade, TradeGood,
+    Action, ClientMessage, FeasibleTrade, MarketFluctuations, MarketSlotKey, PlayState, SpecialistName, Trade, Commodity,
     Unique,
 } from '~/shared_types';
 import { Aspect, DynamicModalInterface, Specification } from '~/client_types';
@@ -127,21 +127,21 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
             this.feasability.missing,
         );
 
-        const isGoodMissing = feasibleSymbols.includes('other');
-        const missingGood = isGoodMissing ? this.feasability.missing[0] : null;
+        const isCommodityMissing = feasibleSymbols.includes('other');
+        const missingCommodity = isCommodityMissing ? this.feasability.missing[0] : null;
 
-        this.description.text(isGoodMissing
-            ? `You may complete this trade without delivering ${missingGood}.`
+        this.description.text(isCommodityMissing
+            ? `You may complete this trade without delivering ${missingCommodity}.`
             : 'You may choose to withhold one commodity from this delivery.',
         );
 
         feasibleSymbols.forEach((symbol, index) => {
-            this.tradeSpecifications[index].isLocked = isGoodMissing;
+            this.tradeSpecifications[index].isLocked = isCommodityMissing;
             if (symbol == 'other')
                 this.tradeSpecifications[index].isOmited = true;
         });
 
-        const actionMessage = this.composeMessage(missingGood || false);
+        const actionMessage = this.composeMessage(missingCommodity || false);
 
         this.symbolRow.update({ specifications: this.tradeSpecifications });
         this.coinDial.update(this.trade.reward.coins - 1);
@@ -171,14 +171,14 @@ export class PeddlerModal extends ModalBase implements Unique<DynamicModalInterf
         this.symbolRow.update({ specifications: this.tradeSpecifications });
     }
 
-    private composeMessage(toOmit: TradeGood | false): ClientMessage {
+    private composeMessage(toOmit: Commodity | false): ClientMessage {
         return toOmit
             ? {
-                action: Action.sell_as_peddler,
+                action: Action.trade_as_peddler,
                 payload: { omit: toOmit },
             }
             : {
-                action: Action.sell_goods,
+                action: Action.trade_commodities,
                 payload: { slot: this.slot },
             };
     }

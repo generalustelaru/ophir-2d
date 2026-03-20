@@ -7,7 +7,7 @@ import { UpgradeButton, TempleMarketCard, MetalDonationCard, MetalDonationsBand 
 
 const { HUES } = clientConstants;
 
-export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, Flashable {
+export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, Unique<Flashable> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -24,7 +24,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, 
         layout: GroupLayoutData,
         maxLevel: number,
         isAdvisor: boolean,
-        donateGoodsCallback: Function | null,
+        donateCommoditiesCallback: Function | null,
     ) {
         this.group = new Konva.Group(layout);
 
@@ -56,10 +56,10 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, 
             { x: this.group.width() - 62 - margin, y: 10 },
             card,
             isAdvisor,
-            (donateGoodsCallback
+            (donateCommoditiesCallback
                 ? isAdvisor
-                    ? () => donateGoodsCallback()
-                    : () => donateGoodsCallback(marketSlot)
+                    ? () => donateCommoditiesCallback()
+                    : () => donateCommoditiesCallback(marketSlot)
                 : null
             ),
         );
@@ -98,7 +98,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, 
 
         this.marketCard.update({
             trade: data.trade,
-            isFeasible: !!player?.locationActions.includes(Action.donate_goods),
+            isFeasible: !!player?.locationActions.includes(Action.donate_commodities),
             isShift: false,
         });
 
@@ -129,7 +129,7 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, 
 
     public async flash(): Promise<void> {
         this.background.opacity(1);
-        await fade(this.background, 0.3, 0);
+        await fade(this.background, 0.6, 0);
     }
 
     public disable(): void {

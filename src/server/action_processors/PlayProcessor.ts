@@ -1,5 +1,5 @@
 import {
-    LocationName, GoodsLocationName, Action, ItemName, MarketSlotKey, TradeGood, CargoMetal, PlayerColor, Metal,
+    LocationName, CommodityLocationName, Action, ItemName, MarketSlotKey, Commodity, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, Unique, FeasibleTrade,
     ServerMessage, PlayerCountables, FeasiblePurchase, BubbleDeed,
 } from '~/shared_types';
@@ -15,7 +15,7 @@ import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
-const { TRADE_DECK_B, LOCATION_GOODS } = serverConstants;
+const { TRADE_DECK_B, LOCATION_COMMODITIES } = serverConstants;
 // TODO: Reduce linecount; extract utility-like functions, move deed composition to dedicated service.
 export class PlayProcessor implements Unique<ActionProcessor> {
     private idleCheckInterval: NodeJS.Timeout | null = null;
@@ -332,19 +332,19 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return this.continueTurn(player);
     }
 
-    // MARK: LOAD GOOD
-    public loadGood(data: DataDigest): Probable<StateResponse> {
+    // MARK: LOAD COMMODITY
+    public loadCommodity(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         const { color } = player.getIdentity();
         this.preserveState(player);
 
-        const loadGoodPayload = validator.validateLoadGoodPayload(payload);
+        const validPayload = validator.validateLoadCommodityPayload(payload);
 
-        if (!loadGoodPayload)
+        if (!validPayload)
             return lib.fail(lib.validationErrorMessage());
 
 
-        const { tradeGood, drop } = loadGoodPayload;
+        const { commodity, drop } = validPayload;
 
         if (drop) {
             for (const item of drop) {
@@ -358,30 +358,30 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             }
         }
 
-        if (!player.mayLoadGood())
-            return lib.fail(`${color} Cannot load good`);
+        if (!player.mayLoadCommodity())
+            return lib.fail(`${color} Cannot load commodity`);
 
         const locationName = this.playState.getLocationName(player.getBearings().seaZone);
         const nonPickupLocations: Array<LocationName> = ['temple', 'market', 'treasury'];
 
         if (nonPickupLocations.includes(locationName))
-            return lib.fail(`Cannot pick up goods from ${locationName}`);
+            return lib.fail(`Cannot pick up commodities from ${locationName}`);
 
-        const localGood = serverConstants.LOCATION_GOODS[locationName as GoodsLocationName];
+        const localCommodity = serverConstants.LOCATION_COMMODITIES[locationName as CommodityLocationName];
 
-        if (localGood !== tradeGood)
-            return lib.fail(`Cannot load ${tradeGood} here.`);
+        if (localCommodity !== commodity)
+            return lib.fail(`Cannot load ${commodity} here.`);
 
-        const loadItem = this.loadItem(player.getCargo(), localGood);
+        const loadItem = this.loadItem(player.getCargo(), localCommodity);
 
         if (loadItem.err)
             return lib.fail(loadItem.message);
 
         player.setCargo(loadItem.data);
-        this.privateState.addSpentAction(Action.load_good);
-        this.privateState.addDeed({ context: Action.load_good, description: `picked up ${localGood}` });
+        this.privateState.addSpentAction(Action.load_commodity);
+        this.privateState.addDeed({ context: Action.load_commodity, description: `picked up ${localCommodity}` });
         player.addBubbleDeed(((): BubbleDeed => {
-            switch (localGood) {
+            switch (localCommodity) {
                 case 'gems': return BubbleDeed.gems;
                 case 'ebony': return BubbleDeed.ebony;
                 case 'linen': return BubbleDeed.linen;
@@ -398,7 +398,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: SELL
-    public sellGoods(data: DataDigest): Probable<StateResponse> {
+    public trade(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.clearUndo(player);
         const marketSlotPayload = validator.validateMarketPayload(payload);
@@ -410,14 +410,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const { name } = player.getIdentity();
 
         if (lib.checkConditions([
-            player.hasAction(Action.sell_goods),
+            player.hasAction(Action.trade_commodities),
             player.getFeasibles().map(t => t.slot).includes(slot),
         ]).err) {
-            return lib.fail(`${name} cannnot sell goods`);
+            return lib.fail(`${name} cannnot sell commodities`);
         }
 
         const { request, reward } = this.playState.getMarketTrade(slot);
-        const unloadResult = this.subtractTradeGoods(player.getCargo(), request);
+        const unloadResult = this.subtractItems(player.getCargo(), request);
 
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
@@ -426,18 +426,18 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         player.setCargo(unloadResult.data);
         player.gainCoins(coins);
-        this.privateState.addSpentAction(Action.sell_goods);
+        this.privateState.addSpentAction(Action.trade_commodities);
 
         const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location == 'temple';
 
         if (moneyChangerAtTemple)
-            this.privateState.addSpentAction(Action.donate_goods);
+            this.privateState.addSpentAction(Action.donate_commodities);
 
         this.privateState.addDeed({
-            context: Action.sell_goods,
+            context: Action.trade_commodities,
             description: (
                 moneyChangerAtTemple ? 'accessed the market and ' : ''
-                + `traded ${request.length} goods for `
+                + `traded ${request.length} commodities for `
                 + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
             ),
         });
@@ -472,7 +472,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const maySell = lib.checkConditions([
             player.isChancellor(),
-            player.hasAction(Action.sell_as_chancellor),
+            player.hasAction(Action.trade_as_chancellor),
             !!player.getFeasibles().find(f => f.slot == slot),
         ]);
 
@@ -480,12 +480,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail('Conditions for chancellor sale not met.');
 
         const { request, reward } = this.playState.getMarketTrade(slot);
-        const payable = this.subtractTradeGoods(request, omit, false);
+        const payable = this.subtractItems(request, omit, false);
 
         if(payable.err)
             return lib.fail('Ommited items are not included in request');
 
-        const cargo = this.subtractTradeGoods(player.getCargo(), payable.data);
+        const cargo = this.subtractItems(player.getCargo(), payable.data);
 
         if(cargo.err)
             return lib.fail(cargo.message);
@@ -495,14 +495,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.setCargo(cargo.data);
         player.spendFavor(omit.length);
         player.gainCoins(coins);
-        this.privateState.addSpentAction(Action.sell_as_chancellor);
+        this.privateState.addSpentAction(Action.trade_as_chancellor);
         player.clearMoves();
         const delivered = request.length - omit.length;
         this.privateState.addDeed({
-            context: Action.sell_as_chancellor,
+            context: Action.trade_as_chancellor,
             description: (
                 (omit.length ? `spent ${omit.length} favor to trade ` : 'traded ')
-                + `${delivered} ${delivered == 1 ? 'good' : 'goods'} for `
+                + `${delivered} ${delivered == 1 ? 'commodity' : 'commodities'} for `
                 + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
             ),
         });
@@ -530,7 +530,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const maySell = lib.checkConditions([
             player.isPeddler(),
-            player.hasAction(Action.sell_goods),
+            player.hasAction(Action.trade_commodities),
             !!player.getFeasibles().find(t => t.slot == this.playState.getReducedValueSlot()),
         ]);
 
@@ -540,12 +540,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const { omit } = peddlerPayload;
         const { request, reward } = this.playState.getMarketTrade(this.playState.getReducedValueSlot());
 
-        const payable = this.subtractTradeGoods(request, [omit], false);
+        const payable = this.subtractItems(request, [omit], false);
 
         if(payable.err)
             return lib.fail(payable.message);
 
-        const cargo = this.subtractTradeGoods(player.getCargo(), payable.data);
+        const cargo = this.subtractItems(player.getCargo(), payable.data);
 
         if (cargo.err)
             return lib.fail(cargo.message);
@@ -555,11 +555,11 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.gainCoins(coinReward);
         player.clearMoves();
 
-        this.privateState.addSpentAction(Action.sell_goods);
+        this.privateState.addSpentAction(Action.trade_commodities);
         this.privateState.addDeed({
-            context: Action.sell_as_peddler,
+            context: Action.trade_as_peddler,
             description: (
-                (request.length > 1 ? `traded 1 good less than ${request.length}` : 'traded nothing')
+                (request.length > 1 ? `traded 1 commodity less than ${request.length}` : 'traded nothing')
                 + ' for '
                 + (coinReward > 0 ? coinReward > 1 ? `${coinReward} coins` : '1 coin' : 'nothing')
             ),
@@ -578,7 +578,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: DONATE
-    public donateGoods(data: DataDigest): Probable<StateResponse> {
+    public donateCommodities(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.clearUndo(player);
         const marketSlotPayload = validator.validateMarketPayload(payload);
@@ -589,12 +589,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const { name, color, userId: userId } = player.getIdentity();
         const { slot } = marketSlotPayload;
 
-        if (!player.hasAction(Action.donate_goods))
-            return lib.fail(`${name} cannot donate goods`);
+        if (!player.hasAction(Action.donate_commodities))
+            return lib.fail(`${name} cannot donate commodities`);
 
         // Transaction
         const { request, reward } = this.playState.getMarketTrade(slot);
-        const unloadResult = this.subtractTradeGoods(player.getCargo(), request);
+        const unloadResult = this.subtractItems(player.getCargo(), request);
 
         if (unloadResult.err)
             return lib.fail(unloadResult.message);
@@ -603,10 +603,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         player.gainFavor(donationReward);
         player.setCargo(unloadResult.data);
-        this.privateState.addSpentAction(Action.donate_goods);
+        this.privateState.addSpentAction(Action.donate_commodities);
 
         if (player.isMoneychanger())
-            this.privateState.addSpentAction(Action.sell_goods);
+            this.privateState.addSpentAction(Action.trade_commodities);
 
         if (player.isHarbormaster())
             this.updateMovesAsHarbormaster(player);
@@ -617,8 +617,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const count = request.length;
         this.privateState.addDeed({
-            context: Action.donate_goods,
-            description: `donated ${count} ${count == 1 ? 'good' : 'goods'} for ${donationReward} favor and VP`,
+            context: Action.donate_commodities,
+            description: `donated ${count} ${count == 1 ? 'commodity' : 'commodities'} for ${donationReward} favor and VP`,
         });
         player.addBubbleDeed(BubbleDeed.vpFavor);
 
@@ -641,7 +641,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.preserveState(player);
         const specialty = player.getSpecialty();
 
-        if (specialty && player.maySellSpecialtyGood()) {
+        if (specialty && player.maySellSpecialty()) {
             const unload = this.unloadItem(player.getCargo(), specialty);
 
             if (unload.err)
@@ -654,7 +654,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 this.privateState.addSpentAction(Action.sell_specialty);
 
             if (player.isMoneychanger() && player.getBearings().location == 'temple') {
-                this.privateState.addSpentAction(Action.donate_goods);
+                this.privateState.addSpentAction(Action.donate_commodities);
                 this.privateState.addDeed({
                     context: Action.sell_specialty,
                     description: `accessed the market and sold ${specialty} for 1 coin`,
@@ -673,7 +673,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return this.continueTurn(player);
         }
 
-        return lib.fail('Player does not meet conditions for selling specialty good.');
+        return lib.fail('Player does not meet conditions for selling specialty.');
     }
 
     // MARK: BUY METAL
@@ -1083,10 +1083,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         }
 
         if (player.isMoneychanger() && currentLocation == 'temple')
-            return [Action.sell_goods, Action.sell_specialty];
+            return [Action.trade_commodities, Action.sell_specialty];
 
         if (player.isChancellor() && currentLocation == 'market')
-            return [Action.sell_as_chancellor];
+            return [Action.trade_as_chancellor];
 
         return [];
     }
@@ -1120,13 +1120,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.pass(orderedCargo);
         }
 
-        const tradeGood = item as TradeGood;
+        const commodity = item as Commodity;
 
-        if (supplies.goods[tradeGood] < 1)
+        if (supplies.commodities[commodity] < 1)
             return lib.fail(`No ${item} available for loading`);
 
         orderedCargo[emptyIndex] = item;
-        this.playState.removeTradeGood(tradeGood);
+        this.playState.removeCommodity(commodity);
 
         return lib.pass(orderedCargo);
     }
@@ -1151,21 +1151,21 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             strip(pool, itemIndex + 1, isPlayerCargo);
             this.playState.returnMetal(item as Metal);
         } else {
-            this.playState.returnTradeGood(item as TradeGood);
+            this.playState.returnCommodity(item as Commodity);
         }
 
         return lib.pass(pool);
     }
 
-    private subtractTradeGoods(
+    private subtractItems(
         minuend: Array<ItemName>,
         subtrahend: Array<ItemName>,
         isPlayerCargo: boolean = true,
     ): Probable<Array<ItemName>> {
         const pool = [...minuend];
 
-        for (const tradeGood of subtrahend) {
-            const subtractionResult = this.unloadItem(pool, tradeGood, isPlayerCargo);
+        for (const item of subtrahend) {
+            const subtractionResult = this.unloadItem(pool, item, isPlayerCargo);
 
             if (subtractionResult.err)
                 return subtractionResult;
@@ -1177,32 +1177,32 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     private pickFeasibleTrades(player: PlayerHandler): Array<FeasibleTrade> {
         const cargo = player.getCargo();
         const market = this.playState.getMarket();
-        const nonGoods: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
+        const nonCommodities: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
         const keys: Array<MarketSlotKey> = ['slot_1', 'slot_2', 'slot_3'];
         const feasible: Array<FeasibleTrade> = [];
 
         keys.forEach(key => {
-            const unfilledGoods = market[key].request;
+            const unfilledCommodities = market[key].request;
 
             for (const item of cargo) {
 
-                if (nonGoods.includes(item))
+                if (nonCommodities.includes(item))
                     continue;
 
-                const carriedGood = item as TradeGood;
-                const match = unfilledGoods.indexOf(carriedGood);
+                const carriedCommodities = item as Commodity;
+                const match = unfilledCommodities.indexOf(carriedCommodities);
 
                 if (match != -1)
-                    unfilledGoods.splice(match, 1);
+                    unfilledCommodities.splice(match, 1);
             }
 
             switch (true) {
-                case player.isPeddler() && (this.playState.getFluctuation(key) == -1) && unfilledGoods.length < 2:
-                case player.isChancellor() && (player.getFavor() - unfilledGoods.length >= 0):
-                    feasible.push({ slot: key, missing: unfilledGoods });
+                case player.isPeddler() && (this.playState.getFluctuation(key) == -1) && unfilledCommodities.length < 2:
+                case player.isChancellor() && (player.getFavor() - unfilledCommodities.length >= 0):
+                    feasible.push({ slot: key, missing: unfilledCommodities });
                     break;
 
-                case unfilledGoods.length == 0:
+                case unfilledCommodities.length == 0:
                     feasible.push({ slot: key, missing: [] });
             }
         });
@@ -1255,17 +1255,17 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 case Action.upgrade_cargo:
                     return player.getCoinAmount() >= 2 && player.getCargo().length < 4;
 
-                case Action.sell_goods:
+                case Action.trade_commodities:
                     return player.isChancellor() ? false : trades.length;
 
-                case Action.sell_as_chancellor:
+                case Action.trade_as_chancellor:
                     return trades.length;
 
                 case Action.sell_specialty:
                     const specialty = player.getSpecialty();
                     return !!specialty && player.getCargo().includes(specialty);
 
-                case Action.donate_goods:
+                case Action.donate_commodities:
                     return (() => {
                         const templeSlot = this.playState.getTempleTradeSlot();
                         const templeFeasible = trades.find(f => f.slot == templeSlot);
@@ -1293,11 +1293,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                         ).length >= 2
                     );
 
-                case Action.load_good:
+                case Action.load_commodity:
                     const { location } = player.getBearings();
                     return ( // TODO: add and use constants instead of this and other examples of hardcoded values.
                         ['quarry', 'forest', 'mines', 'farms'].includes(location)
-                        && this.playState.getItemSupplies().goods[LOCATION_GOODS[location as GoodsLocationName]]
+                        && (this.playState.getItemSupplies()
+                            .commodities[LOCATION_COMMODITIES[location as CommodityLocationName]]
+                        )
                         && player.getCargo().filter(
                             item => replaceableRef.includes(item),
                         ).length >= 1

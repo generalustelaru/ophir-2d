@@ -1,8 +1,8 @@
 import { HexCoordinates } from '~/client_types';
 import {
-    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, PositioningPayload, LoadGoodPayload,
-    MarketSalePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, Action, SpecialistName,
-    OpponentPositioningPayload, ColorSelectionPayload, ChancellorMarketSalePayload, PeddlerMarketPayload, DropItemPayload,
+    ChatPayload, ClientRequest, GameSetupPayload, MovementPayload, Coordinates, PositioningPayload, LoadCommodityPayload,
+    MarketTradePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, Action, SpecialistName,
+    OpponentPositioningPayload, ColorSelectionPayload, ChancellorMarketTradePayload, PeddlerMarketPayload, DropItemPayload,
 } from '~/shared_types';
 import { lib, ObjectTests } from './library';
 import { Configuration, Probable } from '~/server_types';
@@ -13,7 +13,7 @@ const refs = {
     actions: Object.values(Action),
     zoneName: ['center', 'topRight', 'right', 'bottomRight', 'bottomLeft', 'left', 'topLeft'],
     specialistName: Object.values(SpecialistName),
-    tradeGood: ['gems', 'ebony', 'marble', 'linen'],
+    commodity: ['gems', 'ebony', 'marble', 'linen'],
     marketSlotKey: ['slot_1', 'slot_2', 'slot_3'],
     metal: ['silver', 'gold'],
     currency: ['coins', 'favor'],
@@ -197,17 +197,17 @@ class ValidatorService {
         return gameSetupPayload;
     }
 
-    public validateLoadGoodPayload(payload: unknown) {
-        return this.validateObject<LoadGoodPayload>(
-            'LoadGoodPayload',
+    public validateLoadCommodityPayload(payload: unknown) {
+        return this.validateObject<LoadCommodityPayload>(
+            'LoadCommodityPayload',
             payload,
-            [{ key: 'tradeGood', type: 'string', nullable: false, ref: refs.tradeGood }],
+            [{ key: 'commodity', type: 'string', nullable: false, ref: refs.commodity }],
         );
     }
 
     public validateMarketPayload(payload: unknown) {
-        return this.validateObject<MarketSalePayload>(
-            'MarketSalePayload',
+        return this.validateObject<MarketTradePayload>(
+            'MarketTradePayload',
             payload,
             [
                 { key: 'slot', type: 'string', nullable: false, ref: refs.marketSlotKey },
@@ -216,7 +216,7 @@ class ValidatorService {
     }
 
     public validateChancellorPayload(payload: unknown) {
-        const chancellorPayload = this.validateObject<ChancellorMarketSalePayload>(
+        const chancellorPayload = this.validateObject<ChancellorMarketTradePayload>(
             'ChancellorMarketSalePayload',
             payload,
             [
@@ -225,9 +225,9 @@ class ValidatorService {
                     key: 'omit',
                     type: 'array',
                     nullable: false,
-                    ofTypeName: 'TradeGood',
+                    ofTypeName: 'Commodity',
                     ofType: 'string',
-                    ref: refs.tradeGood,
+                    ref: refs.commodity,
                 },
             ],
         );
@@ -239,7 +239,7 @@ class ValidatorService {
         const peddlerPayload = this.validateObject<PeddlerMarketPayload>(
             'PeddlerMarketPayload',
             payload,
-            [{ key: 'omit', type: 'string', nullable: false, ref: refs.tradeGood }],
+            [{ key: 'omit', type: 'string', nullable: false, ref: refs.commodity }],
         );
 
         return peddlerPayload;

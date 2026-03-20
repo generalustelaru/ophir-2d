@@ -1,10 +1,10 @@
 import Konva from 'konva';
 import { IconLayer, DynamicGroupInterface, ElementList } from '~/client_types';
-import { LocationName, TradeGood, Unique } from '~/shared_types';
+import { LocationName, Commodity, Unique } from '~/shared_types';
 import { EmptyLocationToken } from '.';
 
 type LocationTokenUpdate = {
-    tradeGoodSupplies: Record<TradeGood, number>
+    supplies: Record<Commodity, number>
     templeIcon: IconLayer
 };
 
@@ -13,13 +13,13 @@ export class LocationToken implements Unique<DynamicGroupInterface<LocationToken
     private icon: Konva.Path;
     private id: LocationName;
     private emptyLocation: EmptyLocationToken;
-    private tradeGood: TradeGood | null;
+    private commodity: Commodity | null;
 
     constructor(
         locationId: LocationName,
         iconData: IconLayer,
         isPlay: boolean,
-        tradeGood: TradeGood | null,
+        commodity: Commodity | null,
     ) {
         this.group = new Konva.Group({ width: 100, height: 100, x: 0, y: 0 });
         const elements: ElementList = [];
@@ -27,7 +27,7 @@ export class LocationToken implements Unique<DynamicGroupInterface<LocationToken
         const scale = 3;
 
         this.id = locationId;
-        this.tradeGood = tradeGood;
+        this.commodity = commodity;
 
         const verticalDrift = ((): number => {
             switch (locationId) {
@@ -57,7 +57,7 @@ export class LocationToken implements Unique<DynamicGroupInterface<LocationToken
 
         this.emptyLocation = new EmptyLocationToken();
 
-        if (this.tradeGood)
+        if (this.commodity)
             elements.push(this.emptyLocation.getElement());
 
         this.group.add(...elements);
@@ -72,8 +72,8 @@ export class LocationToken implements Unique<DynamicGroupInterface<LocationToken
     }
 
     public update(update: LocationTokenUpdate): void {
-        if (this.tradeGood) {
-            const supply = update.tradeGoodSupplies[this.tradeGood];
+        if (this.commodity) {
+            const supply = update.supplies[this.commodity];
             this.emptyLocation.update(supply > 0);
         }
 

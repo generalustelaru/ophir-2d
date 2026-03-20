@@ -4,7 +4,7 @@ export { TempleArea } from './TempleArea';
 export { MarketDeck } from './MarketDeck';
 export { MarketCard } from './MarketCard';
 export { MarketCardSlot } from './MarketCardSlot';
-export { GoodsAssortment } from './GoodsAssortment';
+export { CommodityAssortment } from './CommodityAssortment';
 export { UpgradeButton } from './UpgradeButton';
 export { TempleMarketCard } from './TempleMarketCard';
 export { TempleRewardDial } from './TempleRewardDial';

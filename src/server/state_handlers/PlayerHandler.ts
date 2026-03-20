@@ -269,8 +269,8 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         return this.specialist.get().specialty;
     }
 
-    public mayLoadGood() {
-        return (this.hasAction(Action.load_good) && this.hasCargoRoom(1));
+    public mayLoadCommodity() {
+        return (this.hasAction(Action.load_commodity) && this.hasCargoRoom(1));
     }
 
     public registerMetalPurchase() {
@@ -288,7 +288,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         return (this.hasAction(Action.donate_metal) && this.cargo.includes(metal));
     }
 
-    public maySellSpecialtyGood() {
+    public maySellSpecialty() {
         return (
             this.hasAction(Action.sell_specialty)
             && this.cargo.includes(this.specialist.get().specialty)

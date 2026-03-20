@@ -1,5 +1,5 @@
 import {
-    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, TradeGood, GoodsLocationName, MessagePayload,
+    BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Commodity, CommodityLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
     StateResponse, PlayState, LocalAction, Action, FeasibleTrade, SpecialistName, ClientRequest, PlayerCountables,
     FeasiblePurchase,
@@ -127,7 +127,7 @@ export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 export type ServerConstants = {
     SPECIALISTS: Array<SpecialistData>
     LOCATION_ACTIONS: Array<LocationData>,
-    LOCATION_GOODS: Record<GoodsLocationName, TradeGood>,
+    LOCATION_COMMODITIES: Record<CommodityLocationName, Commodity>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
     DEFAULT_NEW_STATE: EnrolmentState,
     DEFAULT_NAMES: Array<string>

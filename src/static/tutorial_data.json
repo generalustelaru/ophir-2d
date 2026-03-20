@@ -12,13 +12,13 @@
                     "center": {
                         "name": "farms",
                         "actions": [
-                            "load_good"
+                            "load_commodity"
                         ]
                     },
                     "topRight": {
                         "name": "market",
                         "actions": [
-                            "sell_goods",
+                            "trade",
                             "sell_specialty"
                         ]
                     },
@@ -32,26 +32,26 @@
                         "name": "temple",
                         "actions": [
                             "upgrade_cargo",
-                            "donate_goods",
+                            "donate_commodities",
                             "donate_metal"
                         ]
                     },
                     "bottomLeft": {
                         "name": "quarry",
                         "actions": [
-                            "load_good"
+                            "load_commodity"
                         ]
                     },
                     "left": {
                         "name": "forest",
                         "actions": [
-                            "load_good"
+                            "load_commodity"
                         ]
                     },
                     "topLeft": {
                         "name": "mines",
                         "actions": [
-                            "load_good"
+                            "load_commodity"
                         ]
                     }
                 },
@@ -179,7 +179,7 @@
                 "gold": 2,
                 "silver": 2
             },
-            "goods": {
+            "commodities": {
                 "gems": 2,
                 "linen": 2,
                 "ebony": 2,

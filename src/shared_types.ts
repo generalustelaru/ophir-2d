@@ -21,12 +21,12 @@ export enum Action {
     reposition_opponent = 'reposition_opponent',
     shift_market = 'shift_market',
     end_rival_turn = 'end_rival_turn',
-    load_good = 'load_good',
+    load_commodity = 'load_commodity',
     drop_item = 'drop_item',
-    sell_goods = 'sell_goods',
-    sell_as_chancellor = 'sell_as_chancellor',
-    sell_as_peddler = 'sell_as_peddler', // not in use as local action
-    donate_goods = 'donate_goods',
+    trade_commodities = 'trade',
+    trade_as_chancellor = 'trade_as_chancellor',
+    trade_as_peddler = 'trade_as_peddler', // not in use as local action
+    donate_commodities = 'donate_commodities',
     sell_specialty = 'sell_specialty',
     buy_metal = 'buy_metal',
     donate_metal = 'donate_metal',
@@ -45,18 +45,18 @@ export type Coordinates = { x: number, y: number };
 export type PlayerColor = 'Purple' | 'Yellow' | 'Red' | 'Green';
 export type NeutralColor = 'Neutral';
 export type ZoneName = 'center' | 'topRight' | 'right' | 'bottomRight' | 'bottomLeft' | 'left' | 'topLeft';
-export type TradeGood = 'gems' | 'ebony' | 'marble' | 'linen';
+export type Commodity = 'gems' | 'ebony' | 'marble' | 'linen';
 export type Metal = 'silver' | 'gold';
 export type CargoMetal = Metal | 'silver_extra' | 'gold_extra';
 export type Currency = 'coins' | 'favor';
-export type GoodsLocationName = 'quarry' | 'forest' | 'mines' | 'farms';
-export type LocationName = 'temple' | 'market' | 'treasury' | GoodsLocationName;
+export type CommodityLocationName = 'quarry' | 'forest' | 'mines' | 'farms';
+export type LocationName = 'temple' | 'market' | 'treasury' | CommodityLocationName;
 export type LocalAction =
-    | Action.upgrade_cargo | Action.sell_goods | Action.sell_specialty | Action.donate_goods | Action.donate_metal
-    | Action.buy_metal | Action.load_good | Action.sell_as_chancellor;
-export type ItemName = TradeGood | CargoMetal | 'empty';
+    | Action.upgrade_cargo | Action.trade_commodities | Action.sell_specialty | Action.donate_commodities | Action.donate_metal
+    | Action.buy_metal | Action.load_commodity | Action.trade_as_chancellor;
+export type ItemName = Commodity | CargoMetal | 'empty';
 export type MarketSlotKey = 'slot_1' | 'slot_2' | 'slot_3';
-export type Trade = { request: Array<TradeGood>, reward: Reward };
+export type Trade = { request: Array<Commodity>, reward: Reward };
 export type Reward = { coins: number, favorAndVp: number }
 export type Fluctuation = -1 | 0 | 1;
 export type MarketDeckKey = 'A' | 'B';
@@ -100,7 +100,7 @@ export type SpecialistData = {
     name: SpecialistName,
     displayName: string,
     startingFavor: number,
-    specialty: TradeGood | null,
+    specialty: Commodity | null,
     description: string,
 }
 export type SelectableSpecialist = SpecialistData & { owner: PlayerColor | null }
@@ -134,7 +134,7 @@ export type PlayerSelection = Omit<PlayerDraft, 'turnToPick'> & {
 
 export type FeasibleTrade = {
     slot: MarketSlotKey,
-    missing: Array<TradeGood>
+    missing: Array<Commodity>
 }
 
 export type Player = Omit<PlayerSelection, 'specialist'> & {
@@ -188,7 +188,7 @@ export type TempleState = {
 
 export type ItemSupplies = {
     metals: Record<Metal, number>,
-    goods: Record<TradeGood, number>,
+    commodities: Record<Commodity, number>,
 }
 
 // MARK: STATE
@@ -271,11 +271,11 @@ export type GameSetupPayload = {
     hexPositions: Array<HexCoordinates>,
     startingPositions: Array<Coordinates>,
 }
-export type LoadGoodPayload = { tradeGood: TradeGood, drop: Array<ItemName> | null }
+export type LoadCommodityPayload = { commodity: Commodity, drop: Array<ItemName> | null }
 export type DropItemPayload = { item: ItemName }
-export type MarketSalePayload = { slot: MarketSlotKey }
-export type ChancellorMarketSalePayload = { slot: MarketSlotKey, omit: Array<TradeGood> }
-export type PeddlerMarketPayload = { omit: TradeGood }
+export type MarketTradePayload = { slot: MarketSlotKey }
+export type ChancellorMarketTradePayload = { slot: MarketSlotKey, omit: Array<Commodity> }
+export type PeddlerMarketPayload = { omit: Commodity }
 export type FeasiblePurchase = { metal: Metal, currency: Currency }
 export type MetalPurchasePayload = FeasiblePurchase & { drop: Array<ItemName> | null }
 export type MetalDonationPayload = { metal: Metal }
@@ -303,17 +303,17 @@ export enum BubbleDeed {
 }
 
 export type VerboiseAction =
-    | Action.chat | Action.start_play | Action.move | Action.load_good | Action.drop_item | Action.reposition | Action.move_rival
-    | Action.sell_goods | Action.donate_goods | Action.buy_metal | Action.donate_metal | Action.pick_specialist
-    | Action.enrol | Action.reposition_opponent | Action.change_color | Action.sell_as_chancellor | Action.sell_as_peddler;
+    | Action.chat | Action.start_play | Action.move | Action.load_commodity | Action.drop_item | Action.reposition | Action.move_rival
+    | Action.trade_commodities | Action.donate_commodities | Action.buy_metal | Action.donate_metal | Action.pick_specialist
+    | Action.enrol | Action.reposition_opponent | Action.change_color | Action.trade_as_chancellor | Action.trade_as_peddler;
 export type LaconicAction =
     | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.upgrade_cargo | Action.shift_market
     | Action.end_rival_turn | Action.reposition_rival | Action.start_setup | Action.force_turn | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | PositioningPayload
-    | MarketSalePayload | ChancellorMarketSalePayload | MetalPurchasePayload | PickSpecialistPayload
-    | MetalDonationPayload | LoadGoodPayload | PeddlerMarketPayload | ColorSelectionPayload;
+    | MarketTradePayload | ChancellorMarketTradePayload | MetalPurchasePayload | PickSpecialistPayload
+    | MetalDonationPayload | LoadCommodityPayload | PeddlerMarketPayload | ColorSelectionPayload;
 type MessageFormat<A extends MessageAction, P extends MessagePayload> = { action: A, payload: P }
 export type LaconicMessage = MessageFormat<LaconicAction, null>;
 export type EnrolMessage = MessageFormat<Action.enrol, ColorSelectionPayload>;
@@ -321,21 +321,21 @@ export type ColorSelectMessage = MessageFormat<Action.change_color, ColorSelecti
 export type ChatMessage = MessageFormat<Action.chat, ChatPayload>;
 export type StartMessage = MessageFormat<Action.start_play, GameSetupPayload>;
 export type MoveMessage = MessageFormat<Action.move | Action.move_rival, MovementPayload>;
-export type LoadGoodMessage = MessageFormat<Action.load_good, LoadGoodPayload>;
+export type LoadCommodityMessage = MessageFormat<Action.load_commodity, LoadCommodityPayload>;
 export type DropItemMessage = MessageFormat<Action.drop_item, DropItemPayload>;
 export type RepositionMessage = MessageFormat<Action.reposition | Action.reposition_rival, PositioningPayload>;
 export type RepositionOpponentMessage = MessageFormat<Action.reposition_opponent , OpponentPositioningPayload>;
-export type SellGoodsMessage = MessageFormat<Action.sell_goods, MarketSalePayload>;
-export type SellAsChancellorMessage = MessageFormat<Action.sell_as_chancellor, ChancellorMarketSalePayload>
-export type SellAsPeddlerMessage = MessageFormat<Action.sell_as_peddler, PeddlerMarketPayload>
-export type DonateGoodsMessage = MessageFormat<Action.donate_goods, MarketSalePayload>;
+export type TradeMessage = MessageFormat<Action.trade_commodities, MarketTradePayload>;
+export type TradeAsChancellorMessage = MessageFormat<Action.trade_as_chancellor, ChancellorMarketTradePayload>
+export type TradeAsPeddlerMessage = MessageFormat<Action.trade_as_peddler, PeddlerMarketPayload>
+export type DonateCommoditiesMessage = MessageFormat<Action.donate_commodities, MarketTradePayload>;
 export type BuyMetalsMessage = MessageFormat<Action.buy_metal, MetalPurchasePayload>;
 export type DonateMetalMessage = MessageFormat<Action.donate_metal, MetalDonationPayload>;
 export type PickSpecialistMessage = MessageFormat<Action.pick_specialist, PickSpecialistPayload>;
 export type ClientMessage =
-    | LaconicMessage | StartMessage | MoveMessage | LoadGoodMessage | DropItemMessage | RepositionMessage | EnrolMessage
-    | PickSpecialistMessage | RepositionOpponentMessage | ColorSelectMessage | SellAsChancellorMessage | ChatMessage
-    | SellGoodsMessage | DonateGoodsMessage | BuyMetalsMessage | DonateMetalMessage | SellAsPeddlerMessage
+    | LaconicMessage | StartMessage | MoveMessage | LoadCommodityMessage | DropItemMessage | RepositionMessage | EnrolMessage
+    | PickSpecialistMessage | RepositionOpponentMessage | ColorSelectMessage | TradeAsChancellorMessage | ChatMessage
+    | TradeMessage | DonateCommoditiesMessage | BuyMetalsMessage | DonateMetalMessage | TradeAsPeddlerMessage
 
 export type ClientRequest = {
     message: ClientMessage,

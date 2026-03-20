@@ -1,6 +1,6 @@
 import {
     ChatEntry, GameSetup, ZoneName, ItemSupplies, MarketState, MarketSlotKey, Player, PlayerColor, PlayState,
-    TempleState, Trade, TreasuryOffer, Metal, DiceSix, TradeGood, Rival, ShipBearings, Coordinates, Phase, Unique,
+    TempleState, Trade, TreasuryOffer, Metal, DiceSix, Commodity, Rival, ShipBearings, Coordinates, Phase, Unique,
     PlayerCountables,
 } from '~/shared_types';
 import { GameId, ObjectHandler } from '~/server_types';
@@ -228,16 +228,16 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
         });
     }
 
-    public removeTradeGood(tradeGood: TradeGood) {
+    public removeCommodity(commodity: Commodity) {
         this.itemSupplies.update(s => {
-            s.goods[tradeGood] -= 1;
+            s.commodities[commodity] -= 1;
             return s;
         });
     }
 
-    public returnTradeGood(tradeGood: TradeGood) {
+    public returnCommodity(commodity: Commodity) {
         this.itemSupplies.update(s => {
-            s.goods[tradeGood] += 1;
+            s.commodities[commodity] += 1;
             return s;
         });
     }

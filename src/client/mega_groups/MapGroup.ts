@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import {
-    Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState, TradeGood, Unique,
+    Action, Coordinates, GameSetupPayload, LocationName, Phase, PlayerColor, PlayState, SetupState, Commodity, Unique,
 } from '~/shared_types';
 import {
     MegaGroupInterface, GroupLayoutData, IconLayer, LayerIds, SailAttemptArgs, DropBeforeLoadMessage,
@@ -75,8 +75,8 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                     this.getIconData(locationData.name, state),
                     HUES.defaultHex,
                     state.sessionPhase == Phase.play,
-                    (tradeGood: TradeGood) => {
-                        this.loadActionCallback(this.formatLoadMessage(tradeGood));
+                    (commodity: Commodity) => {
+                        this.loadActionCallback(this.formatLoadMessage(commodity));
                     },
                     ['market', 'treasury', 'temple'].includes(locationData.name)
                         ? () => this.locationFlashCallback(locationData.name)
@@ -296,7 +296,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         return LOCATION_TOKEN_DATA[locationName];
     }
 
-    private formatLoadMessage(tradeGood: TradeGood): DropBeforeLoadMessage {
-        return { action: Action.load_good, payload: { tradeGood, drop: null } };
+    private formatLoadMessage(commodity: Commodity): DropBeforeLoadMessage {
+        return { action: Action.load_commodity, payload: { commodity, drop: null } };
     }
 }

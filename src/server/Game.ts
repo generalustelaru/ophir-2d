@@ -77,7 +77,7 @@ export class Game {
         const { sessionOwner, players, chat } = sharedState;
 
         this.timeStamp = timeStamp;
-        this.userReferences = userReferences; //FIXME: suspicious behavior concerning this property. userReferences is supposed to keep track of user identities relative to the game instance
+        this.userReferences = userReferences;
 
         this.actionProcessor = (() => {
             switch (sharedState.sessionPhase) {
@@ -492,16 +492,16 @@ export class Game {
                     return processor.reposition(digest, true);
                 case Action.reposition_opponent:
                     return processor.repositionOpponent(digest);
-                case Action.load_good:
-                    return processor.loadGood(digest);
-                case Action.sell_goods:
-                    return processor.sellGoods(digest);
-                case Action.sell_as_chancellor:
+                case Action.load_commodity:
+                    return processor.loadCommodity(digest);
+                case Action.trade_commodities:
+                    return processor.trade(digest);
+                case Action.trade_as_chancellor:
                     return processor.sellAsChancellor(digest);
-                case Action.sell_as_peddler:
+                case Action.trade_as_peddler:
                     return processor.sellAsPeddler(digest);
-                case Action.donate_goods:
-                    return processor.donateGoods(digest);
+                case Action.donate_commodities:
+                    return processor.donateCommodities(digest);
                 case Action.sell_specialty:
                     return processor.sellSpecialty(digest);
                 case Action.buy_metal:

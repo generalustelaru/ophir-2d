@@ -474,7 +474,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
 
         return {
             metals: { gold: supplyCount, silver: supplyCount },
-            goods: { gems: supplyCount, linen: supplyCount, ebony: supplyCount, marble: supplyCount },
+            commodities: { gems: supplyCount, linen: supplyCount, ebony: supplyCount, marble: supplyCount },
         };
     }
 

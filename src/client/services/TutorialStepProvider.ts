@@ -33,7 +33,7 @@ export class TutorialStepProvider {
                 p.moveActions = 1;
                 p.mayUndo = true;
                 p.isAnchored = true;
-                p.locationActions = [Action.load_good];
+                p.locationActions = [Action.load_commodity];
                 p.destinations = ['left', 'topRight'];
             },
             visuals: [
@@ -43,7 +43,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.topLeftZone] },
                 { highlights: [Target.topLeftZone] },
             ],
-            expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
+            expecting: { action: Action.load_commodity, payload: { commodity: 'gems', drop: null } },
         },
         {
             laconic: null,
@@ -152,7 +152,7 @@ export class TutorialStepProvider {
                 }
                 const p = state.players[0];
                 p.isHandlingRival = false;
-                p.locationActions = [Action.sell_goods, Action.sell_specialty];
+                p.locationActions = [Action.trade_commodities, Action.sell_specialty];
                 p.feasibleTrades = [{ slot: 'slot_3', missing: [] }];
                 p.mayUndo = false;
             },
@@ -190,13 +190,13 @@ export class TutorialStepProvider {
                 p.cargo = ['gems', 'empty'];
                 p.coins = 0;
                 p.mayUndo = false;
-                p.locationActions = [Action.sell_goods, Action.sell_specialty];
+                p.locationActions = [Action.trade_commodities, Action.sell_specialty];
             },
             visuals: [
                 { highlights: [] },
                 { highlights: [Target.slot_3] },
             ],
-            expecting: { action: Action.sell_goods, payload: { slot: 'slot_3' } },
+            expecting: { action: Action.trade_commodities, payload: { slot: 'slot_3' } },
         },
         {
             laconic: null,
@@ -255,13 +255,13 @@ export class TutorialStepProvider {
                 p.bearings.location = 'mines';
                 p.destinations = ['left', 'center'];
                 p.mayUndo = true;
-                p.locationActions = [Action.load_good];
+                p.locationActions = [Action.load_commodity];
             },
             visuals: [
                 { highlights: [Target.marketCard] },
                 { highlights: [Target.marketCard, Target.topLeftZone] },
             ],
-            expecting: { action: Action.load_good, payload: { tradeGood: 'gems', drop: null } },
+            expecting: { action: Action.load_commodity, payload: { commodity: 'gems', drop: null } },
         },
         {
             laconic: null,
@@ -301,12 +301,12 @@ export class TutorialStepProvider {
                 p.destinations = ['left', 'bottomLeft', 'bottomRight'];
                 p.mayUndo = true;
                 p.isAnchored = true;
-                p.locationActions = [Action.load_good];
+                p.locationActions = [Action.load_commodity];
             },
             visuals: [
                 { highlights: [Target.centerZone] },
             ],
-            expecting: { action: Action.load_good, payload: { tradeGood: 'linen', drop: null } },
+            expecting: { action: Action.load_commodity, payload: { commodity: 'linen', drop: null } },
         },
         {
             laconic: null,
@@ -345,7 +345,7 @@ export class TutorialStepProvider {
                 p.bearings.seaZone = 'bottomRight';
                 p.bearings.location = 'temple';
                 p.destinations = ['bottomLeft', 'right'];
-                p.locationActions = [Action.donate_goods, Action.upgrade_cargo];
+                p.locationActions = [Action.donate_commodities, Action.upgrade_cargo];
                 p.feasibleTrades = [{ slot: 'slot_2', missing: [] }];
             },
             visuals: [
@@ -353,7 +353,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.marketCard, Target.temple_mark] },
                 { highlights: [Target.marketCard] },
             ],
-            expecting: { action: Action.donate_goods, payload: { slot: 'slot_2' } },
+            expecting: { action: Action.donate_commodities, payload: { slot: 'slot_2' } },
         },
         {
             laconic: null,

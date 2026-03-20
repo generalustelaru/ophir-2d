@@ -3,7 +3,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface, PlayerHueVariation } from '~/client_types';
 import { Action, Player, PlayerColor, Unique } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
-import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyGoodButton } from '.';
+import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyButton } from '.';
 import clientConstants from '~/client_constants';
 
 const { PLAYER_HUES } = clientConstants;
@@ -20,7 +20,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
     private vpDial: VictoryPointDial;
-    private specialtyGoodButton: SpecialtyGoodButton;
+    private specialtyButton: SpecialtyButton;
     private color: PlayerColor;
     private variation: PlayerHueVariation;
     private localPlayerColor: PlayerColor | null;
@@ -87,13 +87,13 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         );
         this.group.add(this.vpDial.getElement());
 
-        this.specialtyGoodButton = new SpecialtyGoodButton(
+        this.specialtyButton = new SpecialtyButton(
             stage,
             player,
             { x: 190, y: 40 },
             isLocalPlayer,
         );
-        this.group.add(this.specialtyGoodButton.getElement());
+        this.group.add(this.specialtyButton.getElement());
 
         this.specialistCard = new SpecialistCard(
             { width: this.group.width(), height: this.group.height(), x: 0, y: 0 },
@@ -127,7 +127,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         });
         this.specialistBand.update(isActive);
         this.specialistCard.update(name);
-        this.specialtyGoodButton.update(!!(
+        this.specialtyButton.update(!!(
             isAnchored
             && locationActions.includes(Action.sell_specialty)
             && specialist.specialty
@@ -158,7 +158,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     }
 
     public disable() {
-        this.specialtyGoodButton.disable();
+        this.specialtyButton.disable();
     }
 
     private toggleSpecialistCard() {

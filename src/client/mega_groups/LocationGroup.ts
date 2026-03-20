@@ -9,7 +9,7 @@ import { ResultsPanel } from '../groups/conclusion/ResultsPanel';
 
 type VariableLocationGroupCallbacks = {
     tradeCallback: Function
-    donateGoodsCallback?: Function,
+    donateCommoditiesCallback?: Function,
     advisorCallback?: Function,
     peddlerCallback?: Function,
 }
@@ -23,7 +23,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private purchaseActionCallback: (data: DropBeforeLoadMessage) => void;
     private tradeCallback: Function | null = null;
     private peddlerCallback: Function | null = null;
-    private donateGoodsCallback: Function | null = null;
+    private donateCommoditiesCallback: Function | null = null;
     private advisorOptionsCallback: Function | null = null;
 
     constructor(
@@ -47,9 +47,9 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     }
 
     public setCallbacks(selection:VariableLocationGroupCallbacks) {
-        const { tradeCallback, donateGoodsCallback, advisorCallback, peddlerCallback } = selection;
+        const { tradeCallback, donateCommoditiesCallback, advisorCallback, peddlerCallback } = selection;
         this.tradeCallback = tradeCallback;
-        donateGoodsCallback && (this.donateGoodsCallback = donateGoodsCallback);
+        donateCommoditiesCallback && (this.donateCommoditiesCallback = donateCommoditiesCallback);
         advisorCallback && (this.advisorOptionsCallback = advisorCallback);
         peddlerCallback && (this.peddlerCallback = peddlerCallback);
     }
@@ -111,7 +111,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             },
             state.temple.maxLevel,
             isAdvisor,
-            isAdvisor ? this.advisorOptionsCallback : this.donateGoodsCallback,
+            isAdvisor ? this.advisorOptionsCallback : this.donateCommoditiesCallback,
         );
 
         this.group.add(
@@ -165,7 +165,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         this.stage = null;
         this.tradeCallback = null;
         this.peddlerCallback = null;
-        this.donateGoodsCallback = null;
+        this.donateCommoditiesCallback = null;
         this.advisorOptionsCallback = null;
 
         // these remain in memory

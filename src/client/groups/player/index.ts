@@ -6,4 +6,4 @@ export { RivalPlacard } from './RivalPlacard';
 export { ShiftMarketButton } from './ShiftMarketButton';
 export { SpecialistBand } from './SpecialistBand';
 export { SpecialistCard } from './SpecialistCard';
-export { SpecialtyGoodButton } from './SpecialtyGoodButton';
+export { SpecialtyButton } from './SpecialtyButton';

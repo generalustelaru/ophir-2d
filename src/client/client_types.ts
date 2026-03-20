@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, ColorTransmission, Metal,
     TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
-    TradeGood, BuyMetalsMessage, LoadGoodMessage, FeasiblePurchase, PlayState, FailedInfluenceRollTransmission,
+    Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, FailedInfluenceRollTransmission,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -43,11 +43,11 @@ export type LocalState = {
     vp: number,
 }
 
-export type DropBeforeLoadMessage = LoadGoodMessage | BuyMetalsMessage
+export type DropBeforeLoadMessage = LoadCommodityMessage | BuyMetalsMessage
 
-export type TradeGoodSymbol = TradeGood | 'other';
+export type CommoditySymbol = Commodity | 'other';
 export type Specification = {
-    name: TradeGood
+    name: Commodity
     isOmited: boolean
     isLocked: boolean
 }

@@ -2,14 +2,14 @@ import Konva from 'konva';
 import { MarketCardUpdate, DynamicGroupInterface, ElementList } from '~/client_types';
 import { Coordinates, Trade, Unique } from '~/shared_types';
 import { Button } from '../popular';
-import { GoodsAssortment, TempleRewardDial } from '.';
+import { CommodityAssortment, TempleRewardDial } from '.';
 import clientConstants from '~/client_constants';
 
 const { HUES } = clientConstants;
 export class TempleMarketCard extends Button implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
 
     private rewardDial: TempleRewardDial;
-    private goodsAssortment: GoodsAssortment;
+    private assortment: CommodityAssortment;
     private background: Konva.Rect;
     private opensModal: boolean;
     constructor(
@@ -46,7 +46,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
             opensAdvisorModal ? null : trade.reward.favorAndVp,
         );
 
-        this.goodsAssortment = new GoodsAssortment(
+        this.assortment = new CommodityAssortment(
             {
                 x: 0,
                 y: 0,
@@ -58,7 +58,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
         const elements: ElementList = [
             this.background,
             this.rewardDial.getElement(),
-            this.goodsAssortment.getElement(),
+            this.assortment.getElement(),
         ];
 
         opensAdvisorModal && elements.push(new Konva.Text({
@@ -77,7 +77,7 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
 
     public update(data: MarketCardUpdate): void {
         this.rewardDial.update(this.opensModal ? null : data.trade.reward.favorAndVp);
-        this.goodsAssortment.update(this.opensModal ? null : data.trade.request);
+        this.assortment.update(this.opensModal ? null : data.trade.request);
         data.isFeasible ? this.enable() : this.disable();
     }
 

@@ -7,7 +7,7 @@ import { fade } from '~/client/animations';
 
 const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
 
-export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, Flashable {
+export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, Unique<Flashable> {
 
     private deckSize: number;
     private group: Konva.Group;
@@ -141,7 +141,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, 
             localPlayer?.isActive
             && localPlayer.isAnchored
             && localPlayer.locationActions.filter(
-                a => [Action.sell_goods, Action.sell_as_chancellor].includes(a),
+                a => [Action.trade_commodities, Action.trade_as_chancellor].includes(a),
             ).length
         );
 
@@ -165,7 +165,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, 
 
     public async flash(): Promise<void> {
         this.background.opacity(1);
-        await fade(this.background, 0.3, 0);
+        await fade(this.background, 0.6, 0);
     }
 
     public disable(): void {

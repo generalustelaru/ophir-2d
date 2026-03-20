@@ -1,20 +1,20 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { Coordinates, TradeGood, Unique } from '~/shared_types';
+import { Coordinates, Commodity, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import clientConstants from '~/client/client_constants';
-import { FavorFactory, TradeGoodFactory } from '.';
+import { FavorFactory, CommodityFactory } from '.';
 import { UnavailableFactory } from './UnavalableFactory';
 
 const { HUES } = clientConstants;
 
 type Update = {
-    type: TradeGood | 'favor' | 'unavailable' | 'none',
+    type: Commodity | 'favor' | 'unavailable' | 'none',
     isClickable: boolean;
 }
 
 export class SpecificationToken extends Button implements Unique<DynamicGroupInterface<Update>> {
-    private tokens: Map<TradeGood|'favor'|'unavailable', Konva.Group> = new Map();
+    private tokens: Map<Commodity|'favor'|'unavailable', Konva.Group> = new Map();
     private activeBackground: Konva.Rect;
 
     constructor(
@@ -43,13 +43,13 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
             visible: false,
         });
 
-        const tradeGoodFactory = new TradeGoodFactory();
-        const symbols: Array<TradeGood> = ['linen', 'ebony', 'gems', 'marble'];
+        const commodityFactory = new CommodityFactory();
+        const symbols: Array<Commodity> = ['linen', 'ebony', 'gems', 'marble'];
 
         for (const symbol of symbols) {
             this.tokens.set(
                 symbol,
-                tradeGoodFactory.produceElement(symbol),
+                commodityFactory.produceElement(symbol),
             );
         }
 

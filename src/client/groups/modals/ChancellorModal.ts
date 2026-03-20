@@ -112,13 +112,13 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
                     case 1: return types[0];
                     case 2: return `${types[0]} and ${types[1]}`;
                     case 3: return `${types[0]}, ${types[1]}, and ${types[2]}`;
-                    default: throw new Error('Cannot render moda! Missing goods exceeds requirement potential');
+                    default: throw new Error('Cannot render moda! Missing commodities exceed requirement potential');
                 }
             })();
 
             return typeCount
                 ? `You will need to substitute ${enumeration} with ${feasible.missing.length} favor.`
-                : 'You have all the goods needed for this trade';
+                : 'You have all the commodities needed for this trade';
         })());
 
         // set vanilla specification
@@ -144,7 +144,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         this.coinDial.update(trade.reward.coins + this.fluctuations[slot]);
 
         this.open({
-            action: Action.sell_as_chancellor,
+            action: Action.trade_as_chancellor,
             payload: { slot, omit: feasible.missing },
         });
     }
@@ -153,9 +153,9 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         if (!this.marketSlot)
             throw new Error('Cannot edit request. Market slot missing.');
 
-        const tradeGoodData = this.tradeSpecifications[index];
+        const commodityData = this.tradeSpecifications[index];
 
-        tradeGoodData.isOmited = !tradeGoodData.isOmited;
+        commodityData.isOmited = !commodityData.isOmited;
 
         const omited = (this.tradeSpecifications
             .filter(sp => sp.isOmited)
@@ -167,7 +167,7 @@ export class ChancellorModal extends ModalBase implements Unique<DynamicModalInt
         } else {
             this.setAcceptable(true);
             this.updateActionMessage({
-                action: Action.sell_as_chancellor,
+                action: Action.trade_as_chancellor,
                 payload: { slot: this.marketSlot, omit: omited },
             });
         }

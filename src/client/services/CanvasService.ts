@@ -11,7 +11,7 @@ import localState from '../state';
 import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, SailAttemptArgs, Target } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
-    SellGoodsModal, StartTurnModal, DonateGoodsModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
+    TradeModal, StartTurnModal, DonateCommoditiesModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
     EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal, SailFailureModal,
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
@@ -34,8 +34,8 @@ export class CanvasService extends Communicator {
     private sailFailureModal: SailFailureModal | null = null;
     private forceTurnModal: ForceTurnModal;
     private dropBeforeLoadModal: DropBeforeLoadModal;
-    private sellGoodsModal: SellGoodsModal | null = null;
-    private donateGoodsModal: DonateGoodsModal | null = null;
+    private tradeModal: TradeModal | null = null;
+    private donateCommoditiesModal: DonateCommoditiesModal | null = null;
     private rivalControlModal: RivalControlModal | null = null;
     private endRivalTurnModal: EndRivalTurnModal | null = null;
     private advisorModal: AdvisorModal | null = null;
@@ -219,8 +219,8 @@ export class CanvasService extends Communicator {
                 this.playerGroup.update(state);
                 this.playerGroup.updatePlayerVp(localState.playerColor, localState.vp);
                 this.dropBeforeLoadModal.update(state);
-                this.sellGoodsModal?.update(state);
-                this.donateGoodsModal?.update(state);
+                this.tradeModal?.update(state);
+                this.donateCommoditiesModal?.update(state);
                 this.endTurnModal?.update(state);
                 this.advisorModal?.update(state);
                 this.chancellorModal?.update(state);
@@ -300,8 +300,8 @@ export class CanvasService extends Communicator {
         this.forceTurnModal.repositionModal(this.aspect);
         this.dropBeforeLoadModal.repositionModal(this.aspect);
 
-        this.sellGoodsModal?.repositionModal(this.aspect);
-        this.donateGoodsModal?.repositionModal(this.aspect);
+        this.tradeModal?.repositionModal(this.aspect);
+        this.donateCommoditiesModal?.repositionModal(this.aspect);
         this.rivalControlModal?.repositionModal(this.aspect);
         this.endRivalTurnModal?.repositionModal(this.aspect);
         this.advisorModal?.repositionModal(this.aspect);
@@ -379,27 +379,27 @@ export class CanvasService extends Communicator {
     }
 
     private initializeForAdvisor() {
-        this.sellGoodsModal = new SellGoodsModal(this.stage, this.aspect);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
+        this.tradeModal = new TradeModal(this.stage, this.aspect);
+        this.donateCommoditiesModal = new DonateCommoditiesModal(this.stage, this.aspect);
         this.advisorModal = new AdvisorModal(
             this.stage,
-            (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+            (slot: MarketSlotKey) => { this.donateCommoditiesModal!.show(slot); },
             this.aspect,
         );
 
         this.locationGroup.setCallbacks({
-            tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal?.show(slot); },
+            tradeCallback: (slot: MarketSlotKey) => { this.tradeModal?.show(slot); },
             advisorCallback: () => { this.advisorModal!.show(); },
         });
     }
 
     private initializeForChancellor() {
         this.chancellorModal = new ChancellorModal(this.stage, this.aspect);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
+        this.donateCommoditiesModal = new DonateCommoditiesModal(this.stage, this.aspect);
 
         this.locationGroup.setCallbacks({
             tradeCallback: (slot: MarketSlotKey) => { this.chancellorModal!.show(slot); },
-            donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+            donateCommoditiesCallback: (slot: MarketSlotKey) => { this.donateCommoditiesModal!.show(slot); },
         });
     }
 
@@ -410,23 +410,23 @@ export class CanvasService extends Communicator {
             { ...marketFluctuations },
             this.aspect,
         );
-        this.sellGoodsModal = new SellGoodsModal(this.stage, this.aspect);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
+        this.tradeModal = new TradeModal(this.stage, this.aspect);
+        this.donateCommoditiesModal = new DonateCommoditiesModal(this.stage, this.aspect);
 
         this.locationGroup.setCallbacks({
-            tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
+            tradeCallback: (slot: MarketSlotKey) => { this.tradeModal!.show(slot); },
             peddlerCallback: () => { this.peddlerModal!.show(); },
-            donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+            donateCommoditiesCallback: (slot: MarketSlotKey) => { this.donateCommoditiesModal!.show(slot); },
         });
     }
 
     private initializeForOther() {
-        this.sellGoodsModal = new SellGoodsModal(this.stage, this.aspect);
-        this.donateGoodsModal = new DonateGoodsModal(this.stage, this.aspect);
+        this.tradeModal = new TradeModal(this.stage, this.aspect);
+        this.donateCommoditiesModal = new DonateCommoditiesModal(this.stage, this.aspect);
 
         this.locationGroup.setCallbacks({
-            tradeCallback: (slot: MarketSlotKey) => { this.sellGoodsModal!.show(slot); },
-            donateGoodsCallback: (slot: MarketSlotKey) => { this.donateGoodsModal!.show(slot); },
+            tradeCallback: (slot: MarketSlotKey) => { this.tradeModal!.show(slot); },
+            donateCommoditiesCallback: (slot: MarketSlotKey) => { this.donateCommoditiesModal!.show(slot); },
         });
     }
 

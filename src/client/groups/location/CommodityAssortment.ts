@@ -1,19 +1,19 @@
 import Konva from 'konva';
-import { Coordinates, TradeGood, Unique } from '~/shared_types';
+import { Coordinates, Commodity, Unique } from '~/shared_types';
 import { DynamicGroupInterface, ElementList } from '~/client_types';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA } = clientConstants;
 
 type Scale = 'card' | 'modal'
-export class GoodsAssortment implements Unique<DynamicGroupInterface<Array<TradeGood>>>
+export class CommodityAssortment implements Unique<DynamicGroupInterface<Array<Commodity>>>
 {
     private group: Konva.Group;
     private scale: number;
     constructor(
         position: Coordinates,
         scale: Scale,
-        goods: Array<TradeGood> | null,
+        commodities: Array<Commodity> | null,
     ) {
         this.scale = (() => { switch (scale) {
             case 'modal': return 2;
@@ -28,19 +28,19 @@ export class GoodsAssortment implements Unique<DynamicGroupInterface<Array<Trade
             y: position.y,
         });
 
-        goods && this.group.add( this.getGoodsGroup(goods));
+        commodities && this.group.add( this.getCommodityGroup(commodities));
     }
 
     public getElement(): Konva.Group {
         return this.group;
     }
 
-    public update(goods: Array<TradeGood> | null): void {
+    public update(commodities: Array<Commodity> | null): void {
         this.group.destroyChildren();
-        goods && this.group.add(this.getGoodsGroup(goods));
+        commodities && this.group.add(this.getCommodityGroup(commodities));
     }
 
-    private getGoodsGroup(commodities: Array<TradeGood>): Konva.Group {
+    private getCommodityGroup(commodities: Array<Commodity>): Konva.Group {
         const cX = this.group.width() / 2;
         const cY = this.group.height() / 2;
         const layouts: Record<number, Coordinates[]> = {

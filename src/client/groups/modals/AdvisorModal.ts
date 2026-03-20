@@ -17,7 +17,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
     private cardSelectionCallback: (slot: MarketSlotKey) => void;
     constructor(
         stage: Konva.Stage,
-        donateGoodsCallback: (slot: MarketSlotKey) => void,
+        donateCommoditiesCallback: (slot: MarketSlotKey) => void,
         aspect: Aspect,
     ) {
         super(
@@ -27,7 +27,7 @@ export class AdvisorModal extends ModalBase implements Unique<DynamicModalInterf
             { width: 300, height: 220 },
         );
 
-        this.cardSelectionCallback = donateGoodsCallback;
+        this.cardSelectionCallback = donateCommoditiesCallback;
         this.stage = stage;
         this.advisorTrades = [];
         this.cardRow = new RowDistributor(

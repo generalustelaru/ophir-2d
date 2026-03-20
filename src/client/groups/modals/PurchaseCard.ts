@@ -2,18 +2,18 @@ import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { Button, CoinDial, FavorDial } from '../popular';
 import clientConstants from '~/client_constants';
-import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer, LoadGoodMessage, TradeGood } from '~/shared_types';
-import { TradeGoodFactory } from '.';
+import { Coordinates, Unique, BuyMetalsMessage, TreasuryOffer, LoadCommodityMessage, Commodity } from '~/shared_types';
+import { CommodityFactory } from '.';
 
 const { HUES, CARGO_ITEM_DATA } = clientConstants;
 type Update = {
     treasury: TreasuryOffer
     message: BuyMetalsMessage
-} | { message: LoadGoodMessage }
+} | { message: LoadCommodityMessage }
 export class PurchaseCard extends Button implements Unique<DynamicGroupInterface<Update>> {
     private background: Konva.Rect;
     private useTreasuryColor: boolean = true;
-    private tradeGoodTokens: Map<TradeGood, Konva.Group>;
+    private commodityTokens: Map<Commodity, Konva.Group>;
     private coinDial: CoinDial;
     private favorDial: FavorDial;
     private goldIcon: Konva.Path;
@@ -39,20 +39,20 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
             cornerRadius: 15,
         });
 
-        this.tradeGoodTokens = new Map();
-        const symbols: Array<TradeGood> = ['linen', 'ebony', 'gems', 'marble'];
-        const tradeGoodFactory = new TradeGoodFactory();
+        this.commodityTokens = new Map();
+        const symbols: Array<Commodity> = ['linen', 'ebony', 'gems', 'marble'];
+        const commodityFactory = new CommodityFactory();
 
         for (const symbol of symbols) {
-            this.tradeGoodTokens.set(
+            this.commodityTokens.set(
                 symbol,
-                tradeGoodFactory.produceElement(symbol, 3),
+                commodityFactory.produceElement(symbol, 3),
             );
         }
 
         const tokenGroup = new Konva.Group({ x: 16, y: 30 }).add(...(()=> {
             const nodes: Array<Konva.Group> = [];
-            this.tradeGoodTokens.forEach(token => {
+            this.commodityTokens.forEach(token => {
                 nodes.push(token);
             });
             return nodes;
@@ -116,7 +116,7 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
             this.useTreasuryColor = true;
         } else {
             this.background.fill(HUES.islandGreen);
-            this.tradeGoodTokens.get(data.message.payload.tradeGood)?.show();
+            this.commodityTokens.get(data.message.payload.commodity)?.show();
             this.useTreasuryColor = false;
         }
 
@@ -137,6 +137,6 @@ export class PurchaseCard extends Button implements Unique<DynamicGroupInterface
         this.coinDial.hide();
         this.goldIcon.visible(false);
         this.silverIcon.visible(false);
-        this.tradeGoodTokens.forEach(token => token.hide());
+        this.commodityTokens.forEach(token => token.hide());
     }
 }

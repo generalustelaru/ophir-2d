@@ -1,4 +1,4 @@
-import { BubbleDeed, Metal, TradeGood } from '~/shared_types';
+import { BubbleDeed, Metal, Commodity } from '~/shared_types';
 import clientConstants from '~/client_constants';
 import Konva from 'konva';
 import { Dimensions } from '~/client_types';
@@ -69,7 +69,7 @@ export class DeedIconFactory {
             | BubbleDeed.linen
             | BubbleDeed.marble,
     ) {
-        const type = ((): TradeGood => {
+        const type = ((): Commodity => {
             switch (deed) {
                 case BubbleDeed.ebony: return 'ebony';
                 case BubbleDeed.gems: return 'gems';

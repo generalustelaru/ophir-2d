@@ -7,7 +7,7 @@ import { fade } from '~/client/animations';
 
 const { HUES } = clientConstants;
 
-export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate>>, Flashable {
+export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate>>, Unique<Flashable> {
 
     private group: Konva.Group;
     private background: Konva.Rect;
@@ -111,7 +111,7 @@ export class TreasuryArea implements Unique<DynamicGroupInterface<TreasuryUpdate
 
     public async flash(): Promise<void> {
         this.background.opacity(1);
-        await fade(this.background, 0.3, 0);
+        await fade(this.background, 0.6, 0);
     }
 
     public disable(): void {

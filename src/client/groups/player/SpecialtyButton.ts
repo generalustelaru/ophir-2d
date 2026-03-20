@@ -6,7 +6,7 @@ import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA, HUES } = clientConstants;
 
-export class SpecialtyGoodButton extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
+export class SpecialtyButton extends RequestButton implements Unique<DynamicGroupInterface<boolean>> {
 
     private background: Konva.Rect;
     private playerColor: PlayerColor;
@@ -38,7 +38,7 @@ export class SpecialtyGoodButton extends RequestButton implements Unique<Dynamic
 
         if (specialty) {
             const iconData = CARGO_ITEM_DATA[specialty];
-            const tradeGoodIcon = new Konva.Path({
+            const specialtyIcon = new Konva.Path({
                 data: iconData.shape,
                 fill: iconData.fill,
                 stroke: 'white',
@@ -47,7 +47,7 @@ export class SpecialtyGoodButton extends RequestButton implements Unique<Dynamic
                 x: 7,
                 y: 7,
             });
-            this.group.add(tradeGoodIcon);
+            this.group.add(specialtyIcon);
         }
     }
 

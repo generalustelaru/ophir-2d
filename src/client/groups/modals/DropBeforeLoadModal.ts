@@ -1,4 +1,4 @@
-import { Action, ItemName, PlayState, TradeGood, TreasuryOffer, Unique } from '~/shared_types';
+import { Action, ItemName, PlayState, Commodity, TreasuryOffer, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
 import { Aspect, DropBeforeLoadMessage, DynamicModalInterface, Specification } from '~/client_types';
 import { Stage } from 'konva/lib/Stage';
@@ -71,11 +71,11 @@ export class DropBeforeLoadModal
 
         this.message = message;
         const reference: ItemName[] = ['ebony', 'gems', 'linen', 'marble'];
-        const carriedGoods = this.playerCargo.filter(
+        const carriedCommodities = this.playerCargo.filter(
             name =>  reference.includes(name),
-        ) as TradeGood[];
+        ) as Commodity[];
 
-        this.dropSpecs = carriedGoods.map(name => {
+        this.dropSpecs = carriedCommodities.map(name => {
             return { name, isOmited: false, isLocked: false };
         });
 

@@ -80,7 +80,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
 
         if (specialist.specialty) {
             const iconData = CARGO_ITEM_DATA[specialist.specialty];
-            const tradeGoodIcon = new Konva.Path({
+            const commodityIcon = new Konva.Path({
                 data: iconData.shape,
                 fill: iconData.fill,
                 stroke: 'white',
@@ -89,7 +89,7 @@ export class SpecialistCard extends Button implements Unique<DynamicGroupInterfa
                 x: 155,
                 y: 248,
             });
-            this.group.add(tradeGoodIcon);
+            this.group.add(commodityIcon);
         }
 
         this.group.add(this.selectButton.getElement());

@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MarketCardUpdate, DynamicGroupInterface } from '~/client_types';
 import { Coordinates, Fluctuation, Trade, Unique } from '~/shared_types';
 import { CoinDial, Button } from '../popular';
-import { GoodsAssortment } from '.';
+import { CommodityAssortment } from '.';
 import clientConstants from '~/client_constants';
 import { MiniTempleRewardDial } from './MiniTempleRewardDial';
 import { slideToPosition, fade } from '~/client/animations';
@@ -10,7 +10,7 @@ import { slideToPosition, fade } from '~/client/animations';
 const { HUES } = clientConstants;
 export class MarketCard extends Button implements Unique<DynamicGroupInterface<MarketCardUpdate>> {
     private coinDial: CoinDial;
-    private goodsAssortment: GoodsAssortment;
+    private assortment: CommodityAssortment;
     private background: Konva.Rect;
     private fluctuation: Fluctuation | null = null;
     private miniRewardDial: MiniTempleRewardDial;
@@ -57,7 +57,7 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
             trade.reward.coins + (fluctuation ?? 0),
         );
 
-        this.goodsAssortment = new GoodsAssortment(
+        this.assortment = new CommodityAssortment(
             { x: 0, y: -3 },
             'card',
             trade.request,
@@ -71,7 +71,7 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
         this.group.add(...[
             this.background,
             this.coinDial.getElement(),
-            this.goodsAssortment.getElement(),
+            this.assortment.getElement(),
             this.miniRewardDial.getElement(),
         ]);
     }
@@ -84,7 +84,7 @@ export class MarketCard extends Button implements Unique<DynamicGroupInterface<M
         this.group.x(this.originalPosition.x).y(this.originalPosition.y);
         this.coinDial.update(trade.reward.coins + (this.fluctuation ?? 0));
         this.miniRewardDial.update(trade.reward.favorAndVp);
-        this.goodsAssortment.update(trade.request);
+        this.assortment.update(trade.request);
         this.background.fill(isFeasible ? HUES.marketOrange : HUES.marketDarkOrange);
         this.background.stroke(isFeasible ? HUES.treasuryGold : HUES.boneWhite);
         isFeasible ? this.enable() : this.disable();
