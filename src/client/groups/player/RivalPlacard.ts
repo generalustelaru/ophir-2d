@@ -1,7 +1,3 @@
-// same height but narrower
-// stroke should become of the player color when ship is controllable
-// should contain buttons for shifting the market and endig turn (its turn)
-
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
 import { PlayerColor, Rival, Unique } from '~/shared_types';
@@ -56,7 +52,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         );
         this.concludeButton = new ConcludeButton(
             stage,
-            { x: 100, y: 25 },
+            { x: 110, y: 32 },
             endRivalTurnCallback ? () => endRivalTurnCallback(false) : null,
         );
         this.movesDial = new MovesDial({ x: 80, y: 10 });
@@ -98,5 +94,10 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
         this.movesDial.update({ moves, isActive: activePlayerColor && isControllable });
+    }
+
+    public disable() {
+        this.concludeButton.disable();
+        this.shiftMarketButton.disable();
     }
 }

@@ -106,15 +106,16 @@ export class MapGroup implements Unique<MegaGroupInterface> {
 
         const players = state.players;
         const localPlayer = players.find(player => player.color === localState.playerColor);
-        const isActivePlayer = localPlayer?.isActive || false;
         //MARK: dials/buttons
         this.movesDial = new MovesDial({ x: 15, y: 60 });
 
         this.endTurnButton = new EndTurnButton(
             this.stage,
-            this.group,
+            {
+                x: this.group.width() - 93,
+                y: this.group.height() - 123,
+            },
             () => this.endTurnCallback(),
-            isActivePlayer,
         );
 
         this.favorButton = new FavorButton(
@@ -127,7 +128,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         this.undoButton = new UndoButton(
             this.stage,
             { x: 35, y : 375 },
-            isActivePlayer,
+            localPlayer?.isActive || false,
         );
 
         this.group.add(...[

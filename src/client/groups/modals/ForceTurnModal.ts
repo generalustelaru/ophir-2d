@@ -26,7 +26,7 @@ export class ForceTurnModal extends ModalBase implements Unique<StaticModalInter
             y: 10,
             fontFamily: 'Custom',
         });
-        const anchorPath = ICON_DATA.anchored;
+        const anchorPath = ICON_DATA.anchor;
         const disabledAnchor = new Konva.Path({
             data: anchorPath.shape,
             fill: HUES.disabled,

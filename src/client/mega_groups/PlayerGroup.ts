@@ -105,5 +105,7 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         this.playerPlacards.forEach(placard => {
             placard.isLocal() && placard.disable();
         });
+
+        this.rivalPlacard?.disable();
     }
 }

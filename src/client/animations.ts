@@ -59,3 +59,19 @@ export async function fade(node: Konva.Node, duration: number, opacity: number):
         tween.play();
     });
 }
+
+export async function rotate(node: Konva.Node, duration: number, deg: number): Promise<void> {
+    return new Promise(resolve => {
+        const tween = new Konva.Tween({
+            node,
+            duration,
+            rotation: deg,
+            easing: Konva.Easings.EaseOut,
+            onFinish: () => {
+                tween.destroy();
+                resolve();
+            },
+        });
+        tween.play();
+    });
+}
