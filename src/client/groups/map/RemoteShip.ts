@@ -21,6 +21,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
     private localZone: SeaZone;
     private seaZones: Array<SeaZone>;
     private position: Coordinates = { x: 0, y: 0 };
+    private isInspectable: boolean = true;
 
     constructor(
         stage: Konva.Stage,
@@ -55,6 +56,10 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             stage.container().style.cursor = this.group.draggable() ? 'grab' : 'default';
         });
 
+        this.group.on(RawEvents.CLICK, () => {
+            this.isInspectable && this.deedBubble.peek();
+        });
+
         this.group.on(RawEvents.LEAVE, () => {
             stage.container().style.cursor = 'default';
         });
@@ -62,6 +67,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
         this.group.on(RawEvents.DRAG_START, () => {
             this.group.moveToTop();
             this.position = { x: this.group.x(), y: this.group.y() };
+            this.isInspectable && this.deedBubble.peek(true);
         });
 
         this.group.on(RawEvents.DRAG_MOVE, () => {
@@ -120,7 +126,12 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
         const { remotePlayer, isDraggable } = data;
         const { seaZone, position: newPosition } = remotePlayer.bearings;
 
-        remotePlayer.isActive && this.group.moveToTop();
+        if (remotePlayer.isActive) {
+            this.group.moveToTop();
+            this.isInspectable = false;
+        } else {
+            this.isInspectable = true;
+        }
 
         this.localZone = this.seaZones.find(
             z => z.getZoneName() == seaZone,

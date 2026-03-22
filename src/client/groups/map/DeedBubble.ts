@@ -56,15 +56,17 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
         const { deeds, isVisible } = data;
         this.group.visible(isVisible);
 
-        if (false == isVisible)
+        // if (false == isVisible)
+        //     return;
+        if (deeds.length == this.nodes.length && deeds.length != 1)
             return;
 
         const width = unit.width * deeds.length;
         this.bubble.width(width);
         this.bubble.x((width / 2 * -1) + (unit.width / 2));
 
-        if (deeds.length == this.nodes.length && deeds.length != 1)
-            return;
+        // if (deeds.length == this.nodes.length && deeds.length != 1)
+        //     return;
 
         this.nodes.forEach(node => node.destroy());
         this.nodes = [];
@@ -81,4 +83,12 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
         this.group.y(y);
         this.pointer.visible(collapse);
     }
+
+    public peek(visible?: boolean) {
+        if (visible)
+            this.group.visible(visible);
+        else
+            this.group.visible(!this.group.visible());
+    }
 }
+

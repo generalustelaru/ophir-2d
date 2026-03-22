@@ -41,7 +41,7 @@ export class DeedIconFactory {
                 case BubbleDeed.upgrade:
                     return this.getUpgradeIcon();
                 case BubbleDeed.undecided:
-                    return this.produceCharacter('...');
+                    return this.produceCharacter('(._.)', { emoji: true });
                 default:
                     return new Konva.Group();
             }
@@ -207,7 +207,7 @@ export class DeedIconFactory {
 
     private getUpgradeIcon() {
         const card = this.produceCardShape('black');
-        const sign = this.produceCharacter('+', 'white');
+        const sign = this.produceCharacter('+', { hue: 'white' });
 
         return new Konva.Group().add(card, sign);
     }
@@ -225,18 +225,19 @@ export class DeedIconFactory {
         });
     }
 
-    private produceCharacter(char: string, hue?: string) {
+    private produceCharacter(char: string, options?: { hue?: string, emoji?: boolean }) {
         return new Konva.Text({
             text: char,
             width: this.unit.width,
             height: this.unit.height,
-            fill: hue,
-            fontFamily: 'Custom',
-            fontSize: 16,
+            fill: options?.hue,
+            fontFamily: options?.emoji ? 'monospace' : 'Custom',
+            fontSize: options?.emoji ? 10 : 16,
             fontStyle: 'bold',
             align: 'center',
+            wrap: 'none',
             verticalAlign: 'middle',
-            y: 2,
+            y: options?.emoji ? 0 : 2,
         });
     }
 }
