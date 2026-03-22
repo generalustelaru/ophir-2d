@@ -9,7 +9,6 @@ const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
 
 export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, Unique<Flashable> {
 
-    private deckSize: number;
     private group: Konva.Group;
     private background: Konva.Rect;
     private marketDeck: MarketDeck;
@@ -47,7 +46,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, 
             cornerRadius: 10,
             opacity: 0,
         });
-        this.deckSize = market.deckSize;
+
         this.marketDeck = new MarketDeck(
             stage,
             {
@@ -131,9 +130,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, 
     }
 
     public update(data: MarketUpdate): void {
-        const { market, localPlayer } = data;
-        const isShift = market.deckSize < this.deckSize;
-        this.deckSize = market.deckSize;
+        const { market, localPlayer, isShift } = data;
 
         this.marketDeck.update({ market, isShift });
 
@@ -151,11 +148,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, 
             const isFeasible =
                 localPlayerMaySell
                 && !!localPlayer.feasibleTrades.find(f => f.slot == slot);
-            this[slot].update({
-                isShift,
-                trade: market[slot],
-                isFeasible,
-            });
+            this[slot].update({ isShift, trade: market[slot], isFeasible });
         });
     }
 

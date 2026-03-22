@@ -17,6 +17,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
     private stage: Konva.Stage | null;
     private group: Konva.Group;
     private resultsPanel: ResultsPanel | null = null;
+    private deckSize: number = 0;
     private marketArea: MarketArea | null = null;
     private treasuryArea: TreasuryArea | null = null;
     private templeArea: TempleArea | null = null;
@@ -64,7 +65,7 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
             throw new Error('State is missing setup data.');
 
         const heightSegment = this.group.height() / 9;
-
+        this.deckSize = state.market.deckSize;
         this.marketArea = new MarketArea(
             this.stage,
             state.setup.marketFluctuations,
@@ -125,15 +126,21 @@ export class LocationGroup implements Unique<MegaGroupInterface> {
         if (!this.group)
             return;
 
-        const localPlayer = state.players.find(player => player.color === localState.playerColor);
+        const localPlayer = state.players.find(player => player.color == localState.playerColor);
+
+        const isShift = state.market.deckSize < this.deckSize;
+        this.deckSize = state.market.deckSize;
+
         const marketUpdate: MarketUpdate = {
             localPlayer: localPlayer ?? null,
             market: state.market,
+            isShift,
         };
         const templeUpdate: TempleUpdate = {
             localPlayer: localPlayer ?? null,
             templeStatus: state.temple,
             trade: state.market[state.setup.templeTradeSlot],
+            isShift,
         };
 
         this.marketArea?.update(marketUpdate);

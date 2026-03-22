@@ -3,6 +3,7 @@ import { MarketCardUpdate, DynamicGroupInterface, ElementList } from '~/client_t
 import { Coordinates, Trade, Unique } from '~/shared_types';
 import { Button } from '../popular';
 import { CommodityAssortment, TempleRewardDial } from '.';
+import { fade } from '~/client/animations';
 import clientConstants from '~/client_constants';
 
 const { HUES } = clientConstants;
@@ -75,10 +76,16 @@ export class TempleMarketCard extends Button implements Unique<DynamicGroupInter
         this.group.add(...elements);
     }
 
-    public update(data: MarketCardUpdate): void {
-        this.rewardDial.update(this.opensModal ? null : data.trade.reward.favorAndVp);
-        this.assortment.update(this.opensModal ? null : data.trade.request);
-        data.isFeasible ? this.enable() : this.disable();
+    public async update(data: MarketCardUpdate): Promise<void> {
+        const { trade, isShift, isFeasible } = data;
+
+        isShift && await fade(this.group, 1.5, 0);
+
+        this.rewardDial.update(this.opensModal ? null : trade.reward.favorAndVp);
+        this.assortment.update(this.opensModal ? null : trade.request);
+        isFeasible ? this.enable() : this.disable();
+
+        isShift && fade(this.group, .5, 1);
     }
 
     public enable(): void {

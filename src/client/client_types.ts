@@ -154,6 +154,7 @@ export type MarketCardUpdate = {
 export type MarketUpdate = {
     localPlayer: Player | null,
     market: MarketState,
+    isShift: boolean,
 }
 
 export type TreasuryUpdate = {
@@ -172,6 +173,7 @@ export type TempleUpdate = {
     trade: Trade,
     templeStatus: TempleState,
     localPlayer: Player | null,
+    isShift: boolean,
 }
 
 export type SailAttemptArgs = {
