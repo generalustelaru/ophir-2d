@@ -41,7 +41,9 @@ export class DeedIconFactory {
                 case BubbleDeed.upgrade:
                     return this.getUpgradeIcon();
                 case BubbleDeed.undecided:
-                    return this.produceCharacter('(._.)', { emoji: true });
+                    return this.produceCharacter('(0_0)', { emoji: true });
+                case BubbleDeed.idle:
+                    return this.produceCharacter('(-_-)zZ', { emoji: true });
                 default:
                     return new Konva.Group();
             }
