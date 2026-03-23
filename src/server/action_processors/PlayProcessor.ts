@@ -2,68 +2,65 @@ import {
     LocationName, CommodityLocationName, Action, ItemName, MarketSlotKey, Commodity, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, Unique, FeasibleTrade,
     ServerMessage, PlayerCountables, FeasiblePurchase, BubbleDeed,
+    Player,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
 import serverConstants from '~/server_constants';
 import {
-    ActionsAndDetails, Configuration, DataDigest, Probable, ActionProcessor, StateBundle, TurnEvent,
-    UserId,
+    ActionsAndDetails, Configuration, DataDigest, Probable, ActionProcessor, StateBundle, TurnEvent, UserId, UserReference,
 } from '~/server_types';
 import lib from './library';
 import { validator } from '../services/validation/ValidatorService';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
-const { TRADE_DECK_B, LOCATION_COMMODITIES } = serverConstants;
+const { TRADE_DECK_B, COMMODITIES_BY_LOCATION } = serverConstants;
 // TODO: Reduce linecount; extract utility-like functions, move deed composition to dedicated service.
 export class PlayProcessor implements Unique<ActionProcessor> {
-    private idleCheckInterval: NodeJS.Timeout | null = null;
-    private serverName: string;
+    private idleTimeout: NodeJS.Timeout | null = null;
+    private configuration: Configuration;
     private playState: PlayStateHandler;
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
     private transmit: (userId: UserId, message: ServerMessage) => void;
+    private broadcast: (state: PlayState) => void;
 
     /** @throws */
     constructor(
         stateBundle: StateBundle,
         configuration: Configuration,
-        _broadcastCallback: (state: PlayState) => void,
+        broadcastCallback: (state: PlayState) => void,
         transmitCallback: (userId: UserId, message: ServerMessage) => void,
-        activationId: UserId | null,
+        currentPlayerReference: UserReference,
     ) {
         const { playState, privateState, backupState } = stateBundle;
-        this.serverName = configuration.SERVER_NAME;
+        this.configuration = configuration;
         this.playState = playState;
         this.privateState = privateState;
         this.backupState = backupState;
         this.transmit = transmitCallback;
+        this.broadcast = broadcastCallback;
 
+        const { id, color } = currentPlayerReference;
         const players = this.playState.getAllPlayers();
-        const activePlayer = players.find(p => p.isActive === true);
+        const currentPlayer = players.find(p => p.color == color);
 
-        if (activePlayer)
-            return;
+        if (!currentPlayer)
+            throw new Error('Cannot find not find current player!');
 
-        if (!activationId)
-            throw new Error('Play phase cannot start. No way to activate first player.');
+        const player = new PlayerHandler(currentPlayer, id);
 
-        const firstPlayer = players.find(p => p.turnOrder === 1);
+        if (false == player.isActivePlayer()) {
+            const { seaZone } = player.getBearings();
 
-        if (!firstPlayer)
-            throw new Error('Cannot find not find active player!');
+            player.activate(
+                this.privateState.getDestinations(seaZone),
+                player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
+            );
+        }
 
-        const player = new PlayerHandler(firstPlayer, activationId);
-        const { seaZone } = player.getBearings();
-
-        player.activate(
-            this.privateState.getDestinations(seaZone),
-            player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
-        );
         this.playState.savePlayer(player.toDto());
-
-        // this.startIdleTimeout(configuration.PLAYER_IDLE_MINUTES);
     }
 
     public getState() {
@@ -148,7 +145,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             const rivalInfluence = rival.isIncluded && rival.bearings.seaZone === target ? rival.influence : 0;
 
             if ((!playersInZone.length && !rivalInfluence) || player.isPrivileged()) {
-                this.privateState.addDeed({ context: Action.move, description: `sailed to the ${locationName}` });
                 player.addBubbleDeed(BubbleDeed.move);
 
                 return true;
@@ -182,19 +178,11 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
 
                 this.playState.trimInfluenceByZone(target, threshold);
-                this.privateState.addDeed({
-                    context: TurnEvent.failed_move,
-                    description: `was blocked from sailing towards the ${locationName}`,
-                });
                 player.addBubbleDeed(BubbleDeed.rollFail);
 
                 return false;
             }
 
-            this.privateState.addDeed({
-                context: Action.move,
-                description: `exerted influence to reach the ${locationName}`,
-            });
             player.addBubbleDeed(BubbleDeed.rollMove);
 
             return true;
@@ -228,10 +216,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             if (this.playState.isRivalIncluded()) {
                 if (this.playState.getRivalBearings()!.seaZone == player.getBearings().seaZone) {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
-                    this.privateState.addDeed({
-                        context: TurnEvent.rival_handling,
-                        description: 'took control of the rival ship',
-                    });
                     player.freeze();
                     this.transmit(player.getIdentity().userId, { rivalControl: null });
                 }
@@ -304,7 +288,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(`${player.getIdentity().name} cannot spend favor`);
 
         player.enablePrivilege();
-        this.privateState.addDeed({ context: Action.spend_favor, description: 'spent favor to obtain privileges' });
         player.addBubbleDeed(BubbleDeed.privilege);
 
         return this.continueTurn(player);
@@ -327,7 +310,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return lib.fail(result.message);
 
         player.setCargo(result.data);
-        this.privateState.addDeed({ context: Action.drop_item, description: `ditched ${item} from cargo` });
 
         return this.continueTurn(player);
     }
@@ -354,7 +336,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     return lib.fail(result.message);
 
                 player.setCargo(result.data);
-                this.privateState.addDeed({ context: Action.drop_item, description: `ditched ${item} from cargo` });
             }
         }
 
@@ -367,7 +348,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (nonPickupLocations.includes(locationName))
             return lib.fail(`Cannot pick up commodities from ${locationName}`);
 
-        const localCommodity = serverConstants.LOCATION_COMMODITIES[locationName as CommodityLocationName];
+        const localCommodity = serverConstants.COMMODITIES_BY_LOCATION[locationName as CommodityLocationName];
 
         if (localCommodity !== commodity)
             return lib.fail(`Cannot load ${commodity} here.`);
@@ -379,7 +360,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         player.setCargo(loadItem.data);
         this.privateState.addSpentAction(Action.load_commodity);
-        this.privateState.addDeed({ context: Action.load_commodity, description: `picked up ${localCommodity}` });
         player.addBubbleDeed(((): BubbleDeed => {
             switch (localCommodity) {
                 case 'gems': return BubbleDeed.gems;
@@ -430,17 +410,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const moneyChangerAtTemple = player.isMoneychanger() && player.getBearings().location == 'temple';
 
-        if (moneyChangerAtTemple)
+        if (moneyChangerAtTemple) {
             this.privateState.addSpentAction(Action.donate_commodities);
+            this.privateState.addDeed({
+                context: Action.trade_commodities,
+                description: 'accessed the market to trade for coins',
+            });
+        }
 
-        this.privateState.addDeed({
-            context: Action.trade_commodities,
-            description: (
-                moneyChangerAtTemple ? 'accessed the market and ' : ''
-                + `traded ${request.length} commodities for `
-                + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
-            ),
-        });
         player.addBubbleDeed(BubbleDeed.marketCoin);
 
         if (player.isHarbormaster())
@@ -497,15 +474,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.gainCoins(coins);
         this.privateState.addSpentAction(Action.trade_as_chancellor);
         player.clearMoves();
-        const delivered = request.length - omit.length;
-        this.privateState.addDeed({
-            context: Action.trade_as_chancellor,
-            description: (
-                (omit.length ? `spent ${omit.length} favor to trade ` : 'traded ')
-                + `${delivered} ${delivered == 1 ? 'commodity' : 'commodities'} for `
-                + (coins == 0 ? 'naught' : `${coins} ${coins == 1 ? 'coin' : 'coins'}`)
-            ),
-        });
+
+        if (omit.length) {
+            this.privateState.addDeed({
+                context: Action.trade_as_chancellor,
+                description: `spent ${omit.length} favor to trade `,
+            });
+        }
 
         player.addBubbleDeed(BubbleDeed.marketCoin);
         const marketShift = this.shiftMarketCards(player);
@@ -558,11 +533,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.privateState.addSpentAction(Action.trade_commodities);
         this.privateState.addDeed({
             context: Action.trade_as_peddler,
-            description: (
-                (request.length > 1 ? `traded 1 commodity less than ${request.length}` : 'traded nothing')
-                + ' for '
-                + (coinReward > 0 ? coinReward > 1 ? `${coinReward} coins` : '1 coin' : 'nothing')
-            ),
+            description: `saved ${omit} on the reduced value trade`,
         });
 
         player.addBubbleDeed(BubbleDeed.marketCoin);
@@ -618,7 +589,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const count = request.length;
         this.privateState.addDeed({
             context: Action.donate_commodities,
-            description: `donated ${count} ${count == 1 ? 'commodity' : 'commodities'} for ${donationReward} favor and VP`,
+            description: `donated ${count == 1 ? 'a commodity' : 'commodities'} for ${donationReward} favor and VP`,
         });
         player.addBubbleDeed(BubbleDeed.vpFavor);
 
@@ -659,8 +630,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     context: Action.sell_specialty,
                     description: `accessed the market and sold ${specialty} for 1 coin`,
                 });
-            } else {
-                this.privateState.addDeed({ context: Action.sell_specialty, description: `sold ${specialty} for 1 coin` });
             }
 
             player.addBubbleDeed(BubbleDeed.coin);
@@ -692,11 +661,9 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             for (const item of drop) {
                 const result = this.unloadItem(player.getCargo(), item);
 
-                if (result.err)
-                    return lib.fail(result.message);
+                if (result.err) return lib.fail(result.message);
 
                 player.setCargo(result.data);
-                this.privateState.addDeed({ context: Action.drop_item, description: `ditched ${item} from cargo` });
             }
         }
 
@@ -735,10 +702,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         else
             player.clearMoves();
 
-        this.privateState.addDeed({
-            context: Action.buy_metal,
-            description: `bought ${metal} for ${metalCost[currency]} ${currency}`,
-        });
         player.addBubbleDeed(metal == 'gold' ? BubbleDeed.gold : BubbleDeed.silver);
 
         return this.continueTurn(player);
@@ -775,6 +738,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.privateState.updatePlayerStats(player, reward);
 
         const isMailing = player.isPostmaster() && player.getBearings().location != 'temple';
+
         this.privateState.addDeed({
             context: Action.donate_metal,
             description: `${isMailing ? 'mailed' : 'donated'} ${metal} for ${reward} VP`,
@@ -793,7 +757,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (isTempleComplete) {
             player.deactivate();
             this.clearUndo(player);
-            this.killIdleChecks();
             this.playState.savePlayer(player.toDto());
 
             const results = this.compileGameResults();
@@ -843,6 +806,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             player.gainFavor(1);
         }
 
+        this.clearIdleTimeout();
         player.deactivate();
         this.privateState.clearSpentActions();
         this.privateState.updatePlayerStats(player);
@@ -868,8 +832,9 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
 
-            const { color } = nextPlayer.getIdentity();
+            const { color, userId } = nextPlayer.getIdentity();
             this.playState.updateRival(color);
+            this.startIdleTimeout(userId);
 
             this.transmit(nextPlayerId, { turnStart: null });
 
@@ -917,13 +882,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
             const marketShift = this.shiftMarketCards(player);
 
-            if (marketShift.err)
-                return lib.fail(marketShift.message);
-
-            this.privateState.addDeed({
-                context: Action.end_rival_turn,
-                description: 'sent it to the market, cycled it',
-            });
+            if (marketShift.err) return lib.fail(marketShift.message);
 
             player.addBubbleDeed(BubbleDeed.marketRival);
 
@@ -934,10 +893,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             }
 
         } else {
-            this.privateState.addDeed({
-                context: Action.end_rival_turn,
-                description: `sent it to the ${rivalLocation}`,
-            });
             player.addBubbleDeed(BubbleDeed.rival);
         }
 
@@ -996,7 +951,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const { playState, privateState } = backupOperation.data;
 
-        this.playState = new PlayStateHandler(this.serverName, playState);
+        this.playState = new PlayStateHandler(this.configuration.SERVER_NAME, playState);
         this.privateState = new PrivateStateHandler(privateState);
 
         const revertedPlayer = playState.players.find(p => p.color == color);
@@ -1023,10 +978,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (player.mayUpgradeCargo()) {
             player.spendCoins(2);
             player.addCargoSpace();
-            this.privateState.addDeed({
-                context: Action.upgrade_cargo,
-                description: 'bought a cargo slot',
-            });
             player.addBubbleDeed(BubbleDeed.upgrade);
             this.privateState.addSpentAction(Action.upgrade_cargo);
 
@@ -1055,6 +1006,52 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.backupState.updatePlayerName(player.color, newName);
 
         return { state: this.getState() };
+    };
+
+    public handleReconnection(reference: UserReference) {
+
+        if (!reference.color)
+            return;
+
+        const player = this.getState().players.find(p => p.color == reference.color);
+
+        if (!player)
+            return lib.printError(`Could not find reconnected player. {color: ${reference.color}}`);
+
+        this.addServerMessage(`${player.name} has rejoined the table.`, { color: player.color });
+
+        if (player.isActive) {
+            const handler = new PlayerHandler(player, reference.id);
+            handler.addBubbleDeed(BubbleDeed.active);
+            this.playState.savePlayer(handler.toDto());
+
+            this.transmit(reference.id, { turnStart: null });
+            this.startIdleTimeout(reference.id);
+        }
+
+        this.broadcast(this.getState());
+    }
+
+    public handleDisconnection(reference: UserReference) {
+
+        if (!reference.color)
+            return;
+
+        const player = this.getState().players.find(p => p.color == reference.color);
+
+        if (!player)
+            return lib.printError(`Could not find disconnected player. {color: ${reference.color}}`);
+
+        this.addServerMessage(`${player.name} has left the table.`, { color: player.color });
+
+        if(player.isActive) {
+            this.clearIdleTimeout();
+            const handler = new PlayerHandler(player, reference.id);
+            handler.addBubbleDeed(BubbleDeed.idle);
+            this.playState.savePlayer(handler.toDto());
+        }
+
+        this.broadcast(this.getState());
     };
 
     // MARK: PRIVATE
@@ -1298,7 +1295,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                     return ( // TODO: add and use constants instead of this and other examples of hardcoded values.
                         ['quarry', 'forest', 'mines', 'farms'].includes(location)
                         && (this.playState.getItemSupplies()
-                            .commodities[LOCATION_COMMODITIES[location as CommodityLocationName]]
+                            .commodities[COMMODITIES_BY_LOCATION[location as CommodityLocationName]]
                         )
                         && player.getCargo().filter(
                             item => replaceableRef.includes(item),
@@ -1354,7 +1351,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.addServerMessage(
                 this.convertDeedsToMessage(player), { color: player.getIdentity().color, backup: true },
             );
-            this.killIdleChecks();
+            this.clearIdleTimeout();
             const results = this.compileGameResults();
 
             if (results.err)
@@ -1374,37 +1371,40 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         updateActions && player.setActionsAndDetails(this.determineActionsAndDetails(player));
         this.playState.savePlayer(player.toDto());
 
+        if (updateActions) {
+            this.clearIdleTimeout();
+            this.startIdleTimeout(player.getIdentity().userId);
+        }
+
         return lib.pass({ state: this.playState.toDto() });
     }
 
-    // TODO: convert to a timeout as not to repeat the idle message.
-    // private startIdleTimeout(_timeoutMinutes: number, _email: Email): void {
-    // const limitMinutes = (60 * 1000) * Math.min(timeoutMinutes, 60);
+    private startIdleTimeout(playerId: UserId): void {
+        const limitMinutes = (60 * 1000) * this.configuration.PLAYER_IDLE_MINUTES;
 
-    // this.idleCheckInterval = setInterval(() => {
-    //     const activePlayer = this.playState.getActivePlayer();
+        this.idleTimeout = setTimeout(() => {
+            this.clearIdleTimeout();
+            const activePlayer = this.playState.getActivePlayer();
 
-    //     if (!activePlayer) {
-    //         lib.fail('No active player found in idle check!');
-    //         return;
-    //     }
+            if (!activePlayer) {
+                lib.fail('No active player found in idle check!');
+                return;
+            }
 
-    //     const timeNow = Date.now();
+            activePlayer.isIdle = true;
+            activePlayer.bubbleDeeds.pop();
+            activePlayer.bubbleDeeds.push(BubbleDeed.idle);
+            this.addServerMessage(`${activePlayer.name} is idle`);
+            this.playState.savePlayer(activePlayer);
 
-    //     if (timeNow - activePlayer.timeStamp > limitMinutes && !activePlayer.isIdle) {
-    //         activePlayer.isIdle = true;
-    //         this.addServerMessage(`${activePlayer.name} is idle`);
-    //         this.playState.savePlayer(activePlayer);
+            this.transmit(playerId, { turnStart: null });
+            this.broadcast(this.playState.toDto());
+        }, limitMinutes);
+    }
 
-    //         this.transmit(activePlayer.socketId, { turnStart: null });
-    //         this.broadcast(this.playState.toDto());
-    //     }
-
-    // }, 2000);
-    // }
-
-    public killIdleChecks() {
-        this.idleCheckInterval && clearInterval(this.idleCheckInterval);
+    public clearIdleTimeout() {
+        this.idleTimeout && clearTimeout(this.idleTimeout);
+        this.idleTimeout = null;
     }
 
     private addServerMessage(message: string, options?: { color?: PlayerColor, backup?: boolean}) {
@@ -1435,26 +1435,21 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const length = deeds.length;
         let message = `${name} `;
 
+        if (!length)
+            return message + 'has played.';
+
         deeds.forEach((deed, key) => {
-            const { context: action, description } = deed;
-            const [prev, next] = [deeds[key-1], deeds[key+1]];
-            const isSecondMovement = key > 0 && action == Action.move && prev.context == Action.move;
+            const { description } = deed;
+            message += `${description}`;
 
-            if (key != 0) {
-                const ligature = isSecondMovement ? ' then ' : (length > 2 ? ', ' : ' ');
-                message += ligature;
-            }
-
-            if (!next)
-                message += isSecondMovement ? '' : (length > 3 ? 'and finally ' : 'and ');
-
-            message += description;
+            if (key < length - 1) message += ', ';
         });
 
         return `${message}.`;
     }
 
     private concludeGame(player: PlayerHandler, countables: Array<PlayerCountables>) {
+        this.clearIdleTimeout();
         this.playState.registerGameEnd(countables);
         this.privateState.updatePlayerStats(player);
         player.deactivate();

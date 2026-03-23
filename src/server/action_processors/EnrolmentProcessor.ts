@@ -2,7 +2,7 @@ import {
     ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
     Unique,
 } from '~/shared_types';
-import { Configuration, Probable, RequestMatch, ActionProcessor, UserId } from '~/server_types';
+import { Configuration, Probable, RequestMatch, ActionProcessor, UserId, UserReference } from '~/server_types';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
 import { validator } from '../services/validation/ValidatorService';
 import serverConstants from '../server_constants';
@@ -31,6 +31,32 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
 
     public getPlayerVP(_color: PlayerColor) {
         return 0;
+    }
+
+    public clearIdleTimeout() {};
+
+    public handleDisconnection(_reference: UserReference) {};
+
+    public handleReconnection(_reference: UserReference) {};
+
+    public addChat(entry:ChatEntry): StateResponse {
+        this.enrolmentState.addChatEntry(entry);
+
+        return { state: this.getState() };
+    }
+
+    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+        this.enrolmentState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
+        this.enrolmentState.updateName(player.color, newName);
+
+        return { state: this.getState() };
+    };
+
+    public assignDefaultName() {
+        const pick = Math.random() * this.defaultNames.length;
+        const name = this.defaultNames.splice(pick, 1);
+
+        return name[0];
     }
 
     public getState(): EnrolmentState {
@@ -115,24 +141,5 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
         return players.some(player => player.color === color);
     }
-
-    public addChat(entry:ChatEntry): StateResponse {
-        this.enrolmentState.addChatEntry(entry);
-
-        return { state: this.getState() };
-    }
-
-    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
-        this.enrolmentState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
-        this.enrolmentState.updateName(player.color, newName);
-
-        return { state: this.getState() };
-    };
-
-    public assignDefaultName() {
-        const pick = Math.random() * this.defaultNames.length;
-        const name = this.defaultNames.splice(pick, 1);
-
-        return name[0];
-    }
 }
+

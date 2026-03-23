@@ -51,7 +51,6 @@ export class CanvasService extends Communicator {
 
     constructor(isTutorial: boolean) {
         super();
-        // TODO: Reduce group.add() calls.throughout subclasses
 
         const { width, height, scale, aspect } = this.calculateDimensions();
         this.scale = scale;

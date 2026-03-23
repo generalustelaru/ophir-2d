@@ -2,9 +2,11 @@ import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketState, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
     ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
-    PlayerEntity, Unique,
+    PlayerEntity, Unique, BubbleDeed,
 } from '~/shared_types';
-import { DestinationPackage, StateBundle, SetupDigest, ActionProcessor, Probable, Configuration } from '~/server_types';
+import {
+    DestinationPackage, StateBundle, SetupDigest, ActionProcessor, Probable, Configuration, UserReference,
+} from '~/server_types';
 import serverConstants from '~/server_constants';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PrivateStateHandler } from '../state_handlers/PrivateStateHandler';
@@ -109,6 +111,10 @@ export class SetupProcessor implements Unique<ActionProcessor> {
     public getPlayerVP(_color: PlayerColor) {
         return 0;
     }
+
+    public handleDisconnection(_reference: UserReference) {};
+
+    public handleReconnection(_reference: UserReference) {};
 
     public addChat(entry: ChatEntry): StateResponse {
         this.setupState.addChatEntry(entry);
@@ -250,6 +256,8 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         });
     };
 
+    public clearIdleTimeout() {}
+
     // MARK: Map
     private determineBarriers(): Array<BarrierId> {
 
@@ -375,7 +383,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
                 turnOrder: s.turnOrder,
                 specialist,
                 isActive: false,
-                bubbleDeeds: [],
+                bubbleDeeds: [BubbleDeed.anchor],
                 mayUndo: false,
                 bearings: {
                     seaZone: startingZone,

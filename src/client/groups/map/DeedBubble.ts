@@ -14,6 +14,7 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
     private group: Konva.Group;
     private factory: DeedIconFactory;
     private nodes: Array<Konva.Group> = [];
+    private renderedDeeds: Array<BubbleDeed> = [];
     private bubble: Konva.Rect;
     private pointer : Konva.Line;
 
@@ -55,18 +56,21 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
     public update(data: Update) {
         const { deeds, isVisible } = data;
         this.group.visible(isVisible);
+        const deedsCount = deeds.length;
 
-        // if (false == isVisible)
-        //     return;
-        if (deeds.length == this.nodes.length && deeds.length != 1)
-            return;
+        const isSame = (() => {
+            if (deedsCount != this.nodes.length) return false;
 
-        const width = unit.width * deeds.length;
+            for (let i = 0; i < deedsCount; i++) if (deeds[i] != this.renderedDeeds[i]) return false;
+
+            return true;
+        })();
+
+        if (isSame) return;
+
+        const width = unit.width * deedsCount;
         this.bubble.width(width);
         this.bubble.x((width / 2 * -1) + (unit.width / 2));
-
-        // if (deeds.length == this.nodes.length && deeds.length != 1)
-        //     return;
 
         this.nodes.forEach(node => node.destroy());
         this.nodes = [];
@@ -77,6 +81,8 @@ export class DeedBubble implements Unique<DynamicGroupInterface<Update>> {
             this.nodes.push(node);
         }
         this.group.add(...this.nodes);
+
+        this.renderedDeeds = deeds;
     }
 
     public setVertical(y: number, collapse: boolean) {

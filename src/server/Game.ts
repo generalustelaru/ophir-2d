@@ -86,6 +86,11 @@ export class Game {
                     if (!privateState)
                         throw new Error('Cannot resume play session w/o PrivateState object');
 
+                    const reference = this.getCurrentPlayerReference(sharedState.players);
+
+                    if (!reference)
+                        throw new Error('Could not find current player in SharedState object');
+
                     return new PlayProcessor(
                         {
                             privateState: new PrivateStateHandler(privateState),
@@ -97,7 +102,7 @@ export class Game {
                         configuration,
                         broadcastCallback,
                         this.transmit,
-                        this.getActivationId(sharedState.players),
+                        reference,
                     );
 
                 case Phase.setup:
@@ -134,6 +139,14 @@ export class Game {
         this.userReferences.push({ ...user, color: null });
     }
 
+    public handlePlayerReconnection(reference: UserReference) {
+        this.actionProcessor.handleReconnection(reference);
+    }
+
+    public handlePlayerDisconnection(reference: UserReference) {
+        this.actionProcessor.handleDisconnection(reference);
+    }
+
     private preserveName(userId: UserId, name: string) {
         const ref = this.userReferences.find(r => r.id == userId);
 
@@ -149,6 +162,7 @@ export class Game {
     }
 
     public deReference() {
+        this.actionProcessor.clearIdleTimeout();
         this.broadcast = null;
         this.transmit = null;
         this.saveDisplayName = null;
@@ -189,9 +203,7 @@ export class Game {
         for (const ref of this.userReferences)
             ref.color = null;
 
-        if ('killIdleChecks' in this.actionProcessor)
-            (this.actionProcessor as PlayProcessor).killIdleChecks();
-
+        this.actionProcessor.clearIdleTimeout();
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
             this.transmit,
@@ -410,12 +422,17 @@ export class Game {
                     const stateBundle = bundleResult.data;
 
                     try {
+                        const reference = this.getCurrentPlayerReference(stateBundle.playState.getAllPlayers());
+
+                        if (!reference)
+                            throw new Error('Could not find current player in state handler');
+
                         this.actionProcessor = new PlayProcessor(
                             stateBundle,
                             this.config,
                             this.broadcast,
                             this.transmit,
-                            this.getActivationId(stateBundle.playState.getAllPlayers()),
+                            reference,
                         );
                     } catch (error) {
                         return lib.fail(String(error));
@@ -568,15 +585,18 @@ export class Game {
         return players.some(player => player.name == name);
     }
 
-    private getActivationId(players: Array<Player>): UserId | null {
-        const activePlayer = players.find(p => p.isActive);
+    private getCurrentPlayerReference(players: Array<Player>): UserReference | null {
+        const currentPlayer = (() : Player | null => {
+            const activatedPlayer = players.find(p => p.isActive);
 
-        if (activePlayer)
-            return null;
+            if (activatedPlayer)
+                return activatedPlayer;
 
-        const firstPlayer = players.find(p => p.turnOrder == 1);
-        const ref = this.userReferences.find(r => r.color == firstPlayer?.color);
+            return players.find(p => p.turnOrder == 1) ?? null;
+        })();
 
-        return ref?.id || null;
+        const ref = this.userReferences.find(r => r.color == currentPlayer?.color);
+
+        return ref ?? null;
     }
 }

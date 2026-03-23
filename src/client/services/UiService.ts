@@ -16,7 +16,6 @@ export class UserInterface extends Communicator {
     private chatMessages: HTMLDivElement;
     private chatInput: ChatInput;
     private chatSendButton: HtmlButton;
-    private forceTurnButton: HtmlButton;
     private phase: Phase = Phase.enrolment;
     private toLobby: HtmlButton;
     private toIndex: HtmlButton;
@@ -26,7 +25,6 @@ export class UserInterface extends Communicator {
         this.toLobby = new HtmlButton('lobby', () => { window.location.href = '/lobby'; }, isTutorial);
         this.continueButton = new HtmlButton('continueButton', this.processContinue, isTutorial);
         this.resetButton = new HtmlButton('resetButton', this.processReset, isTutorial);
-        this.forceTurnButton = new HtmlButton('forceTurnButton', this.processForceTurn, isTutorial);
         this.popDisplay = document.querySelector('#chatPop') as HTMLDivElement;
         this.chatMessages = document.querySelector('#chatMessages') as HTMLDivElement;
         this.chatInput = new ChatInput('chatInput', this.handleKeyInput);
@@ -125,14 +123,6 @@ export class UserInterface extends Communicator {
         });
     };
 
-    private processForceTurn = () => {
-
-        return this.createEvent({
-            type: EventType.action,
-            detail: { action: Action.force_turn, payload: null },
-        });
-    };
-
     public setInfo(text: string): void {
         const info = document.getElementById('info') as HTMLDivElement;
         info.innerHTML = text;
@@ -145,7 +135,6 @@ export class UserInterface extends Communicator {
     private disableButtons(): void {
         this.continueButton.disable();
         this.resetButton.disable();
-        this.forceTurnButton.disable();
         this.chatSendButton.disable();
         this.chatInput.disable();
     }
@@ -170,25 +159,14 @@ export class UserInterface extends Communicator {
 
     private updateAsPlay(state: PlayState): void {
         this.phase = Phase.play;
-        const activePlayer = state.players.find(p => p.isActive);
-
-        if (
-            activePlayer?.isIdle
-            && localState.playerColor
-            && localState.playerColor != activePlayer.color
-        ) {
-            this.forceTurnButton.enable();
-        }
 
         this.handleStartedState(state);
     }
 
     private updateAsConcluded(): void {
         this.setInfo('The game has ended');
-        if (localState.playerColor) {
-            this.resetButton.enable();
-        }
-        this.forceTurnButton.disable();
+
+        localState.playerColor && this.resetButton.enable();
     }
 
     private handleCreatedState(state: EnrolmentState): void {

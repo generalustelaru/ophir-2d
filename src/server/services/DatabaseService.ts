@@ -64,7 +64,6 @@ export class DatabaseService {
         }
     }
 
-    // TODO: call this more often (i.e during enrolment on color change, and on phase change to setup)
     public async saveGameState(state: GameState): Promise<Probable<true>> {
         const id = state.sharedState.gameId;
 

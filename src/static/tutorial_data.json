@@ -212,7 +212,7 @@
             "This tutorial will explain the main game concepts by guiding you through a few turns.\n\nNote that you're not playing the actual game, but a staged scenario.",
             "This is the map.\nIt shows where every location is situated and where ships are currently located.",
             "The cards and other elements here represent specific transactions you can make while at the appropriate location.\n\nWe'll examine them in detail later.",
-            "This area contains the player cards.\n\nThe second row of buttons and icons is for the Rival.",
+            "This area contains the player cards.\n\nThe second row of buttons and icons is for the Rival, a balancing mechanism which only appears in two-player games.",
             "Goal: The temple in Ophir is under construction. It needs a lot of gold and silver. Players gain Victory Points (VP) through donations.\n\nYour goal is to gain a bit more VP than any other player.",
             "This hexagonal zone is your current location. The purple disc token represents your ship.",
             "On your turn, your ship token will bob if it can move. Moving implies dragging the ship into an adjacent zone.\n\nYou get two moves per turn. The moves counter keeps track of how many you have.",

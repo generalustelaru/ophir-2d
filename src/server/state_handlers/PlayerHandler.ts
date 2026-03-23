@@ -38,33 +38,33 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     /**
      * @throws Instantiation error
      */
-    constructor(player: Player, userId: UserId) {
+    constructor(playerDto: Player, userId: UserId) {
         this.userId = readable(userId);
-        this.color = readable(player.color);
-        this.timeStamp = writable(player.timeStamp);
-        this.isIdle = writable(player.isIdle);
-        this.name = readable(player.name);
-        this.turnOrder = readable(player.turnOrder);
-        this.specialist = readable(player.specialist);
-        this.isActive = writable(player.isActive);
-        this.bubbleDeeds = writable(player.bubbleDeeds);
-        this._mayUndo = writable(player.mayUndo);
-        this.bearings = writable(player.bearings);
-        this.overnightZone = writable(player.overnightZone);
-        this.favor = writable(player.favor);
-        this.privilegedSailing = writable(player.privilegedSailing);
-        this.influence = writable(player.influence);
-        this.moveActions = writable(player.moveActions);
-        this._isAnchored = writable(player.isAnchored);
-        this.isHandlingRival = writable(player.isHandlingRival);
-        this.localActions = arrayWritable(player.locationActions);
-        this.destinations = arrayWritable(player.destinations);
-        this.navigatorAccess = arrayWritable(player.navigatorAccess);
-        this.cargo = arrayWritable(player.cargo);
-        this.feasibleTrades = arrayWritable(player.feasibleTrades);
-        this.feasiblePurchases = arrayWritable(player.feasiblePurchases);
-        this.coins = writable(player.coins);
-        this.turnPurchases = writable(player.turnPurchases);
+        this.color = readable(playerDto.color);
+        this.timeStamp = writable(playerDto.timeStamp);
+        this.isIdle = writable(playerDto.isIdle);
+        this.name = readable(playerDto.name);
+        this.turnOrder = readable(playerDto.turnOrder);
+        this.specialist = readable(playerDto.specialist);
+        this.isActive = writable(playerDto.isActive);
+        this.bubbleDeeds = writable(playerDto.bubbleDeeds);
+        this._mayUndo = writable(playerDto.mayUndo);
+        this.bearings = writable(playerDto.bearings);
+        this.overnightZone = writable(playerDto.overnightZone);
+        this.favor = writable(playerDto.favor);
+        this.privilegedSailing = writable(playerDto.privilegedSailing);
+        this.influence = writable(playerDto.influence);
+        this.moveActions = writable(playerDto.moveActions);
+        this._isAnchored = writable(playerDto.isAnchored);
+        this.isHandlingRival = writable(playerDto.isHandlingRival);
+        this.localActions = arrayWritable(playerDto.locationActions);
+        this.destinations = arrayWritable(playerDto.destinations);
+        this.navigatorAccess = arrayWritable(playerDto.navigatorAccess);
+        this.cargo = arrayWritable(playerDto.cargo);
+        this.feasibleTrades = arrayWritable(playerDto.feasibleTrades);
+        this.feasiblePurchases = arrayWritable(playerDto.feasiblePurchases);
+        this.coins = writable(playerDto.coins);
+        this.turnPurchases = writable(playerDto.turnPurchases);
     }
 
     public toDto(): Player {
@@ -119,9 +119,10 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     public addBubbleDeed(deed: BubbleDeed) {
         this.bubbleDeeds.update(arr => {
-            if (arr.length == 1 && arr[0] == BubbleDeed.undecided)
-                arr = [];
+            arr.pop();
             arr.push(deed);
+            if (false == [BubbleDeed.anchor, BubbleDeed.idle, BubbleDeed.active].includes(deed))
+                arr.push(BubbleDeed.active);
             return arr;
         });
     }
@@ -384,7 +385,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.destinations.overwrite(destinations);
         this.navigatorAccess.overwrite(navigatorAccess);
         this.turnPurchases.set(0);
-        this.bubbleDeeds.set([BubbleDeed.undecided]);
+        this.bubbleDeeds.set([BubbleDeed.active]);
     }
 
     public deactivate() {
@@ -396,6 +397,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.feasibleTrades.clear();
         this.destinations.clear();
         this.overnightZone.set(this.getBearings().seaZone);
+        this.addBubbleDeed(BubbleDeed.anchor);
     }
 
     private hasCargoRoom(req: 1 | 2): boolean {

@@ -162,7 +162,7 @@ const serverConstants: ServerConstants = {
         { name: 'mines', actions: [Action.load_commodity] },
         { name: 'farms', actions: [Action.load_commodity] },
     ],
-    LOCATION_COMMODITIES: {
+    COMMODITIES_BY_LOCATION: {
         quarry: 'marble',
         forest: 'ebony',
         mines: 'gems',

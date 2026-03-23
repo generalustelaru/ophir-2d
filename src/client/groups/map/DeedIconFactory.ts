@@ -13,8 +13,12 @@ export class DeedIconFactory {
     public getIcon(deed: BubbleDeed) {
         const icon = (() => {
             switch (deed) {
+                case BubbleDeed.active:
+                    return this.produceCharacter('(0_0)', { emoji: true });
                 case BubbleDeed.move:
                     return this.getHexIcon();
+                case BubbleDeed.anchor:
+                    return this.getAnchorIcon();
                 case BubbleDeed.rollMove:
                 case BubbleDeed.rollFail:
                     return this.getDieIcon(deed);
@@ -40,10 +44,8 @@ export class DeedIconFactory {
                     return this.getVpIcon(deed);
                 case BubbleDeed.upgrade:
                     return this.getUpgradeIcon();
-                case BubbleDeed.undecided:
-                    return this.produceCharacter('(0_0)', { emoji: true });
                 case BubbleDeed.idle:
-                    return this.produceCharacter('(-_-)zZ', { emoji: true });
+                    return this.produceCharacter('(-_-)', { emoji: true });
                 default:
                     return new Konva.Group();
             }
@@ -201,6 +203,18 @@ export class DeedIconFactory {
         });
 
         return new Konva.Group().add(card,vpDisc, favorSemiDisc);
+    }
+
+    private getAnchorIcon() {
+        return new Konva.Path({
+            data: ICON_DATA.anchor.shape,
+            fill: HUES.disabled,
+            scale: { x: .66, y: .66 },
+            stroke: 'black',
+            strokeWidth: 1,
+            x: 5,
+            y: 5,
+        });
     }
 
     private getRivalCharacter() {

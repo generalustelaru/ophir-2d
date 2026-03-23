@@ -127,7 +127,7 @@ export type BarrierChecks = Record<BarrierId, BarrierCheck>;
 export type ServerConstants = {
     SPECIALISTS: Array<SpecialistData>
     LOCATION_ACTIONS: Array<LocationData>,
-    LOCATION_COMMODITIES: Record<CommodityLocationName, Commodity>,
+    COMMODITIES_BY_LOCATION: Record<CommodityLocationName, Commodity>,
     DEFAULT_MOVE_RULES: Array<DestinationSetupReference>,
     DEFAULT_NEW_STATE: EnrolmentState,
     DEFAULT_NAMES: Array<string>
@@ -161,6 +161,9 @@ export interface ActionProcessor {
     addChat: (entry: ChatEntry) => ServerMessage;
     updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
     getPlayerVP: (color: PlayerColor) => number;
+    handleDisconnection: (reference: UserReference) => void;
+    handleReconnection: (reference: UserReference) => void;
+    clearIdleTimeout: () => void;
 }
 
 export type GameState = {

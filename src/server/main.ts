@@ -140,15 +140,22 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
     }
 
     const { expiresAt, ...user } = validation.data;
-    const ref = game.getPlayerRef(user.id);
+    const ref = (() => {
+        const ref = game.getPlayerRef(user.id);
 
-    if (!ref) {
-        game.setPlayerRef({ ...user });
-    } else if (ref.color) {
-        transmit(socket, { color: ref.color });
-        transmit(socket, { vp: game.getPlayerVP(ref.color) });
-        // TODO: if it's the active player also send turn notification and start idle timeout
-    }
+        if (!ref) {
+            game.setPlayerRef({ ...user });
+
+            return game.getPlayerRef(user.id)!;
+        }
+
+        if (ref.color) {
+            transmit(socket, { color: ref.color });
+            transmit(socket, { vp: game.getPlayerVP(ref.color) });
+        }
+
+        return ref;
+    })();
 
     const userConnections = ((): Map<GameId, GameConnection> => {
         const userConnections = allConnections.get(user.id);
@@ -170,6 +177,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
             transmit(abandonedSocket, { switch: null });
         } else {
             userConnections.set(gameId, { isSwitching: false, socket });
+            game.handlePlayerReconnection(ref);
         }
 
         return userConnections;
@@ -216,8 +224,10 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         }
 
         setTimeout(() => {
-            if (!userConnections.has(gameId))
+            if (!userConnections.has(gameId)) {
                 handleDisconnection(gameId);
+                game.handlePlayerDisconnection(ref);
+            }
         }, 1000);
     });
 

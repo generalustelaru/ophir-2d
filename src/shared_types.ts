@@ -140,7 +140,7 @@ export type FeasibleTrade = {
 export type Player = Omit<PlayerSelection, 'specialist'> & {
     timeStamp: number,
     isIdle: boolean,
-    isActive: boolean,
+    isActive: boolean, // TODO: rename to isCurrent
     bubbleDeeds: Array<BubbleDeed>,
     mayUndo: boolean,
     bearings: ShipBearings,
@@ -299,8 +299,9 @@ export enum BubbleDeed {
     vpFavor,
     metalVp,
     upgrade,
-    undecided,
+    active,
     idle,
+    anchor
 }
 
 export type VerboiseAction =
