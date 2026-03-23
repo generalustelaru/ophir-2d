@@ -133,7 +133,6 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         });
 
         this.group.add(this.ship.getElement());
-        this.update(data);
     }
 
     public getElement(): Konva.Group {

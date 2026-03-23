@@ -61,7 +61,6 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
                 this.stage,
                 this.endRivalTurnCallback || null,
                 localState.playerColor,
-                rival,
                 verticalOffsets.shift() as number,
             );
 

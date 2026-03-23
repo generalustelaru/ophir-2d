@@ -67,7 +67,6 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
             this.cargoDisplay,
             this.itemRow.getElement(),
         ]);
-        this.update(update);
     }
 
     public update(update: Update): void {

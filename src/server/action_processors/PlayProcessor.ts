@@ -2,7 +2,6 @@ import {
     LocationName, CommodityLocationName, Action, ItemName, MarketSlotKey, Commodity, CargoMetal, PlayerColor, Metal,
     StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, LocalAction, Unique, FeasibleTrade,
     ServerMessage, PlayerCountables, FeasiblePurchase, BubbleDeed,
-    Player,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
 import { PlayerHandler } from '../state_handlers/PlayerHandler';

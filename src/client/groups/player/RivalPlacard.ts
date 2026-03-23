@@ -21,7 +21,6 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         stage: Konva.Stage,
         endRivalTurnCallback: ((p: boolean) => void) | null,
         localPlayerColor: PlayerColor | null,
-        rival: Rival,
         yOffset: number,
     ) {
         this.localPlayerColor = localPlayerColor,
@@ -64,8 +63,6 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
             this.concludeButton.getElement(),
             this.movesDial.getElement(),
         ]);
-
-        this.update(rival);
     }
 
     public getElement() {

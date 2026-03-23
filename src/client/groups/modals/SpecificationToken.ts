@@ -67,9 +67,6 @@ export class SpecificationToken extends Button implements Unique<DynamicGroupInt
                 break;
         }
 
-        if (omitSymbol) {
-        }
-
         const tokenGroup = new Konva.Group().add(...(()=> {
             const nodes: Array<Konva.Group> = [];
             this.tokens.forEach(token => {

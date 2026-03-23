@@ -27,8 +27,6 @@ export class FavorButton extends RequestButton implements Unique<DynamicGroupInt
         });
 
         this.group.add(this.favorIcon.getElement(), this.checkmark);
-
-        this.update(player);
     }
 
     public getElement(): Konva.Group {
