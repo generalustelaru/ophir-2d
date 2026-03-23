@@ -377,8 +377,6 @@ export class SetupProcessor implements Unique<ActionProcessor> {
 
             const playerDto: Player = {
                 color: s.color,
-                timeStamp: 0,
-                isIdle: false,
                 name: s.name,
                 turnOrder: s.turnOrder,
                 specialist,

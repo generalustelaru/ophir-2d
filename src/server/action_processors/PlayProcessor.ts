@@ -901,40 +901,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return this.continueTurn(player);
     }
 
-    // MARK: FORCED TURN
-    public forceTurn(digest: DataDigest): Probable<StateResponse> {
-        const { player, refPool } = digest;
-
-        if (player.isActivePlayer())
-            return lib.fail('Active player cannot force own turn!');
-
-        const activePlayer = this.playState.getActivePlayer();
-        const { id: userId } = refPool.find(r => r.color == activePlayer?.color) || {};
-
-        if (!activePlayer || !userId)
-            return lib.fail('Cannot find active player or userId!');
-
-        if (!activePlayer.isIdle)
-            return lib.fail('Cannot force turn on non-idle player');
-
-        if (activePlayer.isHandlingRival)
-            this.playState.concludeRivalTurn();
-
-        this.addServerMessage(
-            `${player.getIdentity().name} forced ${activePlayer.name} to end the turn.`,
-            { color: player.getIdentity().color, backup: true },
-        );
-
-        return this.endTurn(
-            {
-                player: new PlayerHandler(activePlayer, userId),
-                payload: null,
-                refPool,
-            },
-            false,
-        );
-    }
-
     // MARK: UNDO
     public undo(digest: DataDigest): Probable<StateResponse> {
         const { player, refPool } = digest;
@@ -1390,7 +1356,6 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 return;
             }
 
-            activePlayer.isIdle = true;
             activePlayer.bubbleDeeds.pop();
             activePlayer.bubbleDeeds.push(BubbleDeed.idle);
             this.addServerMessage(`${activePlayer.name} is idle`);

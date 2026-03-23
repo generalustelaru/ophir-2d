@@ -34,7 +34,6 @@ export enum Action {
     change_color = 'change_color',
     undo = 'undo',
     end_turn = 'end_turn',
-    force_turn = 'force_turn',
     declare_reset = 'declare_reset',
     spend_favor = 'spend_favor',
     upgrade_cargo = 'upgrade_cargo',
@@ -138,8 +137,6 @@ export type FeasibleTrade = {
 }
 
 export type Player = Omit<PlayerSelection, 'specialist'> & {
-    timeStamp: number,
-    isIdle: boolean,
     isActive: boolean, // TODO: rename to isCurrent
     bubbleDeeds: Array<BubbleDeed>,
     mayUndo: boolean,
@@ -310,7 +307,7 @@ export type VerboiseAction =
     | Action.enrol | Action.reposition_opponent | Action.change_color | Action.trade_as_chancellor | Action.trade_as_peddler;
 export type LaconicAction =
     | Action.end_turn | Action.undo | Action.declare_reset | Action.spend_favor | Action.upgrade_cargo | Action.shift_market
-    | Action.end_rival_turn | Action.reposition_rival | Action.start_setup | Action.force_turn | Action.sell_specialty
+    | Action.end_rival_turn | Action.reposition_rival | Action.start_setup | Action.sell_specialty
 export type MessageAction = LaconicAction | VerboiseAction;
 export type MessagePayload =
     | null | ChatPayload | GameSetupPayload | MovementPayload | DropItemPayload | PositioningPayload

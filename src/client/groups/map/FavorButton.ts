@@ -13,7 +13,6 @@ export class FavorButton extends RequestButton implements Unique<DynamicGroupInt
     constructor(
         stage: Konva.Stage,
         message: ClientMessage | null,
-        player: Player | null,
         layout: GroupLayoutData,
     ) {
         super(stage, layout, message);

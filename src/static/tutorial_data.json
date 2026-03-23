@@ -78,8 +78,6 @@
         "players": [
             {
                 "color": "Purple",
-                "timeStamp": 1772352693651,
-                "isIdle": false,
                 "name": "You",
                 "turnOrder": 1,
                 "specialist": {

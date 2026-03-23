@@ -121,7 +121,6 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         this.favorButton = new FavorButton(
             this.stage,
             { action: Action.spend_favor, payload: null },
-            localPlayer || null,
             { width: 50, height: 50, x: 500, y: 70 },
         );
 

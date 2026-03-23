@@ -10,8 +10,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
 
     private userId: Readable<UserId>;
     private color: Readable<PlayerColor>;
-    private timeStamp: Writable<number>;
-    private isIdle: Writable<boolean>;
     private name: Readable<string>;
     private turnOrder: Readable<number>;
     private specialist: Readable<Specialist>;
@@ -41,8 +39,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     constructor(playerDto: Player, userId: UserId) {
         this.userId = readable(userId);
         this.color = readable(playerDto.color);
-        this.timeStamp = writable(playerDto.timeStamp);
-        this.isIdle = writable(playerDto.isIdle);
         this.name = readable(playerDto.name);
         this.turnOrder = readable(playerDto.turnOrder);
         this.specialist = readable(playerDto.specialist);
@@ -70,8 +66,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     public toDto(): Player {
         return {
             color: this.color.get(),
-            timeStamp: this.timeStamp.get(),
-            isIdle: this.isIdle.get(),
             name: this.name.get(),
             turnOrder: this.turnOrder.get(),
             specialist: this.specialist.get(),
@@ -98,12 +92,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     // MARK: PUBLIC
-
-    public refreshTimeStamp() {
-        this.isIdle.set(false);
-        this.timeStamp.set(Date.now());
-    }
-
     public getIdentity(): PlayerIdentity {
         return {
             userId: this.userId.get(),
@@ -380,7 +368,6 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     ) {
         this.isActive.set(true);
         this._isAnchored.set(false);
-        this.timeStamp.set(Date.now());
         this.moveActions.set(2);
         this.destinations.overwrite(destinations);
         this.navigatorAccess.overwrite(navigatorAccess);

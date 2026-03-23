@@ -462,17 +462,16 @@ export class Game {
         const { player, message, userId: userId } = request;
         const { action, payload } = message;
 
-        if (!('timeStamp' in player)) {
+        if (!('isAnchored' in player)) {
             lib.printError('Player entity is missing properties');
             return this.issueNominalResponse({ error: 'Cannot process action' });
         }
 
         const playerHandler = new PlayerHandler(player, userId);
-        playerHandler.refreshTimeStamp();
 
         const digest: DataDigest = { player: playerHandler, payload, refPool: this.userReferences };
 
-        if (!playerHandler.isActivePlayer() && ![Action.chat, Action.force_turn].includes(action)) {
+        if (!playerHandler.isActivePlayer() && action != Action.chat) {
             lib.printError(`It is not [${playerHandler.getIdentity().name}]'s turn!`);
             return this.issueNominalResponse({ error: 'Cannot process action' });
         }
@@ -495,8 +494,6 @@ export class Game {
 
         const playUpdate = ((): Probable<StateResponse> => {
             switch (action) {
-                case Action.force_turn:
-                    return processor.forceTurn(digest);
                 case Action.spend_favor:
                     return processor.spendFavor(digest);
                 case Action.move:
