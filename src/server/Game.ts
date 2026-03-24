@@ -250,12 +250,15 @@ export class Game {
             const commandMatch = message.input.match(/^#\w*/);
 
             if (!commandMatch) {
-                return this.issueGroupResponse(this.actionProcessor.addChat({
-                    timeStamp: Date.now(),
-                    color: player.color,
-                    name: player.name,
-                    message: message.input,
-                }));
+                return this.issueGroupResponse(this.actionProcessor.addChat(
+                    {
+                        timeStamp: Date.now(),
+                        color: player.color,
+                        name: player.name,
+                        message: message.input,
+                    },
+                    reference,
+                ));
             }
 
             // future switch if more commands are added
@@ -290,7 +293,7 @@ export class Game {
             }
 
             this.preserveName(userId, newName);
-            const response = this.actionProcessor.updatePlayerName(player, newName);
+            const response = this.actionProcessor.updatePlayerName(player, newName, reference);
 
             return this.issueGroupResponse(response);
         }

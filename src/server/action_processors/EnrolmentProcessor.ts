@@ -2,7 +2,7 @@ import {
     ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
     Unique,
 } from '~/shared_types';
-import { Configuration, Probable, RequestMatch, ActionProcessor, UserId, UserReference } from '~/server_types';
+import { Configuration, Probable, RequestMatch, ActionProcessor, UserId } from '~/server_types';
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
 import { validator } from '../services/validation/ValidatorService';
 import serverConstants from '../server_constants';
@@ -35,9 +35,9 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
 
     public clearIdleTimeout() {};
 
-    public handleDisconnection(_reference: UserReference) {};
+    public handleDisconnection() {};
 
-    public handleReconnection(_reference: UserReference) {};
+    public handleReconnection() {};
 
     public addChat(entry:ChatEntry): StateResponse {
         this.enrolmentState.addChatEntry(entry);

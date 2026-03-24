@@ -158,8 +158,8 @@ export interface ObjectHandler<T> {
 
 export interface ActionProcessor {
     getState: () => State;
-    addChat: (entry: ChatEntry) => ServerMessage;
-    updatePlayerName: (player: PlayerEntity, newName: string) => StateResponse;
+    addChat: (entry: ChatEntry, reference: UserReference) => ServerMessage;
+    updatePlayerName: (player: PlayerEntity, newName: string, reference: UserReference) => StateResponse;
     getPlayerVP: (color: PlayerColor) => number;
     handleDisconnection: (reference: UserReference) => void;
     handleReconnection: (reference: UserReference) => void;

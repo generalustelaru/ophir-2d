@@ -962,18 +962,22 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return lib.fail('Conditions for upgrade not met.');
     }
 
-    public addChat(entry: ChatEntry): StateResponse {
+    public addChat(entry: ChatEntry, reference: UserReference): StateResponse {
         this.playState.addChatEntry(entry);
         this.backupState.addChat(entry);
+
+        this.updateProbableCurrentPlayerStatus(reference);
 
         return { state: this.getState() };
     }
 
-    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+    public updatePlayerName(player: PlayerEntity, newName: string, reference: UserReference): StateResponse {
         this.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, { backup: true });
         this.playState.updateName(player.color, newName);
         this.privateState.updatePlayerName(player.color, newName);
         this.backupState.updatePlayerName(player.color, newName);
+
+        this.updateProbableCurrentPlayerStatus(reference);
 
         return { state: this.getState() };
     };
@@ -1420,5 +1424,17 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.playState.registerGameEnd(countables);
         this.privateState.updatePlayerStats(player);
         player.deactivate();
+    }
+
+    private updateProbableCurrentPlayerStatus(reference: UserReference) {
+        const currentPlayer = this.playState.getActivePlayer();
+        if (currentPlayer && currentPlayer.color == reference.color) {
+            this.clearIdleTimeout();
+            this.startIdleTimeout(reference.id);
+
+            const player = new PlayerHandler(currentPlayer, reference.id);
+            player.addBubbleDeed(BubbleDeed.active);
+            this.playState.savePlayer(player.toDto());
+        }
     }
 }
