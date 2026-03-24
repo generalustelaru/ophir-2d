@@ -14,3 +14,5 @@
 1773f4c720a4510e25f21402883a6dddb3e727e2
 # Major renaming of good to commodity
 85b57c24d19ca1193bad738fc2c73b31da0ceeb8
+# Renamed isActive (player) to isCurrent for clarity.
+9ce9aca67186075f236b281f92d635f65ec65dd2
