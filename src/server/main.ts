@@ -377,12 +377,6 @@ app.get('/lobby', async (req: Request, res: Response) => {
         return;
     }
 
-    if (!validation.data) {
-        res.redirect('/');
-
-        return;
-    }
-
     res.sendFile(path.join(__dirname, 'public', 'lobby.html'));
 });
 app.get('/logout', async (req: Request, res: Response) => {
