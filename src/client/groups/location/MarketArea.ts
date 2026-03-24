@@ -135,7 +135,7 @@ export class MarketArea implements Unique<DynamicGroupInterface<MarketUpdate>>, 
         this.marketDeck.update({ market, isShift });
 
         const localPlayerMaySell = !!(
-            localPlayer?.isActive
+            localPlayer?.isCurrent
             && localPlayer.isAnchored
             && localPlayer.locationActions.filter(
                 a => [Action.trade_commodities, Action.trade_as_chancellor].includes(a),

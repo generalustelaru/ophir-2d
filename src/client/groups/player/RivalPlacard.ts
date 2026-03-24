@@ -90,7 +90,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.influenceDial.update({ value: influence, color: null });
         this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
-        this.movesDial.update({ moves, isActive: activePlayerColor && isControllable });
+        this.movesDial.update({ moves, isCurrent: activePlayerColor && isControllable });
     }
 
     public disable() {

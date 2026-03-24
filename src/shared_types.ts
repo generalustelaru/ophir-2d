@@ -138,7 +138,7 @@ export type FeasibleTrade = {
 }
 
 export type Player = Omit<PlayerSelection, 'specialist'> & {
-    isActive: boolean, // TODO: rename to isCurrent
+    isCurrent: boolean,
     bubbleDeeds: Array<BubbleDeed>,
     mayUndo: boolean,
     bearings: ShipBearings,

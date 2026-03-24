@@ -6,7 +6,7 @@ import { DynamicGroupInterface } from '~/client_types';
 const { ICON_DATA, HUES } = constants;
 
 type MovesDialUpdate = {
-    isActive: boolean,
+    isCurrent: boolean,
     moves: number,
 }
 export class MovesDial implements Unique<DynamicGroupInterface<MovesDialUpdate>> {
@@ -44,9 +44,9 @@ export class MovesDial implements Unique<DynamicGroupInterface<MovesDialUpdate>>
     }
 
     public update(data: MovesDialUpdate): void {
-        const { isActive, moves } = data;
+        const { isCurrent, moves } = data;
         const waveColor = ICON_DATA.ocean_wave.fill;
-        if (isActive) {
+        if (isCurrent) {
             this.upperWave.fill(moves > 1 ? waveColor : HUES.disabled);
             this.lowerWave.fill(moves > 0 ? waveColor : HUES.disabled);
         } else {

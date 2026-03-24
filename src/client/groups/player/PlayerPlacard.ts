@@ -116,16 +116,16 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     }
 
     public update(player: Player): void {
-        const { cargo, favor, isActive, influence, color, locationActions, isAnchored, specialist, name } = player;
-        this.background.fill(isActive ? this.variation.vivid.light : this.variation.muted.dark);
-        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isActive });
+        const { cargo, favor, isCurrent, influence, color, locationActions, isAnchored, specialist, name } = player;
+        this.background.fill(isCurrent ? this.variation.vivid.light : this.variation.muted.dark);
+        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isCurrent });
         this.favorDial.update(favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update({
             value: influence,
-            color: isActive ? this.variation.muted.dark : this.variation.vivid.light,
+            color: isCurrent ? this.variation.muted.dark : this.variation.vivid.light,
         });
-        this.specialistBand.update(isActive);
+        this.specialistBand.update(isCurrent);
         this.specialistCard.update(name);
         this.specialtyButton.update(!!(
             isAnchored

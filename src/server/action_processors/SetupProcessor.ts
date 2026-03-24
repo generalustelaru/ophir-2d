@@ -386,7 +386,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
                 name: s.name,
                 turnOrder: s.turnOrder,
                 specialist,
-                isActive: false,
+                isCurrent: false,
                 isAway: s.isAway,
                 bubbleDeeds: [BubbleDeed.anchor],
                 mayUndo: false,

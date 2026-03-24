@@ -19,10 +19,10 @@ export class EndTurnButton implements Unique<DynamicGroupInterface<Player>> {
     }
 
     public update(player: Player): void {
-        const { isActive, isHandlingRival, isAnchored } = player;
+        const { isCurrent, isHandlingRival, isAnchored } = player;
 
         this.anchor.update({
-            disabled: !isActive || isHandlingRival,
+            disabled: !isCurrent || isHandlingRival,
             anchored: isAnchored,
         });
     }

@@ -86,7 +86,7 @@
                     "specialty": "gems",
                     "description": "No other special ability."
                 },
-                "isActive": true,
+                "isCurrent": true,
                 "mayUndo": false,
                 "bearings": {
                     "seaZone": "center",

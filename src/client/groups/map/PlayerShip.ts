@@ -47,7 +47,7 @@ export class PlayerShip extends Communicator {
         this.players = players;
         this.player = player;
         this.rival = rival;
-        this.group.draggable(player.isActive);
+        this.group.draggable(player.isCurrent);
         this.inControl && player.moveActions ? this.activeEffect.start() : this.activeEffect.stop();
     };
 

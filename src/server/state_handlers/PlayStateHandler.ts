@@ -109,7 +109,7 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     }
 
     public getActivePlayer() {
-        return this.players.getAll().find(p => p.isActive) || null;
+        return this.players.getAll().find(p => p.isCurrent) || null;
     }
 
     public getAllPlayers() {

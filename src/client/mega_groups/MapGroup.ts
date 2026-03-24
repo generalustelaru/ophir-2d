@@ -127,7 +127,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         this.undoButton = new UndoButton(
             this.stage,
             { x: 35, y : 375 },
-            localPlayer?.isActive || false,
+            localPlayer?.isCurrent || false,
         );
 
         this.group.add(...[
@@ -180,7 +180,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
                 state.rival,
                 this.sailAttemptCallback,
             );
-            this.localShip.switchControl(localPlayer.isActive);
+            this.localShip.switchControl(localPlayer.isCurrent);
             shipNodes.push(this.localShip.getElement());
         }
 
@@ -193,8 +193,8 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         const localPlayer = players.find(player => player.color === localState.playerColor);
         //MARK: dials & hexes
         if (localPlayer) {
-            const { moveActions: moves, isActive } = localPlayer;
-            this.movesDial?.update({ moves, isActive });
+            const { moveActions: moves, isCurrent } = localPlayer;
+            this.movesDial?.update({ moves, isCurrent });
             this.endTurnButton?.update(localPlayer);
             this.undoButton?.update(localPlayer);
             this.favorButton?.update(localPlayer);
@@ -210,7 +210,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
         }
 
         // MARK: ships
-        const canDrag = localPlayer?.isActive && state.sessionPhase == Phase.play || false;
+        const canDrag = localPlayer?.isCurrent && state.sessionPhase == Phase.play || false;
         this.opponentShips.forEach(ship => {
             const opponentId: PlayerColor = ship.getId();
             const remotePlayer = players.find(player => player.color === opponentId);
@@ -232,7 +232,7 @@ export class MapGroup implements Unique<MegaGroupInterface> {
             const localShip = this.localShip as PlayerShip;
 
             localShip.switchControl(
-                state.sessionPhase == Phase.play && localPlayer.isActive && !localPlayer.isHandlingRival,
+                state.sessionPhase == Phase.play && localPlayer.isCurrent && !localPlayer.isHandlingRival,
             );
             localShip.update(localPlayer.bearings.position, state.players, state.rival);
         }

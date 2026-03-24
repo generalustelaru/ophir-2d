@@ -126,7 +126,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
         const { remotePlayer, isDraggable } = data;
         const { seaZone, position: newPosition } = remotePlayer.bearings;
 
-        if (remotePlayer.isActive) {
+        if (remotePlayer.isCurrent) {
             this.group.moveToTop();
             this.isInspectable = false;
         } else {
@@ -149,7 +149,7 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             this.deedBubble.setVertical(-90, true);
 
         this.deedBubble.update({
-            isVisible: remotePlayer.isActive,
+            isVisible: remotePlayer.isCurrent,
             deeds: remotePlayer.bubbleDeeds,
         });
 

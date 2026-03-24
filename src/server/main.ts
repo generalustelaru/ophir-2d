@@ -895,7 +895,7 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
             switch (phase) {
                 case Phase.play:
                     const player = playerEntity as Player;
-                    return player.isActive ? UserInvolvement.HasTurn : UserInvolvement.Playing;
+                    return player.isCurrent ? UserInvolvement.HasTurn : UserInvolvement.Playing;
                 case Phase.setup:
                     const draft = playerEntity as PlayerDraft;
                     return draft.turnToPick ? UserInvolvement.HasTurn : UserInvolvement.Playing;

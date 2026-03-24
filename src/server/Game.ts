@@ -476,7 +476,7 @@ export class Game {
 
         const digest: DataDigest = { player: playerHandler, payload, refPool: this.userReferences };
 
-        if (!playerHandler.isActivePlayer() && action != Action.chat) {
+        if (false == playerHandler.isCurrentPlayer() && action != Action.chat) {
             lib.printError(`It is not [${playerHandler.getIdentity().name}]'s turn!`);
             return this.issueNominalResponse({ error: 'Cannot process action' });
         }
@@ -589,7 +589,7 @@ export class Game {
 
     private getCurrentPlayerReference(players: Array<Player>): UserReference | null {
         const currentPlayer = (() : Player | null => {
-            const activatedPlayer = players.find(p => p.isActive);
+            const activatedPlayer = players.find(p => p.isCurrent);
 
             if (activatedPlayer)
                 return activatedPlayer;

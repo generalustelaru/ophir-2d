@@ -52,7 +52,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const player = new PlayerHandler(currentPlayer, id);
 
-        if (false == player.isActivePlayer()) {
+        if (false == player.isCurrentPlayer()) {
             const { seaZone } = player.getBearings();
 
             player.activate(
@@ -1005,7 +1005,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.isAway = false;
         this.addServerMessage(`${player.name} has rejoined the table.`, { color: player.color });
 
-        if (player.isActive) {
+        if (player.isCurrent) {
             const handler = new PlayerHandler(player, reference.id);
             handler.addBubbleDeed(BubbleDeed.active);
             this.playState.savePlayer(handler.toDto());
@@ -1030,7 +1030,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.isAway = true;
         this.addServerMessage(`${player.name} has left the table.`, { color: player.color });
 
-        if(player.isActive) {
+        if(player.isCurrent) {
             this.clearIdleTimeout();
             const handler = new PlayerHandler(player, reference.id);
             handler.addBubbleDeed(BubbleDeed.idle);

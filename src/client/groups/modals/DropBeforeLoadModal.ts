@@ -61,7 +61,7 @@ export class DropBeforeLoadModal
 
     public update(state: PlayState): void {
         this.treasury = state.treasury;
-        this.playerCargo = state.players.find(p => p.isActive)?.cargo || null;
+        this.playerCargo = state.players.find(p => p.isCurrent)?.cargo || null;
     }
 
     public show(message: DropBeforeLoadMessage): void {

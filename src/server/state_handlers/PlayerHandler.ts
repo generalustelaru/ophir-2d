@@ -13,7 +13,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     private name: Readable<string>;
     private turnOrder: Readable<number>;
     private specialist: Readable<Specialist>;
-    private isActive: Writable<boolean>;
+    private isCurrent: Writable<boolean>;
     private _isAway: Writable<boolean>;
     private bubbleDeeds: Writable<Array<BubbleDeed>>;
     private _mayUndo: Writable<boolean>;
@@ -43,7 +43,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.name = readable(playerDto.name);
         this.turnOrder = readable(playerDto.turnOrder);
         this.specialist = readable(playerDto.specialist);
-        this.isActive = writable(playerDto.isActive);
+        this.isCurrent = writable(playerDto.isCurrent);
         this._isAway = writable(playerDto.isAway);
         this.bubbleDeeds = writable(playerDto.bubbleDeeds);
         this._mayUndo = writable(playerDto.mayUndo);
@@ -71,7 +71,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
             name: this.name.get(),
             turnOrder: this.turnOrder.get(),
             specialist: this.specialist.get(),
-            isActive: this.isActive.get(),
+            isCurrent: this.isCurrent.get(),
             isAway: this._isAway.get(),
             bubbleDeeds: this.bubbleDeeds.get(),
             mayUndo: this._mayUndo.get(),
@@ -104,7 +104,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         };
     }
 
-    public isActivePlayer() { return this.isActive.get(); }
+    public isCurrentPlayer() { return this.isCurrent.get(); }
 
     public setAway(isAway: boolean) { this._isAway.set(isAway); }
 
@@ -371,7 +371,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         destinations: Array<ZoneName>,
         navigatorAccess: Array<ZoneName>,
     ) {
-        this.isActive.set(true);
+        this.isCurrent.set(true);
         this._isAnchored.set(false);
         this.moveActions.set(2);
         this.destinations.overwrite(destinations);
@@ -381,7 +381,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public deactivate() {
-        this.isActive.set(false);
+        this.isCurrent.set(false);
         this._isAnchored.set(true);
         this.privilegedSailing.set(false);
         this.moveActions.set(0);

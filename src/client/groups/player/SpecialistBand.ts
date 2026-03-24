@@ -22,7 +22,7 @@ export class SpecialistBand extends Button implements Unique<DynamicGroupInterfa
         this.background = new Konva.Rect({
             width,
             height,
-            fill: player.isActive ? 'white' : 'black',
+            fill: player.isCurrent ? 'white' : 'black',
             cornerRadius: 5,
         });
 
@@ -37,7 +37,7 @@ export class SpecialistBand extends Button implements Unique<DynamicGroupInterfa
             align: 'center',
             verticalAlign: 'middle',
             fontFamily: 'Custom',
-            fill: player.isActive ? 'black' : 'white',
+            fill: player.isCurrent ? 'black' : 'white',
         });
 
         this.group.add(this.background, this.label);
@@ -48,8 +48,8 @@ export class SpecialistBand extends Button implements Unique<DynamicGroupInterfa
         return this.group;
     }
 
-    public update(isActive: boolean): void {
-        this.label.fill(isActive ? 'black': 'white');
-        this.background.fill(isActive ? 'white' : 'black');
+    public update(isCurrent: boolean): void {
+        this.label.fill(isCurrent ? 'black': 'white');
+        this.background.fill(isCurrent ? 'white' : 'black');
     }
 }

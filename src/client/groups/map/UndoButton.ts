@@ -9,7 +9,7 @@ const { ICON_DATA, HUES } = constants;
 export class UndoButton extends RequestButton implements Unique<DynamicGroupInterface<Player>> {
     private icon: Konva.Path;
 
-    constructor(stage: Konva.Stage, position: Coordinates, isActivePlayer: boolean) {
+    constructor(stage: Konva.Stage, position: Coordinates, isCurrentPlayer: boolean) {
 
         super(
             stage,
@@ -28,7 +28,7 @@ export class UndoButton extends RequestButton implements Unique<DynamicGroupInte
             x: 8,
             y: 9,
             data: data.shape,
-            fill: isActivePlayer ? data.fill : HUES.disabled,
+            fill: isCurrentPlayer ? data.fill : HUES.disabled,
             scale: { x: 2, y: 2 },
         });
         this.group.add(hoverZone, this.icon);

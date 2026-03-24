@@ -123,7 +123,7 @@ export class SeaZone extends Button implements Unique<DynamicGroupInterface<SeaZ
             templeIcon: update.templeIcon,
         });
 
-        if (!localPlayer || !localPlayer.isActive)
+        if (!localPlayer || !localPlayer.isCurrent)
             return;
 
         if (localPlayer.isHandlingRival)
