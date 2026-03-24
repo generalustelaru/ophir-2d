@@ -169,12 +169,12 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             const selections = [];
 
             for (let i = 0; i < drafts.length; i++) {
-                const { color, name, turnOrder, specialist } = drafts[i];
+                const { color, name, turnOrder, specialist, isAway } = drafts[i];
 
                 if (!specialist)
                     return null;
 
-                selections.push({ color, name, turnOrder, specialist });
+                selections.push({ color, name, isAway, turnOrder, specialist });
             };
 
             return selections;
@@ -353,6 +353,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             return {
                 color: e.color,
                 name: e.name,
+                isAway: e.isAway,
                 turnOrder: token,
                 specialist: null,
                 turnToPick: !orderTokens.length,
@@ -381,6 +382,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
                 turnOrder: s.turnOrder,
                 specialist,
                 isActive: false,
+                isAway: s.isAway,
                 bubbleDeeds: [BubbleDeed.anchor],
                 mayUndo: false,
                 bearings: {

@@ -119,6 +119,7 @@ export type Rival = {
 export type PlayerEntry = {
     color: PlayerColor,
     name: string,
+    isAway: boolean,
 }
 
 export type PlayerDraft = PlayerEntry & {

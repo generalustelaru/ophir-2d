@@ -14,6 +14,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     private turnOrder: Readable<number>;
     private specialist: Readable<Specialist>;
     private isActive: Writable<boolean>;
+    private isAway: Writable<boolean>;
     private bubbleDeeds: Writable<Array<BubbleDeed>>;
     private _mayUndo: Writable<boolean>;
     private bearings: Writable<ShipBearings>;
@@ -43,6 +44,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
         this.turnOrder = readable(playerDto.turnOrder);
         this.specialist = readable(playerDto.specialist);
         this.isActive = writable(playerDto.isActive);
+        this.isAway = writable(playerDto.isAway);
         this.bubbleDeeds = writable(playerDto.bubbleDeeds);
         this._mayUndo = writable(playerDto.mayUndo);
         this.bearings = writable(playerDto.bearings);
@@ -70,6 +72,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
             turnOrder: this.turnOrder.get(),
             specialist: this.specialist.get(),
             isActive: this.isActive.get(),
+            isAway: this.isAway.get(),
             bubbleDeeds: this.bubbleDeeds.get(),
             mayUndo: this._mayUndo.get(),
             bearings: this.bearings.get(),

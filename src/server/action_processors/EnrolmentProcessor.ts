@@ -90,7 +90,7 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
             if (!this.enrolmentState.isRoomForNewPlayer())
                 return lib.fail('The game is full!');
 
-            this.enrolmentState.addPlayer({ color, name: name || color });
+            this.enrolmentState.addPlayer({ color, name: name || color, isAway: false });
 
             if (this.enrolmentState.getSessionOwner() === null || isAdopting)
                 this.enrolmentState.setSessionOwner(color);

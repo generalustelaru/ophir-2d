@@ -1025,8 +1025,8 @@ function debugCommand(command?: string, target?: string, option?: string): objec
         }
 
         function reduceToEntry(player: PlayerEntity): PlayerEntry {
-            const { color, name } = player;
-            return { color, name };
+            const { color, name, isAway } = player;
+            return { color, name, isAway };
         }
 
     }
