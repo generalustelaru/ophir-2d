@@ -5,7 +5,7 @@ import {
     PlayerEntity, Unique, BubbleDeed,
 } from '~/shared_types';
 import {
-    DestinationPackage, StateBundle, SetupDigest, ActionProcessor, Probable, Configuration, UserReference,
+    DestinationPackage, StateBundle, SetupDigest, ActionProcessor, Probable, Configuration,
 } from '~/server_types';
 import serverConstants from '~/server_constants';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -112,9 +112,9 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         return 0;
     }
 
-    public handleDisconnection(_reference: UserReference) {};
+    public handleDisconnection() {};
 
-    public handleReconnection(_reference: UserReference) {};
+    public handleReconnection() {};
 
     public addChat(entry: ChatEntry): StateResponse {
         this.setupState.addChatEntry(entry);

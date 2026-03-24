@@ -1,5 +1,5 @@
 import { HexCoordinates } from "~/client_types";
-import { GameId } from "./server/server_types";
+import { GameId } from "~/server_types";
 
 /**
  * @description Interface wrapper hack to prevent the TSS from polluting class method references.
