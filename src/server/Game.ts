@@ -83,13 +83,11 @@ export class Game {
             switch (sharedState.sessionPhase) {
                 case Phase.play:
                 case Phase.conclusion:
-                    if (!privateState)
-                        throw new Error('Cannot resume play session w/o PrivateState object');
+                    if (!privateState) throw new Error('Cannot resume play session w/o PrivateState object');
 
                     const reference = this.getCurrentPlayerReference(sharedState.players);
 
-                    if (!reference)
-                        throw new Error('Could not find current player in SharedState object');
+                    if (!reference) throw new Error('Could not find current player in SharedState object');
 
                     return new PlayProcessor(
                         {
@@ -247,50 +245,54 @@ export class Game {
         if (action === Action.chat) {
             const message = validator.validateChatPayload(payload);
 
-            if (!message)
-                return emitError('Invalid chat message');
+            if (!message) return emitError('Invalid chat message');
 
-            const commandMatch = message.input.match(/^#\w*(?=\s)/);
+            const commandMatch = message.input.match(/^#\w*/);
 
-            if (commandMatch) {
-                // future switch if more commands are added
-                const nameMatch = message.input.match(/(?<=#name ).*/);
-
-                if (nameMatch) {
-
-                    if (!this.font)
-                        return emitError('Fonts are missing!');
-
-                    if (state.sessionPhase == Phase.conclusion)
-                        return this.issueNominalResponse({ error: 'Name cannot be updated after the game ended.' });
-
-                    const newName = nameMatch[0];
-
-                    const measurement = lib.validateTextLength(newName, this.font, 28, 424, 212);
-
-                    if (measurement.err)
-                        return this.issueNominalResponse({ error: measurement.message });
-
-                    if (this.isNameTaken(state.players, newName))
-                        return this.issueNominalResponse({ error: 'This name is already taken' });
-
-                    this.preserveName(userId, newName);
-                    const response = this.actionProcessor.updatePlayerName(player, newName);
-
-                    return this.issueGroupResponse(response);
-                } else {
-                    return this.issueNominalResponse(
-                        { error: `${commandMatch[0]} parameter must start with a non-space` },
-                    );
-                }
+            if (!commandMatch) {
+                return this.issueGroupResponse(this.actionProcessor.addChat({
+                    timeStamp: Date.now(),
+                    color: player.color,
+                    name: player.name,
+                    message: message.input,
+                }));
             }
 
-            return this.issueGroupResponse(this.actionProcessor.addChat({
-                timeStamp: Date.now(),
-                color: player.color,
-                name: player.name,
-                message: message.input,
-            }));
+            // future switch if more commands are added
+            const nameMatch = message.input.match(/(?<=#name ).*/);
+
+            if (!nameMatch) {
+                return this.issueNominalResponse(
+                    { error: `"${commandMatch[0]}" is not a recognized command.` },
+                );
+            }
+
+            if (!this.font) return emitError('Fonts are missing!');
+
+            if (state.sessionPhase == Phase.conclusion) {
+                return this.issueNominalResponse({ error: 'Name cannot be updated after the game ended.' });
+            }
+
+            const newName = nameMatch[0];
+
+            if (newName.trim().length == 0) {
+                return this.issueNominalResponse({ error: 'Name cannot be only whitespaces.' });
+            }
+
+            const measurement = lib.validateTextLength(
+                newName, this.font, 28, 424, 212,
+            );
+
+            if (measurement.err) return this.issueNominalResponse({ error: measurement.message });
+
+            if (this.isNameTaken(state.players, newName)) {
+                return this.issueNominalResponse({ error: 'This name is already taken' });
+            }
+
+            this.preserveName(userId, newName);
+            const response = this.actionProcessor.updatePlayerName(player, newName);
+
+            return this.issueGroupResponse(response);
         }
 
         if (action == Action.declare_reset) {

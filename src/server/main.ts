@@ -20,9 +20,7 @@ import { PORT_NUMBER, MONGODB_URI, REDIS_URL, NODE_ENV } from '../environment';
 import { MongoClient } from 'mongodb';
 import opentype, { Font } from 'opentype.js';
 
-// TODO: use runtime flag to disable log verbosity in production
-// const isDev = process.env.NODE_ENV === 'development';
-
+// MARK: STARTUP
 if (!PORT_NUMBER || !MONGODB_URI || !REDIS_URL || !NODE_ENV) {
     console.error('❌ Missing environment variables', {
         PORT_NUMBER, MONGODB_URI, REDIS_URL, NODE_ENV,
@@ -57,12 +55,10 @@ dbClient.connect().then(async () => {
 
     process.exit(1);
 });
-
-
+// Redis
 const sessionService = new SessionService();
 sessionService.connect();
 
-// MARK: PROCESS
 process.on('SIGINT', () => {
     broadcast({ error: 'The server encountered an issue and is shutting down :(' });
     socketServer.close();
@@ -70,6 +66,7 @@ process.on('SIGINT', () => {
     process.exit(1);
 });
 
+// MARK: TYPES
 declare module 'ws' {
     interface WebSocket { isAlive: boolean }
 }
@@ -88,8 +85,7 @@ server.headersTimeout = 0;
 server.keepAliveTimeout = 0;
 const socketServer = new WebSocketServer({ server, path: '/game' });
 
-// MARK: WS
-
+// MARK: WEBSOCKET
 socketServer.on('connection', async (socket: WebSocket, inc) => {
     const validation = await validateClient(inc.headers.cookie);
 
@@ -236,7 +232,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
     });
 });
 
-// MARK: HTTP
+// MARK: HTTP SERVER
 app.set('trust proxy', 1); // trust first proxy (Nginx)
 app.use((_, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -495,6 +491,7 @@ server.listen(PORT_NUMBER, () => {
     console.info('✅ Server started!');
 });
 
+// MARK: WS ACTION
 async function processAction(
     game: Game,
     request: AuthenticatedClientRequest,

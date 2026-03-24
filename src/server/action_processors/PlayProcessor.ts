@@ -223,7 +223,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         } else if (player.getMoves() == 0) {
             this.privateState.addDeed({
                 context: TurnEvent.failed_turn,
-                description: 'also being out of moves--cannot act further',
+                description: 'being out of moves, cannot act further',
             });
 
             return this.endTurn(digest, false);
