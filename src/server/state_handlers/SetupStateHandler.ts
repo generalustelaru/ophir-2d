@@ -38,6 +38,12 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
         };
     };
 
+    public setAway(isAway: boolean, color: PlayerColor) {
+        const player = this.players.getOne(color);
+
+        if (player) player.isAway = isAway;
+    }
+
     public addChatEntry(chat: ChatEntry) {
         this.chat.addOne(chat);
         this.trimChatList();

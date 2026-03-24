@@ -6,6 +6,7 @@ import {
 } from '~/shared_types';
 import {
     DestinationPackage, StateBundle, SetupDigest, ActionProcessor, Probable, Configuration,
+    UserReference,
 } from '~/server_types';
 import serverConstants from '~/server_constants';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -112,9 +113,15 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         return 0;
     }
 
-    public handleDisconnection() {};
+    public clearIdleTimeout() {}
 
-    public handleReconnection() {};
+    public handleDisconnection(reference: UserReference) {
+        reference.color && this.setupState.setAway(true, reference.color);
+    };
+
+    public handleReconnection(reference: UserReference) {
+        reference.color && this.setupState.setAway(false, reference.color);
+    };
 
     public addChat(entry: ChatEntry): StateResponse {
         this.setupState.addChatEntry(entry);
@@ -255,8 +262,6 @@ export class SetupProcessor implements Unique<ActionProcessor> {
             backupState: new BackupStateHandler(null),
         });
     };
-
-    public clearIdleTimeout() {}
 
     // MARK: Map
     private determineBarriers(): Array<BarrierId> {

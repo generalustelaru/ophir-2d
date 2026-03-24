@@ -43,10 +43,12 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         const { id, color } = currentPlayerReference;
         const players = this.playState.getAllPlayers();
+
+        if (playState.hasGameEnded()) return;
+
         const currentPlayer = players.find(p => p.color == color);
 
-        if (!currentPlayer)
-            throw new Error('Cannot find not find current player!');
+        if (!currentPlayer) throw new Error('Cannot find not find current player!');
 
         const player = new PlayerHandler(currentPlayer, id);
 
@@ -57,6 +59,14 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 this.privateState.getDestinations(seaZone),
                 player.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
+        }
+
+        if (player.isAway()) {
+            player.addBubbleDeed(BubbleDeed.idle);
+            const { name, color } = player.getIdentity();
+            this.addServerMessage(`${name} is currently away.`, { color });
+
+            this.broadcast(this.getState());
         }
 
         this.playState.savePlayer(player.toDto());
@@ -992,6 +1002,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!player)
             return lib.printError(`Could not find reconnected player. {color: ${reference.color}}`);
 
+        player.isAway = false;
         this.addServerMessage(`${player.name} has rejoined the table.`, { color: player.color });
 
         if (player.isActive) {
@@ -1016,6 +1027,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!player)
             return lib.printError(`Could not find disconnected player. {color: ${reference.color}}`);
 
+        player.isAway = true;
         this.addServerMessage(`${player.name} has left the table.`, { color: player.color });
 
         if(player.isActive) {

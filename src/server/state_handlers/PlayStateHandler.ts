@@ -61,6 +61,12 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
         };
     }
 
+    public setAway(isAway: boolean, color: PlayerColor) {
+        const player = this.players.getOne(color);
+
+        if (player) player.isAway = isAway;
+    }
+
     public getLocationName(zoneName: ZoneName) {
         return this.setup.get().mapPairings.locationByZone[zoneName].name;
     }
@@ -336,6 +342,10 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     public registerGameEnd(results: Array<PlayerCountables>) {
         this.gameResults.set(results);
         this.sessionPhase.set(Phase.conclusion);
+    }
+
+    public hasGameEnded() {
+        return this.sessionPhase.get() == Phase.conclusion;
     }
 
     private trimChatList() {
