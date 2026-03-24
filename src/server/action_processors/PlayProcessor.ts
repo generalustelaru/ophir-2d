@@ -254,11 +254,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.backupState.saveRepositioning(player.getIdentity().color, position);
         }
 
+        player.addBubbleDeed(BubbleDeed.active);
+
         return this.continueTurn(player, false);
     }
 
     public repositionOpponent(data: DataDigest): Probable<StateResponse> {
-        const { payload, refPool } = data;
+        const { payload, refPool, player } = data;
         const validation = validator.validateOpponentRepositioningPayload(payload);
 
         if (validation.err)
@@ -275,7 +277,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         const opponent = new PlayerHandler(opponentDto, opponentId);
         opponent.setBearings({ ...opponent.getBearings(), position: repositioning });
 
-        return this.continueTurn(opponent, false);
+        this.playState.savePlayer(opponent.toDto());
+        player.addBubbleDeed(BubbleDeed.active);
+
+        return this.continueTurn(player, false);
     }
 
     // MARK: FAVOR
@@ -1336,10 +1341,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         updateActions && player.setActionsAndDetails(this.determineActionsAndDetails(player));
         this.playState.savePlayer(player.toDto());
 
-        if (updateActions) {
-            this.clearIdleTimeout();
-            this.startIdleTimeout(player.getIdentity().userId);
-        }
+        this.clearIdleTimeout();
+        this.startIdleTimeout(player.getIdentity().userId);
 
         return lib.pass({ state: this.playState.toDto() });
     }
