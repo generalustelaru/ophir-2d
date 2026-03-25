@@ -29,7 +29,7 @@ export class LocationHighlightGroup extends GroupHighlight {
             { target: Target.templeArea, layout: { x: 2, y: 285, width: 293, height: 200 } },
             { target: Target.goldCard, layout: { x: 35, y: 285, width: 66, height: 100 } },
             { target: Target.silverCard, layout: { x: 111, y: 285, width: 66, height: 100 } },
-            { target: Target.marketCard, layout: { x: 227, y: 285, width: 66, height: 130 } },
+            { target: Target.templeMarketCard, layout: { x: 227, y: 285, width: 66, height: 130 } },
             { target: Target.upgradeButton, layout: { x: 207, y: 435, width: 86, height: 40 } },
             { target: Target.donationsDisplay, layout: { x: 25, y: 395, width: 162, height: 85 } },
         ];

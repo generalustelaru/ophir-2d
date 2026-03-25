@@ -256,7 +256,7 @@ export enum Target {
     // Location Group
     locationGroup, marketArea, deck,slot_1, slot_2, slot_3, fluctuation_up, fluctuation_down, temple_mark,
     treasuryArea, goldForFavor, silverForFavor, goldForCoin, silverForCoin,
-    templeArea, goldCard, silverCard, marketCard, upgradeButton, donationsDisplay,
+    templeArea, goldCard, silverCard, templeMarketCard, upgradeButton, donationsDisplay,
     // PlayerGroup
     playerGroup, playerPlacard, influenceDie, cargoBand, specialistBand, favorDial, coinDial, vpDial, specialtyButton,
     rivalPlacard, rivalInfluence, cycleMarket, concludeRival, rivalMoves
@@ -279,12 +279,12 @@ export type NotificationType = 'rivalControl' | 'turnStart' | 'forcedTurn' | nul
  */
 export type TutorialScenarioStep = {
     index: number,
-    mutate: (state: PlayState) => void // produces a new state that trickles to every element in regular fashion
+    mutate: (state: PlayState, z?: ZoneName) => void // produces a new state for CanvasService consumption (branch for move)
     laconic: NotificationType // simulates additional server transmissions for laconic events
     vpDetail?: VpTransmission // provision for payload on gaining vp
     failedRollDetail?: FailedInfluenceRollTransmission // provision for failed roll values
     instructions: Array<Instruction> // updates CanvasService via dedicated method
-    expecting: ClientMessage | null // stays in TourService for advancing validation
+    expecting: Array<ClientMessage> | null // stays in TourService for advancing validation
 }
 
 /**

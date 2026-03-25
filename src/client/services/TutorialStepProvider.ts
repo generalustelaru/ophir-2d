@@ -1,4 +1,4 @@
-import { PlayState, Action } from '~/shared_types';
+import { PlayState, Action, ZoneName } from '~/shared_types';
 import { ScenarioStepPartial, Target } from '../client_types';
 
 const position = { x: 0, y: 0 } as const;
@@ -7,22 +7,16 @@ export class TutorialStepProvider {
     private partials: Array<Omit<ScenarioStepPartial, 'index'>> = [
         {
             laconic: null,
-            mutate: (_state: PlayState) => { },
+            mutate: () => { },
             visuals: [
                 { highlights: [] },
-                { highlights: [] },
                 { highlights: [Target.mapGroup] },
-                { highlights: [Target.locationGroup] },
-                { highlights: [Target.playerGroup] },
-                { highlights: [Target.bottomRightZone] },
                 { highlights: [Target.centerZone] },
+                { highlights: [Target.bottomRightZone, Target.templeArea] },
                 { highlights: [Target.movesCounter] },
-                { highlights: [Target.topLeftZone, Target.leftZone, Target.bottomLeftZone, Target.bottomRightZone] },
-                { highlights: [Target.rightZone, Target.topRightZone] },
-                { highlights: [Target.centerZone] },
                 { highlights: [Target.movesCounter, Target.topLeftZone] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'topLeft', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'topLeft', position } }],
         },
         {
             laconic: null,
@@ -37,13 +31,12 @@ export class TutorialStepProvider {
                 p.destinations = ['left', 'topRight'];
             },
             visuals: [
-                { highlights: [Target.movesCounter] },
                 { highlights: [Target.centerZone] },
-                { highlights: [Target.topRightZone, Target.slot_3] },
+                { highlights: [Target.topRightZone, Target.marketArea] },
                 { highlights: [Target.topLeftZone] },
                 { highlights: [Target.topLeftZone] },
             ],
-            expecting: { action: Action.load_commodity, payload: { commodity: 'gems', drop: null } },
+            expecting: [{ action: Action.load_commodity, payload: { commodity: 'gems', drop: null } }],
         },
         {
             laconic: null,
@@ -55,11 +48,11 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.cargoBand] },
-                { highlights: [] },
+                { highlights: [Target.movesCounter] },
                 { highlights: [Target.topLeftZone] },
                 { highlights: [Target.endTurnButton] },
             ],
-            expecting: { action: Action.end_turn , payload: null },
+            expecting: [{ action: Action.end_turn , payload: null }],
         },
         {
             laconic: 'turnStart',
@@ -74,9 +67,10 @@ export class TutorialStepProvider {
             visuals: [
                 { highlights: [] },
                 { highlights: [Target.topRightZone] },
+                { highlights: [Target.rivalPlacard] },
                 { highlights: [Target.topRightZone, Target.rivalInfluence] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'topRight', position } }],
         },
         {
             laconic: null,
@@ -94,7 +88,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.rivalInfluence] },
                 { highlights: [Target.topRightZone] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'topRight', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'topRight', position } }],
         },
         {
             laconic: 'rivalControl',
@@ -115,12 +109,11 @@ export class TutorialStepProvider {
                 }
             },
             visuals: [
-                { highlights: [] },
                 { highlights: [Target.rivalPlacard] },
                 { highlights: [Target.rivalMoves] },
                 { highlights: [Target.rightZone] },
             ],
-            expecting: { action: Action.move_rival, payload: { zoneId: 'right', position } },
+            expecting: [{ action: Action.move_rival, payload: { zoneId: 'right', position } }],
         },
         {
             laconic: null,
@@ -139,7 +132,7 @@ export class TutorialStepProvider {
                 { highlights: [] },
                 { highlights: [Target.concludeRival] },
             ],
-            expecting: { action: Action.end_rival_turn, payload: null },
+            expecting: [{ action: Action.end_rival_turn, payload: null }],
         },
         {
             laconic: null,
@@ -165,7 +158,7 @@ export class TutorialStepProvider {
                 { highlights: [] },
                 { highlights: [Target.specialtyButton] },
             ],
-            expecting: { action: Action.sell_specialty, payload: null },
+            expecting: [{ action: Action.sell_specialty, payload: null }],
         },
         {
             laconic: null,
@@ -181,7 +174,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.cargoBand, Target.coinDial] },
                 { highlights: [Target.undoButton] },
             ],
-            expecting: { action: Action.undo, payload: null },
+            expecting: [{ action: Action.undo, payload: null }],
         },
         {
             laconic: null,
@@ -196,7 +189,7 @@ export class TutorialStepProvider {
                 { highlights: [] },
                 { highlights: [Target.slot_3] },
             ],
-            expecting: { action: Action.trade_commodities, payload: { slot: 'slot_3' } },
+            expecting: [{ action: Action.trade_commodities, payload: { slot: 'slot_3' } }],
         },
         {
             laconic: null,
@@ -211,10 +204,10 @@ export class TutorialStepProvider {
                 m.slot_3 = m.slot_2;
                 m.slot_2 = m.slot_1;
                 m.slot_1 = m.future;
-                m.future = { request: ['ebony','linen'], reward: { coins: 2, favorAndVp: 2 } };
+                m.future = { request: ['gems','linen'], reward: { coins: 3, favorAndVp: 2 } };
             },
             visuals: [
-                { highlights: [Target.goldForCoin] },
+                { highlights: [Target.coinDial] },
                 { highlights: [Target.marketArea, Target.slot_3] },
                 { highlights: [Target.marketArea] },
                 { highlights: [Target.marketArea] },
@@ -225,7 +218,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.temple_mark] },
                 { highlights: [Target.endTurnButton] },
             ],
-            expecting: { action: Action.end_turn, payload: null },
+            expecting: [{ action: Action.end_turn, payload: null }],
         },
         {
             laconic: 'turnStart',
@@ -236,14 +229,14 @@ export class TutorialStepProvider {
                 p.destinations = ['right', 'topLeft'];
             },
             visuals: [
-                { highlights: [Target.rightZone, Target.goldForCoin, Target.silverForCoin] },
+                { highlights: [Target.rightZone, Target.treasuryArea] },
                 { highlights: [Target.rightZone, Target.rivalInfluence] },
                 { highlights: [Target.rivalInfluence] },
                 { highlights: [Target.favorDial, Target.cargoBand] },
                 { highlights: [Target.bottomRightZone, Target.templeArea] },
                 { highlights: [Target.topLeftZone] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'topLeft', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'topLeft', position } }],
         },
         {
             laconic: null,
@@ -258,24 +251,37 @@ export class TutorialStepProvider {
                 p.locationActions = [Action.load_commodity];
             },
             visuals: [
-                { highlights: [Target.marketCard] },
-                { highlights: [Target.marketCard, Target.topLeftZone] },
+                { highlights: [Target.centerZone] },
             ],
-            expecting: { action: Action.load_commodity, payload: { commodity: 'gems', drop: null } },
+            expecting: [{ action: Action.move, payload : { zoneId: 'center', position } }],
+        },
+        {
+            laconic: null,
+            mutate: (state: PlayState)=> {
+                const p = state.players[0];
+                p.moveActions = 0;
+                p.bearings.seaZone = 'center';
+                p.bearings.location = 'farms';
+            },
+            visuals: [
+                { highlights: [Target.templeMarketCard] },
+                { highlights: [] },
+            ],
+            expecting: [{ action: Action.load_commodity, payload: { commodity: 'linen', drop: null } }],
         },
         {
             laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 0;
-                p.cargo = ['gems', 'empty'];
+                p.cargo = ['linen', 'empty'];
                 p.mayUndo = true;
                 p.locationActions = [];
             },
             visuals: [
-                { highlights: [Target.endTurnButton] },
+                { highlights: [] },
             ],
-            expecting: { action: Action.end_turn, payload: null },
+            expecting: [{ action: Action.end_turn, payload: null }],
         },
         {
             laconic: 'turnStart',
@@ -284,29 +290,29 @@ export class TutorialStepProvider {
                 p.isAnchored = false;
                 p.mayUndo = false;
                 p.moveActions = 2;
-                p.destinations = ['left', 'center', 'topRight'];
+                p.destinations = ['topLeft', 'left', 'bottomLeft', 'bottomRight'];
             },
             visuals: [
-                { highlights: [Target.centerZone] },
+                { highlights: [Target.leftZone] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'center', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'left', position } }],
         },
         {
             laconic: null,
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.moveActions = 1;
-                p.bearings.seaZone = 'center';
-                p.bearings.location = 'farms';
-                p.destinations = ['left', 'bottomLeft', 'bottomRight'];
+                p.bearings.seaZone = 'left';
+                p.bearings.location = 'forest';
+                p.destinations = ['topLeft', 'bottomLeft'];
                 p.mayUndo = true;
                 p.isAnchored = true;
                 p.locationActions = [Action.load_commodity];
             },
             visuals: [
-                { highlights: [Target.centerZone] },
+                { highlights: [] },
             ],
-            expecting: { action: Action.load_commodity, payload: { commodity: 'linen', drop: null } },
+            expecting: [{ action: Action.load_commodity, payload: { commodity: 'ebony', drop: null } }],
         },
         {
             laconic: null,
@@ -314,12 +320,12 @@ export class TutorialStepProvider {
                 const p = state.players[0];
                 p.moveActions = 0;
                 p.locationActions = [];
-                p.cargo = ['gems', 'linen'];
+                p.cargo = ['linen', 'ebony'];
             },
             visuals: [
-                { highlights: [Target.endTurnButton] },
+                { highlights: [Target.cargoBand] },
             ],
-            expecting: { action: Action.end_turn, payload: null },
+            expecting: [{ action: Action.end_turn, payload: null }],
         },
         {
             laconic: 'turnStart',
@@ -328,12 +334,33 @@ export class TutorialStepProvider {
                 p.mayUndo = false;
                 p.isAnchored = false;
                 p.moveActions = 2;
-                p.destinations = ['topLeft', 'left', 'bottomLeft', 'bottomRight'];
+                p.destinations = ['topLeft', 'center', 'bottomLeft'];
             },
             visuals: [
                 { highlights: [Target.bottomRightZone] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'bottomRight', position } },
+            expecting: [
+                { action: Action.move, payload: { zoneId: 'center', position } },
+                { action: Action.move, payload: { zoneId: 'bottomLeft', position } },
+            ],
+        },
+        {
+            laconic: null,
+            mutate: (state: PlayState, zone?: ZoneName) => {
+                if (!zone) return;
+                const p = state.players[0];
+                p.mayUndo = true;
+                p.isAnchored = true;
+                p.moveActions = 1;
+                p.bearings.seaZone = zone;
+                p.bearings.location = zone == 'center' ? 'farms' : 'quarry';
+                p.destinations = zone == 'center' ? ['topLeft','bottomLeft','bottomRight'] : ['center','bottomRight'];
+                p.locationActions = [Action.load_commodity];
+            },
+            visuals: [
+                { highlights: [Target.bottomRightZone] },
+            ],
+            expecting: [{ action: Action.move, payload: { zoneId: 'bottomRight', position } }],
         },
         {
             laconic: null,
@@ -341,7 +368,7 @@ export class TutorialStepProvider {
                 const p = state.players[0];
                 p.mayUndo = true;
                 p.isAnchored = true;
-                p.moveActions = 1;
+                p.moveActions = 0;
                 p.bearings.seaZone = 'bottomRight';
                 p.bearings.location = 'temple';
                 p.destinations = ['bottomLeft', 'right'];
@@ -350,10 +377,10 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.templeArea] },
-                { highlights: [Target.marketCard, Target.temple_mark] },
-                { highlights: [Target.marketCard] },
+                { highlights: [Target.templeMarketCard, Target.temple_mark] },
+                { highlights: [Target.templeMarketCard] },
             ],
-            expecting: { action: Action.donate_commodities, payload: { slot: 'slot_2' } },
+            expecting: [{ action: Action.donate_commodities, payload: { slot: 'slot_2' } }],
         },
         {
             laconic: null,
@@ -374,11 +401,11 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.favorDial, Target.vpDial] },
-                { highlights: [Target.marketArea, Target.treasuryArea] },
+                { highlights: [Target.marketArea, Target.treasuryArea, Target.templeMarketCard] },
                 { highlights: [Target.deck] },
                 { highlights: [Target.upgradeButton] },
             ],
-            expecting: { action: Action.upgrade_cargo, payload: null },
+            expecting: [{ action: Action.upgrade_cargo, payload: null }],
         },
         {
             laconic: null,
@@ -391,9 +418,8 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.cargoBand] },
-                { highlights: [Target.endTurnButton] },
             ],
-            expecting: { action: Action.end_turn, payload: null },
+            expecting: [{ action: Action.end_turn, payload: null }],
         },
         {
             laconic: 'turnStart',
@@ -408,7 +434,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.rightZone] },
                 { highlights: [Target.favorButton] },
             ],
-            expecting: { action: Action.spend_favor, payload: null },
+            expecting: [{ action: Action.spend_favor, payload: null }],
         },
         {
             laconic: null,
@@ -421,7 +447,7 @@ export class TutorialStepProvider {
             visuals: [
                 { highlights: [Target.rightZone] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'right', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'right', position } }],
         },
         {
             laconic: 'rivalControl',
@@ -443,7 +469,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.influenceDie] },
                 { highlights: [Target.topRightZone] },
             ],
-            expecting: { action: Action.move_rival, payload: { zoneId: 'topRight', position } },
+            expecting: [{ action: Action.move_rival, payload: { zoneId: 'topRight', position } }],
         },
         {
             laconic: null,
@@ -459,7 +485,7 @@ export class TutorialStepProvider {
             visuals: [
                 { highlights: [Target.cycleMarket, Target.marketArea] },
             ],
-            expecting: { action: Action.shift_market, payload: null },
+            expecting: [{ action: Action.shift_market, payload: null }],
         },
         {
             laconic: null,
@@ -484,7 +510,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.deck] },
                 { highlights: [Target.silverForCoin] },
             ],
-            expecting: { action: Action.buy_metal, payload: { metal: 'silver', currency: 'coins', drop: null } },
+            expecting: [{ action: Action.buy_metal, payload: { metal: 'silver', currency: 'coins', drop: null } }],
         },
         {
             laconic: null,
@@ -501,9 +527,9 @@ export class TutorialStepProvider {
             visuals: [
                 { highlights: [Target.cargoBand] },
                 { highlights: [Target.donationsDisplay] },
-                { highlights: [Target.endTurnButton] },
+                { highlights: [] },
             ],
-            expecting: { action: Action.end_turn, payload: null },
+            expecting: [{ action: Action.end_turn, payload: null }],
         },
         {
             laconic: 'turnStart',
@@ -517,9 +543,9 @@ export class TutorialStepProvider {
                 state.temple.donations = ['gold', 'silver'];
             },
             visuals: [
-                { highlights: [Target.bottomRightZone] },
+                { highlights: [] },
             ],
-            expecting: { action: Action.move, payload: { zoneId: 'bottomRight', position } },
+            expecting: [{ action: Action.move, payload: { zoneId: 'bottomRight', position } }],
         },
         {
             laconic: null,
@@ -538,7 +564,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.donationsDisplay, Target.goldForCoin, Target.silverForCoin] },
                 { highlights: [Target.silverCard, Target.goldForCoin, Target.silverForCoin] },
             ],
-            expecting: { action: Action.donate_metal, payload: { metal: 'silver' } },
+            expecting: [{ action: Action.donate_metal, payload: { metal: 'silver' } }],
         },
         {
             laconic: null,
@@ -556,7 +582,6 @@ export class TutorialStepProvider {
             },
             visuals: [
                 { highlights: [Target.goldForCoin, Target.silverForCoin] },
-                { highlights: [Target.goldForFavor, Target.silverForFavor] },
                 { highlights: [Target.vpDial] },
                 { highlights: [Target.bottomRightZone] },
                 { highlights: [] },
