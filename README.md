@@ -28,7 +28,7 @@ You can set up and run a server quite easily on your local network.
 
 1. Start **Docker Desktop**
 2. Enter the project folder (*\ophir-2d*) and open **Bash** (or **Git Bash**) or another CL tool and:
-   - Run `make dev` or `docker compose up game-server-dev -d --build` and wait for dependencies to download and instantiate.
+   - Run `make start` or `docker compose up game-server-dev -d` and wait for dependencies to download and instantiate.
    - Run `make seed` or `docker compose exec game-server-dev node seed-db.cjs` to initialize game configuration.
 
 You can access the app on your machine by navigating to `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<ip_address>:3001`. How to find it:

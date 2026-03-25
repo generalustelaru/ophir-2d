@@ -35,26 +35,32 @@ export class FavorButton extends RequestButton implements Unique<DynamicGroupInt
     public update(player: Player | null): void {
         switch (true) {
             case (player?.isHandlingRival):
-                this.setEnabled(false);
+                super.setEnabled(false);
                 break;
 
             case (player?.isCurrent && player.privilegedSailing):
-                this.setEnabled(false);
+                super.setEnabled(false);
                 this.favorIcon.update(COLOR_PROFILES.favorStampActive);
                 this.checkmark.visible(true);
                 break;
 
             case (player?.isCurrent && player.favor > 0 && player.moveActions > 0):
-                this.setEnabled(true);
+                super.setEnabled(true);
                 this.favorIcon.update(COLOR_PROFILES.favorStampReady);
                 this.checkmark.visible(false);
                 break;
 
             default:
-                this.setEnabled(false);
+                super.setEnabled(false);
                 this.favorIcon.update(COLOR_PROFILES.favorStampDisabled);
                 this.checkmark.visible(false);
                 break;
         }
+    }
+
+    public disable() {
+        super.setEnabled(false);
+        this.favorIcon.update(COLOR_PROFILES.favorStampDisabled);
+        this.checkmark.visible(false);
     }
 }

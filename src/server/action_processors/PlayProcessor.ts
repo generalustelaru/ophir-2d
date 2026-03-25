@@ -233,7 +233,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         } else if (player.getMoves() == 0) {
             this.privateState.addDeed({
                 context: TurnEvent.failed_turn,
-                description: 'being out of moves, cannot act further',
+                description: 'rolled to low on the second move',
             });
 
             return this.endTurn(digest, false);
@@ -566,16 +566,28 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     public donateCommodities(data: DataDigest): Probable<StateResponse> {
         const { player, payload } = data;
         this.clearUndo(player);
-        const marketSlotPayload = validator.validateMarketPayload(payload);
+        const marketTradePayload = validator.validateMarketPayload(payload);
 
-        if (!marketSlotPayload)
+        if (!marketTradePayload)
             return lib.fail(lib.validationErrorMessage());
 
         const { name, color, userId: userId } = player.getIdentity();
-        const { slot } = marketSlotPayload;
+        const { slot } = marketTradePayload;
 
         if (!player.hasAction(Action.donate_commodities))
             return lib.fail(`${name} cannot donate commodities`);
+
+        if (this.playState.getTempleTradeSlot() != slot) {
+
+            if (player.isAdvisor()) {
+                this.privateState.addDeed({
+                    context: Action.donate_commodities,
+                    description: 'picked a different trade card',
+                });
+            } else {
+                return lib.fail('Donation slot does not match temple slot');
+            }
+        }
 
         // Transaction
         const { request, reward } = this.playState.getMarketTrade(slot);
@@ -590,13 +602,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.setCargo(unloadResult.data);
         this.privateState.addSpentAction(Action.donate_commodities);
 
-        if (player.isMoneychanger())
-            this.privateState.addSpentAction(Action.trade_commodities);
+        if (player.isMoneychanger()) this.privateState.addSpentAction(Action.trade_commodities);
 
-        if (player.isHarbormaster())
-            this.updateMovesAsHarbormaster(player);
-        else
-            player.clearMoves();
+        if (player.isHarbormaster()) this.updateMovesAsHarbormaster(player);
+        else player.clearMoves();
 
         this.privateState.updatePlayerStats(player, donationReward);
 
@@ -976,7 +985,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.playState.addChatEntry(entry);
         this.backupState.addChat(entry);
 
-        this.updateProbableCurrentPlayerStatus(reference);
+        this.resetTimeoutIfCurrentPlayer(reference);
 
         return { state: this.getState() };
     }
@@ -987,7 +996,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.privateState.updatePlayerName(player.color, newName);
         this.backupState.updatePlayerName(player.color, newName);
 
-        this.updateProbableCurrentPlayerStatus(reference);
+        this.resetTimeoutIfCurrentPlayer(reference);
 
         return { state: this.getState() };
     };
@@ -1377,7 +1386,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
             activePlayer.bubbleDeeds.pop();
             activePlayer.bubbleDeeds.push(BubbleDeed.idle);
-            this.addServerMessage(`${activePlayer.name} is idle`);
+            this.addServerMessage(`${activePlayer.name} is idling.`);
             this.playState.savePlayer(activePlayer);
 
             this.transmit(playerId, { turnStart: null });
@@ -1438,7 +1447,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         player.deactivate();
     }
 
-    private updateProbableCurrentPlayerStatus(reference: UserReference) {
+    private resetTimeoutIfCurrentPlayer(reference: UserReference) {
         const currentPlayer = this.playState.getActivePlayer();
         if (currentPlayer && currentPlayer.color == reference.color) {
             this.clearIdleTimeout();

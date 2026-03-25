@@ -57,7 +57,10 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
         });
 
         this.group.on(RawEvents.CLICK, () => {
-            this.isInspectable && this.deedBubble.peek();
+            if (this.isInspectable) {
+                this.group.moveToTop();
+                this.deedBubble.peek();
+            }
         });
 
         this.group.on(RawEvents.LEAVE, () => {

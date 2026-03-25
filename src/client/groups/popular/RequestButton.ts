@@ -19,7 +19,7 @@ export abstract class RequestButton extends Button {
     }
 
     public setEnabled(shouldEnable: boolean) {
-        shouldEnable ? this.enable() : this.disable();
+        shouldEnable ? super.enable() : super.disable();
     }
 
     public updateActionMessage(actionMessage: ClientMessage) {
