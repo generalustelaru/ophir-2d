@@ -1,3 +1,7 @@
+NAME = game-server
+ENV		?= dev
+COMPOSE	= docker compose
+
 # Local Development
 pull:
 	git pull
@@ -29,52 +33,26 @@ ignore:
 fix:
 	npx eslint . --fix
 
-
-# Docker Production
-
-
-# Docker Development / Debugging
-seed:
-	docker compose exec game-server-dev node seed-db.cjs
-
-build:
-	docker compose up -d game-server-dev --build
-
-start:
-	docker compose up -d game-server-dev
-
-stop: # Stop everything
-	docker compose down --remove-orphans
-
-rebuild:
-	docker compose down --remove-orphans
-	docker compose up -d game-server-dev --build
-	docker compose logs -f game-server-dev
-
-rebuild-prod:
-	docker compose down --remove-orphans
-	docker compose up -d game-server-prod --build
-	docker compose logs -f game-server-prod
-
-watch-prod:
-	docker compose logs -f game-server-prod
-
-restart:
-	docker compose restart game-server-dev
-
-containers:
-	docker compose ps
-
+# Docker
 watch:
-	docker compose logs -f game-server-dev
-
+	$(COMPOSE) logs -f $(NAME)-$(ENV)
 watch-all:
-	docker compose logs -f
-
+	$(COMPOSE) logs -f
+seed:
+	$(COMPOSE) exec $(NAME)-$(ENV) node seed-db.cjs
+build:
+	$(COMPOSE) up -d $(NAME)-$(ENV) --remove-orphans --build
+	$(MAKE) watch
+restart:
+	$(COMPOSE) restart $(NAME)-$(ENV)
+	$(MAKE) watch
 shell:
-	docker compose exec game-server-dev sh
+	$(COMPOSE) exec $(NAME)-$(ENV) sh
+stop: # Stop everything
+	$(COMPOSE) down --remove-orphans
+containers:
+	$(COMPOSE) ps
+nuke:
+	$(COMPOSE) down -v
 
-clean:
-	docker compose down -v
-
-.PHONY: client server static build run containers start dev restart watch watch-all seed shell clean
+.PHONY: pull static client server run check ignore fix watch watch-all seed build restart shell stop containers nuke

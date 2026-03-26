@@ -28,15 +28,18 @@ You can set up and run a server quite easily on your local network.
 
 1. Start **Docker Desktop**
 2. Enter the project folder (*\ophir-2d*) and open **Bash** (or **Git Bash**) or another CL tool and:
-   - Run `make start` or `docker compose up game-server-dev -d` and wait for dependencies to download and instantiate.
+   - Run `make build` or `docker compose up game-server-dev -d` and wait for dependencies to download and instantiate.
    - Run `make seed` or `docker compose exec game-server-dev node seed-db.cjs` to initialize game configuration.
 
-You can access the app on your machine by navigating to `localhost:3001` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<ip_address>:3001`. How to find it:
+You can access the app on your machine by navigating to `localhost` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<ip_address>`. How to find it:
    - PowerShell: `(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -eq 'Ethernet'}).IPAddress`
    - Git Bash: `ipconfig | grep -A 3 'Ethernet' | grep 'IPv4' | awk '{print $NF}'`
    - Linux: `ip route get 1.1.1.1 | grep -oP 'src \K\S+'`
 
 To turn off the server and all adjacent processes run `make stop` or `docker compose down`.
+
+## Note:
+The server is using port 80. If something else is already serving on port 80 (e.g. IIS, another web server), stop it first or the container won't start. Alternatively, you can edit it to some other port in `docker-compose.yml`.
 
 ## Troubleshooting
 If you experience mouseover or click issues, try using an alternative browser (Chrome, Firefox, and Edge should work).
@@ -53,7 +56,7 @@ Games start in the "Enrolment" phase, when any visitor can join by selecting a c
  - Read the included rules accessible from the About page and the Lobby. These work better as they reference this implementation and also contain pictures.
 
 ## Configuration options (admin & 'fun' stuff)
-Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easer configuration editing.
+Install [MongoDB Compass](https://www.mongodb.com/try/download/compass) for easier configuration editing.
 Linux:
 ```
 wget https://downloads.mongodb.com/compass/mongodb-compass_1.43.0_amd64.deb
@@ -61,7 +64,7 @@ sudo apt install ./mongodb-compass_1.43.0_amd64.deb
 ```
 Open it and connect to `mongodb://localhost:27017/gamedb`.
 
-You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediatlely for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
+You can edit the "config" values found in the `ophir\config` (`_id: "config_0"`) collection. The game-altering values are applied immediately for new games, restarted games, and revived games (went from *Dormant* to *Active*) that haven't passed the enrolment step yet.
 - Open the `_id: "config_0"` record and click on the Edit icon.
 
 ### Fields:
@@ -79,11 +82,11 @@ CARGO_BONUS | Players start with cargo advantages. | * |
 SHORT_GAME | Reduces the Temple Track to a single column (the game ends after three metal donations). | `boolean` |
 INCLUDE | Array of specialists to appear in the draft. | ** `array` |
 
-- *CARGO_BONUS
+- *CARGO_BONUS:
    - `0`: None
    - `1`: Upgraded cargo (four slots)
-   - `2` One of each commodity onboard
-   - `3` One gold and one silver onboard
+   - `2`: One of each commodity onboard
+   - `3`: One gold and one silver onboard
 
 - **INCLUDE: `"advisor"`, `"ambassador"`, `"chancellor"`, `"harbormaster"`, `"moneychanger"`, `"navigator"`, `"peddler"`, `"postmaster"`, `"priest"`, `"temple_guard"`.
 
@@ -92,10 +95,10 @@ If on **Windows**, install [Git Bash](https://gitforwindows.org/) (it's bundled 
 
 Install [Node](https://nodejs.org/en/download/package-manager) to be able to fiddle with the project outside of Docker.
 
-Run `npm run ommit_revs` to exclude code maintenance commits from GitBlame.
+Run `npm run omit_revs` to exclude code maintenance commits from GitBlame.
 
 To use in memory debug:
-   - Enter the server's Docker container (`docker exec -it ophir-2d-game-server-dev-1 sh`);
+   - Enter the server's Docker container (`docker exec -it ophir-2d-game-server-dev sh`);
    - Run `sh debug.sh <command> <target> <option>` (parameters are optional).
 
 Install **Make** to make use of the Makefile commands.
