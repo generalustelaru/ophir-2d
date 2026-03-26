@@ -33,9 +33,10 @@ export class EnrolmentStateHandler implements Unique<ObjectHandler<EnrolmentStat
     }
 
     public setAway(isAway: boolean, color: PlayerColor) {
-        const player = this.players.getOne(color);
-
-        if (player) player.isAway = isAway;
+        this.players.updateOne(
+            color,
+            (p) => { return { ...p, isAway }; },
+        );
     }
 
     public addChatEntry(chat: ChatEntry) {

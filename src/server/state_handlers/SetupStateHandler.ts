@@ -39,9 +39,10 @@ export class SetupStateHandler implements Unique<ObjectHandler<SetupState>> {
     };
 
     public setAway(isAway: boolean, color: PlayerColor) {
-        const player = this.players.getOne(color);
-
-        if (player) player.isAway = isAway;
+        this.players.updateOne(
+            color,
+            (p) => { return { ...p, isAway }; },
+        );
     }
 
     public addChatEntry(chat: ChatEntry) {

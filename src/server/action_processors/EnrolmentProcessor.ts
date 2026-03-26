@@ -11,12 +11,14 @@ import lib from './library';
 export class EnrolmentProcessor implements Unique<ActionProcessor> {
     private enrolmentState: EnrolmentStateHandler;
     private transmit: (userId: UserId, message: ServerMessage) => void;
+    private broadcast: (state: EnrolmentState) => void;
     private isSinglePlayer: boolean;
     private defaultNames: Array<string>;
     private reportColorAssignment: (userId: UserId, color: PlayerColor) => void;
 
     constructor(
         state: EnrolmentState,
+        broadcastCallback: (state: EnrolmentState) => void,
         transmitCallback: (userId: UserId, message: ServerMessage) => void,
         refUpdateCallback: (userId: UserId, color: PlayerColor) => void,
         configuration: Configuration,
@@ -24,6 +26,7 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         this.isSinglePlayer = configuration.SINGLE_PLAYER;
         this.enrolmentState = new EnrolmentStateHandler(configuration.SERVER_NAME, state);
         this.transmit = transmitCallback;
+        this.broadcast = broadcastCallback;
         this.reportColorAssignment = refUpdateCallback;
         const takenNames = state.players.map(p => p.name);
         this.defaultNames = serverConstants.DEFAULT_NAMES.filter(n => !takenNames.includes(n));
@@ -36,11 +39,27 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
     public clearIdleTimeout() {};
 
     public handleDisconnection(reference: UserReference) {
-        reference.color && this.enrolmentState.setAway(true, reference.color);
+
+        if (!reference.color) return;
+
+        this.enrolmentState.setAway(true, reference.color);
+        const remaining = this.enrolmentState.getAllPlayers().filter(p => !p.isAway);
+
+        if (remaining.length == 1) this.enrolmentState.setSessionOwner(remaining[0].color);
+
+        this.broadcast(this.enrolmentState.toDto());
     };
 
     public handleReconnection(reference: UserReference) {
-        reference.color && this.enrolmentState.setAway(false, reference.color);
+
+        if (!reference.color) return;
+
+        if (this.enrolmentState.getAllPlayers().every(p => p.isAway)) {
+            this.enrolmentState.setSessionOwner(reference.color);
+        }
+
+        this.enrolmentState.setAway(false, reference.color);
+        this.broadcast(this.enrolmentState.toDto());
     };
 
     public addChat(entry:ChatEntry): StateResponse {

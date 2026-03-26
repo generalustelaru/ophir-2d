@@ -62,9 +62,10 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
     }
 
     public setAway(isAway: boolean, color: PlayerColor) {
-        const player = this.players.getOne(color);
-
-        if (player) player.isAway = isAway;
+        this.players.updateOne(
+            color,
+            (p) => { return { ...p, isAway }; },
+        );
     }
 
     public getLocationName(zoneName: ZoneName) {

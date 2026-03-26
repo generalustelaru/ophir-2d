@@ -3,7 +3,7 @@ import {
     GameState, UserId, User, UserSession, GameFeed, LobbyAction, GameStatus, UserInvolvement, UserReference,
 } from '~/server_types';
 import {
-    ServerMessage, PlayState, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity, PlayerEntry,
+    ServerMessage, State, Action, ClientRequest, Phase, Player, PlayerDraft, PlayerEntity, PlayerEntry,
 } from '~/shared_types';
 import { validator } from './services/validation/ValidatorService';
 import express, { Request, Response } from 'express';
@@ -67,13 +67,12 @@ process.on('SIGINT', () => {
 });
 
 // MARK: TYPES
-declare module 'ws' {
-    interface WebSocket { isAlive: boolean }
-}
-type GameConnection = { isSwitching: boolean, socket: WebSocket }
+declare module 'ws' {interface WebSocket { isAlive: boolean }}
+type Connection = { isSwitching: boolean, socket: WebSocket }
+type ActiveUser = Map<GameId, Connection>
 
 // MARK: MEMORY
-const allConnections: Map<UserId, Map<GameId, GameConnection>> = new Map();
+const activeUsers: Map<UserId, ActiveUser> = new Map();
 const activeGames: Map<GameId, Game> = new Map();
 const stats: Map<GameId, GameStats> = new Map();
 
@@ -148,35 +147,36 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         if (ref.color) {
             transmit(socket, { color: ref.color });
             transmit(socket, { vp: game.getPlayerVP(ref.color) });
+            game.handlePlayerReconnection(ref);
         }
 
         return ref;
     })();
 
-    const userConnections = ((): Map<GameId, GameConnection> => {
-        const userConnections = allConnections.get(user.id);
+    const activeUser = ((): Map<GameId, Connection> => {
+        const activeUser = activeUsers.get(user.id);
 
-        if (!userConnections) {
-            const newConnections = new Map([[gameId, { isSwitching: false, socket }]]);
-            allConnections.set(user.id, newConnections);
+        if (!activeUser) {
+            const newActiveUser = new Map([[gameId, { isSwitching: false, socket }]]);
+            activeUsers.set(user.id, newActiveUser);
 
-            return newConnections;
+            return newActiveUser;
         }
 
-        const gameConnection = userConnections.get(gameId);
+        const oldConnection = activeUser.get(gameId);
 
-        if (gameConnection) {
-            const abandonedSocket = gameConnection.socket;
-            gameConnection.socket = socket;
-            gameConnection.isSwitching = true;
+        if (!oldConnection) {
+            activeUser.set(gameId, { isSwitching: false, socket });
 
-            transmit(abandonedSocket, { switch: null });
-        } else {
-            userConnections.set(gameId, { isSwitching: false, socket });
-            game.handlePlayerReconnection(ref);
+            return activeUser;
         }
 
-        return userConnections;
+        const abandonedSocket = oldConnection.socket;
+        oldConnection.socket = socket;
+        oldConnection.isSwitching = true;
+        transmit(abandonedSocket, { switch: null });
+
+        return activeUser;
     })();
 
     updateGameStat(gameId);
@@ -211,18 +211,18 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         socket.isAlive = true;
     });
     socket.on('close', (_code) => {
-        const gameConnection = userConnections.get(gameId);
+        const connection = activeUser.get(gameId);
 
-        if (gameConnection?.isSwitching) {
-            gameConnection.isSwitching = false;
+        if (connection?.isSwitching) {
+            connection.isSwitching = false;
         } else {
-            userConnections.delete(gameId);
+            activeUser.delete(gameId);
         }
 
         setTimeout(() => {
-            if (!userConnections.has(gameId)) {
-                handleDisconnection(gameId);
+            if (!activeUser.has(gameId)) {
                 game.handlePlayerDisconnection(ref);
+                handleDisconnection(game);
             }
         }, 1000);
     });
@@ -494,7 +494,7 @@ async function processAction(
     const gameId = game.getGameId();
     const isAdoption = (
         game.getGameState().sharedState.sessionPhase == Phase.enrolment &&
-        getGameConnections(gameId).length == 1
+        getActiveUserIdsByGame(gameId).length == 1
     );
 
     const result = game.processAction(request, isAdoption);
@@ -513,12 +513,12 @@ async function processAction(
 }
 
 // MARK: CALLBACKS
-function broadcastCallback(state: PlayState) {
+function broadcastCallback(state: State) {
     broadcastToGroup(state.gameId, { state });
 }
 
 function transmitCallback(userId: UserId, gameId: GameId, message: ServerMessage) {
-    const userConnections = allConnections.get(userId);
+    const userConnections = activeUsers.get(userId);
 
     if (!userConnections)
         return;
@@ -550,7 +550,7 @@ function logRequest(request: ClientRequest, userName: string, gameId: GameId) {
 }
 
 function broadcast(message: ServerMessage): void {
-    allConnections.forEach(userConnections => {
+    activeUsers.forEach(userConnections => {
         userConnections.forEach(connection => {
             transmit(connection.socket, message);
         });
@@ -568,7 +568,7 @@ function broadcastToGroup(gameId: GameId, message: ServerMessage): void {
         return console.error('Cannot find active GameSession', { gameId });
 
     for (const userId of playGroupIds) {
-        const socket = allConnections.get(userId)?.get(gameId)?.socket;
+        const socket = activeUsers.get(userId)?.get(gameId)?.socket;
         socket && transmit(socket, message);
     }
 }
@@ -581,7 +581,7 @@ function startGameChecks() {
     setInterval(async () => {
 
         // socket heartbeat check
-        allConnections.forEach((userConnections) => {
+        activeUsers.forEach((userConnections) => {
             userConnections.forEach(connection => {
                 const { socket } = connection;
 
@@ -607,16 +607,12 @@ function startGameChecks() {
 
         stats.forEach(async (stat: GameStats, gameId) => {
             const { timeStamp } = stat;
+
+            if (activeGames.has(gameId) && getActiveUserIdsByGame(gameId).length > 0) return;
+
+            activeGames.delete(gameId);
             const elapsedTime = time - timeStamp;
             const persistence = count * hours;
-
-            if (activeGames.has(gameId)) {
-
-                if (getGameConnections(gameId).length == 0)
-                    activeGames.delete(gameId);
-                else
-                    return;
-            }
 
             if (elapsedTime > persistence) {
 
@@ -624,6 +620,7 @@ function startGameChecks() {
 
                 if (deletion.err) {
                     sLib.printError(deletion.message);
+
                     return;
                 }
 
@@ -634,35 +631,30 @@ function startGameChecks() {
     }, 1 * minutes);
 }
 
-async function handleDisconnection(gameId: GameId) {
-    let toRemove = false;
+async function handleDisconnection(game: Game) {
+    const gameId = game.getGameId();
 
-    if (activeGames.has(gameId)) {
-        const connectedUsers = getGameConnections(gameId);
+    if (false == activeGames.has(gameId)) return;
 
-        if (connectedUsers.length == 0) {
-            const game = activeGames.get(gameId) as Game;
-            toRemove = game.getAllRefs().every(ref => ref.color == null);
+    const connectedUsers = getActiveUserIdsByGame(gameId);
 
-            try {
-                const operation = toRemove
-                    ? await dbService.deleteGameState(gameId)
-                    : await dbService.saveGameState(game.getGameState());
+    if (connectedUsers.length > 0) return await updateGameStat(gameId);
 
-                if (operation.ok) {
-                    game.deReference();
-                    activeGames.delete(gameId);
-                } else {
-                    sLib.printError(operation.message);
-                    toRemove = true;
-                }
-            } catch (error) {
-                sLib.printError(sLib.getErrorBrief(error));
-            }
-        }
+    const areNoPlayers = game.getAllRefs().every(ref => ref.color == null);
+    const operation = areNoPlayers
+        ? await dbService.deleteGameState(gameId)
+        : await dbService.saveGameState(game.getGameState());
+
+    if (operation.err) {
+        sLib.printError(operation.message);
+
+        return await updateGameStat(gameId, true);
     }
 
-    await updateGameStat(gameId, toRemove);
+    game.deReference();
+    activeGames.delete(gameId);
+
+    return await updateGameStat(gameId, areNoPlayers);
 }
 
 async function createGame(): Promise<Probable<Game>> {
@@ -805,8 +797,9 @@ type GameStats = {
     activeCount: number
 }
 
-async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promise<void> {
-    if (toRemove) {
+async function updateGameStat(gameId: GameId, removeStat: boolean = false): Promise<void> {
+
+    if (removeStat) {
         stats.delete(gameId);
         return;
     }
@@ -834,7 +827,7 @@ async function updateGameStat(gameId: GameId, toRemove: boolean = false): Promis
     const { sharedState, userReferences: userReferences, timeStamp } = gameState;
     const { sessionPhase: phase, players } = sharedState;
     const activeCount = (() => {
-        const connections = getGameConnections(gameId);
+        const connections = getActiveUserIdsByGame(gameId);
         const activePlayers = userReferences.filter(
             ref => ref.color && connections.includes(ref.id),
         );
@@ -923,9 +916,9 @@ function composeLobbyFeed(userId: UserId): Array<GameFeed> {
     return lobbyFeed;
 }
 
-function getGameConnections(gameId: GameId): Array<UserId> {
-    return Array.from(allConnections.entries())
-        .filter(([, userConnection]) => userConnection.has(gameId))
+function getActiveUserIdsByGame(gameId: GameId): Array<UserId> {
+    return Array.from(activeUsers.entries())
+        .filter(([, activeUser]) => activeUser.has(gameId))
         .map(([userId]) => userId);
 }
 
@@ -946,7 +939,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
         return {
             overview: {
                 active_games: activeGames.size,
-                connected_users: allConnections.size,
+                connected_users: activeUsers.size,
                 game_stats: stats.size,
             },
             commands: ['users', 'stats', 'games'],
@@ -954,7 +947,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
 
     switch (command) {
         case 'users':
-            return Array.from(allConnections.keys());
+            return Array.from(activeUsers.keys());
         case 'games':
             return debugGame(target, option);
         case 'stats':
@@ -975,7 +968,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
             return {
                 overview: {
                     refs: game.getAllRefs().length,
-                    connected: getGameConnections(probableGameId).length,
+                    connected: getActiveUserIdsByGame(probableGameId).length,
                 },
                 options: ['refs', 'connected'],
             };
@@ -985,7 +978,7 @@ function debugCommand(command?: string, target?: string, option?: string): objec
             case 'refs':
                 return game.getAllRefs().map(r => r.name);
             case 'connected':
-                return getGameConnections(probableGameId).map(userId =>
+                return getActiveUserIdsByGame(probableGameId).map(userId =>
                     game.getAllRefs().filter(r => r.id == userId)[0].name,
                 );
             default:

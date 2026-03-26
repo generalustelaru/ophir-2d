@@ -4,7 +4,7 @@ import {
     GameId,
 } from '~/server_types';
 import {
-    ServerMessage, Action, Phase, PlayState, StateResponse, PlayerColor, PlayerEntity, State, Player,
+    ServerMessage, Action, Phase, StateResponse, PlayerColor, PlayerEntity, State, Player,
 } from '~/shared_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library';
@@ -25,14 +25,14 @@ export class Game {
     private timeStamp: number;
     private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
-    private broadcast: ((state: PlayState) => void) | null;
+    private broadcast: ((state: State) => void) | null;
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private saveDisplayName: ((userId: UserId, name: string) => void) | null;
     private userReferences: Array<UserReference> = [];
     private font: Font | null;
 
     constructor(
-        broadcastCallback: (state: PlayState) => void,
+        broadcastCallback: (state: State) => void,
         transmitCallback: (userId: UserId, gameId: GameId, message: ServerMessage) => void,
         nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
@@ -64,6 +64,7 @@ export class Game {
             this.timeStamp = Date.now();
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
+                broadcastCallback,
                 this.transmit,
                 this.updateReferenceColor.bind(this),
                 configuration,
@@ -112,6 +113,7 @@ export class Game {
                 case Phase.enrolment:
                     return new EnrolmentProcessor(
                         sharedState,
+                        broadcastCallback,
                         this.transmit,
                         this.updateReferenceColor.bind(this),
                         configuration,
@@ -193,7 +195,7 @@ export class Game {
     }
 
     public reset() {
-        if (!this.transmit) {
+        if (!this.transmit || !this.broadcast) {
             lib.printError('GameSession was dereferenced but not removed.');
             return;
         }
@@ -204,6 +206,7 @@ export class Game {
         this.actionProcessor.clearIdleTimeout();
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
+            this.broadcast,
             this.transmit,
             this.updateReferenceColor.bind(this),
             this.config,
@@ -317,7 +320,7 @@ export class Game {
             case Phase.setup:
                 return this.processSetupAction(matchedRequest);
             case Phase.enrolment:
-                return this.processEnrolmentAction(matchedRequest, false);
+                return this.processEnrolmentAction(matchedRequest, isAdoption);
             default:
                 return emitError('Unknown game phase!');
         }

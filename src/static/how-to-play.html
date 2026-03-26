@@ -11,39 +11,45 @@
 </head>
 
 <body>
-    <div id="recommendation">
-        play tutorial first, this is a boring read, read section about what tutorial didn't cover
-    </div>
     <div class="navbar">
         <button id="back">Back</button>
     </div>
     <div class="content">
     <article>
+        <h2>Starting a Game</h2>
+        <p>A game of Ophir 2D can be created ad-hoc from the <a href="/lobby">/lobby</a> page (log in required).</p>
         <h2 id="the-navbar">The Navbar</h2>
         <p>The game-specific navbar contains these buttons:</p>
         <ul>
             <li><button disabled>Lobby</button> returns to the Lobby. The game will persist and you will be able to
                 rejoin it.</li>
             <li><button disabled="disabled">Next</button> transitions to the next game <strong>phase</strong>. Only
-                available to the <strong>game owner</strong>. Phases are <strong>Enrolment</strong>, <strong>Specialist
-                Selection</strong>, and <strong>Play</strong>.</li>
-            <li><button disabled="disabled">Reset</button> The game reverts to the Enrolment phase. Only available to
-                the game owner.</li>
+                available to the <strong>game owner</strong> throughout the <strong>Color Selection</strong> and <strong>
+                Specialist Drafting</strong> phases.</li>
+            <li><button disabled="disabled">Reset</button> reverts the game to the <strong>Color Selection</strong>
+                phase. Only available to the <strong>game owner</strong>.</li>
         </ul>
-        <h2 id="enrolment">Enrolment</h2>
-        <p>During <strong>Enrolment</strong> visitors will have to select one of the available colors to become players.
-            This is a free-for-all phase. A player may still select a different color if available. The first visitor to
-            become a player is also the <strong>game owner</strong>. The game owner may
-            <button disabled="disabled">Reset</button> the session at any time.</p>
+        <h2 id="enrolment">Color Selection</h2>
+        <h3>The game owner</h3>
+        <p>During <strong>Color Selection</strong> visitors may join by select one of the available colors.
+            This is a free-for-all phase. A player may still select a different color if and when available. The first
+            visitor to become a player is also the <strong>game owner</strong>. The game owner may click on
+            <button disabled="disabled">Reset</button> at any time to clear the entire session and begin anew.</p>
+        <h3>Adoption</h3>
+        <p>If all players leave during this phase, the game is labelled as "Abandoned". An abandoned game will be adopted
+            automatically by the first returning player or by the first visitor who joins selects a color.</p>
+        <h3>Deletion</h3>
+        <p>Games that have no players and no visitors are deleted automatically. Games that have passed Color Selection
+            will also be deleted if they register no activity for a long time (usually 36 hours).</p>
         <img class="picture" src="/pictures/enrolment-panel.png" />
         <p>Once you&#39;ve chosen a color, you can start typing in the included chat. As a special command, you can
             currently change your display name by typing <code>#name &lt;some_name&gt;</code>. You can do this any time
             during the game except after its conclusion. </p>
         <img class="picture" src="/pictures/chat-interface.png" />
         <p>When the owner is satisfied with the player composition, he or she may click on <button disabled="disabled">
-            Next</button>. This will transition the game to the <strong>Specialist Selection</strong> phase.
+            Next</button>. This will transition the game to the <strong>Specialist Drafting</strong> phase.
         </p>
-        <h2 id="specialist-selection">Specialist Selection</h2>
+        <h2 id="specialist-selection">Specialist Drafting</h2>
         <p>In this phase players will have to select a <strong>specialist</strong> to carry into the <strong>
             Play</strong> phase. Each specialist provides:
             <ol type="a">
