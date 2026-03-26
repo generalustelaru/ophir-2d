@@ -199,6 +199,14 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     public clearMoves() {
         this.moveActions.set(0);
     }
+
+    /** Clears moves after a location action, preserving the harbormaster's second move while privileged. */
+    public spendActionMoves() {
+        if (this.isHarbormaster() && this.isPrivileged() && this.getMoves() == 1)
+            return;
+
+        this.clearMoves();
+    }
     public getOvernightZone() {
         return this.overnightZone.get();
     }
