@@ -9,12 +9,14 @@ import { Controller, EventType } from '~/client_types';
 export class GameController extends Communicator implements Controller {
 
     private socket: WebSocket | null = null;
+    private isLocal: boolean;
 
-    constructor() {
+    constructor(protocol: 'ws:' | 'wss:') {
         super();
+        this.isLocal = protocol == 'ws:' || false;
     }
 
-    public initialize(url: string, gameId: string) {
+    public initialize(url: string, gameId: string, ) {
         this.socket = new WebSocket(`${url}?gameId=${gameId}`);
 
         this.socket.onopen = () => {
@@ -44,7 +46,7 @@ export class GameController extends Communicator implements Controller {
 
         this.socket.onmessage = (event) => {
             const data: ServerMessage = JSON.parse(event.data);
-            console.debug('<-', data);
+            this.isLocal && console.debug('<-', data);
 
             switch (true) {
                 case this.isGameStateResponse(data):
@@ -104,7 +106,7 @@ export class GameController extends Communicator implements Controller {
 
         const request: ClientRequest = { message };
 
-        console.debug('->', request);
+        this.isLocal && console.debug('->', request);
 
         this.socket.send(JSON.stringify(request));
     }

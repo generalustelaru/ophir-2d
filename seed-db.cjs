@@ -12,7 +12,7 @@ const { MongoClient } = require('mongodb');
         // Seed config
         const config = {
             SERVER_NAME: 'TempleBot',
-            PLAYER_IDLE_MINUTES: 5,
+            PLAYER_IDLE_MINUTES: 1,
             USER_SESSION_HOURS: 2,
             GAME_PERSIST_HOURS: 36,
             SINGLE_PLAYER: true,

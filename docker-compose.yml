@@ -2,7 +2,7 @@ services:
   game-server-dev:
     build:
       context: .
-      target: dev_build
+      target: development
     ports:
       - "80:3001"
     environment:
@@ -19,7 +19,7 @@ services:
   game-server-prod:
     build:
       context: .
-      target: prod_build
+      target: production
     ports:
       - "127.0.0.1:3001:3001"
     environment:

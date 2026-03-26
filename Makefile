@@ -34,12 +34,14 @@ fix:
 	npx eslint . --fix
 
 # Docker
+deploy:
+	$(COMPOSE) up -d $(NAME)-$(ENV)
+	$(COMPOSE) exec $(NAME)-$(ENV) node seed-db.cjs
+	$(MAKE) watch
 watch:
 	$(COMPOSE) logs -f $(NAME)-$(ENV)
 watch-all:
 	$(COMPOSE) logs -f
-seed:
-	$(COMPOSE) exec $(NAME)-$(ENV) node seed-db.cjs
 build:
 	$(COMPOSE) up -d $(NAME)-$(ENV) --remove-orphans --build
 	$(MAKE) watch
@@ -49,10 +51,10 @@ restart:
 shell:
 	$(COMPOSE) exec $(NAME)-$(ENV) sh
 stop: # Stop everything
-	$(COMPOSE) down --remove-orphans
+	$(COMPOSE) down
 containers:
 	$(COMPOSE) ps
 nuke:
 	$(COMPOSE) down -v
 
-.PHONY: pull static client server run check ignore fix watch watch-all seed build restart shell stop containers nuke
+.PHONY: pull static client server run check ignore fix deploy watch watch-all build restart shell stop containers nuke

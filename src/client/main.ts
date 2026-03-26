@@ -13,7 +13,7 @@ const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 const isTutorial = requestedGameId == 'tutorial';
 const uiService = new UserInterface(isTutorial);
-const controller = isTutorial ? new TutorialController() : new GameController();
+const controller = isTutorial ? new TutorialController() : new GameController(protocol);
 const gameAdress = `${protocol}//${window.location.host}/game`;
 
 function signalError(message?: string) {
