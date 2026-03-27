@@ -7,7 +7,6 @@ const { HUES, LOCATION_TOKEN_DATA } = clientConstants;
 export class CoinDial implements Unique<DynamicGroupInterface<number>> {
     private group: Konva.Group;
     private amount: Konva.Text;
-    private coinCenter: number;
     constructor(
         position: Coordinates,
         amount: number,
@@ -45,10 +44,9 @@ export class CoinDial implements Unique<DynamicGroupInterface<number>> {
             fill: 'black',
         });
 
-        this.coinCenter = this.group.getClientRect().width / 2;
         this.amount = new Konva.Text({
-            x: this.coinCenter - 5,
-            y: this.coinCenter - 8,
+            x: - 5,
+            y: - 8,
             text: amount.toString(),
             fontSize: 20,
             fill: HUES.upgradeBoxSilver,
@@ -65,7 +63,7 @@ export class CoinDial implements Unique<DynamicGroupInterface<number>> {
 
     public update(value: number): void {
         this.amount.text(value.toString());
-        this.amount.x(value > 9 ? this.coinCenter - 10 : this.coinCenter - 5);
+        this.amount.x(value > 9 ? - 10 : - 5);
     }
 
     public show() {

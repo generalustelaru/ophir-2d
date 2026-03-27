@@ -1,6 +1,6 @@
 
 import Konva from 'konva';
-import { DynamicGroupInterface, PlayerHueVariation } from '~/client_types';
+import { DynamicGroupInterface, ElementList, PlayerHueVariation } from '~/client_types';
 import { Action, Player, PlayerColor, Unique } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyButton } from '.';
@@ -72,20 +72,20 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
             this.variation.vivid.light,
         );
 
-        this.group.add(
+        const elements: ElementList = [
             this.background,
             this.cargoBand.getElement(),
             this.favorDial.getElement(),
             this.coinDial.getElement(),
             this.influenceDial.getElement(),
-        );
+        ];
 
         this.vpDial = new VictoryPointDial(
             { x:120, y: 33 },
             0,
             player.color === localColorName,
         );
-        this.group.add(this.vpDial.getElement());
+        elements.push(this.vpDial.getElement());
 
         this.specialtyButton = new SpecialtyButton(
             stage,
@@ -93,7 +93,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
             { x: 190, y: 40 },
             isLocalPlayer,
         );
-        this.group.add(this.specialtyButton.getElement());
+        elements.push(this.specialtyButton.getElement());
 
         this.specialistCard = new SpecialistCard(
             { width: this.group.width(), height: this.group.height(), x: 0, y: 0 },
@@ -109,10 +109,12 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
             () => this.toggleSpecialistCard(),
         );
 
-        this.group.add(
+        elements.push(
             this.specialistCard.getElement(),
             this.specialistBand.getElement(),
         );
+
+        this.group.add(...elements);
     }
 
     public update(player: Player): void {

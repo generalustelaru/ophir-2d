@@ -39,8 +39,6 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, 
         this.upgradeButton = new UpgradeButton(
             stage,
             {
-                width: 80,
-                height: 30 + 10,
                 x: layout.width - 85,
                 y: layout.height - 65,
             },

@@ -26,7 +26,7 @@ export class MetalDonationCard extends RequestButton implements Unique<DynamicGr
             fill: isEnabled ? HUES.templeBlue : HUES.templeDarkBlue,
             stroke: isEnabled ? HUES.treasuryGold : HUES.boneWhite,
             strokeWidth: 2,
-            cornerRadius: 15,
+            cornerRadius: 5,
         });
 
         const metalIcon = new Konva.Path({

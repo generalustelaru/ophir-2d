@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { DynamicGroupInterface, GroupLayoutData } from '~/client_types';
-import { Action, Unique } from '~/shared_types';
+import { DynamicGroupInterface } from '~/client_types';
+import { Action, Coordinates, Unique } from '~/shared_types';
 import { RequestButton, CoinDial } from '../popular';
 import clientConstants from '~/client_constants';
 
@@ -13,15 +13,23 @@ export class UpgradeButton extends RequestButton implements Unique<DynamicGroupI
 
     constructor(
         stage: Konva.Stage,
-        layout: GroupLayoutData,
+        position: Coordinates,
     ) {
+        const layout = {
+            width: 80,
+            height: 40,
+            ...position,
+        };
+
         super(stage, layout, { action: Action.upgrade_cargo, payload: null });
 
+        const bgRetraction = 9;
         this.background = new Konva.Rect({
-            width: layout.width,
+            width: layout.width - bgRetraction,
             height: layout.height,
+            x: bgRetraction,
             fill: HUES.upgradeBoxSilver,
-            cornerRadius: 15,
+            cornerRadius: 5,
         });
 
         const coin = new CoinDial({ x: 15, y: 20 }, 2);

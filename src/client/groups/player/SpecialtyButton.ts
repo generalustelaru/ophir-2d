@@ -1,7 +1,7 @@
 import Konva from 'konva';
-import { DynamicGroupInterface } from '~/client_types';
+import { DynamicGroupInterface, ElementList } from '~/client_types';
 import { Player, Coordinates, PlayerColor, Action, Unique } from '~/shared_types';
-import { RequestButton } from '../popular';
+import { RequestButton, CoinDial } from '../popular';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA, HUES } = clientConstants;
@@ -11,6 +11,7 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
     private background: Konva.Rect;
     private playerColor: PlayerColor;
     private isLocalPlayer: boolean;
+    private coin: CoinDial | null = null;
 
     constructor(
         stage: Konva.Stage,
@@ -22,8 +23,12 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
         const size = { width: 50, height: 50 };
         const layout = { ...position, ...size };
         const { specialty } = player.specialist;
-
-        super(stage, layout, isLocalPlayer && specialty ? { action: Action.sell_specialty, payload: null } :  null);
+        const isWorkingButton = isLocalPlayer && specialty;
+        super(
+            stage,
+            layout,
+            isWorkingButton ? { action: Action.sell_specialty, payload: null } :  null,
+        );
 
         this.playerColor = player.color;
         this.isLocalPlayer = isLocalPlayer;
@@ -31,10 +36,11 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
             ...size,
             fill: isLocalPlayer ? HUES[`dark${player.color}`] : undefined,
             cornerRadius: 5,
-            stroke: isLocalPlayer && specialty ? 'white' : undefined,
+            stroke: isWorkingButton ? 'white' : undefined,
             strokeWidth: 2,
         });
-        this.group.add(this.background);
+
+        const elements: ElementList = [this.background];
 
         if (specialty) {
             const iconData = CARGO_ITEM_DATA[specialty];
@@ -47,8 +53,19 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
                 x: 7,
                 y: 7,
             });
-            this.group.add(specialtyIcon);
+            elements.push(specialtyIcon);
         }
+
+        if (isLocalPlayer) {
+            this.coin = new CoinDial({ x: 25, y: 40 }, 1);
+            const clipGroup = new Konva.Group({
+                clipFunc: (ctx => {ctx.rect(0, 0, size.width, size.height - 1);}),
+            }).add(this.coin.getElement());
+
+            elements.push(clipGroup);
+        }
+
+        this.group.add(...elements);
     }
 
     public getElement(): Konva.Group {
@@ -61,6 +78,7 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
                 ? HUES.marketOrange
                 : HUES[`dark${this.playerColor}`],
             );
+            maySell ? this.coin?.show() : this.coin?.hide();
         }
         this.setEnabled(maySell);
     }
