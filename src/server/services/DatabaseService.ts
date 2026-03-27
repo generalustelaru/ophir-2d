@@ -2,7 +2,7 @@ import {
     AuthenticationForm, Configuration, Probable, RegistrationForm, GameState, UserRecord, UserId, User,
 } from '../server_types';
 import { validator } from './validation/ValidatorService';
-import { Db } from 'mongodb';
+import { Db, ObjectId } from 'mongodb';
 
 import { randomUUID } from 'crypto';
 import lib from './library';
@@ -13,6 +13,8 @@ enum CollectionName {
     games = 'games',
 }
 
+enum CustomId { config = 'config_0' }
+
 type GameStateRecord = { id: string, data: GameState }
 
 type Validity = { invalid: false } | { invalid: true, reason: string }
@@ -22,11 +24,46 @@ export class DatabaseService {
         this.db = db;
     }
 
+    public async inspectAndSeed(): Promise<Probable<boolean>> {
+        try {
+            const config = await this.db.collection<{ _id: string } & Configuration>(CollectionName.config).findOne(
+                { _id: CustomId.config },
+                { projection: { _id: 0 } },
+            );
+
+            if (!config) {
+                const configId = CustomId.config as unknown as ObjectId;
+                const defaultConfig: Configuration = {
+                    SERVER_NAME: 'TempleBot',
+                    PLAYER_IDLE_MINUTES: 1,
+                    USER_SESSION_HOURS: 2,
+                    GAME_PERSIST_HOURS: 36,
+                    SINGLE_PLAYER: true,
+                    NO_RIVAL: false,
+                    RICH_PLAYERS: false,
+                    FAVORED_PLAYERS: false,
+                    CARGO_BONUS: 0,
+                    SHORT_GAME: false,
+                    INCLUDE: [],
+                };
+
+                await this.db.collection('config').insertOne({ _id: configId, ...defaultConfig });
+
+                return lib.pass(true);
+            }
+
+            return lib.pass(false);
+
+        } catch (error) {
+            return lib.fail(lib.getErrorBrief(error));
+        }
+    }
+
     // MARK: CONFIG
     public async getConfig(): Promise<Probable<Configuration>> {
         try {
             const record = await this.db.collection<{ _id: string } & Configuration>(CollectionName.config).findOne(
-                { _id: 'config_0' },
+                { _id: CustomId.config },
                 { projection: { _id: 0 } },
             );
 

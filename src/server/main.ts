@@ -46,6 +46,15 @@ dbClient.connect().then(async () => {
     dbService = new DatabaseService(db);
     console.info('✅ Connected to MongoDB');
 
+    const seeding = await dbService.inspectAndSeed();
+
+    if (seeding.err) {
+        console.error('❌ Db could not be seeded.');
+        process.exit(1);
+    }
+
+    if (seeding.data) console.info('✅ Db seeded succesfully.');
+
     await initializeStats();
 
     startGameChecks();

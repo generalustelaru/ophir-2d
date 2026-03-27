@@ -28,7 +28,7 @@ You can set up and run a server quite easily on your local network.
 
 1. Start **Docker Desktop**
 2. Enter the project folder (*\ophir-2d*) and open **Bash** (or **Git Bash**) or another CL tool and:
-   - Run `make deploy`. Alternatively run `docker compose up game-server-dev -d` and wait for dependencies to download and instantiate, then`docker compose exec game-server-dev node seed-db.cjs` to initialize game configuration.
+   - Run `make build` or `docker compose up game-server-dev -d`, then wait for dependencies to download and instantiate.
 
 You can access the app on your machine by navigating to `localhost` but if you want to share the link with others on your network, you'll need to find your actual local address and share it as `<ip_address>`. How to find it:
    - PowerShell: `(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -eq 'Ethernet'}).IPAddress`
@@ -97,7 +97,7 @@ Install [Node](https://nodejs.org/en/download/package-manager) to be able to fid
 Run `npm run omit_revs` to exclude code maintenance commits from GitBlame.
 
 To use in memory debug:
-   - Enter the server's Docker container (`docker exec -it ophir-2d-game-server-dev sh`);
+   - Enter the server's Docker container (`make shell`);
    - Run `sh debug.sh <command> <target> <option>` (parameters are optional).
 
 Install **Make** to make use of the Makefile commands.
