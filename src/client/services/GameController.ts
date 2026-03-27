@@ -9,14 +9,14 @@ import { Controller, EventType } from '~/client_types';
 export class GameController extends Communicator implements Controller {
 
     private socket: WebSocket | null = null;
-    private isLocal: boolean;
+    private readonly isLocal: boolean;
 
     constructor(protocol: 'ws:' | 'wss:') {
         super();
         this.isLocal = protocol == 'ws:' || false;
     }
 
-    public initialize(url: string, gameId: string, ) {
+    public initialize(url: string, gameId: string) {
         this.socket = new WebSocket(`${url}?gameId=${gameId}`);
 
         this.socket.onopen = () => {

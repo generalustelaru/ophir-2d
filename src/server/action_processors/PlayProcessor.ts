@@ -16,7 +16,7 @@ import { validator } from '../services/validation/ValidatorService';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 
 const { TRADE_DECK_B } = serverConstants;
-// TODO: Reduce linecount; extract utility-like functions, move deed composition to dedicated service.
+
 export class PlayProcessor implements Unique<ActionProcessor> {
     private idleTimeout: NodeJS.Timeout | null = null;
     private configuration: Configuration;

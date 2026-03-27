@@ -21,7 +21,7 @@ The two grey **barriers** are blocking access between adjacent sea zones. The se
 
 When all players have selected a card, the owner may click on **Next** to start the game.
 
-Upon starting, your **ship** will appear in the map's center zone as a disc token in your chosen color . The token is draggable and it is used to indicate your current location on the map. It's actual position is irrelevant as long as it is within the sea zone's hexagonal boundaries. 
+Upon starting, your **ship** will appear in the map's center zone as a disc token in your chosen color . The token is draggable and it is used to indicate your current location on the map. It's actual position is irrelevant as long as it is within the sea zone's hexagonal boundaries.
 
 Your goal is to collect as many VP as possible before the end game is triggered. Points are secured via donations of **gold**(10VP), **silver**(5VP), as well as **commodities**(1-4VP) at the **temple**.  Leftover gold and silver are also worth 5VP and 3VP, respectively. Finally, favor, then coins are compared to break possible ties.
 
