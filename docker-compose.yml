@@ -1,5 +1,7 @@
 services:
-  game-server-dev:
+  ophir-2d-dev:
+    image: ophir-2d-development
+    container_name: ophir-2d-server
     build:
       context: .
       target: development_image
@@ -16,7 +18,9 @@ services:
       - redisinsight
     restart: unless-stopped
 
-  game-server-prod:
+  ophir-2d-prod:
+    image: ophir-2d-production
+    container_name: ophir-2d-server
     build:
       context: .
       target: production_image

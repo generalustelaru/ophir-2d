@@ -1,5 +1,5 @@
-NAME 	= game-server
-COMPOSE	= docker compose
+NAME		= ophir-2d
+CONTAINER 	= $(NAME)-server
 
 env	?= dev # env|prod
 m	?= Formatting commit
@@ -29,24 +29,22 @@ ignore:
 fix:
 	npx eslint . --fix
 
-# Docker
-watch:
-	$(COMPOSE) logs --follow $(NAME)-$(env)
-watch-all:
-	$(COMPOSE) logs --follow
+# Orchestration
 build:
-	$(COMPOSE) up $(NAME)-$(env) --remove-orphans --build --detach
-	$(MAKE) watch
+	docker compose up $(NAME)-$(env) --remove-orphans --build --detach
+	$(MAKE) peek
+
+# Container interaction
+peek:
+	docker logs $(CONTAINER)
+watch:
+	docker logs $(CONTAINER) --follow
+clear:
+	truncate -s 0 $$(docker inspect --format='{{.LogPath}}' $(CONTAINER))
 restart:
-	$(COMPOSE) restart $(NAME)-$(env)
+	docker restart $(CONTAINER)
 	$(MAKE) watch
 shell:
-	$(COMPOSE) exec $(NAME)-$(env) sh
-stop: # Stop everything
-	$(COMPOSE) down
-containers:
-	$(COMPOSE) ps
-nuke:
-	$(COMPOSE) down --volumes --rmi all
+	docker exec --interactive --tty $(CONTAINER) sh
 
-.PHONY: pull static client server run check ignore fix watch watch-all build restart shell stop containers nuke
+.PHONY: pull static client server run check ignore fix watch peek clear build restart shell
