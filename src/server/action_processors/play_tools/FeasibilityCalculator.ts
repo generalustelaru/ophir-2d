@@ -49,6 +49,7 @@ export class FeasibilityCalculator {
                         switch (true) {
                             case player.isAdvisor():
                                 return trades.length;
+                            case player.isPeddler():
                             case player.isChancellor():
                                 return templeFeasible?.missing.length == 0;
                             default:
