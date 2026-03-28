@@ -1,11 +1,11 @@
 FROM node:22-alpine AS resources
 WORKDIR /app
-# Advanced copying for Docker to cache dependencies
 COPY package*.json ./
 RUN npm ci
-
 COPY . .
-RUN mkdir -p dist/public && cp -r src/static/* dist/public/
+RUN chmod +x debug.sh \
+    && mkdir -p dist/public \
+    && cp -r src/static/* dist/public/
 
 FROM resources AS development_image
 # Build with sourcemaps

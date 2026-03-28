@@ -39,12 +39,14 @@ peek:
 	docker logs $(CONTAINER)
 watch:
 	docker logs $(CONTAINER) --follow
-clear:
-	truncate -s 0 $$(docker inspect --format='{{.LogPath}}' $(CONTAINER))
 restart:
 	docker restart $(CONTAINER)
 	$(MAKE) watch
 shell:
 	docker exec --interactive --tty $(CONTAINER) sh
+clear: # Linux exclusive
+	truncate -s 0 $$(docker inspect --format='{{.LogPath}}' $(CONTAINER))
+restart-daemon:
+	systemctl restart docker
 
-.PHONY: pull static client server run check ignore fix watch peek clear build restart shell
+.PHONY: pull static client server run check ignore fix watch peek clear build restart shell, restart-daemon
