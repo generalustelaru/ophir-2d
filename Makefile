@@ -32,7 +32,6 @@ fix:
 # Orchestration
 build:
 	docker compose up $(NAME)-$(env) --remove-orphans --build --detach
-	$(MAKE) peek
 
 # Container interaction
 peek:
