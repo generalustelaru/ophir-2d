@@ -1,5 +1,6 @@
 import Konva from 'konva';
 import { Coordinates } from '~/shared_types';
+import { Dimensions } from './client_types';
 
 export function defineBobbing(node: Konva.Node, constraints: { pixelAmplitude: number, periodSeconds: number }) {
     const { pixelAmplitude, periodSeconds } = constraints;
@@ -66,6 +67,22 @@ export async function rotate(node: Konva.Node, duration: number, deg: number): P
             node,
             duration,
             rotation: deg,
+            easing: Konva.Easings.EaseOut,
+            onFinish: () => {
+                tween.destroy();
+                resolve();
+            },
+        });
+        tween.play();
+    });
+}
+
+export async function resize(node: Konva.Node, duration: number, dimensions: Dimensions): Promise<void> {
+    return new Promise(resolve => {
+        const tween = new Konva.Tween({
+            node,
+            duration,
+            ...dimensions,
             easing: Konva.Easings.EaseOut,
             onFinish: () => {
                 tween.destroy();

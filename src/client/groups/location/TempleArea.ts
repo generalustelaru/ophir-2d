@@ -100,9 +100,10 @@ export class TempleArea implements Unique<DynamicGroupInterface<TempleUpdate>>, 
             isShift: data.isShift,
         });
 
-        this.upgradeButton.update(
-            !!player?.locationActions.includes(Action.upgrade_cargo),
-        );
+        this.upgradeButton.update(player ? {
+            mayUpgrade: player.locationActions.includes(Action.upgrade_cargo),
+            cargoSize: player.cargo.length,
+        } : null);
 
         const playerCanDonateMetals = (
             !!player?.locationActions.includes(Action.donate_metal)

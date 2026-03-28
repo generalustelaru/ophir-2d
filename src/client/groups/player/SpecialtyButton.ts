@@ -2,6 +2,7 @@ import Konva from 'konva';
 import { DynamicGroupInterface, ElementList } from '~/client_types';
 import { Player, Coordinates, PlayerColor, Action, Unique } from '~/shared_types';
 import { RequestButton, CoinDial } from '../popular';
+import { slideToPosition } from '~/client/animations';
 import clientConstants from '~/client_constants';
 
 const { CARGO_ITEM_DATA, HUES } = clientConstants;
@@ -11,7 +12,7 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
     private background: Konva.Rect;
     private playerColor: PlayerColor;
     private isLocalPlayer: boolean;
-    private coin: CoinDial | null = null;
+    private coinGroup: Konva.Group | null = null;
 
     constructor(
         stage: Konva.Stage,
@@ -57,10 +58,11 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
         }
 
         if (isLocalPlayer) {
-            this.coin = new CoinDial({ x: 25, y: 40 }, 1);
+            this.coinGroup = new Konva.Group({ x: 25, y: 40 });
+            this.coinGroup.add(new CoinDial({ x: 0, y: 0 }, 1).getElement());
             const clipGroup = new Konva.Group({
                 clipFunc: (ctx => {ctx.rect(0, 0, size.width, size.height - 1);}),
-            }).add(this.coin.getElement());
+            }).add(this.coinGroup);
 
             elements.push(clipGroup);
         }
@@ -72,14 +74,15 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
         return this.group;
     }
 
-    public update(maySell: boolean): void {
-        if (this.isLocalPlayer) {
-            this.background.fill( maySell
-                ? HUES.marketOrange
-                : HUES[`dark${this.playerColor}`],
-            );
-            maySell ? this.coin?.show() : this.coin?.hide();
-        }
+    public async update(maySell: boolean): Promise<void> {
+
+        if (!this.isLocalPlayer || !this.coinGroup) return;
+
+        this.background.fill(maySell ? HUES.marketOrange : HUES[`dark${this.playerColor}`]);
+        const towards = { x: 25,  y: maySell ? 40 : 80 };
+
+        if (this.coinGroup.y() != towards.y) await slideToPosition(this.coinGroup, towards, 0.25);
+
         this.setEnabled(maySell);
     }
 }

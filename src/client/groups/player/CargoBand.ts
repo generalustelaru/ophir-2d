@@ -4,6 +4,7 @@ import { Action, ItemName, PlayerColor, Unique } from '~/shared_types';
 import { DynamicGroupInterface, EventType } from '~/client_types';
 import { ItemRow } from '../popular';
 import { Communicator } from '~/client/services/Communicator';
+import { resize } from '~/client/animations';
 
 const { HUES } = clientConstants;
 const SLOT_WIDTH = 25;
@@ -38,7 +39,7 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
         });
         this.cargoDisplay = new Konva.Rect({
             width: update.cargo.length * SLOT_WIDTH,
-            height: this.group.height(),
+            height: 30,
             fill: 'black',
             cornerRadius: 5,
         });
@@ -69,9 +70,17 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
         ]);
     }
 
-    public update(update: Update): void {
+    public async update(update: Update): Promise<void> {
         const { cargo, canDrop } = update;
-        this.cargoDisplay.width(cargo.length * SLOT_WIDTH);
+        const newWidth = cargo.length * SLOT_WIDTH;
+
+        if (this.cargoDisplay.width() != newWidth) {
+            await resize(
+                this.cargoDisplay,
+                1,
+                { width: newWidth, height: 30 },
+            );
+        }
 
         this.itemRow.update({ items: update.cargo, isClickable: canDrop });
     };
