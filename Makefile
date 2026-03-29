@@ -21,7 +21,6 @@ run:
 pull:
 	git pull
 	npm run omit_revs
-
 cut:
 	git push origin --delete $(branch)
 	git branch --delete origin/$(branch)

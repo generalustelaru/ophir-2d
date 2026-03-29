@@ -18,3 +18,5 @@
 9ce9aca67186075f236b281f92d635f65ec65dd2
 # Cleaned up newPlayerOp.
 4ea5e1b422d8120878961c4d00c8934f507ea9d2
+# Moved constructor in playership to the top
+93ff50fc45d5be271432963659887609bc52cc30
