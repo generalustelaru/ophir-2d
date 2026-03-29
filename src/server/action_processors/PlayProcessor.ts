@@ -827,33 +827,29 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             const allPlayers = this.playState.getAllPlayers();
             const nextInOrder = turnOrder == allPlayers.length ? 1 : turnOrder + 1;
             const nextPlayerDto = allPlayers.find(player => player.turnOrder == nextInOrder);
-            const { id: nextPlayerId } = refPool.find(r => r.color == nextPlayerDto?.color) || {};
+            const { id: nextPlayerId } = refPool.find(
+                r => r.color == nextPlayerDto?.color,
+            ) || {};
 
-            if (!nextPlayerDto || !nextPlayerId)
+            if (!nextPlayerDto || !nextPlayerId) {
                 return lib.fail('Could not find the next player or reference');
+            }
 
+            this.playState.updateRival(nextPlayerDto.color);
             const nextPlayer = new PlayerHandler(nextPlayerDto, nextPlayerId);
             const { seaZone } = nextPlayer.getBearings();
-
             nextPlayer.activate(
                 this.privateState.getDestinations(seaZone),
                 nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
-
-            const { color, userId } = nextPlayer.getIdentity();
-            this.playState.updateRival(color);
-            this.startIdleTimeout(userId);
-
             this.transmit(nextPlayerId, { turnStart: null });
 
             return lib.pass(nextPlayer);
         })();
 
-        if (newPlayerOperation.err)
-            return lib.fail(newPlayerOperation.message);
+        if (newPlayerOperation.err) return lib.fail(newPlayerOperation.message);
 
-        const newPlayer = newPlayerOperation.data;
-
+        const { data: newPlayer } = newPlayerOperation;
         const deeds = DeedService.convertToMessage(player, this.privateState);
         const nextPlayerTurn = `It's ${newPlayer.getIdentity().name}'s turn!`;
         this.addServerMessage(
@@ -1000,9 +996,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             const handler = new PlayerHandler(player, reference.id);
             handler.addBubbleDeed(BubbleDeed.active);
             this.playState.savePlayer(handler.toDto());
-
             this.transmit(reference.id, { turnStart: null });
-            this.startIdleTimeout(reference.id);
+            this.setIdleTimeout(reference.id);
         }
 
         this.broadcast(this.getState());
@@ -1096,14 +1091,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             FeasibilityCalculator.determineActionsAndDetails(player, this.playState, this.privateState),
         );
         this.playState.savePlayer(player.toDto());
-
-        this.clearIdleTimeout();
-        this.startIdleTimeout(player.getIdentity().userId);
+        this.setIdleTimeout(player.getIdentity().userId);
 
         return lib.pass({ state: this.playState.toDto() });
     }
 
-    private startIdleTimeout(playerId: UserId): void {
+    private setIdleTimeout(playerId: UserId): void {
+        this.clearIdleTimeout();
         const limitMinutes = (60 * 1000) * this.configuration.PLAYER_IDLE_MINUTES;
 
         this.idleTimeout = setTimeout(() => {
@@ -1161,10 +1155,9 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
     private resetTimeoutIfCurrentPlayer(reference: UserReference) {
         const currentPlayer = this.playState.getActivePlayer();
-        if (currentPlayer && currentPlayer.color == reference.color) {
-            this.clearIdleTimeout();
-            this.startIdleTimeout(reference.id);
 
+        if (currentPlayer && currentPlayer.color == reference.color) {
+            this.setIdleTimeout(reference.id);
             const player = new PlayerHandler(currentPlayer, reference.id);
             player.addBubbleDeed(BubbleDeed.active);
             this.playState.savePlayer(player.toDto());
