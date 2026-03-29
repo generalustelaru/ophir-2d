@@ -69,6 +69,7 @@ type AspectData<T> = {
 export type ClientConstants = {
     STAGE_AREA: AspectData<Dimensions>,
     GROUP_DIMENSIONS: { location: Dimensions, map: Dimensions, player: Dimensions }
+    ROLL_SUSPENSE_MS: number
     LOCATION_PLACEMENT: AspectData<Coordinates>,
     MAP_PLACEMENT: AspectData<Coordinates>,
     PLAYER_PLACEMENT: AspectData<Coordinates>,
