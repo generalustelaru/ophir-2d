@@ -234,7 +234,7 @@ export class TutorialStepProvider {
                 { highlights: [Target.rivalInfluence] },
                 { highlights: [Target.favorDial, Target.cargoBand] },
                 { highlights: [Target.bottomRightZone, Target.templeArea] },
-                { highlights: [Target.topLeftZone] },
+                { highlights: [Target.centerZone] },
             ],
             expecting: [{ action: Action.move, payload: { zoneId: 'topLeft', position } }],
         },
