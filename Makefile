@@ -1,5 +1,6 @@
-NAME		= ophir-2d
-CONTAINER 	= $(NAME)-server
+NAME			= ophir-2d
+CONTAINER		= $(NAME)-server
+SILENT_OUTPUT 	= /dev/null 2>&1
 
 env	?= dev # env|prod
 m	?= Formatting commit
@@ -32,7 +33,7 @@ fix:
 
 # Orchestration
 build:
-	$(MAKE) stop
+	docker inspect $(CONTAINER) > $(SILENT_OUTPUT) && $(MAKE) stop || true
 	docker compose up $(NAME)-$(env) --build --detach
 
 # Container interaction
@@ -44,6 +45,7 @@ restart:
 	docker restart $(CONTAINER)
 	$(MAKE) watch
 stop:
+	echo "Removing $(CONTAINER) container."
 	docker stop $(CONTAINER)
 	docker rm $(CONTAINER)
 shell:
