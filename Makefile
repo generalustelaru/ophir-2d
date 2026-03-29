@@ -26,6 +26,7 @@ check:
 ignore:
 	@echo "# $(m)" >> .git-blame-ignore-revs
 	@git rev-parse HEAD >> .git-blame-ignore-revs
+	@echo "Hash added."
 fix:
 	npx eslint . --fix
 
