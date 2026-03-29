@@ -25,32 +25,6 @@ export class PlayerShip extends Communicator {
     private activeEffect: Konva.Animation;
     private attemptSailing: (data: SailAttemptArgs) => void;
 
-    public switchControl(isControllable: boolean) {
-        this.inControl = isControllable;
-    }
-
-    public getElement() {
-        return this.group;
-    };
-
-    public update(newPosition: Coordinates, players: Array<Player>, rival: Rival) {
-        const player = players.find(p => p.color === localState.playerColor);
-
-        if (!player)
-            throw new Error('Cannot update player ship w/o participating color');
-
-        if (newPosition.x != this.group.x() || newPosition.y != this.group.y()) {
-            this.group.moveToTop();
-            slideToPosition( this.group, newPosition, 0.66);
-        }
-
-        this.players = players;
-        this.player = player;
-        this.rival = rival;
-        this.group.draggable(player.isCurrent);
-        this.inControl && player.moveActions ? this.activeEffect.start() : this.activeEffect.stop();
-    };
-
     // MARK: -Constructor
     constructor(
         stage: Konva.Stage,
@@ -229,6 +203,32 @@ export class PlayerShip extends Communicator {
         });
         this.group.add(this.ship.getElement());
     }
+
+    public switchControl(isControllable: boolean) {
+        this.inControl = isControllable;
+    }
+
+    public getElement() {
+        return this.group;
+    };
+
+    public update(newPosition: Coordinates, players: Array<Player>, rival: Rival) {
+        const player = players.find(p => p.color === localState.playerColor);
+
+        if (!player)
+            throw new Error('Cannot update player ship w/o participating color');
+
+        if (newPosition.x != this.group.x() || newPosition.y != this.group.y()) {
+            this.group.moveToTop();
+            slideToPosition( this.group, newPosition, 0.66);
+        }
+
+        this.players = players;
+        this.player = player;
+        this.rival = rival;
+        this.group.draggable(player.isCurrent);
+        this.inControl && player.moveActions ? this.activeEffect.start() : this.activeEffect.stop();
+    };
 
     public getId(): PlayerColor {
         return this.group.attrs.id() as PlayerColor;
