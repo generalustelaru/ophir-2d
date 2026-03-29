@@ -32,7 +32,8 @@ fix:
 
 # Orchestration
 build:
-	docker compose up $(NAME)-$(env) --remove-orphans --build --detach
+	$(MAKE) stop
+	docker compose up $(NAME)-$(env) --build --detach
 
 # Container interaction
 peek:
@@ -42,6 +43,9 @@ watch:
 restart:
 	docker restart $(CONTAINER)
 	$(MAKE) watch
+stop:
+	docker stop $(CONTAINER)
+	docker rm $(CONTAINER)
 shell:
 	docker exec --interactive --tty $(CONTAINER) sh
 clear: # Linux exclusive
