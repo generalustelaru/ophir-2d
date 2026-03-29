@@ -83,7 +83,7 @@ export class SailAttemptModal extends ModalBase implements Unique<DynamicModalIn
             }
         })();
         this.ownerDie.update({ symbol, hue: PLAYER_HUES[data.playerColor].vivid.light });
-        this.toSailDial.update({ value: data.toSail, color: null });
+        this.toSailDial.update({ value: data.toSail, hue: null });
 
         this.open({ action: Action.move, payload: data.destination });
     }

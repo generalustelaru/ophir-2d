@@ -1,16 +1,18 @@
 import { Aspect, DynamicModalInterface } from '~/client_types';
-import { FailedInfluenceRollTransmission, Player, Unique } from '~/shared_types';
+import { DiceSix, FailedInfluenceRollTransmission, Player, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
 import Konva from 'konva';
 import { InfluenceDial } from '../popular';
 import clientConstants from '~/client/client_constants';
 
 const { PLAYER_HUES, HUES } = clientConstants;
+//TODO: display on both outcomes
+//TODO: delay player placard die from updating
+//TODO: delay ship token from updating
 
-export class SailFailureModal
+export class SailResultModal
     extends ModalBase
-    implements Unique<DynamicModalInterface<undefined, FailedInfluenceRollTransmission>>
-{
+    implements Unique<DynamicModalInterface<undefined, FailedInfluenceRollTransmission>> {
     private ownerDie: InfluenceDial;
     private toSailDial: InfluenceDial;
 
@@ -67,15 +69,37 @@ export class SailFailureModal
             this.toSailDial.getElement(),
         );
     }
-    public update(): void {}
+    public update(): void { }
 
     public repositionModal(aspect: Aspect): void {
         this.reposition(aspect);
     }
 
-    public show(data: FailedInfluenceRollTransmission): void {
-        this.ownerDie.update({ value: data.rolled, color: null });
-        this.toSailDial.update({ value: data.toHit, color: null });
+    public async show(data: FailedInfluenceRollTransmission): Promise<void> {
+        this.ownerDie.update({ value: data.rolled, hue: null });
+        this.toSailDial.update({ value: data.toHit, hue: null });
         this.open();
+        await this.simulateRoll(data.rolled);
+    }
+
+    private async simulateRoll(result: DiceSix): Promise<void> {
+        return new Promise(resolve => {
+            let fauxRolled = Math.ceil(Math.random() * 6);
+
+            const rollInterval = setInterval(() => {
+                let roll = fauxRolled;
+
+                while (roll == fauxRolled) roll = Math.ceil(Math.random() * 5);
+
+                fauxRolled = roll;
+                this.ownerDie.displayValue(roll as DiceSix);
+            }, 100);
+
+            setTimeout(() => {
+                clearInterval(rollInterval);
+                this.ownerDie.displayValue(result);
+                resolve();
+            }, 2000);
+        });
     }
 }

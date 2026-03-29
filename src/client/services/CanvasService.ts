@@ -12,7 +12,7 @@ import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, Sail
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     TradeModal, StartTurnModal, DonateCommoditiesModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
-    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal, SailFailureModal,
+    EndRivalTurnModal, AdvisorModal, ChancellorModal, PeddlerModal, DropBeforeLoadModal, SailResultModal,
 } from '../groups/modals/';
 import clientConstants from '../client_constants';
 import { InstructionPanel } from '../groups/tutorial/InstructionPanel';
@@ -31,7 +31,7 @@ export class CanvasService extends Communicator {
     private startTurnModal: StartTurnModal;
     private endTurnModal: EndTurnModal;
     private sailAttemptModal: SailAttemptModal;
-    private sailFailureModal: SailFailureModal | null = null;
+    private sailResultModal: SailResultModal | null = null;
     private forceTurnModal: ForceTurnModal;
     private dropBeforeLoadModal: DropBeforeLoadModal;
     private tradeModal: TradeModal | null = null;
@@ -157,7 +157,7 @@ export class CanvasService extends Communicator {
     }
 
     public notifyFailedRoll(data: FailedInfluenceRollTransmission): void {
-        this.sailFailureModal?.show(data);
+        this.sailResultModal?.show(data);
     }
 
     public notifyForForceTurn(): void {
@@ -295,7 +295,7 @@ export class CanvasService extends Communicator {
         this.startTurnModal.repositionModal(this.aspect);
         this.endTurnModal.repositionModal(this.aspect);
         this.sailAttemptModal.repositionModal(this.aspect);
-        this.sailFailureModal?.repositionModal(this.aspect);
+        this.sailResultModal?.repositionModal(this.aspect);
         this.forceTurnModal.repositionModal(this.aspect);
         this.dropBeforeLoadModal.repositionModal(this.aspect);
 
@@ -352,7 +352,7 @@ export class CanvasService extends Communicator {
             return;
 
         //TODO: move all modal initializations here and absolve their updates from constantly getting local player
-        this.sailFailureModal = new SailFailureModal(this.stage, this.aspect, localPlayer);
+        this.sailResultModal = new SailResultModal(this.stage, this.aspect, localPlayer);
 
         if (state.rival.isIncluded) {
             this.rivalControlModal = new RivalControlModal(this.stage, this.aspect);

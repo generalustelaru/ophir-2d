@@ -125,7 +125,7 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         this.coinDial.update(player.coins);
         this.influenceDial.update({
             value: influence,
-            color: isCurrent ? this.variation.muted.dark : this.variation.vivid.light,
+            hue: isCurrent ? this.variation.muted.dark : this.variation.vivid.light,
         });
         this.specialistBand.update(isCurrent);
         this.specialistCard.update(name);
