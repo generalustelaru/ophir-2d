@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import {
-    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action, FailedInfluenceRollTransmission,
+    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action, InfluenceRollTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
@@ -156,7 +156,7 @@ export class CanvasService extends Communicator {
         this.startTurnModal?.show();
     }
 
-    public notifyFailedRoll(data: FailedInfluenceRollTransmission): void {
+    public notifyRollSuspense(data: InfluenceRollTransmission): void {
         this.sailResultModal?.show(data);
     }
 
@@ -350,9 +350,8 @@ export class CanvasService extends Communicator {
 
         if (!localPlayer)
             return;
-
+        //TODO: return coordinate diff from modal base upon dragging and udate all modals with the offset
         //TODO: move all modal initializations here and absolve their updates from constantly getting local player
-        this.sailResultModal = new SailResultModal(this.stage, this.aspect, localPlayer);
 
         if (state.rival.isIncluded) {
             this.rivalControlModal = new RivalControlModal(this.stage, this.aspect);
@@ -361,6 +360,8 @@ export class CanvasService extends Communicator {
                 (isShiftingMarket: boolean) => { this.endRivalTurnModal!.show(isShiftingMarket);},
             );
         }
+
+        this.sailResultModal = new SailResultModal(this.stage, this.aspect, localPlayer);
 
         switch (localPlayer.specialist.name) {
             case SpecialistName.advisor:

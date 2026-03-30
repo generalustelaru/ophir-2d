@@ -1,7 +1,7 @@
 import {
     ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse, VpTransmission,
     TurnNotificationTransmission, RivalControlTransmission, ForceTurnNotificationTransmission, ColorTransmission,
-    NotFoundTransmission, ExpiredTransmission, SocketSwitchTransmission, FailedInfluenceRollTransmission,
+    NotFoundTransmission, ExpiredTransmission, SocketSwitchTransmission, InfluenceRollTransmission,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { Controller, EventType } from '~/client_types';
@@ -55,8 +55,8 @@ export class GameController extends Communicator implements Controller {
                 case this.isTurnNotification(data):
                     this.createEvent({ type: EventType.start_turn, detail: null });
                     break;
-                case this.isFailedRollTransmission(data):
-                    this.createEvent({ type: EventType.failed_roll, detail: data });
+                case this.isInfluenceRollTransmission(data):
+                    this.createEvent({ type: EventType.roll_suspense, detail: data });
                     break;
                 case this.isForceTurnNotification(data):
                     this.createEvent( { type: EventType.force_turn, detail: null });
@@ -119,7 +119,7 @@ export class GameController extends Communicator implements Controller {
         return 'turnStart' in data;
     }
 
-    private isFailedRollTransmission(data: ServerMessage): data is FailedInfluenceRollTransmission {
+    private isInfluenceRollTransmission(data: ServerMessage): data is InfluenceRollTransmission {
         return 'rolled' in data && 'toHit' in data;
     }
 
