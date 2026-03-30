@@ -2,12 +2,16 @@ import Konva from 'konva';
 import { DiceSix, Unique } from '~/shared_types';
 import { Coordinates } from '~/shared_types';
 import { Hue, DynamicGroupInterface } from '~/client_types';
+import clientConstants from '~/client/client_constants';
+
+const { ROLL_SUSPENSE_MS } = clientConstants;
 
 type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle | null }
 type PipData = Array<PipDataElement>
 type Update = {
-    value: DiceSix | false,
+    value: DiceSix | false
     hue: Hue | null
+    simRoll?: boolean
 }
 export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
     private group: Konva.Group;
@@ -61,7 +65,7 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
 
     // TODO: No longer used in map context. Change update so it doesn't affect visibility.
     public update(data: Update): void {
-        const { value, hue: color } = data;
+        const { value, hue: color, simRoll } = data;
 
         if (!value) {
             this.group.hide();
@@ -70,8 +74,8 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
         }
 
         color && this.body.fill(color);
-        this.displayValue(value);
         this.group.show();
+        simRoll ? this.simulateRoll(value) : this.displayValue(value);;
     }
 
     public selfDestroy() {
@@ -94,5 +98,26 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
                 dot.element?.hide();
             }
         }
+    }
+
+    public async simulateRoll(result: DiceSix): Promise<void> {
+        return new Promise(resolve => {
+            let fauxRolled = Math.ceil(Math.random() * 6);
+
+            const rollInterval = setInterval(() => {
+                let roll = fauxRolled;
+
+                while (roll == fauxRolled) roll = Math.ceil(Math.random() * 5);
+
+                fauxRolled = roll;
+                this.displayValue(roll as DiceSix);
+            }, 150);
+
+            setTimeout(() => {
+                clearInterval(rollInterval);
+                this.displayValue(result);
+                resolve();
+            }, ROLL_SUSPENSE_MS);
+        });
     }
 }
