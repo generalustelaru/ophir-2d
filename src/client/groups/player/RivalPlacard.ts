@@ -16,10 +16,11 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
     private shiftMarketButton: ShiftMarketButton;
     private concludeButton: ConcludeButton;
     private movesDial: MovesDial;
+    private hasConcludedTurn: boolean = false;
 
     constructor(
         stage: Konva.Stage,
-        endRivalTurnCallback: ((p: boolean) => void) | null,
+        endRivalTurnCallback: ((shiftMarket: boolean) => void) | null,
         localPlayerColor: PlayerColor | null,
         yOffset: number,
     ) {
@@ -47,15 +48,21 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.shiftMarketButton = new ShiftMarketButton(
             stage,
             { x: 25, y: 10 },
-            endRivalTurnCallback ? () => endRivalTurnCallback(true) : null,
+            endRivalTurnCallback ? () => {
+                this.hasConcludedTurn = true;
+                endRivalTurnCallback(true);
+            } : null,
         );
         this.concludeButton = new ConcludeButton(
             stage,
             { x: 110, y: 32 },
-            endRivalTurnCallback ? () => endRivalTurnCallback(false) : null,
+            endRivalTurnCallback ? () => {
+                this.hasConcludedTurn = true;
+                endRivalTurnCallback(false);
+            } : null,
         );
-        this.movesDial = new MovesDial({ x: 80, y: 10 });
 
+        this.movesDial = new MovesDial({ x: 80, y: 10 });
         this.group.add(...[
             this.background,
             this.influenceDial.getElement(),
@@ -87,10 +94,16 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
             : HUES.boneWhite,
         );
         this.background.strokeWidth(isControllable ? 3 : 0);
-        this.influenceDial.update({ value: influence, hue: null });
         this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
         this.movesDial.update({ moves, isCurrent: activePlayerColor && isControllable });
+
+        if (this.hasConcludedTurn) {
+            this.hasConcludedTurn = false;
+            this.influenceDial.simulateRoll(influence);
+        } else {
+            this.influenceDial.update({ value: influence });
+        }
     }
 
     public disable() {

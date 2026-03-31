@@ -343,20 +343,20 @@ export type ClientRequest = {
 
 // MARK: RESPONSE
 export type ColorTransmission = { color: PlayerColor }
-export type StateResponse = { state: State }
-export type ResetResponse = { resetFrom: string | PlayerColor }
+export type StateBroadcast = { state: State }
+export type ResetTransmission = { resetFrom: string | PlayerColor }
 export type ErrorResponse = { error: string }
 export type NotFoundTransmission = { notFound: null }
 export type VpTransmission = { vp: number }
 export type TurnNotificationTransmission = { turnStart: null }
-export type InfluenceRollTransmission = { rolled: DiceSix, toHit: DiceSix }
+export type InfluenceRollTransmission = { color: PlayerColor, rolled: DiceSix, toHit: DiceSix }
 export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
 export type ExpiredTransmission = { expired: null }
 export type SocketSwitchTransmission = { switch: null }
 export type ServerMessage =
-    | StateResponse
-    | ResetResponse
+    | StateBroadcast
+    | ResetTransmission
     | ErrorResponse
     | ColorTransmission
     | NotFoundTransmission

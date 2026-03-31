@@ -522,8 +522,12 @@ async function processAction(
 }
 
 // MARK: CALLBACKS
-function broadcastCallback(state: State) {
+function stateBroadcastCallback(state: State) {
     broadcastToGroup(state.gameId, { state });
+}
+
+function broadcastCallback(gameId: GameId, message: ServerMessage) {
+    broadcastToGroup(gameId, message);
 }
 
 function transmitCallback(userId: UserId, gameId: GameId, message: ServerMessage) {
@@ -734,6 +738,7 @@ async function getGameInstance(savedSession: GameState | null): Promise<Probable
     try {
         const configuration = query.data;
         const session = new Game(
+            stateBroadcastCallback,
             broadcastCallback,
             transmitCallback,
             nameUpdateCallback,

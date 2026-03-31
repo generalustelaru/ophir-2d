@@ -5,7 +5,7 @@ import { TutorialController } from './services/TutorialController';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
 import {
-    Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State,
+    Action, ClientMessage, ResetTransmission, VpTransmission, ColorTransmission, State,
 } from '~/shared_types';
 import clientConstants from './client_constants';
 
@@ -149,7 +149,7 @@ document.fonts.ready.then(() => {
     });
 
     window.addEventListener(EventType.reset, (event: CustomEventInit) => {
-        const response: ResetResponse = event.detail;
+        const response: ResetTransmission = event.detail;
         resetClient(response.resetFrom);
     });
 
@@ -194,7 +194,9 @@ document.fonts.ready.then(() => {
     });
 
     window.addEventListener(EventType.start_turn, () => {
-        canvas.notifyForTurn();
+
+        if (isRollSuspense) transmissionQueue.push(() => { canvas.notifyForTurn(); });
+        else canvas.notifyForTurn();
     });
 
     window.addEventListener( EventType.roll_suspense, (event: CustomEventInit) => {

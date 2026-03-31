@@ -1,7 +1,7 @@
 import {
     BarrierId, Coordinates, Player, PlayerColor, MarketFluctuations, Trade, MarketState, MarketSlotKey, LocationData,
     Fluctuation, ExchangeTier, PlayerEntry, Rival, GameSetupPayload, Phase, PlayerDraft, MapPairings, LocationName,
-    ZoneName, PlayerSelection, SpecialistName, StateResponse, SpecialistData, SelectableSpecialist, ChatEntry,
+    ZoneName, PlayerSelection, SpecialistName, StateBroadcast, SpecialistData, SelectableSpecialist, ChatEntry,
     PlayerEntity, Unique, BubbleDeed,
 } from '~/shared_types';
 import {
@@ -123,20 +123,20 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         reference.color && this.setupState.setAway(false, reference.color);
     };
 
-    public addChat(entry: ChatEntry): StateResponse {
+    public addChat(entry: ChatEntry): StateBroadcast {
         this.setupState.addChatEntry(entry);
 
         return { state: this.getState() };
     }
 
-    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+    public updatePlayerName(player: PlayerEntity, newName: string): StateBroadcast {
         this.setupState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.setupState.updateName(player.color, newName);
 
         return { state: this.getState() };
     };
     //#MARK: Specialist
-    public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateResponse> {
+    public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateBroadcast> {
         const specialistPayload = validator.validatePickSpecialistPayload(payload);
 
         if (!specialistPayload)

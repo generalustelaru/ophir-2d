@@ -1,6 +1,6 @@
 import {
     LocationName, CommodityLocationName, Action, PlayerColor,
-    StateResponse, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, Unique,
+    StateBroadcast, PlayState, SpecialistName, DiceSix, ChatEntry, PlayerEntity, Unique,
     ServerMessage, PlayerCountables, BubbleDeed,
 } from '~/shared_types';
 import { PlayStateHandler } from '../state_handlers/PlayStateHandler';
@@ -24,14 +24,16 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     private privateState: PrivateStateHandler;
     private backupState: BackupStateHandler;
     private transmit: (userId: UserId, message: ServerMessage) => void;
-    private broadcast: (state: PlayState) => void;
+    private stateBroadcast: (state: PlayState) => void;
+    private broadcast: (message: ServerMessage) => void;
 
     /** @throws */
     constructor(
         stateBundle: StateBundle,
         configuration: Configuration,
-        broadcastCallback: (state: PlayState) => void,
+        stateBroadcastCallback: (state: PlayState) => void,
         transmitCallback: (userId: UserId, message: ServerMessage) => void,
+        broadcastCallback: (message: ServerMessage) => void,
         currentPlayerReference: UserReference,
     ) {
         const { playState, privateState, backupState } = stateBundle;
@@ -41,6 +43,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.backupState = backupState;
         this.transmit = transmitCallback;
         this.broadcast = broadcastCallback;
+        this.stateBroadcast = stateBroadcastCallback;
 
         const { id, color } = currentPlayerReference;
         const players = this.playState.getAllPlayers();
@@ -67,7 +70,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             const { name, color } = player.getIdentity();
             this.addServerMessage(`${name} is currently away.`, { color });
 
-            this.broadcast(this.getState());
+            this.stateBroadcast(this.getState());
         }
 
         this.playState.savePlayer(player.toDto());
@@ -90,7 +93,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: MOVE
-    public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
+    public move(digest: DataDigest, isRivalShip: boolean = false): Probable<StateBroadcast> {
         const { player, payload } = digest;
         this.preserveState(player, true);
 
@@ -180,7 +183,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 return roll;
             })();
 
-            this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
+            this.broadcast({ color: player.getIdentity().color, rolled: influenceRoll, toHit: threshold });
 
             if (influenceRoll < threshold) {
                 this.playState.trimInfluenceByZone(target, threshold);
@@ -243,7 +246,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: REPOSITION
-    public reposition(data: DataDigest, isRivalShip: boolean = false): Probable<StateResponse> {
+    public reposition(data: DataDigest, isRivalShip: boolean = false): Probable<StateBroadcast> {
         const { payload, player } = data;
         const repositioningPayload = validator.validateRepositioningPayload(payload);
 
@@ -266,7 +269,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return this.continueTurn(player, false);
     }
 
-    public repositionOpponent(data: DataDigest): Probable<StateResponse> {
+    public repositionOpponent(data: DataDigest): Probable<StateBroadcast> {
         const { payload, refPool, player } = data;
         const validation = validator.validateOpponentRepositioningPayload(payload);
 
@@ -291,7 +294,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: FAVOR
-    public spendFavor(data: DataDigest): Probable<StateResponse> {
+    public spendFavor(data: DataDigest): Probable<StateBroadcast> {
         const { player } = data;
         this.preserveState(player);
 
@@ -305,7 +308,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: DROP ITEM
-    public dropItem(data: DataDigest): Probable<StateResponse> {
+    public dropItem(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.preserveState(player);
 
@@ -326,7 +329,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: LOAD COMMODITY
-    public loadCommodity(data: DataDigest): Probable<StateResponse> {
+    public loadCommodity(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         const { color } = player.getIdentity();
         this.preserveState(player);
@@ -386,7 +389,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: SELL
-    public trade(data: DataDigest): Probable<StateResponse> {
+    public trade(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.clearUndo(player);
         const marketSlotPayload = validator.validateMarketPayload(payload);
@@ -441,7 +444,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return this.continueTurn(player);
     }
 
-    public sellAsChancellor(data: DataDigest): Probable<StateResponse> {
+    public sellAsChancellor(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.clearUndo(player);
 
@@ -499,7 +502,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return this.continueTurn(player);
     }
 
-    public sellAsPeddler(data: DataDigest): Probable<StateResponse> {
+    public sellAsPeddler(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.clearUndo(player);
 
@@ -554,7 +557,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: DONATE
-    public donateCommodities(data: DataDigest): Probable<StateResponse> {
+    public donateCommodities(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.clearUndo(player);
         const marketTradePayload = validator.validateMarketPayload(payload);
@@ -620,7 +623,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: SPECIALTY
-    public sellSpecialty(data: DataDigest): Probable<StateResponse> {
+    public sellSpecialty(data: DataDigest): Probable<StateBroadcast> {
         const { player } = data;
         this.preserveState(player);
         const specialty = player.getSpecialty();
@@ -656,7 +659,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: BUY METAL
-    public buyMetal(data: DataDigest): Probable<StateResponse> {
+    public buyMetal(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.preserveState(player);
         const { name } = player.getIdentity();
@@ -715,7 +718,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: DONATE METAL
-    public donateMetal(data: DataDigest): Probable<StateResponse> {
+    public donateMetal(data: DataDigest): Probable<StateBroadcast> {
         const { player, payload } = data;
         this.preserveState(player);
         const { color, name } = player.getIdentity();
@@ -790,7 +793,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: END TURN
-    public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateResponse> {
+    public endTurn(data: DataDigest, isVoluntary: boolean = true): Probable<StateBroadcast> {
         const { player, refPool } = data;
         this.clearUndo(player);
         const { turnOrder, userId: playerId } = player.getIdentity();
@@ -857,7 +860,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: RIVAL TURN
-    public endRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateResponse> {
+    public endRivalTurn(digest: DataDigest, isShiftingMarket: boolean = false): Probable<StateBroadcast> {
         const { player } = digest;
         const rival = this.playState.getRivalData();
 
@@ -903,7 +906,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: UNDO
-    public undo(digest: DataDigest): Probable<StateResponse> {
+    public undo(digest: DataDigest): Probable<StateBroadcast> {
         const { player, refPool } = digest;
         const { color } = player.getIdentity();
 
@@ -937,7 +940,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
     }
 
     // MARK: UPGRADE
-    public upgradeCargo(data: DataDigest): Probable<StateResponse> {
+    public upgradeCargo(data: DataDigest): Probable<StateBroadcast> {
         const { player } = data;
         this.preserveState(player);
 
@@ -955,7 +958,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return lib.fail('Conditions for upgrade not met.');
     }
 
-    public addChat(entry: ChatEntry, reference: UserReference): StateResponse {
+    public addChat(entry: ChatEntry, reference: UserReference): StateBroadcast {
         this.playState.addChatEntry(entry);
         this.backupState.addChat(entry);
 
@@ -964,7 +967,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return { state: this.getState() };
     }
 
-    public updatePlayerName(player: PlayerEntity, newName: string, reference: UserReference): StateResponse {
+    public updatePlayerName(player: PlayerEntity, newName: string, reference: UserReference): StateBroadcast {
         this.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, { backup: true });
         this.playState.updateName(player.color, newName);
         this.privateState.updatePlayerName(player.color, newName);
@@ -996,7 +999,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.setIdleTimeout(reference.id);
         }
 
-        this.broadcast(this.getState());
+        this.stateBroadcast(this.getState());
     }
 
     public handleDisconnection(reference: UserReference) {
@@ -1019,7 +1022,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.playState.savePlayer(handler.toDto());
         }
 
-        this.broadcast(this.getState());
+        this.stateBroadcast(this.getState());
     };
 
     // MARK: PRIVATE
@@ -1082,7 +1085,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         return lib.pass({ hasGameEnded: false, countables: [] });
     }
 
-    private continueTurn(player: PlayerHandler, updateActions: boolean = true): Probable<StateResponse> {
+    private continueTurn(player: PlayerHandler, updateActions: boolean = true): Probable<StateBroadcast> {
         updateActions && player.setActionsAndDetails(
             FeasibilityCalculator.determineActionsAndDetails(player, this.playState, this.privateState),
         );
@@ -1111,7 +1114,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.playState.savePlayer(activePlayer);
 
             this.transmit(playerId, { turnStart: null });
-            this.broadcast(this.playState.toDto());
+            this.stateBroadcast(this.playState.toDto());
         }, limitMinutes);
     }
 

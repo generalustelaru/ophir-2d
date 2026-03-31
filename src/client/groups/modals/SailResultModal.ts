@@ -1,5 +1,5 @@
 import { Aspect, DynamicModalInterface } from '~/client_types';
-import { DiceSix, InfluenceRollTransmission, Player, Unique } from '~/shared_types';
+import { DiceSix, InfluenceRollTransmission, Player, PlayerColor, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
 import Konva from 'konva';
 import { InfluenceDial } from '../popular';
@@ -7,9 +7,10 @@ import clientConstants from '~/client/client_constants';
 
 const { PLAYER_HUES, HUES, ROLL_SUSPENSE_MS } = clientConstants;
 
+type Update = { color: PlayerColor }
 export class SailResultModal
     extends ModalBase
-    implements Unique<DynamicModalInterface<undefined, InfluenceRollTransmission>> {
+    implements Unique<DynamicModalInterface<Update, InfluenceRollTransmission>> {
     private ownerDie: InfluenceDial;
     private toSailDial: InfluenceDial;
     private symbol: Konva.Text;
@@ -76,11 +77,10 @@ export class SailResultModal
 
     public async show(data: InfluenceRollTransmission): Promise<void> {
         const { toHit, rolled } = data;
-        this.toSailDial.update({ value: toHit, hue: null });
-        this.ownerDie.update({ value: 1, hue: null });
         this.description.text('Rolling influence...');
         this.symbol.text('?');
         this.symbol.fill(HUES.boneWhite);
+        this.toSailDial.update({ value: toHit });
         this.open();
         super.disableDismiss();
 
@@ -106,15 +106,15 @@ export class SailResultModal
             const rollInterval = setInterval(() => {
                 let roll = fauxRolled;
 
-                while (roll == fauxRolled) roll = Math.ceil(Math.random() * 5);
+                while (roll == fauxRolled) roll = Math.ceil(Math.random() * 6);
 
                 fauxRolled = roll;
-                this.ownerDie.displayValue(roll as DiceSix);
+                this.ownerDie.update({ value: roll as DiceSix } );
             }, 150);
 
             setTimeout(() => {
                 clearInterval(rollInterval);
-                this.ownerDie.displayValue(result);
+                this.ownerDie.update({ value: result } );
                 resolve();
             }, ROLL_SUSPENSE_MS);
         });

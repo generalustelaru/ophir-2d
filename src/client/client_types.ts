@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, ColorTransmission, Metal,
-    TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
-    Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, InfluenceRollTransmission,
+    TreasuryOffer, TempleState, ClientMessage, ResetTransmission, VpTransmission, State, MovementPayload, DiceSix,
+    MetalCost, Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, InfluenceRollTransmission,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -231,7 +231,7 @@ export type Event =
     | EventFormat<EventType.action, ClientMessage>
     | EventFormat<EventType.error, ErrorDetail>
     | EventFormat<EventType.info, InfoDetail>
-    | EventFormat<EventType.reset, ResetResponse>
+    | EventFormat<EventType.reset, ResetTransmission>
     | EventFormat<EventType.state_update, State>
     | EventFormat<EventType.tour_update, TutorialState>
     | EventFormat<EventType.identification, ColorTransmission>

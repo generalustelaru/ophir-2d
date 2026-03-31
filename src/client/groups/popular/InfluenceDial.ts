@@ -8,11 +8,7 @@ const { ROLL_SUSPENSE_MS } = clientConstants;
 
 type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle | null }
 type PipData = Array<PipDataElement>
-type Update = {
-    value: DiceSix | false
-    hue: Hue | null
-    simRoll?: boolean
-}
+type Update = { value: DiceSix }
 export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
     private group: Konva.Group;
     private body: Konva.Rect;
@@ -46,7 +42,6 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
             { position: { x: 40, y: 40 }, included: [2, 3, 4, 5, 6], element: null },
             { position: { x: 25, y: 25 }, included: [1, 3, 5], element: null },
         ];
-        // const length = pipData.length;
 
         pipData.forEach(pip => {
             const element = new Konva.Circle({
@@ -60,22 +55,13 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
         });
 
         this.dotMatrix = pipData;
-        this.group.hide();
+        this.displayValue(1);
     }
 
-    // TODO: No longer used in map context. Change update so it doesn't affect visibility.
     public update(data: Update): void {
-        const { value, hue: color, simRoll } = data;
+        const { value } = data;
 
-        if (!value) {
-            this.group.hide();
-
-            return;
-        }
-
-        color && this.body.fill(color);
-        this.group.show();
-        simRoll ? this.simulateRoll(value) : this.displayValue(value);;
+        this.displayValue(value);
     }
 
     public selfDestroy() {
@@ -87,7 +73,7 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
         return this.group;
     }
 
-    public displayValue(value: DiceSix) {
+    private displayValue(value: DiceSix) {
 
         for (let i = 0; i < 7; i++) {
             const dot = this.dotMatrix[i];

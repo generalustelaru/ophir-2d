@@ -157,7 +157,11 @@ export class CanvasService extends Communicator {
     }
 
     public notifyRollSuspense(data: InfluenceRollTransmission): void {
-        this.sailResultModal?.show(data);
+        if (data.color == localState.playerColor) {
+            this.sailResultModal?.show(data);
+        } else {
+            this.playerGroup.simulateRollForPlayer(data);
+        }
     }
 
     public notifyForForceTurn(): void {

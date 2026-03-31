@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { DynamicGroupInterface, ElementList, PlayerHueVariation } from '~/client_types';
-import { Action, DiceSix, Player, PlayerColor, Unique, ZoneName } from '~/shared_types';
+import { Action, DiceSix, Player, PlayerColor, Unique } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyButton } from '.';
 import clientConstants from '~/client_constants';
@@ -19,8 +19,6 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     private favorDial: FavorDial;
     private coinDial: CoinDial;
     private influenceDial: InfluenceDial;
-    private currentInfluence: DiceSix;
-    private currentZone: ZoneName;
     private vpDial: VictoryPointDial;
     private specialtyButton: SpecialtyButton;
     private color: PlayerColor;
@@ -69,8 +67,6 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
             player.coins,
         );
 
-        this.currentZone = player.bearings.seaZone;
-        this.currentInfluence = player.influence;
         this.influenceDial = new InfluenceDial(
             { x: -53, y: 25 },
             this.variation.vivid.light,
@@ -122,20 +118,17 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     }
 
     public update(player: Player): void {
-        const { cargo, isCurrent, influence, specialist, bearings } = player;
-        const { seaZone } = bearings;
+        const { cargo, isCurrent, influence, specialist } = player;
+        const isLocalPlayer = this.localPlayerColor === player.color;
         this.background.fill(isCurrent ? this.variation.vivid.light : this.variation.muted.dark);
-        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === player.color && isCurrent });
+        this.cargoBand.update({ cargo, canDrop: isLocalPlayer && isCurrent });
         this.favorDial.update(player.favor);
         this.coinDial.update(player.coins);
         this.influenceDial.update({
             value: influence,
-            hue: isCurrent ? this.variation.muted.dark : this.variation.vivid.light,
-            simRoll: isCurrent && influence != this.currentInfluence &&  seaZone != this.currentZone,
+            // hue: isCurrent ? this.variation.muted.dark : this.variation.vivid.light,
         });
 
-        this.currentInfluence = influence;
-        this.currentZone = seaZone;
         this.specialistBand.update(isCurrent);
         this.specialistCard.update(player.name);
         this.specialtyButton.update(!!(
@@ -152,11 +145,15 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         this.vpDial.update(vp);
     }
 
+    public simulateRoll(value: DiceSix) {
+        this.influenceDial.simulateRoll(value);
+    }
+
     public updateVP(vp: number) {
         this.vpDial.update(vp);
     }
 
-    public getId(): PlayerColor {
+    public getColor(): PlayerColor {
         return this.color;
     }
 

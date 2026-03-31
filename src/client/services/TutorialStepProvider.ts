@@ -74,7 +74,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            influenceRollDetail: { rolled: 2, toHit: 3 },
+            influenceRollDetail: { color: 'Purple', rolled: 2, toHit: 3 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 2;
@@ -92,7 +92,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: 'rivalControl',
-            influenceRollDetail: { rolled: 6, toHit: 2 },
+            influenceRollDetail: { color: 'Purple', rolled: 6, toHit: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 6;

@@ -1,5 +1,5 @@
 import {
-    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateResponse,
+    ChatEntry, EnrolmentState, MessagePayload, PlayerColor, PlayerEntity, PlayerEntry, ServerMessage, StateBroadcast,
     Unique,
 } from '~/shared_types';
 import { Configuration, Probable, RequestMatch, ActionProcessor, UserId, UserReference } from '~/server_types';
@@ -62,13 +62,13 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         this.broadcast(this.enrolmentState.toDto());
     };
 
-    public addChat(entry:ChatEntry): StateResponse {
+    public addChat(entry:ChatEntry): StateBroadcast {
         this.enrolmentState.addChatEntry(entry);
 
         return { state: this.getState() };
     }
 
-    public updatePlayerName(player: PlayerEntity, newName: string): StateResponse {
+    public updatePlayerName(player: PlayerEntity, newName: string): StateBroadcast {
         this.enrolmentState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.enrolmentState.updateName(player.color, newName);
 
@@ -91,7 +91,7 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         payload: MessagePayload,
         displayName: string | null,
         isAdopting: boolean,
-    ): Probable<StateResponse> {
+    ): Probable<StateBroadcast> {
 
         if (!userId)
             return failEnrol('User ID is missing.');
@@ -134,12 +134,12 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
 
         return lib.pass({ state: this.enrolmentState.toDto() });
 
-        function failEnrol(reason: string): Probable<StateResponse> {
+        function failEnrol(reason: string): Probable<StateBroadcast> {
             return lib.fail(`Cannot enrol: ${reason}`);
         }
     }
 
-    public processChangeColor(player: PlayerEntry, match: RequestMatch): Probable<StateResponse> {
+    public processChangeColor(player: PlayerEntry, match: RequestMatch): Probable<StateBroadcast> {
         const change = validator.validateColorSelectionPayload(match.message.payload);
 
         if (!change)

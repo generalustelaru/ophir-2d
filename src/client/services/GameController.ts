@@ -1,5 +1,5 @@
 import {
-    ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetResponse, StateResponse, VpTransmission,
+    ErrorResponse, ClientRequest, ClientMessage, ServerMessage, ResetTransmission, StateBroadcast, VpTransmission,
     TurnNotificationTransmission, RivalControlTransmission, ForceTurnNotificationTransmission, ColorTransmission,
     NotFoundTransmission, ExpiredTransmission, SocketSwitchTransmission, InfluenceRollTransmission,
 } from '~/shared_types';
@@ -55,7 +55,7 @@ export class GameController extends Communicator implements Controller {
                 case this.isTurnNotification(data):
                     this.createEvent({ type: EventType.start_turn, detail: null });
                     break;
-                case this.isInfluenceRollTransmission(data):
+                case this.isInfluenceRollBroadcast(data):
                     this.createEvent({ type: EventType.roll_suspense, detail: data });
                     break;
                 case this.isForceTurnNotification(data):
@@ -111,7 +111,7 @@ export class GameController extends Communicator implements Controller {
         this.socket.send(JSON.stringify(request));
     }
 
-    private isGameStateResponse(data: ServerMessage): data is StateResponse {
+    private isGameStateResponse(data: ServerMessage): data is StateBroadcast {
         return 'state' in data;
     }
 
@@ -119,7 +119,7 @@ export class GameController extends Communicator implements Controller {
         return 'turnStart' in data;
     }
 
-    private isInfluenceRollTransmission(data: ServerMessage): data is InfluenceRollTransmission {
+    private isInfluenceRollBroadcast(data: ServerMessage): data is InfluenceRollTransmission {
         return 'rolled' in data && 'toHit' in data;
     }
 
@@ -147,7 +147,7 @@ export class GameController extends Communicator implements Controller {
         return 'error' in data;
     }
 
-    private isResetOrder(data: ServerMessage): data is ResetResponse {
+    private isResetOrder(data: ServerMessage): data is ResetTransmission {
         return 'resetFrom' in data;
     }
 
@@ -159,7 +159,7 @@ export class GameController extends Communicator implements Controller {
         return 'switch' in data;
     }
 
-    private createStateEvent(data: StateResponse) {
+    private createStateEvent(data: StateBroadcast) {
         return this.createEvent({ type: EventType.state_update, detail: data.state });
     }
 };
