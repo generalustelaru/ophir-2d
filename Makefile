@@ -23,7 +23,6 @@ pull:
 	npm run omit_revs
 cut:
 	git push origin --delete $(branch)
-	git branch --delete origin/$(branch)
 	git branch --delete $(branch)
 grow:
 	git checkout --branch $(branch)
