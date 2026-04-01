@@ -136,6 +136,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.end_rival_turn, payload: null }],
         },
         {
+            rivalRollDetail: { rivalRoll: 6 },
             laconic: null,
             mutate: (state: PlayState) => {
                 if(state.rival.isIncluded) {
@@ -489,6 +490,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.shift_market, payload: null }],
         },
         {
+            rivalRollDetail: { rivalRoll: 4 },
             laconic: null,
             mutate: (state: PlayState) => {
                 const m = state.market;

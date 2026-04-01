@@ -141,11 +141,11 @@ export class PlayStateHandler implements Unique<ObjectHandler<PlayState>>{
         });
     }
 
-    public concludeRivalTurn() {
+    public concludeRivalTurn(influence: DiceSix) {
         this.rival.update(r => {
             if (r.isIncluded) {
                 r.isControllable = false;
-                r.influence = Math.ceil(Math.random() * 6) as DiceSix;
+                r.influence = influence;
                 r.moves = 2;
             }
             return r;

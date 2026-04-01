@@ -1,5 +1,5 @@
 import { Aspect, DynamicModalInterface } from '~/client_types';
-import { InfluenceRollTransmission, Player, PlayerColor, Unique } from '~/shared_types';
+import { InfluenceRollBroadcast, Player, PlayerColor, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
 import Konva from 'konva';
 import { InfluenceDial } from '../popular';
@@ -10,7 +10,7 @@ const { PLAYER_HUES, HUES } = clientConstants;
 type Update = { color: PlayerColor }
 export class SailResultModal
     extends ModalBase
-    implements Unique<DynamicModalInterface<Update, InfluenceRollTransmission>> {
+    implements Unique<DynamicModalInterface<Update, InfluenceRollBroadcast>> {
     private ownerDie: InfluenceDial;
     private toSailDial: InfluenceDial;
     private symbol: Konva.Text;
@@ -75,7 +75,7 @@ export class SailResultModal
         this.reposition(aspect);
     }
 
-    public async show(data: InfluenceRollTransmission): Promise<void> {
+    public async show(data: InfluenceRollBroadcast): Promise<void> {
         const { toHit, rolled } = data;
         this.description.text('Rolling influence...');
         this.symbol.text('?');

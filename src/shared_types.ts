@@ -344,27 +344,29 @@ export type ClientRequest = {
 // MARK: RESPONSE
 export type ColorTransmission = { color: PlayerColor }
 export type StateBroadcast = { state: State }
-export type ResetTransmission = { resetFrom: string | PlayerColor }
-export type ErrorResponse = { error: string }
+export type ResetBroadcast = { resetFrom: string | PlayerColor }
+export type ErrorTransmission = { error: string }
 export type NotFoundTransmission = { notFound: null }
 export type VpTransmission = { vp: number }
-export type TurnNotificationTransmission = { turnStart: null }
-export type InfluenceRollTransmission = { color: PlayerColor, rolled: DiceSix, toHit: DiceSix }
-export type ForceTurnNotificationTransmission = { forceTurn: null }
+export type TurnTransmission = { turnStart: null }
+export type InfluenceRollBroadcast = { color: PlayerColor, rolled: DiceSix, toHit: DiceSix }
+export type NewRivalInfluenceBroadcast = { rivalRoll: DiceSix }
+export type ForceTurnTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
-export type ExpiredTransmission = { expired: null }
+export type TokenExpiredTransmission = { expired: null }
 export type SocketSwitchTransmission = { switch: null }
 export type ServerMessage =
     | StateBroadcast
-    | ResetTransmission
-    | ErrorResponse
+    | ResetBroadcast
+    | ErrorTransmission
     | ColorTransmission
     | NotFoundTransmission
     | VpTransmission
-    | TurnNotificationTransmission
+    | TurnTransmission
     | RivalControlTransmission
-    | InfluenceRollTransmission
-    | ForceTurnNotificationTransmission
-    | ExpiredTransmission
+    | InfluenceRollBroadcast
+    | ForceTurnTransmission
+    | TokenExpiredTransmission
     | SocketSwitchTransmission
+    | NewRivalInfluenceBroadcast
 ;

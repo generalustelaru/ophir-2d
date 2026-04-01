@@ -1,6 +1,7 @@
 import Konva from 'konva';
 import {
-    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action, InfluenceRollTransmission,
+    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action, InfluenceRollBroadcast,
+    NewRivalInfluenceBroadcast,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
@@ -156,12 +157,16 @@ export class CanvasService extends Communicator {
         this.startTurnModal?.show();
     }
 
-    public notifyRollSuspense(data: InfluenceRollTransmission): void {
+    public notifyRollSuspense(data: InfluenceRollBroadcast): void {
         if (data.color == localState.playerColor) {
             this.sailResultModal?.show(data);
         } else {
             this.playerGroup.simulateRollForPlayer(data);
         }
+    }
+
+    public notifyRivalRoll(data: NewRivalInfluenceBroadcast) {
+        this.playerGroup.simulateRollForRival(data);
     }
 
     public notifyForForceTurn(): void {

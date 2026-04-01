@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { PlayerColor, Rival, Unique } from '~/shared_types';
+import { DiceSix, PlayerColor, Rival, Unique } from '~/shared_types';
 import { InfluenceDial, MovesDial } from '../popular';
 import { ShiftMarketButton, ConcludeButton } from '.';
 import clientConstants from '~/client_constants';
@@ -75,6 +75,10 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
 
     public hideInfluence() {
         this.influenceDial.selfDestroy();
+    }
+
+    public simulateRoll(value: DiceSix) {
+        this.influenceDial.simulateRoll(value);
     }
 
     public update(rival: Rival) {

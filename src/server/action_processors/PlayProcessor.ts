@@ -876,7 +876,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (mayConclude.err)
             return lib.fail('Player cannot conclude rival turn');
 
-        this.playState.concludeRivalTurn();
+        const newInfluence = Math.round(Math.random() * 6) as DiceSix || 1 ;
+        this.playState.concludeRivalTurn(newInfluence);
         const rivalLocation = this.playState.getLocationName(rival.bearings.seaZone);
 
         if (isShiftingMarket) {
@@ -898,6 +899,8 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         } else {
             player.addBubbleDeed(BubbleDeed.rival);
         }
+
+        this.broadcast({ rivalRoll: newInfluence });
 
         this.clearUndo(player);
         player.unfreeze(rival.bearings.seaZone);

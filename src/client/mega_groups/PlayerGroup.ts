@@ -1,6 +1,8 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
-import { Coordinates, InfluenceRollTransmission, Player, PlayerColor, PlayState, Unique } from '~/shared_types';
+import {
+    Coordinates, InfluenceRollBroadcast, NewRivalInfluenceBroadcast, Player, PlayerColor, PlayState, Unique,
+} from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
 
@@ -85,9 +87,13 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         }
     }
 
-    public simulateRollForPlayer(data: InfluenceRollTransmission) {
+    public simulateRollForPlayer(data: InfluenceRollBroadcast) {
         const placard = this.playerPlacards.find(p => p.getColor() == data.color);
         if (placard) placard.simulateRoll(data.rolled);
+    }
+
+    public simulateRollForRival(data: NewRivalInfluenceBroadcast) {
+        this.rivalPlacard?.simulateRoll(data.rivalRoll);
     }
 
     public switchToResults(state: PlayState): void {
