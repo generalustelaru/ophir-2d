@@ -1,11 +1,11 @@
 import { Aspect, DynamicModalInterface } from '~/client_types';
-import { DiceSix, InfluenceRollTransmission, Player, PlayerColor, Unique } from '~/shared_types';
+import { InfluenceRollTransmission, Player, PlayerColor, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
 import Konva from 'konva';
 import { InfluenceDial } from '../popular';
 import clientConstants from '~/client/client_constants';
 
-const { PLAYER_HUES, HUES, ROLL_SUSPENSE_MS } = clientConstants;
+const { PLAYER_HUES, HUES } = clientConstants;
 
 type Update = { color: PlayerColor }
 export class SailResultModal
@@ -84,7 +84,7 @@ export class SailResultModal
         this.open();
         super.disableDismiss();
 
-        this.simulateRoll(rolled).then(() => {
+        this.ownerDie.simulateRoll(rolled).then(() => {
             if (rolled < toHit) {
                 this.description.text('The roll has failed.');
                 this.symbol.text('<');
@@ -96,27 +96,6 @@ export class SailResultModal
             }
 
             super.enableDismiss();
-        });
-    }
-
-    private async simulateRoll(result: DiceSix): Promise<void> {
-        return new Promise(resolve => {
-            let fauxRolled = Math.ceil(Math.random() * 6);
-
-            const rollInterval = setInterval(() => {
-                let roll = fauxRolled;
-
-                while (roll == fauxRolled) roll = Math.ceil(Math.random() * 6);
-
-                fauxRolled = roll;
-                this.ownerDie.update({ value: roll as DiceSix } );
-            }, 150);
-
-            setTimeout(() => {
-                clearInterval(rollInterval);
-                this.ownerDie.update({ value: result } );
-                resolve();
-            }, ROLL_SUSPENSE_MS);
         });
     }
 }

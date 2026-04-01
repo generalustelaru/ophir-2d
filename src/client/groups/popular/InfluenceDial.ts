@@ -6,7 +6,7 @@ import clientConstants from '~/client/client_constants';
 
 const { ROLL_SUSPENSE_MS } = clientConstants;
 
-type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle | null }
+type PipDataElement = { position: Coordinates, included: Array<DiceSix>, element: Konva.Circle }
 type PipData = Array<PipDataElement>
 type Update = { value: DiceSix }
 export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
@@ -33,28 +33,28 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
         });
         this.group.add(this.body);
 
-        const pipData: PipData = [
-            { position: { x: 10, y: 10 }, included: [2, 3, 4, 5, 6], element: null },
-            { position: { x: 10, y: 25 }, included: [6], element: null },
-            { position: { x: 10, y: 40 }, included: [4, 5, 6], element: null },
-            { position: { x: 40, y: 10 }, included: [4, 5, 6], element: null },
-            { position: { x: 40, y: 25 }, included: [6], element: null },
-            { position: { x: 40, y: 40 }, included: [2, 3, 4, 5, 6], element: null },
-            { position: { x: 25, y: 25 }, included: [1, 3, 5], element: null },
+        const pipData: Array<Omit<PipDataElement, 'element'>> = [
+            { position: { x: 10, y: 10 }, included: [2, 3, 4, 5, 6] },
+            { position: { x: 10, y: 25 }, included: [6] },
+            { position: { x: 10, y: 40 }, included: [4, 5, 6] },
+            { position: { x: 40, y: 10 }, included: [4, 5, 6] },
+            { position: { x: 40, y: 25 }, included: [6] },
+            { position: { x: 40, y: 40 }, included: [2, 3, 4, 5, 6] },
+            { position: { x: 25, y: 25 }, included: [1, 3, 5] },
         ];
 
-        pipData.forEach(pip => {
-            const element = new Konva.Circle({
-                x: pip.position.x,
-                y: pip.position.y,
-                radius: 6,
-                fill: 'black',
-            });
-            pip.element = element;
-            this.group.add(element);
+        this.dotMatrix = pipData.map(pip => {
+            return {
+                ...pip,
+                element: new Konva.Circle({
+                    x: pip.position.x,
+                    y: pip.position.y,
+                    radius: 6,
+                    fill: 'black',
+                }),
+            };
         });
-
-        this.dotMatrix = pipData;
+        this.group.add(...this.dotMatrix.map(d => d.element));
         this.displayValue(1);
     }
 
@@ -77,26 +77,23 @@ export class InfluenceDial implements Unique<DynamicGroupInterface<Update>> {
 
         for (let i = 0; i < 7; i++) {
             const dot = this.dotMatrix[i];
-
-            if (dot.included.includes(value)) {
-                dot.element?.show();
-            } else {
-                dot.element?.hide();
-            }
+            dot.included.includes(value) ? dot.element?.show() : dot.element?.hide();
         }
     }
 
     public async simulateRoll(result: DiceSix): Promise<void> {
         return new Promise(resolve => {
-            let fauxRolled = Math.ceil(Math.random() * 6);
+            function randomD6(): DiceSix { return Math.round(Math.random() * 6) as DiceSix || 1; };
+
+            let currentRoll = randomD6();
 
             const rollInterval = setInterval(() => {
-                let roll = fauxRolled;
+                let newRoll = randomD6();
 
-                while (roll == fauxRolled) roll = Math.ceil(Math.random() * 5);
+                while (newRoll == currentRoll) newRoll = randomD6();
 
-                fauxRolled = roll;
-                this.displayValue(roll as DiceSix);
+                currentRoll = newRoll;
+                this.displayValue(newRoll);
             }, 150);
 
             setTimeout(() => {
