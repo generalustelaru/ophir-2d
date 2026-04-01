@@ -16,7 +16,6 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
     private shiftMarketButton: ShiftMarketButton;
     private concludeButton: ConcludeButton;
     private movesDial: MovesDial;
-    private hasConcludedTurn: boolean = false;
 
     constructor(
         stage: Konva.Stage,
@@ -49,7 +48,6 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
             stage,
             { x: 25, y: 10 },
             endRivalTurnCallback ? () => {
-                this.hasConcludedTurn = true;
                 endRivalTurnCallback(true);
             } : null,
         );
@@ -57,7 +55,6 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
             stage,
             { x: 110, y: 32 },
             endRivalTurnCallback ? () => {
-                this.hasConcludedTurn = true;
                 endRivalTurnCallback(false);
             } : null,
         );
@@ -97,13 +94,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
         this.movesDial.update({ moves, isCurrent: activePlayerColor && isControllable });
-
-        if (this.hasConcludedTurn) {
-            this.hasConcludedTurn = false;
-            this.influenceDial.simulateRoll(influence);
-        } else {
-            this.influenceDial.update({ value: influence });
-        }
+        this.influenceDial.update({ value: influence });
     }
 
     public disable() {
