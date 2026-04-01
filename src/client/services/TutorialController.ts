@@ -100,11 +100,11 @@ export class TutorialController extends Communicator implements Controller {
 
             scenario.mutate(this.currentState, (action == Action.move) ? payload.zoneId : undefined);
 
-            const { instructions, expecting, laconic: notification, vpDetail, failedRollDetail, index } = scenario;
+            const { instructions, expecting, laconic: notification, vpDetail, influenceRollDetail, index } = scenario;
             this.expectedMessages = expecting;
 
             vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
-            failedRollDetail && this.createEvent({ type: EventType.failed_roll, detail: failedRollDetail });
+            influenceRollDetail && this.createEvent({ type: EventType.roll_suspense, detail: influenceRollDetail });
             this.createEvent({ type: EventType.tour_update, detail: {
                 index,
                 state: this.currentState,
@@ -139,7 +139,7 @@ export class TutorialController extends Communicator implements Controller {
             index,
             expecting,
             vpDetail,
-            failedRollDetail,
+            influenceRollDetail: roll,
             laconic,
             visuals: stepHighlights,
             mutate: originalMutate,
@@ -158,7 +158,7 @@ export class TutorialController extends Communicator implements Controller {
 
         const mutate: (state: PlayState, z?: ZoneName) => void = (() => {
             switch (true) {
-                case newPosition && !failedRollDetail:
+                case newPosition && (!roll || roll.rolled >= roll.toHit):
                     return (state: PlayState, z?: ZoneName): void => {
                         state.players[0].bearings.position = newPosition;
                         originalMutate(state, z);
@@ -174,7 +174,7 @@ export class TutorialController extends Communicator implements Controller {
             }
         })();
 
-        return { index, mutate, instructions, expecting, laconic, vpDetail, failedRollDetail };
+        return { index, mutate, instructions, expecting, laconic, vpDetail, influenceRollDetail: roll };
     }
 
     private isSame(reference: any, tested: any): boolean {

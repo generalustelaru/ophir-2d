@@ -1,7 +1,7 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, ColorTransmission, Metal,
     TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
-    Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, FailedInfluenceRollTransmission,
+    Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, InfluenceRollTransmission,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -69,6 +69,7 @@ type AspectData<T> = {
 export type ClientConstants = {
     STAGE_AREA: AspectData<Dimensions>,
     GROUP_DIMENSIONS: { location: Dimensions, map: Dimensions, player: Dimensions }
+    ROLL_SUSPENSE_MS: number
     LOCATION_PLACEMENT: AspectData<Coordinates>,
     MAP_PLACEMENT: AspectData<Coordinates>,
     PLAYER_PLACEMENT: AspectData<Coordinates>,
@@ -208,7 +209,7 @@ export enum EventType {
     vp_transmission = 'vp_transmission',
     rival_control_transmission = 'rival_control_transmission',
     start_turn = 'start_turn',
-    failed_roll = 'failed_roll',
+    roll_suspense = 'roll_suspense',
     force_turn = 'force_turn',
 }
 
@@ -235,7 +236,7 @@ export type Event =
     | EventFormat<EventType.tour_update, TutorialState>
     | EventFormat<EventType.identification, ColorTransmission>
     | EventFormat<EventType.vp_transmission, VpTransmission>
-    | EventFormat<EventType.failed_roll, FailedInfluenceRollTransmission>
+    | EventFormat<EventType.roll_suspense, InfluenceRollTransmission>
 ;
 
 export type InfoDetail = {
@@ -282,7 +283,7 @@ export type TutorialScenarioStep = {
     mutate: (state: PlayState, z?: ZoneName) => void // produces a new state for CanvasService consumption (branch for move)
     laconic: NotificationType // simulates additional server transmissions for laconic events
     vpDetail?: VpTransmission // provision for payload on gaining vp
-    failedRollDetail?: FailedInfluenceRollTransmission // provision for failed roll values
+    influenceRollDetail?: InfluenceRollTransmission // provision for roll result values
     instructions: Array<Instruction> // updates CanvasService via dedicated method
     expecting: Array<ClientMessage> | null // stays in TourService for advancing validation
 }

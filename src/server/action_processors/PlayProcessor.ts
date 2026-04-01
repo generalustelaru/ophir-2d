@@ -161,12 +161,16 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             }
 
             this.clearUndo(player);
+            const threshold = (() => {
+                const influencePool = playersInZone.map(p => p.influence);
 
+                return Math.max(...influencePool, rivalInfluence) as DiceSix;
+            })();
             const influenceRoll = ((): DiceSix => {
                 player.rollInfluence();
                 const roll = player.getInfluence();
 
-                if (player.getSpecialistName() === SpecialistName.temple_guard) {
+                if (player.getSpecialistName() == SpecialistName.temple_guard) {
                     const bumpedRoll = Math.min(roll + 1, 6) as DiceSix;
                     player.setInfluence(bumpedRoll);
 
@@ -176,17 +180,9 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 return roll;
             })();
 
-            const rivalThreshold = rivalInfluence > influenceRoll ? rivalInfluence : 0;
-            const blockingOpponents = playersInZone.filter(p => p.influence > influenceRoll);
-            const opponentThreshold = blockingOpponents.length ? blockingOpponents.reduce((topBlocker, player) =>
-                player.influence > topBlocker.influence ? player : topBlocker,
-            ).influence : 0;
+            this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
 
-            const threshold = opponentThreshold || rivalThreshold;
-
-            if (threshold) {
-                this.transmit(player.getIdentity().userId, { rolled: influenceRoll, toHit: threshold });
-
+            if (influenceRoll < threshold) {
                 this.playState.trimInfluenceByZone(target, threshold);
                 player.addBubbleDeed(BubbleDeed.rollFail);
 

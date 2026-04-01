@@ -349,7 +349,7 @@ export type ErrorResponse = { error: string }
 export type NotFoundTransmission = { notFound: null }
 export type VpTransmission = { vp: number }
 export type TurnNotificationTransmission = { turnStart: null }
-export type FailedInfluenceRollTransmission = { rolled: DiceSix, toHit: DiceSix }
+export type InfluenceRollTransmission = { rolled: DiceSix, toHit: DiceSix }
 export type ForceTurnNotificationTransmission = { forceTurn: null }
 export type RivalControlTransmission = { rivalControl: null }
 export type ExpiredTransmission = { expired: null }
@@ -363,7 +363,7 @@ export type ServerMessage =
     | VpTransmission
     | TurnNotificationTransmission
     | RivalControlTransmission
-    | FailedInfluenceRollTransmission
+    | InfluenceRollTransmission
     | ForceTurnNotificationTransmission
     | ExpiredTransmission
     | SocketSwitchTransmission

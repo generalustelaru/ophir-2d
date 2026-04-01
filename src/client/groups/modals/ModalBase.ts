@@ -5,7 +5,7 @@ import { AcceptButton } from './AcceptButton';
 import { ClientMessage } from '~/shared_types';
 import { Aspect, Dimensions, ElementList, LayerIds } from '~/client/client_types';
 
-type SubmitBehavior = {
+type ButtonBehavior = {
     hasSubmit: true,
     actionMessage: ClientMessage | null,
     submitLabel: string,
@@ -22,12 +22,13 @@ export abstract class ModalBase {
     private modalGroup: Konva.Group;
     protected contentGroup: Konva.Group;
     private acceptButton: AcceptButton | null = null;
+    private dismissButton: DismissButton;
     private isFixedActionMessage: boolean;
     private lockLayer: Konva.Rect;
 
     constructor(
         stage: Konva.Stage,
-        behavior: SubmitBehavior,
+        behavior: ButtonBehavior,
         aspect: Aspect,
         dimensions: Dimensions = { width: 300, height: 150 },
     ) {
@@ -57,7 +58,7 @@ export abstract class ModalBase {
         });
         modalElements.push(this.contentGroup);
 
-        const dismissButton = new DismissButton(
+        this.dismissButton = new DismissButton(
             stage,
             () => { this.screenGroup.hide(); },
             {
@@ -66,7 +67,7 @@ export abstract class ModalBase {
             },
             behavior.dismissLabel,
         );
-        modalElements.push(dismissButton.getElement());
+        modalElements.push(this.dismissButton.getElement());
 
         if (behavior.hasSubmit) {
             this.acceptButton = new AcceptButton(
@@ -130,6 +131,14 @@ export abstract class ModalBase {
         }
 
         this.screenGroup.show();
+    }
+
+    protected enableDismiss() {
+        this.dismissButton.enable();
+    }
+
+    protected disableDismiss() {
+        this.dismissButton.disable();
     }
 
     protected close() {

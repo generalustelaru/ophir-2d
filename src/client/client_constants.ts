@@ -7,6 +7,7 @@ const clientConstants: ClientConstants = {
     MAP_PLACEMENT: { wide: { x: 300, y: 0 }, tall: { x: 0, y: 0 } },
     PLAYER_PLACEMENT: { wide: { x: 900, y: 0 }, tall: { x: 300, y: 500 } },
     GROUP_DIMENSIONS: { location: { width: 300, height: 500 }, map: { width: 600, height: 500 }, player: { width: 300, height: 500 } },
+    ROLL_SUSPENSE_MS: 2000,
     HUES: {
         lowRoll: '#FF7F50',
         midRoll: '#FF4500',

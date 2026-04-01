@@ -7,6 +7,9 @@ import { UserInterface } from './services/UiService';
 import {
     Action, ClientMessage, ResetResponse, VpTransmission, ColorTransmission, State,
 } from '~/shared_types';
+import clientConstants from './client_constants';
+
+const { ROLL_SUSPENSE_MS } = clientConstants;
 
 const protocol = window.location.protocol == 'https:' ? 'wss:' : 'ws:';
 const pathSegments = window.location.pathname.split('/');
@@ -15,6 +18,26 @@ const isTutorial = requestedGameId == 'tutorial';
 const uiService = new UserInterface(isTutorial);
 const controller = isTutorial ? new TutorialController() : new GameController(protocol);
 const gameAdress = `${protocol}//${window.location.host}/game`;
+
+let isRollSuspense: boolean = false;
+const transmissionQueue: Array<Function> = [];
+
+function releaseUpdate(updateCallback: Function) {
+
+    if (isRollSuspense) {
+        setTimeout(() => {
+            isRollSuspense = false;
+            updateCallback();
+
+            while (transmissionQueue.length) {
+                const callback = transmissionQueue.shift();
+                callback && callback();
+            }
+        }, ROLL_SUSPENSE_MS);
+    } else {
+        updateCallback();
+    }
+}
 
 function signalError(message?: string) {
     const errMessage = message || 'An error occurred';
@@ -121,7 +144,8 @@ document.fonts.ready.then(() => {
         if (!localState.playerColor)
             return signalError('Missing local player data');
 
-        canvas.notifyForRivalControl();
+        if (isRollSuspense) transmissionQueue.push(() => { canvas.notifyForRivalControl(); });
+        else canvas.notifyForRivalControl();
     });
 
     window.addEventListener(EventType.reset, (event: CustomEventInit) => {
@@ -143,23 +167,28 @@ document.fonts.ready.then(() => {
     });
 
     window.addEventListener(EventType.state_update, (event: CustomEventInit) => {
+
         if (!event.detail)
             return signalError('State is missing!');
 
         const state = event.detail as State;
-
-        uiService.update(state);
-        canvas.drawUpdateElements(state);
+        releaseUpdate(() => {
+            uiService.update(state);
+            canvas.drawUpdateElements(state);
+        });
     });
 
     window.addEventListener(EventType.tour_update, (event: CustomEventInit) => {
+
         if (!event.detail)
             return signalError('State is missing!');
 
         const { index, state, instructions } = event.detail as TutorialState;
-        uiService.update(state, true);
-        canvas.drawUpdateElements(state);
-        canvas.updateInstructions(instructions);
+        releaseUpdate(() => {
+            uiService.update(state, true);
+            canvas.drawUpdateElements(state);
+            canvas.updateInstructions(instructions);
+        });
 
         fetch(`/tutolytics/${index}`, { method: 'POST' });
     });
@@ -168,12 +197,15 @@ document.fonts.ready.then(() => {
         canvas.notifyForTurn();
     });
 
-    window.addEventListener( EventType.failed_roll, (event: CustomEventInit) => {
-        canvas.notifyFailedRoll(event.detail);
+    window.addEventListener( EventType.roll_suspense, (event: CustomEventInit) => {
+        isRollSuspense = true;
+        canvas.notifyRollSuspense(event.detail);
     });
 
     window.addEventListener(EventType.force_turn, () => {
-        canvas.notifyForForceTurn();
+
+        if (isRollSuspense) transmissionQueue.push(() => { canvas.notifyForForceTurn(); });
+        else canvas.notifyForForceTurn();
     });
 
     window.addEventListener(EventType.abandon, () => {
