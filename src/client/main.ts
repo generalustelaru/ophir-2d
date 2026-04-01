@@ -74,7 +74,7 @@ function resetClient(source: string) {
 
 document.fonts.ready.then(() => {
     const canvas = new CanvasService(isTutorial);
-
+    // TODO: reduce the number of event listenrs by grouping websocket ones into transmission and broadcast maybe
     window.addEventListener('resize', () => {
         canvas.handleResize();
     });
