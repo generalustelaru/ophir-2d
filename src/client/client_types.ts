@@ -1,7 +1,8 @@
 import {
     ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, ColorTransmission, Metal,
-    TreasuryOffer, TempleState, ClientMessage, ResetResponse, VpTransmission, State, MovementPayload, DiceSix, MetalCost,
-    Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, InfluenceRollTransmission,
+    TreasuryOffer, TempleState, ClientMessage, ResetBroadcast, VpTransmission, State, MovementPayload, DiceSix,
+    MetalCost, Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, InfluenceRollBroadcast,
+    NewRivalInfluenceBroadcast,
 } from '~/shared_types';
 import Konva from 'konva';
 
@@ -208,6 +209,7 @@ export enum EventType {
     tour_update = 'tour_update',
     vp_transmission = 'vp_transmission',
     rival_control_transmission = 'rival_control_transmission',
+    rival_roll_broadcast = 'rival_roll_broadcast',
     start_turn = 'start_turn',
     roll_suspense = 'roll_suspense',
     force_turn = 'force_turn',
@@ -231,12 +233,13 @@ export type Event =
     | EventFormat<EventType.action, ClientMessage>
     | EventFormat<EventType.error, ErrorDetail>
     | EventFormat<EventType.info, InfoDetail>
-    | EventFormat<EventType.reset, ResetResponse>
+    | EventFormat<EventType.reset, ResetBroadcast>
     | EventFormat<EventType.state_update, State>
     | EventFormat<EventType.tour_update, TutorialState>
     | EventFormat<EventType.identification, ColorTransmission>
     | EventFormat<EventType.vp_transmission, VpTransmission>
-    | EventFormat<EventType.roll_suspense, InfluenceRollTransmission>
+    | EventFormat<EventType.roll_suspense, InfluenceRollBroadcast>
+    | EventFormat<EventType.rival_roll_broadcast, NewRivalInfluenceBroadcast>
 ;
 
 export type InfoDetail = {
@@ -283,7 +286,8 @@ export type TutorialScenarioStep = {
     mutate: (state: PlayState, z?: ZoneName) => void // produces a new state for CanvasService consumption (branch for move)
     laconic: NotificationType // simulates additional server transmissions for laconic events
     vpDetail?: VpTransmission // provision for payload on gaining vp
-    influenceRollDetail?: InfluenceRollTransmission // provision for roll result values
+    influenceRollDetail?: InfluenceRollBroadcast // provision for roll result values
+    rivalRollDetail?: NewRivalInfluenceBroadcast // provision for rival turn conclusion
     instructions: Array<Instruction> // updates CanvasService via dedicated method
     expecting: Array<ClientMessage> | null // stays in TourService for advancing validation
 }

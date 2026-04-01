@@ -1,6 +1,8 @@
 import Konva from 'konva';
 import { MegaGroupInterface, GroupLayoutData, LayerIds } from '~/client_types';
-import { Coordinates, Player, PlayerColor, PlayState, Unique } from '~/shared_types';
+import {
+    Coordinates, InfluenceRollBroadcast, NewRivalInfluenceBroadcast, Player, PlayerColor, PlayState, Unique,
+} from '~/shared_types';
 import { PlayerPlacard, RivalPlacard } from '../groups/player';
 import localState from '../state';
 
@@ -72,7 +74,7 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
     public update(state: PlayState): void {
 
         this.playerPlacards.forEach(placard => {
-            const player = state.players.find(player => player.color === placard.getId());
+            const player = state.players.find(player => player.color === placard.getColor());
             if (player) {
                 placard.update(player);
             } else {
@@ -85,10 +87,19 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
         }
     }
 
+    public simulateRollForPlayer(data: InfluenceRollBroadcast) {
+        const placard = this.playerPlacards.find(p => p.getColor() == data.color);
+        if (placard) placard.simulateRoll(data.rolled);
+    }
+
+    public simulateRollForRival(data: NewRivalInfluenceBroadcast) {
+        this.rivalPlacard?.simulateRoll(data.rivalRoll);
+    }
+
     public switchToResults(state: PlayState): void {
         const results = state.gameResults;
         for (const placard of this.playerPlacards) {
-            const color = placard.getId();
+            const color = placard.getColor();
             const vp = results.find(r => r.color == color)?.vp || 0;
             placard.switchToResults(vp);
         }
@@ -96,7 +107,7 @@ export class PlayerGroup implements Unique<MegaGroupInterface> {
     }
 
     public updatePlayerVp(color: PlayerColor|null, vp: number) {
-        const localPlacard = this.playerPlacards.find(placard => placard.getId() === color);
+        const localPlacard = this.playerPlacards.find(placard => placard.getColor() === color);
         localPlacard && localPlacard.updateVP(vp);
     }
 

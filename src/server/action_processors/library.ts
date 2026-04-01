@@ -1,4 +1,4 @@
-import { State, StateResponse } from '~/shared_types';
+import { State, StateBroadcast } from '~/shared_types';
 import { Font } from 'opentype.js';
 import sLib from '../server_lib';
 import { Probable } from '../server_types';
@@ -7,7 +7,7 @@ function validationErrorMessage(){
     return 'Malformed request.';
 }
 
-function stateResponse(state: State): StateResponse {
+function stateResponse(state: State): StateBroadcast {
     return { state };
 }
 

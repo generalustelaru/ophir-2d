@@ -100,11 +100,14 @@ export class TutorialController extends Communicator implements Controller {
 
             scenario.mutate(this.currentState, (action == Action.move) ? payload.zoneId : undefined);
 
-            const { instructions, expecting, laconic: notification, vpDetail, influenceRollDetail, index } = scenario;
+            const {
+                instructions, expecting, laconic: notification, vpDetail, influenceRollDetail, rivalRollDetail, index,
+            } = scenario;
             this.expectedMessages = expecting;
 
             vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
             influenceRollDetail && this.createEvent({ type: EventType.roll_suspense, detail: influenceRollDetail });
+            rivalRollDetail && this.createEvent({ type: EventType.rival_roll_broadcast, detail: rivalRollDetail });
             this.createEvent({ type: EventType.tour_update, detail: {
                 index,
                 state: this.currentState,
@@ -140,6 +143,7 @@ export class TutorialController extends Communicator implements Controller {
             expecting,
             vpDetail,
             influenceRollDetail: roll,
+            rivalRollDetail,
             laconic,
             visuals: stepHighlights,
             mutate: originalMutate,
@@ -174,7 +178,7 @@ export class TutorialController extends Communicator implements Controller {
             }
         })();
 
-        return { index, mutate, instructions, expecting, laconic, vpDetail, influenceRollDetail: roll };
+        return { index, mutate, instructions, expecting, laconic, vpDetail, influenceRollDetail: roll, rivalRollDetail };
     }
 
     private isSame(reference: any, tested: any): boolean {

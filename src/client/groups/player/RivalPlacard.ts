@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { DynamicGroupInterface } from '~/client_types';
-import { PlayerColor, Rival, Unique } from '~/shared_types';
+import { DiceSix, PlayerColor, Rival, Unique } from '~/shared_types';
 import { InfluenceDial, MovesDial } from '../popular';
 import { ShiftMarketButton, ConcludeButton } from '.';
 import clientConstants from '~/client_constants';
@@ -19,7 +19,7 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
 
     constructor(
         stage: Konva.Stage,
-        endRivalTurnCallback: ((p: boolean) => void) | null,
+        endRivalTurnCallback: ((shiftMarket: boolean) => void) | null,
         localPlayerColor: PlayerColor | null,
         yOffset: number,
     ) {
@@ -47,15 +47,19 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.shiftMarketButton = new ShiftMarketButton(
             stage,
             { x: 25, y: 10 },
-            endRivalTurnCallback ? () => endRivalTurnCallback(true) : null,
+            endRivalTurnCallback ? () => {
+                endRivalTurnCallback(true);
+            } : null,
         );
         this.concludeButton = new ConcludeButton(
             stage,
             { x: 110, y: 32 },
-            endRivalTurnCallback ? () => endRivalTurnCallback(false) : null,
+            endRivalTurnCallback ? () => {
+                endRivalTurnCallback(false);
+            } : null,
         );
-        this.movesDial = new MovesDial({ x: 80, y: 10 });
 
+        this.movesDial = new MovesDial({ x: 80, y: 10 });
         this.group.add(...[
             this.background,
             this.influenceDial.getElement(),
@@ -73,6 +77,10 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
         this.influenceDial.selfDestroy();
     }
 
+    public simulateRoll(value: DiceSix) {
+        this.influenceDial.simulateRoll(value);
+    }
+
     public update(rival: Rival) {
         if (!rival.isIncluded)
             return;
@@ -87,10 +95,10 @@ export class RivalPlacard implements Unique<DynamicGroupInterface<Rival>> {
             : HUES.boneWhite,
         );
         this.background.strokeWidth(isControllable ? 3 : 0);
-        this.influenceDial.update({ value: influence, hue: null });
         this.concludeButton.update({ isControllable, mayConclude });
         this.shiftMarketButton.update(mayShift);
         this.movesDial.update({ moves, isCurrent: activePlayerColor && isControllable });
+        this.influenceDial.update({ value: influence });
     }
 
     public disable() {

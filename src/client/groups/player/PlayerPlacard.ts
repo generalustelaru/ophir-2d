@@ -1,7 +1,7 @@
 
 import Konva from 'konva';
 import { DynamicGroupInterface, ElementList, PlayerHueVariation } from '~/client_types';
-import { Action, Player, PlayerColor, Unique } from '~/shared_types';
+import { Action, DiceSix, Player, PlayerColor, Unique } from '~/shared_types';
 import { CoinDial, FavorDial, InfluenceDial, VictoryPointDial } from '../popular';
 import { CargoBand, SpecialistBand, SpecialistCard, SpecialtyButton } from '.';
 import clientConstants from '~/client_constants';
@@ -118,20 +118,19 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
     }
 
     public update(player: Player): void {
-        const { cargo, favor, isCurrent, influence, color, locationActions, isAnchored, specialist, name } = player;
+        const { cargo, isCurrent, influence, specialist } = player;
+        const isLocalPlayer = this.localPlayerColor === player.color;
         this.background.fill(isCurrent ? this.variation.vivid.light : this.variation.muted.dark);
-        this.cargoBand.update({ cargo, canDrop: this.localPlayerColor === color && isCurrent });
-        this.favorDial.update(favor);
+        this.cargoBand.update({ cargo, canDrop: isLocalPlayer && isCurrent });
+        this.favorDial.update(player.favor);
         this.coinDial.update(player.coins);
-        this.influenceDial.update({
-            value: influence,
-            hue: isCurrent ? this.variation.muted.dark : this.variation.vivid.light,
-        });
+        this.influenceDial.update({ value: influence });
+
         this.specialistBand.update(isCurrent);
-        this.specialistCard.update(name);
+        this.specialistCard.update(player.name);
         this.specialtyButton.update(!!(
-            isAnchored
-            && locationActions.includes(Action.sell_specialty)
+            player.isAnchored
+            && player.locationActions.includes(Action.sell_specialty)
             && specialist.specialty
             && cargo.includes(specialist.specialty)
         ));
@@ -143,11 +142,15 @@ export class PlayerPlacard implements Unique<DynamicGroupInterface<Player>> {
         this.vpDial.update(vp);
     }
 
+    public simulateRoll(value: DiceSix) {
+        this.influenceDial.simulateRoll(value);
+    }
+
     public updateVP(vp: number) {
         this.vpDial.update(vp);
     }
 
-    public getId(): PlayerColor {
+    public getColor(): PlayerColor {
         return this.color;
     }
 

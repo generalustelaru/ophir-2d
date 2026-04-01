@@ -4,7 +4,7 @@ import {
     GameId,
 } from '~/server_types';
 import {
-    ServerMessage, Action, Phase, StateResponse, PlayerColor, PlayerEntity, State, Player,
+    ServerMessage, Action, Phase, StateBroadcast, PlayerColor, PlayerEntity, State, Player,
 } from '~/shared_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
 import lib from './action_processors/library';
@@ -25,14 +25,16 @@ export class Game {
     private timeStamp: number;
     private config: Configuration;
     private actionProcessor: EnrolmentProcessor | SetupProcessor | PlayProcessor;
-    private broadcast: ((state: State) => void) | null;
+    private stateBroadcast: ((state: State) => void) | null;
+    private broadcast: ((message: ServerMessage) => void) | null;
     private transmit: ((userId: UserId, message: ServerMessage) => void) | null;
     private saveDisplayName: ((userId: UserId, name: string) => void) | null;
     private userReferences: Array<UserReference> = [];
     private font: Font | null;
 
     constructor(
-        broadcastCallback: (state: State) => void,
+        stateBroadcastCallback: (state: State) => void,
+        broadcastCallback: (gameId: GameId, message: ServerMessage) => void,
         transmitCallback: (userId: UserId, gameId: GameId, message: ServerMessage) => void,
         nameUpdateCallback: (userId: UserId, name: string) => void,
         configuration: Configuration,
@@ -44,7 +46,7 @@ export class Game {
             throw new Error('Missing fonts!');
 
         this.config = { ...configuration };
-        this.broadcast = broadcastCallback;
+        this.stateBroadcast = stateBroadcastCallback;
         this.saveDisplayName = nameUpdateCallback;
         this.font = font;
 
@@ -56,6 +58,10 @@ export class Game {
                 separator: '-',
             }) as GameId;
 
+        this.broadcast = (message: ServerMessage) => {
+            broadcastCallback(this.gameId, message);
+        };
+
         this.transmit = (userId: UserId, message: ServerMessage) => {
             transmitCallback(userId, this.gameId, message);
         };
@@ -64,7 +70,7 @@ export class Game {
             this.timeStamp = Date.now();
             this.actionProcessor = new EnrolmentProcessor(
                 this.getNewState(this.gameId),
-                broadcastCallback,
+                stateBroadcastCallback,
                 this.transmit,
                 this.updateReferenceColor.bind(this),
                 configuration,
@@ -99,8 +105,9 @@ export class Game {
                             backupState: new BackupStateHandler(backupStates),
                         },
                         configuration,
-                        broadcastCallback,
+                        stateBroadcastCallback,
                         this.transmit,
+                        this.broadcast,
                         reference,
                     );
 
@@ -113,7 +120,7 @@ export class Game {
                 case Phase.enrolment:
                     return new EnrolmentProcessor(
                         sharedState,
-                        broadcastCallback,
+                        stateBroadcastCallback,
                         this.transmit,
                         this.updateReferenceColor.bind(this),
                         configuration,
@@ -163,7 +170,7 @@ export class Game {
 
     public deReference() {
         this.actionProcessor.clearIdleTimeout();
-        this.broadcast = null;
+        this.stateBroadcast = null;
         this.transmit = null;
         this.saveDisplayName = null;
         this.userReferences = [];
@@ -195,7 +202,7 @@ export class Game {
     }
 
     public reset() {
-        if (!this.transmit || !this.broadcast) {
+        if (!this.transmit || !this.stateBroadcast) {
             lib.printError('GameSession was dereferenced but not removed.');
             return;
         }
@@ -206,7 +213,7 @@ export class Game {
         this.actionProcessor.clearIdleTimeout();
         this.actionProcessor = new EnrolmentProcessor(
             this.getNewState(this.gameId),
-            this.broadcast,
+            this.stateBroadcast,
             this.transmit,
             this.updateReferenceColor.bind(this),
             this.config,
@@ -364,7 +371,7 @@ export class Game {
 
         const state = processor.getState();
 
-        const enrolUpdate = ((): Probable<StateResponse> => {
+        const enrolUpdate = ((): Probable<StateBroadcast> => {
             switch (action) {
                 case Action.change_color: {
                     return processor.processChangeColor(player, request);
@@ -412,7 +419,7 @@ export class Game {
             return this.issueNominalResponse({ error: 'Cannot process request.' });
         }
 
-        const setupUpdate = ((): Probable<StateResponse> => {
+        const setupUpdate = ((): Probable<StateBroadcast> => {
             switch (action) {
                 case Action.pick_specialist:
                     return processor.processSpecialistSelection((player), payload);
@@ -422,7 +429,7 @@ export class Game {
                     if (bundleResult.err)
                         return lib.fail('Cannot start game!');
 
-                    if (!this.broadcast || !this.transmit) {
+                    if (!this.stateBroadcast || !this.broadcast || !this.transmit) {
                         console.error('GameSession was dereferenced but not removed');
                         return lib.fail('Cannot start game!');
                     }
@@ -438,8 +445,9 @@ export class Game {
                         this.actionProcessor = new PlayProcessor(
                             stateBundle,
                             this.config,
-                            this.broadcast,
+                            this.stateBroadcast,
                             this.transmit,
+                            this.broadcast,
                             reference,
                         );
                     } catch (error) {
@@ -500,7 +508,7 @@ export class Game {
             return this.issueNominalResponse({ error: 'Cannot process action' });
         }
 
-        const playUpdate = ((): Probable<StateResponse> => {
+        const playUpdate = ((): Probable<StateBroadcast> => {
             switch (action) {
                 case Action.spend_favor:
                     return processor.spendFavor(digest);

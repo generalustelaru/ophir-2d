@@ -74,7 +74,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            influenceRollDetail: { rolled: 2, toHit: 3 },
+            influenceRollDetail: { color: 'Purple', rolled: 2, toHit: 3 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 2;
@@ -92,7 +92,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: 'rivalControl',
-            influenceRollDetail: { rolled: 6, toHit: 2 },
+            influenceRollDetail: { color: 'Purple', rolled: 6, toHit: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 6;
@@ -136,6 +136,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.end_rival_turn, payload: null }],
         },
         {
+            rivalRollDetail: { rivalRoll: 6 },
             laconic: null,
             mutate: (state: PlayState) => {
                 if(state.rival.isIncluded) {
@@ -489,6 +490,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.shift_market, payload: null }],
         },
         {
+            rivalRollDetail: { rivalRoll: 4 },
             laconic: null,
             mutate: (state: PlayState) => {
                 const m = state.market;

@@ -1,7 +1,7 @@
 import {
     BarrierId, ZoneName, PlayerColor, EnrolmentState, Trade, LocationData, Commodity, CommodityLocationName, MessagePayload,
     ExchangeTier, ServerMessage, State, PlayerEntity, ClientMessage, PlayerEntry, ChatEntry, SpecialistData,
-    StateResponse, PlayState, LocalAction, Action, FeasibleTrade, SpecialistName, ClientRequest, PlayerCountables,
+    StateBroadcast, PlayState, LocalAction, Action, FeasibleTrade, SpecialistName, ClientRequest, PlayerCountables,
     FeasiblePurchase,
 } from '~/shared_types';
 import { PlayStateHandler } from './state_handlers/PlayStateHandler';
@@ -159,7 +159,7 @@ export interface ObjectHandler<T> {
 export interface ActionProcessor {
     getState: () => State;
     addChat: (entry: ChatEntry, reference: UserReference) => ServerMessage;
-    updatePlayerName: (player: PlayerEntity, newName: string, reference: UserReference) => StateResponse;
+    updatePlayerName: (player: PlayerEntity, newName: string, reference: UserReference) => StateBroadcast;
     getPlayerVP: (color: PlayerColor) => number;
     handleDisconnection: (reference: UserReference) => void;
     handleReconnection: (reference: UserReference) => void;
