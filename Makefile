@@ -17,26 +17,29 @@ server:
 run:
 	node dist/server.cjs
 
-# Coding tools
-pull:
+# Git wrappers
+branches:
+	git branch -a
+sync-branches:
+	git fetch --prune origin
 	git pull
 	npm run omit_revs
-cut:
+remove:
 	git push origin --delete $(branch)
 	git branch --delete $(branch)
-grow:
+create:
 	git checkout --branch $(branch)
 	git push --set-upstream origin $(branch)
-sync:
+mirror:
 	git checkout --track origin/$(branch)
+ignore-last:
+	@echo "# $(m)" >> .git-blame-ignore-revs
+	@git rev-parse HEAD >> .git-blame-ignore-revs
+	@echo "Hash added."
 
 check:
 	npx tsc --noEmit
 	npx eslint .
-ignore:
-	@echo "# $(m)" >> .git-blame-ignore-revs
-	@git rev-parse HEAD >> .git-blame-ignore-revs
-	@echo "Hash added."
 fix:
 	npx eslint . --fix
 
@@ -64,4 +67,4 @@ clear: # Linux exclusive
 restart-daemon:
 	systemctl restart docker
 
-.PHONY: pull static client server run check ignore fix watch peek clear build restart shell, restart-daemon
+.PHONY: branches sync-branches remove create mirror static client server run check ignore-last fix watch peek clear build restart shell restart-daemon

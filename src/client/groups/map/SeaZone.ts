@@ -39,7 +39,7 @@ export class SeaZone extends Button implements Unique<DynamicGroupInterface<SeaZ
         fill: Hue,
         isPlay: boolean,
         loadCommodityCallback: (commodity: Commodity) => void,
-        onAnchorClick: (() => void) | null = null,
+        locationFlashCallback: (() => void) | null = null,
     ) {
         const commodity = ((): Commodity | null => {
             switch (locationId) {
@@ -92,8 +92,7 @@ export class SeaZone extends Button implements Unique<DynamicGroupInterface<SeaZ
             visible: false,
         });
 
-        if (onAnchorClick)
-            this.group.on(RawEvents.CLICK, onAnchorClick);
+        if (locationFlashCallback) this.group.on(RawEvents.CLICK, locationFlashCallback);
 
         this.group.add(
             this.hexagon,
