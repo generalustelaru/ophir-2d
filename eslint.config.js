@@ -18,6 +18,7 @@ export default [
             '@typescript-eslint': tsPlugin,
         },
         rules: {
+            'no-return-assign': ['error', 'always'],
             'quotes': ['warn', 'single'],
             'semi': ['warn', 'always'],
             'max-len': ['warn', { code: 125 }],
