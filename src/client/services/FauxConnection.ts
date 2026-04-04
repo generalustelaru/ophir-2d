@@ -1,11 +1,13 @@
 import { ClientMessage, Action, PlayState, Coordinates, MoveMessage, ZoneName } from '~/shared_types';
 import { Communicator } from './Communicator';
 import {
-    EventType, TutorialScenarioStep, Instruction, ScenarioStepPartial, ScenarioStepText, Controller,
+    TutorialScenarioStep, Instruction, ScenarioStepPartial, ScenarioStepText, Connection, EventType, DetailKey,
+    ServerDetail,
+    TutorialState,
 } from '~/client_types';
 import { TutorialStepProvider } from './TutorialStepProvider';
 
-export class TutorialController extends Communicator implements Controller {
+export class FauxConnection extends Communicator implements Connection {
     private stepProvider: TutorialStepProvider;
     private currentState: PlayState | null = null;
     private expectedMessages: Array<ClientMessage> | null = null;
@@ -16,7 +18,7 @@ export class TutorialController extends Communicator implements Controller {
         this.stepProvider = new TutorialStepProvider();
     }
 
-    public async initialize(_url: string, _gameId: string) {
+    public async initialize() {
         const response = await fetch('/tutorial-data');
         const data = await response.json();
 
@@ -27,7 +29,10 @@ export class TutorialController extends Communicator implements Controller {
 
         this.currentState = data.state as PlayState;
         this.textSources = data.text as Array<ScenarioStepText>;
-        this.createEvent( { type: EventType.identification, detail: { color: this.currentState.players[0].color } });
+        this.createServerEvent({
+            key: DetailKey.player_id_transmission,
+            message: { color: this.currentState.players[0].color, displayName: 'Captain' },
+        });
         const initialScenario = this.buildStep({ partial: this.stepProvider.getNextPartial() });
 
         if (!initialScenario) {
@@ -38,10 +43,10 @@ export class TutorialController extends Communicator implements Controller {
         const { instructions, expecting, index: key } = initialScenario;
 
         this.expectedMessages = expecting;
-        this.createEvent({ type: EventType.tour_update, detail: { index: key, instructions, state: this.currentState } });
+        this.createTourEvent({ index: key, instructions, state: this.currentState });
     }
 
-    public processMessage(message: ClientMessage) {
+    public sendToServer(message: ClientMessage) {
         if (null == this.currentState)
             throw new Error('No state to modify!');
 
@@ -53,13 +58,14 @@ export class TutorialController extends Communicator implements Controller {
 
         if (action == Action.reposition_rival && this.currentState.rival.isIncluded && payload) {
             this.currentState.rival.bearings.position = payload.position;
-            this.createEvent({ type: EventType.state_update, detail: this.currentState });
+            this.createServerEvent({ key: DetailKey.state_broadcast, message: { state: this.currentState } });
             return;
         }
 
         if (action == Action.reposition) {
             this.currentState.players[0].bearings.position = payload.position;
-            this.createEvent({ type: EventType.state_update, detail: this.currentState });
+            this.createServerEvent({ key: DetailKey.state_broadcast, message: { state: this.currentState } });
+
             return;
         }
 
@@ -73,7 +79,10 @@ export class TutorialController extends Communicator implements Controller {
                 if (expectedZones.includes(payload.zoneId)) {
                     expectedPayload.zoneId = payload.zoneId;
                 } else {
-                    this.createEvent({ type: EventType.state_update, detail: this.currentState });
+                    this.createServerEvent({
+                        key: DetailKey.state_broadcast, message: { state: this.currentState },
+                    });
+
                     return;
                 }
             }
@@ -101,31 +110,32 @@ export class TutorialController extends Communicator implements Controller {
             scenario.mutate(this.currentState, (action == Action.move) ? payload.zoneId : undefined);
 
             const {
-                instructions, expecting, laconic: notification, vpDetail, influenceRollDetail, rivalRollDetail, index,
+                instructions, expecting, laconic: notification, vp, influenceRoll, rivalRoll, index,
             } = scenario;
             this.expectedMessages = expecting;
 
-            vpDetail && this.createEvent({ type: EventType.vp_transmission, detail: vpDetail });
-            influenceRollDetail && this.createEvent({ type: EventType.roll_suspense, detail: influenceRollDetail });
-            rivalRollDetail && this.createEvent({ type: EventType.rival_roll_broadcast, detail: rivalRollDetail });
-            this.createEvent({ type: EventType.tour_update, detail: {
-                index,
-                state: this.currentState,
-                instructions,
-            } });
+            vp && this.createServerEvent({ key: DetailKey.vp_transmission, message: vp });
+            influenceRoll && this.createServerEvent({
+                key: DetailKey.roll_suspense_broadcast,
+                message: influenceRoll,
+            });
+            rivalRoll && this.createServerEvent( { key: DetailKey.rival_roll_broadcast, message: rivalRoll });
+            this.createTourEvent({ index, state: this.currentState, instructions });
 
             switch (notification) {
                 case 'turnStart':
-                    this.createEvent({ type: EventType.start_turn, detail: null });
+                    this.createServerEvent({ key: DetailKey.start_turn_transmission, message: null });
                     break;
+
                 case 'rivalControl':
-                    this.createEvent( { type: EventType.rival_control_transmission, detail: null });
+                    this.createServerEvent({ key: DetailKey.rival_control_transmission, message: null });
                     break;
+
                 default:
                     break;
             }
         } else {
-            this.createEvent({ type: EventType.state_update, detail: this.currentState });
+            this.createServerEvent({ key: DetailKey.state_broadcast, message: { state: this.currentState } });
         }
     }
 
@@ -141,9 +151,9 @@ export class TutorialController extends Communicator implements Controller {
         const {
             index,
             expecting,
-            vpDetail,
-            influenceRollDetail: roll,
-            rivalRollDetail,
+            vp,
+            influenceRoll,
+            rivalRoll,
             laconic,
             visuals: stepHighlights,
             mutate: originalMutate,
@@ -162,23 +172,23 @@ export class TutorialController extends Communicator implements Controller {
 
         const mutate: (state: PlayState, z?: ZoneName) => void = (() => {
             switch (true) {
-                case newPosition && (!roll || roll.rolled >= roll.toHit):
+                case newPosition && (!influenceRoll || influenceRoll.rolled >= influenceRoll.toHit):
                     return (state: PlayState, z?: ZoneName): void => {
                         state.players[0].bearings.position = newPosition;
                         originalMutate(state, z);
                     };
+
                 case !!newRivalPosition:
                     return (state: PlayState, z?: ZoneName): void => {
-                        if (state.rival.isIncluded)
-                            state.rival.bearings.position = newRivalPosition;
+                        if (state.rival.isIncluded) state.rival.bearings.position = newRivalPosition;
                         originalMutate(state, z);
                     };
-                default:
-                    return originalMutate;
+
+                default: return originalMutate;
             }
         })();
 
-        return { index, mutate, instructions, expecting, laconic, vpDetail, influenceRollDetail: roll, rivalRollDetail };
+        return { index, mutate, instructions, expecting, laconic, vp, influenceRoll, rivalRoll };
     }
 
     private isSame(reference: any, tested: any): boolean {
@@ -208,5 +218,16 @@ export class TutorialController extends Communicator implements Controller {
         }
 
         return reference == tested;
+    }
+
+    private createTourEvent(state: TutorialState) {
+        this.createEvent({
+            type: EventType.internal,
+            detail: { key: DetailKey.tour_update, message: state },
+        });
+    }
+
+    private createServerEvent(detail: ServerDetail) {
+        this.createEvent({ type: EventType.server, detail });
     }
 };

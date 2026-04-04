@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData, EventType } from '~/client_types';
+import { GroupLayoutData, EventType, DetailKey } from '~/client_types';
 import { ClientMessage } from '~/shared_types';
 import { Button } from './Button';
 
@@ -11,8 +11,8 @@ export abstract class RequestButton extends Button {
             layout,
             (
                 actionMessage ? () => window.dispatchEvent(new CustomEvent(
-                    EventType.action,
-                    { detail: actionMessage },
+                    EventType.client,
+                    { detail: { key: DetailKey.client_message, message: actionMessage } },
                 )): null
             ),
         );
@@ -22,11 +22,11 @@ export abstract class RequestButton extends Button {
         shouldEnable ? super.enable() : super.disable();
     }
 
-    public updateActionMessage(actionMessage: ClientMessage) {
+    public updateActionMessage(cleintMessage: ClientMessage) {
         this.updateFunction(
             () => window.dispatchEvent(new CustomEvent(
-                'action',
-                { detail: actionMessage },
+                EventType.client,
+                { detail: { key: DetailKey.client_message, message: cleintMessage } },
             )),
         );
     }

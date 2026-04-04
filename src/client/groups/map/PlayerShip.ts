@@ -1,6 +1,8 @@
 import Konva from 'konva';
-import { EventType, RawEvents, SailAttemptArgs } from '~/client_types';
-import { Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName } from '~/shared_types';
+import { ClientDetail, ClientEvent, DetailKey, EventType, RawEvents, SailAttemptArgs } from '~/client_types';
+import {
+    Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName, MoveMessage, MovementPayload,
+} from '~/shared_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { Communicator } from '~/client/services/Communicator';
@@ -151,48 +153,40 @@ export class PlayerShip extends Communicator {
             if (!departureZone)
                 throw new Error('Missing departure hex data to compute repositioning/moving!');
 
+            const groupPosition = { x: this.group.x(), y: this.group.y() };
+
             switch (true) {
                 case targetZone && this.isDestinationValid:
 
-                    if (this.toSailValue && !player.privilegedSailing) {
-                        this.attemptSailing({
-                            playerColor,
-                            moveActions: player.moveActions,
-                            origin: this.initialPosition,
-                            destination: {
-                                zoneId: targetZone.getZoneName(),
-                                position: { x: this.group.x(), y: this.group.y() },
-                            },
-                            toSail: this.toSailValue,
-                            isTempleGuard: player.specialist.name === SpecialistName.temple_guard,
-                        });
-                        this.group.x(this.initialPosition.x);
-                        this.group.y(this.initialPosition.y);
-                    } else {
-                        this.createEvent({
-                            type: EventType.action,
-                            detail: {
-                                action: Action.move,
-                                payload: {
-                                    zoneId: targetZone.getZoneName(),
-                                    position: { x: this.group.x(), y: this.group.y() },
-                                },
-                            },
-                        });
+                    if (!this.toSailValue || player.privilegedSailing) {
+                        const payload: MovementPayload = { zoneId: targetZone.getZoneName(), position: groupPosition };
+                        const message: MoveMessage = { action: Action.move, payload };
+                        const detail: ClientDetail = { key: DetailKey.client_message, message };
+                        const event: ClientEvent = { type: EventType.client, detail };
+                        this.createEvent(event);
+                        break;
                     }
 
-                    break;
-                case departureZone === targetZone:
-                    this.createEvent({
-                        type: EventType.action,
-                        detail: {
-                            action: Action.reposition,
-                            payload: {
-                                position: { x: this.group.x(), y: this.group.y() },
-                            },
-                        },
+                    this.attemptSailing({
+                        playerColor,
+                        moveActions: player.moveActions,
+                        origin: this.initialPosition,
+                        destination: { zoneId: targetZone.getZoneName(), position: groupPosition },
+                        toSail: this.toSailValue,
+                        isTempleGuard: player.specialist.name == SpecialistName.temple_guard,
                     });
+                    this.group.x(this.initialPosition.x);
+                    this.group.y(this.initialPosition.y);
                     break;
+
+                case departureZone == targetZone:
+                    const detail: ClientDetail = {
+                        key: DetailKey.client_message,
+                        message: { action: Action.reposition, payload: { position: groupPosition } },
+                    };
+                    this.createEvent({ type: EventType.client, detail });
+                    break;
+
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);

@@ -1,10 +1,11 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, Unique, ZoneName } from '~/shared_types';
-import { DynamicGroupInterface, RawEvents } from '~/client_types';
+import { DetailKey, DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { defineBobbing, slideToPosition } from '~/client/animations';
 import clientConstants from '~/client_constants';
+import { Communicator } from '~/client/services/Communicator';
 
 const { HUES, SEA_ZONE_COUNT } = clientConstants;
 
@@ -16,7 +17,7 @@ export type RivalShipUpdate = {
     moves: number,
     activePlayerColor: PlayerColor,
 }
-export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>> {
+export class RivalShip extends Communicator implements Unique<DynamicGroupInterface<RivalShipUpdate>> {
 
     private seaZones: Array<SeaZone>;
     private currentZone: ZoneName;
@@ -34,6 +35,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         seaZones: Array<SeaZone>,
         data: RivalShipUpdate,
     ) {
+        super();
         this.seaZones = seaZones;
         this.currentZone = data.bearings.seaZone;
         this.movesLeft = data.moves;
@@ -104,25 +106,23 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
             if (!departureZone)
                 throw new Error('Missing data for repositioning/moving!');
 
+            const groupPosition = { x: this.group.x(), y: this.group.y() };
             switch (true) {
                 case targetZone && this.isDestinationValid:
                     targetZone.setFill(HUES.activeHex);
-                    this.broadcastAction({
+                    this.createClientEvent({
                         action: Action.move_rival,
-                        payload: {
-                            zoneId: targetZone.getZoneName(),
-                            position: { x: this.group.x(), y: this.group.y() },
-                        },
+                        payload: { zoneId: targetZone.getZoneName(),position: groupPosition },
                     });
                     break;
+
                 case departureZone === targetZone:
-                    this.broadcastAction({
+                    this.createClientEvent({
                         action: Action.reposition_rival,
-                        payload: {
-                            position: { x: this.group.x(), y: this.group.y() },
-                        },
+                        payload: { position: groupPosition },
                     });
                     break;
+
                 default:
                     this.group.x(this.initialPosition.x);
                     this.group.y(this.initialPosition.y);
@@ -155,10 +155,7 @@ export class RivalShip implements Unique<DynamicGroupInterface<RivalShipUpdate>>
         isDraggable && this.isControllable && moves ? this.activeEffect.start() : this.activeEffect.stop();
     };
 
-    private broadcastAction(detail: ClientMessage): void {
-        window.dispatchEvent(new CustomEvent(
-            'action',
-            { detail: detail },
-        ));
+    private createClientEvent(message: ClientMessage): void {
+        this.createEvent({ type: EventType.client, detail: { key: DetailKey.client_message, message } });
     }
 }

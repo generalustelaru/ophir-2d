@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
 import { Action, ItemName, PlayerColor, Unique } from '~/shared_types';
-import { DynamicGroupInterface, EventType } from '~/client_types';
+import { DetailKey, DynamicGroupInterface, EventType } from '~/client_types';
 import { ItemRow } from '../popular';
 import { Communicator } from '~/client/services/Communicator';
 import { resize } from '~/client/animations';
@@ -44,6 +44,12 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
             cornerRadius: 5,
         });
 
+        const itemCallback = (item: ItemName) => {
+            this.createEvent({
+                type: EventType.client,
+                detail: { key: DetailKey.client_message, message: { action: Action.drop_item, payload: { item } } },
+            });
+        };
         this.itemRow = new ItemRow(
             stage,
             {
@@ -52,15 +58,7 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
                 width: this.group.width(),
                 height: this.group.height(),
             },
-            {
-                spacing: SLOT_WIDTH,
-                itemCallback: (name: ItemName) => {
-                    this.createEvent({
-                        type: EventType.action,
-                        detail: { action: Action.drop_item, payload: { item: name } },
-                    });
-                },
-            },
+            { spacing: SLOT_WIDTH, itemCallback },
         );
 
         this.group.add(...[

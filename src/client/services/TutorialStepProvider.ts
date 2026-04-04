@@ -74,7 +74,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            influenceRollDetail: { color: 'Purple', rolled: 2, toHit: 3 },
+            influenceRoll: { color: 'Purple', rolled: 2, toHit: 3 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 2;
@@ -92,7 +92,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: 'rivalControl',
-            influenceRollDetail: { color: 'Purple', rolled: 6, toHit: 2 },
+            influenceRoll: { color: 'Purple', rolled: 6, toHit: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 6;
@@ -136,7 +136,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.end_rival_turn, payload: null }],
         },
         {
-            rivalRollDetail: { rivalRoll: 6 },
+            rivalRoll: { rivalRoll: 6 },
             laconic: null,
             mutate: (state: PlayState) => {
                 if(state.rival.isIncluded) {
@@ -386,7 +386,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            vpDetail: { vp: 2 },
+            vp: { vp: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.favor = 2;
@@ -490,7 +490,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.shift_market, payload: null }],
         },
         {
-            rivalRollDetail: { rivalRoll: 4 },
+            rivalRoll: { rivalRoll: 4 },
             laconic: null,
             mutate: (state: PlayState) => {
                 const m = state.market;
@@ -571,7 +571,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            vpDetail: { vp: 7 },
+            vp: { vp: 7 },
             mutate: (state: PlayState) => {
                 state.temple.donations.push('silver');
                 state.temple.currentLevel += 1;

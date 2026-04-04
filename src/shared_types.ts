@@ -280,26 +280,8 @@ export type MetalDonationPayload = { metal: Metal }
 export type PickSpecialistPayload = { name: SpecialistName }
 
 export enum BubbleDeed {
-    move,
-    rollMove,
-    rollFail,
-    rival,
-    marketRival,
-    privilege,
-    gems,
-    ebony,
-    linen,
-    marble,
-    coin,
-    marketCoin,
-    silver,
-    gold,
-    vpFavor,
-    metalVp,
-    upgrade,
-    active,
-    idle,
-    anchor
+    move, rollMove, rollFail, rival, marketRival, privilege, gems, ebony, linen, marble,
+    coin, marketCoin, silver, gold, vpFavor, metalVp, upgrade, active, idle, anchor
 }
 
 export type VerboiseAction =
@@ -342,7 +324,7 @@ export type ClientRequest = {
 }
 
 // MARK: RESPONSE
-export type ColorTransmission = { color: PlayerColor }
+export type PlayerIdTransmission = { color: PlayerColor, displayName: string | null }
 export type StateBroadcast = { state: State }
 export type ResetBroadcast = { resetFrom: string | PlayerColor }
 export type ErrorTransmission = { error: string }
@@ -359,7 +341,7 @@ export type ServerMessage =
     | StateBroadcast
     | ResetBroadcast
     | ErrorTransmission
-    | ColorTransmission
+    | PlayerIdTransmission
     | NotFoundTransmission
     | VpTransmission
     | TurnTransmission

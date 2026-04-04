@@ -1,12 +1,10 @@
-import { InfoDetail, ErrorDetail, EventType, MessageType, TutorialState } from '~/client_types';
+import { MessageType, EventType, ServerDetail, DetailKey, ClientDetail, InternalDetail } from '~/client_types';
 import localState from './state';
-import { GameController } from './services/GameController';
-import { TutorialController } from './services/TutorialController';
+import { ServerConnection } from './services/ServerConnection';
+import { FauxConnection } from './services/FauxConnection';
 import { CanvasService } from './services/CanvasService';
 import { UserInterface } from './services/UiService';
-import {
-    Action, ClientMessage, ResetBroadcast, VpTransmission, ColorTransmission, State,
-} from '~/shared_types';
+import { Action } from '~/shared_types';
 import clientConstants from './client_constants';
 
 const { ROLL_SUSPENSE_MS } = clientConstants;
@@ -16,7 +14,7 @@ const pathSegments = window.location.pathname.split('/');
 const requestedGameId = pathSegments[1];
 const isTutorial = requestedGameId == 'tutorial';
 const uiService = new UserInterface(isTutorial);
-const controller = isTutorial ? new TutorialController() : new GameController(protocol);
+const connection = isTutorial ? new FauxConnection() : new ServerConnection(protocol);
 const gameAdress = `${protocol}//${window.location.host}/game`;
 
 let isRollSuspense: boolean = false;
@@ -49,188 +47,171 @@ function probe(intervalSeconds: number) {
     uiService.setInfo('Trying to reconnect...');
     const milliseconds = intervalSeconds * 1000;
 
-    const probe = setInterval(() => {
-        fetch(
-            '/probe',
-        ).then(
-            (res) => {
-                if (res.status === 200) {
-                    clearInterval(probe);
-                    uiService.addInternalPop(MessageType.INFO, 'Connection restored.');
-                    controller.initialize(gameAdress, requestedGameId);
-                }
-            },
-        ).catch(
-            err => console.log('Failed to reconnect', { err }),
-        );
-    },
-    milliseconds);
+    const probe = setInterval(async () => {
+        try {
+            const response = await fetch( '/probe');
+
+            if (response.status === 200) {
+                clearInterval(probe);
+                signalInfo('Connection restored.');
+                connection.initialize(gameAdress, requestedGameId);
+            }
+
+        } catch (error) {
+            console.log('Failed to reconnect', { error });
+        }
+    }, milliseconds);
 }
 
-function resetClient(source: string) {
-    alert(`Client reset ordered by ${source}`);
-    window.location.reload();
+function signalInfo(text: string) {
+    uiService.addInternalPop(MessageType.INFO, text);
+}
+
+function processServerMessage(detail: ServerDetail, canvas: CanvasService) {
+    const { key, message: message } = detail;
+
+    switch (key) {
+        case DetailKey.reset_broadcast: return (() => {
+            uiService.disable();
+            signalInfo(
+                `The game has been reset by ${message.resetFrom}. Please refresh the page.`,
+            );
+        })();
+
+        case DetailKey.state_broadcast: return releaseUpdate(() => {
+            uiService.update(message);
+            canvas.drawUpdateElements(message);
+        });
+
+        case DetailKey.roll_suspense_broadcast: return (() => {
+            isRollSuspense = true;
+            canvas.notifyRollSuspense(message);
+        })();
+
+        case DetailKey.rival_roll_broadcast: return canvas.notifyForRivalRoll(message);
+
+        case DetailKey.player_id_transmission: return (() => {
+            localState.playerColor = message.color;
+            signalInfo(message.displayName
+                ? `Welcome back, ${message.displayName}!`
+                : 'Type in a display name by prefacing it with "#name ".',
+            );
+        })();
+
+        case DetailKey.vp_transmission: return (() => { localState.vp = message.vp; })();
+
+        case DetailKey.start_turn_transmission: return (isRollSuspense
+            ? transmissionQueue.push(() => { canvas.notifyForTurn(); })
+            : canvas.notifyForTurn()
+        );
+
+        case DetailKey.rival_control_transmission: return (isRollSuspense
+            ? transmissionQueue.push(() => { canvas.notifyForRivalControl(); })
+            : canvas.notifyForRivalControl()
+        );
+
+        case DetailKey.force_turn_transmission: return (isRollSuspense
+            ? transmissionQueue.push(() => { canvas.notifyForForceTurn(); })
+            : canvas.notifyForForceTurn()
+        );
+
+        case DetailKey.not_found_transmission: return signalError('This game no longer exists. :(');
+
+        case DetailKey.expired_transmission: return (() => { window.location.href = '/'; })();
+
+        case DetailKey.client_switch_transmission: return (() => {
+            alert('Control in this game has been switched to a different window.');
+            window.location.href = '/lobby';
+        })();
+
+        case DetailKey.ws_timeout: return (() => {
+            signalError('The connection has timed out.');
+            uiService.disable();
+            canvas.disable();
+            probe(5);
+        })();
+
+        case DetailKey.ws_closed: return (() => {
+            signalInfo('The server has entered maintenance.');
+            uiService.disable();
+            canvas.disable();
+            probe(30);
+        })();
+
+        default: return;
+    }
+}
+
+function dispatchClientMessage(detail: ClientDetail, canvas: CanvasService) {
+    const { key, message } = detail;
+
+    switch (key) {
+        case DetailKey.client_message: return connection.sendToServer(message);
+
+        case DetailKey.start_setup: return connection.sendToServer(
+            { action: Action.start_setup, payload: null },
+        );
+
+        case DetailKey.start_play: return connection.sendToServer(
+            { action: Action.start_play, payload: canvas.getSetupCoordinates() },
+        );
+
+        default: break;
+    }
+}
+
+function processInternalMessage(detail: InternalDetail, canvas: CanvasService) {
+    const { key, message } = detail;
+
+    switch (key) {
+        case DetailKey.error: return signalError(message);
+
+        case DetailKey.info: return (() => {
+            uiService.setInfo(message);
+            signalInfo(message);
+        })();
+
+        case DetailKey.tour_update: return releaseUpdate(() => {
+            const { index, state, instructions } = message;
+            uiService.update({ state }, true);
+            canvas.drawUpdateElements({ state });
+            canvas.updateInstructions(instructions);
+            fetch(`/tutolytics/${index}`, { method: 'POST' });
+        });
+
+        default: break;
+    }
 }
 
 document.fonts.ready.then(() => {
     const canvas = new CanvasService(isTutorial);
-    // TODO: reduce the number of event listenrs by grouping websocket ones into transmission and broadcast maybe
+
     window.addEventListener('resize', () => {
         canvas.handleResize();
     });
 
-    //Send player action to server
-    window.addEventListener(EventType.action, (event: CustomEventInit<ClientMessage>) => {
-        const message = event.detail;
+    // Receive server/network message
+    window.addEventListener(EventType.server, (event: CustomEventInit<ServerDetail>) => {
 
-        if (!message)
-            return signalError('Action message is missing!');
+        if (!event.detail) return signalError('Received empty server event!');
 
-        controller.processMessage(message);
+        processServerMessage(event.detail, canvas);
     });
 
-    //Send state change message to server
-    window.addEventListener(EventType.start_setup, () => {
-        const message: ClientMessage = {
-            action: Action.start_setup,
-            payload: null,
-        };
-        controller.processMessage(message);
+    // Send player message to server
+    window.addEventListener(EventType.client, (event: CustomEventInit<ClientDetail>) => {
+
+        if (!event.detail) return signalError('Received empty client event!');
+
+        dispatchClientMessage(event.detail, canvas);
     });
 
-    window.addEventListener(EventType.start_play, () => {
-        const message: ClientMessage = {
-            action: Action.start_play,
-            payload: canvas.getSetupCoordinates(),
-        };
-        controller.processMessage(message);
+    window.addEventListener(EventType.internal, (event: CustomEventInit<InternalDetail>) => {
+
+        if (!event.detail) return signalError('Received empty internal event!');
+
+        processInternalMessage(event.detail, canvas);
     });
 
-    window.addEventListener(EventType.error, (event: CustomEventInit) => {
-        const detail: ErrorDetail = event.detail;
-        signalError(detail.message);
-    });
-
-    window.addEventListener(EventType.timeout, () => {
-        console.warn('Connection timeout');
-        uiService.addInternalPop(MessageType.ERROR, 'Connection was lost.');
-        uiService.disable();
-        canvas.disable();
-        probe(5);
-    });
-
-    window.addEventListener(EventType.close, () => {
-        console.warn('Connection closed');
-        uiService.addInternalPop(MessageType.INFO, 'The server has entered maintenance.');
-        uiService.disable();
-        canvas.disable();
-        probe(30);
-    });
-
-    window.addEventListener(EventType.deauthenticate, (): void => {
-        alert('Please log back in again :)');
-        window.location.href ='/';
-    });
-
-    window.addEventListener(EventType.vp_transmission, (event: CustomEventInit<VpTransmission>) => {
-        if (!event.detail || !localState.playerColor)
-            return signalError('VP update failed');
-
-        const { vp } = event.detail;
-        localState.vp = vp;
-    });
-
-    window.addEventListener(EventType.rival_control_transmission, () => {
-        if (!localState.playerColor)
-            return signalError('Missing local player data');
-
-        if (isRollSuspense) transmissionQueue.push(() => { canvas.notifyForRivalControl(); });
-        else canvas.notifyForRivalControl();
-    });
-
-    window.addEventListener(EventType.reset, (event: CustomEventInit) => {
-        const response: ResetBroadcast = event.detail;
-        resetClient(response.resetFrom);
-    });
-
-    window.addEventListener( EventType.identification, (event: CustomEventInit<ColorTransmission>) => {
-        if (!event.detail)
-            return signalError('Missing color!');
-
-        if (!localState.playerColor) {
-            uiService.addInternalPop(
-                MessageType.INFO, 'Set a player name by typing #name and then a preferred name.',
-            );
-        }
-
-        localState.playerColor = event.detail.color;
-    });
-
-    window.addEventListener(EventType.state_update, (event: CustomEventInit) => {
-
-        if (!event.detail)
-            return signalError('State is missing!');
-
-        const state = event.detail as State;
-        releaseUpdate(() => {
-            uiService.update(state);
-            canvas.drawUpdateElements(state);
-        });
-    });
-
-    window.addEventListener(EventType.tour_update, (event: CustomEventInit) => {
-
-        if (!event.detail)
-            return signalError('State is missing!');
-
-        const { index, state, instructions } = event.detail as TutorialState;
-        releaseUpdate(() => {
-            uiService.update(state, true);
-            canvas.drawUpdateElements(state);
-            canvas.updateInstructions(instructions);
-        });
-
-        fetch(`/tutolytics/${index}`, { method: 'POST' });
-    });
-
-    window.addEventListener(EventType.start_turn, () => {
-
-        if (isRollSuspense) transmissionQueue.push(() => { canvas.notifyForTurn(); });
-        else canvas.notifyForTurn();
-    });
-
-    window.addEventListener(EventType.roll_suspense, (event: CustomEventInit) => {
-        isRollSuspense = true;
-        canvas.notifyRollSuspense(event.detail);
-    });
-
-    window.addEventListener(EventType.rival_roll_broadcast, (event: CustomEventInit) => {
-        canvas.notifyRivalRoll(event.detail);
-    });
-
-    window.addEventListener(EventType.force_turn, () => {
-
-        if (isRollSuspense) transmissionQueue.push(() => { canvas.notifyForForceTurn(); });
-        else canvas.notifyForForceTurn();
-    });
-
-    window.addEventListener(EventType.abandon, () => {
-        alert('This session is no longer supported.');
-        window.location.href = '/lobby';
-    });
-
-    window.addEventListener(EventType.client_switch, () => {
-        alert('Control of this session has been switched to a different window.');
-        window.location.href = '/lobby';
-    });
-
-    window.addEventListener(
-        EventType.info,
-        (event: CustomEventInit) => {
-            const payload: InfoDetail = event.detail;
-            uiService.setInfo(payload.text);
-        },
-    );
-
-    controller.initialize(gameAdress, requestedGameId);
+    connection.initialize(gameAdress, requestedGameId);
 });

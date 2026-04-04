@@ -1,14 +1,14 @@
 import {
-    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, ColorTransmission, Metal,
+    ZoneName, PlayerColor, Coordinates, LocationName, ItemName, Trade, MarketState, Player, PlayerIdTransmission, Metal,
     TreasuryOffer, TempleState, ClientMessage, ResetBroadcast, VpTransmission, State, MovementPayload, DiceSix,
     MetalCost, Commodity, BuyMetalsMessage, LoadCommodityMessage, FeasiblePurchase, PlayState, InfluenceRollBroadcast,
-    NewRivalInfluenceBroadcast,
+    NewRivalInfluenceBroadcast, StateBroadcast,
 } from '~/shared_types';
 import Konva from 'konva';
 
-export interface Controller {
+export interface Connection {
     initialize: (url: string, gameId: string) => void
-    processMessage: (message: ClientMessage) => void
+    sendToServer: (message: ClientMessage) => void
 }
 export type ElementList = Array<Konva.Group | Konva.Shape>
 export type Hue = `#${string}`;
@@ -192,62 +192,57 @@ export type EventFormat<T extends EventType, D> = {
     detail: D,
 }
 
+export type DetailFormat<K extends DetailKey, M> = {
+    key: K,
+    message: M,
+}
+
 export enum EventType {
-    identification = 'identification',
-    start_setup = 'setup',
-    start_play = 'play',
-    close = 'close',
-    timeout = 'timeout',
-    action = 'action',
-    error = 'error',
-    info = 'info',
-    reset = 'reset',
-    abandon = 'abandon',
-    client_switch = 'client_switch',
-    deauthenticate = 'deauthenticate',
-    state_update = 'state_update',
-    tour_update = 'tour_update',
-    vp_transmission = 'vp_transmission',
-    rival_control_transmission = 'rival_control_transmission',
-    rival_roll_broadcast = 'rival_roll_broadcast',
-    start_turn = 'start_turn',
-    roll_suspense = 'roll_suspense',
-    force_turn = 'force_turn',
+    server = 'server',
+    client = 'client',
+    internal = 'internal',
 }
 
-export type LaconicType =
-    | EventType.start_setup
-    | EventType.start_play
-    | EventType.close
-    | EventType.timeout
-    | EventType.start_turn
-    | EventType.rival_control_transmission
-    | EventType.force_turn
-    | EventType.abandon
-    | EventType.deauthenticate
-    | EventType.client_switch
+export type Event = ServerEvent | ClientEvent | InternalEvent
+export type ServerEvent = EventFormat<EventType.server, ServerDetail>
+export type ClientEvent = EventFormat<EventType.client, ClientDetail>
+export type InternalEvent = EventFormat<EventType.internal, InternalDetail>
+
+export type ServerDetail =
+    | DetailFormat<DetailKey.reset_broadcast, ResetBroadcast>
+    | DetailFormat<DetailKey.state_broadcast, StateBroadcast>
+    | DetailFormat<DetailKey.roll_suspense_broadcast, InfluenceRollBroadcast>
+    | DetailFormat<DetailKey.rival_roll_broadcast, NewRivalInfluenceBroadcast>
+    | DetailFormat<DetailKey.player_id_transmission, PlayerIdTransmission>
+    | DetailFormat<DetailKey.vp_transmission, VpTransmission>
+    | DetailFormat<DetailKey.start_turn_transmission, null>
+    | DetailFormat<DetailKey.rival_control_transmission, null>
+    | DetailFormat<DetailKey.force_turn_transmission, null>
+    | DetailFormat<DetailKey.not_found_transmission, null>
+    | DetailFormat<DetailKey.expired_transmission, null>
+    | DetailFormat<DetailKey.client_switch_transmission, null>
+    | DetailFormat<DetailKey.ws_closed, null>
+    | DetailFormat<DetailKey.ws_timeout, null>
 ;
 
-export type Event =
-    | EventFormat<LaconicType, null>
-    | EventFormat<EventType.action, ClientMessage>
-    | EventFormat<EventType.error, ErrorDetail>
-    | EventFormat<EventType.info, InfoDetail>
-    | EventFormat<EventType.reset, ResetBroadcast>
-    | EventFormat<EventType.state_update, State>
-    | EventFormat<EventType.tour_update, TutorialState>
-    | EventFormat<EventType.identification, ColorTransmission>
-    | EventFormat<EventType.vp_transmission, VpTransmission>
-    | EventFormat<EventType.roll_suspense, InfluenceRollBroadcast>
-    | EventFormat<EventType.rival_roll_broadcast, NewRivalInfluenceBroadcast>
+export type ClientDetail =
+    | DetailFormat<DetailKey.client_message, ClientMessage>
+    | DetailFormat<DetailKey.start_play, null>
+    | DetailFormat<DetailKey.start_setup, null>
+
 ;
 
-export type InfoDetail = {
-    text: string,
-}
+export type InternalDetail =
+    | DetailFormat<DetailKey.tour_update, TutorialState>
+    | DetailFormat<DetailKey.error, string>
+    | DetailFormat<DetailKey.info, string>
+;
 
-export type ErrorDetail = {
-    message: string,
+export enum DetailKey {
+    player_id_transmission, start_play, start_setup,  ws_closed, ws_timeout, client_message, error,
+    info, reset_broadcast, not_found_transmission, client_switch_transmission, expired_transmission,
+    state_broadcast, tour_update, vp_transmission, rival_control_transmission, rival_roll_broadcast,
+    start_turn_transmission, roll_suspense_broadcast, force_turn_transmission,
 }
 
 // MARK: TUTORIAL
@@ -285,9 +280,9 @@ export type TutorialScenarioStep = {
     index: number,
     mutate: (state: PlayState, z?: ZoneName) => void // produces a new state for CanvasService consumption (branch for move)
     laconic: NotificationType // simulates additional server transmissions for laconic events
-    vpDetail?: VpTransmission // provision for payload on gaining vp
-    influenceRollDetail?: InfluenceRollBroadcast // provision for roll result values
-    rivalRollDetail?: NewRivalInfluenceBroadcast // provision for rival turn conclusion
+    vp?: VpTransmission // provision for payload on gaining vp
+    influenceRoll?: InfluenceRollBroadcast // provision for roll result values
+    rivalRoll?: NewRivalInfluenceBroadcast // provision for rival turn conclusion
     instructions: Array<Instruction> // updates CanvasService via dedicated method
     expecting: Array<ClientMessage> | null // stays in TourService for advancing validation
 }

@@ -128,7 +128,7 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
             return failEnrol(result.message);
 
         this.reportColorAssignment(userId, color);
-        this.transmit(userId, { color });
+        this.transmit(userId, { color, displayName });
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
 
@@ -156,7 +156,7 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         this.enrolmentState.changeColor(player.color, newColor);
 
         this.reportColorAssignment(match.userId, newColor);
-        this.transmit(match.userId, { color: newColor });
+        this.transmit(match.userId, { color: newColor, displayName: match.player.name });
 
         return lib.pass({ state: this.enrolmentState.toDto() });
     }

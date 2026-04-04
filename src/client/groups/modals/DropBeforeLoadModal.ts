@@ -1,6 +1,6 @@
 import { Action, ItemName, PlayState, Commodity, TreasuryOffer, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
-import { Aspect, DropBeforeLoadMessage, DynamicModalInterface, Specification } from '~/client_types';
+import { Aspect, DetailKey, DropBeforeLoadMessage, DynamicModalInterface, EventType, Specification } from '~/client_types';
 import { Stage } from 'konva/lib/Stage';
 import Konva from 'konva';
 import clientConstants from '~/client/client_constants';
@@ -49,7 +49,7 @@ export class DropBeforeLoadModal
         this.purchaseCard = new PurchaseCard(
             stage,
             { x: 180, y: 50 },
-            () => { this.dropAndLoadItems(); },
+            () => { this.clientEventCallback(); },
         );
 
         this.contentGroup.add(...[
@@ -123,10 +123,10 @@ export class DropBeforeLoadModal
         this.purchaseCard.setFeasable(isFeasible);
     }
 
-    private dropAndLoadItems() {
+    private clientEventCallback() {
         window.dispatchEvent(new CustomEvent(
-            'action',
-            { detail: this.message },
+            EventType.client,
+            { detail: { key: DetailKey.client_message, message: this.message } },
         ));
         this.close();
     }

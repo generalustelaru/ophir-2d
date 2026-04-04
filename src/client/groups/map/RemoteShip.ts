@@ -1,6 +1,6 @@
 import Konva from 'konva';
-import { Action, Coordinates, Player, PlayerColor, Unique } from '~/shared_types';
-import { DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
+import { Action, ClientMessage, Coordinates, OpponentPositioningPayload, Player, PlayerColor, Unique } from '~/shared_types';
+import { ClientEvent, DetailKey, DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import clientConstants from '~/client_constants';
 import { SeaZone, DeedBubble } from '.';
@@ -98,23 +98,14 @@ export class RemoteShip extends Communicator implements Unique<DynamicGroupInter
             } else {
                 this.position.x = this.group.x();
                 this.position.y = this.group.y();
-                this.createEvent({
-                    type: EventType.action,
-                    detail: {
-                        action: Action.reposition_opponent,
-                        payload: {
-                            color: player.color,
-                            position: { x: this.group.x(), y: this.group.y() },
-                        },
-                    },
-                });
+                const payload: OpponentPositioningPayload = { color: player.color, position: this.position };
+                const message: ClientMessage = { action: Action.reposition_opponent, payload };
+                const event: ClientEvent = { type: EventType.client, detail: { key: DetailKey.client_message, message } };
+                this.createEvent(event);
             }
         });
 
-        this.group.add(
-            this.ship.getElement(),
-            this.deedBubble.getElement(),
-        );
+        this.group.add(this.ship.getElement(), this.deedBubble.getElement());
     }
 
     public getElement(): Konva.Group {

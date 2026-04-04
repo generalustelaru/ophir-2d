@@ -1,7 +1,8 @@
 import Konva from 'konva';
 import {
-    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, State, Action, InfluenceRollBroadcast,
+    GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, Action, InfluenceRollBroadcast,
     NewRivalInfluenceBroadcast,
+    StateBroadcast,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
@@ -9,7 +10,9 @@ import { MapGroup } from '../mega_groups/MapGroup';
 import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
-import { Aspect, Dimensions, DropBeforeLoadMessage, EventType, Instruction, SailAttemptArgs, Target } from '~/client_types';
+import {
+    Aspect, DetailKey, Dimensions, DropBeforeLoadMessage, EventType, Instruction, InternalEvent, SailAttemptArgs, Target,
+} from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
     TradeModal, StartTurnModal, DonateCommoditiesModal,EndTurnModal, SailAttemptModal, RivalControlModal, ForceTurnModal,
@@ -165,7 +168,7 @@ export class CanvasService extends Communicator {
         }
     }
 
-    public notifyRivalRoll(data: NewRivalInfluenceBroadcast) {
+    public notifyForRivalRoll(data: NewRivalInfluenceBroadcast) {
         this.playerGroup.simulateRollForRival(data);
     }
 
@@ -178,18 +181,19 @@ export class CanvasService extends Communicator {
     }
 
     // MARK: UPDATE
-    public drawUpdateElements(state: State) {
+    public drawUpdateElements(data: StateBroadcast) {
+        const { state } = data;
         const { sessionPhase } = state;
 
         if (!localState.playerColor) {
-            this.createEvent({
-                type: EventType.info,
+            const event: InternalEvent = {
+                type: EventType.internal,
                 detail: {
-                    text: sessionPhase == Phase.enrolment
-                        ? 'Registrations open!'
-                        : 'You are a spectator.',
+                    key: DetailKey.info,
+                    message: sessionPhase == Phase.enrolment ? 'Registrations open!' : 'You are a spectator.',
                 },
-            });
+            };
+            this.createEvent(event);
         }
 
         switch (sessionPhase) {
@@ -443,13 +447,12 @@ export class CanvasService extends Communicator {
         const detachedMessage = structuredClone(message);
 
         if (this.dropBeforeLoadModal.hasCargoRoom(detachedMessage.action == Action.buy_metal ? 2 : 1)) {
-            window.dispatchEvent(new CustomEvent(
-                EventType.action,
-                { detail: detachedMessage },
-            ));
+            this.createEvent({
+                type: EventType.client,
+                detail: { key: DetailKey.client_message, message: detachedMessage },
+            });
         } else {
             this.dropBeforeLoadModal.show(detachedMessage);
         }
     }
 };
-

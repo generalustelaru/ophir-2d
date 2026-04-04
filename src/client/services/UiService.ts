@@ -1,10 +1,10 @@
-import { EnrolmentState, ChatEntry, Action, PlayState, SetupState, State, Phase } from '~/shared_types';
+import { EnrolmentState, ChatEntry, Action, PlayState, SetupState, StateBroadcast, Phase } from '~/shared_types';
 import { Communicator } from './Communicator';
 import localState from '../state';
 import { HtmlButton } from '../html_behaviors/button';
 import { ChatInput } from '../html_behaviors/ChatInput';
 import clientConstants from '~/client_constants';
-import { EventType, MessageType } from '~/client_types';
+import { EventType, DetailKey, MessageType } from '~/client_types';
 
 export class UserInterface extends Communicator {
     private continueButton: HtmlButton;
@@ -65,11 +65,11 @@ export class UserInterface extends Communicator {
         },1000);
     }
 
-    public update(state: State, isTour: boolean = false) {
+    public update(data: StateBroadcast, isTour: boolean = false) {
 
-        if (isTour)
-            return;
+        if (isTour) return;
 
+        const { state } = data;
         this.toLobby.enable();
         this.disableButtons();
         this.updateChat(state.chat);
@@ -95,10 +95,10 @@ export class UserInterface extends Communicator {
         if (!message || false === !!message.match(/[^\s]/)) return;
 
         return this.createEvent({
-            type: EventType.action,
+            type: EventType.client,
             detail: {
-                action: Action.chat,
-                payload: { input: message },
+                key: DetailKey.client_message,
+                message: { action: Action.chat, payload: { input: message } },
             },
         });
     };
@@ -108,18 +108,23 @@ export class UserInterface extends Communicator {
     };
 
     private processContinue = (): void => {
-
         return this.createEvent({
-            type: this.phase == Phase.setup ? EventType.start_play : EventType.start_setup,
-            detail: null,
+            type: EventType.client,
+            detail: {
+                key: this.phase == Phase.setup ? DetailKey.start_play : DetailKey.start_setup,
+                message: null,
+            },
         });
     };
 
     private processReset = (): void => {
 
         return this.createEvent({
-            type: EventType.action,
-            detail: { action: Action.declare_reset , payload: null },
+            type: EventType.client,
+            detail: {
+                key: DetailKey.client_message,
+                message: { action: Action.declare_reset , payload: null },
+            },
         });
     };
 

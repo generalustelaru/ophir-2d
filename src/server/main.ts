@@ -154,8 +154,9 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         }
 
         if (ref.color) {
-            transmit(socket, { color: ref.color });
-            transmit(socket, { vp: game.getPlayerVP(ref.color) });
+            const { color, displayName } = ref;
+            transmit(socket, { color, displayName });
+            transmit(socket, { vp: game.getPlayerVP(color) });
             game.handlePlayerReconnection(ref);
         }
 

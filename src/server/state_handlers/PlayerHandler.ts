@@ -330,11 +330,11 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public gainCoins(amount: number) {
-        this.coins.update(c => c += amount);
+        this.coins.update(c => { c += amount; return c; });
     }
 
     public spendCoins(cost: number) {
-        this.coins.update(c => c -= cost);
+        this.coins.update(c => { c -= cost; return c; });
     }
 
     public gainFavor(amount: number) {
@@ -342,7 +342,7 @@ export class PlayerHandler implements Unique<ObjectHandler<Player>>{
     }
 
     public spendFavor(cost: number) {
-        this.favor.update(f => f -= cost);
+        this.favor.update(f => { f -= cost; return f; });
     }
 
     public getActions() {
