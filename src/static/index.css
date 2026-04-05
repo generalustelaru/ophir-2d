@@ -1,6 +1,10 @@
 .button-row {
     width: 300px;
 
+    & img {
+        width: 300px;
+        height: 300px;
+    }
     & button {
         margin: 20px 0;
         width: 100%;
