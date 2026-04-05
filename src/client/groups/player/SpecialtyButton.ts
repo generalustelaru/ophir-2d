@@ -20,7 +20,6 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
         position: Coordinates,
         isLocalPlayer: boolean,
     ) {
-
         const size = { width: 50, height: 50 };
         const layout = { ...position, ...size };
         const { specialty } = player.specialist;
@@ -58,7 +57,7 @@ export class SpecialtyButton extends RequestButton implements Unique<DynamicGrou
         }
 
         if (isLocalPlayer) {
-            this.coinGroup = new Konva.Group({ x: 25, y: 40 });
+            this.coinGroup = new Konva.Group({ x: 25, y: 80 });
             this.coinGroup.add(new CoinDial({ x: 0, y: 0 }, 1).getElement());
             const clipGroup = new Konva.Group({
                 clipFunc: (ctx => {ctx.rect(0, 0, size.width, size.height - 1);}),
