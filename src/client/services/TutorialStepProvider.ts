@@ -1,4 +1,4 @@
-import { PlayState, Action, ZoneName } from '~/shared_types';
+import { PlayState, Action, ZoneName, MessageKey } from '~/shared_types';
 import { ScenarioStepPartial, Target } from '../client_types';
 
 const position = { x: 0, y: 0 } as const;
@@ -74,7 +74,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            influenceRoll: { color: 'Purple', rolled: 2, toHit: 3 },
+            influenceRoll: { key: MessageKey.influence_roll_broadcast, color: 'Purple', rolled: 2, toHit: 3 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 2;
@@ -92,7 +92,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: 'rivalControl',
-            influenceRoll: { color: 'Purple', rolled: 6, toHit: 2 },
+            influenceRoll: { key: MessageKey.influence_roll_broadcast, color: 'Purple', rolled: 6, toHit: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.influence = 6;
@@ -136,7 +136,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.end_rival_turn, payload: null }],
         },
         {
-            rivalRoll: { rivalRoll: 6 },
+            rivalRoll: { key: MessageKey.newRival_influence_broadcast, rivalRoll: 6 },
             laconic: null,
             mutate: (state: PlayState) => {
                 if(state.rival.isIncluded) {
@@ -386,7 +386,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            vp: { vp: 2 },
+            vp: { key: MessageKey.vp_transmission, vp: 2 },
             mutate: (state: PlayState) => {
                 const p = state.players[0];
                 p.favor = 2;
@@ -490,7 +490,7 @@ export class TutorialStepProvider {
             expecting: [{ action: Action.shift_market, payload: null }],
         },
         {
-            rivalRoll: { rivalRoll: 4 },
+            rivalRoll: { key: MessageKey.newRival_influence_broadcast, rivalRoll: 4 },
             laconic: null,
             mutate: (state: PlayState) => {
                 const m = state.market;
@@ -571,7 +571,7 @@ export class TutorialStepProvider {
         },
         {
             laconic: null,
-            vp: { vp: 7 },
+            vp: { key: MessageKey.vp_transmission, vp: 7 },
             mutate: (state: PlayState) => {
                 state.temple.donations.push('silver');
                 state.temple.currentLevel += 1;

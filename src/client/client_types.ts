@@ -192,7 +192,7 @@ export type EventFormat<T extends EventType, D> = {
     detail: D,
 }
 
-export type DetailFormat<K extends DetailKey, M> = {
+export type DetailFormat<K extends EventKey, M> = {
     key: K,
     message: M,
 }
@@ -209,36 +209,36 @@ export type ClientEvent = EventFormat<EventType.client, ClientDetail>
 export type InternalEvent = EventFormat<EventType.internal, InternalDetail>
 
 export type ServerDetail =
-    | DetailFormat<DetailKey.reset_broadcast, ResetBroadcast>
-    | DetailFormat<DetailKey.state_broadcast, StateBroadcast>
-    | DetailFormat<DetailKey.roll_suspense_broadcast, InfluenceRollBroadcast>
-    | DetailFormat<DetailKey.rival_roll_broadcast, NewRivalInfluenceBroadcast>
-    | DetailFormat<DetailKey.player_id_transmission, PlayerIdTransmission>
-    | DetailFormat<DetailKey.vp_transmission, VpTransmission>
-    | DetailFormat<DetailKey.start_turn_transmission, null>
-    | DetailFormat<DetailKey.rival_control_transmission, null>
-    | DetailFormat<DetailKey.force_turn_transmission, null>
-    | DetailFormat<DetailKey.not_found_transmission, null>
-    | DetailFormat<DetailKey.expired_transmission, null>
-    | DetailFormat<DetailKey.client_switch_transmission, null>
-    | DetailFormat<DetailKey.ws_closed, null>
-    | DetailFormat<DetailKey.ws_timeout, null>
+    | DetailFormat<EventKey.reset_broadcast, ResetBroadcast>
+    | DetailFormat<EventKey.state_broadcast, StateBroadcast>
+    | DetailFormat<EventKey.roll_suspense_broadcast, InfluenceRollBroadcast>
+    | DetailFormat<EventKey.rival_roll_broadcast, NewRivalInfluenceBroadcast>
+    | DetailFormat<EventKey.player_id_transmission, PlayerIdTransmission>
+    | DetailFormat<EventKey.vp_transmission, VpTransmission>
+    | DetailFormat<EventKey.start_turn_transmission, null>
+    | DetailFormat<EventKey.rival_control_transmission, null>
+    | DetailFormat<EventKey.force_turn_transmission, null>
+    | DetailFormat<EventKey.not_found_transmission, null>
+    | DetailFormat<EventKey.expired_transmission, null>
+    | DetailFormat<EventKey.client_switch_transmission, null>
+    | DetailFormat<EventKey.ws_closed, null>
+    | DetailFormat<EventKey.ws_timeout, null>
 ;
 
 export type ClientDetail =
-    | DetailFormat<DetailKey.client_message, ClientMessage>
-    | DetailFormat<DetailKey.start_play, null>
-    | DetailFormat<DetailKey.start_setup, null>
+    | DetailFormat<EventKey.client_message, ClientMessage>
+    | DetailFormat<EventKey.start_play, null>
+    | DetailFormat<EventKey.start_setup, null>
 
 ;
 
 export type InternalDetail =
-    | DetailFormat<DetailKey.tour_update, TutorialState>
-    | DetailFormat<DetailKey.error, string>
-    | DetailFormat<DetailKey.info, string>
+    | DetailFormat<EventKey.tour_update, TutorialState>
+    | DetailFormat<EventKey.error, string>
+    | DetailFormat<EventKey.info, string>
 ;
 
-export enum DetailKey {
+export enum EventKey {
     player_id_transmission, start_play, start_setup,  ws_closed, ws_timeout, client_message, error,
     info, reset_broadcast, not_found_transmission, client_switch_transmission, expired_transmission,
     state_broadcast, tour_update, vp_transmission, rival_control_transmission, rival_roll_broadcast,

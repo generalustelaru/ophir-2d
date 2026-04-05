@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { ClientDetail, ClientEvent, DetailKey, EventType, RawEvents, SailAttemptArgs } from '~/client_types';
+import { ClientDetail, ClientEvent, EventKey, EventType, RawEvents, SailAttemptArgs } from '~/client_types';
 import {
     Coordinates, ZoneName, PlayerColor, DiceSix, Action, Player, Rival, SpecialistName, MoveMessage, MovementPayload,
 } from '~/shared_types';
@@ -161,7 +161,7 @@ export class PlayerShip extends Communicator {
                     if (!this.toSailValue || player.privilegedSailing) {
                         const payload: MovementPayload = { zoneId: targetZone.getZoneName(), position: groupPosition };
                         const message: MoveMessage = { action: Action.move, payload };
-                        const detail: ClientDetail = { key: DetailKey.client_message, message };
+                        const detail: ClientDetail = { key: EventKey.client_message, message };
                         const event: ClientEvent = { type: EventType.client, detail };
                         this.createEvent(event);
                         break;
@@ -181,7 +181,7 @@ export class PlayerShip extends Communicator {
 
                 case departureZone == targetZone:
                     const detail: ClientDetail = {
-                        key: DetailKey.client_message,
+                        key: EventKey.client_message,
                         message: { action: Action.reposition, payload: { position: groupPosition } },
                     };
                     this.createEvent({ type: EventType.client, detail });

@@ -1,6 +1,6 @@
 import { Action, ItemName, PlayState, Commodity, TreasuryOffer, Unique } from '~/shared_types';
 import { ModalBase } from './ModalBase';
-import { Aspect, DetailKey, DropBeforeLoadMessage, DynamicModalInterface, EventType, Specification } from '~/client_types';
+import { Aspect, EventKey, DropBeforeLoadMessage, DynamicModalInterface, EventType, Specification } from '~/client_types';
 import { Stage } from 'konva/lib/Stage';
 import Konva from 'konva';
 import clientConstants from '~/client/client_constants';
@@ -126,7 +126,7 @@ export class DropBeforeLoadModal
     private clientEventCallback() {
         window.dispatchEvent(new CustomEvent(
             EventType.client,
-            { detail: { key: DetailKey.client_message, message: this.message } },
+            { detail: { key: EventKey.client_message, message: this.message } },
         ));
         this.close();
     }

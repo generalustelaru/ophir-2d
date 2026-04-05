@@ -183,7 +183,9 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 return roll;
             })();
 
-            this.broadcast({ color: player.getIdentity().color, rolled: influenceRoll, toHit: threshold });
+            this.broadcast(lib.getInfluenceRollBroadcast(
+                player.getIdentity().color, influenceRoll, threshold),
+            );
 
             if (influenceRoll < threshold) {
                 this.playState.trimInfluenceByZone(target, threshold);
@@ -226,7 +228,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 if (this.playState.getRivalBearings()!.seaZone == player.getBearings().seaZone) {
                     this.playState.enableRivalControl(this.privateState.getDestinations(target));
                     player.freeze();
-                    this.transmit(player.getIdentity().userId, { rivalControl: null });
+                    this.transmit(
+                        player.getIdentity().userId,
+                        lib.getRivalControlTransmission(),
+                    );
                 }
             }
 
@@ -609,7 +614,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         });
         player.addBubbleDeed(BubbleDeed.vpFavor);
 
-        this.transmit(userId, { vp: this.privateState.getPlayerVictoryPoints(color) });
+        this.transmit(userId, lib.getVpTransmission(this.privateState.getPlayerVictoryPoints(color)));
 
         const marketShift = this.shiftMarketCards(player);
 
@@ -754,7 +759,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         this.transmit(
             player.getIdentity().userId,
-            { vp: this.privateState.getPlayerVictoryPoints(color) },
+            lib.getVpTransmission(this.privateState.getPlayerVictoryPoints(color)),
         );
 
         const { isNewLevel, isTempleComplete } = this.playState.processMetalDonation(metal);
@@ -776,7 +781,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.addServerMessage(DeedService.convertToMessage(player, this.privateState), { color, backup: true });
             this.addServerMessage('The temple construction is complete! Game has ended.');
 
-            return lib.pass({ state: this.playState.toDto() });
+            return lib.pass(lib.getStateBroadcast(this.playState.toDto()));
         }
 
         if (isNewLevel) {
@@ -820,7 +825,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.playState.savePlayer(player.toDto());
 
         if(!isVoluntary)
-            this.transmit(playerId, { forceTurn: null });
+            this.transmit(playerId, lib.getForceTurnTransmission());
 
         const newPlayerOperation = ((): Probable<PlayerHandler> => {
             const allPlayers = this.playState.getAllPlayers();
@@ -841,7 +846,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 this.privateState.getDestinations(seaZone),
                 nextPlayer.isNavigator() ? this.privateState.getNavigatorAccess(seaZone) : [],
             );
-            this.transmit(nextPlayerId, { turnStart: null });
+            this.transmit(nextPlayerId, lib.getTurnTransmission());
 
             return lib.pass(nextPlayer);
         })();
@@ -900,7 +905,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             player.addBubbleDeed(BubbleDeed.rival);
         }
 
-        this.broadcast({ rivalRoll: newInfluence });
+        this.broadcast(lib.getNewRivalInfluenceBroadcast(newInfluence));
 
         this.clearUndo(player);
         player.unfreeze(rival.bearings.seaZone);
@@ -932,7 +937,10 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         if (!revertedPlayer || !userId)
             return lib.fail('Could not find active player in backup or reference');
 
-        this.transmit(player.getIdentity().userId, { vp: this.privateState.getPlayerVictoryPoints(color) });
+        this.transmit(
+            player.getIdentity().userId,
+            lib.getVpTransmission(this.privateState.getPlayerVictoryPoints(color)),
+        );
 
         const playerHandler = new PlayerHandler(revertedPlayer, userId);
 
@@ -967,7 +975,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         this.resetTimeoutIfCurrentPlayer(reference);
 
-        return { state: this.getState() };
+        return lib.getStateBroadcast(this.getState());
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string, reference: UserReference): StateBroadcast {
@@ -978,7 +986,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
         this.resetTimeoutIfCurrentPlayer(reference);
 
-        return { state: this.getState() };
+        return lib.getStateBroadcast(this.getState());
     };
 
     public handleReconnection(reference: UserReference) {
@@ -998,7 +1006,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             const handler = new PlayerHandler(player, reference.id);
             handler.addBubbleDeed(BubbleDeed.active);
             this.playState.savePlayer(handler.toDto());
-            this.transmit(reference.id, { turnStart: null });
+            this.transmit(reference.id, lib.getTurnTransmission());
             this.setIdleTimeout(reference.id);
         }
 
@@ -1095,7 +1103,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         this.playState.savePlayer(player.toDto());
         this.setIdleTimeout(player.getIdentity().userId);
 
-        return lib.pass({ state: this.playState.toDto() });
+        return lib.pass(lib.getStateBroadcast(this.getState()));
     }
 
     private setIdleTimeout(playerId: UserId): void {
@@ -1116,7 +1124,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             this.addServerMessage(`${activePlayer.name} is idling.`);
             this.playState.savePlayer(activePlayer);
 
-            this.transmit(playerId, { turnStart: null });
+            this.transmit(playerId, lib.getTurnTransmission());
             this.stateBroadcast(this.playState.toDto());
         }, limitMinutes);
     }

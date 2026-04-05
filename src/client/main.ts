@@ -1,4 +1,4 @@
-import { MessageType, EventType, ServerDetail, DetailKey, ClientDetail, InternalDetail } from '~/client_types';
+import { MessageType, EventType, ServerDetail, EventKey, ClientDetail, InternalDetail } from '~/client_types';
 import localState from './state';
 import { ServerConnection } from './services/ServerConnection';
 import { FauxConnection } from './services/FauxConnection';
@@ -68,29 +68,29 @@ function signalInfo(text: string) {
 }
 
 function processServerMessage(detail: ServerDetail, canvas: CanvasService) {
-    const { key, message: message } = detail;
+    const { key, message } = detail;
 
     switch (key) {
-        case DetailKey.reset_broadcast: return (() => {
+        case EventKey.reset_broadcast: return (() => {
             uiService.disable();
             signalInfo(
                 `The game has been reset by ${message.resetFrom}. Please refresh the page.`,
             );
         })();
 
-        case DetailKey.state_broadcast: return releaseUpdate(() => {
-            uiService.update(message);
-            canvas.drawUpdateElements(message);
+        case EventKey.state_broadcast: return releaseUpdate(() => {
+            uiService.update(message.state);
+            canvas.drawUpdateElements(message.state);
         });
 
-        case DetailKey.roll_suspense_broadcast: return (() => {
+        case EventKey.roll_suspense_broadcast: return (() => {
             isRollSuspense = true;
             canvas.notifyRollSuspense(message);
         })();
 
-        case DetailKey.rival_roll_broadcast: return canvas.notifyForRivalRoll(message);
+        case EventKey.rival_roll_broadcast: return canvas.notifyForRivalRoll(message);
 
-        case DetailKey.player_id_transmission: return (() => {
+        case EventKey.player_id_transmission: return (() => {
             localState.playerColor = message.color;
             signalInfo(message.displayName
                 ? `Welcome back, ${message.displayName}!`
@@ -98,40 +98,40 @@ function processServerMessage(detail: ServerDetail, canvas: CanvasService) {
             );
         })();
 
-        case DetailKey.vp_transmission: return (() => { localState.vp = message.vp; })();
+        case EventKey.vp_transmission: return (() => { localState.vp = message.vp; })();
 
-        case DetailKey.start_turn_transmission: return (isRollSuspense
+        case EventKey.start_turn_transmission: return (isRollSuspense
             ? transmissionQueue.push(() => { canvas.notifyForTurn(); })
             : canvas.notifyForTurn()
         );
 
-        case DetailKey.rival_control_transmission: return (isRollSuspense
+        case EventKey.rival_control_transmission: return (isRollSuspense
             ? transmissionQueue.push(() => { canvas.notifyForRivalControl(); })
             : canvas.notifyForRivalControl()
         );
 
-        case DetailKey.force_turn_transmission: return (isRollSuspense
+        case EventKey.force_turn_transmission: return (isRollSuspense
             ? transmissionQueue.push(() => { canvas.notifyForForceTurn(); })
             : canvas.notifyForForceTurn()
         );
 
-        case DetailKey.not_found_transmission: return signalError('This game no longer exists. :(');
+        case EventKey.not_found_transmission: return signalError('This game no longer exists. :(');
 
-        case DetailKey.expired_transmission: return (() => { window.location.href = '/'; })();
+        case EventKey.expired_transmission: return (() => { window.location.href = '/'; })();
 
-        case DetailKey.client_switch_transmission: return (() => {
+        case EventKey.client_switch_transmission: return (() => {
             alert('Control in this game has been switched to a different window.');
             window.location.href = '/lobby';
         })();
 
-        case DetailKey.ws_timeout: return (() => {
+        case EventKey.ws_timeout: return (() => {
             signalError('The connection has timed out.');
             uiService.disable();
             canvas.disable();
             probe(5);
         })();
 
-        case DetailKey.ws_closed: return (() => {
+        case EventKey.ws_closed: return (() => {
             signalInfo('The server has entered maintenance.');
             uiService.disable();
             canvas.disable();
@@ -146,13 +146,13 @@ function dispatchClientMessage(detail: ClientDetail, canvas: CanvasService) {
     const { key, message } = detail;
 
     switch (key) {
-        case DetailKey.client_message: return connection.sendToServer(message);
+        case EventKey.client_message: return connection.sendToServer(message);
 
-        case DetailKey.start_setup: return connection.sendToServer(
+        case EventKey.start_setup: return connection.sendToServer(
             { action: Action.start_setup, payload: null },
         );
 
-        case DetailKey.start_play: return connection.sendToServer(
+        case EventKey.start_play: return connection.sendToServer(
             { action: Action.start_play, payload: canvas.getSetupCoordinates() },
         );
 
@@ -164,17 +164,17 @@ function processInternalMessage(detail: InternalDetail, canvas: CanvasService) {
     const { key, message } = detail;
 
     switch (key) {
-        case DetailKey.error: return signalError(message);
+        case EventKey.error: return signalError(message);
 
-        case DetailKey.info: return (() => {
+        case EventKey.info: return (() => {
             uiService.setInfo(message);
             signalInfo(message);
         })();
 
-        case DetailKey.tour_update: return releaseUpdate(() => {
+        case EventKey.tour_update: return releaseUpdate(() => {
             const { index, state, instructions } = message;
-            uiService.update({ state }, true);
-            canvas.drawUpdateElements({ state });
+            uiService.update(state, true);
+            canvas.drawUpdateElements(state);
             canvas.updateInstructions(instructions);
             fetch(`/tutolytics/${index}`, { method: 'POST' });
         });

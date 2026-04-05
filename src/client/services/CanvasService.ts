@@ -1,8 +1,7 @@
 import Konva from 'konva';
 import {
     GameSetupPayload, MarketSlotKey, Phase, PlayState, SpecialistName, Action, InfluenceRollBroadcast,
-    NewRivalInfluenceBroadcast,
-    StateBroadcast,
+    NewRivalInfluenceBroadcast, State,
 } from '~/shared_types';
 import { Communicator } from './Communicator';
 import { LocationGroup } from '../mega_groups/LocationGroup';
@@ -11,7 +10,7 @@ import { PlayerGroup } from '../mega_groups/PlayerGroup';
 import { SetupGroup } from '../mega_groups/SetupGroup';
 import localState from '../state';
 import {
-    Aspect, DetailKey, Dimensions, DropBeforeLoadMessage, EventType, Instruction, InternalEvent, SailAttemptArgs, Target,
+    Aspect, EventKey, Dimensions, DropBeforeLoadMessage, EventType, Instruction, InternalEvent, SailAttemptArgs, Target,
 } from '~/client_types';
 import { EnrolmentGroup } from '../mega_groups/EnrolmentGroup';
 import {
@@ -181,15 +180,14 @@ export class CanvasService extends Communicator {
     }
 
     // MARK: UPDATE
-    public drawUpdateElements(data: StateBroadcast) {
-        const { state } = data;
+    public drawUpdateElements(state: State) {
         const { sessionPhase } = state;
 
         if (!localState.playerColor) {
             const event: InternalEvent = {
                 type: EventType.internal,
                 detail: {
-                    key: DetailKey.info,
+                    key: EventKey.info,
                     message: sessionPhase == Phase.enrolment ? 'Registrations open!' : 'You are a spectator.',
                 },
             };
@@ -449,7 +447,7 @@ export class CanvasService extends Communicator {
         if (this.dropBeforeLoadModal.hasCargoRoom(detachedMessage.action == Action.buy_metal ? 2 : 1)) {
             this.createEvent({
                 type: EventType.client,
-                detail: { key: DetailKey.client_message, message: detachedMessage },
+                detail: { key: EventKey.client_message, message: detachedMessage },
             });
         } else {
             this.dropBeforeLoadModal.show(detachedMessage);

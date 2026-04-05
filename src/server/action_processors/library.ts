@@ -1,14 +1,9 @@
-import { State, StateBroadcast } from '~/shared_types';
 import { Font } from 'opentype.js';
 import sLib from '../server_lib';
 import { Probable } from '../server_types';
 
 function validationErrorMessage(){
     return 'Malformed request.';
-}
-
-function stateResponse(state: State): StateBroadcast {
-    return { state };
 }
 
 export function validateTextLength(
@@ -37,7 +32,6 @@ export function validateTextLength(
 
 const lib = {
     ...sLib,
-    stateResponse,
     validationErrorMessage,
     validateTextLength,
 };

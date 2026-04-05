@@ -1,7 +1,7 @@
-import { ClientMessage, Action, PlayState, Coordinates, MoveMessage, ZoneName } from '~/shared_types';
+import { ClientMessage, Action, PlayState, Coordinates, MoveMessage, ZoneName, MessageKey } from '~/shared_types';
 import { Communicator } from './Communicator';
 import {
-    TutorialScenarioStep, Instruction, ScenarioStepPartial, ScenarioStepText, Connection, EventType, DetailKey,
+    TutorialScenarioStep, Instruction, ScenarioStepPartial, ScenarioStepText, Connection, EventType, EventKey,
     ServerDetail,
     TutorialState,
 } from '~/client_types';
@@ -30,8 +30,12 @@ export class FauxConnection extends Communicator implements Connection {
         this.currentState = data.state as PlayState;
         this.textSources = data.text as Array<ScenarioStepText>;
         this.createServerEvent({
-            key: DetailKey.player_id_transmission,
-            message: { color: this.currentState.players[0].color, displayName: 'Captain' },
+            key: EventKey.player_id_transmission,
+            message: {
+                key: MessageKey.player_id_transmission,
+                color: this.currentState.players[0].color,
+                displayName: 'Captain',
+            },
         });
         const initialScenario = this.buildStep({ partial: this.stepProvider.getNextPartial() });
 
@@ -58,13 +62,21 @@ export class FauxConnection extends Communicator implements Connection {
 
         if (action == Action.reposition_rival && this.currentState.rival.isIncluded && payload) {
             this.currentState.rival.bearings.position = payload.position;
-            this.createServerEvent({ key: DetailKey.state_broadcast, message: { state: this.currentState } });
+            this.createServerEvent({
+                key: EventKey.state_broadcast,
+                message: {
+                    key: MessageKey.state_broadcast,
+                    state: this.currentState,
+                } });
             return;
         }
 
         if (action == Action.reposition) {
             this.currentState.players[0].bearings.position = payload.position;
-            this.createServerEvent({ key: DetailKey.state_broadcast, message: { state: this.currentState } });
+            this.createServerEvent({
+                key: EventKey.state_broadcast,
+                message: { key: MessageKey.state_broadcast, state: this.currentState },
+            });
 
             return;
         }
@@ -80,7 +92,8 @@ export class FauxConnection extends Communicator implements Connection {
                     expectedPayload.zoneId = payload.zoneId;
                 } else {
                     this.createServerEvent({
-                        key: DetailKey.state_broadcast, message: { state: this.currentState },
+                        key: EventKey.state_broadcast,
+                        message: { key: MessageKey.state_broadcast, state: this.currentState },
                     });
 
                     return;
@@ -114,28 +127,31 @@ export class FauxConnection extends Communicator implements Connection {
             } = scenario;
             this.expectedMessages = expecting;
 
-            vp && this.createServerEvent({ key: DetailKey.vp_transmission, message: vp });
+            vp && this.createServerEvent({ key: EventKey.vp_transmission, message: vp });
             influenceRoll && this.createServerEvent({
-                key: DetailKey.roll_suspense_broadcast,
+                key: EventKey.roll_suspense_broadcast,
                 message: influenceRoll,
             });
-            rivalRoll && this.createServerEvent( { key: DetailKey.rival_roll_broadcast, message: rivalRoll });
+            rivalRoll && this.createServerEvent( { key: EventKey.rival_roll_broadcast, message: rivalRoll });
             this.createTourEvent({ index, state: this.currentState, instructions });
 
             switch (notification) {
                 case 'turnStart':
-                    this.createServerEvent({ key: DetailKey.start_turn_transmission, message: null });
+                    this.createServerEvent({ key: EventKey.start_turn_transmission, message: null });
                     break;
 
                 case 'rivalControl':
-                    this.createServerEvent({ key: DetailKey.rival_control_transmission, message: null });
+                    this.createServerEvent({ key: EventKey.rival_control_transmission, message: null });
                     break;
 
                 default:
                     break;
             }
         } else {
-            this.createServerEvent({ key: DetailKey.state_broadcast, message: { state: this.currentState } });
+            this.createServerEvent({
+                key: EventKey.state_broadcast,
+                message: { key: MessageKey.state_broadcast, state: this.currentState },
+            });
         }
     }
 
@@ -223,7 +239,7 @@ export class FauxConnection extends Communicator implements Connection {
     private createTourEvent(state: TutorialState) {
         this.createEvent({
             type: EventType.internal,
-            detail: { key: DetailKey.tour_update, message: state },
+            detail: { key: EventKey.tour_update, message: state },
         });
     }
 

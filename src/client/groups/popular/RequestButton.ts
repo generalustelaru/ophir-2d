@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { GroupLayoutData, EventType, DetailKey } from '~/client_types';
+import { GroupLayoutData, EventType, EventKey } from '~/client_types';
 import { ClientMessage } from '~/shared_types';
 import { Button } from './Button';
 
@@ -12,7 +12,7 @@ export abstract class RequestButton extends Button {
             (
                 actionMessage ? () => window.dispatchEvent(new CustomEvent(
                     EventType.client,
-                    { detail: { key: DetailKey.client_message, message: actionMessage } },
+                    { detail: { key: EventKey.client_message, message: actionMessage } },
                 )): null
             ),
         );
@@ -26,7 +26,7 @@ export abstract class RequestButton extends Button {
         this.updateFunction(
             () => window.dispatchEvent(new CustomEvent(
                 EventType.client,
-                { detail: { key: DetailKey.client_message, message: cleintMessage } },
+                { detail: { key: EventKey.client_message, message: cleintMessage } },
             )),
         );
     }

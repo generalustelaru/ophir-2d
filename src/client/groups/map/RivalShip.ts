@@ -1,6 +1,6 @@
 import Konva from 'konva';
 import { Action, ClientMessage, Coordinates, PlayerColor, ShipBearings, Unique, ZoneName } from '~/shared_types';
-import { DetailKey, DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
+import { EventKey, DynamicGroupInterface, EventType, RawEvents } from '~/client_types';
 import { ShipToken } from '../popular';
 import { SeaZone } from '.';
 import { defineBobbing, slideToPosition } from '~/client/animations';
@@ -156,6 +156,6 @@ export class RivalShip extends Communicator implements Unique<DynamicGroupInterf
     };
 
     private createClientEvent(message: ClientMessage): void {
-        this.createEvent({ type: EventType.client, detail: { key: DetailKey.client_message, message } });
+        this.createEvent({ type: EventType.client, detail: { key: EventKey.client_message, message } });
     }
 }

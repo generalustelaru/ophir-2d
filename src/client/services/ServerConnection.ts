@@ -1,10 +1,6 @@
-import {
-    ErrorTransmission, ClientRequest, ClientMessage, ServerMessage, ResetBroadcast, StateBroadcast, VpTransmission,
-    TurnTransmission, RivalControlTransmission, ForceTurnTransmission, PlayerIdTransmission, NewRivalInfluenceBroadcast,
-    NotFoundTransmission, TokenExpiredTransmission, SocketSwitchTransmission, InfluenceRollBroadcast,
-} from '~/shared_types';
+import { ClientRequest, ClientMessage, ServerMessage, MessageKey } from '~/shared_types';
 import { Communicator } from './Communicator';
-import { EventType, Connection, DetailKey, ServerDetail } from '~/client_types';
+import { EventType, Connection, EventKey, ServerDetail } from '~/client_types';
 
 export class ServerConnection extends Communicator implements Connection {
 
@@ -26,10 +22,10 @@ export class ServerConnection extends Communicator implements Connection {
         this.socket.onclose = (event) => {
             if (event.wasClean) {
                 console.info('Connection terminated');
-                this.createServerEvent({ key: DetailKey.ws_closed, message: null });
+                this.createServerEvent({ key: EventKey.ws_closed, message: null });
             } else {
                 console.info('Connection timeout');
-                this.createServerEvent({ key: DetailKey.ws_timeout, message: null });
+                this.createServerEvent({ key: EventKey.ws_timeout, message: null });
             }
 
             this.socket?.close();
@@ -40,7 +36,7 @@ export class ServerConnection extends Communicator implements Connection {
             console.error(error);
             this.createEvent({
                 type: EventType.internal,
-                detail: { key:DetailKey.error, message: 'The connection encountered an error' },
+                detail: { key:EventKey.error, message: 'The connection encountered an error' },
             });
         };
 
@@ -48,46 +44,33 @@ export class ServerConnection extends Communicator implements Connection {
             const message: ServerMessage = JSON.parse(event.data);
             this.isLocal && console.debug('<-', message);
 
-            switch (true) {
-                case this.isStateBroadcast(message):
-                    return this.createServerEvent({ key: DetailKey.state_broadcast, message });
-
-                case this.isTurnTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.start_turn_transmission, message: null });
-
-                case this.isInfluenceRollBroadcast(message):
-                    return this.createServerEvent({ key: DetailKey.roll_suspense_broadcast, message: message });
-
-                case this.isNewRivalInfluenceBroadcast(message):
-                    return this.createServerEvent({ key: DetailKey.rival_roll_broadcast, message: message });
-
-                case this.isForceTurnTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.force_turn_transmission, message: null });
-
-                case this.isNotFoundTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.not_found_transmission, message: null });
-
-                case this.isVpTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.vp_transmission, message: message });
-
-                case this.isRivalControlTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.rival_control_transmission, message: null });
-
-                case this.isColorTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.player_id_transmission, message: message });
-
-                case this.isResetBroadcast(message):
-                    return this.createServerEvent({ key: DetailKey.reset_broadcast, message: message });
-
-                case this.isExpiredTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.expired_transmission, message: null });
-
-                case this.isClientSwitchTransmission(message):
-                    return this.createServerEvent({ key: DetailKey.client_switch_transmission, message: null });
-
-                case this.isErrorTransmission(message):
+            switch (message.key) {
+                case MessageKey.state_broadcast:
+                    return this.createServerEvent({ key: EventKey.state_broadcast, message });
+                case MessageKey.reset_broadcast:
+                    return this.createServerEvent({ key: EventKey.reset_broadcast, message: message });
+                case MessageKey.error_transmission:
                     return this.createErrorEvent(message.error);
-
+                case MessageKey.player_id_transmission:
+                    return this.createServerEvent({ key: EventKey.player_id_transmission, message: message });
+                case MessageKey.not_found_transmission:
+                    return this.createServerEvent({ key: EventKey.not_found_transmission, message: null });
+                case MessageKey.vp_transmission:
+                    return this.createServerEvent({ key: EventKey.vp_transmission, message: message });
+                case MessageKey.turn_transmission:
+                    return this.createServerEvent({ key: EventKey.start_turn_transmission, message: null });
+                case MessageKey.rival_control_transmission:
+                    return this.createServerEvent({ key: EventKey.rival_control_transmission, message: null });
+                case MessageKey.influence_roll_broadcast:
+                    return this.createServerEvent({ key: EventKey.roll_suspense_broadcast, message: message });
+                case MessageKey.force_turn_transmission:
+                    return this.createServerEvent({ key: EventKey.force_turn_transmission, message: null });
+                case MessageKey.token_expired_transmission:
+                    return this.createServerEvent({ key: EventKey.expired_transmission, message: null });
+                case MessageKey.socket_switch_transmission:
+                    return this.createServerEvent({ key: EventKey.client_switch_transmission, message: null });
+                case MessageKey.newRival_influence_broadcast:
+                    return this.createServerEvent({ key: EventKey.rival_roll_broadcast, message: message });
                 default:
                     this.createErrorEvent('Could not determine message type.');
             }
@@ -110,63 +93,11 @@ export class ServerConnection extends Communicator implements Connection {
         this.socket.send(JSON.stringify(request));
     }
 
-    private isStateBroadcast(data: ServerMessage): data is StateBroadcast {
-        return 'state' in data;
-    }
-
-    private isTurnTransmission(data: ServerMessage): data is TurnTransmission {
-        return 'turnStart' in data;
-    }
-
-    private isInfluenceRollBroadcast(data: ServerMessage): data is InfluenceRollBroadcast {
-        return 'rolled' in data && 'toHit' in data;
-    }
-
-    private isNewRivalInfluenceBroadcast(data: ServerMessage): data is NewRivalInfluenceBroadcast {
-        return 'rivalRoll' in data;
-    }
-
-    private isForceTurnTransmission(data: ServerMessage): data is ForceTurnTransmission {
-        return 'forceTurn' in data;
-    }
-
-    private isNotFoundTransmission(data: ServerMessage): data is NotFoundTransmission {
-        return 'notFound' in data;
-    }
-
-    private isColorTransmission(data: ServerMessage): data is PlayerIdTransmission {
-        return 'color' in data;
-    }
-
-    private isVpTransmission(data: ServerMessage): data is VpTransmission {
-        return 'vp' in data;
-    }
-
-    private isRivalControlTransmission(data: ServerMessage): data is RivalControlTransmission {
-        return 'rivalControl' in data;
-    }
-
-    private isErrorTransmission(data: ServerMessage): data is ErrorTransmission {
-        return 'error' in data;
-    }
-
-    private isResetBroadcast(data: ServerMessage): data is ResetBroadcast {
-        return 'resetFrom' in data;
-    }
-
-    private isExpiredTransmission(data: ServerMessage): data is TokenExpiredTransmission {
-        return 'expired' in data;
-    }
-
-    private isClientSwitchTransmission(data: ServerMessage): data is SocketSwitchTransmission {
-        return 'switch' in data;
-    }
-
     private createServerEvent(detail: ServerDetail) {
         this.createEvent({ type: EventType.server, detail });
     }
 
     private createErrorEvent(message: string) {
-        this.createEvent({ type: EventType.internal,detail: { key: DetailKey.error, message } });
+        this.createEvent({ type: EventType.internal,detail: { key: EventKey.error, message } });
     }
 };

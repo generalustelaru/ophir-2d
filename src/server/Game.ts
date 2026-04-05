@@ -99,9 +99,7 @@ export class Game {
                     return new PlayProcessor(
                         {
                             privateState: new PrivateStateHandler(privateState),
-                            playState: new PlayStateHandler(
-                                configuration.SERVER_NAME, sharedState,
-                            ),
+                            playState: new PlayStateHandler(configuration.SERVER_NAME, sharedState),
                             backupState: new BackupStateHandler(backupStates),
                         },
                         configuration,
@@ -224,7 +222,7 @@ export class Game {
         this.timeStamp = Date.now();
         const emitError = (reason: string) => {
             lib.printError(`Cannot process action: ${reason}`);
-            return this.issueNominalResponse({ error: 'Cannot process request' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process request'));
         };
 
         const reference = this.userReferences.find(r => r.id == request.userId);
@@ -276,30 +274,36 @@ export class Game {
 
             if (!nameMatch) {
                 return this.issueNominalResponse(
-                    { error: `"${commandMatch[0]}" is not a recognized command.` },
+                    lib.getErrorTransmission(`"${commandMatch[0]}" is not a recognized command.`),
                 );
             }
 
             if (!this.font) return emitError('Fonts are missing!');
 
             if (state.sessionPhase == Phase.conclusion) {
-                return this.issueNominalResponse({ error: 'Name cannot be updated after the game ended.' });
+                return this.issueNominalResponse(
+                    lib.getErrorTransmission('Name cannot be updated after the game ended.'),
+                );
             }
 
             const newName = nameMatch[0];
 
             if (newName.trim().length == 0) {
-                return this.issueNominalResponse({ error: 'Name cannot be only whitespaces.' });
+                return this.issueNominalResponse(
+                    lib.getErrorTransmission('Name cannot be only whitespaces.'),
+                );
             }
 
             const measurement = lib.validateTextLength(
                 newName, this.font, 28, 424, 212,
             );
 
-            if (measurement.err) return this.issueNominalResponse({ error: measurement.message });
+            if (measurement.err) return this.issueNominalResponse(
+                lib.getErrorTransmission(measurement.message),
+            );
 
             if (this.isNameTaken(state.players, newName)) {
-                return this.issueNominalResponse({ error: 'This name is already taken' });
+                return this.issueNominalResponse(lib.getErrorTransmission('This name is already taken'));
             }
 
             this.preserveName(userId, newName);
@@ -313,7 +317,7 @@ export class Game {
 
             if (player.color == sessionOwner || (sessionPhase == Phase.conclusion)) {
                 this.reset();
-                return this.issueGroupResponse({ resetFrom: player.name });
+                return this.issueGroupResponse(lib.getResetBroadcast(player.name));
             }
 
             return emitError('Non-owner cannot reset.');
@@ -358,7 +362,7 @@ export class Game {
 
             if (enrolment.err) {
                 lib.printError(enrolment.message);
-                return this.issueNominalResponse({ error: 'Cannot enrol in game.' });
+                return this.issueNominalResponse(lib.getErrorTransmission('Cannot enrol in game.'));
             }
 
             return this.issueGroupResponse(enrolment.data);
@@ -366,7 +370,7 @@ export class Game {
 
         if (!player) {
             lib.printError('Cannot process action, player not enrolled.');
-            return this.issueNominalResponse({ error: 'Cannot process request.' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process request.'));
         }
 
         const state = processor.getState();
@@ -394,7 +398,7 @@ export class Game {
                         return lib.fail(String(error));
                     }
 
-                    return lib.pass({ state: this.actionProcessor.getState() });
+                    return lib.pass(lib.getStateBroadcast(this.actionProcessor.getState()));
                 }
                 default:
                     return lib.fail('Unsupported enrol action');
@@ -402,7 +406,7 @@ export class Game {
         })();
 
         if (enrolUpdate.err)
-            return this.issueNominalResponse({ error: 'Cannot process request.' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process request.'));
 
         return this.issueGroupResponse(enrolUpdate.data);
     }
@@ -416,7 +420,7 @@ export class Game {
 
         if (!('turnToPick' in player)) {
             lib.printError('Player entity is missing properties');
-            return this.issueNominalResponse({ error: 'Cannot process request.' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process request.'));
         }
 
         const setupUpdate = ((): Probable<StateBroadcast> => {
@@ -456,7 +460,7 @@ export class Game {
 
                     const { playState } = bundleResult.data;
 
-                    return lib.pass({ state: playState.toDto() });
+                    return lib.pass(lib.getStateBroadcast(playState.toDto()));
                 }
                 default:
                     return lib.fail('Unsupported setup action');
@@ -465,7 +469,7 @@ export class Game {
 
         if (setupUpdate.err) {
             lib.printError(setupUpdate.message);
-            return this.issueNominalResponse({ error: 'Cannot process request.' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process request.'));
         }
 
         return this.issueGroupResponse(setupUpdate.data);
@@ -480,7 +484,7 @@ export class Game {
 
         if (!('isAnchored' in player)) {
             lib.printError('Player entity is missing properties');
-            return this.issueNominalResponse({ error: 'Cannot process action' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process action'));
         }
 
         const playerHandler = new PlayerHandler(player, userId);
@@ -489,7 +493,7 @@ export class Game {
 
         if (false == playerHandler.isCurrentPlayer() && action != Action.chat) {
             lib.printError(`It is not [${playerHandler.getIdentity().name}]'s turn!`);
-            return this.issueNominalResponse({ error: 'Cannot process action' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process action'));
         }
 
         const actionsWhileFrozen: Array<Action> = [
@@ -505,7 +509,7 @@ export class Game {
 
         if (playerHandler.isFrozen() && !actionsWhileFrozen.includes(action)) {
             lib.printError(`[${playerHandler.getIdentity().name}] is handling rival and cannot act.`);
-            return this.issueNominalResponse({ error: 'Cannot process action' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process action'));
         }
 
         const playUpdate = ((): Probable<StateBroadcast> => {
@@ -557,7 +561,7 @@ export class Game {
 
         if (playUpdate.err) {
             lib.printError(playUpdate.message);
-            return this.issueNominalResponse({ error: 'Cannot process action' });
+            return this.issueNominalResponse(lib.getErrorTransmission('Cannot process action'));
         }
 
         return this.issueGroupResponse(playUpdate.data);

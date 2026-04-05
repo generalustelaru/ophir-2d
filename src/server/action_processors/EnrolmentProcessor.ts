@@ -65,14 +65,14 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
     public addChat(entry:ChatEntry): StateBroadcast {
         this.enrolmentState.addChatEntry(entry);
 
-        return { state: this.getState() };
+        return this.getStateBroadcast();
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateBroadcast {
         this.enrolmentState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.enrolmentState.updateName(player.color, newName);
 
-        return { state: this.getState() };
+        return this.getStateBroadcast();
     };
 
     public assignDefaultName() {
@@ -128,11 +128,11 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
             return failEnrol(result.message);
 
         this.reportColorAssignment(userId, color);
-        this.transmit(userId, { color, displayName });
+        this.transmit(userId, lib.getPlayerIdTransmission(color, displayName));
 
         this.enrolmentState.addServerMessage(`${name} has joined the game`, color);
 
-        return lib.pass({ state: this.enrolmentState.toDto() });
+        return lib.pass(this.getStateBroadcast());
 
         function failEnrol(reason: string): Probable<StateBroadcast> {
             return lib.fail(`Cannot enrol: ${reason}`);
@@ -156,13 +156,16 @@ export class EnrolmentProcessor implements Unique<ActionProcessor> {
         this.enrolmentState.changeColor(player.color, newColor);
 
         this.reportColorAssignment(match.userId, newColor);
-        this.transmit(match.userId, { color: newColor, displayName: match.player.name });
+        this.transmit(match.userId, lib.getPlayerIdTransmission(newColor, match.player.name));
 
-        return lib.pass({ state: this.enrolmentState.toDto() });
+        return lib.pass(this.getStateBroadcast());
     }
 
     private isColorTaken(players: PlayerEntry[], color: PlayerColor) {
         return players.some(player => player.color === color);
     }
-}
 
+    private getStateBroadcast() {
+        return lib.getStateBroadcast(this.getState());
+    }
+}

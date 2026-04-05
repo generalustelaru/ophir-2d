@@ -1,4 +1,9 @@
 import { CookieName, Cookies, Probable } from './server_types';
+import {
+    State, StateBroadcast, MessageKey, ErrorTransmission, ForceTurnTransmission, InfluenceRollBroadcast,
+    NewRivalInfluenceBroadcast, NotFoundTransmission, PlayerIdTransmission, ResetBroadcast, RivalControlTransmission,
+    SocketSwitchTransmission, TokenExpiredTransmission, TurnTransmission, VpTransmission, PlayerColor, DiceSix,
+} from '~/shared_types';
 import crypto from 'crypto';
 
 function pass<T>(data: T): Probable<T> {
@@ -81,6 +86,46 @@ function getErrorBrief(error: unknown): string {
     return 'Unknown Error';
 }
 
+function getStateBroadcast(state: State): StateBroadcast {
+    return { key: MessageKey.state_broadcast, state };
+}
+function getResetBroadcast(resetFrom: string | PlayerColor): ResetBroadcast {
+    return { key: MessageKey.reset_broadcast, resetFrom };
+}
+function getErrorTransmission(error: string): ErrorTransmission {
+    return { key: MessageKey.error_transmission, error };
+}
+function getPlayerIdTransmission(color: PlayerColor, displayName: string | null): PlayerIdTransmission {
+    return { key: MessageKey.player_id_transmission, color, displayName };
+}
+function getNotFoundTransmission(): NotFoundTransmission {
+    return { key: MessageKey.not_found_transmission };
+}
+function getVpTransmission(vp: number): VpTransmission {
+    return { key: MessageKey.vp_transmission, vp };
+}
+function getTurnTransmission(): TurnTransmission {
+    return { key: MessageKey.turn_transmission };
+}
+function getRivalControlTransmission(): RivalControlTransmission {
+    return { key: MessageKey.rival_control_transmission };
+}
+function getInfluenceRollBroadcast(color: PlayerColor, rolled: DiceSix, toHit: DiceSix): InfluenceRollBroadcast {
+    return { key: MessageKey.influence_roll_broadcast, color, rolled, toHit };
+}
+function getForceTurnTransmission(): ForceTurnTransmission {
+    return { key: MessageKey.force_turn_transmission };
+}
+function getTokenExpiredTransmission(): TokenExpiredTransmission {
+    return { key: MessageKey.token_expired_transmission };
+}
+function getSocketSwitchTransmission(): SocketSwitchTransmission {
+    return { key: MessageKey.socket_switch_transmission };
+}
+function getNewRivalInfluenceBroadcast(rivalRoll: DiceSix): NewRivalInfluenceBroadcast {
+    return { key: MessageKey.newRival_influence_broadcast, rivalRoll };
+}
+
 const sLib = { // TODO: Maybe rename this to common_library (file too)
     pass,
     fail,
@@ -93,6 +138,19 @@ const sLib = { // TODO: Maybe rename this to common_library (file too)
     parseCookies,
     getCopy,
     getErrorBrief,
+    getStateBroadcast,
+    getResetBroadcast,
+    getErrorTransmission,
+    getPlayerIdTransmission,
+    getNotFoundTransmission,
+    getVpTransmission,
+    getTurnTransmission,
+    getRivalControlTransmission,
+    getInfluenceRollBroadcast,
+    getForceTurnTransmission,
+    getTokenExpiredTransmission,
+    getSocketSwitchTransmission,
+    getNewRivalInfluenceBroadcast,
 };
 
 export default sLib;

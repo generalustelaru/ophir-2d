@@ -126,14 +126,14 @@ export class SetupProcessor implements Unique<ActionProcessor> {
     public addChat(entry: ChatEntry): StateBroadcast {
         this.setupState.addChatEntry(entry);
 
-        return { state: this.getState() };
+        return lib.getStateBroadcast(this.getState());
     }
 
     public updatePlayerName(player: PlayerEntity, newName: string): StateBroadcast {
         this.setupState.addServerMessage(`[${player.name}] is henceforth known as [${newName}]`, player.color);
         this.setupState.updateName(player.color, newName);
 
-        return { state: this.getState() };
+        return lib.getStateBroadcast(this.getState());;
     };
     //#MARK: Specialist
     public processSpecialistSelection(player: PlayerDraft, payload: unknown): Probable<StateBroadcast> {
@@ -158,7 +158,7 @@ export class SetupProcessor implements Unique<ActionProcessor> {
         if (nextPlayer)
             this.setupState.addServerMessage(`[${nextPlayer.name}] is picking a specialist.`, nextPlayer.color);
 
-        return lib.pass({ state: this.setupState.toDto() });
+        return lib.pass(lib.getStateBroadcast(this.getState()));
     }
 
     /**

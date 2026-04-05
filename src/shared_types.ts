@@ -259,7 +259,7 @@ export type GameSetup = {
 }
 export type GamePartialSetup = Pick<GameSetup, 'barriers' | 'mapPairings'>
 
-// MARK: REQUEST
+// MARK: CLIENT
 export type ColorSelectionPayload = { color: PlayerColor }
 export type ChatPayload = { input: string }
 export type PositioningPayload = { position: Coordinates }
@@ -323,32 +323,39 @@ export type ClientRequest = {
     message: ClientMessage,
 }
 
-// MARK: RESPONSE
-export type PlayerIdTransmission = { color: PlayerColor, displayName: string | null }
-export type StateBroadcast = { state: State }
-export type ResetBroadcast = { resetFrom: string | PlayerColor }
-export type ErrorTransmission = { error: string }
-export type NotFoundTransmission = { notFound: null }
-export type VpTransmission = { vp: number }
-export type TurnTransmission = { turnStart: null }
-export type InfluenceRollBroadcast = { color: PlayerColor, rolled: DiceSix, toHit: DiceSix }
-export type NewRivalInfluenceBroadcast = { rivalRoll: DiceSix }
-export type ForceTurnTransmission = { forceTurn: null }
-export type RivalControlTransmission = { rivalControl: null }
-export type TokenExpiredTransmission = { expired: null }
-export type SocketSwitchTransmission = { switch: null }
+// MARK: SERVER
+export type StateBroadcast = { key: MessageKey.state_broadcast, state: State }
+export type ResetBroadcast = { key: MessageKey.reset_broadcast, resetFrom: string | PlayerColor }
+export type ErrorTransmission = { key: MessageKey.error_transmission, error: string }
+export type PlayerIdTransmission = { key: MessageKey.player_id_transmission, color: PlayerColor, displayName: string | null }
+export type NotFoundTransmission = { key: MessageKey.not_found_transmission }
+export type VpTransmission = { key: MessageKey.vp_transmission, vp: number }
+export type TurnTransmission = { key: MessageKey.turn_transmission }
+export type RivalControlTransmission = { key: MessageKey.rival_control_transmission }
+export type InfluenceRollBroadcast = { key: MessageKey.influence_roll_broadcast, color: PlayerColor, rolled: DiceSix, toHit: DiceSix }
+export type ForceTurnTransmission = { key: MessageKey.force_turn_transmission }
+export type TokenExpiredTransmission = { key: MessageKey.token_expired_transmission }
+export type SocketSwitchTransmission = { key: MessageKey.socket_switch_transmission }
+export type NewRivalInfluenceBroadcast = { key: MessageKey.newRival_influence_broadcast, rivalRoll: DiceSix }
+
+export enum MessageKey {
+    state_broadcast,
+    reset_broadcast,
+    error_transmission,
+    player_id_transmission,
+    not_found_transmission,
+    vp_transmission,
+    turn_transmission,
+    rival_control_transmission,
+    influence_roll_broadcast,
+    force_turn_transmission,
+    token_expired_transmission,
+    socket_switch_transmission,
+    newRival_influence_broadcast,
+}
+
 export type ServerMessage =
-    | StateBroadcast
-    | ResetBroadcast
-    | ErrorTransmission
-    | PlayerIdTransmission
-    | NotFoundTransmission
-    | VpTransmission
-    | TurnTransmission
-    | RivalControlTransmission
-    | InfluenceRollBroadcast
-    | ForceTurnTransmission
-    | TokenExpiredTransmission
-    | SocketSwitchTransmission
-    | NewRivalInfluenceBroadcast
+    | StateBroadcast | ResetBroadcast | ErrorTransmission | PlayerIdTransmission | NotFoundTransmission
+    | VpTransmission | TurnTransmission | RivalControlTransmission | InfluenceRollBroadcast | ForceTurnTransmission
+    | TokenExpiredTransmission | SocketSwitchTransmission | NewRivalInfluenceBroadcast
 ;

@@ -1,7 +1,7 @@
 import Konva from 'konva';
 import clientConstants from '~/client_constants';
 import { Action, ItemName, PlayerColor, Unique } from '~/shared_types';
-import { DetailKey, DynamicGroupInterface, EventType } from '~/client_types';
+import { EventKey, DynamicGroupInterface, EventType } from '~/client_types';
 import { ItemRow } from '../popular';
 import { Communicator } from '~/client/services/Communicator';
 import { resize } from '~/client/animations';
@@ -47,7 +47,7 @@ export class CargoBand extends Communicator implements Unique<DynamicGroupInterf
         const itemCallback = (item: ItemName) => {
             this.createEvent({
                 type: EventType.client,
-                detail: { key: DetailKey.client_message, message: { action: Action.drop_item, payload: { item } } },
+                detail: { key: EventKey.client_message, message: { action: Action.drop_item, payload: { item } } },
             });
         };
         this.itemRow = new ItemRow(

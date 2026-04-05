@@ -69,7 +69,7 @@ const sessionService = new SessionService();
 sessionService.connect();
 
 process.on('SIGINT', () => {
-    broadcast({ error: 'The server encountered an issue and is shutting down :(' });
+    broadcast(sLib.getErrorTransmission('The server encountered an issue and is shutting down :('));
     socketServer.close();
     console.log('Exiting...');
     process.exit(1);
@@ -99,7 +99,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
 
     if (validation.err) {
         sLib.printWarning(validation.message);
-        transmit(socket, { expired: null });
+        transmit(socket, sLib.getTokenExpiredTransmission());
 
         return;
     }
@@ -109,7 +109,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
 
     if (extraction.err) {
         sLib.printError(extraction.message);
-        transmit(socket, { error: 'Invalid connection data.' });
+        transmit(socket, sLib.getErrorTransmission('Invalid connection data.'));
 
         return;
     }
@@ -138,7 +138,7 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
 
     if (!game) {
         sLib.printWarning(`Could not find: [${gameId}]`);
-        transmit(socket, { notFound: null });
+        transmit(socket, sLib.getNotFoundTransmission());
 
         return;
     }
@@ -155,8 +155,8 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
 
         if (ref.color) {
             const { color, displayName } = ref;
-            transmit(socket, { color, displayName });
-            transmit(socket, { vp: game.getPlayerVP(color) });
+            transmit(socket, sLib.getPlayerIdTransmission(color, displayName));
+            transmit(socket, sLib.getVpTransmission(game.getPlayerVP(color)));
             game.handlePlayerReconnection(ref);
         }
 
@@ -184,13 +184,13 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         const abandonedSocket = oldConnection.socket;
         oldConnection.socket = socket;
         oldConnection.isSwitching = true;
-        transmit(abandonedSocket, { switch: null });
+        transmit(abandonedSocket, sLib.getSocketSwitchTransmission());
 
         return activeUser;
     })();
 
     updateGameStat(gameId);
-    transmit(socket, { state: game.getSharedState() });
+    transmit(socket, sLib.getStateBroadcast(game.getSharedState()));
 
     sLib.printInfo(`[${user.name}] connected to [${gameId}]`);
 
@@ -198,10 +198,10 @@ socketServer.on('connection', async (socket: WebSocket, inc) => {
         const clientRequest = validator.validateClientRequest(JSON.parse(req));
 
         if (!clientRequest)
-            return transmit(socket, { error: 'Invalid request data.' });
+            return transmit(socket, sLib.getErrorTransmission('Invalid request data.'));
 
         if (expiresAt <= Date.now())
-            return transmit(socket, { expired: null });
+            return transmit(socket, sLib.getTokenExpiredTransmission());
 
         NODE_ENV == 'development' && logRequest(clientRequest, user.name, gameId);
 
@@ -514,7 +514,7 @@ async function processAction(
     if (save.err) {
         console.error(save.message);
         updateGameStat(gameId, true);
-        return broadcastToGroup(gameId, { error: 'Action cannot be saved' });
+        return broadcastToGroup(gameId, sLib.getNotFoundTransmission());
     }
 
     updateGameStat(gameId);
@@ -524,7 +524,7 @@ async function processAction(
 
 // MARK: CALLBACKS
 function stateBroadcastCallback(state: State) {
-    broadcastToGroup(state.gameId, { state });
+    broadcastToGroup(state.gameId, sLib.getStateBroadcast(state));
 }
 
 function broadcastCallback(gameId: GameId, message: ServerMessage) {
@@ -1036,7 +1036,6 @@ function debugCommand(command?: string, target?: string, option?: string): objec
             const { color, name, isAway } = player;
             return { color, name, isAway };
         }
-
     }
 }
 
