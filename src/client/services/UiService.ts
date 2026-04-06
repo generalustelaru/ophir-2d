@@ -35,6 +35,7 @@ export class UserInterface extends Communicator {
             this.toIndex.enable();
             const chatRoom = document.querySelector('#chatRoom') as HTMLDivElement;
             chatRoom.hidden = true;
+            this.setInfo('You are playing.');
 
             return;
         }
@@ -65,9 +66,7 @@ export class UserInterface extends Communicator {
         },1000);
     }
 
-    public update(state: State, isTour: boolean = false) {
-
-        if (isTour) return;
+    public update(state: State) {
 
         this.toLobby.enable();
         this.disableButtons();
@@ -168,7 +167,7 @@ export class UserInterface extends Communicator {
     }
 
     private updateAsConcluded(): void {
-        this.setInfo('The game has ended');
+        this.setInfo('The game has ended.');
 
         localState.playerColor && this.resetButton.enable();
     }

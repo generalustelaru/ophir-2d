@@ -173,7 +173,6 @@ function processInternalMessage(detail: InternalDetail, canvas: CanvasService) {
 
         case EventKey.tour_update: return releaseUpdate(() => {
             const { index, state, instructions } = message;
-            uiService.update(state, true);
             canvas.drawUpdateElements(state);
             canvas.updateInstructions(instructions);
             fetch(`/tutolytics/${index}`, { method: 'POST' });
