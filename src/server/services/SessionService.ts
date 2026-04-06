@@ -1,7 +1,7 @@
 import { Probable, UserSession } from '../server_types';
 import { createClient, RedisClientType } from 'redis';
 import { REDIS_URL } from '~/environment';
-import sLib from '../server_lib';
+import { ServerTools as sLib } from '../ServerTools';
 export class SessionService {
     private redis: RedisClientType;
 

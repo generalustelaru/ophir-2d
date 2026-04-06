@@ -11,7 +11,7 @@ import {
     Configuration, DataDigest, Probable, ActionProcessor, StateBundle, TurnEvent, UserId, UserReference,
 } from '~/server_types';
 import { CargoManipulator, FeasibilityCalculator, DeedService } from './play_tools';
-import lib from './library';
+import { ProcessorTools as lib } from './ProcessorTools';
 import { validator } from '../services/validation/ValidatorService';
 import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 

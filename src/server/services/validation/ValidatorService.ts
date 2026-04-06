@@ -4,7 +4,7 @@ import {
     MarketTradePayload, MetalPurchasePayload, MetalDonationPayload, PickSpecialistPayload, Action, SpecialistName,
     OpponentPositioningPayload, ColorSelectionPayload, ChancellorMarketTradePayload, PeddlerMarketPayload, DropItemPayload,
 } from '~/shared_types';
-import { lib, ObjectTests } from './library';
+import { ValidationTools as lib, ObjectTests } from './ValidationTools';
 import { Configuration, Probable } from '~/server_types';
 
 const refs = {

@@ -5,7 +5,7 @@ import {
 } from '~/shared_types';
 import { Aspect, DynamicModalInterface, Specification } from '~/client_types';
 import { CoinDial } from '../popular';
-import { ModalBase, SymbolRow, lib } from '.';
+import { ModalBase, SymbolRow, ModalTools as lib } from '.';
 import clientConstants from '~/client_constants';
 
 const { HUES } = clientConstants;

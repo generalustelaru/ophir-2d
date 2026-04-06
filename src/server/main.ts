@@ -11,7 +11,7 @@ import { DatabaseService } from './services/DatabaseService';
 import { SessionService } from './services/SessionService';
 import { WebSocketServer, WebSocket } from 'ws';
 import { Game } from './Game';
-import sLib from './server_lib';
+import { ServerTools as sLib } from './ServerTools';
 import process from 'process';
 import path from 'path';
 import http from 'http';

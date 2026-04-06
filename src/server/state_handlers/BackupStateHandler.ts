@@ -1,6 +1,6 @@
 import { ChatEntry, Coordinates, NeutralColor, Player, PlayerColor, Rival } from '~/shared_types';
 import { BackupState, Probable } from '../server_types';
-import lib from '../action_processors/library';
+import { ProcessorTools as lib } from '../action_processors/ProcessorTools';
 
 export class BackupStateHandler {
     private backupState: Array<BackupState> = [];
@@ -76,7 +76,6 @@ export class BackupStateHandler {
                 player.name = name;
                 countable.name = name;
             }
-
         }
     }
 

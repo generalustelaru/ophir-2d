@@ -15,7 +15,7 @@ import { BackupStateHandler } from '../state_handlers/BackupStateHandler';
 import { SetupStateHandler } from '../state_handlers/SetupStateHandler';
 import { HexCoordinates } from '~/client_types';
 import { validator } from '../services/validation/ValidatorService';
-import lib from './library';
+import { ProcessorTools as lib } from './ProcessorTools';
 
 const {
     BARRIER_CHECKS, DEFAULT_MOVE_RULES, TRADE_DECK_A, TRADE_DECK_B, COST_TIERS, LOCATION_ACTIONS, SPECIALISTS,

@@ -6,7 +6,7 @@ import { Configuration, Probable, RequestMatch, ActionProcessor, UserId, UserRef
 import { EnrolmentStateHandler } from '../state_handlers/EnrolmentStateHandler';
 import { validator } from '../services/validation/ValidatorService';
 import serverConstants from '../server_constants';
-import lib from './library';
+import { ProcessorTools as lib } from './ProcessorTools';
 
 export class EnrolmentProcessor implements Unique<ActionProcessor> {
     private enrolmentState: EnrolmentStateHandler;

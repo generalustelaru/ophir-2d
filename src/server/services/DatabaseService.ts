@@ -5,7 +5,7 @@ import { validator } from './validation/ValidatorService';
 import { Db, ObjectId } from 'mongodb';
 
 import { randomUUID } from 'crypto';
-import lib from './library';
+import { ServiceTools as lib } from './ServiceTools';
 
 enum CollectionName {
     config = 'config',

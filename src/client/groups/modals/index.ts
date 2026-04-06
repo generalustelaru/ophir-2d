@@ -1,4 +1,4 @@
-export { lib } from './lib';
+export { ModalTools } from './ModalTools';
 export { ModalBase } from './ModalBase';
 export { TradeModal } from './TradeModal';
 export { StartTurnModal } from './StartTurnModal';

@@ -7,7 +7,7 @@ import {
     ServerMessage, Action, Phase, StateBroadcast, PlayerColor, PlayerEntity, State, Player,
 } from '~/shared_types';
 import { PlayerHandler } from './state_handlers/PlayerHandler';
-import lib from './action_processors/library';
+import { ProcessorTools as lib } from './action_processors/ProcessorTools';
 import { PlayProcessor } from './action_processors/PlayProcessor';
 import { SetupProcessor } from './action_processors/SetupProcessor';
 import { EnrolmentProcessor } from './action_processors/EnrolmentProcessor';

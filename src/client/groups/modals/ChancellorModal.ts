@@ -1,5 +1,5 @@
 import Konva from 'konva';
-import { ModalBase, SymbolRow, lib } from '.';
+import { ModalBase, SymbolRow, ModalTools as lib } from '.';
 import { Aspect, DynamicModalInterface, Specification } from '~/client/client_types';
 import {
     Action, FeasibleTrade, MarketFluctuations, MarketState, MarketSlotKey, PlayState, SpecialistName, Unique,

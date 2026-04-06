@@ -2,7 +2,7 @@ import Konva from 'konva';
 import { MarketState, PlayState, MarketSlotKey, Action, Unique } from '~/shared_types';
 import { Aspect, DynamicModalInterface } from '~/client/client_types';
 import { FavorDial, VictoryPointDial } from '../popular';
-import { ModalBase, SymbolRow, lib } from '.';
+import { ModalBase, SymbolRow, ModalTools as lib } from '.';
 import clientConstants from '~/client_constants';
 import localState from '~/client/state';
 

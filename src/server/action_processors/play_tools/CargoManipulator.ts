@@ -1,7 +1,7 @@
 import { CargoMetal, Commodity, ItemName, Metal } from '~/shared_types';
 import { Probable } from '~/server_types';
 import { PlayStateHandler } from '../../state_handlers/PlayStateHandler';
-import lib from '../library';
+import { ProcessorTools as lib } from '../ProcessorTools';
 
 export class CargoManipulator {
 
