@@ -2,7 +2,7 @@ import Konva from 'konva';
 import clientConstants from '../../client_constants';
 import { DismissButton } from './DismissButton';
 import { AcceptButton } from './AcceptButton';
-import { ClientMessage } from '~/shared_types';
+import { ClientMessage, Coordinates } from '~/shared_types';
 import { Aspect, Dimensions, ElementList, LayerIds } from '~/client/client_types';
 
 type ButtonBehavior = {
@@ -25,6 +25,7 @@ export abstract class ModalBase {
     private dismissButton: DismissButton;
     private isFixedActionMessage: boolean;
     private lockLayer: Konva.Rect;
+    private position: Coordinates;
 
     constructor(
         stage: Konva.Stage,
@@ -36,7 +37,7 @@ export abstract class ModalBase {
 
         const { width: stageWidth, height: stageHeight } = STAGE_AREA[aspect];
         const { width: modalWidth, height: modalHeight } = dimensions;
-        const offset = { x: stageWidth / 2 - modalWidth / 2, y: stageHeight / 2 - modalHeight / 2 };
+        this.position = { x: stageWidth / 2 - modalWidth / 2, y: stageHeight / 2 - modalHeight / 2 };
         const buttonLevel = modalHeight - 50;
 
         this.lockLayer = new Konva.Rect({ width: stageWidth, height: stageHeight });
@@ -84,8 +85,7 @@ export abstract class ModalBase {
         }
 
         this.modalGroup = new Konva.Group({
-            x: offset.x,
-            y: offset.y,
+            ...this.position,
             width: modalWidth,
             height: modalHeight,
             draggable: true,
@@ -102,13 +102,13 @@ export abstract class ModalBase {
 
     protected reposition(aspect: Aspect) {
         const { width: stageWidth, height: stageHeight } = STAGE_AREA[aspect];
-        const offset = {
+        this.position = {
             x: stageWidth / 2 - this.modalGroup.width() / 2,
             y: stageHeight / 2 - this.modalGroup.height() / 2,
         };
 
         this.lockLayer.width(stageWidth).height(stageHeight);
-        this.modalGroup.x(offset.x).y(offset.y);
+        this.modalGroup.x(this.position.x).y(this.position.y);
     }
     protected open(message: ClientMessage|null = null) {
 
@@ -130,6 +130,7 @@ export abstract class ModalBase {
             }
         }
 
+        this.modalGroup.x(this.position.x).y(this.position.y);
         this.screenGroup.show();
     }
 
