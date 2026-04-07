@@ -244,8 +244,13 @@ export class PlayProcessor implements Unique<ActionProcessor> {
             return this.endTurn(digest, false);
         }
 
-        if(player.isHarbormaster() && player.isPrivileged())
+        if (player.isHarbormaster() && this.privateState.getSpentActions().length && player.isPrivileged()) {
+            this.privateState.addDeed({
+                context: Action.move,
+                description: 'used favor to access a second zone\'s actions',
+            });
             this.privateState.clearSpentActions();
+        }
 
         return this.continueTurn(player, hasSailed && !player.isFrozen());
     }
