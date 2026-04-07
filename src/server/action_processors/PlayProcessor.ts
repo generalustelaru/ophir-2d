@@ -207,16 +207,18 @@ export class PlayProcessor implements Unique<ActionProcessor> {
                 location: this.playState.getLocationName(target),
             });
 
+            const overnight = player.getOvernightZone();
+            const destinations = this.privateState.getDestinations(target);
+
             if (player.getMoves() > 0) {
                 player.setDestinationOptions(
-                    this.privateState.getDestinations(target)
-                        .filter(zone => zone != player.getOvernightZone()),
+                    destinations.filter(zone => zone != overnight),
                 );
 
                 if (player.isNavigator()) {
+                    const navigatorAccess = this.privateState.getNavigatorAccess(target);
                     player.setNavigatorAccess(
-                        this.privateState.getNavigatorAccess(target)
-                            .filter(zone => zone != player.getOvernightZone()),
+                        navigatorAccess.filter(zone => zone != overnight),
                     );
                 }
             } else {
@@ -226,7 +228,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
 
             if (this.playState.isRivalIncluded()) {
                 if (this.playState.getRivalBearings()!.seaZone == player.getBearings().seaZone) {
-                    this.playState.enableRivalControl(this.privateState.getDestinations(target));
+                    this.playState.enableRivalControl(destinations);
                     player.freeze();
                     this.transmit(
                         player.getIdentity().userId,
@@ -238,7 +240,7 @@ export class PlayProcessor implements Unique<ActionProcessor> {
         } else if (player.getMoves() == 0) {
             this.privateState.addDeed({
                 context: TurnEvent.failed_turn,
-                description: 'rolled to low on the second move',
+                description: 'rolled too low on the second move',
             });
 
             return this.endTurn(digest, false);
