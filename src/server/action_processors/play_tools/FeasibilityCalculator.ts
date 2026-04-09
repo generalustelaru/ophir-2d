@@ -14,48 +14,39 @@ export class FeasibilityCalculator {
     public static determineActionsAndDetails(
         player: PlayerHandler, playState: PlayStateHandler, privateState: PrivateStateHandler,
     ): ActionsAndDetails {
-        if (!player.isAnchored() || player.isFrozen())
-            return { actions: [], trades: [], purchases: [] };
 
-        const actionsByLocation = (
-            FeasibilityCalculator.getDefaultActions(player, playState)
-                .concat(FeasibilityCalculator.getSpecialistActions(player, playState, privateState))
-                .filter(a => !privateState.getSpentActions().includes(a))
+        if (!player.isAnchored() || player.isFrozen()) return { actions: [], trades: [], purchases: [] };
+
+        const feasiblePurchases = FeasibilityCalculator.pickFeasiblePurchases(player, playState);
+        const feasibleTrades = FeasibilityCalculator.pickFeasibleTrades(player, playState);
+        const couldTrade = Boolean(feasibleTrades.length);
+        const defaultActions = (playState
+            .getLocalActions(player.getBearings().seaZone)
+            .concat(FeasibilityCalculator.getSpecialistActions(player, playState, privateState))
+            .filter(a => false == privateState.getSpentActions().includes(a))
         );
-
-        const replaceableRef = ['empty', 'marble', 'ebony', 'gems', 'linen'];
-        const trades = FeasibilityCalculator.pickFeasibleTrades(player, playState);
-        const purchases = FeasibilityCalculator.pickFeasiblePurchases(player, playState);
-
-        const actions = actionsByLocation.filter(action => {
+        const replaceable: ItemName[] = ['empty', 'marble', 'ebony', 'gems', 'linen'];
+        const feasibleActions = defaultActions.filter(action => {
             switch (action) {
                 case Action.upgrade_cargo:
                     return player.getCoinAmount() >= 2 && player.getCargo().length < 4;
 
                 case Action.trade_commodities:
-                    return player.isChancellor() ? false : trades.length;
+                    return player.isChancellor() ? false : couldTrade;
 
                 case Action.trade_as_chancellor:
-                    return trades.length;
+                    return couldTrade;
 
                 case Action.sell_specialty:
                     const specialty = player.getSpecialty();
                     return !!specialty && player.getCargo().includes(specialty);
 
                 case Action.donate_commodities:
-                    return (() => {
-                        const templeSlot = playState.getTempleTradeSlot();
-                        const templeFeasible = trades.find(f => f.slot == templeSlot);
-                        switch (true) {
-                            case player.isAdvisor():
-                                return trades.length;
-                            case player.isPeddler():
-                            case player.isChancellor():
-                                return templeFeasible?.missing.length == 0;
-                            default:
-                                return !!templeFeasible;
-                        }
-                    })();
+                    if (player.isAdvisor()) return couldTrade;
+
+                    const templeSlot = playState.getTempleTradeSlot();
+                    const templeFeasible = feasibleTrades.find(f => f.slot == templeSlot);
+                    return templeFeasible ? templeFeasible.missing.length == 0 : false;
 
                 case Action.donate_metal:
                     return player.getCargo()
@@ -65,8 +56,10 @@ export class FeasibilityCalculator {
                 case Action.buy_metal:
                     return (
                         player.hasPurchaseAllowance()
-                        && purchases.length
-                        && player.getCargo().filter(item => replaceableRef.includes(item)).length >= 2
+                        && feasiblePurchases.length
+                        && player.getCargo().filter(
+                            item => replaceable.includes(item),
+                        ).length >= 2
                     );
 
                 case Action.load_commodity:
@@ -75,7 +68,9 @@ export class FeasibilityCalculator {
                         ['quarry', 'forest', 'mines', 'farms'].includes(location)
                         && (playState.getItemSupplies()
                             .commodities[COMMODITIES_BY_LOCATION[location as CommodityLocationName]])
-                        && player.getCargo().filter(item => replaceableRef.includes(item)).length >= 1
+                        && player.getCargo().filter(
+                            item => replaceable.includes(item),
+                        ).length >= 1
                     );
 
                 default:
@@ -83,14 +78,14 @@ export class FeasibilityCalculator {
             }
         });
 
-        return { actions, trades, purchases };
+        return {
+            actions: feasibleActions,
+            trades: feasibleTrades,
+            purchases: feasiblePurchases,
+        };
     }
 
-    public static getDefaultActions(player: PlayerHandler, playState: PlayStateHandler): LocalAction[] {
-        return playState.getLocalActions(player.getBearings().seaZone);
-    }
-
-    public static getSpecialistActions(
+    private static getSpecialistActions(
         player: PlayerHandler, playState: PlayStateHandler, privateState: PrivateStateHandler,
     ): LocalAction[] {
         const currentZone = player.getBearings().seaZone;
@@ -114,7 +109,7 @@ export class FeasibilityCalculator {
         return [];
     }
 
-    public static pickFeasibleTrades(player: PlayerHandler, playState: PlayStateHandler): Array<FeasibleTrade> {
+    private static pickFeasibleTrades(player: PlayerHandler, playState: PlayStateHandler): Array<FeasibleTrade> {
         const cargo = player.getCargo();
         const market = playState.getMarket();
         const nonCommodities: Array<ItemName> = ['empty', 'gold', 'silver', 'gold_extra', 'silver_extra'];
@@ -149,7 +144,7 @@ export class FeasibilityCalculator {
         return feasible;
     }
 
-    public static pickFeasiblePurchases(player: PlayerHandler, playState: PlayStateHandler): Array<FeasiblePurchase> {
+    private static pickFeasiblePurchases(player: PlayerHandler, playState: PlayStateHandler): Array<FeasiblePurchase> {
         const { silver: silverCost, gold: goldCost } = playState.getMetalCosts();
         const playerCoins = player.getCoinAmount();
         const playerFavor = player.getFavor();
